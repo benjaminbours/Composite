@@ -1,4 +1,5 @@
 const path = require("path");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 // const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const ouputPath = path.resolve(__dirname, "./dist/");
@@ -51,11 +52,12 @@ module.exports = {
         path: ouputPath,
         publicPath: "dist",
     },
-    // plugins: [
+    plugins: [
+        new BundleAnalyzerPlugin(),
     //     new MiniCssExtractPlugin({
     //         filename: "stylesheets/style.css",
     //     }),
-    // ],
+    ],
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"],
     },

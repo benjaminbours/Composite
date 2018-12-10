@@ -10,8 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/dat.gui": "^0.7.2",
+    "@types/gsap": "^1.20.0",
     "@types/pixi.js": "^4.8.4",
     "@types/three": "^0.93.10",
+    "dat.gui": "^0.7.3",
+    "gsap": "^2.0.2",
     "pixi.js": "^4.8.2",
     "three": "^0.99.0"
   },
@@ -22,6 +26,7 @@
     "tslint": "^5.11.0",
     "typescript": "^3.2.1",
     "webpack": "^4.27.0",
+    "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10"
   },
