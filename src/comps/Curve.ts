@@ -1,21 +1,56 @@
 import * as dat from "dat.gui";
 
-export default class Curve {
-    private step: number = 0;
-    private speed: number = 4;
-    private amplitude: number = 60;
-    private frequency: number = 100;
+interface ISineWave {
+    step: number;
+    speed: number;
+    amplitude: number;
+    frequency: number;
+    y: number;
+}
 
-    private speed2: number = 4;
-    private amplitude2: number = 60;
-    private frequency2: number = 50;
+interface IMouseCoordinate {
+    x: number;
+    y: number;
+}
+
+function isIntersect(point, circleX, circleY, circleRadius) {
+    return Math.sqrt((point.x - circleX) ** 2 + (point.y - circleY) ** 2) < circleRadius;
+    // return Math.sqrt((point.x - circleY) ** 2 + (point.y - circleY) ** 2) < circleRadius;
+}
+export default class Curve {
+    private mouseCoordinate: IMouseCoordinate = {
+        x: 0,
+        y: 0,
+    };
+
+    private waves: ISineWave[] = [
+        {
+            step: 0,
+            speed: 4,
+            amplitude: 60,
+            frequency: 100,
+            y: 0,
+        },
+        // {
+        //     step: 0,
+        //     speed: 4,
+        //     amplitude: 60,
+        //     frequency: 50,
+        //     y: 0,
+        // },
+    ];
 
     public constructor() {
         const gui = new dat.GUI();
-        const sin1 = gui.addFolder("sin1");
-        sin1.add(this, "speed", -20, 20);
-        sin1.add(this, "amplitude", -200, 200);
-        sin1.add(this, "frequency", 0, 250);
+
+        this.waves.forEach((item, index) => {
+            const folder = gui.addFolder(`sin${index + 1}`);
+            folder.add(item, "speed", -20, 20);
+            folder.add(item, "amplitude", -200, 200);
+            folder.add(item, "frequency", 0, 250);
+        });
+
+        document.addEventListener("mousemove", this.handleMouseMove);
     }
 
     public render = (ctx: CanvasRenderingContext2D) => {
@@ -24,33 +59,39 @@ export default class Curve {
 
         let x = 0;
         let y = 0;
-        let y2 = 0;
-        let y3 = 0;
 
         ctx.moveTo(x, 50);
         while (x < window.innerWidth) {
-            y = this.amplitude * Math.sin((x + this.step) / this.frequency);
-            y2 = this.amplitude2 * Math.sin((x + this.step) / this.frequency2);
-            y3 = window.innerHeight / 2 + y + y2;
-            ctx.lineTo(x, y3);
+            y = this.waves.reduce((value: number, item) => {
+                item.y = item.amplitude * Math.sin((x + item.step) / item.frequency);
+                return value = value + item.y;
+            }, window.innerHeight / 2);
+
+            // console.log(isIntersect(this.mouseCoordinate, x, y, 10));
+            // const distanceFromMouse = x
+            if (isIntersect(this.mouseCoordinate, x, y, 100)) {
+                // console.log("here", x, y);
+                ctx.lineTo(x, y + this.mouseCoordinate.y / 10);
+            } else {
+                ctx.lineTo(x, y);
+            //     ctx.lineTo(x, y + this.mouseCoordinate.y / 10);
+            }
             x++;
         }
         ctx.stroke();
         ctx.closePath();
 
-        ctx.beginPath();
-        ctx.lineWidth = 2;
+        this.waves.forEach((item) => {
+            item.step += item.speed;
+        });
+    }
 
-        // let x2 = 0;
-        // ctx.moveTo(x2, 50);
-        // while (x2 < window.innerWidth) {
-        //     y2 = window.innerHeight / 2 + this.amplitude2 * Math.sin((x2 + this.step) / this.frequency2);
-        //     ctx.lineTo(x2, y2);
-        //     x2++;
-        // }
-        // ctx.stroke();
-        // ctx.closePath();
-
-        this.step += this.speed;
+    private handleMouseMove = (e: MouseEvent) => {
+        this.mouseCoordinate = {
+            x: e.x,
+            y: e.y,
+        };
+        // console.log(e.x);
+        // console.log(e.y);
     }
 }
