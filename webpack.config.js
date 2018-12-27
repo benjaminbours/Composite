@@ -50,7 +50,7 @@ module.exports = {
         chunkFilename: "[name].chunk.js",
         filename: "[name].bundle.js",
         path: ouputPath,
-        publicPath: "dist",
+        publicPath: "dist/",
     },
     plugins: [
         new BundleAnalyzerPlugin(),

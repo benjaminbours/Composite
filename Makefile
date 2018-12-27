@@ -17,11 +17,11 @@ install-dev-front: init-npm install-dev-js install-dev-bundler
 # Deploy
 #-----------------------------------------------------------------------
 
-# deploy:
-# 	rsync -avhpz --exclude-from=.syncignore ./ trainthetrainerbe.insideapp.be:www/
+deploy:
+	rsync -avhpz --exclude-from=.syncignore ./ pi@192.168.1.2:Public/composite2/
 
-# deploy-test:
-# 	rsync -avhpzn --exclude-from=.syncignore ./ trainthetrainerbe.insideapp.be:www/
+deploy-test:
+	rsync -avhpzn --exclude-from=.syncignore ./ pi@192.168.1.2:Public/composite2/
 
 # backup-live:
 # 	rsync -avhpz trainthetrainerbe.insideapp.be:www/ ./backup

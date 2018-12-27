@@ -13,10 +13,12 @@
     "@types/dat.gui": "^0.7.2",
     "@types/gsap": "^1.20.0",
     "@types/pixi.js": "^4.8.4",
+    "@types/stats.js": "^0.17.0",
     "@types/three": "^0.93.10",
     "dat.gui": "^0.7.3",
     "gsap": "^2.0.2",
     "pixi.js": "^4.8.2",
+    "stats.js": "^0.17.0",
     "three": "^0.99.0"
   },
   "devDependencies": {

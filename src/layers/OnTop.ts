@@ -1,4 +1,4 @@
-import ButtonPlay from "./comps/ButtonPlay";
+import ButtonPlay from "../comps/ButtonPlay";
 
 export default class OnTop {
     private ctxDom = document.querySelector("#onTop") as HTMLCanvasElement;
