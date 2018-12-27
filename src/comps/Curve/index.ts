@@ -1,15 +1,28 @@
 import * as dat from "dat.gui";
 import { TweenMax } from "gsap";
+import { IWaveOptions } from "../../types";
 import Mouse from "./Mouse";
 import Point from "./Point";
 
-export const wave = {
+export const defaultWave: IWaveOptions = {
     viscosity: 340,
-    mouseDist: 54,
+    mouseDist: 200,
     damping: 0.1,
     amplitudeRange: 100,
     randomRange: 4,
     randomTransition: 5,
+    amplitudeTransition: 1,
+    speed: 0.02,
+};
+
+export const wave: IWaveOptions = {
+    viscosity: 340,
+    mouseDist: 200,
+    damping: 0.1,
+    amplitudeRange: 100,
+    randomRange: 4,
+    randomTransition: 5,
+    amplitudeTransition: 1,
     speed: 0.02,
 };
 
@@ -17,6 +30,18 @@ export default class Curve {
     public static gui = new dat.GUI();
     public static vTotalPoints = 15;
     public static vGap = window.innerHeight / (Curve.vTotalPoints - 1);
+    public static mouseIsHoverButton = false;
+
+    public static transformWave(options: IWaveOptions) {
+        console.log("here i'm called");
+        TweenMax.to(wave, 0.1, {
+            ...options,
+            overwrite: "all",
+            onComplete: () => {
+                console.log("complete");
+            },
+        });
+    }
 
     private readonly ctx: CanvasRenderingContext2D;
     private vPoints: Point[] = [];
@@ -24,6 +49,8 @@ export default class Curve {
     private mainColor: string = "#000";
     private time: number = Date.now();
     private start: boolean = false;
+
+    // private frameToUpdate: number = 300;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -49,6 +76,7 @@ export default class Curve {
         Curve.gui.add(wave, "amplitudeRange", 1, 201);
         Curve.gui.add(wave, "randomRange", 1, 101);
         Curve.gui.add(wave, "randomTransition", 0, 10);
+        Curve.gui.add(wave, "amplitudeTransition", 0, 10);
         Curve.gui.add(wave, "speed", -0.1, 0.1);
         Mouse.speed();
     }
@@ -58,8 +86,13 @@ export default class Curve {
 
         for (let i = 0; i <= this.vPoints.length - 1; i++) {
 
-            if (TweenMax.ticker.frame % 200 === 0) {
+            if (TweenMax.ticker.frame % 500 === 0 && !Curve.mouseIsHoverButton) {
                 TweenMax.to(this.vPoints[i], wave.randomTransition, {
+                    random: Math.floor(Math.random() * wave.randomRange),
+                    // amplitude: Math.floor(Math.random() * wave.amplitudeRange),
+                });
+
+                TweenMax.to(this.vPoints[i], wave.amplitudeTransition, {
                     random: Math.floor(Math.random() * wave.randomRange),
                     amplitude: Math.floor(Math.random() * wave.amplitudeRange),
                 });

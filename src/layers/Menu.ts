@@ -1,6 +1,7 @@
-import Curve from "./comps/Curve";
-import MainTitle from "./comps/MainTitle";
-import TextDrawer from "./comps/TextDrawer";
+import Curve from "../comps/Curve";
+import Light from "../comps/ImageDrawer/Light";
+import MainTitle from "../comps/MainTitle";
+import TextDrawer from "../comps/TextDrawer";
 
 export default class Menu {
     private ctxDom = document.querySelector("#menu") as HTMLCanvasElement;
@@ -8,12 +9,14 @@ export default class Menu {
     private readonly curve: Curve;
     private readonly mainTitle: MainTitle;
     private readonly title: TextDrawer;
+    private readonly light: Light;
 
     constructor() {
         this.resize();
         this.curve = new Curve(this.ctx);
         this.mainTitle = new MainTitle(this.ctx, "white");
         this.title = new TextDrawer(this.ctx, "white");
+        this.light = new Light(this.ctx);
         window.addEventListener("resize", this.resize);
     }
 
@@ -23,6 +26,7 @@ export default class Menu {
         this.curve.render();
         this.mainTitle.render();
         this.title.render();
+        this.light.render();
         this.ctx.restore();
     }
 

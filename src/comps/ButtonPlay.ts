@@ -1,6 +1,12 @@
 import { TweenMax } from "gsap";
+import Curve, { defaultWave, wave } from "./Curve";
+import Shadow from "./ImageDrawer/Shadow";
 
 export default class ButtonPlay {
+    public static isMouseHover: boolean = false;
+    public static isMouseEnter: boolean = false;
+    public static isMouseExit: boolean = false;
+
     public ray: number = 45;
     private readonly ctx: CanvasRenderingContext2D;
 
@@ -13,10 +19,6 @@ export default class ButtonPlay {
     private width: number = 0;
 
     private circle = new Path2D();
-
-    private isMouseHover: boolean = false;
-    private isMouseEnter: boolean = false;
-    private isMouseExit: boolean = false;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -35,48 +37,72 @@ export default class ButtonPlay {
         this.ctx.fill();
 
         this.ctx.canvas.style.letterSpacing = "5px";
-        this.ctx.font = "400 20px sans-serif";
+        this.ctx.font = "100 20px sans-serif";
         this.ctx.fillStyle = this.textColor;
         this.ctx.fillText("PLAY", this.startX - this.width / 2, this.startY + 10);
         this.width = this.ctx.measureText("PLAY").width;
     }
 
-    private handleMousemove = (event: MouseEvent) => {
+    private detectMouseEvent = (event: MouseEvent) => {
         if (this.ctx.isPointInPath(this.circle, event.clientX, event.clientY)) {
-            if (this.isMouseHover === false) {
-                this.isMouseEnter = true;
+            if (ButtonPlay.isMouseHover === false) {
+                ButtonPlay.isMouseEnter = true;
             } else {
-                this.isMouseEnter = false;
+                ButtonPlay.isMouseEnter = false;
             }
-            this.isMouseHover = true;
+            ButtonPlay.isMouseHover = true;
         } else {
-            if (this.isMouseHover === true) {
-                this.isMouseExit = true;
+            if (ButtonPlay.isMouseHover === true) {
+                ButtonPlay.isMouseExit = true;
             } else {
-                this.isMouseExit = false;
+                ButtonPlay.isMouseExit = false;
             }
-            this.isMouseHover = false;
+            ButtonPlay.isMouseHover = false;
+        }
+    }
+
+    private handleMousemove = (event: MouseEvent) => {
+        this.detectMouseEvent(event);
+        if (ButtonPlay.isMouseEnter) {
+            this.handleMouseEnter();
         }
 
-        // console.log(this.isMouseExit, "exit");
-        // console.log(this.isMouseEnter, "enter");
-
-        if (this.isMouseEnter) {
-            TweenMax.to(this, 0.5, {
-                color: "#FFF",
-                textColor: "#000",
-                overwrite: "all",
-                repeat: 0,
-            });
+        if (ButtonPlay.isMouseExit) {
+            this.handleMouseExit();
         }
+    }
 
-        if (this.isMouseExit) {
-            TweenMax.to(this, 0.5, {
-                color: "#000",
-                textColor: "#FFF",
-                overwrite: "all",
-            });
-        }
+    private handleMouseEnter = () => {
+        Curve.mouseIsHoverButton = true;
+        Shadow.setRotationSpeed(0.02);
+        Curve.transformWave({
+            ...defaultWave,
+            // en slow motion,
+            // damping: 0.6,
+            // courte mais agité,
+            randomRange: 300,
+            amplitudeRange: 50,
+            speed: 0.1,
+        });
+        TweenMax.to(this, 0.5, {
+            color: "#FFF",
+            textColor: "#000",
+            overwrite: "all",
+            repeat: 0,
+        });
+    }
+
+    private handleMouseExit = () => {
+        Shadow.setRotationSpeed(0.005);
+        Curve.mouseIsHoverButton = false;
+        Curve.transformWave({
+            ...defaultWave,
+        });
+        TweenMax.to(this, 0.5, {
+            color: "#000",
+            textColor: "#FFF",
+            overwrite: "all",
+        });
     }
 
     private resize = () => {
