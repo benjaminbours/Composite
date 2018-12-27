@@ -1,15 +1,5 @@
-import MenuApp, { wave } from "../main";
+import Curve, { wave } from "./index";
 import Mouse from "./Mouse";
-
-// const waveViscosity = 20;
-// const waveMouseDist = 20;
-// const waveDamping = 0.01;
-// const waveViscosity = 200;
-// const waveMouseDist = 80;
-// const waveDamping = 0.10;
-// const waveViscosity = 200;
-// const waveMouseDist = 100;
-// const waveDamping = 0.10;
 
 export default class Point {
     public isAnimating: boolean = false;
@@ -25,10 +15,8 @@ export default class Point {
     private vy: number;
     private axis;
     private fixed: boolean;
-    private canvas;
-    private time: number = Date.now();
 
-    constructor(x: number, y: number, axis: any, fixed: any, canvas: HTMLCanvasElement) {
+    constructor(x: number, y: number, axis: any, fixed: any) {
         this.x = x;
         this.ix = x;
         this.vx = 0;
@@ -39,7 +27,6 @@ export default class Point {
         this.cy = 0;
         this.axis = axis;
         this.fixed = fixed;
-        this.canvas = canvas;
     }
 
     public move = () => {
@@ -52,7 +39,7 @@ export default class Point {
         const dx = this.ix - Mouse.x;
         const dy = this.iy - Mouse.y;
 
-        const vGap = MenuApp.vGap;
+        const vGap = Curve.vGap;
 
         const isVerticalAxis = this.axis === "v";
 

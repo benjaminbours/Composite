@@ -21,11 +21,25 @@
             height: 100%;
             width: 100%;
         }
+
+        #under {
+            z-index: -3;
+        }
+
+        #menu {
+            z-index: -2;
+        }
+
+        #onTop {
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
 
+    <canvas id="under"></canvas>
     <canvas id="menu"></canvas>
+    <canvas id="onTop"></canvas>
 
     <script src="./dist/app.bundle.js"></script>
     
