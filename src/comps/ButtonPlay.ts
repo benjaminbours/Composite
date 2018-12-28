@@ -1,6 +1,9 @@
 import { TweenMax } from "gsap";
 import Curve, { defaultWave, wave } from "./Curve";
+<<<<<<< HEAD
 import Light from "./ImageDrawer/Light";
+=======
+>>>>>>> 0a709f8bd1953d86b7acd641f94d26a1d13e723a
 import Shadow from "./ImageDrawer/Shadow";
 
 export default class ButtonPlay {
@@ -76,7 +79,10 @@ export default class ButtonPlay {
     private handleMouseEnter = () => {
         Curve.mouseIsHoverButton = true;
         Shadow.setRotationSpeed(0.02);
+<<<<<<< HEAD
         Light.pulseFast();
+=======
+>>>>>>> 0a709f8bd1953d86b7acd641f94d26a1d13e723a
         Curve.transformWave({
             ...defaultWave,
             // en slow motion,
@@ -96,7 +102,10 @@ export default class ButtonPlay {
 
     private handleMouseExit = () => {
         Shadow.setRotationSpeed(0.005);
+<<<<<<< HEAD
         Light.pulseSlow();
+=======
+>>>>>>> 0a709f8bd1953d86b7acd641f94d26a1d13e723a
         Curve.mouseIsHoverButton = false;
         Curve.transformWave({
             ...defaultWave,
