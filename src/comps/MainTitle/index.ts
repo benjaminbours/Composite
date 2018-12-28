@@ -1,3 +1,4 @@
+import { TweenMax } from "gsap";
 import { Side } from "../../types";
 import mainTitleBlackPath from "./composite_black.svg";
 import mainTitleWhitePath from "./composite_white.svg";
@@ -8,6 +9,9 @@ const mainTitleBlack = new Image();
 mainTitleBlack.src = mainTitleBlackPath;
 
 export default class MainTitle {
+    public isMount: boolean = true;
+    public onTransition: boolean = false;
+
     private width: number = 1370;
     private height: number = 99;
     private ratio: number = this.width / this.height;
@@ -15,6 +19,8 @@ export default class MainTitle {
     private startX: number = 0;
     private startY: number = 0;
     private readonly img: HTMLImageElement;
+
+    private opacity: number = 1;
 
     constructor(ctx: CanvasRenderingContext2D, color: Side) {
         this.img = color === "black" ? mainTitleBlack : mainTitleWhite;
@@ -24,8 +30,21 @@ export default class MainTitle {
     }
 
     public render = () => {
-        // this.ctx.drawImage(mainTitle, GlobalMenuVar.mainTitleBbox.left, GlobalMenuVar.mainTitleBbox.top, GlobalMenuVar.mainTitleBbox.width, GlobalMenuVar.mainTitleBbox.height);
+        this.ctx.save();
+        this.ctx.globalAlpha = this.opacity;
         this.ctx.drawImage(this.img, this.startX, this.startY, this.width, this.height);
+        this.ctx.restore();
+    }
+
+    public disappear = () => {
+        this.onTransition = true;
+        TweenMax.to(this, 0.5, {
+            opacity: 0,
+            onComplete: () => {
+                this.onTransition = false;
+                this.isMount = false;
+            },
+        });
     }
 
     private resize = () => {

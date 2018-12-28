@@ -1,20 +1,34 @@
 import ButtonPlay from "../comps/ButtonPlay";
+import Mouse from "../Mouse";
+import { Iscenes } from "../types";
 
 export default class OnTop {
-    private ctxDom = document.querySelector("#onTop") as HTMLCanvasElement;
-    private ctx = this.ctxDom.getContext("2d") as CanvasRenderingContext2D;
+    public ctxDom = document.querySelector("#onTop") as HTMLCanvasElement;
+    public ctx = this.ctxDom.getContext("2d") as CanvasRenderingContext2D;
 
-    private readonly buttonPlay: ButtonPlay;
+    // public readonly buttonPlay: ButtonPlay;
+
+    public scenes: Iscenes;
 
     constructor() {
         this.resize();
-        this.buttonPlay = new ButtonPlay(this.ctx);
+        this.scenes = {
+            home: {
+                buttonPlay: new ButtonPlay(this.ctx),
+            },
+        };
         window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
         this.clear();
-        this.buttonPlay.render();
+        for (const comps in this.scenes.home) {
+            if (this.scenes.home[comps].hasOwnProperty("render")) {
+                if (this.scenes.home[comps].isMount || this.scenes.home[comps].onTransition) {
+                    this.scenes.home[comps].render();
+                }
+            }
+        }
     }
 
     private clear = () => {

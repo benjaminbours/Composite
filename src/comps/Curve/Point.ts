@@ -1,5 +1,5 @@
+import Mouse from "../../Mouse";
 import Curve, { wave } from "./index";
-import Mouse from "./Mouse";
 
 export default class Point {
     public isAnimating: boolean = false;
@@ -11,6 +11,7 @@ export default class Point {
     public cy: number;
     public ix: number;
     public iy: number;
+
     private vx: number;
     private vy: number;
     private axis;

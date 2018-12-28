@@ -3,19 +3,36 @@ import * as STATS from "stats.js";
 import Menu from "./layers/Menu";
 import OnTop from "./layers/OnTop";
 import UnderMenu from "./layers/UnderMenu";
-
-const menu = new Menu();
-const underMenu = new UnderMenu();
-const onTop = new OnTop();
+import Mouse from "./Mouse";
 
 const stats = new STATS.default();
-stats.showPanel( 1 );
-document.body.appendChild( stats.dom );
+stats.showPanel(1);
+document.body.appendChild(stats.dom);
 
-TweenMax.ticker.addEventListener("tick", () => {
-    stats.begin();
-    underMenu.render();
-    menu.render();
-    onTop.render();
-    stats.end();
-});
+export default class App {
+    public static layers = {
+        menu: new Menu(),
+        underMenu: new UnderMenu(),
+        onTop: new OnTop(),
+    };
+
+    public static currentScene = "home";
+    public static lastScene = "home";
+
+    constructor() {
+        TweenMax.ticker.addEventListener("tick", this.render);
+        Mouse.init();
+    }
+
+    private render = () => {
+        stats.begin();
+        for (const layer in App.layers) {
+            if (App.layers[layer].hasOwnProperty("render")) {
+                App.layers[layer].render();
+            }
+        }
+        stats.end();
+    }
+}
+
+const app = new App();

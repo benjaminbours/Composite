@@ -1,7 +1,6 @@
 import * as dat from "dat.gui";
-import { TweenMax } from "gsap";
+import { Power3, TweenMax } from "gsap";
 import { IWaveOptions } from "../../types";
-import Mouse from "./Mouse";
 import Point from "./Point";
 
 export const defaultWave: IWaveOptions = {
@@ -27,20 +26,12 @@ export const wave: IWaveOptions = {
 };
 
 export default class Curve {
+    // maybe bad use of static property
     public static gui = new dat.GUI();
     public static vTotalPoints = 15;
     public static vGap = window.innerHeight / (Curve.vTotalPoints - 1);
-    public static mouseIsHoverButton = false;
 
-    public static transformWave(options: IWaveOptions) {
-        TweenMax.to(wave, 0.1, {
-            ...options,
-            overwrite: "all",
-            // onComplete: () => {
-            //     console.log("complete");
-            // },
-        });
-    }
+    public mouseIsHoverButton = false;
 
     private readonly ctx: CanvasRenderingContext2D;
     private vPoints: Point[] = [];
@@ -49,17 +40,12 @@ export default class Curve {
     private time: number = Date.now();
     private start: boolean = false;
 
-    // private frameToUpdate: number = 300;
+    private origin: number;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
-        document.addEventListener("mousemove", Mouse.handleMouseMove);
-        document.addEventListener("click", () => {
-            if (!this.start) {
-                console.log("here I start");
-                this.start = true;
-            }
-        });
+        this.origin = this.ctx.canvas.width * 0.5;
+        window.addEventListener("resize", this.resize);
 
         this.initVPoints();
 
@@ -77,7 +63,31 @@ export default class Curve {
         Curve.gui.add(wave, "randomTransition", 0, 10);
         Curve.gui.add(wave, "amplitudeTransition", 0, 10);
         Curve.gui.add(wave, "speed", -0.1, 0.1);
-        Mouse.speed();
+        // Curve.moveOrigin(this.ctx.canvas.width * 0.75);
+    }
+
+    public moveOrigin(value: number) {
+        // wave.damping = 0;
+        // this.origin = value;
+        wave.viscosity = 60;
+        // wave.damping = 0;
+        TweenMax.to(this, 0.2, {
+            origin: value,
+            onComplete: () => {
+                TweenMax.to(wave, 0.2, {
+                    viscosity: defaultWave.viscosity,
+                });
+            },
+            // ease: Power3.easeOut,
+        });
+
+    }
+
+    public transformWave(options: IWaveOptions) {
+        TweenMax.to(wave, 0.1, {
+            ...options,
+            overwrite: "all",
+        });
     }
 
     public render = () => {
@@ -85,7 +95,7 @@ export default class Curve {
 
         for (let i = 0; i <= this.vPoints.length - 1; i++) {
 
-            if (TweenMax.ticker.frame % 200 === 0 && !Curve.mouseIsHoverButton) {
+            if (TweenMax.ticker.frame % 200 === 0 && !this.mouseIsHoverButton) {
                 TweenMax.to(this.vPoints[i], wave.randomTransition, {
                     random: Math.floor(Math.random() * wave.randomRange),
                     // amplitude: Math.floor(Math.random() * wave.amplitudeRange),
@@ -97,8 +107,8 @@ export default class Curve {
                 });
             }
             const waveValue = (Math.sin(i + this.time + this.vPoints[i].random)) * this.vPoints[i].amplitude;
-            const origin = this.ctx.canvas.width * 0.5;
-            this.vPoints[i].ix = origin + waveValue;
+            // const origin = this.ctx.canvas.width * 0.5;
+            this.vPoints[i].ix = this.origin + waveValue;
             this.vPoints[i].move();
         }
         this.ctx.beginPath();
@@ -130,10 +140,14 @@ export default class Curve {
         this.time -= wave.speed;
     }
 
+    private resize = () => {
+        this.origin = this.ctx.canvas.width * 0.5;
+    }
+
     private initVPoints = () => {
         this.vPoints = [];
         for (let i = 0; i <= Curve.vTotalPoints - 1; i++) {
-            this.vPoints.push(new Point(this.ctx.canvas.width * 0.5, i * Curve.vGap, "v", false));
+            this.vPoints.push(new Point(this.origin, i * Curve.vGap, "v", false));
         }
     }
 }

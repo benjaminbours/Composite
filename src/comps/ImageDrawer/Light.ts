@@ -1,4 +1,4 @@
-import { Power3, TimelineMax, TweenMax } from "gsap";
+import { Power3, TimelineMax } from "gsap";
 import ImageDrawer from "./index";
 import lightPath from "./light.png";
 import lightHaloPath from "./light_halo.png";
@@ -18,17 +18,12 @@ export interface IPulseOptions {
 }
 
 export default class Light extends ImageDrawer {
-    public static pulseFast() {
-        Light.isPulsingFast = true;
-    }
+    private width: number = 450;
+    private img: HTMLImageElement;
 
-    public static pulseSlow() {
-        Light.isPulsingFast = false;
-    }
+    private isPulsingFast: boolean = false;
 
-    private static isPulsingFast: boolean = false;
-
-    private static pulsesOptions: IPulseOptions[] = [
+    private pulsesOptions: IPulseOptions[] = [
         {
             startScale: 0.6,
             scale: 0.6,
@@ -63,12 +58,45 @@ export default class Light extends ImageDrawer {
         },
     ];
 
-    private static pulsesFastAnimation: TimelineMax[] = [];
+    private pulsesFastAnimation: TimelineMax[] = [];
 
-    private static createAnimation(pulseOptions: IPulseOptions) {
+    constructor(ctx: CanvasRenderingContext2D) {
+        super(ctx);
+        this.img = light;
+        this.pulsesOptions.forEach((pulse) => {
+            this.createAnimation(pulse);
+        });
+    }
+    public pulseFast(value: boolean) {
+        this.isPulsingFast = value;
+    }
+
+    public render = () => {
+        this.ctx.save();
+        this.ctx.translate(this.startX, this.startY);
+        this.ctx.drawImage(this.img, -this.width / 2, -this.width / 2, this.width, this.width);
+        this.renderLightHalo();
+        this.ctx.restore();
+    }
+
+    private renderLightHalo = () => {
+        for (let i = 0; i < this.pulsesOptions.length; i++) {
+            const pulse = this.pulsesOptions[i];
+            this.ctx.save();
+            this.ctx.scale(pulse.scale, pulse.scale);
+            this.ctx.globalAlpha = pulse.opacity;
+            this.ctx.drawImage(lightHalo, -this.width / 2, -this.width / 2, this.width, this.width);
+            this.ctx.restore();
+            if (!this.isPulsingFast && i === 0) {
+                // TODO: desactivate the render smoothly
+                break;
+            }
+        }
+    }
+
+    private createAnimation(pulseOptions: IPulseOptions) {
         const animation = new TimelineMax({
             delay: pulseOptions.delay,
-            // paused: true,
             onComplete(this: TimelineMax) {
                 this.restart();
             },
@@ -86,63 +114,7 @@ export default class Light extends ImageDrawer {
                 scale: pulseOptions.maxScale,
             });
 
-        Light.pulsesFastAnimation.push(animation);
+        this.pulsesFastAnimation.push(animation);
     }
 
-    private width: number = 450;
-    private img: HTMLImageElement;
-
-    constructor(ctx: CanvasRenderingContext2D) {
-        super(ctx);
-        this.img = light;
-
-        // Light.pulseAnimation = new TimelineMax({
-        //     onComplete(this: TimelineMax) {
-        //         this.invalidate().restart();
-        //         console.log(Light.maxScale);
-        //         // if (Light.isPulsingFast) {
-
-        //         // }
-        //         console.log(Light.pulsingTime);
-        //     },
-        // });
-
-        // Light.pulseAnimation.to(Light, Light.pulsingTime / 2, {
-        //     haloOpacity: 1,
-        // });
-
-        // Light.pulseAnimation.fromTo(Light, Light.pulsingTime / 2, {
-        //     scale: 0.6,
-        // }, {
-        //         haloOpacity: 0,
-        //         scale: Light.maxScale,
-        //     });
-        Light.pulsesOptions.forEach((pulse) => {
-            Light.createAnimation(pulse);
-        });
-
-        // Light.isPulsingFast = true;
-    }
-
-    public render = () => {
-        this.ctx.save();
-        this.ctx.translate(this.startX, this.startY);
-        this.ctx.drawImage(this.img, -this.width / 2, -this.width / 2, this.width, this.width);
-        this.renderLightHalo();
-        this.ctx.restore();
-    }
-
-    private renderLightHalo = () => {
-        for (let i = 0; i < Light.pulsesOptions.length; i++) {
-            const pulse = Light.pulsesOptions[i];
-            this.ctx.save();
-            this.ctx.scale(pulse.scale, pulse.scale);
-            this.ctx.globalAlpha = pulse.opacity;
-            this.ctx.drawImage(lightHalo, -this.width / 2, -this.width / 2, this.width, this.width);
-            this.ctx.restore();
-            if (!Light.isPulsingFast && i === 0) {
-                break;
-            }
-        }
-    }
 }

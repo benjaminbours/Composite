@@ -1,15 +1,22 @@
+import { TweenMax } from "gsap";
 // Maybe this class is not usefull anymore
-
 export default class ImageDrawer {
-    protected readonly ctx: CanvasRenderingContext2D;
+    public startY: number = 30;
+    public startX: number = 0;
 
-    protected startX: number = 0;
-    protected startY: number = 30;
+    protected readonly ctx: CanvasRenderingContext2D;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.resize();
         window.addEventListener("resize", this.resize);
+    }
+
+    public move = (x: number, y: number) => {
+        TweenMax.to(this, 0.5, {
+            startX: x,
+            startY: y,
+        });
     }
 
     private resize = () => {
