@@ -33,22 +33,12 @@ export default class Curve {
     public static mouseIsHoverButton = false;
 
     public static transformWave(options: IWaveOptions) {
-<<<<<<< HEAD
         TweenMax.to(wave, 0.1, {
             ...options,
             overwrite: "all",
             // onComplete: () => {
             //     console.log("complete");
             // },
-=======
-        console.log("here i'm called");
-        TweenMax.to(wave, 0.1, {
-            ...options,
-            overwrite: "all",
-            onComplete: () => {
-                console.log("complete");
-            },
->>>>>>> 0a709f8bd1953d86b7acd641f94d26a1d13e723a
         });
     }
 
@@ -95,11 +85,7 @@ export default class Curve {
 
         for (let i = 0; i <= this.vPoints.length - 1; i++) {
 
-<<<<<<< HEAD
             if (TweenMax.ticker.frame % 200 === 0 && !Curve.mouseIsHoverButton) {
-=======
-            if (TweenMax.ticker.frame % 500 === 0 && !Curve.mouseIsHoverButton) {
->>>>>>> 0a709f8bd1953d86b7acd641f94d26a1d13e723a
                 TweenMax.to(this.vPoints[i], wave.randomTransition, {
                     random: Math.floor(Math.random() * wave.randomRange),
                     // amplitude: Math.floor(Math.random() * wave.amplitudeRange),
