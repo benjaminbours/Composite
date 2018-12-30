@@ -36,17 +36,6 @@ export default class MainTitle {
         this.ctx.restore();
     }
 
-    public disappear = () => {
-        this.onTransition = true;
-        TweenMax.to(this, 0.5, {
-            opacity: 0,
-            onComplete: () => {
-                this.onTransition = false;
-                this.isMount = false;
-            },
-        });
-    }
-
     private resize = () => {
         this.width = this.ctx.canvas.width * 0.9;
         this.height = this.width / this.ratio;

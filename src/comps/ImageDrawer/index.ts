@@ -12,13 +12,6 @@ export default class ImageDrawer {
         window.addEventListener("resize", this.resize);
     }
 
-    public move = (x: number, y: number) => {
-        TweenMax.to(this, 0.5, {
-            startX: x,
-            startY: y,
-        });
-    }
-
     private resize = () => {
         this.startX = (this.ctx.canvas.width / 2);
         this.startY = (this.ctx.canvas.height / 2) + this.ctx.canvas.height / 100 * 25;

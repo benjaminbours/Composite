@@ -17,13 +17,6 @@ export default class Shadow extends ImageDrawer {
         this.img = shadow;
     }
 
-    public setRotationSpeed(value: number) {
-        TweenMax.to(this, 1, {
-            rotationSpeed: value,
-            ease: Power3.easeOut,
-        });
-    }
-
     public render = () => {
         this.ctx.save();
         this.ctx.translate(this.startX, this.startY);

@@ -2,7 +2,6 @@ import Curve from "../comps/Curve";
 import Light from "../comps/ImageDrawer/Light";
 import MainTitle from "../comps/MainTitle";
 import TextDrawer from "../comps/TextDrawer";
-import App from "../main";
 import { Iscenes } from "../types";
 
 export default class Menu {
@@ -20,7 +19,10 @@ export default class Menu {
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "white"),
-                title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS"),
+                title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS", true),
+            },
+            level: {
+                title: new TextDrawer(this.ctx, "white", "SELECT A LEVEL", false),
             },
         };
         this.light = new Light(this.ctx);
@@ -31,10 +33,15 @@ export default class Menu {
         this.clear();
         this.ctx.save();
         this.curve.render();
-        for (const comps in this.scenes.home) {
-            if (this.scenes.home[comps].hasOwnProperty("render")) {
-                if (this.scenes.home[comps].isMount || this.scenes.home[comps].onTransition) {
-                    this.scenes.home[comps].render();
+        for (const sceneName in this.scenes) {
+            if (this.scenes[sceneName]) {
+                const scene = this.scenes[sceneName];
+                for (const comps in scene) {
+                    if (scene[comps].hasOwnProperty("render")) {
+                        if (scene[comps].isMount || scene[comps].onTransition) {
+                            scene[comps].render();
+                        }
+                    }
                 }
             }
         }

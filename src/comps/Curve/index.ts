@@ -38,7 +38,6 @@ export default class Curve {
 
     private mainColor: string = "#000";
     private time: number = Date.now();
-    private start: boolean = false;
 
     private origin: number;
 
@@ -63,31 +62,6 @@ export default class Curve {
         Curve.gui.add(wave, "randomTransition", 0, 10);
         Curve.gui.add(wave, "amplitudeTransition", 0, 10);
         Curve.gui.add(wave, "speed", -0.1, 0.1);
-        // Curve.moveOrigin(this.ctx.canvas.width * 0.75);
-    }
-
-    public moveOrigin(value: number) {
-        // wave.damping = 0;
-        // this.origin = value;
-        wave.viscosity = 60;
-        // wave.damping = 0;
-        TweenMax.to(this, 0.2, {
-            origin: value,
-            onComplete: () => {
-                TweenMax.to(wave, 0.2, {
-                    viscosity: defaultWave.viscosity,
-                });
-            },
-            // ease: Power3.easeOut,
-        });
-
-    }
-
-    public transformWave(options: IWaveOptions) {
-        TweenMax.to(wave, 0.1, {
-            ...options,
-            overwrite: "all",
-        });
     }
 
     public render = () => {
@@ -102,7 +76,7 @@ export default class Curve {
                 });
 
                 TweenMax.to(this.vPoints[i], wave.amplitudeTransition, {
-                    random: Math.floor(Math.random() * wave.randomRange),
+                    // random: Math.floor(Math.random() * wave.randomRange),
                     amplitude: Math.floor(Math.random() * wave.amplitudeRange),
                 });
             }
@@ -111,6 +85,7 @@ export default class Curve {
             this.vPoints[i].ix = this.origin + waveValue;
             this.vPoints[i].move();
         }
+
         this.ctx.beginPath();
         this.ctx.moveTo(this.ctx.canvas.width * 0.5, 0);
 

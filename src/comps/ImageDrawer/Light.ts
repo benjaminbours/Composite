@@ -18,12 +18,8 @@ export interface IPulseOptions {
 }
 
 export default class Light extends ImageDrawer {
-    private width: number = 450;
-    private img: HTMLImageElement;
-
-    private isPulsingFast: boolean = false;
-
-    private pulsesOptions: IPulseOptions[] = [
+    public isPulsingFast: boolean = false;
+    public pulsesOptions: IPulseOptions[] = [
         {
             startScale: 0.6,
             scale: 0.6,
@@ -57,6 +53,8 @@ export default class Light extends ImageDrawer {
             delay: 2.25,
         },
     ];
+    private width: number = 450;
+    private img: HTMLImageElement;
 
     private pulsesFastAnimation: TimelineMax[] = [];
 
@@ -66,9 +64,6 @@ export default class Light extends ImageDrawer {
         this.pulsesOptions.forEach((pulse) => {
             this.createAnimation(pulse);
         });
-    }
-    public pulseFast(value: boolean) {
-        this.isPulsingFast = value;
     }
 
     public render = () => {

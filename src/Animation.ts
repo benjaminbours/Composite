@@ -1,39 +1,128 @@
+import { Power3, TimelineMax, TweenMax } from "gsap";
 import ButtonPlay from "./comps/ButtonPlay";
-import { defaultWave } from "./comps/Curve";
+import { defaultWave, wave } from "./comps/Curve";
 import App from "./main";
 
 export default class Animation {
     public static homeToLevel() {
-        // Maybe better to use a timeline
-        App.layers.menu.curve.moveOrigin(App.layers.menu.ctx.canvas.width * 0.85);
-        App.layers.menu.light.move((App.layers.menu.ctx.canvas.width * 0.85), App.layers.menu.ctx.canvas.height * 0.5);
-        App.layers.menu.scenes.home.title.disappear();
-        App.layers.menu.scenes.home.mainTitle.disappear();
-        App.layers.underMenu.shadow.move((App.layers.menu.ctx.canvas.width * 0.85), App.layers.menu.ctx.canvas.height * 0.5);
-        App.layers.underMenu.scenes.home.title.disappear();
-        App.layers.underMenu.scenes.home.mainTitle.disappear();
-        App.layers.onTop.scenes.home.buttonPlay.disappear();
+        console.log("home to level");
+        const { curve, light } = App.layers.menu;
+        const shadow = App.layers.underMenu.shadow;
+        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
+        const canvas = App.layers.menu.ctx.canvas;
+        const mainTitleWhite = App.layers.menu.scenes.home.mainTitle;
+        const mainTitleBlack = App.layers.underMenu.scenes.home.mainTitle;
+        const titleHomeWhite = App.layers.menu.scenes.home.title;
+        const titleHomeBlack = App.layers.underMenu.scenes.home.title;
+
+        const titleLevelWhite = App.layers.menu.scenes.level.title;
+
+        App.layers.onTop.ctx.canvas.style.cursor = "initial";
+
+        const tl = new TimelineMax();
+        wave.viscosity = 40;
+        wave.damping = 0.2;
+        tl.to(curve, 0.5, {
+            origin: canvas.width * 0.85,
+            overwrite: "all",
+            onComplete: () => {
+                TweenMax.to(wave, 0.1, {
+                    ...defaultWave,
+                    overwrite: "all",
+                });
+            },
+        });
+
+        tl.to(light, 0.5, {
+            startX: canvas.width * 0.85,
+            startY: canvas.height * 0.5,
+        }, "-= 0.5");
+
+        tl.to(shadow, 0.5, {
+            startX: canvas.width * 0.85,
+            startY: canvas.height * 0.5,
+        }, "-= 0.5");
+
+        mainTitleBlack.onTransition = true;
+        mainTitleWhite.onTransition = true;
+
+        titleHomeBlack.onTransition = true;
+        titleHomeWhite.onTransition = true;
+
+        buttonPlay.onTransition = true;
+
+        tl.to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack, buttonPlay], 0.5, {
+            opacity: 0,
+            overwrite: "all",
+            onComplete: () => {
+                mainTitleBlack.onTransition = false;
+                mainTitleBlack.isMount = false;
+                mainTitleWhite.onTransition = false;
+                mainTitleWhite.isMount = false;
+
+                titleHomeWhite.onTransition = false;
+                titleHomeBlack.onTransition = false;
+                titleHomeWhite.isMount = false;
+                titleHomeBlack.isMount = false;
+
+                buttonPlay.onTransition = false;
+                buttonPlay.isMount = false;
+                buttonPlay.isMouseHover = false;
+                buttonPlay.isMouseEnter = false;
+                buttonPlay.isMouseExit = false;
+            },
+        }, "-= 0.5");
+
+        tl.to(shadow, 1, {
+            rotationSpeed: 0.005,
+            ease: Power3.easeOut,
+        }, "-= 0.5");
+
+        titleLevelWhite.onTransition = true;
+        tl.fromTo(titleLevelWhite, 0.5, {
+            opacity: 0,
+        }, {
+            opacity: 1,
+        }, "-= 0.5");
+
+        light.isPulsingFast = false;
     }
     public static mouseExitButtonPlay() {
-        console.log("mouse exit");
+        const { curve, light } = App.layers.menu;
+        const shadow = App.layers.underMenu.shadow;
+        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+
         App.layers.onTop.ctx.canvas.style.cursor = "initial";
-        App.layers.underMenu.shadow.setRotationSpeed(0.005);
-        App.layers.menu.light.pulseFast(false);
-        App.layers.menu.curve.mouseIsHoverButton = false;
-        App.layers.menu.curve.transformWave({
+        curve.mouseIsHoverButton = false;
+        const tl = new TimelineMax();
+        tl.to(wave, 0.1, {
             ...defaultWave,
+            overwrite: "all",
         });
-        if (App.layers.onTop.scenes.home.buttonPlay instanceof ButtonPlay) {
-            App.layers.onTop.scenes.home.buttonPlay.handleMouseExit();
-        }
+
+        tl.to(shadow, 1, {
+            rotationSpeed: 0.005,
+            ease: Power3.easeOut,
+        });
+
+        light.isPulsingFast = false;
+
+        tl.to(buttonPlay, 0.5, {
+            color: "#000",
+            textColor: "#FFF",
+            // overwrite: "all",
+        }, "-= 1");
     }
 
     public static mouseEnterButtonPlay() {
+        const { curve, light } = App.layers.menu;
+        const shadow = App.layers.underMenu.shadow;
+        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+
         App.layers.onTop.ctx.canvas.style.cursor = "pointer";
-        App.layers.menu.curve.mouseIsHoverButton = true;
-        App.layers.underMenu.shadow.setRotationSpeed(0.02);
-        App.layers.menu.light.pulseFast(true);
-        App.layers.menu.curve.transformWave({
+        curve.mouseIsHoverButton = true;
+        const tl = new TimelineMax();
+        tl.to(wave, 0.1, {
             ...defaultWave,
             // en slow motion,
             // damping: 0.6,
@@ -41,9 +130,22 @@ export default class Animation {
             randomRange: 300,
             amplitudeRange: 50,
             speed: 0.1,
+            overwrite: "all",
         });
-        if (App.layers.onTop.scenes.home.buttonPlay instanceof ButtonPlay) {
-            App.layers.onTop.scenes.home.buttonPlay.handleMouseEnter();
-        }
+
+        tl.to(shadow, 1, {
+            rotationSpeed: 0.02,
+            ease: Power3.easeOut,
+        }, "-= 0.1");
+
+        // try to animate it smoothly.
+        light.isPulsingFast = true;
+
+        tl.to(buttonPlay, 0.5, {
+            color: "#FFF",
+            textColor: "#000",
+            // overwrite: "all",
+            repeat: 0,
+        }, "-= 1");
     }
 }

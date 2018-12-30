@@ -17,9 +17,10 @@ export default class TextDrawer {
     private content: string;
     private side: Side;
 
-    constructor(ctx: CanvasRenderingContext2D, side: Side, content: string) {
+    constructor(ctx: CanvasRenderingContext2D, side: Side, content: string, isMount: boolean) {
         this.ctx = ctx;
         this.side = side;
+        this.isMount = isMount;
         this.color = side === "black" ? "#000" : "#FFF";
         this.content = content;
         this.width = this.ctx.measureText(this.content).width;
@@ -34,22 +35,11 @@ export default class TextDrawer {
         this.ctx.fillStyle = this.color;
         this.ctx.globalAlpha = this.opacity;
         this.ctx.fillText(this.content, this.startX, this.startY);
-        if (TweenMax.ticker.frame === 4) {
+        if (TweenMax.ticker.frame === 4 || this.onTransition) {
             this.width = this.ctx.measureText(this.content).width;
             this.resize();
         }
         this.ctx.restore();
-    }
-
-    public disappear = () => {
-        this.onTransition = true;
-        TweenMax.to(this, 0.5, {
-            opacity: 0,
-            onComplete: () => {
-                this.onTransition = false;
-                this.isMount = false;
-            },
-        });
     }
 
     private resize = () => {

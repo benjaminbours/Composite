@@ -1,5 +1,3 @@
-import { TweenMax } from "gsap";
-
 export default class ButtonPlay {
     public isMount: boolean = true;
     public onTransition: boolean = false;
@@ -43,35 +41,6 @@ export default class ButtonPlay {
         this.ctx.fillStyle = this.textColor;
         this.ctx.fillText("PLAY", this.startX - this.width / 2, this.startY + 10);
         this.width = this.ctx.measureText("PLAY").width;
-    }
-
-    public disappear = () => {
-        this.onTransition = true;
-        TweenMax.to(this, 0.5, {
-            opacity: 0,
-            overwrite: "all",
-            onComplete: () => {
-                this.onTransition = false;
-                this.isMount = false;
-            },
-        });
-    }
-
-    public handleMouseEnter = () => {
-        TweenMax.to(this, 0.5, {
-            color: "#FFF",
-            textColor: "#000",
-            // overwrite: "all",
-            repeat: 0,
-        });
-    }
-
-    public handleMouseExit = () => {
-        TweenMax.to(this, 0.5, {
-            color: "#000",
-            textColor: "#FFF",
-            // overwrite: "all",
-        });
     }
 
     private resize = () => {

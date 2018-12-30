@@ -30,8 +30,6 @@ export default class Mouse {
 
         if (buttonPlay instanceof ButtonPlay && buttonPlay.isMouseHover) {
             Animation.homeToLevel();
-            Animation.mouseExitButtonPlay();
-            App.currentScene = "other";
         } else {
             // console.log("click outside");
         }

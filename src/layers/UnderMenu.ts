@@ -9,8 +9,6 @@ export default class UnderMenu {
 
     public scenes: Iscenes;
 
-    // public readonly mainTitle: MainTitle;
-    // public readonly title: TextDrawer;
     public readonly shadow: Shadow;
 
     constructor() {
@@ -18,7 +16,10 @@ export default class UnderMenu {
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "black"),
-                title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS"),
+                title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS", true),
+            },
+            level: {
+                // title: new TextDrawer(this.ctx, "black", "SELECT A LEVEL", false),
             },
         };
         this.shadow = new Shadow(this.ctx);
@@ -27,10 +28,15 @@ export default class UnderMenu {
 
     public render = () => {
         this.clear();
-        for (const comps in this.scenes.home) {
-            if (this.scenes.home[comps].hasOwnProperty("render")) {
-                if (this.scenes.home[comps].isMount || this.scenes.home[comps].onTransition) {
-                    this.scenes.home[comps].render();
+        for (const sceneName in this.scenes) {
+            if (this.scenes[sceneName]) {
+                const scene = this.scenes[sceneName];
+                for (const comps in scene) {
+                    if (scene[comps].hasOwnProperty("render")) {
+                        if (scene[comps].isMount || scene[comps].onTransition) {
+                            scene[comps].render();
+                        }
+                    }
                 }
             }
         }
