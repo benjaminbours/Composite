@@ -1,5 +1,5 @@
 import { TweenMax } from "gsap";
-import { Side } from "../types";
+import { ICoordinate, Side } from "../types";
 
 export default class TextDrawer {
     public isMount: boolean = true;
@@ -8,8 +8,11 @@ export default class TextDrawer {
     private readonly ctx: CanvasRenderingContext2D;
     private readonly color: string;
 
-    private startX: number = 0;
-    private startY: number = 30;
+    private x: number = 0;
+    private y: number = 30;
+
+    private ix: number = 0;
+    private iy: number = 0;
 
     private width: number = 0;
     private opacity: number = 1;
@@ -17,12 +20,14 @@ export default class TextDrawer {
     private content: string;
     private side: Side;
 
-    constructor(ctx: CanvasRenderingContext2D, side: Side, content: string, isMount: boolean) {
+    constructor(ctx: CanvasRenderingContext2D, side: Side, content: string, isMount: boolean, initialCoordinate: ICoordinate) {
         this.ctx = ctx;
         this.side = side;
         this.isMount = isMount;
         this.color = side === "black" ? "#000" : "#FFF";
         this.content = content;
+        this.ix = initialCoordinate.x;
+        this.iy = initialCoordinate.y;
         this.width = this.ctx.measureText(this.content).width;
         this.resize();
         window.addEventListener("resize", this.resize);
@@ -34,7 +39,7 @@ export default class TextDrawer {
         this.ctx.font = "400 30px sans-serif";
         this.ctx.fillStyle = this.color;
         this.ctx.globalAlpha = this.opacity;
-        this.ctx.fillText(this.content, this.startX, this.startY);
+        this.ctx.fillText(this.content, this.x, this.y);
         if (TweenMax.ticker.frame === 4 || this.onTransition) {
             this.width = this.ctx.measureText(this.content).width;
             this.resize();
@@ -43,7 +48,7 @@ export default class TextDrawer {
     }
 
     private resize = () => {
-        this.startX = (this.ctx.canvas.width / 2) - this.width / 2;
-        this.startY = (this.ctx.canvas.height / 100 * 50) - 100 / 2;
+        this.x = this.ix - this.width / 2;
+        this.y = this.iy - 100 / 2;
     }
 }

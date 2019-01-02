@@ -1,4 +1,5 @@
 import ButtonPlay from "../comps/ButtonPlay";
+import Portal from "../comps/Portal";
 import { Iscenes } from "../types";
 
 export default class OnTop {
@@ -13,7 +14,12 @@ export default class OnTop {
             home: {
                 buttonPlay: new ButtonPlay(this.ctx),
             },
-            level: {},
+            level: {
+                first: new Portal(this.ctx, false, {
+                    x: this.ctx.canvas.width / 2,
+                    y: this.ctx.canvas.height / 100 * 40,
+                }),
+            },
         };
         window.addEventListener("resize", this.resize);
     }

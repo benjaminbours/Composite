@@ -5,7 +5,6 @@ export default class ButtonPlay {
     public isMouseHover: boolean = false;
     public isMouseEnter: boolean = false;
     public isMouseExit: boolean = false;
-    public isOpen: boolean = false;
 
     public path = new Path2D();
     public ray: number = 45;

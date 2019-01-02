@@ -65,31 +65,32 @@ export default class Mouse {
     }
 
     private static detectMouseEventButtonPlay(e: MouseEvent) {
-        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
-        if (buttonPlay instanceof ButtonPlay) {
-            if (App.layers.onTop.ctx.isPointInPath(buttonPlay.path, e.clientX, e.clientY)) {
-                if (buttonPlay.isMouseHover === false) {
-                    buttonPlay.isMouseEnter = true;
-                } else {
-                    buttonPlay.isMouseEnter = false;
-                }
-                buttonPlay.isMouseHover = true;
+        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
+
+        if (App.layers.onTop.ctx.isPointInPath(buttonPlay.path, e.clientX, e.clientY)) {
+            if (!buttonPlay.isMouseHover) {
+                buttonPlay.isMouseEnter = true;
+                buttonPlay.isMouseExit = false;
             } else {
-                if (buttonPlay.isMouseHover === true || buttonPlay.isMouseEnter) {
-                    buttonPlay.isMouseExit = true;
-                } else {
-                    buttonPlay.isMouseExit = false;
-                }
-                buttonPlay.isMouseHover = false;
+                buttonPlay.isMouseEnter = false;
             }
+            buttonPlay.isMouseHover = true;
+        } else {
+            if (buttonPlay.isMouseHover || buttonPlay.isMouseEnter) {
+                buttonPlay.isMouseExit = true;
+                buttonPlay.isMouseEnter = false;
+            } else {
+                buttonPlay.isMouseExit = false;
+            }
+            buttonPlay.isMouseHover = false;
+        }
 
-            if (buttonPlay.isMouseEnter) {
-                Animation.mouseEnterButtonPlay();
-            }
+        if (buttonPlay.isMouseEnter) {
+            Animation.mouseEnterButtonPlay();
+        }
 
-            if (buttonPlay.isMouseExit) {
-                Animation.mouseExitButtonPlay();
-            }
+        if (buttonPlay.isMouseExit) {
+            Animation.mouseExitButtonPlay();
         }
     }
 }

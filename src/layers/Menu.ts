@@ -19,10 +19,16 @@ export default class Menu {
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "white"),
-                title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS", true),
+                title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS", true, {
+                    x: this.ctx.canvas.width / 2,
+                    y: this.ctx.canvas.height / 100 * 50,
+                }),
             },
             level: {
-                title: new TextDrawer(this.ctx, "white", "SELECT A LEVEL", false),
+                title: new TextDrawer(this.ctx, "white", "SELECT A LEVEL", false, {
+                    x: this.ctx.canvas.width / 2,
+                    y: this.ctx.canvas.height / 100 * 25,
+                }),
             },
         };
         this.light = new Light(this.ctx);

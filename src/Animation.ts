@@ -16,6 +16,7 @@ export default class Animation {
         const titleHomeBlack = App.layers.underMenu.scenes.home.title;
 
         const titleLevelWhite = App.layers.menu.scenes.level.title;
+        const firstLevel = App.layers.onTop.scenes.level.first;
 
         App.layers.onTop.ctx.canvas.style.cursor = "initial";
 
@@ -79,15 +80,20 @@ export default class Animation {
         }, "-= 0.5");
 
         titleLevelWhite.onTransition = true;
-        tl.fromTo(titleLevelWhite, 0.5, {
+        firstLevel.onTransition = true;
+        tl.fromTo([titleLevelWhite, firstLevel], 0.5, {
             opacity: 0,
         }, {
             opacity: 1,
+            // onComplete: () => {
+            //     // first
+            // }
         }, "-= 0.5");
 
         light.isPulsingFast = false;
     }
     public static mouseExitButtonPlay() {
+        // console.log("mouse exit");
         const { curve, light } = App.layers.menu;
         const shadow = App.layers.underMenu.shadow;
         const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
@@ -115,6 +121,7 @@ export default class Animation {
     }
 
     public static mouseEnterButtonPlay() {
+        // console.log("mouse enter");
         const { curve, light } = App.layers.menu;
         const shadow = App.layers.underMenu.shadow;
         const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;

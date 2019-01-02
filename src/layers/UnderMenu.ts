@@ -16,7 +16,10 @@ export default class UnderMenu {
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "black"),
-                title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS", true),
+                title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS", true, {
+                    x: this.ctx.canvas.width / 2,
+                    y: this.ctx.canvas.height / 100 * 50,
+                }),
             },
             level: {
                 // title: new TextDrawer(this.ctx, "black", "SELECT A LEVEL", false),

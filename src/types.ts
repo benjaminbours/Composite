@@ -1,8 +1,16 @@
 import ButtonPlay from "./comps/ButtonPlay";
 import MainTitle from "./comps/MainTitle";
+import Portal from "./comps/Portal";
 import TextDrawer from "./comps/TextDrawer";
 
+export type Components = ButtonPlay | MainTitle | TextDrawer | Portal;
+
 export type Side = "black" | "white";
+
+export interface ICoordinate {
+    x: number;
+    y: number;
+}
 
 export interface IWaveOptions {
     viscosity: number;
@@ -23,5 +31,3 @@ export interface Iscenes {
         [key: string]: Components;
     };
 }
-
-export type Components = ButtonPlay | MainTitle | TextDrawer;
