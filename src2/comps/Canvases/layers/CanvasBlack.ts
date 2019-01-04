@@ -4,16 +4,16 @@ import MainTitle from "../comps/MainTitle";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
 
-export default class Menu {
-    public ctxDom = document.querySelector("#menu") as HTMLCanvasElement;
-    public ctx = this.ctxDom.getContext("2d") as CanvasRenderingContext2D;
+export default class CanvasBlack {
+    public ctx: CanvasRenderingContext2D;
 
     public scenes: Iscenes;
 
     public readonly curve: Curve;
     public readonly light: Light;
 
-    constructor() {
+    constructor(ctxDom: HTMLCanvasElement) {
+        this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
         this.resize();
         this.curve = new Curve(this.ctx);
         this.scenes = {

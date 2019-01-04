@@ -1,44 +1,36 @@
-import Curve from "../comps/Curve";
-import Light from "../comps/ImageDrawer/Light";
+import Shadow from "../comps/ImageDrawer/Shadow";
 import MainTitle from "../comps/MainTitle";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
 
-export default class Menu {
-    public ctxDom = document.querySelector("#menu") as HTMLCanvasElement;
-    public ctx = this.ctxDom.getContext("2d") as CanvasRenderingContext2D;
+export default class CanvasWhite {
+    public ctx: CanvasRenderingContext2D;
 
     public scenes: Iscenes;
 
-    public readonly curve: Curve;
-    public readonly light: Light;
+    public readonly shadow: Shadow;
 
-    constructor() {
+    constructor(ctxDom: HTMLCanvasElement) {
+        this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
         this.resize();
-        this.curve = new Curve(this.ctx);
         this.scenes = {
             home: {
-                mainTitle: new MainTitle(this.ctx, "white"),
-                title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS", true, {
+                mainTitle: new MainTitle(this.ctx, "black"),
+                title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS", true, {
                     x: this.ctx.canvas.width / 2,
                     y: this.ctx.canvas.height / 100 * 50,
                 }),
             },
             level: {
-                title: new TextDrawer(this.ctx, "white", "SELECT A LEVEL", false, {
-                    x: this.ctx.canvas.width / 2,
-                    y: this.ctx.canvas.height / 100 * 15,
-                }),
+                // title: new TextDrawer(this.ctx, "black", "SELECT A LEVEL", false),
             },
         };
-        this.light = new Light(this.ctx);
+        this.shadow = new Shadow(this.ctx);
         window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
         this.clear();
-        this.ctx.save();
-        this.curve.render();
         for (const sceneName in this.scenes) {
             if (this.scenes[sceneName]) {
                 const scene = this.scenes[sceneName];
@@ -51,8 +43,7 @@ export default class Menu {
                 }
             }
         }
-        this.light.render();
-        this.ctx.restore();
+        this.shadow.render();
     }
 
     private clear = () => {
