@@ -1,3 +1,4 @@
+import App from "../App";
 import ButtonPlay from "../comps/ButtonPlay";
 import Portal from "../comps/Portal";
 import { Iscenes } from "../types";
@@ -17,7 +18,15 @@ export default class OnTop {
             level: {
                 first: new Portal(this.ctx, false, {
                     x: this.ctx.canvas.width / 2,
-                    y: this.ctx.canvas.height / 100 * 40,
+                    y: this.ctx.canvas.height / 100 * 30,
+                }),
+                second: new Portal(this.ctx, false, {
+                    x: this.ctx.canvas.width / 2,
+                    y: this.ctx.canvas.height / 100 * 55,
+                }),
+                third: new Portal(this.ctx, false, {
+                    x: this.ctx.canvas.width / 2,
+                    y: this.ctx.canvas.height / 100 * 80,
                 }),
             },
         };
@@ -44,7 +53,7 @@ export default class OnTop {
         this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
-     private resize = () => {
+    private resize = () => {
         this.ctx.canvas.width = window.innerWidth;
         this.ctx.canvas.height = window.innerHeight;
     }

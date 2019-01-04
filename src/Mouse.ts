@@ -1,6 +1,6 @@
 import Animation from "./Animation";
+import App from "./App";
 import ButtonPlay from "./comps/ButtonPlay";
-import App from "./main";
 
 export default class Mouse {
     public static x: number = 0;
@@ -15,24 +15,38 @@ export default class Mouse {
     public static init() {
         document.addEventListener("mousemove", Mouse.handleMouseMove);
         document.addEventListener("click", Mouse.handleClickButtonPlay);
+        window.addEventListener("wheel", Mouse.handleWheel);
         Mouse.detectMouseSpeed();
+    }
+
+    private static handleWheel(e: MouseWheelEvent) {
+        console.log(App.currentScene);
+        if (App.currentScene !== "level") {
+            return;
+        }
+        if (e.deltaY > 0) {
+            // console.log("down");
+        }
+        if (e.deltaY < 0) {
+            // Animation.levelScrollUp();
+        }
     }
 
     private static handleMouseMove(e: MouseEvent) {
         Mouse.detectMouseDirection(e);
-        if (App.layers.onTop.scenes.home.buttonPlay.isMount) {
-            Mouse.detectMouseEventButtonPlay(e);
-        }
+        // if (App.layers.onTop.scenes.home.buttonPlay.isMount) {
+        //     Mouse.detectMouseEventButtonPlay(e);
+        // }
     }
 
     private static handleClickButtonPlay(e: MouseEvent) {
-        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
 
-        if (buttonPlay instanceof ButtonPlay && buttonPlay.isMouseHover) {
-            Animation.homeToLevel();
-        } else {
-            // console.log("click outside");
-        }
+        // if (buttonPlay instanceof ButtonPlay && buttonPlay.isMouseHover) {
+        //     Animation.homeToLevel();
+        // } else {
+        //     // console.log("click outside");
+        // }
     }
 
     private static detectMouseSpeed() {
@@ -64,33 +78,33 @@ export default class Mouse {
         Mouse.y = e.y;
     }
 
-    private static detectMouseEventButtonPlay(e: MouseEvent) {
-        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
+    // private static detectMouseEventButtonPlay(e: MouseEvent) {
+    //     const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
 
-        if (App.layers.onTop.ctx.isPointInPath(buttonPlay.path, e.clientX, e.clientY)) {
-            if (!buttonPlay.isMouseHover) {
-                buttonPlay.isMouseEnter = true;
-                buttonPlay.isMouseExit = false;
-            } else {
-                buttonPlay.isMouseEnter = false;
-            }
-            buttonPlay.isMouseHover = true;
-        } else {
-            if (buttonPlay.isMouseHover || buttonPlay.isMouseEnter) {
-                buttonPlay.isMouseExit = true;
-                buttonPlay.isMouseEnter = false;
-            } else {
-                buttonPlay.isMouseExit = false;
-            }
-            buttonPlay.isMouseHover = false;
-        }
+    //     if (App.layers.onTop.ctx.isPointInPath(buttonPlay.path, e.clientX, e.clientY)) {
+    //         if (!buttonPlay.isMouseHover) {
+    //             buttonPlay.isMouseEnter = true;
+    //             buttonPlay.isMouseExit = false;
+    //         } else {
+    //             buttonPlay.isMouseEnter = false;
+    //         }
+    //         buttonPlay.isMouseHover = true;
+    //     } else {
+    //         if (buttonPlay.isMouseHover || buttonPlay.isMouseEnter) {
+    //             buttonPlay.isMouseExit = true;
+    //             buttonPlay.isMouseEnter = false;
+    //         } else {
+    //             buttonPlay.isMouseExit = false;
+    //         }
+    //         buttonPlay.isMouseHover = false;
+    //     }
 
-        if (buttonPlay.isMouseEnter) {
-            Animation.mouseEnterButtonPlay();
-        }
+    //     if (buttonPlay.isMouseEnter) {
+    //         Animation.mouseEnterButtonPlay();
+    //     }
 
-        if (buttonPlay.isMouseExit) {
-            Animation.mouseExitButtonPlay();
-        }
-    }
+    //     if (buttonPlay.isMouseExit) {
+    //         Animation.mouseExitButtonPlay();
+    //     }
+    // }
 }

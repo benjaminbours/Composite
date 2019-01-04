@@ -27,7 +27,7 @@ export default class Menu {
             level: {
                 title: new TextDrawer(this.ctx, "white", "SELECT A LEVEL", false, {
                     x: this.ctx.canvas.width / 2,
-                    y: this.ctx.canvas.height / 100 * 25,
+                    y: this.ctx.canvas.height / 100 * 15,
                 }),
             },
         };

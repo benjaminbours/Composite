@@ -1,9 +1,12 @@
 import { TweenMax } from "gsap";
+import React from "react";
+import ReactDOM from "react-dom";
 import * as STATS from "stats.js";
 import Menu from "./layers/Menu";
 import OnTop from "./layers/OnTop";
 import UnderMenu from "./layers/UnderMenu";
 import Mouse from "./Mouse";
+import ButtonPlay from "./reactComps/ButtonPlay";
 
 const stats = new STATS.default();
 stats.showPanel(1);
@@ -13,7 +16,6 @@ export default class App {
     public static layers = {
         menu: new Menu(),
         underMenu: new UnderMenu(),
-        onTop: new OnTop(),
     };
 
     public static currentScene = "home";
@@ -22,6 +24,10 @@ export default class App {
     constructor() {
         TweenMax.ticker.addEventListener("tick", this.render);
         Mouse.init();
+        ReactDOM.render(
+            <ButtonPlay />,
+            document.querySelector("#onTop"),
+        );
     }
 
     private render = () => {

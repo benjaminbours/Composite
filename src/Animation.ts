@@ -1,14 +1,14 @@
 import { Power3, TimelineMax, TweenMax } from "gsap";
+import App from "./App";
 import ButtonPlay from "./comps/ButtonPlay";
 import { defaultWave, wave } from "./comps/Curve";
-import App from "./main";
 
 export default class Animation {
     public static homeToLevel() {
         console.log("home to level");
         const { curve, light } = App.layers.menu;
         const shadow = App.layers.underMenu.shadow;
-        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
+        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
         const canvas = App.layers.menu.ctx.canvas;
         const mainTitleWhite = App.layers.menu.scenes.home.mainTitle;
         const mainTitleBlack = App.layers.underMenu.scenes.home.mainTitle;
@@ -16,9 +16,12 @@ export default class Animation {
         const titleHomeBlack = App.layers.underMenu.scenes.home.title;
 
         const titleLevelWhite = App.layers.menu.scenes.level.title;
-        const firstLevel = App.layers.onTop.scenes.level.first;
 
-        App.layers.onTop.ctx.canvas.style.cursor = "initial";
+        // const firstLevel = App.layers.onTop.scenes.level.first;
+        // const secondLevel = App.layers.onTop.scenes.level.second;
+        // const thirdLevel = App.layers.onTop.scenes.level.third;
+
+        // App.layers.onTop.ctx.canvas.style.cursor = "initial";
 
         const tl = new TimelineMax();
         wave.viscosity = 40;
@@ -50,9 +53,9 @@ export default class Animation {
         titleHomeBlack.onTransition = true;
         titleHomeWhite.onTransition = true;
 
-        buttonPlay.onTransition = true;
+        // buttonPlay.onTransition = true;
 
-        tl.to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack, buttonPlay], 0.5, {
+        tl.to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
             opacity: 0,
             overwrite: "all",
             onComplete: () => {
@@ -66,11 +69,11 @@ export default class Animation {
                 titleHomeWhite.isMount = false;
                 titleHomeBlack.isMount = false;
 
-                buttonPlay.onTransition = false;
-                buttonPlay.isMount = false;
-                buttonPlay.isMouseHover = false;
-                buttonPlay.isMouseEnter = false;
-                buttonPlay.isMouseExit = false;
+                // buttonPlay.onTransition = false;
+                // buttonPlay.isMount = false;
+                // buttonPlay.isMouseHover = false;
+                // buttonPlay.isMouseEnter = false;
+                // buttonPlay.isMouseExit = false;
             },
         }, "-= 0.5");
 
@@ -80,25 +83,42 @@ export default class Animation {
         }, "-= 0.5");
 
         titleLevelWhite.onTransition = true;
-        firstLevel.onTransition = true;
-        tl.fromTo([titleLevelWhite, firstLevel], 0.5, {
+        // firstLevel.onTransition = true;
+        // secondLevel.onTransition = true;
+        // thirdLevel.onTransition = true;
+        tl.fromTo([titleLevelWhite], 0.5, {
             opacity: 0,
         }, {
-            opacity: 1,
-            // onComplete: () => {
-            //     // first
-            // }
-        }, "-= 0.5");
+                opacity: 1,
+                onComplete: () => {
+                    App.currentScene = "level";
+                },
+            }, "-= 0.5");
 
         light.isPulsingFast = false;
     }
+
+    // public static levelScrollUp() {
+    //     const { first, second, third } = App.layers.onTop.scenes.level;
+    //     const { canvas } = App.layers.onTop.ctx;
+    //     const tl = new TimelineMax()
+    //         .to(first, 0.5, {
+    //             iy: canvas.height / 100 * 20,
+    //         })
+    //         .to(second, 0.5, {
+    //             iy: canvas.height / 100 * 45,
+    //         }, "-= 0.5")
+    //         .to(third, 0.5, {
+    //             iy: canvas.height / 100 * 70,
+    //         }, "-= 0.5");
+    // }
     public static mouseExitButtonPlay() {
         // console.log("mouse exit");
         const { curve, light } = App.layers.menu;
         const shadow = App.layers.underMenu.shadow;
-        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
 
-        App.layers.onTop.ctx.canvas.style.cursor = "initial";
+        // App.layers.onTop.ctx.canvas.style.cursor = "initial";
         curve.mouseIsHoverButton = false;
         const tl = new TimelineMax();
         tl.to(wave, 0.1, {
@@ -113,20 +133,20 @@ export default class Animation {
 
         light.isPulsingFast = false;
 
-        tl.to(buttonPlay, 0.5, {
-            color: "#000",
-            textColor: "#FFF",
-            // overwrite: "all",
-        }, "-= 1");
+        // tl.to(buttonPlay, 0.5, {
+        //     color: "#000",
+        //     textColor: "#FFF",
+        //     // overwrite: "all",
+        // }, "-= 1");
     }
 
     public static mouseEnterButtonPlay() {
         // console.log("mouse enter");
         const { curve, light } = App.layers.menu;
         const shadow = App.layers.underMenu.shadow;
-        const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
 
-        App.layers.onTop.ctx.canvas.style.cursor = "pointer";
+        // App.layers.onTop.ctx.canvas.style.cursor = "pointer";
         curve.mouseIsHoverButton = true;
         const tl = new TimelineMax();
         tl.to(wave, 0.1, {
@@ -148,11 +168,11 @@ export default class Animation {
         // try to animate it smoothly.
         light.isPulsingFast = true;
 
-        tl.to(buttonPlay, 0.5, {
-            color: "#FFF",
-            textColor: "#000",
-            // overwrite: "all",
-            repeat: 0,
-        }, "-= 1");
+        // tl.to(buttonPlay, 0.5, {
+        //     color: "#FFF",
+        //     textColor: "#000",
+        //     // overwrite: "all",
+        //     repeat: 0,
+        // }, "-= 1");
     }
 }

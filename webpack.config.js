@@ -1,6 +1,6 @@
 const path = require("path");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-// const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const ouputPath = path.resolve(__dirname, "./dist/");
 
@@ -8,7 +8,7 @@ module.exports = {
     context: path.resolve(__dirname, "./src"),
     devtool: "source-map",
     entry: {
-        "app": "./main.ts",
+        "app": "./App.tsx",
     },
     module: {
         rules: [
@@ -17,25 +17,25 @@ module.exports = {
                 loader: "ts-loader",
                 test: /\.(ts|tsx|js|jsx)$/,
             },
-            // {
-            //     test: /\.(sass|scss)$/,
-            //     use: [
-            //         "style-loader",
-            //         MiniCssExtractPlugin.loader,
-            //         { loader: "css-loader", options: { importLoaders: 1 } },
-            //         {
-            //             loader: "postcss-loader",
-            //             options: {
-            //                 ident: "postcss",
-            //                 plugins: (loader) => [
-            //                     require("autoprefixer"),
-            //                     require("cssnano"),
-            //                 ],
-            //             },
-            //         },
-            //         "sass-loader",
-            //     ],
-            // },
+            {
+                test: /\.(sass|scss)$/,
+                use: [
+                    "style-loader",
+                    MiniCssExtractPlugin.loader,
+                    { loader: "css-loader", options: { importLoaders: 1 } },
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            ident: "postcss",
+                            plugins: (loader) => [
+                                require("autoprefixer"),
+                                require("cssnano"),
+                            ],
+                        },
+                    },
+                    "sass-loader",
+                ],
+            },
             {
                 loader: "file-loader?limit=20000&name=images/[name].[ext]",
                 test: /\.(png|jpg|jpeg|svg)$/,
@@ -54,9 +54,9 @@ module.exports = {
     },
     plugins: [
         new BundleAnalyzerPlugin(),
-    //     new MiniCssExtractPlugin({
-    //         filename: "stylesheets/style.css",
-    //     }),
+        new MiniCssExtractPlugin({
+            filename: "stylesheets/style.css",
+        }),
     ],
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"],

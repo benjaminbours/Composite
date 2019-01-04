@@ -15,8 +15,8 @@ export default class Portal {
     public ix: number = 0;
     public iy: number = 0;
 
-    public x: number = 0;
-    public y: number = 0;
+    // public x: number = 0;
+    // public y: number = 0;
 
     public path = new Path2D();
     public ray: number = 200;
