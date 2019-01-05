@@ -1,178 +1,223 @@
-import { Power3, TimelineMax, TweenMax } from "gsap";
-import App from "./App";
-import ButtonPlay from "./comps/ButtonPlay";
-import { defaultWave, wave } from "./comps/Curve";
+import { Power3, TimelineLite, TweenLite } from "gsap";
+import React, { RefObject } from "react";
+import Canvases from "./comps/Canvases";
+import { defaultWave, wave } from "./comps/Canvases/comps/Curve/index";
+import CanvasBlack from "./comps/Canvases/layers/CanvasBlack";
+import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
+
+interface IAnimationComps {
+    buttonPlay: RefObject<HTMLButtonElement>;
+    levelInterface: RefObject<HTMLDivElement>;
+}
 
 export default class Animation {
-    public static homeToLevel() {
-        console.log("home to level");
-        const { curve, light } = App.layers.menu;
-        const shadow = App.layers.underMenu.shadow;
-        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay as ButtonPlay;
-        const canvas = App.layers.menu.ctx.canvas;
-        const mainTitleWhite = App.layers.menu.scenes.home.mainTitle;
-        const mainTitleBlack = App.layers.underMenu.scenes.home.mainTitle;
-        const titleHomeWhite = App.layers.menu.scenes.home.title;
-        const titleHomeBlack = App.layers.underMenu.scenes.home.title;
+    public static mouseEnterButtonPlay: TweenLite;
+    public static mouseLeaveButtonPlay: TweenLite;
 
-        const titleLevelWhite = App.layers.menu.scenes.level.title;
+    public static homeToLevel: TimelineLite;
+    public static levelToHome: TimelineLite;
 
-        // const firstLevel = App.layers.onTop.scenes.level.first;
-        // const secondLevel = App.layers.onTop.scenes.level.second;
-        // const thirdLevel = App.layers.onTop.scenes.level.third;
+    public static components: IAnimationComps = {
+        buttonPlay: React.createRef(),
+        levelInterface: React.createRef(),
+    };
 
-        // App.layers.onTop.ctx.canvas.style.cursor = "initial";
+    public static initHomeToLevel(onComplete: () => void) {
+        const canvasBlack = Canvases.layers.black as CanvasBlack;
+        const canvasWhite = Canvases.layers.white as CanvasWhite;
+        const { curve, light } = canvasBlack;
+        const { shadow } = canvasWhite;
 
-        const tl = new TimelineMax();
-        wave.viscosity = 40;
-        wave.damping = 0.2;
-        tl.to(curve, 0.5, {
-            origin: canvas.width * 0.85,
-            overwrite: "all",
+        const canvas = Canvases.layers.white.ctx.canvas;
+        const mainTitleWhite = canvasBlack.scenes.home.mainTitle;
+        const titleHomeWhite = canvasBlack.scenes.home.title;
+
+        const mainTitleBlack = canvasWhite.scenes.home.mainTitle;
+        const titleHomeBlack = canvasWhite.scenes.home.title;
+
+        const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
+        const levelInterface = this.components.levelInterface.current as HTMLElement;
+
+        this.homeToLevel = new TimelineLite({
+            paused: true,
             onComplete: () => {
-                TweenMax.to(wave, 0.1, {
-                    ...defaultWave,
-                    overwrite: "all",
-                });
+                curve.mouseIsHoverButton = false;
+                light.isPulsingFast = false;
+                this.mouseLeaveButtonPlay.play();
+                onComplete();
             },
-        });
-
-        tl.to(light, 0.5, {
-            startX: canvas.width * 0.85,
-            startY: canvas.height * 0.5,
-        }, "-= 0.5");
-
-        tl.to(shadow, 0.5, {
-            startX: canvas.width * 0.85,
-            startY: canvas.height * 0.5,
-        }, "-= 0.5");
-
-        mainTitleBlack.onTransition = true;
-        mainTitleWhite.onTransition = true;
-
-        titleHomeBlack.onTransition = true;
-        titleHomeWhite.onTransition = true;
-
-        // buttonPlay.onTransition = true;
-
-        tl.to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
-            opacity: 0,
-            overwrite: "all",
-            onComplete: () => {
-                mainTitleBlack.onTransition = false;
-                mainTitleBlack.isMount = false;
-                mainTitleWhite.onTransition = false;
-                mainTitleWhite.isMount = false;
-
-                titleHomeWhite.onTransition = false;
-                titleHomeBlack.onTransition = false;
-                titleHomeWhite.isMount = false;
-                titleHomeBlack.isMount = false;
-
-                // buttonPlay.onTransition = false;
-                // buttonPlay.isMount = false;
-                // buttonPlay.isMouseHover = false;
-                // buttonPlay.isMouseEnter = false;
-                // buttonPlay.isMouseExit = false;
-            },
-        }, "-= 0.5");
-
-        tl.to(shadow, 1, {
-            rotationSpeed: 0.005,
-            ease: Power3.easeOut,
-        }, "-= 0.5");
-
-        titleLevelWhite.onTransition = true;
-        // firstLevel.onTransition = true;
-        // secondLevel.onTransition = true;
-        // thirdLevel.onTransition = true;
-        tl.fromTo([titleLevelWhite], 0.5, {
-            opacity: 0,
-        }, {
-                opacity: 1,
+        })
+            .to(curve, 0.5, {
+                origin: canvas.width * 0.85,
                 onComplete: () => {
-                    App.currentScene = "level";
+                    TweenLite.set(wave, {
+                        ...defaultWave,
+                    });
                 },
-            }, "-= 0.5");
+            })
+            .to([light, shadow], 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.85,
+                startY: canvas.height * 0.5,
+            }, "-= 0.5")
+            .to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
+                opacity: 0,
+                onComplete: () => {
+                    mainTitleBlack.onTransition = false;
+                    mainTitleBlack.isMount = false;
+                    mainTitleWhite.onTransition = false;
+                    mainTitleWhite.isMount = false;
 
-        light.isPulsingFast = false;
+                    titleHomeWhite.onTransition = false;
+                    titleHomeBlack.onTransition = false;
+                    titleHomeWhite.isMount = false;
+                    titleHomeBlack.isMount = false;
+                },
+            }, "-= 0.5")
+            .to(buttonPlay, 0.5, {
+                opacity: 0,
+            }, "-= 0.5")
+            .to(levelInterface, 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    levelInterface.style.display = "block";
+                },
+            });
     }
 
-    // public static levelScrollUp() {
-    //     const { first, second, third } = App.layers.onTop.scenes.level;
-    //     const { canvas } = App.layers.onTop.ctx;
-    //     const tl = new TimelineMax()
-    //         .to(first, 0.5, {
-    //             iy: canvas.height / 100 * 20,
-    //         })
-    //         .to(second, 0.5, {
-    //             iy: canvas.height / 100 * 45,
-    //         }, "-= 0.5")
-    //         .to(third, 0.5, {
-    //             iy: canvas.height / 100 * 70,
-    //         }, "-= 0.5");
-    // }
-    public static mouseExitButtonPlay() {
-        // console.log("mouse exit");
-        const { curve, light } = App.layers.menu;
-        const shadow = App.layers.underMenu.shadow;
-        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+    public static initLevelToHome(onComplete: () => void) {
+        const canvasBlack = Canvases.layers.black as CanvasBlack;
+        const canvasWhite = Canvases.layers.white as CanvasWhite;
+        const { curve, light } = canvasBlack;
+        const { shadow } = canvasWhite;
 
-        // App.layers.onTop.ctx.canvas.style.cursor = "initial";
-        curve.mouseIsHoverButton = false;
-        const tl = new TimelineMax();
-        tl.to(wave, 0.1, {
-            ...defaultWave,
+        const canvas = Canvases.layers.white.ctx.canvas;
+        const mainTitleWhite = canvasBlack.scenes.home.mainTitle;
+        const titleHomeWhite = canvasBlack.scenes.home.title;
+
+        const mainTitleBlack = canvasWhite.scenes.home.mainTitle;
+        const titleHomeBlack = canvasWhite.scenes.home.title;
+
+        const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
+        const levelInterface = this.components.levelInterface.current as HTMLElement;
+
+        this.levelToHome = new TimelineLite({
+            paused: true,
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .to(curve, 0.5, {
+                origin: canvas.width * 0.5,
+                onComplete: () => {
+                    TweenLite.set(wave, {
+                        ...defaultWave,
+                    });
+                },
+            })
+            .to([light, shadow], 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.5,
+                startY: canvas.height * 0.75,
+            }, "-= 0.5")
+            .to(levelInterface, 0.5, {
+                opacity: 0,
+                onStart: () => {
+                    levelInterface.style.display = "block";
+                },
+                onComplete: () => {
+                    levelInterface.style.display = "none";
+                },
+            }, "-= 0.5")
+            .to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    mainTitleBlack.onTransition = true;
+                    mainTitleWhite.onTransition = true;
+
+                    titleHomeWhite.onTransition = true;
+                    titleHomeBlack.onTransition = true;
+                },
+                onComplete: () => {
+                    mainTitleBlack.onTransition = false;
+                    mainTitleWhite.onTransition = false;
+
+                    titleHomeWhite.onTransition = false;
+                    titleHomeBlack.onTransition = false;
+
+                    mainTitleBlack.isMount = true;
+                    mainTitleWhite.isMount = true;
+
+                    titleHomeWhite.isMount = true;
+                    titleHomeBlack.isMount = true;
+                },
+            })
+            .to(buttonPlay, 0.5, {
+                opacity: 1,
+            }, "-= 0.5");
+    }
+
+    public static initMouseEnterButtonPlay() {
+        const shadow = (Canvases.layers.white as CanvasWhite).shadow;
+
+        this.mouseEnterButtonPlay = TweenLite.to(shadow, 1, {
+            paused: true,
+            rotationSpeed: 0.02,
+            ease: Power3.easeOut,
             overwrite: "all",
         });
-
-        tl.to(shadow, 1, {
-            rotationSpeed: 0.005,
-            ease: Power3.easeOut,
-        });
-
-        light.isPulsingFast = false;
-
-        // tl.to(buttonPlay, 0.5, {
-        //     color: "#000",
-        //     textColor: "#FFF",
-        //     // overwrite: "all",
-        // }, "-= 1");
     }
 
-    public static mouseEnterButtonPlay() {
-        // console.log("mouse enter");
-        const { curve, light } = App.layers.menu;
-        const shadow = App.layers.underMenu.shadow;
-        // const buttonPlay = App.layers.onTop.scenes.home.buttonPlay;
+    public static initMouseLeaveButtonPlay() {
+        const shadow = (Canvases.layers.white as CanvasWhite).shadow;
 
-        // App.layers.onTop.ctx.canvas.style.cursor = "pointer";
-        curve.mouseIsHoverButton = true;
-        const tl = new TimelineMax();
-        tl.to(wave, 0.1, {
+        this.mouseLeaveButtonPlay = TweenLite.to(shadow, 1, {
+            paused: true,
+            rotationSpeed: 0.005,
+            ease: Power3.easeOut,
+            overwrite: "all",
+        });
+    }
+
+    public static playHomeToLevel() {
+        TweenLite.set(wave, {
+            viscosity: 40,
+            damping: 0.2,
+            overwrite: "all",
+        });
+        this.homeToLevel.play(0);
+    }
+
+    public static playLevelToHome() {
+        TweenLite.set(wave, {
+            viscosity: 40,
+            damping: 0.2,
+            overwrite: "all",
+        });
+        this.levelToHome.play(0);
+    }
+
+    public static playMouseLeaveButtonPlay() {
+        const { curve, light } = Canvases.layers.black as CanvasBlack;
+
+        curve.mouseIsHoverButton = false;
+        light.isPulsingFast = false;
+        TweenLite.set(wave, {
             ...defaultWave,
-            // en slow motion,
-            // damping: 0.6,
-            // courte mais agité,
+        });
+        this.mouseLeaveButtonPlay.play();
+    }
+
+    public static playMouseEnterButtonPlay() {
+        const { curve, light } = Canvases.layers.black as CanvasBlack;
+
+        curve.mouseIsHoverButton = true;
+        light.isPulsingFast = true;
+        TweenLite.set(wave, {
             randomRange: 300,
             amplitudeRange: 50,
             speed: 0.1,
-            overwrite: "all",
         });
-
-        tl.to(shadow, 1, {
-            rotationSpeed: 0.02,
-            ease: Power3.easeOut,
-        }, "-= 0.1");
-
-        // try to animate it smoothly.
-        light.isPulsingFast = true;
-
-        // tl.to(buttonPlay, 0.5, {
-        //     color: "#FFF",
-        //     textColor: "#000",
-        //     // overwrite: "all",
-        //     repeat: 0,
-        // }, "-= 1");
+        this.mouseEnterButtonPlay.play();
     }
 }

@@ -1,44 +1,78 @@
-import { TweenMax } from "gsap";
-import React from "react";
+import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import * as STATS from "stats.js";
-import Menu from "./layers/Menu";
-import OnTop from "./layers/OnTop";
-import UnderMenu from "./layers/UnderMenu";
-import Mouse from "./Mouse";
-import ButtonPlay from "./reactComps/ButtonPlay";
+import Animation from "./Animation";
+import Canvases from "./comps/Canvases";
+import Interfaces from "./comps/Interfaces";
+import { Context } from "./context";
+import "./styles/main.scss";
 
-const stats = new STATS.default();
-stats.showPanel(1);
-document.body.appendChild(stats.dom);
+const backOptions = {
+    level() {
+        Animation.playLevelToHome();
+    },
+};
+export default class App extends Component {
+    public state;
+    public onTransition: boolean = false;
 
-export default class App {
-    public static layers = {
-        menu: new Menu(),
-        underMenu: new UnderMenu(),
-    };
-
-    public static currentScene = "home";
-    public static lastScene = "home";
-
-    constructor() {
-        TweenMax.ticker.addEventListener("tick", this.render);
-        Mouse.init();
-        ReactDOM.render(
-            <ButtonPlay />,
-            document.querySelector("#onTop"),
-        );
+    constructor(props) {
+        super(props);
+        this.state = {
+            currentScene: "home",
+            handleMouseEnterPlay: this.handleMouseEnterPlay,
+            handleMouseLeavePlay: this.handleMouseLeavePlay,
+            handleClickOnPlay: this.handleClickOnPlay,
+            handleClickOnBack: this.handleClickOnBack,
+        };
     }
 
-    private render = () => {
-        stats.begin();
-        for (const layer in App.layers) {
-            if (App.layers[layer].hasOwnProperty("render")) {
-                App.layers[layer].render();
-            }
+    public componentDidMount() {
+        Animation.initHomeToLevel(() => {
+            this.onTransition = false;
+            this.setState({
+                currentScene: "level",
+            });
+        });
+        Animation.initLevelToHome(() => {
+            this.onTransition = false;
+            this.setState({
+                currentScene: "home",
+            });
+        });
+    }
+
+    public handleMouseEnterPlay = () => {
+        Animation.playMouseEnterButtonPlay();
+    }
+
+    public handleMouseLeavePlay = () => {
+        if (!this.onTransition) {
+            Animation.playMouseLeaveButtonPlay();
         }
-        stats.end();
+    }
+
+    public handleClickOnPlay = () => {
+        this.onTransition = true;
+        Animation.playHomeToLevel();
+    }
+
+    public handleClickOnBack = () => {
+        const { currentScene } = this.state;
+        this.onTransition = true;
+        backOptions[currentScene]();
+    }
+
+    public render() {
+        return (
+            <Context.Provider value={this.state}>
+                <Canvases />
+                <Interfaces />
+            </Context.Provider>
+        );
     }
 }
 
-const app = new App();
+ReactDOM.render(
+    <App />,
+    document.querySelector("#root"),
+);

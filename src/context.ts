@@ -19,4 +19,7 @@ export const Context = React.createContext({
     handleClickOnPlay: () => {
         //
     },
+    handleClickOnBack: () => {
+        //
+    },
 });

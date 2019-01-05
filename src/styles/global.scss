@@ -1,0 +1,23 @@
+.buttonRect {
+    width: auto;
+    text-align: center;
+    border: solid transparent 1px;
+    padding: 20px;
+    font-family: sans-serif;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    transition: 0.7s;
+    cursor: pointer;
+
+    &.white {
+        color: white;
+    
+        &:hover {
+            border-color: white;
+        }
+    }
+
+    &:hover {
+        transition: 0.7s;
+    }
+}

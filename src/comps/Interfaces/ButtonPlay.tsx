@@ -1,11 +1,8 @@
 import React, { Component } from "react";
+import Animation from "../../Animation";
 import { Context } from "../../context";
 
-interface IProps {
-    refPlay;
-}
-
-export default class ButtonPlay extends Component<IProps> {
+export default class ButtonPlay extends Component {
     public render() {
         return (
             <Context.Consumer>
@@ -15,7 +12,7 @@ export default class ButtonPlay extends Component<IProps> {
                     handleClickOnPlay,
                 }) => (
                     <button
-                        ref={this.props.refPlay}
+                        ref={Animation.components.buttonPlay}
                         id="buttonPlay"
                         onMouseEnter={handleMouseEnterPlay}
                         onMouseLeave={handleMouseLeavePlay}

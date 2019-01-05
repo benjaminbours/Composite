@@ -48,12 +48,12 @@ export default class Curve {
 
         this.initVPoints();
 
-        const controller = Curve.gui.add(Curve, "vTotalPoints", 0, 30);
-        controller.onFinishChange((value) => {
-            Curve.vTotalPoints = Math.floor(value);
-            Curve.vGap = window.innerHeight / (Curve.vTotalPoints - 1);
-            this.initVPoints();
-        });
+        // const controller = Curve.gui.add(Curve, "vTotalPoints", 0, 30);
+        // controller.onFinishChange((value) => {
+        //     Curve.vTotalPoints = Math.floor(value);
+        //     Curve.vGap = window.innerHeight / (Curve.vTotalPoints - 1);
+        //     this.initVPoints();
+        // });
         // Curve.gui.add(wave, "viscosity", 0, 500);
         // Curve.gui.add(wave, "mouseDist", 0, 500);
         // Curve.gui.add(wave, "damping", 0, 1);
