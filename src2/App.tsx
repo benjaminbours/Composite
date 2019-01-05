@@ -39,12 +39,11 @@ export default class App extends Component {
         const canvas = Canvases.layers.white.ctx.canvas;
         const mainTitleWhite = canvasBlack.scenes.home.mainTitle;
         const titleHomeWhite = canvasBlack.scenes.home.title;
-        const titleLevelWhite = canvasBlack.scenes.level.title;
 
         const mainTitleBlack = canvasWhite.scenes.home.mainTitle;
         const titleHomeBlack = canvasWhite.scenes.home.title;
 
-        const buttonPlay = this.buttonPlay.current as HTMLButtonElement;
+        // const buttonPlay = this.buttonPlay.current as HTMLButtonElement;
 
         this.homeToLevelAnimation
             .fromTo(curve, 0.5, {
@@ -84,26 +83,17 @@ export default class App extends Component {
                         titleHomeWhite.isMount = false;
                         titleHomeBlack.isMount = false;
                     },
-                }, "-= 0.5")
-            .fromTo(buttonPlay, 0.5, {
-                opacity: 1,
-            }, {
-                    opacity: 0,
-                    onComplete: () => {
-                        buttonPlay.style.display = "none";
-                        this.setState({
-                            currentScene: "level",
-                        });
-                    },
-                }, "-= 0.5")
-            .fromTo(titleLevelWhite, 0.5, {
-                opacity: 0,
-            }, {
-                    opacity: 1,
-                    onStart: () => {
-                        titleLevelWhite.onTransition = true;
-                    },
-                });
+                }, "-= 0.5");
+            // .fromTo(buttonPlay, 0.5, {
+            //     opacity: 1,
+            // }, {
+            //         opacity: 0,
+            //         onComplete: () => {
+            //             this.setState({
+            //                 currentScene: "level",
+            //             });
+            //         },
+            //     }, "-= 0.5");
     }
 
     public handleMouseEnterPlay = () => {

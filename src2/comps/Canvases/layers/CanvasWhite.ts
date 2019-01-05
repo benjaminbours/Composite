@@ -21,9 +21,9 @@ export default class CanvasWhite {
                     y: this.ctx.canvas.height / 100 * 50,
                 }),
             },
-            level: {
-                // title: new TextDrawer(this.ctx, "black", "SELECT A LEVEL", false),
-            },
+            // level: {
+            //     // title: new TextDrawer(this.ctx, "black", "SELECT A LEVEL", false),
+            // },
         };
         this.shadow = new Shadow(this.ctx);
         window.addEventListener("resize", this.resize);

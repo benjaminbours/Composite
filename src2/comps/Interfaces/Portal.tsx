@@ -11,7 +11,7 @@ export default function Portal(props: IProps) {
         <div className="portal">
             <div className="image-container">
                 <img src={img} alt={`screenshot of the level ${name}`}/>
-                <h2>{name}</h2>
+                <h3>{name}</h3>
             </div>
         </div>
     );

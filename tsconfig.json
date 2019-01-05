@@ -60,7 +60,7 @@
 	// 	"./src/"
 	// ],
 	"exclude": [
-		"./src/comps/old",
+		"./src",
 	// 	"./src/server/routes",
 	// 	"./src/server/sockerManager",
 	// 	"./src/server/Game.ts",

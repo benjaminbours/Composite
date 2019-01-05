@@ -25,7 +25,7 @@ export interface Iscenes {
     home: {
         [key: string]: Components;
     };
-    level: {
-        [key: string]: Components;
-    };
+    // level: {
+    //     [key: string]: Components;
+    // };
 }

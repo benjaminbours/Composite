@@ -34,7 +34,18 @@
 .level-list {
     width: 80%;
     margin: 0 auto;
-    margin-top: 200px;
+    margin-top: 100px;
+
+    h2 {
+        color: white;
+        text-transform: uppercase;
+        font-family: sans-serif;
+        font-weight: 400;
+        font-size: 30px;
+        letter-spacing: 20px;
+        margin-bottom: 50px;
+        text-align: center;
+    }
 }
 
 .portal {
@@ -69,7 +80,7 @@
         transition: 2s;
     }
 
-    h2 {
+    h3 {
         position: absolute;
         top: 50%;
         left: 50%;
