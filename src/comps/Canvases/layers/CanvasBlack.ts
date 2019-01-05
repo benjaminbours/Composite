@@ -24,12 +24,12 @@ export default class CanvasBlack {
                     y: this.ctx.canvas.height / 100 * 50,
                 }),
             },
-            // level: {
-            //     title: new TextDrawer(this.ctx, "white", "SELECT A LEVEL", false, {
-            //         x: this.ctx.canvas.width / 2,
-            //         y: this.ctx.canvas.height / 100 * 15,
-            //     }),
-            // },
+            faction: {
+                title: new TextDrawer(this.ctx, "white", "SELECT A SIDE", false, {
+                    x: this.ctx.canvas.width * 0.5,
+                    y: 180,
+                }),
+            },
         };
         this.light = new Light(this.ctx);
         window.addEventListener("resize", this.resize);

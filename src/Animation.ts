@@ -8,6 +8,8 @@ import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
 interface IAnimationComps {
     buttonPlay: RefObject<HTMLButtonElement>;
     levelInterface: RefObject<HTMLDivElement>;
+    factionInterface: RefObject<HTMLDivElement>;
+    queueInterface: RefObject<HTMLDivElement>;
 }
 
 export default class Animation {
@@ -16,10 +18,15 @@ export default class Animation {
 
     public static homeToLevel: TimelineLite;
     public static levelToHome: TimelineLite;
+    public static levelToFaction: TimelineLite;
+    public static factionToLevel: TimelineLite;
+    public static factionToQueue: TimelineLite;
 
     public static components: IAnimationComps = {
         buttonPlay: React.createRef(),
         levelInterface: React.createRef(),
+        factionInterface: React.createRef(),
+        queueInterface: React.createRef(),
     };
 
     public static initHomeToLevel(onComplete: () => void) {
@@ -157,6 +164,201 @@ export default class Animation {
             }, "-= 0.5");
     }
 
+    public static initLevelToFaction(onComplete: () => void) {
+        const canvasBlack = Canvases.layers.black as CanvasBlack;
+        const canvasWhite = Canvases.layers.white as CanvasWhite;
+        const { curve, light } = canvasBlack;
+        const { shadow } = canvasWhite;
+
+        const canvas = Canvases.layers.white.ctx.canvas;
+
+        const titleFactionWhite = canvasBlack.scenes.faction.title;
+        const titleFactionBlack = canvasWhite.scenes.faction.title;
+
+        const levelInterface = this.components.levelInterface.current as HTMLElement;
+        const factionInterface = this.components.factionInterface.current as HTMLElement;
+
+        this.levelToFaction = new TimelineLite({
+            paused: true,
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .to(curve, 0.5, {
+                origin: canvas.width * 0.5,
+                onComplete: () => {
+                    TweenLite.set(wave, {
+                        ...defaultWave,
+                    });
+                },
+            })
+            .to(light, 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.25,
+                startY: canvas.height * 0.5,
+            }, "-= 0.5")
+            .to(shadow, 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.75,
+                startY: canvas.height * 0.5,
+            }, "-= 0.5")
+            .to(levelInterface, 0.5, {
+                opacity: 0,
+                onComplete: () => {
+                    levelInterface.style.display = "none";
+                },
+            }, "-= 0.5")
+            .to(factionInterface, 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    factionInterface.style.display = "block";
+                },
+            })
+            .to([titleFactionBlack, titleFactionWhite], 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    titleFactionBlack.onTransition = true;
+                    titleFactionWhite.onTransition = true;
+                },
+                onComplete: () => {
+                    titleFactionBlack.onTransition = false;
+                    titleFactionWhite.onTransition = false;
+
+                    titleFactionBlack.isMount = true;
+                    titleFactionWhite.isMount = true;
+                },
+            }, "-= 0.5");
+    }
+
+    public static initFactionToLevel(onComplete: () => void) {
+        const canvasBlack = Canvases.layers.black as CanvasBlack;
+        const canvasWhite = Canvases.layers.white as CanvasWhite;
+        const { curve, light } = canvasBlack;
+        const { shadow } = canvasWhite;
+
+        const canvas = Canvases.layers.white.ctx.canvas;
+
+        const titleFactionWhite = canvasBlack.scenes.faction.title;
+        const titleFactionBlack = canvasWhite.scenes.faction.title;
+
+        const levelInterface = this.components.levelInterface.current as HTMLElement;
+        const factionInterface = this.components.factionInterface.current as HTMLElement;
+
+        this.factionToLevel = new TimelineLite({
+            paused: true,
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .to(curve, 0.5, {
+                origin: canvas.width * 0.85,
+                onComplete: () => {
+                    TweenLite.set(wave, {
+                        ...defaultWave,
+                    });
+                },
+            })
+            .to([light, shadow], 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.85,
+                startY: canvas.height * 0.5,
+            }, "-= 0.5")
+            .to(factionInterface, 0.5, {
+                opacity: 0,
+                onComplete: () => {
+                    factionInterface.style.display = "none";
+                },
+            }, "-= 0.5")
+            .to([titleFactionBlack, titleFactionWhite], 0.5, {
+                opacity: 0,
+                onStart: () => {
+                    titleFactionBlack.onTransition = true;
+                    titleFactionWhite.onTransition = true;
+                },
+                onComplete: () => {
+                    titleFactionBlack.onTransition = false;
+                    titleFactionWhite.onTransition = false;
+
+                    titleFactionBlack.isMount = false;
+                    titleFactionWhite.isMount = false;
+                },
+            }, "-= 0.5")
+            .to(levelInterface, 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    levelInterface.style.display = "block";
+                },
+            });
+    }
+
+    public static initFactionToQueue(onComplete: () => void, faction: string) {
+        const canvasBlack = Canvases.layers.black as CanvasBlack;
+        const canvasWhite = Canvases.layers.white as CanvasWhite;
+        const { curve, light } = canvasBlack;
+        const { shadow } = canvasWhite;
+
+        const canvas = Canvases.layers.white.ctx.canvas;
+
+        const titleFactionWhite = canvasBlack.scenes.faction.title;
+        const titleFactionBlack = canvasWhite.scenes.faction.title;
+
+        const factionInterface = this.components.factionInterface.current as HTMLElement;
+        const queueInterface = this.components.queueInterface.current as HTMLElement;
+
+        const curveTarget = faction === "light" ? canvas.width * 1.2 : canvas.width * -0.2;
+        const lightTarget = faction === "light" ? canvas.width * 0.5 : canvas.width * -0.5;
+        const shadowTarget = faction === "light" ? canvas.width * 1.5 : canvas.width * 0.5;
+
+        this.factionToQueue = new TimelineLite({
+            paused: true,
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .to(curve, 0.5, {
+                origin: curveTarget,
+                onComplete: () => {
+                    TweenLite.set(wave, {
+                        ...defaultWave,
+                    });
+                },
+            })
+            .to(light, 0.5, {
+                delay: 0.1,
+                startX: lightTarget,
+            }, "-= 0.5")
+            .to(shadow, 0.5, {
+                delay: 0.1,
+                startX: shadowTarget,
+            }, "-= 0.5")
+            .to([titleFactionBlack, titleFactionWhite], 0.5, {
+                opacity: 0,
+                onStart: () => {
+                    titleFactionBlack.onTransition = true;
+                    titleFactionWhite.onTransition = true;
+                },
+                onComplete: () => {
+                    titleFactionBlack.onTransition = false;
+                    titleFactionWhite.onTransition = false;
+
+                    titleFactionBlack.isMount = false;
+                    titleFactionWhite.isMount = false;
+                },
+            }, "-= 0.5")
+            .to(factionInterface, 0.5, {
+                opacity: 0,
+                onComplete: () => {
+                    factionInterface.style.display = "none";
+                },
+            }, "-= 0.5")
+            .to(queueInterface, 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    queueInterface.style.display = "block";
+                },
+            });
+    }
+
     public static initMouseEnterButtonPlay() {
         const shadow = (Canvases.layers.white as CanvasWhite).shadow;
 
@@ -195,6 +397,33 @@ export default class Animation {
             overwrite: "all",
         });
         this.levelToHome.play(0);
+    }
+
+    public static playLevelToFaction() {
+        TweenLite.set(wave, {
+            viscosity: 40,
+            damping: 0.2,
+            overwrite: "all",
+        });
+        this.levelToFaction.play(0);
+    }
+
+    public static playFactionToLevel() {
+        TweenLite.set(wave, {
+            viscosity: 40,
+            damping: 0.2,
+            overwrite: "all",
+        });
+        this.factionToLevel.play(0);
+    }
+
+    public static playFactionToQueue() {
+        TweenLite.set(wave, {
+            viscosity: 40,
+            damping: 0.2,
+            overwrite: "all",
+        });
+        this.factionToQueue.play(0);
     }
 
     public static playMouseLeaveButtonPlay() {

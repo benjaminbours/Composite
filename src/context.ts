@@ -1,15 +1,19 @@
 import React from "react";
 
-export const states = {
-    home: {
-        currentScene: "home",
-        isMouseHoverPlay: false,
-    },
-};
+export interface IState {
+    currentScene: "home" | "level" | "faction" | "queue";
+    faction: "light" | "shadow";
+    handleMouseEnterPlay: () => void;
+    handleMouseLeavePlay: () => void;
+    handleClickOnPlay: () => void;
+    handleClickOnBack: () => void;
+    handleClickOnLevel: (name: string) => void;
+    handleClickOnFaction: (side: string) => void;
+}
 
-// default value
-export const Context = React.createContext({
-    ...states.home,
+export const defaultState: IState = {
+    currentScene: "home",
+    faction: "shadow",
     handleMouseEnterPlay: () => {
         //
     },
@@ -22,4 +26,12 @@ export const Context = React.createContext({
     handleClickOnBack: () => {
         //
     },
-});
+    handleClickOnLevel: (name: string) => {
+        //
+    },
+    handleClickOnFaction: (side: string) => {
+        //
+    },
+};
+
+export const Context = React.createContext(defaultState);

@@ -24,6 +24,9 @@ export default class TextDrawer {
         this.ctx = ctx;
         this.side = side;
         this.isMount = isMount;
+        if (!isMount) {
+            this.opacity = 0;
+        }
         this.color = side === "black" ? "#000" : "#FFF";
         this.content = content;
         this.ix = initialCoordinate.x;

@@ -1,3 +1,12 @@
+h2 {
+    text-transform: uppercase;
+    font-family: sans-serif;
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: 20px;
+    text-align: center;
+}
+
 .buttonRect {
     width: auto;
     text-align: center;
@@ -17,7 +26,28 @@
         }
     }
 
+    &.black {
+        color: black;
+
+        &:hover {
+            border-color: black;
+        }
+    }
+
     &:hover {
         transition: 0.7s;
     }
+}
+
+.buttonCircle {
+    text-align: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 100px;
+    line-height: 90px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 100;
 }

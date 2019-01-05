@@ -1,0 +1,47 @@
+.faction-container {
+    display: none;
+    opacity: 0;
+}
+
+.factionButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: "Inconsolata";
+    transition: all 0.3s;
+    text-transform: uppercase;
+
+    &.light {
+        background: white;
+        color: black;
+        left: calc(25% - 45px);
+
+        &:hover {
+            background: black;
+            color: white;
+        }
+    }
+
+    &.shadow {
+        background: black;
+        color: white;
+        left: calc(75% - 45px);
+
+        &:hover {
+            background: white;
+            color: black;
+        }
+    }
+
+    // @media screen and (max-width: 768px) {
+    //     transform: translateX(-50%);
+    // }
+
+    &:hover {
+        transition: all 0.3s;
+
+        //     background: black;
+        //     color: white;
+   
+    }
+}

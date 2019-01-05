@@ -1,25 +1,24 @@
 import React, { Component } from "react";
 import Animation from "../../Animation";
 import ButtonBack from "./ButtonBack";
+import ButtonFaction from "./ButtonFaction";
 import ButtonPlay from "./ButtonPlay";
 import crackTheDoorPath from "./crack_the_door.png";
 import learnToFlyPath from "./learn_to_fly.png";
 import Portal from "./Portal";
+import Queue from "./Queue";
 import theHightSpheresPath from "./the_hight_spheres.png";
 
 const levels = [
     {
-        id: "position",
         name: "Crack the door",
         img: crackTheDoorPath,
     },
     {
-        id: "projection",
         name: "Learn to fly",
         img: learnToFlyPath,
     },
     {
-        id: "mixed",
         name: "The hight spheres",
         img: theHightSpheresPath,
     },
@@ -42,6 +41,12 @@ export default class Interfaces extends Component {
                         ))}
                     </div>
                 </div>
+                <div ref={Animation.components.factionInterface} className="faction-container">
+                    <ButtonBack color={"white"} />
+                    <ButtonFaction faction="light" />
+                    <ButtonFaction faction="shadow" />
+                </div>
+                <Queue />
             </>
         );
     }
