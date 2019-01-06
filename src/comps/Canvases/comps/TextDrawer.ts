@@ -18,11 +18,9 @@ export default class TextDrawer {
     private opacity: number = 1;
 
     private content: string;
-    private side: Side;
 
     constructor(ctx: CanvasRenderingContext2D, side: Side, content: string, isMount: boolean, initialCoordinate: ICoordinate) {
         this.ctx = ctx;
-        this.side = side;
         this.isMount = isMount;
         if (!isMount) {
             this.opacity = 0;
@@ -51,7 +49,7 @@ export default class TextDrawer {
     }
 
     private resize = () => {
-        this.x = this.ix - this.width / 2;
-        this.y = this.iy - 100 / 2;
+        this.x = (this.ctx.canvas.width * this.ix) - this.width / 2;
+        this.y = (this.ctx.canvas.height * this.iy) - 100 / 2;
     }
 }

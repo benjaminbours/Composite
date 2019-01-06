@@ -1,5 +1,5 @@
 import { Power3, TimelineMax } from "gsap";
-import ImageDrawer from "./index";
+import { app } from "../../../../App";
 import lightPath from "./light.png";
 import lightHaloPath from "./light_halo.png";
 
@@ -17,7 +17,31 @@ export interface IPulseOptions {
     delay: number;
 }
 
-export default class Light extends ImageDrawer {
+const resizeOptions = {
+    home(width: number, height: number) {
+        return {
+            x: width * 0.5,
+            y: height * 0.75,
+        };
+    },
+    level(width: number, height: number) {
+        return {
+            x: width * 0.85,
+            y: height * 0.5,
+        };
+    },
+    faction(width: number, height: number) {
+        return {
+            x: width * 0.25,
+            y: height * 0.5,
+        };
+    },
+};
+
+export default class Light {
+    public startY: number = 30;
+    public startX: number = 0;
+
     public isPulsingFast: boolean = false;
     public pulsesOptions: IPulseOptions[] = [
         {
@@ -58,12 +82,17 @@ export default class Light extends ImageDrawer {
 
     private pulsesFastAnimation: TimelineMax[] = [];
 
+    private readonly ctx: CanvasRenderingContext2D;
+
     constructor(ctx: CanvasRenderingContext2D) {
-        super(ctx);
+        this.ctx = ctx;
+        this.startX = this.ctx.canvas.width * 0.5;
+        this.startY = this.ctx.canvas.height * 0.75;
         this.img = light;
         this.pulsesOptions.forEach((pulse) => {
             this.createAnimation(pulse);
         });
+        window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
@@ -72,6 +101,14 @@ export default class Light extends ImageDrawer {
         this.ctx.drawImage(this.img, -this.width / 2, -this.width / 2, this.width, this.width);
         this.renderLightHalo();
         this.ctx.restore();
+    }
+
+    private resize = () => {
+        if (app) {
+            const coordinate = resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height);
+            this.startX = coordinate.x;
+            this.startY = coordinate.y;
+        }
     }
 
     private renderLightHalo = () => {

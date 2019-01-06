@@ -1,5 +1,6 @@
-import * as dat from "dat.gui";
+// import * as dat from "dat.gui";
 import { Power3, TweenMax } from "gsap";
+import { app } from "../../../../App";
 import { IWaveOptions } from "../../types";
 import Point from "./Point";
 
@@ -25,6 +26,18 @@ export const wave: IWaveOptions = {
     speed: 0.02,
 };
 
+const resizeOptions = {
+    home(width: number) {
+        return width * 0.5;
+    },
+    level(width: number) {
+        return width * 0.85;
+    },
+    faction(width: number) {
+        return width * 0.5;
+    },
+};
+
 export default class Curve {
     // maybe bad use of static property
     // public static gui = new dat.GUI();
@@ -33,13 +46,13 @@ export default class Curve {
 
     public mouseIsHoverButton = false;
 
+    private origin: number;
+
     private readonly ctx: CanvasRenderingContext2D;
     private vPoints: Point[] = [];
 
     private mainColor: string = "#000";
     private time: number = Date.now();
-
-    private origin: number;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -116,7 +129,9 @@ export default class Curve {
     }
 
     private resize = () => {
-        this.origin = this.ctx.canvas.width * 0.5;
+        if (app) {
+            this.origin = resizeOptions[app.state.currentScene](this.ctx.canvas.width);
+        }
     }
 
     private initVPoints = () => {

@@ -1,5 +1,5 @@
-import Shadow from "../comps/ImageDrawer/Shadow";
 import MainTitle from "../comps/MainTitle";
+import Shadow from "../comps/Shadow";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
 
@@ -17,14 +17,14 @@ export default class CanvasWhite {
             home: {
                 mainTitle: new MainTitle(this.ctx, "black"),
                 title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS", true, {
-                    x: this.ctx.canvas.width / 2,
-                    y: this.ctx.canvas.height / 100 * 50,
+                    x: 0.5, // percent of width
+                    y: 0.5, // percent of height
                 }),
             },
             faction: {
                 title: new TextDrawer(this.ctx, "black", "SELECT A SIDE", false, {
-                    x: this.ctx.canvas.width * 0.5,
-                    y: 180,
+                    x: 0.5,
+                    y: 0.2,
                 }),
             },
         };

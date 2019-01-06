@@ -1,5 +1,5 @@
 import Curve from "../comps/Curve";
-import Light from "../comps/ImageDrawer/Light";
+import Light from "../comps/Light";
 import MainTitle from "../comps/MainTitle";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
@@ -20,14 +20,14 @@ export default class CanvasBlack {
             home: {
                 mainTitle: new MainTitle(this.ctx, "white"),
                 title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS", true, {
-                    x: this.ctx.canvas.width / 2,
-                    y: this.ctx.canvas.height / 100 * 50,
+                    x: 0.5,
+                    y: 0.5,
                 }),
             },
             faction: {
                 title: new TextDrawer(this.ctx, "white", "SELECT A SIDE", false, {
-                    x: this.ctx.canvas.width * 0.5,
-                    y: 180,
+                    x: 0.5,
+                    y: 0.2,
                 }),
             },
         };

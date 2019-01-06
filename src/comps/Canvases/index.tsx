@@ -1,8 +1,6 @@
-import { Power3, TimelineLite, TweenLite } from "gsap";
+import { TweenLite } from "gsap";
 import React, { Component, RefObject } from "react";
 import * as STATS from "stats.js";
-import Animation from "../../Animation";
-// import { defaultWave, wave } from "./comps/Curve/index";
 import CanvasBlack from "./layers/CanvasBlack";
 import CanvasWhite from "./layers/CanvasWhite";
 import Mouse from "./Mouse";

@@ -37,6 +37,9 @@ export default class MainTitle {
     }
 
     private resize = () => {
+        if (!this.isMount && !this.onTransition) {
+            return;
+        }
         this.width = this.ctx.canvas.width * 0.9;
         this.height = this.width / this.ratio;
         this.startX = (this.ctx.canvas.width - this.width) / 2;

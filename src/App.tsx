@@ -14,6 +14,8 @@ const backOptions = {
         Animation.playFactionToLevel();
     },
 };
+
+export let app: App | null = null;
 export default class App extends Component {
     public state: IState;
     public onTransition: boolean = false;
@@ -30,6 +32,7 @@ export default class App extends Component {
             handleClickOnLevel: this.handleClickOnLevel,
             handleClickOnFaction: this.handleClickOnFaction,
         };
+        app = this;
     }
 
     public componentDidMount() {
@@ -105,6 +108,7 @@ export default class App extends Component {
     }
 
     public render() {
+        const { currentScene } = this.state;
         return (
             <Context.Provider value={this.state}>
                 <Canvases />
