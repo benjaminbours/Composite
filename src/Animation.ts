@@ -1,15 +1,31 @@
 import { Power3, TimelineLite, TweenLite } from "gsap";
 import React, { RefObject } from "react";
 import Canvases from "./comps/Canvases";
-import { defaultWave, wave } from "./comps/Canvases/comps/Curve/index";
+import Curve, { defaultWave, wave } from "./comps/Canvases/comps/Curve/index";
+import Light from "./comps/Canvases/comps/ImageDrawer/Light";
+import Shadow from "./comps/Canvases/comps/ImageDrawer/Shadow";
 import CanvasBlack from "./comps/Canvases/layers/CanvasBlack";
 import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
+import { Components } from "./comps/Canvases/types";
 
 interface IAnimationComps {
     buttonPlay: RefObject<HTMLButtonElement>;
     levelInterface: RefObject<HTMLDivElement>;
     factionInterface: RefObject<HTMLDivElement>;
     queueInterface: RefObject<HTMLDivElement>;
+}
+
+interface IAnimationCanvasComps {
+    canvas: HTMLCanvasElement;
+    curve: Curve;
+    shadow: Shadow;
+    light: Light;
+    mainTitleBlack: Components;
+    mainTitleWhite: Components;
+    titleHomeBlack: Components;
+    titleHomeWhite: Components;
+    titleFactionBlack: Components;
+    titleFactionWhite: Components;
 }
 
 export default class Animation {
@@ -29,18 +45,34 @@ export default class Animation {
         queueInterface: React.createRef(),
     };
 
+    public static canvasComponents: IAnimationCanvasComps;
+
+    public static initComponents() {
+        this.canvasComponents = {
+            curve: (Canvases.layers.black as CanvasBlack).curve,
+            light: (Canvases.layers.black as CanvasBlack).light,
+            shadow: (Canvases.layers.white as CanvasWhite).shadow,
+            canvas: (Canvases.layers.white as CanvasWhite).ctx.canvas,
+            mainTitleBlack: (Canvases.layers.black as CanvasBlack).scenes.home.mainTitle,
+            mainTitleWhite: (Canvases.layers.white as CanvasWhite).scenes.home.mainTitle,
+            titleHomeBlack: (Canvases.layers.black as CanvasBlack).scenes.home.title,
+            titleHomeWhite: (Canvases.layers.white as CanvasWhite).scenes.home.title,
+            titleFactionBlack: (Canvases.layers.white as CanvasWhite).scenes.faction.title,
+            titleFactionWhite: (Canvases.layers.black as CanvasBlack).scenes.faction.title,
+        };
+    }
+
     public static initHomeToLevel(onComplete: () => void) {
-        const canvasBlack = Canvases.layers.black as CanvasBlack;
-        const canvasWhite = Canvases.layers.white as CanvasWhite;
-        const { curve, light } = canvasBlack;
-        const { shadow } = canvasWhite;
-
-        const canvas = Canvases.layers.white.ctx.canvas;
-        const mainTitleWhite = canvasBlack.scenes.home.mainTitle;
-        const titleHomeWhite = canvasBlack.scenes.home.title;
-
-        const mainTitleBlack = canvasWhite.scenes.home.mainTitle;
-        const titleHomeBlack = canvasWhite.scenes.home.title;
+        const {
+            canvas,
+            curve,
+            shadow,
+            light,
+            mainTitleBlack,
+            mainTitleWhite,
+            titleHomeBlack,
+            titleHomeWhite,
+        } = this.canvasComponents;
 
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
         const levelInterface = this.components.levelInterface.current as HTMLElement;
@@ -56,11 +88,7 @@ export default class Animation {
         })
             .to(curve, 0.5, {
                 origin: canvas.width * 0.85,
-                onComplete: () => {
-                    TweenLite.set(wave, {
-                        ...defaultWave,
-                    });
-                },
+                onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
                 delay: 0.1,
@@ -93,17 +121,16 @@ export default class Animation {
     }
 
     public static initLevelToHome(onComplete: () => void) {
-        const canvasBlack = Canvases.layers.black as CanvasBlack;
-        const canvasWhite = Canvases.layers.white as CanvasWhite;
-        const { curve, light } = canvasBlack;
-        const { shadow } = canvasWhite;
-
-        const canvas = Canvases.layers.white.ctx.canvas;
-        const mainTitleWhite = canvasBlack.scenes.home.mainTitle;
-        const titleHomeWhite = canvasBlack.scenes.home.title;
-
-        const mainTitleBlack = canvasWhite.scenes.home.mainTitle;
-        const titleHomeBlack = canvasWhite.scenes.home.title;
+        const {
+            canvas,
+            curve,
+            shadow,
+            light,
+            mainTitleBlack,
+            mainTitleWhite,
+            titleHomeBlack,
+            titleHomeWhite,
+        } = this.canvasComponents;
 
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
         const levelInterface = this.components.levelInterface.current as HTMLElement;
@@ -116,11 +143,7 @@ export default class Animation {
         })
             .to(curve, 0.5, {
                 origin: canvas.width * 0.5,
-                onComplete: () => {
-                    TweenLite.set(wave, {
-                        ...defaultWave,
-                    });
-                },
+                onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
                 delay: 0.1,
@@ -165,15 +188,14 @@ export default class Animation {
     }
 
     public static initLevelToFaction(onComplete: () => void) {
-        const canvasBlack = Canvases.layers.black as CanvasBlack;
-        const canvasWhite = Canvases.layers.white as CanvasWhite;
-        const { curve, light } = canvasBlack;
-        const { shadow } = canvasWhite;
-
-        const canvas = Canvases.layers.white.ctx.canvas;
-
-        const titleFactionWhite = canvasBlack.scenes.faction.title;
-        const titleFactionBlack = canvasWhite.scenes.faction.title;
+        const {
+            canvas,
+            curve,
+            shadow,
+            light,
+            titleFactionBlack,
+            titleFactionWhite,
+        } = this.canvasComponents;
 
         const levelInterface = this.components.levelInterface.current as HTMLElement;
         const factionInterface = this.components.factionInterface.current as HTMLElement;
@@ -186,11 +208,7 @@ export default class Animation {
         })
             .to(curve, 0.5, {
                 origin: canvas.width * 0.5,
-                onComplete: () => {
-                    TweenLite.set(wave, {
-                        ...defaultWave,
-                    });
-                },
+                onComplete: this.setWaveInDefaultMode,
             })
             .to(light, 0.5, {
                 delay: 0.1,
@@ -231,15 +249,14 @@ export default class Animation {
     }
 
     public static initFactionToLevel(onComplete: () => void) {
-        const canvasBlack = Canvases.layers.black as CanvasBlack;
-        const canvasWhite = Canvases.layers.white as CanvasWhite;
-        const { curve, light } = canvasBlack;
-        const { shadow } = canvasWhite;
-
-        const canvas = Canvases.layers.white.ctx.canvas;
-
-        const titleFactionWhite = canvasBlack.scenes.faction.title;
-        const titleFactionBlack = canvasWhite.scenes.faction.title;
+        const {
+            canvas,
+            curve,
+            shadow,
+            light,
+            titleFactionBlack,
+            titleFactionWhite,
+        } = this.canvasComponents;
 
         const levelInterface = this.components.levelInterface.current as HTMLElement;
         const factionInterface = this.components.factionInterface.current as HTMLElement;
@@ -252,11 +269,7 @@ export default class Animation {
         })
             .to(curve, 0.5, {
                 origin: canvas.width * 0.85,
-                onComplete: () => {
-                    TweenLite.set(wave, {
-                        ...defaultWave,
-                    });
-                },
+                onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
                 delay: 0.1,
@@ -292,15 +305,14 @@ export default class Animation {
     }
 
     public static initFactionToQueue(onComplete: () => void, faction: string) {
-        const canvasBlack = Canvases.layers.black as CanvasBlack;
-        const canvasWhite = Canvases.layers.white as CanvasWhite;
-        const { curve, light } = canvasBlack;
-        const { shadow } = canvasWhite;
-
-        const canvas = Canvases.layers.white.ctx.canvas;
-
-        const titleFactionWhite = canvasBlack.scenes.faction.title;
-        const titleFactionBlack = canvasWhite.scenes.faction.title;
+        const {
+            canvas,
+            curve,
+            shadow,
+            light,
+            titleFactionBlack,
+            titleFactionWhite,
+        } = this.canvasComponents;
 
         const factionInterface = this.components.factionInterface.current as HTMLElement;
         const queueInterface = this.components.queueInterface.current as HTMLElement;
@@ -317,11 +329,7 @@ export default class Animation {
         })
             .to(curve, 0.5, {
                 origin: curveTarget,
-                onComplete: () => {
-                    TweenLite.set(wave, {
-                        ...defaultWave,
-                    });
-                },
+                onComplete: this.setWaveInDefaultMode,
             })
             .to(light, 0.5, {
                 delay: 0.1,
@@ -360,7 +368,7 @@ export default class Animation {
     }
 
     public static initMouseEnterButtonPlay() {
-        const shadow = (Canvases.layers.white as CanvasWhite).shadow;
+        const { shadow } = this.canvasComponents;
 
         this.mouseEnterButtonPlay = TweenLite.to(shadow, 1, {
             paused: true,
@@ -371,7 +379,7 @@ export default class Animation {
     }
 
     public static initMouseLeaveButtonPlay() {
-        const shadow = (Canvases.layers.white as CanvasWhite).shadow;
+        const { shadow } = this.canvasComponents;
 
         this.mouseLeaveButtonPlay = TweenLite.to(shadow, 1, {
             paused: true,
@@ -382,63 +390,41 @@ export default class Animation {
     }
 
     public static playHomeToLevel() {
-        TweenLite.set(wave, {
-            viscosity: 40,
-            damping: 0.2,
-            overwrite: "all",
-        });
+        this.setWaveInMoveMode();
         this.homeToLevel.play(0);
     }
 
     public static playLevelToHome() {
-        TweenLite.set(wave, {
-            viscosity: 40,
-            damping: 0.2,
-            overwrite: "all",
-        });
+        this.setWaveInMoveMode();
         this.levelToHome.play(0);
     }
 
     public static playLevelToFaction() {
-        TweenLite.set(wave, {
-            viscosity: 40,
-            damping: 0.2,
-            overwrite: "all",
-        });
+        this.setWaveInMoveMode();
         this.levelToFaction.play(0);
     }
 
     public static playFactionToLevel() {
-        TweenLite.set(wave, {
-            viscosity: 40,
-            damping: 0.2,
-            overwrite: "all",
-        });
+        this.setWaveInMoveMode();
         this.factionToLevel.play(0);
     }
 
     public static playFactionToQueue() {
-        TweenLite.set(wave, {
-            viscosity: 40,
-            damping: 0.2,
-            overwrite: "all",
-        });
+        this.setWaveInMoveMode();
         this.factionToQueue.play(0);
     }
 
     public static playMouseLeaveButtonPlay() {
-        const { curve, light } = Canvases.layers.black as CanvasBlack;
+        const { curve, light } = this.canvasComponents;
 
         curve.mouseIsHoverButton = false;
         light.isPulsingFast = false;
-        TweenLite.set(wave, {
-            ...defaultWave,
-        });
+        this.setWaveInDefaultMode();
         this.mouseLeaveButtonPlay.play();
     }
 
     public static playMouseEnterButtonPlay() {
-        const { curve, light } = Canvases.layers.black as CanvasBlack;
+        const { curve, light } = this.canvasComponents;
 
         curve.mouseIsHoverButton = true;
         light.isPulsingFast = true;
@@ -448,5 +434,19 @@ export default class Animation {
             speed: 0.1,
         });
         this.mouseEnterButtonPlay.play();
+    }
+
+    public static setWaveInMoveMode() {
+        TweenLite.set(wave, {
+            viscosity: 40,
+            damping: 0.2,
+            overwrite: "all",
+        });
+    }
+
+    public static setWaveInDefaultMode() {
+        TweenLite.set(wave, {
+            ...defaultWave,
+        });
     }
 }

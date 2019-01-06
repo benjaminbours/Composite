@@ -1,7 +1,3 @@
-// import Animation from "./Animation";
-// import App from "./App";
-// import ButtonPlay from "./comps/ButtonPlay";
-
 export default class Mouse {
     public static x: number = 0;
     public static y: number = 0;

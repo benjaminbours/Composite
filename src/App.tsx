@@ -33,6 +33,10 @@ export default class App extends Component {
     }
 
     public componentDidMount() {
+        console.log("App did mount");
+        Animation.initComponents();
+        Animation.initMouseEnterButtonPlay();
+        Animation.initMouseLeaveButtonPlay();
         Animation.initHomeToLevel(() => {
             this.onTransition = false;
             this.setState({
