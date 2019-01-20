@@ -12,7 +12,6 @@ export default class CanvasWhite {
 
     constructor(ctxDom: HTMLCanvasElement) {
         this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
-        this.resize();
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "black"),
@@ -29,7 +28,7 @@ export default class CanvasWhite {
             },
         };
         this.shadow = new Shadow(this.ctx);
-        window.addEventListener("resize", this.resize);
+        this.resize();
     }
 
     public render = () => {
@@ -49,12 +48,27 @@ export default class CanvasWhite {
         this.shadow.render();
     }
 
-    private clear = () => {
-        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    }
-
-    private resize = () => {
+    public resize = () => {
         this.ctx.canvas.width = window.innerWidth;
         this.ctx.canvas.height = window.innerHeight;
+
+        for (const sceneName in this.scenes) {
+            if (this.scenes[sceneName]) {
+                const scene = this.scenes[sceneName];
+                for (const comps in scene) {
+                    if (scene[comps].hasOwnProperty("resize")) {
+                        if (scene[comps].isMount || scene[comps].onTransition) {
+                            scene[comps].resize();
+                        }
+                    }
+                }
+            }
+        }
+
+        this.shadow.resize();
+    }
+
+    private clear = () => {
+        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 }

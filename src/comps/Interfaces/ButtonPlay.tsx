@@ -11,16 +11,16 @@ export default class ButtonPlay extends Component {
                     handleMouseLeavePlay,
                     handleClickOnPlay,
                 }) => (
-                    <button
-                        ref={Animation.components.buttonPlay}
-                        id="buttonPlay"
-                        onMouseEnter={handleMouseEnterPlay}
-                        onMouseLeave={handleMouseLeavePlay}
-                        onClick={handleClickOnPlay}
-                    >
-                        Play
+                        <button
+                            ref={Animation.components.buttonPlay}
+                            id="buttonPlay"
+                            onMouseEnter={handleMouseEnterPlay}
+                            onMouseLeave={handleMouseLeavePlay}
+                            onClick={handleClickOnPlay}
+                        >
+                            Play
                     </button>
-                )}
+                    )}
             </Context.Consumer>
         );
     }

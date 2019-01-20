@@ -92,7 +92,6 @@ export default class Light {
         this.pulsesOptions.forEach((pulse) => {
             this.createAnimation(pulse);
         });
-        window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
@@ -103,7 +102,7 @@ export default class Light {
         this.ctx.restore();
     }
 
-    private resize = () => {
+    public resize = () => {
         if (app) {
             const coordinate = resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height);
             this.startX = coordinate.x;

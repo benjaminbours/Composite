@@ -14,8 +14,6 @@ export default class CanvasBlack {
 
     constructor(ctxDom: HTMLCanvasElement) {
         this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
-        this.resize();
-        this.curve = new Curve(this.ctx);
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "white"),
@@ -32,7 +30,8 @@ export default class CanvasBlack {
             },
         };
         this.light = new Light(this.ctx);
-        window.addEventListener("resize", this.resize);
+        this.resize();
+        this.curve = new Curve(this.ctx);
     }
 
     public render = () => {
@@ -55,12 +54,30 @@ export default class CanvasBlack {
         this.ctx.restore();
     }
 
-    private clear = () => {
-        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    }
-
-    private resize = () => {
+    public resize = () => {
         this.ctx.canvas.width = window.innerWidth;
         this.ctx.canvas.height = window.innerHeight;
+
+        for (const sceneName in this.scenes) {
+            if (this.scenes[sceneName]) {
+                const scene = this.scenes[sceneName];
+                for (const comps in scene) {
+                    if (scene[comps].hasOwnProperty("resize")) {
+                        if (scene[comps].isMount || scene[comps].onTransition) {
+                            scene[comps].resize();
+                        }
+                    }
+                }
+            }
+        }
+
+        this.light.resize();
+        if (this.curve) {
+            this.curve.resize();
+        }
+    }
+
+    private clear = () => {
+        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 }

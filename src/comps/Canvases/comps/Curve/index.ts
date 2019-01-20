@@ -57,24 +57,7 @@ export default class Curve {
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.origin = this.ctx.canvas.width * 0.5;
-        window.addEventListener("resize", this.resize);
-
         this.initVPoints();
-
-        // const controller = Curve.gui.add(Curve, "vTotalPoints", 0, 30);
-        // controller.onFinishChange((value) => {
-        //     Curve.vTotalPoints = Math.floor(value);
-        //     Curve.vGap = window.innerHeight / (Curve.vTotalPoints - 1);
-        //     this.initVPoints();
-        // });
-        // Curve.gui.add(wave, "viscosity", 0, 500);
-        // Curve.gui.add(wave, "mouseDist", 0, 500);
-        // Curve.gui.add(wave, "damping", 0, 1);
-        // Curve.gui.add(wave, "amplitudeRange", 1, 201);
-        // Curve.gui.add(wave, "randomRange", 1, 101);
-        // Curve.gui.add(wave, "randomTransition", 0, 10);
-        // Curve.gui.add(wave, "amplitudeTransition", 0, 10);
-        // Curve.gui.add(wave, "speed", -0.1, 0.1);
     }
 
     public render = () => {
@@ -85,16 +68,13 @@ export default class Curve {
             if (TweenMax.ticker.frame % 200 === 0 && !this.mouseIsHoverButton) {
                 TweenMax.to(this.vPoints[i], wave.randomTransition, {
                     random: Math.floor(Math.random() * wave.randomRange),
-                    // amplitude: Math.floor(Math.random() * wave.amplitudeRange),
                 });
 
                 TweenMax.to(this.vPoints[i], wave.amplitudeTransition, {
-                    // random: Math.floor(Math.random() * wave.randomRange),
                     amplitude: Math.floor(Math.random() * wave.amplitudeRange),
                 });
             }
             const waveValue = (Math.sin(i + this.time + this.vPoints[i].random)) * this.vPoints[i].amplitude;
-            // const origin = this.ctx.canvas.width * 0.5;
             this.vPoints[i].ix = this.origin + waveValue;
             this.vPoints[i].move();
         }
@@ -128,7 +108,7 @@ export default class Curve {
         this.time -= wave.speed;
     }
 
-    private resize = () => {
+    public resize = () => {
         if (app) {
             this.origin = resizeOptions[app.state.currentScene](this.ctx.canvas.width);
         }

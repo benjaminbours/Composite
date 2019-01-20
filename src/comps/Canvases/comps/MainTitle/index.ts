@@ -26,7 +26,6 @@ export default class MainTitle {
         this.img = color === "black" ? mainTitleBlack : mainTitleWhite;
         this.ctx = ctx;
         this.resize();
-        window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
@@ -36,7 +35,7 @@ export default class MainTitle {
         this.ctx.restore();
     }
 
-    private resize = () => {
+    public resize = () => {
         if (!this.isMount && !this.onTransition) {
             return;
         }

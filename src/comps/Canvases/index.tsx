@@ -19,7 +19,7 @@ export default class Canvases extends Component {
     public blackCanvas: RefObject<HTMLCanvasElement>;
     public whiteCanvas: RefObject<HTMLCanvasElement>;
 
-    constructor(props) {
+    constructor(props: {}) {
         super(props);
         this.blackCanvas = React.createRef();
         this.whiteCanvas = React.createRef();
@@ -32,6 +32,7 @@ export default class Canvases extends Component {
         };
         Mouse.init();
         TweenLite.ticker.addEventListener("tick", this.canvasLoop);
+        window.addEventListener("resize", this.resize);
     }
 
     public render() {
@@ -51,5 +52,13 @@ export default class Canvases extends Component {
             }
         }
         stats.end();
+    }
+
+    private resize = () => {
+        for (const layer in Canvases.layers) {
+            if (Canvases.layers[layer].hasOwnProperty("resize")) {
+                Canvases.layers[layer].resize();
+            }
+        }
     }
 }

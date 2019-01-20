@@ -41,7 +41,6 @@ export default class Shadow {
         this.startX = this.ctx.canvas.width * 0.5;
         this.startY = this.ctx.canvas.height * 0.75;
         this.img = shadow;
-        window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
@@ -53,12 +52,11 @@ export default class Shadow {
         this.ctx.restore();
     }
 
-    private resize = () => {
+    public resize = () => {
         if (app) {
             const coordinate = resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height);
             this.startX = coordinate.x;
             this.startY = coordinate.y;
         }
     }
-
 }

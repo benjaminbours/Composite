@@ -31,7 +31,6 @@ export default class TextDrawer {
         this.iy = initialCoordinate.y;
         this.width = this.ctx.measureText(this.content).width;
         this.resize();
-        window.addEventListener("resize", this.resize);
     }
 
     public render = () => {
@@ -48,7 +47,7 @@ export default class TextDrawer {
         this.ctx.restore();
     }
 
-    private resize = () => {
+    public resize = () => {
         this.x = (this.ctx.canvas.width * this.ix) - this.width / 2;
         this.y = (this.ctx.canvas.height * this.iy) - 100 / 2;
     }
