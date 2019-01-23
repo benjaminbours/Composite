@@ -11,13 +11,13 @@ mainTitleBlack.src = mainTitleBlackPath;
 export default class MainTitle {
     public isMount: boolean = true;
     public onTransition: boolean = false;
+    public startX: number = 0;
+    public startY: number = 0;
 
     private width: number = 1370;
     private height: number = 99;
     private ratio: number = this.width / this.height;
     private readonly ctx: CanvasRenderingContext2D;
-    private startX: number = 0;
-    private startY: number = 0;
     private readonly img: HTMLImageElement;
 
     private opacity: number = 1;
@@ -49,12 +49,12 @@ export default class MainTitle {
         this.startX = (this.ctx.canvas.width - this.width) / 2;
 
         this.height = this.width / this.ratio;
-        if (this.ctx.canvas.height < 800) {
-            this.startY = (this.ctx.canvas.height / 100 * 20) - this.height / 2;
-        } else if (this.ctx.canvas.height < 800) {
-            //
-        } else {
-            this.startY = (this.ctx.canvas.height / 100 * 30) - this.height / 2;
-        }
+        // if (this.ctx.canvas.height < 800) {
+        //     this.startY = (this.ctx.canvas.height / 100 * 20) - this.height / 2;
+        // } else if (this.ctx.canvas.height < 800) {
+        //     //
+        // } else {
+        // }
+        this.startY = (this.ctx.canvas.height / 100 * 30) - this.height / 2;
     }
 }

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import Animation from "./Animation";
 import Canvases from "./comps/Canvases";
 import Interfaces from "./comps/Interfaces";
@@ -108,7 +107,7 @@ export default class App extends Component {
     }
 
     public render() {
-        const { currentScene } = this.state;
+        // const { currentScene } = this.state;
         return (
             <Context.Provider value={this.state}>
                 <Canvases />
@@ -117,8 +116,3 @@ export default class App extends Component {
         );
     }
 }
-
-ReactDOM.render(
-    <App />,
-    document.querySelector("#root"),
-);
