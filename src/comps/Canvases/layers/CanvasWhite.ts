@@ -1,5 +1,6 @@
 import MainTitle from "../comps/MainTitle";
 import Shadow from "../comps/Shadow";
+import SubtitleHome from "../comps/SubtitleHome";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
 
@@ -15,10 +16,7 @@ export default class CanvasWhite {
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "black"),
-                title: new TextDrawer(this.ctx, "black", "THINK BOTH WAYS", true, {
-                    x: 0.5, // percent of width
-                    y: 0.5, // percent of height
-                }),
+                title: new SubtitleHome(this.ctx, "black", "THINK BOTH WAYS", true),
             },
             faction: {
                 title: new TextDrawer(this.ctx, "black", "SELECT A SIDE", false, {

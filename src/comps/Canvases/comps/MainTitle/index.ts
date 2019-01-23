@@ -39,9 +39,22 @@ export default class MainTitle {
         if (!this.isMount && !this.onTransition) {
             return;
         }
-        this.width = this.ctx.canvas.width * 0.9;
-        this.height = this.width / this.ratio;
+
+        if (this.ctx.canvas.height < 600) {
+            this.width = this.ctx.canvas.width * 0.7;
+        } else {
+            this.width = this.ctx.canvas.width * 0.9;
+        }
+
         this.startX = (this.ctx.canvas.width - this.width) / 2;
-        this.startY = (this.ctx.canvas.height / 100 * 30) - this.height / 2;
+
+        this.height = this.width / this.ratio;
+        if (this.ctx.canvas.height < 800) {
+            this.startY = (this.ctx.canvas.height / 100 * 20) - this.height / 2;
+        } else if (this.ctx.canvas.height < 800) {
+            //
+        } else {
+            this.startY = (this.ctx.canvas.height / 100 * 30) - this.height / 2;
+        }
     }
 }

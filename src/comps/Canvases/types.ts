@@ -1,7 +1,7 @@
 import MainTitle from "./comps/MainTitle";
-import TextDrawer from "./comps/TextDrawer";
+import SubtitleHome from "./comps/SubtitleHome";
 
-export type Components =  MainTitle | TextDrawer;
+export type Components =  MainTitle | SubtitleHome;
 
 export type Side = "black" | "white";
 

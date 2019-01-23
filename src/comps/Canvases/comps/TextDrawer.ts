@@ -5,16 +5,17 @@ export default class TextDrawer {
     public isMount: boolean = true;
     public onTransition: boolean = false;
 
-    private readonly ctx: CanvasRenderingContext2D;
+    protected readonly ctx: CanvasRenderingContext2D;
+
+    protected x: number = 0;
+    protected y: number = 30;
+    protected ix: number = 0;
+    protected iy: number = 0;
+
+    protected width: number = 0;
+
     private readonly color: string;
 
-    private x: number = 0;
-    private y: number = 30;
-
-    private ix: number = 0;
-    private iy: number = 0;
-
-    private width: number = 0;
     private opacity: number = 1;
 
     private content: string;

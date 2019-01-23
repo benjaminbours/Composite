@@ -1,6 +1,7 @@
 import Curve from "../comps/Curve";
 import Light from "../comps/Light";
 import MainTitle from "../comps/MainTitle";
+import SubtitleHome from "../comps/SubtitleHome";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
 
@@ -17,10 +18,7 @@ export default class CanvasBlack {
         this.scenes = {
             home: {
                 mainTitle: new MainTitle(this.ctx, "white"),
-                title: new TextDrawer(this.ctx, "white", "THINK BOTH WAYS", true, {
-                    x: 0.5,
-                    y: 0.5,
-                }),
+                title: new SubtitleHome(this.ctx, "white", "THINK BOTH WAYS", true),
             },
             faction: {
                 title: new TextDrawer(this.ctx, "white", "SELECT A SIDE", false, {
