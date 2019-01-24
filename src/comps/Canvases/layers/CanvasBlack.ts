@@ -1,12 +1,13 @@
 import Curve from "../comps/Curve";
 import Light from "../comps/Light";
-import MainTitle from "../comps/MainTitle";
 import SubtitleHome from "../comps/SubtitleHome";
 import TextDrawer from "../comps/TextDrawer";
+import Canvases from "../index";
 import { Iscenes } from "../types";
+import Canvas from "./Canvas";
 
-export default class CanvasBlack {
-    public ctx: CanvasRenderingContext2D;
+export default class CanvasBlack extends Canvas {
+    // public ctx: CanvasRenderingContext2D;
 
     public scenes: Iscenes;
 
@@ -14,10 +15,11 @@ export default class CanvasBlack {
     public readonly light: Light;
 
     constructor(ctxDom: HTMLCanvasElement) {
-        this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
+        super(ctxDom);
+        // this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
         this.scenes = {
             home: {
-                mainTitle: new MainTitle(this.ctx, "white"),
+                // mainTitle: new MainTitle(this.ctx, "white"),
                 title: new SubtitleHome(this.ctx, "white", "THINK BOTH WAYS", true),
             },
             faction: {
@@ -36,6 +38,7 @@ export default class CanvasBlack {
         this.clear();
         this.ctx.save();
         this.curve.render();
+        super.renderBothComponents("white");
         for (const sceneName in this.scenes) {
             if (this.scenes[sceneName]) {
                 const scene = this.scenes[sceneName];
@@ -56,6 +59,19 @@ export default class CanvasBlack {
         this.ctx.canvas.width = window.innerWidth;
         this.ctx.canvas.height = window.innerHeight;
 
+        for (const sceneName in Canvases.bothComponents) {
+            if (Canvases.bothComponents[sceneName]) {
+                const scene = Canvases.bothComponents[sceneName];
+                for (const comp in scene) {
+                    if (scene[comp].hasOwnProperty("resize")) {
+                        if (scene[comp].isMount || scene[comp].onTransition) {
+                            scene[comp].resize(this.ctx);
+                        }
+                    }
+                }
+            }
+        }
+
         for (const sceneName in this.scenes) {
             if (this.scenes[sceneName]) {
                 const scene = this.scenes[sceneName];
@@ -73,9 +89,5 @@ export default class CanvasBlack {
         if (this.curve) {
             this.curve.resize();
         }
-    }
-
-    private clear = () => {
-        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 }

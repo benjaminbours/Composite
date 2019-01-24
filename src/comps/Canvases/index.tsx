@@ -1,6 +1,7 @@
 import { TweenLite } from "gsap";
 import React, { Component, RefObject } from "react";
 import * as STATS from "stats.js";
+import MainTitle from "./comps/MainTitle";
 import CanvasBlack from "./layers/CanvasBlack";
 import CanvasWhite from "./layers/CanvasWhite";
 import Mouse from "./Mouse";
@@ -15,6 +16,12 @@ interface ILayers {
 
 export default class Canvases extends Component {
     public static layers: ILayers = {};
+
+    public static bothComponents = {
+        home: {
+            mainTitle: new MainTitle(),
+        },
+    };
 
     public blackCanvas: RefObject<HTMLCanvasElement>;
     public whiteCanvas: RefObject<HTMLCanvasElement>;

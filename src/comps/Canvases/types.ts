@@ -1,7 +1,4 @@
-import MainTitle from "./comps/MainTitle";
-import SubtitleHome from "./comps/SubtitleHome";
-
-export type Components =  MainTitle | SubtitleHome;
+import { MainTitle, SubtitleHome, TextDrawer } from "./comps";
 
 export type Side = "black" | "white";
 
@@ -22,10 +19,11 @@ export interface IWaveOptions {
 }
 
 export interface Iscenes {
-    home: {
-        [key: string]: Components;
+    home?: {
+        // mainTitle: MainTitle;
+        title: SubtitleHome;
     };
     faction: {
-        [key: string]: Components;
+        title: TextDrawer;
     };
 }

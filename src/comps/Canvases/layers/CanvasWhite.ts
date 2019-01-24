@@ -1,23 +1,17 @@
-import MainTitle from "../comps/MainTitle";
 import Shadow from "../comps/Shadow";
 import SubtitleHome from "../comps/SubtitleHome";
 import TextDrawer from "../comps/TextDrawer";
 import { Iscenes } from "../types";
+import Canvas from "./Canvas";
 
-export default class CanvasWhite {
-    public ctx: CanvasRenderingContext2D;
-
+export default class CanvasWhite extends Canvas {
     public scenes: Iscenes;
 
     public readonly shadow: Shadow;
 
     constructor(ctxDom: HTMLCanvasElement) {
-        this.ctx = ctxDom.getContext("2d") as CanvasRenderingContext2D;
+        super(ctxDom);
         this.scenes = {
-            home: {
-                mainTitle: new MainTitle(this.ctx, "black"),
-                title: new SubtitleHome(this.ctx, "black", "THINK BOTH WAYS", true),
-            },
             faction: {
                 title: new TextDrawer(this.ctx, "black", "SELECT A SIDE", false, {
                     x: 0.5,
@@ -25,12 +19,21 @@ export default class CanvasWhite {
                 }),
             },
         };
+        console.log(this.ctx.canvas.width);
         this.shadow = new Shadow(this.ctx);
         this.resize();
+        if (this.ctx.canvas.width > 768) {
+            console.log("here");
+            this.scenes.home = {
+                // mainTitle: new MainTitle(this.ctx, "black"),
+                title: new SubtitleHome(this.ctx, "black", "THINK BOTH WAYS", true),
+            };
+        }
     }
 
     public render = () => {
-        this.clear();
+        super.clear();
+        super.renderBothComponents("black");
         for (const sceneName in this.scenes) {
             if (this.scenes[sceneName]) {
                 const scene = this.scenes[sceneName];
@@ -47,9 +50,7 @@ export default class CanvasWhite {
     }
 
     public resize = () => {
-        this.ctx.canvas.width = window.innerWidth;
-        this.ctx.canvas.height = window.innerHeight;
-
+        super.resize();
         for (const sceneName in this.scenes) {
             if (this.scenes[sceneName]) {
                 const scene = this.scenes[sceneName];
@@ -64,9 +65,5 @@ export default class CanvasWhite {
         }
 
         this.shadow.resize();
-    }
-
-    private clear = () => {
-        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     }
 }

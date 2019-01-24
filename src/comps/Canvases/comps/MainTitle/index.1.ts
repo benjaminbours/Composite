@@ -17,26 +17,25 @@ export default class MainTitle {
     private width: number = 1370;
     private height: number = 99;
     private ratio: number = this.width / this.height;
-    // private readonly ctx: CanvasRenderingContext2D;
-    // private readonly img: HTMLImageElement;
+    private readonly ctx: CanvasRenderingContext2D;
+    private readonly img: HTMLImageElement;
 
     private opacity: number = 1;
 
-    // constructor() {
-    //     // this.img = color === "black" ? mainTitleBlack : mainTitleWhite;
-    //     // this.ctx = ctx;
-    //     this.resize();
-    // }
-
-    public render = (ctx: CanvasRenderingContext2D, color: Side) => {
-        const img = color === "black" ? mainTitleBlack : mainTitleWhite;
-        ctx.save();
-        ctx.globalAlpha = this.opacity;
-        ctx.drawImage(img, this.startX, this.startY, this.width, this.height);
-        ctx.restore();
+    constructor(ctx: CanvasRenderingContext2D, color: Side) {
+        this.img = color === "black" ? mainTitleBlack : mainTitleWhite;
+        this.ctx = ctx;
+        this.resize();
     }
 
-    public resize = (ctx: CanvasRenderingContext2D) => {
+    public render = () => {
+        this.ctx.save();
+        this.ctx.globalAlpha = this.opacity;
+        this.ctx.drawImage(this.img, this.startX, this.startY, this.width, this.height);
+        this.ctx.restore();
+    }
+
+    public resize = () => {
         if (!this.isMount && !this.onTransition) {
             return;
         }
@@ -44,10 +43,10 @@ export default class MainTitle {
         // if (this.ctx.canvas.height < 600) {
         //     this.width = this.ctx.canvas.width * 0.7;
         // } else {
-        this.width = ctx.canvas.width * 0.9;
+        this.width = this.ctx.canvas.width * 0.9;
         // }
 
-        this.startX = (ctx.canvas.width - this.width) / 2;
+        this.startX = (this.ctx.canvas.width - this.width) / 2;
 
         this.height = this.width / this.ratio;
         // if (this.ctx.canvas.height < 800) {
@@ -56,7 +55,7 @@ export default class MainTitle {
         //     //
         // } else {
         // }
-        this.startY = ctx.canvas.height * 0.30 - this.height / 2;
+        this.startY = (this.ctx.canvas.height / 100 * 30) - this.height / 2;
 
         console.log("height " + this.height);
         // console.log(this.startX + "|" + this.startY);

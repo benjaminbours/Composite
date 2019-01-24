@@ -8,7 +8,7 @@ module.exports = {
     context: path.resolve(__dirname, "./src"),
     devtool: "source-map",
     entry: {
-        "app": "./App.tsx",
+        "app": "./main.tsx",
     },
     module: {
         rules: [

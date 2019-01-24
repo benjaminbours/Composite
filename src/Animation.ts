@@ -1,12 +1,13 @@
 import { Power3, TimelineLite, TweenLite } from "gsap";
 import React, { RefObject } from "react";
 import Canvases from "./comps/Canvases";
+import { MainTitle, SubtitleHome, TextDrawer } from "./comps/Canvases/comps";
 import Curve, { defaultWave, wave } from "./comps/Canvases/comps/Curve/index";
 import Light from "./comps/Canvases/comps/Light";
 import Shadow from "./comps/Canvases/comps/Shadow";
 import CanvasBlack from "./comps/Canvases/layers/CanvasBlack";
 import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
-import { Components } from "./comps/Canvases/types";
+import { Iscenes } from "./comps/Canvases/types";
 
 interface IAnimationComps {
     buttonPlay: RefObject<HTMLButtonElement>;
@@ -20,12 +21,12 @@ interface IAnimationCanvasComps {
     curve: Curve;
     shadow: Shadow;
     light: Light;
-    mainTitleBlack: Components;
-    mainTitleWhite: Components;
-    titleHomeBlack: Components;
-    titleHomeWhite: Components;
-    titleFactionBlack: Components;
-    titleFactionWhite: Components;
+    mainTitleBlack?: MainTitle;
+    titleHomeBlack?: SubtitleHome;
+    mainTitleWhite?: MainTitle;
+    titleHomeWhite?: SubtitleHome;
+    titleFactionBlack: TextDrawer;
+    titleFactionWhite: TextDrawer;
 }
 
 export default class Animation {
@@ -48,18 +49,28 @@ export default class Animation {
     public static canvasComponents: IAnimationCanvasComps;
 
     public static initComponents() {
+        const canvasWhiteScene = (Canvases.layers.white as CanvasWhite).scenes;
+        const canvasBlackScene = (Canvases.layers.white as CanvasBlack).scenes;
         this.canvasComponents = {
             curve: (Canvases.layers.black as CanvasBlack).curve,
             light: (Canvases.layers.black as CanvasBlack).light,
             shadow: (Canvases.layers.white as CanvasWhite).shadow,
             canvas: (Canvases.layers.white as CanvasWhite).ctx.canvas,
-            mainTitleBlack: (Canvases.layers.black as CanvasBlack).scenes.home.mainTitle,
-            mainTitleWhite: (Canvases.layers.white as CanvasWhite).scenes.home.mainTitle,
-            titleHomeBlack: (Canvases.layers.black as CanvasBlack).scenes.home.title,
-            titleHomeWhite: (Canvases.layers.white as CanvasWhite).scenes.home.title,
             titleFactionBlack: (Canvases.layers.white as CanvasWhite).scenes.faction.title,
             titleFactionWhite: (Canvases.layers.black as CanvasBlack).scenes.faction.title,
         };
+
+        if (canvasWhiteScene.home) {
+            // this.canvasComponents.canvasWhiteHome = canvasWhiteScene.home;
+            // this.canvasComponents.mainTitleBlack = canvasWhiteScene.home.mainTitle;
+            this.canvasComponents.titleHomeBlack = canvasWhiteScene.home.title;
+        }
+
+        if (canvasBlackScene.home) {
+            // this.canvasComponents.canvasBlackHome = canvasBlackScene.home;
+            // this.canvasComponents.mainTitleWhite = canvasBlackScene.home.mainTitle;
+            this.canvasComponents.titleHomeWhite = canvasBlackScene.home.title;
+        }
     }
 
     public static initHomeToLevel(onComplete: () => void) {
@@ -73,6 +84,11 @@ export default class Animation {
             titleHomeBlack,
             titleHomeWhite,
         } = this.canvasComponents;
+
+        // if (canvasBlackHome) {
+        //     const { mainTitle } = canvasBlackHome;
+        // }
+        // const { mainTitle } = canvasBlackHome;
 
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
         const levelInterface = this.components.levelInterface.current as HTMLElement;
@@ -98,15 +114,17 @@ export default class Animation {
             .to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
                 opacity: 0,
                 onComplete: () => {
-                    mainTitleBlack.onTransition = false;
-                    mainTitleBlack.isMount = false;
-                    mainTitleWhite.onTransition = false;
-                    mainTitleWhite.isMount = false;
+                    if (mainTitleBlack && mainTitleWhite && titleHomeBlack && titleHomeWhite) {
+                        mainTitleBlack.onTransition = false;
+                        mainTitleBlack.isMount = false;
+                        mainTitleWhite.onTransition = false;
+                        mainTitleWhite.isMount = false;
 
-                    titleHomeWhite.onTransition = false;
-                    titleHomeBlack.onTransition = false;
-                    titleHomeWhite.isMount = false;
-                    titleHomeBlack.isMount = false;
+                        titleHomeWhite.onTransition = false;
+                        titleHomeBlack.onTransition = false;
+                        titleHomeWhite.isMount = false;
+                        titleHomeBlack.isMount = false;
+                    }
                 },
             }, "-= 0.5")
             .to(buttonPlay, 0.5, {
@@ -162,24 +180,28 @@ export default class Animation {
             .to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
                 opacity: 1,
                 onStart: () => {
-                    mainTitleBlack.onTransition = true;
-                    mainTitleWhite.onTransition = true;
+                    if (mainTitleBlack && mainTitleWhite && titleHomeBlack && titleHomeWhite) {
+                        mainTitleBlack.onTransition = true;
+                        mainTitleWhite.onTransition = true;
 
-                    titleHomeWhite.onTransition = true;
-                    titleHomeBlack.onTransition = true;
+                        titleHomeWhite.onTransition = true;
+                        titleHomeBlack.onTransition = true;
+                    }
                 },
                 onComplete: () => {
-                    mainTitleBlack.onTransition = false;
-                    mainTitleWhite.onTransition = false;
+                    if (mainTitleBlack && mainTitleWhite && titleHomeBlack && titleHomeWhite) {
+                        mainTitleBlack.onTransition = false;
+                        mainTitleWhite.onTransition = false;
 
-                    titleHomeWhite.onTransition = false;
-                    titleHomeBlack.onTransition = false;
+                        titleHomeWhite.onTransition = false;
+                        titleHomeBlack.onTransition = false;
 
-                    mainTitleBlack.isMount = true;
-                    mainTitleWhite.isMount = true;
+                        mainTitleBlack.isMount = true;
+                        mainTitleWhite.isMount = true;
 
-                    titleHomeWhite.isMount = true;
-                    titleHomeBlack.isMount = true;
+                        titleHomeWhite.isMount = true;
+                        titleHomeBlack.isMount = true;
+                    }
                 },
             })
             .to(buttonPlay, 0.5, {
