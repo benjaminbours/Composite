@@ -7,17 +7,24 @@ const coordinate = {
 };
 
 export default class SubtitleHome extends TextDrawer {
-    constructor(ctx: CanvasRenderingContext2D, side: Side, content: string, isMount: boolean) {
-        super(ctx, side, content, isMount, coordinate);
+    constructor(content: string, isMount: boolean) {
+        super(content, isMount, coordinate);
     }
 
-    public resize = () => {
+    public render = (ctx: CanvasRenderingContext2D, color: Side): boolean => {
+        if (ctx.canvas.width <= 768 && color === "black") {
+            return false;
+        }
+        super.render(ctx, color);
+        return true;
+    }
+
+    public resize = (ctx: CanvasRenderingContext2D) => {
         if (window.innerHeight < 600) {
             this.iy = 0.6;
         } else {
             this.iy = coordinate.y;
         }
-        this.x = (this.ctx.canvas.width * this.ix) - this.width / 2;
-        this.y = (this.ctx.canvas.height * this.iy) - 100 / 2;
+        super.resize(ctx);
     }
 }

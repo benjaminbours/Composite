@@ -1,5 +1,3 @@
-import { MainTitle, SubtitleHome, TextDrawer } from "./comps";
-
 export type Side = "black" | "white";
 
 export interface ICoordinate {
@@ -16,14 +14,4 @@ export interface IWaveOptions {
     randomTransition: number;
     amplitudeTransition: number;
     speed: number;
-}
-
-export interface Iscenes {
-    home?: {
-        // mainTitle: MainTitle;
-        title: SubtitleHome;
-    };
-    faction: {
-        title: TextDrawer;
-    };
 }

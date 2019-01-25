@@ -12,6 +12,9 @@ const backOptions = {
     faction() {
         Animation.playFactionToLevel();
     },
+    queue() {
+        Animation.playQueueToFaction();
+    },
 };
 
 export let app: App | null = null;
@@ -63,6 +66,12 @@ export default class App extends Component {
                 currentScene: "level",
             });
         });
+        Animation.initQueueToFaction(() => {
+            this.onTransition = false;
+            this.setState({
+                currentScene: "faction",
+            });
+        });
     }
 
     public handleMouseEnterPlay = () => {
@@ -93,17 +102,18 @@ export default class App extends Component {
     }
 
     public handleClickOnFaction = (side: string) => {
+        this.onTransition = true;
         Animation.initFactionToQueue(() => {
             this.onTransition = false;
             this.setState({
                 currentScene: "queue",
+                faction: side,
             });
         }, side);
-        this.onTransition = true;
-        Animation.playFactionToQueue();
-        this.setState({
-            faction: side,
-        });
+        // Animation.playFactionToQueue();
+        // this.setState({
+        //     faction: side,
+        // });
     }
 
     public render() {

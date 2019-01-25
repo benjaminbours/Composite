@@ -1,5 +1,4 @@
-import Canvases from "../index";
-
+import { runMethodForAllBothComponents } from "../bothComponents";
 export default class Canvas {
     public ctx: CanvasRenderingContext2D;
 
@@ -11,18 +10,10 @@ export default class Canvas {
     }
 
     protected renderBothComponents(color: string) {
-        for (const sceneName in Canvases.bothComponents) {
-            if (Canvases.bothComponents[sceneName]) {
-                const scene = Canvases.bothComponents[sceneName];
-                for (const comp in scene) {
-                    if (scene[comp].hasOwnProperty("render")) {
-                        if (scene[comp].isMount || scene[comp].onTransition) {
-                            scene[comp].render(this.ctx, color);
-                        }
-                    }
-                }
-            }
-        }
+        runMethodForAllBothComponents("render", [
+            this.ctx,
+            color,
+        ]);
     }
 
     protected resize() {

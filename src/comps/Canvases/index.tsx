@@ -1,7 +1,7 @@
 import { TweenLite } from "gsap";
 import React, { Component, RefObject } from "react";
 import * as STATS from "stats.js";
-import MainTitle from "./comps/MainTitle";
+import { runMethodForAllBothComponents } from "./bothComponents";
 import CanvasBlack from "./layers/CanvasBlack";
 import CanvasWhite from "./layers/CanvasWhite";
 import Mouse from "./Mouse";
@@ -11,17 +11,12 @@ stats.showPanel(1);
 document.body.appendChild(stats.dom);
 
 interface ILayers {
-    [key: string]: CanvasBlack | CanvasWhite;
+    black: CanvasBlack;
+    white: CanvasWhite;
 }
 
 export default class Canvases extends Component {
-    public static layers: ILayers = {};
-
-    public static bothComponents = {
-        home: {
-            mainTitle: new MainTitle(),
-        },
-    };
+    public static layers: ILayers;
 
     public blackCanvas: RefObject<HTMLCanvasElement>;
     public whiteCanvas: RefObject<HTMLCanvasElement>;
@@ -37,6 +32,9 @@ export default class Canvases extends Component {
             black: new CanvasBlack(this.blackCanvas.current as HTMLCanvasElement),
             white: new CanvasWhite(this.whiteCanvas.current as HTMLCanvasElement),
         };
+        runMethodForAllBothComponents("resize", [
+            Canvases.layers.black.ctx,
+        ]);
         Mouse.init();
         TweenLite.ticker.addEventListener("tick", this.canvasLoop);
         window.addEventListener("resize", this.resize);
@@ -67,5 +65,8 @@ export default class Canvases extends Component {
                 Canvases.layers[layer].resize();
             }
         }
+        runMethodForAllBothComponents("resize", [
+            Canvases.layers.black.ctx, // no matter which canvas is used here, they have the same size
+        ]);
     }
 }

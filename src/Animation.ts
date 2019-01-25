@@ -1,13 +1,13 @@
 import { Power3, TimelineLite, TweenLite } from "gsap";
 import React, { RefObject } from "react";
 import Canvases from "./comps/Canvases";
+import { bothComponents } from "./comps/Canvases/bothComponents";
 import { MainTitle, SubtitleHome, TextDrawer } from "./comps/Canvases/comps";
 import Curve, { defaultWave, wave } from "./comps/Canvases/comps/Curve/index";
 import Light from "./comps/Canvases/comps/Light";
 import Shadow from "./comps/Canvases/comps/Shadow";
 import CanvasBlack from "./comps/Canvases/layers/CanvasBlack";
 import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
-import { Iscenes } from "./comps/Canvases/types";
 
 interface IAnimationComps {
     buttonPlay: RefObject<HTMLButtonElement>;
@@ -21,12 +21,9 @@ interface IAnimationCanvasComps {
     curve: Curve;
     shadow: Shadow;
     light: Light;
-    mainTitleBlack?: MainTitle;
-    titleHomeBlack?: SubtitleHome;
-    mainTitleWhite?: MainTitle;
-    titleHomeWhite?: SubtitleHome;
-    titleFactionBlack: TextDrawer;
-    titleFactionWhite: TextDrawer;
+    mainTitle: MainTitle;
+    subtitleHome: SubtitleHome;
+    titleFaction: TextDrawer;
 }
 
 export default class Animation {
@@ -38,6 +35,7 @@ export default class Animation {
     public static levelToFaction: TimelineLite;
     public static factionToLevel: TimelineLite;
     public static factionToQueue: TimelineLite;
+    public static queueToFaction: TimelineLite;
 
     public static components: IAnimationComps = {
         buttonPlay: React.createRef(),
@@ -49,28 +47,15 @@ export default class Animation {
     public static canvasComponents: IAnimationCanvasComps;
 
     public static initComponents() {
-        const canvasWhiteScene = (Canvases.layers.white as CanvasWhite).scenes;
-        const canvasBlackScene = (Canvases.layers.white as CanvasBlack).scenes;
         this.canvasComponents = {
             curve: (Canvases.layers.black as CanvasBlack).curve,
             light: (Canvases.layers.black as CanvasBlack).light,
             shadow: (Canvases.layers.white as CanvasWhite).shadow,
             canvas: (Canvases.layers.white as CanvasWhite).ctx.canvas,
-            titleFactionBlack: (Canvases.layers.white as CanvasWhite).scenes.faction.title,
-            titleFactionWhite: (Canvases.layers.black as CanvasBlack).scenes.faction.title,
+            mainTitle: bothComponents.home.mainTitle,
+            subtitleHome: bothComponents.home.title,
+            titleFaction: bothComponents.faction.title,
         };
-
-        if (canvasWhiteScene.home) {
-            // this.canvasComponents.canvasWhiteHome = canvasWhiteScene.home;
-            // this.canvasComponents.mainTitleBlack = canvasWhiteScene.home.mainTitle;
-            this.canvasComponents.titleHomeBlack = canvasWhiteScene.home.title;
-        }
-
-        if (canvasBlackScene.home) {
-            // this.canvasComponents.canvasBlackHome = canvasBlackScene.home;
-            // this.canvasComponents.mainTitleWhite = canvasBlackScene.home.mainTitle;
-            this.canvasComponents.titleHomeWhite = canvasBlackScene.home.title;
-        }
     }
 
     public static initHomeToLevel(onComplete: () => void) {
@@ -79,16 +64,9 @@ export default class Animation {
             curve,
             shadow,
             light,
-            mainTitleBlack,
-            mainTitleWhite,
-            titleHomeBlack,
-            titleHomeWhite,
+            mainTitle,
+            subtitleHome,
         } = this.canvasComponents;
-
-        // if (canvasBlackHome) {
-        //     const { mainTitle } = canvasBlackHome;
-        // }
-        // const { mainTitle } = canvasBlackHome;
 
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
         const levelInterface = this.components.levelInterface.current as HTMLElement;
@@ -111,19 +89,15 @@ export default class Animation {
                 startX: canvas.width * 0.85,
                 startY: canvas.height * 0.5,
             }, "-= 0.5")
-            .to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
+            .to([mainTitle, subtitleHome], 0.5, {
                 opacity: 0,
                 onComplete: () => {
-                    if (mainTitleBlack && mainTitleWhite && titleHomeBlack && titleHomeWhite) {
-                        mainTitleBlack.onTransition = false;
-                        mainTitleBlack.isMount = false;
-                        mainTitleWhite.onTransition = false;
-                        mainTitleWhite.isMount = false;
+                    if (mainTitle && subtitleHome) {
+                        mainTitle.onTransition = false;
+                        mainTitle.isMount = false;
 
-                        titleHomeWhite.onTransition = false;
-                        titleHomeBlack.onTransition = false;
-                        titleHomeWhite.isMount = false;
-                        titleHomeBlack.isMount = false;
+                        subtitleHome.onTransition = false;
+                        subtitleHome.isMount = false;
                     }
                 },
             }, "-= 0.5")
@@ -144,10 +118,8 @@ export default class Animation {
             curve,
             shadow,
             light,
-            mainTitleBlack,
-            mainTitleWhite,
-            titleHomeBlack,
-            titleHomeWhite,
+            mainTitle,
+            subtitleHome,
         } = this.canvasComponents;
 
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
@@ -177,30 +149,21 @@ export default class Animation {
                     levelInterface.style.display = "none";
                 },
             }, "-= 0.5")
-            .to([mainTitleBlack, mainTitleWhite, titleHomeWhite, titleHomeBlack], 0.5, {
+            .to([mainTitle, subtitleHome], 0.5, {
                 opacity: 1,
                 onStart: () => {
-                    if (mainTitleBlack && mainTitleWhite && titleHomeBlack && titleHomeWhite) {
-                        mainTitleBlack.onTransition = true;
-                        mainTitleWhite.onTransition = true;
-
-                        titleHomeWhite.onTransition = true;
-                        titleHomeBlack.onTransition = true;
+                    if (mainTitle && subtitleHome) {
+                        mainTitle.onTransition = true;
+                        subtitleHome.onTransition = true;
                     }
                 },
                 onComplete: () => {
-                    if (mainTitleBlack && mainTitleWhite && titleHomeBlack && titleHomeWhite) {
-                        mainTitleBlack.onTransition = false;
-                        mainTitleWhite.onTransition = false;
+                    if (mainTitle && subtitleHome) {
+                        mainTitle.onTransition = false;
+                        mainTitle.isMount = true;
 
-                        titleHomeWhite.onTransition = false;
-                        titleHomeBlack.onTransition = false;
-
-                        mainTitleBlack.isMount = true;
-                        mainTitleWhite.isMount = true;
-
-                        titleHomeWhite.isMount = true;
-                        titleHomeBlack.isMount = true;
+                        subtitleHome.onTransition = false;
+                        subtitleHome.isMount = true;
                     }
                 },
             })
@@ -215,8 +178,7 @@ export default class Animation {
             curve,
             shadow,
             light,
-            titleFactionBlack,
-            titleFactionWhite,
+            titleFaction,
         } = this.canvasComponents;
 
         const levelInterface = this.components.levelInterface.current as HTMLElement;
@@ -254,18 +216,14 @@ export default class Animation {
                     factionInterface.style.display = "block";
                 },
             })
-            .to([titleFactionBlack, titleFactionWhite], 0.5, {
+            .to(titleFaction, 0.5, {
                 opacity: 1,
                 onStart: () => {
-                    titleFactionBlack.onTransition = true;
-                    titleFactionWhite.onTransition = true;
+                    titleFaction.onTransition = true;
                 },
                 onComplete: () => {
-                    titleFactionBlack.onTransition = false;
-                    titleFactionWhite.onTransition = false;
-
-                    titleFactionBlack.isMount = true;
-                    titleFactionWhite.isMount = true;
+                    titleFaction.onTransition = false;
+                    titleFaction.isMount = true;
                 },
             }, "-= 0.5");
     }
@@ -276,8 +234,7 @@ export default class Animation {
             curve,
             shadow,
             light,
-            titleFactionBlack,
-            titleFactionWhite,
+            titleFaction,
         } = this.canvasComponents;
 
         const levelInterface = this.components.levelInterface.current as HTMLElement;
@@ -304,18 +261,14 @@ export default class Animation {
                     factionInterface.style.display = "none";
                 },
             }, "-= 0.5")
-            .to([titleFactionBlack, titleFactionWhite], 0.5, {
+            .to(titleFaction, 0.5, {
                 opacity: 0,
                 onStart: () => {
-                    titleFactionBlack.onTransition = true;
-                    titleFactionWhite.onTransition = true;
+                    titleFaction.onTransition = true;
                 },
                 onComplete: () => {
-                    titleFactionBlack.onTransition = false;
-                    titleFactionWhite.onTransition = false;
-
-                    titleFactionBlack.isMount = false;
-                    titleFactionWhite.isMount = false;
+                    titleFaction.onTransition = false;
+                    titleFaction.isMount = false;
                 },
             }, "-= 0.5")
             .to(levelInterface, 0.5, {
@@ -332,9 +285,10 @@ export default class Animation {
             curve,
             shadow,
             light,
-            titleFactionBlack,
-            titleFactionWhite,
+            titleFaction,
         } = this.canvasComponents;
+
+        console.log(faction);
 
         const factionInterface = this.components.factionInterface.current as HTMLElement;
         const queueInterface = this.components.queueInterface.current as HTMLElement;
@@ -344,7 +298,8 @@ export default class Animation {
         const shadowTarget = faction === "light" ? canvas.width * 1.5 : canvas.width * 0.5;
 
         this.factionToQueue = new TimelineLite({
-            paused: true,
+            // paused: true,
+            overwrite: "all",
             onComplete: () => {
                 onComplete();
             },
@@ -361,18 +316,14 @@ export default class Animation {
                 delay: 0.1,
                 startX: shadowTarget,
             }, "-= 0.5")
-            .to([titleFactionBlack, titleFactionWhite], 0.5, {
+            .to(titleFaction, 0.5, {
                 opacity: 0,
                 onStart: () => {
-                    titleFactionBlack.onTransition = true;
-                    titleFactionWhite.onTransition = true;
+                    titleFaction.onTransition = true;
                 },
                 onComplete: () => {
-                    titleFactionBlack.onTransition = false;
-                    titleFactionWhite.onTransition = false;
-
-                    titleFactionBlack.isMount = false;
-                    titleFactionWhite.isMount = false;
+                    titleFaction.onTransition = false;
+                    titleFaction.isMount = false;
                 },
             }, "-= 0.5")
             .to(factionInterface, 0.5, {
@@ -387,6 +338,62 @@ export default class Animation {
                     queueInterface.style.display = "block";
                 },
             });
+    }
+
+    public static initQueueToFaction(onComplete: () => void) {
+        const {
+            canvas,
+            curve,
+            shadow,
+            light,
+            titleFaction,
+        } = this.canvasComponents;
+
+        const queueInterface = this.components.queueInterface.current as HTMLElement;
+        const factionInterface = this.components.factionInterface.current as HTMLElement;
+
+        this.queueToFaction = new TimelineLite({
+            paused: true,
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .to(curve, 0.5, {
+                origin: canvas.width * 0.5,
+                onComplete: this.setWaveInDefaultMode,
+            })
+            .to(light, 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.25,
+                startY: canvas.height * 0.5,
+            }, "-= 0.5")
+            .to(shadow, 0.5, {
+                delay: 0.1,
+                startX: canvas.width * 0.75,
+                startY: canvas.height * 0.5,
+            }, "-= 0.5")
+            .to(queueInterface, 0.5, {
+                opacity: 0,
+                onComplete: () => {
+                    queueInterface.style.display = "none";
+                },
+            }, "-= 0.5")
+            .to(factionInterface, 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    factionInterface.style.display = "block";
+                },
+            })
+            .to(titleFaction, 0.5, {
+                opacity: 1,
+                onStart: () => {
+                    titleFaction.onTransition = true;
+                },
+                onComplete: () => {
+                    titleFaction.onTransition = false;
+                    titleFaction.isMount = true;
+                },
+            }, "-= 0.5");
     }
 
     public static initMouseEnterButtonPlay() {
@@ -434,6 +441,11 @@ export default class Animation {
     public static playFactionToQueue() {
         this.setWaveInMoveMode();
         this.factionToQueue.play(0);
+    }
+
+    public static playQueueToFaction() {
+        this.setWaveInMoveMode();
+        this.queueToFaction.play(0);
     }
 
     public static playMouseLeaveButtonPlay() {
