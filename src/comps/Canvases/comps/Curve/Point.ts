@@ -14,10 +14,9 @@ export default class Point {
 
     private vx: number;
     private vy: number;
-    private axis;
-    private fixed: boolean;
+    private axis: "v" | "h";
 
-    constructor(x: number, y: number, axis: any, fixed: any) {
+    constructor(x: number, y: number, axis: any) {
         this.x = x;
         this.ix = x;
         this.vx = 0;
@@ -27,37 +26,46 @@ export default class Point {
         this.cx = 0;
         this.cy = 0;
         this.axis = axis;
-        this.fixed = fixed;
     }
 
     public move = () => {
-        if (this.fixed) {
-            return;
-        }
-
         this.vx += (this.ix - this.x) / wave.viscosity;
         this.vy += (this.iy - this.y) / wave.viscosity;
         const dx = this.ix - Mouse.x;
         const dy = this.iy - Mouse.y;
 
         const vGap = Curve.vGap;
+        const hGap = Curve.hGap;
 
         const isVerticalAxis = this.axis === "v";
+        const isHorizontalAxis = this.axis === "h";
 
-        if ((isVerticalAxis && Mouse.directionX > 0 && Mouse.x > this.x) || (Mouse.directionX < 0 && Mouse.x < this.x)) {
-            if ((this.axis === "v" && Math.sqrt(dx * dx) < wave.mouseDist && Math.sqrt(dy * dy) < vGap)) {
-                if (this.axis === "v") {
+        if ((isVerticalAxis && (Mouse.directionX > 0 && Mouse.x > this.x) || (Mouse.directionX < 0 && Mouse.x < this.x)) || (isHorizontalAxis && (Mouse.directionY > 0 && Mouse.y > this.y) || (Mouse.directionY < 0 && Mouse.y < this.y))) {
+            if ((this.axis === "v" && Math.sqrt(dx * dx) < wave.mouseDist && Math.sqrt(dy * dy) < vGap) || (this.axis === "h" && Math.sqrt(dy * dy) < wave.mouseDist && Math.sqrt(dx * dx) < hGap)) {
+                if (isVerticalAxis) {
                     this.vx = Mouse.speedX / 8;
                 } else {
                     this.vx = 0;
                 }
+
+                if (isHorizontalAxis) {
+                    this.vy = Mouse.speedY / 8;
+                } else {
+                    this.vy = 0;
+                }
             }
         }
 
-        if (this.axis === "v") {
+        if (isVerticalAxis) {
             this.vx *= (1 - wave.damping);
             this.x += this.vx;
             this.y = this.iy;
+        }
+
+        if (isHorizontalAxis) {
+            this.vy *= (1 - wave.damping);
+            this.y += this.vy;
+            this.x = this.ix;
         }
     }
 }
