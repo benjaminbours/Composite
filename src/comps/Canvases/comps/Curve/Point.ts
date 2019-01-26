@@ -1,10 +1,10 @@
 import Mouse from "../../Mouse";
-import Curve, { wave } from "./index";
+import Curve, { waveOptions } from "./index";
 
 export default class Point {
     public isAnimating: boolean = false;
-    public amplitude: number = Math.floor(Math.random() * wave.amplitudeRange);
-    public random: number = Math.floor(Math.random() * wave.randomRange);
+    public amplitude: number = Math.floor(Math.random() * waveOptions.amplitudeRange);
+    public random: number = Math.floor(Math.random() * waveOptions.randomRange);
     public x: number;
     public y: number;
     public cx: number;
@@ -29,8 +29,8 @@ export default class Point {
     }
 
     public move = () => {
-        this.vx += (this.ix - this.x) / wave.viscosity;
-        this.vy += (this.iy - this.y) / wave.viscosity;
+        this.vx += (this.ix - this.x) / waveOptions.viscosity;
+        this.vy += (this.iy - this.y) / waveOptions.viscosity;
         const dx = this.ix - Mouse.x;
         const dy = this.iy - Mouse.y;
 
@@ -41,7 +41,7 @@ export default class Point {
         const isHorizontalAxis = this.axis === "h";
 
         if ((isVerticalAxis && (Mouse.directionX > 0 && Mouse.x > this.x) || (Mouse.directionX < 0 && Mouse.x < this.x)) || (isHorizontalAxis && (Mouse.directionY > 0 && Mouse.y > this.y) || (Mouse.directionY < 0 && Mouse.y < this.y))) {
-            if ((this.axis === "v" && Math.sqrt(dx * dx) < wave.mouseDist && Math.sqrt(dy * dy) < vGap) || (this.axis === "h" && Math.sqrt(dy * dy) < wave.mouseDist && Math.sqrt(dx * dx) < hGap)) {
+            if ((this.axis === "v" && Math.sqrt(dx * dx) < waveOptions.mouseDist && Math.sqrt(dy * dy) < vGap) || (this.axis === "h" && Math.sqrt(dy * dy) < waveOptions.mouseDist && Math.sqrt(dx * dx) < hGap)) {
                 if (isVerticalAxis) {
                     this.vx = Mouse.speedX / 8;
                 } else {
@@ -57,13 +57,13 @@ export default class Point {
         }
 
         if (isVerticalAxis) {
-            this.vx *= (1 - wave.damping);
+            this.vx *= (1 - waveOptions.damping);
             this.x += this.vx;
             this.y = this.iy;
         }
 
         if (isHorizontalAxis) {
-            this.vy *= (1 - wave.damping);
+            this.vy *= (1 - waveOptions.damping);
             this.y += this.vy;
             this.x = this.ix;
         }

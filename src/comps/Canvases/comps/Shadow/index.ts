@@ -57,6 +57,15 @@ export default class Shadow {
             const coordinate = resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height);
             this.startX = coordinate.x;
             this.startY = coordinate.y;
+
+            this.width = 600;
+            if (window.innerHeight < 700) {
+                this.width = 500;
+            }
+
+            if (window.innerWidth > 1700) {
+                this.width = 800;
+            }
         }
     }
 }

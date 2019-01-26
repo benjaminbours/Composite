@@ -107,6 +107,15 @@ export default class Light {
             const coordinate = resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height);
             this.startX = coordinate.x;
             this.startY = coordinate.y;
+
+            this.width = 450;
+            if (window.innerHeight < 700) {
+                this.width = 400;
+            }
+
+            if (window.innerWidth > 1700) {
+                this.width = 600;
+            }
         }
     }
 

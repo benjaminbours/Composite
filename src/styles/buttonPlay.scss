@@ -29,4 +29,20 @@
         color: black;
         transition: 0.3s ease-out;
     }
+
+    @media (max-height: 700px) {
+        width: 80px;
+        height: 80px;
+        top: calc(75% - 40px);
+        font-size: 18px;
+        line-height: 40px;
+    }
+
+    @media (min-width: 1700px) {
+        width: 120px;
+        height: 120px;
+        top: calc(75% - 60px);
+        font-size: 30px;
+        line-height: 60px;
+    }
 }

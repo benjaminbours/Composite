@@ -1,10 +1,9 @@
-// import * as dat from "dat.gui";
 import { Power3, TweenMax } from "gsap";
 import { app } from "../../../../App";
 import { IWaveOptions } from "../../types";
 import Point from "./Point";
 
-export const defaultWave: IWaveOptions = {
+export const defaultWaveOptions: IWaveOptions = {
     viscosity: 340,
     mouseDist: 200,
     damping: 0.1,
@@ -15,7 +14,7 @@ export const defaultWave: IWaveOptions = {
     speed: 0.02,
 };
 
-export const wave: IWaveOptions = {
+export const waveOptions: IWaveOptions = {
     viscosity: 340,
     mouseDist: 200,
     damping: 0.1,
@@ -26,7 +25,7 @@ export const wave: IWaveOptions = {
     speed: 0.02,
 };
 
-const resizeOptions = {
+export const resizeOptions = {
     home(width: number) {
         return width * 0.5;
     },
@@ -36,17 +35,33 @@ const resizeOptions = {
     faction(width: number) {
         return width * 0.5;
     },
+    // should setup something about the resize of this step
+    queue(width: number) {
+        return width * 0.5;
+    },
+};
+
+export const resizeMobileOptions = {
+    home(height: number) {
+        return height * 0.75;
+    },
+    level(height: number) {
+        return height * 0.95;
+    },
+    faction(height: number) {
+        return height * 0.75;
+    },
 };
 
 export default class Curve {
-    // maybe bad use of static property
-    // public static gui = new dat.GUI();
     public static vTotalPoints = 15;
-    public static hTotalPoints = 15;
+    public static hTotalPoints = 8;
     public static vGap = window.innerHeight / (Curve.vTotalPoints - 1);
     public static hGap = window.innerWidth / (Curve.hTotalPoints - 1);
 
     public mouseIsHoverButton = false;
+
+    public axis: "h" | "v" = "v";
 
     private origin: number = 0;
 
@@ -60,11 +75,6 @@ export default class Curve {
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.resize();
-        if (window.innerWidth <= 768) {
-            this.initHPoints();
-        } else {
-            this.initVPoints();
-        }
     }
 
     public render = () => {
@@ -73,7 +83,8 @@ export default class Curve {
         this.ctx.beginPath();
 
         let arrayPoint: Point[] = [];
-        if (window.innerWidth <= 768) {
+
+        if (this.axis === "h") {
             arrayPoint = this.hPoints;
             this.ctx.moveTo(0, this.ctx.canvas.height * 0.5);
         } else {
@@ -83,26 +94,28 @@ export default class Curve {
 
         for (let i = 0; i <= arrayPoint.length - 1; i++) {
             if (TweenMax.ticker.frame % 200 === 0 && !this.mouseIsHoverButton) {
-                TweenMax.to(arrayPoint[i], wave.randomTransition, {
-                    random: Math.floor(Math.random() * wave.randomRange),
+                TweenMax.to(arrayPoint[i], waveOptions.randomTransition, {
+                    random: Math.floor(Math.random() * waveOptions.randomRange),
                 });
 
-                TweenMax.to(arrayPoint[i], wave.amplitudeTransition, {
-                    amplitude: Math.floor(Math.random() * wave.amplitudeRange),
+                TweenMax.to(arrayPoint[i], waveOptions.amplitudeTransition, {
+                    amplitude: Math.floor(Math.random() * waveOptions.amplitudeRange),
                 });
             }
             const waveValue = (Math.sin(i + this.time + arrayPoint[i].random)) * arrayPoint[i].amplitude;
-            if (window.innerWidth <= 768) {
+
+            if (this.axis === "h") {
                 arrayPoint[i].iy = this.origin + waveValue;
             } else {
                 arrayPoint[i].ix = this.origin + waveValue;
             }
+
             arrayPoint[i].move();
 
             const p = arrayPoint[i];
             if (i < arrayPoint.length - 1) {
                 if (i === 0) {
-                    if (window.innerWidth <= 768) {
+                    if (this.axis === "h") {
                         p.x = 0;
                     } else {
                         p.y = 0;
@@ -120,7 +133,7 @@ export default class Curve {
             this.ctx.bezierCurveTo(p.x, p.y, p.cx, p.cy, p.cx, p.cy);
         }
 
-        if (window.innerWidth <= 768) {
+        if (this.axis === "h") {
             this.ctx.lineTo(this.ctx.canvas.width, 0);
             this.ctx.lineTo(0, 0);
         } else {
@@ -131,29 +144,42 @@ export default class Curve {
         this.ctx.fill();
         this.ctx.clip();
 
-        this.time -= wave.speed;
+        this.time -= waveOptions.speed;
     }
 
     public resize = () => {
+        Curve.vGap = window.innerHeight / (Curve.vTotalPoints - 1);
+        Curve.hGap = window.innerWidth / (Curve.hTotalPoints - 1);
+        if (window.innerWidth <= 768) {
+            this.axis = "h";
+        } else {
+            this.axis = "v";
+        }
+
         if (app) {
-            if (window.innerWidth <= 768) {
-                this.origin = this.ctx.canvas.height * 0.75;
+            if (this.axis === "h") {
+                this.origin = resizeMobileOptions[app.state.currentScene](this.ctx.canvas.height);
             } else {
                 this.origin = resizeOptions[app.state.currentScene](this.ctx.canvas.width);
             }
-
         }
+
+        this.init();
     }
 
-    private initVPoints = () => {
-        for (let i = 0; i <= Curve.vTotalPoints - 1; i++) {
-            this.vPoints.push(new Point(this.origin, i * Curve.vGap, "v"));
-        }
-    }
-
-    private initHPoints = () => {
-        for (let i = 0; i <= Curve.hTotalPoints - 1; i++) {
-            this.hPoints.push(new Point(i * Curve.hGap, this.origin, "h"));
+    private init = () => {
+        if (this.axis === "h") {
+            // reset the current array before fill with news points.
+            this.hPoints = [];
+            for (let i = 0; i <= Curve.hTotalPoints - 1; i++) {
+                this.hPoints.push(new Point(i * Curve.hGap, this.origin, "h"));
+            }
+        } else {
+            // reset the current array before fill with news points.
+            this.vPoints = [];
+            for (let i = 0; i <= Curve.vTotalPoints - 1; i++) {
+                this.vPoints.push(new Point(this.origin, i * Curve.vGap, "v"));
+            }
         }
     }
 }

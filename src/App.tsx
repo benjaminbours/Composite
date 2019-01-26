@@ -22,7 +22,7 @@ export default class App extends Component {
     public state: IState;
     public onTransition: boolean = false;
 
-    constructor(props) {
+    constructor(props: {}) {
         super(props);
         this.state = {
             currentScene: "home",

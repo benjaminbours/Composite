@@ -1,11 +1,21 @@
 import { Power3, TimelineLite, TweenLite } from "gsap";
 import React, { RefObject } from "react";
+import App from "./App";
 import Canvases from "./comps/Canvases";
 import { bothComponents } from "./comps/Canvases/bothComponents";
-import { MainTitle, SubtitleHome, TextDrawer } from "./comps/Canvases/comps";
-import Curve, { defaultWave, wave } from "./comps/Canvases/comps/Curve/index";
-import Light from "./comps/Canvases/comps/Light";
-import Shadow from "./comps/Canvases/comps/Shadow";
+import {
+    Light,
+    MainTitle,
+    Shadow,
+    SubtitleHome,
+    TextDrawer,
+} from "./comps/Canvases/comps";
+import Curve, {
+    defaultWaveOptions,
+    resizeMobileOptions,
+    resizeOptions,
+    waveOptions,
+} from "./comps/Canvases/comps/Curve";
 import CanvasBlack from "./comps/Canvases/layers/CanvasBlack";
 import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
 
@@ -71,6 +81,8 @@ export default class Animation {
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
         const levelInterface = this.components.levelInterface.current as HTMLElement;
 
+        const isMobileDevise = window.innerWidth <= 768;
+
         this.homeToLevel = new TimelineLite({
             paused: true,
             onComplete: () => {
@@ -81,7 +93,7 @@ export default class Animation {
             },
         })
             .to(curve, 0.5, {
-                origin: canvas.width * 0.85,
+                origin: isMobileDevise ? resizeMobileOptions.level(canvas.height) : resizeOptions.level(canvas.width),
                 onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
@@ -125,6 +137,8 @@ export default class Animation {
         const buttonPlay = this.components.buttonPlay.current as HTMLButtonElement;
         const levelInterface = this.components.levelInterface.current as HTMLElement;
 
+        const isMobileDevise = window.innerWidth <= 768;
+
         this.levelToHome = new TimelineLite({
             paused: true,
             onComplete: () => {
@@ -132,7 +146,7 @@ export default class Animation {
             },
         })
             .to(curve, 0.5, {
-                origin: canvas.width * 0.5,
+                origin: isMobileDevise ? resizeMobileOptions.home(canvas.height) : resizeOptions.home(canvas.width),
                 onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
@@ -462,7 +476,7 @@ export default class Animation {
 
         curve.mouseIsHoverButton = true;
         light.isPulsingFast = true;
-        TweenLite.set(wave, {
+        TweenLite.set(waveOptions, {
             randomRange: 300,
             amplitudeRange: 50,
             speed: 0.1,
@@ -471,16 +485,15 @@ export default class Animation {
     }
 
     public static setWaveInMoveMode() {
-        TweenLite.set(wave, {
+        TweenLite.set(waveOptions, {
             viscosity: 40,
             damping: 0.2,
             overwrite: "all",
         });
     }
-
     public static setWaveInDefaultMode() {
-        TweenLite.set(wave, {
-            ...defaultWave,
+        TweenLite.set(waveOptions, {
+            ...defaultWaveOptions,
         });
     }
 }

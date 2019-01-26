@@ -33,9 +33,26 @@ export default class MainTitle {
     }
 
     public resize = (ctx: CanvasRenderingContext2D) => {
-        this.width = ctx.canvas.width * 0.9;
+        let positionY = 0.30;
+        this.width = ctx.canvas.width * 0.80;
+
+        if (window.innerHeight < 800) {
+            positionY = 0.18;
+        }
+
+        if (window.innerHeight < 700 || window.innerWidth > 1700) {
+            this.width = ctx.canvas.width * 0.75;
+        }
+
+        // if (window.innerWidth > 1700) {
+        //     this.width = ctx.canvas.width * 0.75;
+        // }
+
+        if (window.innerWidth <= 768) {
+            this.width = ctx.canvas.width * 0.9;
+        }
         this.startX = (ctx.canvas.width - this.width) / 2;
         this.height = this.width / this.ratio;
-        this.startY = ctx.canvas.height * 0.30 - this.height / 2;
+        this.startY = ctx.canvas.height * positionY - this.height / 2;
     }
 }

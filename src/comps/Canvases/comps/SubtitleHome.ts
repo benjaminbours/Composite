@@ -20,11 +20,15 @@ export default class SubtitleHome extends TextDrawer {
     }
 
     public resize = (ctx: CanvasRenderingContext2D) => {
-        if (window.innerHeight < 600) {
-            this.iy = 0.6;
-        } else {
-            this.iy = coordinate.y;
+        this.iy = coordinate.y;
+
+        if (window.innerHeight < 800) {
+            this.iy = 0.4;
         }
-        super.resize(ctx);
+
+        if (window.innerHeight < 700) {
+        // if (window.innerHeight < 600 || (window.innerWidth <= 1024 || window.innerHeight < 700)) {
+            this.iy = 0.45;
+        }
     }
 }
