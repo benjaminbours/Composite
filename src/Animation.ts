@@ -1,6 +1,5 @@
 import { Power3, TimelineLite, TweenLite } from "gsap";
 import React, { RefObject } from "react";
-import App from "./App";
 import Canvases from "./comps/Canvases";
 import { bothComponents } from "./comps/Canvases/bothComponents";
 import {
@@ -10,14 +9,29 @@ import {
     SubtitleHome,
     TextDrawer,
 } from "./comps/Canvases/comps";
-import Curve, {
-    defaultWaveOptions,
-    resizeMobileOptions,
-    resizeOptions,
-    waveOptions,
-} from "./comps/Canvases/comps/Curve";
+import Curve, { defaultWaveOptions, waveOptions } from "./comps/Canvases/comps/Curve";
 import CanvasBlack from "./comps/Canvases/layers/CanvasBlack";
 import CanvasWhite from "./comps/Canvases/layers/CanvasWhite";
+import {
+    curveCenter,
+    curveQueue,
+    curveLevel,
+    lightCenter,
+    lightOut,
+    lightLevel,
+    lightFaction,
+    shadowCenter,
+    shadowOut,
+    shadowLevel,
+    shadowFaction,
+    levelInterfaceOut,
+    factionInterfaceOut,
+    factionInterfaceIn,
+    queueInterfaceIn,
+    queueInterfaceOut,
+    titleFactionOut,
+    titleFactionIn,
+} from "./tweens";
 
 interface IAnimationComps {
     buttonPlay: RefObject<HTMLButtonElement>;
@@ -44,7 +58,8 @@ export default class Animation {
     public static levelToHome: TimelineLite;
     public static levelToFaction: TimelineLite;
     public static factionToLevel: TimelineLite;
-    public static factionToQueue: TimelineLite;
+    public static factionToQueueShadow: TimelineLite;
+    public static factionToQueueLight: TimelineLite;
     public static queueToFaction: TimelineLite;
 
     public static components: IAnimationComps = {
@@ -92,15 +107,17 @@ export default class Animation {
                 onComplete();
             },
         })
-            .to(curve, 0.5, {
-                origin: isMobileDevise ? resizeMobileOptions.level(canvas.height) : resizeOptions.level(canvas.width),
-                onComplete: this.setWaveInDefaultMode,
-            })
-            .to([light, shadow], 0.5, {
-                delay: 0.1,
-                startX: canvas.width * 0.85,
-                startY: canvas.height * 0.5,
-            }, "-= 0.5")
+            .add(curveLevel())
+            .add([lightLevel(), shadowLevel()], "-= 0.5")
+            // .to(curve, 0.5, {
+            //     origin: curve.resizeOptions.level(canvas.width, canvas.height, isMobileDevise),
+            //     onComplete: this.setWaveInDefaultMode,
+            // })
+            // .to([light, shadow], 0.5, {
+            //     delay: 0.1,
+            //     startX: canvas.width * 0.85,
+            //     startY: canvas.height * 0.5,
+            // }, "-= 0.5")
             .to([mainTitle, subtitleHome], 0.5, {
                 opacity: 0,
                 onComplete: () => {
@@ -146,7 +163,7 @@ export default class Animation {
             },
         })
             .to(curve, 0.5, {
-                origin: isMobileDevise ? resizeMobileOptions.home(canvas.height) : resizeOptions.home(canvas.width),
+                origin: curve.resizeOptions.home(canvas.width, canvas.height, isMobileDevise),
                 onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
@@ -187,59 +204,17 @@ export default class Animation {
     }
 
     public static initLevelToFaction(onComplete: () => void) {
-        const {
-            canvas,
-            curve,
-            shadow,
-            light,
-            titleFaction,
-        } = this.canvasComponents;
-
-        const levelInterface = this.components.levelInterface.current as HTMLElement;
-        const factionInterface = this.components.factionInterface.current as HTMLElement;
-
+        // const isMobileDevise = window.innerWidth <= 768;
         this.levelToFaction = new TimelineLite({
             paused: true,
             onComplete: () => {
                 onComplete();
             },
         })
-            .to(curve, 0.5, {
-                origin: canvas.width * 0.5,
-                onComplete: this.setWaveInDefaultMode,
-            })
-            .to(light, 0.5, {
-                delay: 0.1,
-                startX: canvas.width * 0.25,
-                startY: canvas.height * 0.5,
-            }, "-= 0.5")
-            .to(shadow, 0.5, {
-                delay: 0.1,
-                startX: canvas.width * 0.75,
-                startY: canvas.height * 0.5,
-            }, "-= 0.5")
-            .to(levelInterface, 0.5, {
-                opacity: 0,
-                onComplete: () => {
-                    levelInterface.style.display = "none";
-                },
-            }, "-= 0.5")
-            .to(factionInterface, 0.5, {
-                opacity: 1,
-                onStart: () => {
-                    factionInterface.style.display = "block";
-                },
-            })
-            .to(titleFaction, 0.5, {
-                opacity: 1,
-                onStart: () => {
-                    titleFaction.onTransition = true;
-                },
-                onComplete: () => {
-                    titleFaction.onTransition = false;
-                    titleFaction.isMount = true;
-                },
-            }, "-= 0.5");
+            .add(curveCenter())
+            .add([lightFaction(), shadowFaction(), levelInterfaceOut()], "-= 0.5")
+            .add(factionInterfaceIn())
+            .add(titleFactionIn(), "-= 0.5");
     }
 
     public static initFactionToLevel(onComplete: () => void) {
@@ -254,6 +229,8 @@ export default class Animation {
         const levelInterface = this.components.levelInterface.current as HTMLElement;
         const factionInterface = this.components.factionInterface.current as HTMLElement;
 
+        const isMobileDevise = window.innerWidth <= 768;
+
         this.factionToLevel = new TimelineLite({
             paused: true,
             onComplete: () => {
@@ -261,7 +238,7 @@ export default class Animation {
             },
         })
             .to(curve, 0.5, {
-                origin: canvas.width * 0.85,
+                origin: curve.resizeOptions.level(canvas.width, canvas.height, isMobileDevise),
                 onComplete: this.setWaveInDefaultMode,
             })
             .to([light, shadow], 0.5, {
@@ -293,78 +270,30 @@ export default class Animation {
             });
     }
 
-    public static initFactionToQueue(onComplete: () => void, faction: string) {
-        const {
-            canvas,
-            curve,
-            shadow,
-            light,
-            titleFaction,
-        } = this.canvasComponents;
-
-        console.log(faction);
-
-        const factionInterface = this.components.factionInterface.current as HTMLElement;
-        const queueInterface = this.components.queueInterface.current as HTMLElement;
-
-        const curveTarget = faction === "light" ? canvas.width * 1.2 : canvas.width * -0.2;
-        const lightTarget = faction === "light" ? canvas.width * 0.5 : canvas.width * -0.5;
-        const shadowTarget = faction === "light" ? canvas.width * 1.5 : canvas.width * 0.5;
-
-        this.factionToQueue = new TimelineLite({
-            // paused: true,
-            overwrite: "all",
+    public static initFactionToQueue(onComplete: () => void) {
+        this.factionToQueueLight = new TimelineLite({
+            paused: true,
             onComplete: () => {
                 onComplete();
             },
         })
-            .to(curve, 0.5, {
-                origin: curveTarget,
-                onComplete: this.setWaveInDefaultMode,
-            })
-            .to(light, 0.5, {
-                delay: 0.1,
-                startX: lightTarget,
-            }, "-= 0.5")
-            .to(shadow, 0.5, {
-                delay: 0.1,
-                startX: shadowTarget,
-            }, "-= 0.5")
-            .to(titleFaction, 0.5, {
-                opacity: 0,
-                onStart: () => {
-                    titleFaction.onTransition = true;
-                },
-                onComplete: () => {
-                    titleFaction.onTransition = false;
-                    titleFaction.isMount = false;
-                },
-            }, "-= 0.5")
-            .to(factionInterface, 0.5, {
-                opacity: 0,
-                onComplete: () => {
-                    factionInterface.style.display = "none";
-                },
-            }, "-= 0.5")
-            .to(queueInterface, 0.5, {
-                opacity: 1,
-                onStart: () => {
-                    queueInterface.style.display = "block";
-                },
-            });
+            .add(curveQueue())
+            .add([lightCenter(), shadowOut(), titleFactionOut(), factionInterfaceOut()], "-= 0.5")
+            .add(queueInterfaceIn());
+
+        this.factionToQueueShadow = new TimelineLite({
+            paused: true,
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .add(curveQueue())
+            .add([lightOut(), shadowCenter(), titleFactionOut(), factionInterfaceOut()], "-= 0.5")
+            .add(queueInterfaceIn());
     }
 
     public static initQueueToFaction(onComplete: () => void) {
-        const {
-            canvas,
-            curve,
-            shadow,
-            light,
-            titleFaction,
-        } = this.canvasComponents;
-
-        const queueInterface = this.components.queueInterface.current as HTMLElement;
-        const factionInterface = this.components.factionInterface.current as HTMLElement;
+        // const isMobileDevise = window.innerWidth <= 768;
 
         this.queueToFaction = new TimelineLite({
             paused: true,
@@ -372,42 +301,10 @@ export default class Animation {
                 onComplete();
             },
         })
-            .to(curve, 0.5, {
-                origin: canvas.width * 0.5,
-                onComplete: this.setWaveInDefaultMode,
-            })
-            .to(light, 0.5, {
-                delay: 0.1,
-                startX: canvas.width * 0.25,
-                startY: canvas.height * 0.5,
-            }, "-= 0.5")
-            .to(shadow, 0.5, {
-                delay: 0.1,
-                startX: canvas.width * 0.75,
-                startY: canvas.height * 0.5,
-            }, "-= 0.5")
-            .to(queueInterface, 0.5, {
-                opacity: 0,
-                onComplete: () => {
-                    queueInterface.style.display = "none";
-                },
-            }, "-= 0.5")
-            .to(factionInterface, 0.5, {
-                opacity: 1,
-                onStart: () => {
-                    factionInterface.style.display = "block";
-                },
-            })
-            .to(titleFaction, 0.5, {
-                opacity: 1,
-                onStart: () => {
-                    titleFaction.onTransition = true;
-                },
-                onComplete: () => {
-                    titleFaction.onTransition = false;
-                    titleFaction.isMount = true;
-                },
-            }, "-= 0.5");
+            .add(curveCenter())
+            .add([lightFaction(), shadowFaction(), queueInterfaceOut()], "-= 0.5")
+            .add(factionInterfaceIn())
+            .add(titleFactionIn(), "-= 0.5");
     }
 
     public static initMouseEnterButtonPlay() {
@@ -452,13 +349,21 @@ export default class Animation {
         this.factionToLevel.play(0);
     }
 
-    public static playFactionToQueue() {
+    public static playFactionToQueue(side: string) {
         this.setWaveInMoveMode();
-        this.factionToQueue.play(0);
+        if (side === "light") {
+            this.factionToQueueShadow.kill();
+            this.factionToQueueLight.play(0);
+        } else {
+            this.factionToQueueLight.kill();
+            this.factionToQueueShadow.play(0);
+        }
     }
 
     public static playQueueToFaction() {
         this.setWaveInMoveMode();
+        this.factionToQueueShadow.kill();
+        this.factionToQueueLight.kill();
         this.queueToFaction.play(0);
     }
 
@@ -491,6 +396,7 @@ export default class Animation {
             overwrite: "all",
         });
     }
+
     public static setWaveInDefaultMode() {
         TweenLite.set(waveOptions, {
             ...defaultWaveOptions,

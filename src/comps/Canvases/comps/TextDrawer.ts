@@ -16,7 +16,7 @@ export default class TextDrawer {
     private opacity: number = 1;
 
     private content: string;
-    private lineHeight: number = 40;
+    // private lineHeight: number = 40;
     private letterSpacing: number = 20;
 
     constructor(content: string, isMount: boolean, initialCoordinate: ICoordinate) {

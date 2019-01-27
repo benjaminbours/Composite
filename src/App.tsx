@@ -13,11 +13,13 @@ const backOptions = {
         Animation.playFactionToLevel();
     },
     queue() {
+        console.log("here");
         Animation.playQueueToFaction();
     },
 };
 
-export let app: App | null = null;
+export let app: App;
+// export let app: App | null = null;
 export default class App extends Component {
     public state: IState;
     public onTransition: boolean = false;
@@ -38,7 +40,64 @@ export default class App extends Component {
     }
 
     public componentDidMount() {
-        // console.log("App did mount");
+        this.initAnimations();
+        window.addEventListener("resize", this.resize);
+    }
+
+    public handleMouseEnterPlay = () => {
+        Animation.playMouseEnterButtonPlay();
+    }
+
+    public handleMouseLeavePlay = () => {
+        if (!this.onTransition) {
+            Animation.playMouseLeaveButtonPlay();
+        }
+    }
+
+    public handleClickOnPlay = () => {
+        this.onTransition = true;
+        Animation.playHomeToLevel();
+    }
+
+    public handleClickOnBack = () => {
+        const { currentScene } = this.state;
+        this.onTransition = true;
+        if (currentScene === "queue") {
+            Animation.initQueueToFaction(() => {
+                this.onTransition = false;
+                this.setState({
+                    currentScene: "faction",
+                });
+            });
+        }
+        backOptions[currentScene]();
+    }
+
+    public handleClickOnLevel = (name: string) => {
+        // console.log(name);
+        this.onTransition = true;
+        Animation.playLevelToFaction();
+    }
+
+    public handleClickOnFaction = (side: string) => {
+        this.onTransition = true;
+        Animation.playFactionToQueue(side);
+        this.setState({
+            faction: side,
+        });
+    }
+
+    public render() {
+        // const { currentScene } = this.state;
+        return (
+            <Context.Provider value={this.state}>
+                <Canvases />
+                <Interfaces />
+            </Context.Provider>
+        );
+    }
+
+    private initAnimations = () => {
         Animation.initComponents();
         Animation.initMouseEnterButtonPlay();
         Animation.initMouseLeaveButtonPlay();
@@ -66,63 +125,15 @@ export default class App extends Component {
                 currentScene: "level",
             });
         });
-        Animation.initQueueToFaction(() => {
-            this.onTransition = false;
-            this.setState({
-                currentScene: "faction",
-            });
-        });
-    }
-
-    public handleMouseEnterPlay = () => {
-        Animation.playMouseEnterButtonPlay();
-    }
-
-    public handleMouseLeavePlay = () => {
-        if (!this.onTransition) {
-            Animation.playMouseLeaveButtonPlay();
-        }
-    }
-
-    public handleClickOnPlay = () => {
-        this.onTransition = true;
-        Animation.playHomeToLevel();
-    }
-
-    public handleClickOnBack = () => {
-        const { currentScene } = this.state;
-        this.onTransition = true;
-        backOptions[currentScene]();
-    }
-
-    public handleClickOnLevel = (name: string) => {
-        // console.log(name);
-        this.onTransition = true;
-        Animation.playLevelToFaction();
-    }
-
-    public handleClickOnFaction = (side: string) => {
-        this.onTransition = true;
         Animation.initFactionToQueue(() => {
             this.onTransition = false;
             this.setState({
                 currentScene: "queue",
-                faction: side,
             });
-        }, side);
-        // Animation.playFactionToQueue();
-        // this.setState({
-        //     faction: side,
-        // });
+        });
     }
 
-    public render() {
-        // const { currentScene } = this.state;
-        return (
-            <Context.Provider value={this.state}>
-                <Canvases />
-                <Interfaces />
-            </Context.Provider>
-        );
+    private resize = () => {
+        this.initAnimations();
     }
 }

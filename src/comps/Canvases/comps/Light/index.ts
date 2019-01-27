@@ -17,27 +17,6 @@ export interface IPulseOptions {
     delay: number;
 }
 
-const resizeOptions = {
-    home(width: number, height: number) {
-        return {
-            x: width * 0.5,
-            y: height * 0.75,
-        };
-    },
-    level(width: number, height: number) {
-        return {
-            x: width * 0.85,
-            y: height * 0.5,
-        };
-    },
-    faction(width: number, height: number) {
-        return {
-            x: width * 0.25,
-            y: height * 0.5,
-        };
-    },
-};
-
 export default class Light {
     public startY: number = 30;
     public startX: number = 0;
@@ -77,6 +56,42 @@ export default class Light {
             delay: 2.25,
         },
     ];
+
+    public resizeOptions = {
+        home(width: number, height: number) {
+            return {
+                x: width * 0.5,
+                y: height * 0.75,
+            };
+        },
+        level(width: number, height: number) {
+            return {
+                x: width * 0.85,
+                y: height * 0.5,
+            };
+        },
+        faction(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return {
+                    x: width * 0.5,
+                    y: height * 0.25,
+                };
+            }
+            return {
+                x: width * 0.25,
+                y: height * 0.5,
+            };
+        },
+        queue(width: number, height: number, isOnMobile: boolean, faction: string) {
+            const positionX = faction === "light" ? 0.5 : -0.5;
+            const positionY = 0.5;
+            return {
+                x: width * positionX,
+                y: height * positionY,
+            };
+        },
+    };
+
     private width: number = 450;
     private img: HTMLImageElement;
 
@@ -104,7 +119,9 @@ export default class Light {
 
     public resize = () => {
         if (app) {
-            const coordinate = resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height);
+            const isOnMobile = window.innerWidth <= 768;
+            const coordinate = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, isOnMobile, app.state.faction);
+
             this.startX = coordinate.x;
             this.startY = coordinate.y;
 
@@ -156,5 +173,4 @@ export default class Light {
 
         this.pulsesFastAnimation.push(animation);
     }
-
 }

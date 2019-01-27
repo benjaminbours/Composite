@@ -25,34 +25,6 @@ export const waveOptions: IWaveOptions = {
     speed: 0.02,
 };
 
-export const resizeOptions = {
-    home(width: number) {
-        return width * 0.5;
-    },
-    level(width: number) {
-        return width * 0.85;
-    },
-    faction(width: number) {
-        return width * 0.5;
-    },
-    // should setup something about the resize of this step
-    queue(width: number) {
-        return width * 0.5;
-    },
-};
-
-export const resizeMobileOptions = {
-    home(height: number) {
-        return height * 0.75;
-    },
-    level(height: number) {
-        return height * 0.95;
-    },
-    faction(height: number) {
-        return height * 0.75;
-    },
-};
-
 export default class Curve {
     public static vTotalPoints = 15;
     public static hTotalPoints = 8;
@@ -62,6 +34,31 @@ export default class Curve {
     public mouseIsHoverButton = false;
 
     public axis: "h" | "v" = "v";
+
+    public resizeOptions = {
+        home(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return height * 0.75;
+            }
+            return width * 0.5;
+        },
+        level(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return height * 0.5;
+            }
+            return width * 0.85;
+        },
+        faction(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return height * 0.5;
+            }
+            return width * 0.5;
+        },
+        queue(width: number, height: number, isOnMobile: boolean, faction: string) {
+            const position = faction === "light" ? 1.2 : -0.2;
+            return width * position;
+        },
+    };
 
     private origin: number = 0;
 
@@ -157,11 +154,8 @@ export default class Curve {
         }
 
         if (app) {
-            if (this.axis === "h") {
-                this.origin = resizeMobileOptions[app.state.currentScene](this.ctx.canvas.height);
-            } else {
-                this.origin = resizeOptions[app.state.currentScene](this.ctx.canvas.width);
-            }
+            const isOnMobile = this.axis === "h";
+            this.origin = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, isOnMobile, app.state.faction);
         }
 
         this.init();
