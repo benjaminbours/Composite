@@ -56,6 +56,9 @@ export default class Curve {
         },
         queue(width: number, height: number, isOnMobile: boolean, faction: string) {
             const position = faction === "light" ? 1.2 : -0.2;
+            if (isOnMobile) {
+                return height * position;
+            }
             return width * position;
         },
     };
@@ -147,15 +150,14 @@ export default class Curve {
     public resize = () => {
         Curve.vGap = window.innerHeight / (Curve.vTotalPoints - 1);
         Curve.hGap = window.innerWidth / (Curve.hTotalPoints - 1);
-        if (window.innerWidth <= 768) {
+        if (app.isMobileDevice) {
             this.axis = "h";
         } else {
             this.axis = "v";
         }
 
         if (app) {
-            const isOnMobile = this.axis === "h";
-            this.origin = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, isOnMobile, app.state.faction);
+            this.origin = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, app.isMobileDevice, app.state.faction);
         }
 
         this.init();

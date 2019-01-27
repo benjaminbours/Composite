@@ -20,6 +20,10 @@ export default class MainTitle {
 
     private opacity: number = 1;
 
+    constructor(isMount: boolean) {
+        this.isMount = isMount;
+    }
+
     public render = (ctx: CanvasRenderingContext2D, color: Side): boolean => {
         if (ctx.canvas.width <= 768 && color === "black") {
             return false;

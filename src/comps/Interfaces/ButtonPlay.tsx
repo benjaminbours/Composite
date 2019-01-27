@@ -10,8 +10,10 @@ export default class ButtonPlay extends Component {
                     handleMouseEnterPlay,
                     handleMouseLeavePlay,
                     handleClickOnPlay,
+                    currentScene,
                 }) => (
                         <button
+                            className={`${currentScene !== "home" ? "unmount" : ""}`}
                             ref={Animation.components.buttonPlay}
                             id="buttonPlay"
                             onMouseEnter={handleMouseEnterPlay}

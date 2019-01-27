@@ -75,8 +75,7 @@ export default class Shadow {
 
     public resize = () => {
         if (app) {
-            const isOnMobile = window.innerWidth <= 768;
-            const coordinate = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, isOnMobile, app.state.faction);
+            const coordinate = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, app.isMobileDevice, app.state.faction);
             this.startX = coordinate.x;
             this.startY = coordinate.y;
 

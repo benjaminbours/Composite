@@ -1,9 +1,10 @@
-import React, { Component } from "react";
+import React, { Component, RefObject } from "react";
 import Animation from "./Animation";
 import Canvases from "./comps/Canvases";
 import Interfaces from "./comps/Interfaces";
 import { Context, IState } from "./context";
 import "./styles/main.scss";
+import { initBothComponents } from "./comps/Canvases/bothComponents";
 
 const backOptions = {
     level() {
@@ -13,16 +14,18 @@ const backOptions = {
         Animation.playFactionToLevel();
     },
     queue() {
-        console.log("here");
         Animation.playQueueToFaction();
     },
 };
 
 export let app: App;
-// export let app: App | null = null;
+
 export default class App extends Component {
     public state: IState;
     public onTransition: boolean = false;
+    public isMobileDevice: boolean = window.innerWidth <= 768;
+
+    private canvases: RefObject<Canvases> = React.createRef();
 
     constructor(props: {}) {
         super(props);
@@ -37,6 +40,7 @@ export default class App extends Component {
             handleClickOnFaction: this.handleClickOnFaction,
         };
         app = this;
+        initBothComponents(this.state.currentScene);
     }
 
     public componentDidMount() {
@@ -80,19 +84,26 @@ export default class App extends Component {
     }
 
     public handleClickOnFaction = (side: string) => {
-        this.onTransition = true;
-        Animation.playFactionToQueue(side);
         this.setState({
             faction: side,
+        }, () => {
+            this.onTransition = true;
+            Animation.initFactionToQueue(() => {
+                this.onTransition = false;
+                this.setState({
+                    currentScene: "queue",
+                });
+            });
+            Animation.playFactionToQueue();
         });
     }
 
     public render() {
-        // const { currentScene } = this.state;
+        const { currentScene } = this.state;
         return (
             <Context.Provider value={this.state}>
-                <Canvases />
-                <Interfaces />
+                <Canvases ref={this.canvases} />
+                <Interfaces currentScene={currentScene} />
             </Context.Provider>
         );
     }
@@ -125,15 +136,13 @@ export default class App extends Component {
                 currentScene: "level",
             });
         });
-        Animation.initFactionToQueue(() => {
-            this.onTransition = false;
-            this.setState({
-                currentScene: "queue",
-            });
-        });
     }
 
     private resize = () => {
+        this.isMobileDevice = window.innerWidth <= 768;
+        if (this.canvases.current) {
+            this.canvases.current.resize();
+        }
         this.initAnimations();
     }
 }

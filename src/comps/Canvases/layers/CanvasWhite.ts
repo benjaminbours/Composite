@@ -6,7 +6,6 @@ export default class CanvasWhite extends Canvas {
 
     constructor(ctxDom: HTMLCanvasElement) {
         super(ctxDom);
-        console.log(this.ctx.canvas.width);
         this.shadow = new Shadow(this.ctx);
         this.resize();
     }

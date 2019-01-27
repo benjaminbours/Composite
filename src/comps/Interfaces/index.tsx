@@ -24,12 +24,17 @@ const levels = [
     },
 ];
 
-export default class Interfaces extends Component {
+interface IProps {
+    currentScene: string;
+}
+
+export default class Interfaces extends Component<IProps> {
     public render() {
+        const { currentScene } = this.props;
         return (
             <>
                 <ButtonPlay />
-                <div ref={Animation.components.levelInterface} className="level-container">
+                <div ref={Animation.components.levelInterface} className={`level-container ${currentScene !== "level" ? "unmount" : ""}`}>
                     <ButtonBack color={"white"} />
                     <div className="level-list">
                         <h2>Select a level</h2>
@@ -41,7 +46,7 @@ export default class Interfaces extends Component {
                         ))}
                     </div>
                 </div>
-                <div ref={Animation.components.factionInterface} className="faction-container">
+                <div ref={Animation.components.factionInterface} className={`faction-container ${currentScene !== "faction" ? "unmount" : ""}`}>
                     <ButtonBack color={"white"} />
                     <ButtonFaction faction="light" />
                     <ButtonFaction faction="shadow" />

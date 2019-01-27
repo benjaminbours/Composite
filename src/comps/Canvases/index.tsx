@@ -37,7 +37,6 @@ export default class Canvases extends Component {
         ]);
         Mouse.init();
         TweenLite.ticker.addEventListener("tick", this.canvasLoop);
-        window.addEventListener("resize", this.resize);
     }
 
     public render() {
@@ -49,17 +48,7 @@ export default class Canvases extends Component {
         );
     }
 
-    private canvasLoop = () => {
-        stats.begin();
-        for (const layer in Canvases.layers) {
-            if (Canvases.layers[layer].hasOwnProperty("render")) {
-                Canvases.layers[layer].render();
-            }
-        }
-        stats.end();
-    }
-
-    private resize = () => {
+    public resize = () => {
         for (const layer in Canvases.layers) {
             if (Canvases.layers[layer].hasOwnProperty("resize")) {
                 Canvases.layers[layer].resize();
@@ -68,5 +57,15 @@ export default class Canvases extends Component {
         runMethodForAllBothComponents("resize", [
             Canvases.layers.black.ctx, // no matter which canvas is used here, they have the same size
         ]);
+    }
+
+    private canvasLoop = () => {
+        stats.begin();
+        for (const layer in Canvases.layers) {
+            if (Canvases.layers[layer].hasOwnProperty("render")) {
+                Canvases.layers[layer].render();
+            }
+        }
+        stats.end();
     }
 }

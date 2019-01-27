@@ -5,124 +5,84 @@ import { app } from "./App";
 /**
  * Curve
  */
-export function curveCenter() {
+export function curveToStep(step: string) {
     const { canvas, curve } = Animation.canvasComponents;
 
-    const isMobileDevise = window.innerWidth <= 768;
-
     return TweenLite.to(curve, 0.5, {
-        origin: curve.resizeOptions.faction(canvas.width, canvas.height, isMobileDevise),
+        origin: curve.resizeOptions[step](canvas.width, canvas.height, app.isMobileDevice, app.state.faction),
         onComplete: Animation.setWaveInDefaultMode,
-    });
-}
-
-export function curveLevel() {
-    const { canvas, curve } = Animation.canvasComponents;
-
-    const isMobileDevise = window.innerWidth <= 768;
-
-    return TweenLite.to(curve, 0.5, {
-        origin: curve.resizeOptions.level(canvas.width, canvas.height, isMobileDevise),
-        onComplete: Animation.setWaveInDefaultMode,
-    });
-}
-
-export function curveQueue() {
-    const { canvas, curve } = Animation.canvasComponents;
-
-    const isMobileDevise = window.innerWidth <= 768;
-
-    return TweenLite.to(curve, 0.5, {
-        origin: curve.resizeOptions.queue(canvas.width, canvas.height, isMobileDevise, app.state.faction),
-        onComplete: Animation.setWaveInDefaultMode,
-    });
-}
-
-// export function curveOutRight() {
-//     const { canvas, curve } = Animation.canvasComponents;
-
-//     return TweenLite.to(curve, 0.5, {
-//         origin: canvas.width * 1.2,
-//         onComplete: Animation.setWaveInDefaultMode,
-//     });
-// }
-
-/**
- * Queue
- */
-export function queueInterfaceIn() {
-    const queueInterface = Animation.components.queueInterface.current as HTMLElement;
-
-    return TweenLite.to(queueInterface, 0.5, {
-        opacity: 1,
-        onStart: () => {
-            queueInterface.style.display = "block";
-        },
-    });
-}
-
-export function queueInterfaceOut() {
-    const queueInterface = Animation.components.queueInterface.current as HTMLElement;
-
-    return TweenLite.to(queueInterface, 0.5, {
-        opacity: 0,
-        onComplete: () => {
-            queueInterface.style.display = "none";
-        },
     });
 }
 
 /**
- * Faction
+ * Light
  */
-export function titleFactionOut() {
-    const { titleFaction } = Animation.canvasComponents;
+export function lightToStep(step: string) {
+    const { canvas, light } = Animation.canvasComponents;
+    const coordinate = light.resizeOptions[step](canvas.width, canvas.height, app.isMobileDevice, app.state.faction);
 
-    return TweenLite.to(titleFaction, 0.5, {
+    return TweenLite.to(light, 0.5, {
+        delay: 0.1,
+        startX: coordinate.x,
+        startY: coordinate.y,
+    });
+}
+
+/**
+ * Shadow
+ */
+export function shadowToStep(step: string) {
+    const { canvas, shadow } = Animation.canvasComponents;
+    const coordinate = shadow.resizeOptions[step](canvas.width, canvas.height, app.isMobileDevice, app.state.faction);
+
+    return TweenLite.to(shadow, 0.5, {
+        delay: 0.1,
+        startX: coordinate.x,
+        startY: coordinate.y,
+    });
+}
+
+/**
+ * Home
+ */
+export function homeOut() {
+    const { mainTitle, subtitleHome } = Animation.canvasComponents;
+    const buttonPlay = Animation.components.buttonPlay.current as HTMLButtonElement;
+
+    return TweenLite.to([mainTitle, subtitleHome, buttonPlay], 0.5, {
         opacity: 0,
-        onStart: () => {
-            titleFaction.onTransition = true;
-        },
         onComplete: () => {
-            titleFaction.onTransition = false;
-            titleFaction.isMount = false;
+            if (mainTitle && subtitleHome) {
+                mainTitle.onTransition = false;
+                mainTitle.isMount = false;
+
+                subtitleHome.onTransition = false;
+                subtitleHome.isMount = false;
+            }
         },
     });
 }
 
-export function titleFactionIn() {
-    const { titleFaction } = Animation.canvasComponents;
+export function homeIn() {
+    const { mainTitle, subtitleHome } = Animation.canvasComponents;
+    const buttonPlay = Animation.components.buttonPlay.current as HTMLButtonElement;
 
-    return TweenLite.to(titleFaction, 0.5, {
+    return TweenLite.to([mainTitle, subtitleHome, buttonPlay], 0.5, {
         opacity: 1,
         onStart: () => {
-            titleFaction.onTransition = true;
+            if (mainTitle && subtitleHome) {
+                mainTitle.onTransition = true;
+                subtitleHome.onTransition = true;
+            }
         },
         onComplete: () => {
-            titleFaction.onTransition = false;
-            titleFaction.isMount = true;
-        },
-    });
-}
+            if (mainTitle && subtitleHome) {
+                mainTitle.onTransition = false;
+                mainTitle.isMount = true;
 
-export function factionInterfaceOut() {
-    const factionInterface = Animation.components.factionInterface.current as HTMLElement;
-
-    return TweenLite.to(factionInterface, 0.5, {
-        opacity: 0,
-        onComplete: () => {
-            factionInterface.style.display = "none";
-        },
-    });
-}
-
-export function factionInterfaceIn() {
-    const factionInterface = Animation.components.factionInterface.current as HTMLElement;
-
-    return TweenLite.to(factionInterface, 0.5, {
-        opacity: 1,
-        onStart: () => {
-            factionInterface.style.display = "block";
+                subtitleHome.onTransition = false;
+                subtitleHome.isMount = true;
+            }
         },
     });
 }
@@ -130,7 +90,7 @@ export function factionInterfaceIn() {
 /**
  * Level
  */
-export function levelInterfaceOut() {
+export function levelOut() {
     const levelInterface = Animation.components.levelInterface.current as HTMLElement;
 
     return TweenLite.to(levelInterface, 0.5, {
@@ -141,84 +101,75 @@ export function levelInterfaceOut() {
     });
 }
 
-/**
- * Light
- */
-export function lightOut() {
-    const { canvas, light } = Animation.canvasComponents;
+export function levelIn() {
+    const levelInterface = Animation.components.levelInterface.current as HTMLElement;
 
-    return TweenLite.to(light, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * -0.5,
-    });
-}
-
-export function lightCenter() {
-    const { canvas, light } = Animation.canvasComponents;
-
-    return TweenLite.to(light, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 0.5,
-    });
-}
-
-export function lightLevel() {
-    const { canvas, light } = Animation.canvasComponents;
-
-    return TweenLite.to(light, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 0.85,
-        startY: canvas.height * 0.5,
-    });
-}
-
-export function lightFaction() {
-    const { canvas, light } = Animation.canvasComponents;
-
-    return TweenLite.to(light, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 0.25,
-        startY: canvas.height * 0.5,
+    return TweenLite.to(levelInterface, 0.5, {
+        opacity: 1,
+        onStart: () => {
+            levelInterface.style.display = "block";
+        },
     });
 }
 
 /**
- * Shadow
+ * Faction
  */
-export function shadowOut() {
-    const { canvas, shadow } = Animation.canvasComponents;
+export function factionOut() {
+    const { titleFaction } = Animation.canvasComponents;
+    const factionInterface = Animation.components.factionInterface.current as HTMLElement;
 
-    return TweenLite.to(shadow, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 1.5,
+    return TweenLite.to([titleFaction, factionInterface], 0.5, {
+        opacity: 0,
+        onStart: () => {
+            titleFaction.onTransition = true;
+        },
+        onComplete: () => {
+            titleFaction.onTransition = false;
+            titleFaction.isMount = false;
+            factionInterface.style.display = "none";
+        },
     });
 }
 
-export function shadowCenter() {
-    const { canvas, shadow } = Animation.canvasComponents;
+export function factionIn() {
+    const { titleFaction } = Animation.canvasComponents;
+    const factionInterface = Animation.components.factionInterface.current as HTMLElement;
 
-    return TweenLite.to(shadow, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 0.5,
+    return TweenLite.to([titleFaction, factionInterface], 0.5, {
+        opacity: 1,
+        onStart: () => {
+            factionInterface.style.display = "block";
+            titleFaction.onTransition = true;
+        },
+        onComplete: () => {
+            titleFaction.onTransition = false;
+            titleFaction.isMount = true;
+        },
     });
 }
 
-export function shadowLevel() {
-    const { canvas, shadow } = Animation.canvasComponents;
+/**
+ * Queue
+ */
+export function queueIn() {
+    const queueInterface = Animation.components.queueInterface.current as HTMLElement;
 
-    return TweenLite.to(shadow, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 0.85,
-        startY: canvas.height * 0.5,
+    return TweenLite.to(queueInterface, 0.5, {
+        opacity: 1,
+        onStart: () => {
+            queueInterface.style.display = "block";
+        },
     });
 }
 
-export function shadowFaction() {
-    const { canvas, shadow } = Animation.canvasComponents;
+export function queueOut() {
+    const queueInterface = Animation.components.queueInterface.current as HTMLElement;
 
-    return TweenLite.to(shadow, 0.5, {
-        delay: 0.1,
-        startX: canvas.width * 0.75,
-        startY: canvas.height * 0.5,
+    return TweenLite.to(queueInterface, 0.5, {
+        opacity: 0,
+        onComplete: () => {
+            queueInterface.style.display = "none";
+        },
     });
 }
