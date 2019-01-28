@@ -18,6 +18,9 @@ const backOptions = {
     },
 };
 
+const iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+
+console.log(iOS);
 export let app: App;
 
 export default class App extends Component {

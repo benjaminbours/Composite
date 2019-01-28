@@ -1,3 +1,7 @@
+// canvas {
+//     letter-spacing: 2px;
+// }
+
 h2 {
     text-transform: uppercase;
     font-family: sans-serif;
@@ -5,6 +9,20 @@ h2 {
     font-size: 30px;
     letter-spacing: 20px;
     text-align: center;
+
+    @media (min-width: 2000px) {
+        font-size: 40px;       
+    }
+
+    @media (max-width: 768px) {
+        font-size: 25px;
+        letter-spacing: 15px;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 20px;
+        line-height: 1.5;
+    }
 }
 
 .buttonRect {
@@ -50,6 +68,26 @@ h2 {
     font-weight: 900;
     cursor: pointer;
     z-index: 100;
+    border: none;
+
+    &:focus {
+        outline: none;
+    }
+
+    @media (max-height: 700px), (max-width: 768px) {
+        width: 80px;
+        height: 80px;
+        font-size: 18px;
+        line-height: 80px;
+        font-weight: 500;
+    }
+
+    @media (min-width: 2000px) {
+        width: 120px;
+        height: 120px;
+        font-size: 30px;
+        line-height: 120px;
+    }
 }
 
 .unmount {

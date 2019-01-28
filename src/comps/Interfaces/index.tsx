@@ -33,11 +33,14 @@ export default class Interfaces extends Component<IProps> {
         const { currentScene } = this.props;
         return (
             <>
-                <ButtonPlay />
+                <div ref={Animation.components.homeInterface} className={`home-container ${currentScene !== "home" ? "unmount" : ""}`}>
+                    <h2>Think both ways</h2>
+                    <ButtonPlay />
+                </div>
                 <div ref={Animation.components.levelInterface} className={`level-container ${currentScene !== "level" ? "unmount" : ""}`}>
                     <ButtonBack color={"white"} />
                     <div className="level-list">
-                        <h2>Select a level</h2>
+                        <h2>Select a&nbsp;level</h2>
                         {levels.map((item) => (
                             <Portal
                                 {...item}

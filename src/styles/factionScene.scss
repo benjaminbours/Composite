@@ -1,8 +1,3 @@
-// .faction-container {
-//     display: none;
-//     opacity: 0;
-// }
-
 .factionButton {
     position: absolute;
     top: 50%;
@@ -16,10 +11,17 @@
         color: black;
         left: calc(25% - 45px);
 
-        &:hover {
-            background: black;
-            color: white;
+        @media (max-width: 768px) {
+            top: calc(25% - 40px);
         }
+
+        @media (min-width: 769px) {
+            &:hover {
+                background: black;
+                color: white;
+            }
+        }
+
     }
 
     &.shadow {
@@ -27,21 +29,24 @@
         color: white;
         left: calc(75% - 45px);
 
-        &:hover {
-            background: white;
-            color: black;
+        @media (max-width: 768px) {
+            top: calc(75% - 40px);
+        }
+
+        @media (min-width: 769px) {
+            &:hover {
+                background: white;
+                color: black;
+            }
         }
     }
 
-    // @media screen and (max-width: 768px) {
-    //     transform: translateX(-50%);
-    // }
-
     &:hover {
         transition: all 0.3s;
+    }
 
-        //     background: black;
-        //     color: white;
-   
+    @media (max-width: 768px) {
+       left: 50% !important;
+       transform: translateX(-50%);
     }
 }

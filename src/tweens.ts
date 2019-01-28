@@ -47,42 +47,44 @@ export function shadowToStep(step: string) {
  */
 export function homeOut() {
     const { mainTitle, subtitleHome } = Animation.canvasComponents;
-    const buttonPlay = Animation.components.buttonPlay.current as HTMLButtonElement;
+    const homeInterface = Animation.components.homeInterface.current as HTMLDivElement;
 
-    return TweenLite.to([mainTitle, subtitleHome, buttonPlay], 0.5, {
+    return TweenLite.to([mainTitle, subtitleHome, homeInterface], 0.5, {
         opacity: 0,
         onComplete: () => {
-            if (mainTitle && subtitleHome) {
-                mainTitle.onTransition = false;
-                mainTitle.isMount = false;
+            mainTitle.onTransition = false;
+            mainTitle.isMount = false;
 
-                subtitleHome.onTransition = false;
-                subtitleHome.isMount = false;
-            }
+            subtitleHome.onTransition = false;
+            subtitleHome.isMount = false;
+
+            console.log(mainTitle);
+
+            homeInterface.style.display = "none";
         },
     });
 }
 
 export function homeIn() {
     const { mainTitle, subtitleHome } = Animation.canvasComponents;
-    const buttonPlay = Animation.components.buttonPlay.current as HTMLButtonElement;
+    const homeInterface = Animation.components.homeInterface.current as HTMLDivElement;
 
-    return TweenLite.to([mainTitle, subtitleHome, buttonPlay], 0.5, {
+    return TweenLite.to([mainTitle, subtitleHome, homeInterface], 0.5, {
         opacity: 1,
         onStart: () => {
-            if (mainTitle && subtitleHome) {
-                mainTitle.onTransition = true;
-                subtitleHome.onTransition = true;
-            }
+            mainTitle.onTransition = true;
+            subtitleHome.onTransition = true;
+
+            homeInterface.style.display = "block";
         },
         onComplete: () => {
-            if (mainTitle && subtitleHome) {
-                mainTitle.onTransition = false;
-                mainTitle.isMount = true;
+            mainTitle.onTransition = false;
+            mainTitle.isMount = true;
 
-                subtitleHome.onTransition = false;
-                subtitleHome.isMount = true;
-            }
+            subtitleHome.onTransition = false;
+            subtitleHome.isMount = true;
+
+            console.log(mainTitle);
         },
     });
 }

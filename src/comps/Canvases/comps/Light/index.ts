@@ -125,11 +125,11 @@ export default class Light {
             this.startY = coordinate.y;
 
             this.width = 450;
-            if (window.innerHeight < 700) {
+            if (window.innerHeight < 700 || window.innerWidth <= 768) {
                 this.width = 400;
             }
 
-            if (window.innerWidth > 1700) {
+            if (window.innerWidth > 2000) {
                 this.width = 600;
             }
         }

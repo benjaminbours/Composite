@@ -14,6 +14,8 @@ export default class MainTitle {
     public startX: number = 0;
     public startY: number = 0;
 
+    private iy: number = 0.3;
+
     private width: number = 1370;
     private height: number = 99;
     private ratio: number = this.width / this.height;
@@ -37,26 +39,35 @@ export default class MainTitle {
     }
 
     public resize = (ctx: CanvasRenderingContext2D) => {
-        let positionY = 0.30;
         this.width = ctx.canvas.width * 0.80;
+        this.iy = 0.3;
 
-        if (window.innerHeight < 800) {
-            positionY = 0.18;
+        if (window.innerHeight < 800 || window.innerHeight > 1000) {
+            this.iy = 0.18;
+        }
+
+        if (window.innerWidth <= 580 && window.innerHeight > 750) {
+            this.iy = 0.25;
         }
 
         if (window.innerHeight < 700 || window.innerWidth > 1700) {
             this.width = ctx.canvas.width * 0.75;
         }
 
-        // if (window.innerWidth > 1700) {
-        //     this.width = ctx.canvas.width * 0.75;
-        // }
+        if (window.innerWidth > 1700) {
+            this.width = ctx.canvas.width * 0.75;
+        }
 
         if (window.innerWidth <= 768) {
             this.width = ctx.canvas.width * 0.9;
         }
+
+        // if (window.innerWidth <= 450) {
+        //     this.width = ctx.canvas.width * 0.95;
+        // }
+
         this.startX = (ctx.canvas.width - this.width) / 2;
         this.height = this.width / this.ratio;
-        this.startY = ctx.canvas.height * positionY - this.height / 2;
+        this.startY = ctx.canvas.height * this.iy - this.height / 2;
     }
 }

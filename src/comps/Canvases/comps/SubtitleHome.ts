@@ -3,7 +3,7 @@ import TextDrawer from "./TextDrawer";
 
 const coordinate = {
     x: 0.5,
-    y: 0.5,
+    y: 0.45,
 };
 
 export default class SubtitleHome extends TextDrawer {
@@ -12,23 +12,41 @@ export default class SubtitleHome extends TextDrawer {
     }
 
     public render = (ctx: CanvasRenderingContext2D, color: Side): boolean => {
-        if (ctx.canvas.width <= 768 && color === "black") {
+        if (ctx.canvas.width <= 768) {
             return false;
         }
+
         super.render(ctx, color);
         return true;
     }
 
     public resize = (ctx: CanvasRenderingContext2D) => {
+        super.resize(ctx);
         this.iy = coordinate.y;
 
         if (window.innerHeight < 800) {
             this.iy = 0.4;
         }
 
+        if (window.innerWidth < 580) {
+            this.iy = 0.35;
+        }
+
         if (window.innerHeight < 700) {
-        // if (window.innerHeight < 600 || (window.innerWidth <= 1024 || window.innerHeight < 700)) {
-            this.iy = 0.45;
+            this.iy = 0.35;
+        }
+
+        if (window.innerHeight > 1000) {
+            this.iy = 0.4;
+        }
+
+        if (window.innerWidth <= 400 && window.innerHeight < 700) {
+            this.iy = 0.3;
+            this.fontSize = 20;
+        }
+
+        if (window.innerWidth <= 400) {
+            this.fontSize = 15;
         }
     }
 }

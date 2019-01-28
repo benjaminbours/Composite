@@ -27,7 +27,7 @@ import {
 } from "./tweens";
 
 interface IAnimationComps {
-    buttonPlay: RefObject<HTMLButtonElement>;
+    homeInterface: RefObject<HTMLDivElement>;
     levelInterface: RefObject<HTMLDivElement>;
     factionInterface: RefObject<HTMLDivElement>;
     queueInterface: RefObject<HTMLDivElement>;
@@ -57,7 +57,7 @@ export default class Animation {
     public static queueToFaction: TimelineLite;
 
     public static components: IAnimationComps = {
-        buttonPlay: React.createRef(),
+        homeInterface: React.createRef(),
         levelInterface: React.createRef(),
         factionInterface: React.createRef(),
         queueInterface: React.createRef(),

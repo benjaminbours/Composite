@@ -1,4 +1,4 @@
-import { MainTitle, SubtitleHome, TextDrawer } from "./comps";
+import { MainTitle, SubtitleHome, TextDrawer, TitleFaction } from "./comps";
 
 export let bothComponents;
 
@@ -9,10 +9,11 @@ export function initBothComponents(currentScene: string) {
             title: new SubtitleHome("THINK BOTH WAYS", currentScene === "home"),
         },
         faction: {
-            title: new TextDrawer("SELECT A SIDE", currentScene === "faction", {
-                x: 0.5,
-                y: 0.2,
-            }),
+            title: new TitleFaction("SELECT A SIDE", currentScene === "faction"),
+            // title: new TextDrawer("SELECT A SIDE", currentScene === "faction", {
+            //     x: 0.5,
+            //     y: 0.2,
+            // }),
         },
     };
 }

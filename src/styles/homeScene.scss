@@ -1,0 +1,33 @@
+.home-container h2 {
+    width: 90%;
+
+    @include centerAbsoluteHori;
+
+    top: 40%;
+    color: white;
+    display: none;
+
+    @media (max-width: 768px) {
+        display: block;
+    }
+
+    @media (max-width: 400px) {
+        font-size: 18px;
+    }
+
+    @media (max-width: 400px) and (min-height: 800px) {
+        top: 30%;
+    }
+
+    @media (max-height: 800px) {
+        top: 30%;
+    }
+
+    @media (max-height: 600px) {
+        top: 25%;
+    }
+
+    @media (min-height: 1000px) {
+        top: 30%;
+    }
+}

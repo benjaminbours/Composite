@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Animation from "../../Animation";
 import { Context } from "../../context";
 
 export default class ButtonPlay extends Component {
@@ -10,11 +9,9 @@ export default class ButtonPlay extends Component {
                     handleMouseEnterPlay,
                     handleMouseLeavePlay,
                     handleClickOnPlay,
-                    currentScene,
                 }) => (
                         <button
-                            className={`${currentScene !== "home" ? "unmount" : ""}`}
-                            ref={Animation.components.buttonPlay}
+                            className="buttonCircle"
                             id="buttonPlay"
                             onMouseEnter={handleMouseEnterPlay}
                             onMouseLeave={handleMouseLeavePlay}
