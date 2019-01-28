@@ -1,9 +1,10 @@
-import "./crossBrowser";
+import "./styles/main.scss";
+import "./Menu/crossBrowser";
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
+import MainApp from "./MainApp";
 
 ReactDOM.render(
-    <App />,
+    <MainApp />,
     document.querySelector("#root"),
 );

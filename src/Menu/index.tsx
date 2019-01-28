@@ -3,7 +3,6 @@ import Animation from "./Animation";
 import Canvases from "./comps/Canvases";
 import Interfaces from "./comps/Interfaces";
 import { Context, IState } from "./context";
-import "./styles/main.scss";
 import { initBothComponents } from "./comps/Canvases/bothComponents";
 
 const backOptions = {
@@ -18,12 +17,9 @@ const backOptions = {
     },
 };
 
-const iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+export let app: Menu;
 
-console.log(iOS);
-export let app: App;
-
-export default class App extends Component {
+export default class Menu extends Component {
     public state: IState;
     public onTransition: boolean = false;
     public isMobileDevice: boolean = window.innerWidth <= 768;

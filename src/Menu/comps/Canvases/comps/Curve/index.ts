@@ -1,5 +1,5 @@
 import { Power3, TweenMax } from "gsap";
-import { app } from "../../../../App";
+import { app } from "../../../..";
 import { IWaveOptions } from "../../types";
 import Point from "./Point";
 

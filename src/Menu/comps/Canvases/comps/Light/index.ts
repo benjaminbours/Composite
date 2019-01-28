@@ -1,5 +1,5 @@
 import { Power3, TimelineMax } from "gsap";
-import { app } from "../../../../App";
+import { app } from "../../../..";
 import lightPath from "./light.png";
 import lightHaloPath from "./light_halo.png";
 

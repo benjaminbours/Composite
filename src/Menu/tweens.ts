@@ -1,6 +1,6 @@
 import { Power3, TimelineLite, TweenLite } from "gsap";
 import Animation from "./Animation";
-import { app } from "./App";
+import { app } from ".";
 
 /**
  * Curve

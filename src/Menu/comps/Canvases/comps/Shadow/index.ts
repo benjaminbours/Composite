@@ -1,4 +1,4 @@
-import { app } from "../../../../App";
+import { app } from "../../../..";
 import shadowPath from "./shadow.png";
 
 const shadow = new Image();
