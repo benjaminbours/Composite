@@ -7,27 +7,25 @@ import {
     Mesh,
 } from "three";
 import Inputs from "./Inputs";
+import Collider from "./Collider";
+import { ArrCollidingElem } from "./types";
 
-type PlayerState = "onFloor" | "inside" | "inAIr" | "projected";
+type PlayerState = "onFloor" | "inside" | "inAir" | "projected";
 
 export default class Player extends Object3D {
-    private rays = [
-        new Vector3(1, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(0, 1, 0),
-        new Vector3(0, -1, 0),
-    ];
+    public velocity = {
+        x: 0,
+        y: 0,
+    };
 
-    private state: PlayerState = "onFloor";
+    public range = new Vector3(20, 21, 0);
+    public state: PlayerState = "onFloor";
 
     private velocityTarget = {
         x: 15,
     };
 
-    private velocity = {
-        x: 0,
-        y: 0,
-    };
+    private gravity = 0.6;
 
     private speed = 20;
 
@@ -44,13 +42,20 @@ export default class Player extends Object3D {
         this.add(sphere);
     }
 
-    public render = () => {
+    public render = (obstacles: ArrCollidingElem) => {
         this.delta = this.clock.getDelta() / 2;
         this.deltaInverse = (1 / this.delta) / (60 * 60);
 
+        Collider.detectCollision(this, obstacles);
+        this.handleCollision();
+
+        this.canGoLeft();
+        this.canGoRight();
         if (this.state === "onFloor") {
-            this.canGoLeft();
-            this.canGoRight();
+            this.canJump();
+        }
+        if (this.state === "inAir") {
+            this.useGravity();
         }
 
         this.useVelocity();
@@ -76,17 +81,56 @@ export default class Player extends Object3D {
         }
     }
 
+    private canJump = () => {
+        if (Inputs.jumpIsActive) {
+
+            if (this.state === "onFloor") {
+                this.velocity.y = 20;
+            }
+        }
+    }
+
     private updateVelocity = (target: number) => {
         // TODO: explain what is this calcul
         this.velocity.x += (target - this.velocity.x) / ((this.speed * this.deltaInverse) * 60);
     }
 
-    private jump = () => {
-        //
+    private useVelocity = () => {
+        this.position.x += (this.velocity.x * this.deltaInverse) * 60;
+        this.position.y += (this.velocity.y * this.deltaInverse) * 60;
     }
 
-    private useVelocity = () => {
-        // this.position.y += Player.calcSpeed(this.delta, this.velocity.y);
-        this.position.x += (this.velocity.x * this.deltaInverse) * 60;
+    private useGravity = () => {
+        // set maximal down speed
+        if (this.velocity.y <= -20) {
+            this.velocity.y = -20;
+        } else {
+            this.velocity.y -= (this.gravity * this.delta) * 60;
+        }
+    }
+
+    private handleCollision = () => {
+        if (Collider.nearestObjects.down) {
+            if (this.state !== "onFloor") {
+                this.state = "onFloor";
+            }
+            this.velocity.y = 0;
+            this.position.y = Collider.nearestObjects.down.point.y + 20;
+        } else {
+            if (this.state !== "inAir") {
+                this.state = "inAir";
+            }
+        }
+
+        if (Collider.nearestObjects.right) {
+            this.velocity.x = 0;
+            this.position.x = Collider.nearestObjects.right.point.x - 20;
+        }
+
+        if (Collider.nearestObjects.left) {
+            this.velocity.x = 0;
+            this.position.x = Collider.nearestObjects.left.point.x + 20;
+        }
+        console.log(this.state);
     }
 }

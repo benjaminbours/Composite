@@ -1,23 +1,26 @@
 import * as THREE from "three";
-import { Mesh, IFog, Clock, DirectionalLight, Object3D } from "three";
+import { Mesh, IFog, Clock, DirectionalLight, Object3D, Group } from "three";
 // import SkyShader from "./SkyShader";
 import Inputs from "./Inputs";
 import Player from "./Player";
+import Level from "./Level";
 import CustomCamera from "./CustomCamera";
+import { ArrCollidingElem } from "./types";
 
 export default class App {
     private scene = new THREE.Scene();
     private camera = new CustomCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // private camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     private renderer: THREE.WebGLRenderer;
 
-    private player = new Player();
+    private player: Player;
     // private skyMesh: Mesh;
 
     private clock = new Clock();
     private dirLight = new DirectionalLight(0xFFFFEE, 0.5);
 
     private floor: Mesh;
+
+    private collidingElements: ArrCollidingElem = [];
 
     constructor(canvasDom: HTMLCanvasElement) {
         // inputs
@@ -40,14 +43,6 @@ export default class App {
         const ambient = new THREE.HemisphereLight(0xFFFFFF, 0x000000, .1);
         this.scene.add(ambient);
 
-        // // cube
-        // const geometry = new THREE.BoxGeometry(1, 1, 1);
-        // const material = new THREE.MeshBasicMaterial({
-        //     color: 0x00ff00,
-        // });
-        // this.cube = new THREE.Mesh(geometry, material);
-        // this.scene.add(this.cube);
-
         this.scene.fog = new THREE.FogExp2(0xFFFFFF, 0.0006);
 
         // this.camera.position.z = 5;
@@ -69,12 +64,20 @@ export default class App {
         this.floor.rotation.x = -Math.PI * .5;
         this.floor.position.x = 3.5;
         this.scene.add(this.floor);
+        this.collidingElements.push(this.floor);
+
+        // level
+        const level = new Level();
+        this.scene.add(level);
+        this.collidingElements.push(level);
 
         // player
+        this.player = new Player();
+        this.player.position.set(-50, 0, 0);
+        // this.player.position.set(-8000, 0, 0);
         this.camera.playerPosition.x = this.player.position.x;
         this.camera.playerPosition.y = this.player.position.y;
         this.scene.add(this.player);
-        console.log(this.scene);
     }
 
     public render = () => {
@@ -84,14 +87,11 @@ export default class App {
         // update everything which need an update in the scene
         for (const item of this.scene.children as Object3D | Player[]) {
             if (item.hasOwnProperty("render")) {
-                item.render();
+                item.render(this.collidingElements);
             }
         }
 
         this.camera.setCameraPosition(this.player.position, 10);
-
-        // this.cube.rotation.x += 0.01;
-        // this.cube.rotation.y += 0.01;
 
         // this.skyMesh.position.set(this.camera.position.x, 0, 0);
         // skyShaderMat.setSunAngle(100);
