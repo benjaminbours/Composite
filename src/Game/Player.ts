@@ -6,11 +6,31 @@ import {
     MeshBasicMaterial,
     Mesh,
 } from "three";
+import * as R from "ramda";
 import Inputs from "./Inputs";
 import Collider from "./Collider";
 import { ArrCollidingElem } from "./types";
 
 type PlayerState = "onFloor" | "inside" | "inAir" | "projected";
+
+const MAX_FALL_SPEED = -20;
+const GRAVITY = 30;
+const CLOCK = new Clock();
+let delta = CLOCK.getDelta();
+
+// gravity helpers
+const hasReachedMaxFallSpeed = R.propSatisfies(
+    (y) => y <= MAX_FALL_SPEED,
+    "y",
+);
+const setToMaxFallSpeed = (value) => value.y = MAX_FALL_SPEED;
+const increaseFallSpeed = (velocity) => velocity.y -= GRAVITY * delta;
+
+const applyGravity = R.ifElse(
+    hasReachedMaxFallSpeed,
+    setToMaxFallSpeed,
+    increaseFallSpeed,
+);
 
 export default class Player extends Object3D {
     public velocity = {
@@ -25,13 +45,7 @@ export default class Player extends Object3D {
         x: 15,
     };
 
-    private gravity = 0.6;
-
     private speed = 20;
-
-    private clock = new Clock();
-    private delta = this.clock.getDelta() / 2;
-    private deltaInverse = (1 / this.delta) / (60 * 60);
 
     constructor() {
         super();
@@ -43,8 +57,7 @@ export default class Player extends Object3D {
     }
 
     public render = (obstacles: ArrCollidingElem) => {
-        this.delta = this.clock.getDelta() / 2;
-        this.deltaInverse = (1 / this.delta) / (60 * 60);
+        delta = CLOCK.getDelta();
 
         Collider.detectCollision(this, obstacles);
         this.handleCollision();
@@ -55,7 +68,7 @@ export default class Player extends Object3D {
             this.canJump();
         }
         if (this.state === "inAir") {
-            this.useGravity();
+            applyGravity(this.velocity);
         }
 
         this.useVelocity();
@@ -92,21 +105,12 @@ export default class Player extends Object3D {
 
     private updateVelocity = (target: number) => {
         // TODO: explain what is this calcul
-        this.velocity.x += (target - this.velocity.x) / ((this.speed * this.deltaInverse) * 60);
+        this.velocity.x += (target - this.velocity.x) / ((this.speed * delta) * 60);
     }
 
     private useVelocity = () => {
-        this.position.x += (this.velocity.x * this.deltaInverse) * 60;
-        this.position.y += (this.velocity.y * this.deltaInverse) * 60;
-    }
-
-    private useGravity = () => {
-        // set maximal down speed
-        if (this.velocity.y <= -20) {
-            this.velocity.y = -20;
-        } else {
-            this.velocity.y -= (this.gravity * this.delta) * 60;
-        }
+        this.position.x += (this.velocity.x * delta) * 60;
+        this.position.y += (this.velocity.y * delta) * 60;
     }
 
     private handleCollision = () => {
@@ -131,6 +135,5 @@ export default class Player extends Object3D {
             this.velocity.x = 0;
             this.position.x = Collider.nearestObjects.left.point.x + 20;
         }
-        console.log(this.state);
     }
 }

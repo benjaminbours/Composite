@@ -73,7 +73,7 @@ export default class App {
 
         // player
         this.player = new Player();
-        this.player.position.set(-50, 0, 0);
+        // this.player.position.set(-50, 0, 0);
         // this.player.position.set(-8000, 0, 0);
         this.camera.playerPosition.x = this.player.position.x;
         this.camera.playerPosition.y = this.player.position.y;

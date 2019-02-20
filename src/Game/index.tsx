@@ -2,6 +2,7 @@ import { TweenLite } from "gsap";
 import * as STATS from "stats.js";
 import React, { Component, RefObject } from "react";
 import App from "./App";
+import { startLoading } from "./assetsLoader";
 
 export default class Game extends Component {
     private stats = new STATS.default();
@@ -17,6 +18,7 @@ export default class Game extends Component {
     }
 
     public componentDidMount() {
+        startLoading();
         if (this.canvas.current) {
             this.app = new App(this.canvas.current);
             this.gameLoop();
