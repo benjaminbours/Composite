@@ -1,4 +1,4 @@
-import R from "ramda";
+import * as R from "ramda";
 import { MeshBasicMaterial, Mesh, BoxGeometry, Vector3, Material } from "three";
 
 const gridSize = 250;

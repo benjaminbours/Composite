@@ -1,36 +1,15 @@
 import {
     Object3D,
     Vector3,
-    Clock,
     SphereGeometry,
     MeshBasicMaterial,
     Mesh,
 } from "three";
-import * as R from "ramda";
-import Inputs from "./Inputs";
-import Collider from "./Collider";
+import { detectPlayerCollision, INearestObjects } from "./collider";
 import { ArrCollidingElem } from "./types";
+import { jumpIfPossible, applyGravity, updateDelta, moveLeft, moveRight, useVelocity } from "./movementHelpers";
 
 type PlayerState = "onFloor" | "inside" | "inAir" | "projected";
-
-const MAX_FALL_SPEED = -20;
-const GRAVITY = 30;
-const CLOCK = new Clock();
-let delta = CLOCK.getDelta();
-
-// gravity helpers
-const hasReachedMaxFallSpeed = R.propSatisfies(
-    (y) => y <= MAX_FALL_SPEED,
-    "y",
-);
-const setToMaxFallSpeed = (value) => value.y = MAX_FALL_SPEED;
-const increaseFallSpeed = (velocity) => velocity.y -= GRAVITY * delta;
-
-const applyGravity = R.ifElse(
-    hasReachedMaxFallSpeed,
-    setToMaxFallSpeed,
-    increaseFallSpeed,
-);
 
 export default class Player extends Object3D {
     public velocity = {
@@ -40,12 +19,6 @@ export default class Player extends Object3D {
 
     public range = new Vector3(20, 21, 0);
     public state: PlayerState = "onFloor";
-
-    private velocityTarget = {
-        x: 15,
-    };
-
-    private speed = 20;
 
     constructor() {
         super();
@@ -57,83 +30,45 @@ export default class Player extends Object3D {
     }
 
     public render = (obstacles: ArrCollidingElem) => {
-        delta = CLOCK.getDelta();
+        updateDelta();
+        const nearestObjects = detectPlayerCollision(this, obstacles);
+        this.handleCollision(nearestObjects);
 
-        Collider.detectCollision(this, obstacles);
-        this.handleCollision();
+        // maybe possible to find a way to avoid this duplication
+        moveRight(this.velocity);
+        moveLeft(this.velocity);
 
-        this.canGoLeft();
-        this.canGoRight();
-        if (this.state === "onFloor") {
-            this.canJump();
-        }
+        jumpIfPossible(this);
+
         if (this.state === "inAir") {
             applyGravity(this.velocity);
         }
 
-        this.useVelocity();
+        useVelocity(this);
     }
 
-    private canGoLeft = () => {
-        if (Inputs.leftIsActive) {
-            if (this.velocity.x > -this.velocityTarget.x) {
-                this.updateVelocity(-this.velocityTarget.x);
-            }
-        } else {
-            this.updateVelocity(0);
-        }
-    }
-
-    private canGoRight = () => {
-        if (Inputs.rightIsActive) {
-            if (this.velocity.x < this.velocityTarget.x) {
-                this.updateVelocity(this.velocityTarget.x);
-            }
-        } else {
-            this.updateVelocity(0);
-        }
-    }
-
-    private canJump = () => {
-        if (Inputs.jumpIsActive) {
-
-            if (this.state === "onFloor") {
-                this.velocity.y = 20;
-            }
-        }
-    }
-
-    private updateVelocity = (target: number) => {
-        // TODO: explain what is this calcul
-        this.velocity.x += (target - this.velocity.x) / ((this.speed * delta) * 60);
-    }
-
-    private useVelocity = () => {
-        this.position.x += (this.velocity.x * delta) * 60;
-        this.position.y += (this.velocity.y * delta) * 60;
-    }
-
-    private handleCollision = () => {
-        if (Collider.nearestObjects.down) {
+    // mutate value
+    private handleCollision = (nearestObjects: INearestObjects) => {
+        if (nearestObjects.down) {
             if (this.state !== "onFloor") {
                 this.state = "onFloor";
             }
             this.velocity.y = 0;
-            this.position.y = Collider.nearestObjects.down.point.y + 20;
+            this.position.y = nearestObjects.down.point.y + 20;
         } else {
             if (this.state !== "inAir") {
                 this.state = "inAir";
             }
         }
 
-        if (Collider.nearestObjects.right) {
+        if (nearestObjects.right) {
             this.velocity.x = 0;
-            this.position.x = Collider.nearestObjects.right.point.x - 20;
+            this.position.x = nearestObjects.right.point.x - 20;
         }
 
-        if (Collider.nearestObjects.left) {
+        if (nearestObjects.left) {
             this.velocity.x = 0;
-            this.position.x = Collider.nearestObjects.left.point.x + 20;
+            this.position.x = nearestObjects.left.point.x + 20;
         }
     }
 }
