@@ -1,5 +1,5 @@
 import { putMeshOnGrid, multiplyByGridSize, sizeBox } from "../src/Game/Mesh/Grid";
-import { Vector3, BoxGeometry, MeshBasicMaterial, Mesh, DoubleSide, Box3 } from "three";
+import { Vector3, BoxGeometry, Box3 } from "three";
 
 describe("Grid", () => {
     test("element should have a width of 500", () => {

@@ -1,6 +1,6 @@
 import { Vector3, Raycaster, Intersection } from "three";
-import Player from "./Player";
-import { ArrCollidingElem } from "./types";
+import Player from "../Player";
+import { ArrCollidingElem } from "../types";
 
 export interface INearestObjects {
     right?: Intersection;

@@ -1,7 +1,7 @@
 import { Clock } from "three";
 import * as R from "ramda";
-import Player from "./Player";
-import Inputs from "./Inputs";
+import Player from "../Player";
+import Inputs from "../Inputs";
 
 const MAX_VELOCITY_X = 15;
 const MAX_VELOCITY_Y = -20;
@@ -33,6 +33,7 @@ export const applyGravity = R.ifElse(
 
 // Jump helpers
 const isJumpPossible = (player: Player) => Inputs.jumpIsActive && player.state === "onFloor";
+// const isJumpPossible = (player: Player) => Inputs.jumpIsActive && player.state === "onFloor";
 const setToJumpPower = (player: Player) => player.velocity.y = JUMP_POWER;
 
 export const jumpIfPossible = R.when(

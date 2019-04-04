@@ -18,7 +18,7 @@
     "@types/react-dom": "^16.8.2",
     "@types/react-transition-group": "^2.0.16",
     "@types/stats.js": "^0.17.0",
-    "@types/three": "^0.93.22",
+    "@types/three": "^0.93.30",
     "dat.gui": "^0.7.5",
     "gsap": "^2.1.1",
     "ramda": "^0.26.1",
@@ -26,7 +26,7 @@
     "react-dom": "^16.8.3",
     "react-transition-group": "^2.5.3",
     "stats.js": "^0.17.0",
-    "three": "^0.100.0"
+    "three": "^0.103.0"
   },
   "devDependencies": {
     "@types/jest": "^23.3.14",

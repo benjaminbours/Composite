@@ -18,7 +18,7 @@ export default class Game extends Component {
     }
 
     public componentDidMount() {
-        startLoading();
+        // startLoading();
         if (this.canvas.current) {
             this.app = new App(this.canvas.current);
             this.gameLoop();

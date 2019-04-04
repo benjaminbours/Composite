@@ -28,3 +28,6 @@ deploy-test:
 
 # backup-live-test:
 # 	rsync -avhpzn trainthetrainerbe.insideapp.be:www/ ./backup
+
+get-shaders:
+	rsync -avhpz pi@boursbenjamin.ddns.net:tfeProduction/build/glsl ./

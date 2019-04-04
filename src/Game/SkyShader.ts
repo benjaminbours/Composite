@@ -198,9 +198,9 @@ export default class SkyShader extends THREE.ShaderMaterial {
     }
 
     public render(clock?: any) {
-        if (clock) {
-            this.uniforms.time.value = clock.getElapsedTime();
-        }
+        // if (clock) {
+        //     this.uniforms.time.value = clock.getElapsedTime();
+        // }
         this.uniforms.cameraLookAt.value = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion);
     }
 

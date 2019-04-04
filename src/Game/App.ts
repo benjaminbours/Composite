@@ -1,21 +1,22 @@
 import * as THREE from "three";
 import { Mesh, IFog, Clock, DirectionalLight, Object3D, Group } from "three";
-// import SkyShader from "./SkyShader";
+import SkyShader from "./SkyShader";
 import Inputs from "./Inputs";
 import Player from "./Player";
 import Level from "./Level";
 import CustomCamera from "./CustomCamera";
 import { ArrCollidingElem } from "./types";
+import { MysticPlace } from "./Elements/MysticPlace";
 
 export default class App {
     private scene = new THREE.Scene();
-    private camera = new CustomCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    private camera = new CustomCamera(75, window.innerWidth / window.innerHeight, 0.1, 12000);
     private renderer: THREE.WebGLRenderer;
 
     private player: Player;
-    // private skyMesh: Mesh;
+    private skyMesh: Mesh;
 
-    private clock = new Clock();
+    // private clock = new Clock();
     private dirLight = new DirectionalLight(0xFFFFEE, 0.5);
 
     private floor: Mesh;
@@ -50,9 +51,10 @@ export default class App {
         this.camera.position.y = 10;
 
         // sky
-        // const skyShaterMat = new SkyShader(this.camera);
-        // const skyBox = new THREE.IcosahedronGeometry(3000, 1);
-        // this.skyMesh = new THREE.Mesh(skyBox, skyShaterMat);
+        const skyShaterMat = new SkyShader(this.camera);
+        const skyBox = new THREE.IcosahedronGeometry(3000, 1);
+        this.skyMesh = new THREE.Mesh(skyBox, skyShaterMat);
+        this.skyMesh.rotation.set(0, 1, 0);
         // this.scene.add(this.skyMesh);
 
         // floor
@@ -66,10 +68,14 @@ export default class App {
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
 
+        // mystic place test
+        const mysticPlace = new MysticPlace(150);
+        this.scene.add(mysticPlace);
+
         // level
         const level = new Level();
-        this.scene.add(level);
-        this.collidingElements.push(level);
+        // this.scene.add(level);
+        // this.collidingElements.push(level);
 
         // player
         this.player = new Player();
@@ -81,7 +87,7 @@ export default class App {
     }
 
     public render = () => {
-        // const skyShaderMat = (this.skyMesh.material as SkyShader);
+        const skyShaderMat = (this.skyMesh.material as SkyShader);
         this.renderer.render(this.scene, this.camera);
 
         // update everything which need an update in the scene
@@ -93,17 +99,20 @@ export default class App {
 
         this.camera.setCameraPosition(this.player.position, 10);
 
-        // this.skyMesh.position.set(this.camera.position.x, 0, 0);
-        // skyShaderMat.setSunAngle(100);
+        this.skyMesh.position.set(this.camera.position.x, 0, 0);
+        // (this.skyMesh.material as any).setSunAngle(70);
+        // (this.skyMesh.material as any).render();
+        skyShaderMat.setSunAngle(70);
+        skyShaderMat.render();
         // skyShaderMat.render(this.clock);
-        // (this.scene.fog as IFog).color = skyShaderMat.getFogColor();
+        (this.scene.fog as IFog).color.copy(skyShaderMat.getFogColor());
         // // this.fogColor = (this.skyMesh.material as SkyShader).getFogColor();
-        // skyShaderMat.setTimeOfDay(1, [20, 55], 0, [195, 230], 0);
-        // const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
+        skyShaderMat.setTimeOfDay(0.6, [20, 55], 0, [195, 230], 0);
+        const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
 
-        // this.dirLight.position.copy(lightInfo.position);
-        // this.dirLight.intensity = lightInfo.intensity;
-        // this.dirLight.color.copy(lightInfo.color);
-        // this.dirLight.target.position.set(this.camera.position.x, 0, 0);
+        this.dirLight.position.copy(lightInfo.position);
+        this.dirLight.intensity = lightInfo.intensity;
+        this.dirLight.color.copy(lightInfo.color);
+        this.dirLight.target.position.set(this.camera.position.x, 0, 0);
     }
 }

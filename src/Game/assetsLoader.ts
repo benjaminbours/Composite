@@ -1,4 +1,4 @@
-import { FileLoader, LoadingManager } from "three";
+import { ObjectLoader, FileLoader, LoadingManager } from "three";
 import { IAsset } from "./types";
 
 const assets: IAsset[] = [
@@ -28,7 +28,18 @@ manager.onError = (url) => {
 };
 
 const assetsLoader = new FileLoader(manager);
+// const assetsLoader = new ObjectLoader(manager);
+
+function onAssetLoaded(response): void {
+// function onAssetLoaded(object): void {
+    console.log(arguments);
+    console.log(JSON.parse(response));
+}
 
 export function startLoading() {
-    assetsLoader.load(assets[0].url);
+    console.log("YO");
+    for (const asset of assets) {
+        console.log(asset);
+        assetsLoader.load(asset.url, onAssetLoaded);
+    }
 }

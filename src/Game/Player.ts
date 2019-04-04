@@ -5,9 +5,9 @@ import {
     MeshBasicMaterial,
     Mesh,
 } from "three";
-import { detectPlayerCollision, INearestObjects } from "./collider";
+import { detectPlayerCollision, INearestObjects } from "./Physics/collider";
 import { ArrCollidingElem } from "./types";
-import { jumpIfPossible, applyGravity, updateDelta, moveLeft, moveRight, useVelocity } from "./movementHelpers";
+import { jumpIfPossible, applyGravity, updateDelta, moveLeft, moveRight, useVelocity } from "./Physics/movementHelpers";
 
 type PlayerState = "onFloor" | "inside" | "inAir" | "projected";
 

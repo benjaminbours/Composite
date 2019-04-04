@@ -1,11 +1,11 @@
 import * as R from "ramda";
-import { MeshBasicMaterial, Mesh, BoxGeometry, Vector3, Material } from "three";
+import { MeshBasicMaterial, Mesh, BoxGeometry, Vector3, Material, Object3D } from "three";
 
-const gridSize = 250;
+export const gridSize = 250;
 
 export const multiplyByGridSize = R.multiply(gridSize);
 
-export function putMeshOnGrid(mesh: Mesh, vec: Vector3): void {
+export function putMeshOnGrid(mesh: Mesh | Object3D, vec: Vector3): void {
     const coordinate = vec.multiplyScalar(gridSize);
     console.log(coordinate);
     mesh.position.set(
@@ -15,15 +15,17 @@ export function putMeshOnGrid(mesh: Mesh, vec: Vector3): void {
     );
 }
 
-export function createMeshForGrid(geometry: BoxGeometry, material: Material): Mesh { 
-    geometry.translate(
-        geometry.parameters.width / 2,
-        geometry.parameters.height / 2,
-        geometry.parameters.depth / 2
+// this function center
+export function createMeshForGrid(geo: BoxGeometry, mat: Material): Mesh {
+    geo.translate(
+        geo.parameters.width / 2,
+        geo.parameters.height / 2,
+        geo.parameters.depth / 2,
     );
-    return new Mesh(geometry, material);
+    return new Mesh(geo, mat);
 }
 
+// test purpose
 const geometry = new BoxGeometry(
     multiplyByGridSize(1),
     multiplyByGridSize(1),
