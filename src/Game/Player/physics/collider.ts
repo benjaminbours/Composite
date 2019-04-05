@@ -1,6 +1,6 @@
 import { Vector3, Raycaster, Intersection } from "three";
-import Player from "../Player";
-import { ArrCollidingElem } from "../types";
+import Player from "../index";
+import { CollidingElem } from "../../types";
 
 export interface INearestObjects {
     right?: Intersection;
@@ -18,7 +18,7 @@ const RAYS = {
 
 const RAYCASTER = new Raycaster();
 
-export function detectPlayerCollision(player: Player, obstacles: ArrCollidingElem): INearestObjects {
+export function detectPlayerCollision(player: Player, obstacles: CollidingElem[]): INearestObjects {
     const nearestObjects: INearestObjects = {};
 
     for (const direction in RAYS) {

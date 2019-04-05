@@ -8,15 +8,21 @@ import {
     DoubleSide,
     Points,
     Clock,
-    RectAreaLight,
-    RectAreaLightHelper,
+    BoxGeometry,
+    Mesh,
+    MeshPhongMaterial,
 } from "three";
-import { getRange, degreesToRadians } from "../helpers";
-import { putMeshOnGrid } from "../Mesh/Grid";
+import { getRange } from "../helpers/math";
+import { putMeshOnGrid, gridSize } from "../Mesh/Grid";
+
+import VS from "../glsl/mysticPlace_vs.glsl";
+import FS from "../glsl/mysticPlace_fs.glsl";
 
 const clock = new Clock();
 
 export class MysticPlace extends Object3D {
+    public playerIsOn: boolean = false;
+
     private particles: Points;
 
     constructor(particlesNumber: number, position?: Vector3) {
@@ -33,7 +39,6 @@ export class MysticPlace extends Object3D {
         const particlesSize = new Float32Array(particlesNumber);
 
         for (let i = 0; i < particlesVertices.length; i = i + 3) {
-            // const element = particlesVertices[i];
             const directionRange = new Vector3(60.0, 40.0, 20.0);
             particlesDirection[i] = getRange(-directionRange.x, directionRange.x);
             particlesDirection[i + 1] = getRange(-directionRange.y, directionRange.y);
@@ -64,10 +69,11 @@ export class MysticPlace extends Object3D {
 
         const particlesMat = new ShaderMaterial({
             uniforms: {
-                time: { type: "f", value: 0.0 },
-                opacity: { type: "f", value: 0.5 },
-                powerRotationGlobal: { type: "f", value: getRange(0, 10) },
-                angleGlobal: { type: "f", value: getRange(1, Math.PI) },
+                time: { value: 0.0 },
+                opacity: { value: 0.5 },
+                fast: { value: false },
+                // powerRotationGlobal: { type: "f", value: getRange(0, 10) },
+                // angleGlobal: { type: "f", value: getRange(1, Math.PI) },
             },
             vertexShader: VS,
             fragmentShader: FS,
@@ -77,152 +83,28 @@ export class MysticPlace extends Object3D {
         });
 
         this.particles = new Points(particlesGeo, particlesMat);
+        // this.particles.position.set(0, 30, 0);
         this.add(this.particles);
 
-        const width = 100;
-        const height = 150;
-        const rectLight = new RectAreaLight( 0xffffff, undefined,  width, height );
-        rectLight.intensity = 50000;
-        rectLight.position.set(0, 10, 0);
-        // rectLight.rotation.set(degreesToRadians(90), 0, degreesToRadians(180));
-        this.add(rectLight);
-        // const helper = new RectAreaLightHelper(rectLight);
-        // rectLight.add(helper as any);
+        const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
+        const whiteBlockmat = new MeshPhongMaterial({ color: 0xFFFFFF, side: DoubleSide, specular: 0x000000, shininess: 50, transparent: true });
+
+        const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockmat);
+        this.add(whiteBlock);
 
         putMeshOnGrid(this, new Vector3(1, 0, 0));
+
+        this.particles.frustumCulled = false;
     }
 
     public render = () => {
         const delta = clock.getDelta();
         const particlesMat = this.particles.material as ShaderMaterial;
-        particlesMat.uniforms.time.value += delta * 2;
+        if (this.playerIsOn) {
+            particlesMat.uniforms.time.value += delta * 2;
+            particlesMat.uniforms.fast.value = true;
+        } else {
+            particlesMat.uniforms.time.value += delta;
+        }
     }
 }
-
-const VS = `
-attribute vec3 direction;
-attribute float delay;
-attribute float speed;
-attribute float size;
-attribute float angle;
-attribute vec3 axisRotation;
-uniform float time;
-uniform float uPowerRotationGlobal;
-uniform float uAngleGlobal;
-varying vec4 vLastPosition;
-varying float depth;
-
-float cosh(float x)
-{
-     return exp(x) + exp(-x) / 2.0;
-}
-
-float tanh(float x)
-{
-    return (exp(x) - exp(-x)) / exp(x) + exp(-x);
-}
-//    varying float vSelection;
-mat4 rotationMatrix(vec3 axis, float angle)
-{
-    axis = normalize(axis);
-    float s = sin(angle);
-    float c = cos(angle);
-    float oc = 1.0 - c;
-    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-                0.0,                                0.0,                                0.0,                                1.0);
-}
-void main(){
-
-    const float PI = 3.1415926535897932384626433832795;
-    float speed2 = speed*2.0;
-    float updateTime;
-    updateTime = (time-delay) * 0.05;
-    updateTime = updateTime * speed2;
-    float elapsedTime = updateTime;
-
-    vec3 dPosition = position;
-    //
-    float sz = 15.0 / 2.0;
-    float cxy = 100.0 / 2.0;
-    float cz = cxy * sz;
-
-    float hxy = PI / cxy;
-    float hz = PI / cz;
-
-    float r = 20.0;
-
-    const float index = 1500.0 / 2.0;
-
-    float delay2 = delay * 2.0;
-
-    for (float i = -index; i < index ; i++) {
-
-         float lxy = i * hxy;
-         float lz = i * hz;
-         float rxy = r / cosh(lz);
-         float x = rxy * cos(lxy);
-         float y = rxy * sin(lxy);
-         float timePositionZModifier = mod((time + delay2 * 10.0 * (speed / 10.0)) * 0.1 ,1.0);
-         float z = (r * (tanh(lz)+ 20.0)) * timePositionZModifier;
-
-         dPosition = vec3(x, y, z);
-
-    }
-
-    dPosition = dPosition + direction;
-    // rotation
-    float powerRotation = 10.0;
-    float angleRotation = angle * powerRotation * (updateTime * 1.5);
-    mat4 rotation = rotationMatrix(axisRotation, angleRotation);
-
-    // rotation curve
-    vec3 axisRotationGlobal = vec3(-1.0,0.0,0.0);
-    float powerRotationGlobal = 1.0;
-    float angleRotationGlobal = (PI / 2.0) * powerRotationGlobal;
-    mat4 rotationGlobal = rotationMatrix(axisRotationGlobal, angleRotationGlobal);
-
-    vec4 lastPosition = (vec4(dPosition, 1.0) - vec4(position, 1.0)) * rotation;
-    lastPosition = lastPosition + vec4(position, 1.0);
-    lastPosition = lastPosition * rotationGlobal;
-
-    vec4 mvPosition = modelViewMatrix * lastPosition;
-
-    gl_PointSize =  (size - (lastPosition.y - dPosition.y) / 10.0 ) * ( 300.0 / -mvPosition.z );
-
-    depth = lastPosition.z;
-    vLastPosition = lastPosition;
-    gl_Position = projectionMatrix * mvPosition;
-
-}
-`;
-
-const FS = `
-uniform float opacity;
-varying float depth;
-varying vec4 vLastPosition;
-
-
-void main(){
-    vec4 lastPosition = vLastPosition;
-    vec2 position = gl_PointCoord - vec2(.5,.5);
-    float r = sqrt(dot(position*2.0, position*2.0));
-    float nDepth = abs(depth);
-    r = 1.0-r;
-    if (r > 0.0){
-        gl_FragColor = vec4((vLastPosition.x / 500.0)+1.0,(vLastPosition.y / 500.0)+1.0,(vLastPosition.z / 500.0)+1.0,((r * (2.3 - nDepth/500.0))*opacity));
-
-
-    } else {
-        discard;
-    }
-
-    if(lastPosition.y < 0.0) {
-
-        discard;
-
-    }
-
-}
-`;

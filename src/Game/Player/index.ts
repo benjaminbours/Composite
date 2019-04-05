@@ -5,9 +5,10 @@ import {
     MeshBasicMaterial,
     Mesh,
 } from "three";
-import { detectPlayerCollision, INearestObjects } from "./Physics/collider";
-import { ArrCollidingElem } from "./types";
-import { jumpIfPossible, applyGravity, updateDelta, moveLeft, moveRight, useVelocity } from "./Physics/movementHelpers";
+import { detectPlayerCollision, INearestObjects } from "./physics/collider";
+import { CollidingElem } from "../types";
+import { jumpIfPossible, applyGravity, updateDelta, moveLeft, moveRight, useVelocity } from "./physics/movementHelpers";
+import { MysticPlace } from "../Elements/MysticPlace";
 
 type PlayerState = "onFloor" | "inside" | "inAir" | "projected";
 
@@ -20,6 +21,8 @@ export default class Player extends Object3D {
     public range = new Vector3(20, 21, 0);
     public state: PlayerState = "onFloor";
 
+    private currentMysticPlace: MysticPlace | undefined;
+
     constructor() {
         super();
 
@@ -29,7 +32,7 @@ export default class Player extends Object3D {
         this.add(sphere);
     }
 
-    public render = (obstacles: ArrCollidingElem) => {
+    public render = (obstacles: CollidingElem[]) => {
         updateDelta();
         const nearestObjects = detectPlayerCollision(this, obstacles);
         this.handleCollision(nearestObjects);
@@ -50,6 +53,17 @@ export default class Player extends Object3D {
     // mutate value
     private handleCollision = (nearestObjects: INearestObjects) => {
         if (nearestObjects.down) {
+            const { parent } = nearestObjects.down.object;
+            if (parent instanceof MysticPlace) {
+                this.currentMysticPlace = parent;
+                parent.playerIsOn = true;
+            }
+
+            if (!(parent instanceof MysticPlace) && this.currentMysticPlace) {
+                this.currentMysticPlace.playerIsOn = false;
+                this.currentMysticPlace = undefined;
+            }
+
             if (this.state !== "onFloor") {
                 this.state = "onFloor";
             }

@@ -7,6 +7,8 @@ declare module "*.png" {
   export default value;
 }
 
+declare module "*.glsl";
+
 declare interface CanvasRenderingContext2D {
   renderText(text, x, y, letterSpacing);
 }

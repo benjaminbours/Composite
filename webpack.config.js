@@ -40,6 +40,10 @@ module.exports = {
                 loader: "file-loader?limit=20000&name=images/[name].[ext]",
                 test: /\.(png|jpg|jpeg|svg)$/,
             },
+            {
+                test: /\.glsl$/,
+                loader: 'webpack-glsl-loader',
+            }
             // {
             //     test: /\.(woff|woff2|eot|ttf)$/,
             //     loader: "url-loader?limit=20000&name=fonts/[name].[ext]"

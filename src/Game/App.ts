@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { Mesh, IFog, Clock, DirectionalLight, Object3D, Group } from "three";
 import SkyShader from "./SkyShader";
-import Inputs from "./Inputs";
+import Inputs from "./Player/Inputs";
 import Player from "./Player";
 import Level from "./Level";
 import CustomCamera from "./CustomCamera";
-import { ArrCollidingElem } from "./types";
+import { CollidingElem } from "./types";
 import { MysticPlace } from "./Elements/MysticPlace";
 
 export default class App {
@@ -21,7 +21,8 @@ export default class App {
 
     private floor: Mesh;
 
-    private collidingElements: ArrCollidingElem = [];
+    private collidingElements: CollidingElem[] = [];
+    // private interactElements: InteractElem[] = [];
 
     constructor(canvasDom: HTMLCanvasElement) {
         // inputs
@@ -32,6 +33,10 @@ export default class App {
             canvas: canvasDom,
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.gammaInput = true;
+        this.renderer.gammaOutput = true;
 
         // dirlight
         this.dirLight.castShadow = true;
@@ -60,7 +65,7 @@ export default class App {
         // floor
         this.floor = new THREE.Mesh(
             new THREE.CircleGeometry(10000, 10),
-            new THREE.MeshPhongMaterial({ color: 0x00ff00, side: THREE.DoubleSide, specular: 0x000000, shininess: 0, transparent: true }),
+            new THREE.MeshPhongMaterial({ color: 0x000000, side: THREE.DoubleSide, specular: 0x000000, shininess: 0, transparent: true }),
         );
         this.floor.receiveShadow = true;
         this.floor.rotation.x = -Math.PI * .5;
@@ -71,9 +76,10 @@ export default class App {
         // mystic place test
         const mysticPlace = new MysticPlace(150);
         this.scene.add(mysticPlace);
+        this.collidingElements.push(mysticPlace);
 
         // level
-        const level = new Level();
+        // const level = new Level();
         // this.scene.add(level);
         // this.collidingElements.push(level);
 
@@ -84,6 +90,7 @@ export default class App {
         this.camera.playerPosition.x = this.player.position.x;
         this.camera.playerPosition.y = this.player.position.y;
         this.scene.add(this.player);
+        console.log(this.scene.children);
     }
 
     public render = () => {
@@ -91,9 +98,17 @@ export default class App {
         this.renderer.render(this.scene, this.camera);
 
         // update everything which need an update in the scene
-        for (const item of this.scene.children as Object3D | Player[]) {
+        for (const item of this.scene.children as any) {
             if (item.hasOwnProperty("render")) {
-                item.render(this.collidingElements);
+
+                switch (true) {
+                    case item instanceof Player:
+                        item.render(this.collidingElements);
+                        break;
+                    default:
+                        item.render();
+                        break;
+                }
             }
         }
 

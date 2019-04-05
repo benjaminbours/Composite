@@ -1,12 +1,12 @@
 import { Clock } from "three";
 import * as R from "ramda";
-import Player from "../Player";
+import Player from "../index";
 import Inputs from "../Inputs";
 
 const MAX_VELOCITY_X = 15;
 const MAX_VELOCITY_Y = -20;
-const JUMP_POWER = 20;
-const GRAVITY = 30;
+const JUMP_POWER = 15;
+const GRAVITY = 20;
 const SPEED = 20; // less is faster
 const CLOCK = new Clock();
 export let delta = CLOCK.getDelta();
