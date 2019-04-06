@@ -4,7 +4,8 @@ import Player from "../index";
 import Inputs from "../Inputs";
 
 const MAX_VELOCITY_X = 15;
-const MAX_VELOCITY_Y = -20;
+const MAX_FALL_SPEED = 20;
+const MAX_ASCEND_SPEED = 10;
 const JUMP_POWER = 15;
 const GRAVITY = 20;
 const SPEED = 20; // less is faster
@@ -19,10 +20,12 @@ export const useVelocity = (player: Player) => {
 
 // Gravity helpers
 const hasReachedMaxFallSpeed = R.propSatisfies(
-    (y) => y <= MAX_VELOCITY_Y,
+    (y: number) => {
+        return y <= -MAX_FALL_SPEED;
+    },
     "y",
 );
-const setToMaxFallSpeed = (velocity) => velocity.y = MAX_VELOCITY_Y;
+const setToMaxFallSpeed = (velocity) => velocity.y = -MAX_FALL_SPEED;
 const increaseFallSpeed = (velocity) => velocity.y -= GRAVITY * delta;
 
 export const applyGravity = R.ifElse(
@@ -30,6 +33,29 @@ export const applyGravity = R.ifElse(
     setToMaxFallSpeed,
     increaseFallSpeed,
 );
+
+const hasReachedMaxAscendSpeed = R.propSatisfies(
+    (y: number) => {
+        // console.log(y >= MAX_FALL_SPEED);
+        return y >= MAX_ASCEND_SPEED;
+    },
+    "y",
+);
+const setToMaxAscendSpeed = (velocity) => velocity.y = MAX_ASCEND_SPEED;
+const increaseAscendSpeed = (velocity) => velocity.y += GRAVITY * delta;
+
+// TODO: Inclure la distance par rapport au sol dans le calcule de la poussée vers le haut
+export const applyAscension = R.ifElse(
+    hasReachedMaxAscendSpeed,
+    setToMaxAscendSpeed,
+    increaseAscendSpeed,
+);
+
+// export function applyAscension(velocity, distanceFromFloor: number) {
+//     // if (velocity.x >=) {
+
+//     // }
+// }
 
 // Jump helpers
 const isJumpPossible = (player: Player) => Inputs.jumpIsActive && player.state === "onFloor";

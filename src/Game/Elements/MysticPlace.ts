@@ -17,11 +17,14 @@ import { putMeshOnGrid, gridSize } from "../Mesh/Grid";
 
 import VS from "../glsl/mysticPlace_vs.glsl";
 import FS from "../glsl/mysticPlace_fs.glsl";
+import { TweenLite } from "gsap";
 
 const clock = new Clock();
 
 export class MysticPlace extends Object3D {
     public playerIsOn: boolean = false;
+    private isFast: boolean = false;
+    private speedModifier: number = 0.5;
 
     private particles: Points;
 
@@ -71,7 +74,7 @@ export class MysticPlace extends Object3D {
             uniforms: {
                 time: { value: 0.0 },
                 opacity: { value: 0.5 },
-                fast: { value: false },
+                // fast: { value: false },
                 // powerRotationGlobal: { type: "f", value: getRange(0, 10) },
                 // angleGlobal: { type: "f", value: getRange(1, Math.PI) },
             },
@@ -100,11 +103,19 @@ export class MysticPlace extends Object3D {
     public render = () => {
         const delta = clock.getDelta();
         const particlesMat = this.particles.material as ShaderMaterial;
-        if (this.playerIsOn) {
-            particlesMat.uniforms.time.value += delta * 2;
-            particlesMat.uniforms.fast.value = true;
-        } else {
-            particlesMat.uniforms.time.value += delta;
+        if (this.playerIsOn && !this.isFast) {
+            this.isFast = true;
+            TweenLite.to(this, 2, {
+                speedModifier: 2,
+            });
         }
+
+        if (!this.playerIsOn && this.isFast) {
+            this.isFast = false;
+            TweenLite.to(this, 2, {
+                speedModifier: 0.5,
+            });
+        }
+        particlesMat.uniforms.time.value += delta * this.speedModifier;
     }
 }

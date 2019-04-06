@@ -5,7 +5,6 @@ attribute float size;
 attribute float angle;
 attribute vec3 axisRotation;
 uniform float time;
-uniform bool fast;
 varying vec4 vLastPosition;
 varying float depth;
 
@@ -77,10 +76,10 @@ void main()
     vec4 mvPosition=modelViewMatrix*lastPosition;
     
     // gl_PointSize=10.;
-    // gl_PointSize=(size-(lastPosition.y-dPosition.y)/10.)*(300./-mvPosition.z);
+    gl_PointSize=(size-(lastPosition.y-dPosition.y)/100.)*(300./-mvPosition.z);
     // float test = 20.;
     // gl_PointSize=size-lastPosition.y/20.;
-    gl_PointSize=(size)*(300./-mvPosition.z);
+    // gl_PointSize=(size)*(300./-mvPosition.z);
     
     depth=lastPosition.z;
     vLastPosition=lastPosition;

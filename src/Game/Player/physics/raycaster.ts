@@ -18,7 +18,7 @@ const RAYS = {
 
 const RAYCASTER = new Raycaster();
 
-export function detectPlayerCollision(player: Player, obstacles: CollidingElem[]): INearestObjects {
+export function getNearestObjects(player: Player, obstacles: CollidingElem[]): INearestObjects {
     const nearestObjects: INearestObjects = {};
 
     for (const direction in RAYS) {
@@ -32,17 +32,7 @@ export function detectPlayerCollision(player: Player, obstacles: CollidingElem[]
             continue;
         }
 
-        if (direction === "down" && player.position.y + player.velocity.y < player.range.y + nearestObject.point.y) {
-            nearestObjects[direction] = nearestObject;
-        }
-
-        if (direction === "right" && player.position.x + player.velocity.x + player.range.x > nearestObject.point.x) {
-            nearestObjects[direction] = nearestObject;
-        }
-
-        if (direction === "left" && player.position.x + player.velocity.x < player.range.x + nearestObject.point.x) {
-            nearestObjects[direction] = nearestObject;
-        }
+        nearestObjects[direction] = nearestObject;
     }
 
     return nearestObjects;
