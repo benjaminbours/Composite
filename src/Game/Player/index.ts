@@ -7,7 +7,7 @@ import {
 } from "three";
 import { getNearestObjects, INearestObjects } from "./physics/raycaster";
 import { CollidingElem } from "../types";
-import { jumpIfPossible, applyGravity, applyAscension, updateDelta, moveLeft, moveRight, useVelocity } from "./physics/movementHelpers";
+import { jumpIfPossible, applyGravity, applyAscension, updateDelta, moveLeft, moveRight, useVelocity, delta } from "./physics/movementHelpers";
 import { MysticPlace } from "../Elements/MysticPlace";
 
 // TODO: Can optimize with an enum
@@ -19,7 +19,7 @@ export default class Player extends Object3D {
         y: 0,
     };
 
-    public range = new Vector3(20, 21, 0);
+    public range = new Vector3(20, 20, 0);
     public state: PlayerState = "onFloor";
 
     private currentMysticPlace: MysticPlace | undefined;
@@ -51,10 +51,11 @@ export default class Player extends Object3D {
 
         if (this.state === "ascend") {
             applyAscension(this.velocity);
+            // applyAscension(this.velocity, this.distanceFromFloor);
         }
 
         useVelocity(this);
-        console.log(this.distanceFromFloor);
+        // console.log(this.state);
     }
 
     // mutate value
@@ -79,8 +80,8 @@ export default class Player extends Object3D {
                     }
                 }
             } else { // when the player is not toucher the floor
-                if (parent instanceof MysticPlace) {
-                // if (parent instanceof MysticPlace && nearestObjects.down.distance <= 600) {
+                // if (parent instanceof MysticPlace) {
+                if (parent instanceof MysticPlace && nearestObjects.down.distance <= 600) {
                     this.currentMysticPlace = parent;
                     parent.playerIsOn = true;
                     this.state = "ascend";

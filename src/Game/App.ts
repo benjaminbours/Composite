@@ -74,7 +74,7 @@ export default class App {
         this.collidingElements.push(this.floor);
 
         // mystic place test
-        const mysticPlace = new MysticPlace(150);
+        const mysticPlace = new MysticPlace(200);
         this.scene.add(mysticPlace);
         this.collidingElements.push(mysticPlace);
 

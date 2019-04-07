@@ -52,7 +52,7 @@ export class MysticPlace extends Object3D {
             particlesVertices[i + 2] = 0.0;
 
             particlesDelay[i / 3] = getRange(0, 50);
-            particlesSpeed[i / 3] = getRange(0.05, 0.2);
+            particlesSpeed[i / 3] = getRange(0.05, 0.5);
 
             particlesAxisRotation[i] = 0; // x
             particlesAxisRotation[i + 1] = 0; // y
@@ -74,9 +74,6 @@ export class MysticPlace extends Object3D {
             uniforms: {
                 time: { value: 0.0 },
                 opacity: { value: 0.5 },
-                // fast: { value: false },
-                // powerRotationGlobal: { type: "f", value: getRange(0, 10) },
-                // angleGlobal: { type: "f", value: getRange(1, Math.PI) },
             },
             vertexShader: VS,
             fragmentShader: FS,
@@ -106,14 +103,14 @@ export class MysticPlace extends Object3D {
         if (this.playerIsOn && !this.isFast) {
             this.isFast = true;
             TweenLite.to(this, 2, {
-                speedModifier: 2,
+                speedModifier: 2.5,
             });
         }
 
         if (!this.playerIsOn && this.isFast) {
             this.isFast = false;
             TweenLite.to(this, 2, {
-                speedModifier: 0.5,
+                speedModifier: 0.2,
             });
         }
         particlesMat.uniforms.time.value += delta * this.speedModifier;

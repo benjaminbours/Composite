@@ -21,12 +21,16 @@ export const useVelocity = (player: Player) => {
 // Gravity helpers
 const hasReachedMaxFallSpeed = R.propSatisfies(
     (y: number) => {
+        // console.log(y <= -MAX_FALL_SPEED);
         return y <= -MAX_FALL_SPEED;
     },
     "y",
 );
 const setToMaxFallSpeed = (velocity) => velocity.y = -MAX_FALL_SPEED;
 const increaseFallSpeed = (velocity) => velocity.y -= GRAVITY * delta;
+
+const updateVelocityX = (target: number) => (velocity) => velocity.x += (target - velocity.x) / ((SPEED * delta) * 60);
+// const updateVelocityY = (target: number) => (velocity) => velocity.y += (target - velocity.y) / ((SPEED * delta) * 60);
 
 export const applyGravity = R.ifElse(
     hasReachedMaxFallSpeed,
@@ -42,7 +46,13 @@ const hasReachedMaxAscendSpeed = R.propSatisfies(
     "y",
 );
 const setToMaxAscendSpeed = (velocity) => velocity.y = MAX_ASCEND_SPEED;
-const increaseAscendSpeed = (velocity) => velocity.y += GRAVITY * delta;
+const increaseAscendSpeed = (velocity) => {
+    // console.log(delta * GRAVITY);
+    // return velocity.y += GRAVITY * delta;
+    // console.log(velocity.y += GRAVITY / 1000);
+    return velocity.y += GRAVITY / 1000;
+    // return velocity.y += GRAVITY * (delta < 0.03 ? 0.03 : delta);
+};
 
 // TODO: Inclure la distance par rapport au sol dans le calcule de la poussée vers le haut
 export const applyAscension = R.ifElse(
@@ -51,7 +61,9 @@ export const applyAscension = R.ifElse(
     increaseAscendSpeed,
 );
 
+// const maxAscensionDistance = 600;
 // export function applyAscension(velocity, distanceFromFloor: number) {
+//     // La velocity.y doit être égal à la distanceFromFloor divisé par...
 //     // if (velocity.x >=) {
 
 //     // }
@@ -71,16 +83,14 @@ export const jumpIfPossible = R.when(
 const hasReachedMaxLeftSpeed = (velocity) => Inputs.leftIsActive && velocity.x > -MAX_VELOCITY_X;
 const hasReachedMaxRightSpeed = (velocity) => Inputs.rightIsActive && velocity.x < MAX_VELOCITY_X;
 
-const updateVelocity = (target: number) => (velocity) => velocity.x += (target - velocity.x) / ((SPEED * delta) * 60);
-
 export const moveLeft = R.ifElse(
     hasReachedMaxLeftSpeed,
-    updateVelocity(-MAX_VELOCITY_X),
-    updateVelocity(0),
+    updateVelocityX(-MAX_VELOCITY_X),
+    updateVelocityX(0),
 );
 
 export const moveRight = R.ifElse(
     hasReachedMaxRightSpeed,
-    updateVelocity(MAX_VELOCITY_X),
-    updateVelocity(0),
+    updateVelocityX(MAX_VELOCITY_X),
+    updateVelocityX(0),
 );
