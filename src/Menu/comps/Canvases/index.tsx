@@ -1,4 +1,4 @@
-import { TweenLite } from "gsap";
+import { gsap } from "gsap";
 import React, { Component, RefObject } from "react";
 import * as STATS from "stats.js";
 import { runMethodForAllBothComponents } from "./bothComponents";
@@ -36,7 +36,7 @@ export default class Canvases extends Component {
             Canvases.layers.black.ctx,
         ]);
         Mouse.init();
-        TweenLite.ticker.addEventListener("tick", this.canvasLoop);
+        gsap.ticker.add(this.canvasLoop);
     }
 
     public render() {

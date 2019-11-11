@@ -1,4 +1,4 @@
-import { Power3, TimelineLite, TweenLite } from "gsap";
+import { TimelineLite, TweenLite } from "gsap";
 import Animation from "./Animation";
 import { app } from ".";
 
@@ -58,8 +58,6 @@ export function homeOut() {
             subtitleHome.onTransition = false;
             subtitleHome.isMount = false;
 
-            console.log(mainTitle);
-
             homeInterface.style.display = "none";
         },
     });
@@ -83,8 +81,6 @@ export function homeIn() {
 
             subtitleHome.onTransition = false;
             subtitleHome.isMount = true;
-
-            console.log(mainTitle);
         },
     });
 }

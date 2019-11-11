@@ -1,4 +1,4 @@
-import { Power3, TimelineMax } from "gsap";
+import { TimelineMax, GSAPStatic } from "gsap";
 import { app } from "../../../..";
 import lightPath from "./light.png";
 import lightHaloPath from "./light_halo.png";
@@ -95,7 +95,7 @@ export default class Light {
     private width: number = 450;
     private img: HTMLImageElement;
 
-    private pulsesFastAnimation: TimelineMax[] = [];
+    private pulsesFastAnimation: GSAPStatic.Timeline[] = [];
 
     private readonly ctx: CanvasRenderingContext2D;
 
@@ -153,18 +153,18 @@ export default class Light {
     private createAnimation(pulseOptions: IPulseOptions) {
         const animation = new TimelineMax({
             delay: pulseOptions.delay,
-            onComplete(this: TimelineMax) {
+            onComplete(this: GSAPStatic.Timeline) {
                 this.restart();
             },
         });
         animation.to(pulseOptions, pulseOptions.pulsingTime / 2, {
             opacity: 1,
-            ease: Power3.easeOut,
+            ease: "power3.easeOut",
         });
 
         animation.fromTo(pulseOptions, pulseOptions.pulsingTime / 2, {
             scale: pulseOptions.startScale,
-            ease: Power3.easeOut,
+            ease: "power3.easeOut",
         }, {
                 opacity: 0,
                 scale: pulseOptions.maxScale,

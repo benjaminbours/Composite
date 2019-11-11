@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-// import Menu from "./Menu";
+import Menu from "./Menu";
 import Game from "./Game";
 
 export default class MainApp extends Component {
@@ -9,8 +9,8 @@ export default class MainApp extends Component {
 
     public render() {
         return (
-            <Game />
-            // <Menu />
+            // <Game />
+            <Menu />
         );
     }
 }

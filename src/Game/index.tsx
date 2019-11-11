@@ -1,4 +1,4 @@
-import { TweenLite } from "gsap";
+import { gsap } from "gsap";
 import * as STATS from "stats.js";
 import React, { Component, RefObject } from "react";
 import App from "./App";
@@ -11,10 +11,9 @@ export default class Game extends Component {
 
     constructor(props: {}) {
         super(props);
-
         this.stats.showPanel(1);
         document.body.appendChild(this.stats.dom);
-        TweenLite.ticker.addEventListener("tick", this.gameLoop);
+        gsap.ticker.add(this.gameLoop);
     }
 
     public componentDidMount() {
