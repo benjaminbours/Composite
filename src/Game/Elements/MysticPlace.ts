@@ -11,13 +11,13 @@ import {
     BoxGeometry,
     Mesh,
     MeshPhongMaterial,
-} from "three";
-import { getRange } from "../helpers/math";
-import { putMeshOnGrid, gridSize } from "../Mesh/Grid";
+} from 'three';
+import { getRange } from '../helpers/math';
+import { putMeshOnGrid, gridSize } from '../Mesh/Grid';
 
-import VS from "../glsl/mysticPlace_vs.glsl";
-import FS from "../glsl/mysticPlace_fs.glsl";
-import { TweenLite } from "gsap";
+import VS from '../glsl/mysticPlace_vs.glsl';
+import FS from '../glsl/mysticPlace_fs.glsl';
+import { gsap } from 'gsap';
 
 const clock = new Clock();
 
@@ -43,9 +43,18 @@ export class MysticPlace extends Object3D {
 
         for (let i = 0; i < particlesVertices.length; i = i + 3) {
             const directionRange = new Vector3(60.0, 40.0, 20.0);
-            particlesDirection[i] = getRange(-directionRange.x, directionRange.x);
-            particlesDirection[i + 1] = getRange(-directionRange.y, directionRange.y);
-            particlesDirection[i + 2] = getRange(-directionRange.z, directionRange.z);
+            particlesDirection[i] = getRange(
+                -directionRange.x,
+                directionRange.x,
+            );
+            particlesDirection[i + 1] = getRange(
+                -directionRange.y,
+                directionRange.y,
+            );
+            particlesDirection[i + 2] = getRange(
+                -directionRange.z,
+                directionRange.z,
+            );
 
             particlesVertices[i] = 0.0;
             particlesVertices[i + 1] = 0.0;
@@ -62,13 +71,34 @@ export class MysticPlace extends Object3D {
             particlesSize[i / 3] = getRange(5.0, 15.0);
         }
 
-        particlesGeo.addAttribute("position", new BufferAttribute(particlesVertices, 3));
-        particlesGeo.addAttribute("direction", new BufferAttribute(particlesDirection, 3));
-        particlesGeo.addAttribute("delay", new BufferAttribute(particlesDelay, 1));
-        particlesGeo.addAttribute("speed", new BufferAttribute(particlesSpeed, 1));
-        particlesGeo.addAttribute("axisRotation", new BufferAttribute(particlesAxisRotation, 3));
-        particlesGeo.addAttribute("angle", new BufferAttribute(particlesAngle, 1));
-        particlesGeo.addAttribute("size", new BufferAttribute(particlesSize, 1));
+        particlesGeo.setAttribute(
+            'position',
+            new BufferAttribute(particlesVertices, 3),
+        );
+        particlesGeo.setAttribute(
+            'direction',
+            new BufferAttribute(particlesDirection, 3),
+        );
+        particlesGeo.setAttribute(
+            'delay',
+            new BufferAttribute(particlesDelay, 1),
+        );
+        particlesGeo.setAttribute(
+            'speed',
+            new BufferAttribute(particlesSpeed, 1),
+        );
+        particlesGeo.setAttribute(
+            'axisRotation',
+            new BufferAttribute(particlesAxisRotation, 3),
+        );
+        particlesGeo.setAttribute(
+            'angle',
+            new BufferAttribute(particlesAngle, 1),
+        );
+        particlesGeo.setAttribute(
+            'size',
+            new BufferAttribute(particlesSize, 1),
+        );
 
         const particlesMat = new ShaderMaterial({
             uniforms: {
@@ -87,7 +117,13 @@ export class MysticPlace extends Object3D {
         this.add(this.particles);
 
         const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
-        const whiteBlockmat = new MeshPhongMaterial({ color: 0xFFFFFF, side: DoubleSide, specular: 0x000000, shininess: 50, transparent: true });
+        const whiteBlockmat = new MeshPhongMaterial({
+            color: 0xffffff,
+            side: DoubleSide,
+            specular: 0x000000,
+            shininess: 50,
+            transparent: true,
+        });
 
         const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockmat);
         this.add(whiteBlock);
@@ -102,17 +138,19 @@ export class MysticPlace extends Object3D {
         const particlesMat = this.particles.material as ShaderMaterial;
         if (this.playerIsOn && !this.isFast) {
             this.isFast = true;
-            TweenLite.to(this, 2, {
+            gsap.to(this, {
+                duration: 2,
                 speedModifier: 2.5,
             });
         }
 
         if (!this.playerIsOn && this.isFast) {
             this.isFast = false;
-            TweenLite.to(this, 2, {
+            gsap.to(this, {
+                duration: 2,
                 speedModifier: 0.2,
             });
         }
         particlesMat.uniforms.time.value += delta * this.speedModifier;
-    }
+    };
 }

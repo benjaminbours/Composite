@@ -1,23 +1,28 @@
-import * as THREE from "three";
-import { Mesh, IFog, Clock, DirectionalLight, Object3D, Group } from "three";
-import SkyShader from "./SkyShader";
-import Inputs from "./Player/Inputs";
-import Player from "./Player";
-import Level from "./Level";
-import CustomCamera from "./CustomCamera";
-import { CollidingElem } from "./types";
-import { MysticPlace } from "./Elements/MysticPlace";
+import * as THREE from 'three';
+import { Mesh, Fog, Clock, DirectionalLight, Object3D, Group } from 'three';
+import SkyShader from './SkyShader';
+import Inputs from './Player/Inputs';
+import Player from './Player';
+import Level from './Level';
+import CustomCamera from './CustomCamera';
+import { CollidingElem } from './types';
+import { MysticPlace } from './Elements/MysticPlace';
 
 export default class App {
     private scene = new THREE.Scene();
-    private camera = new CustomCamera(75, window.innerWidth / window.innerHeight, 0.1, 12000);
+    private camera = new CustomCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        12000,
+    );
     private renderer: THREE.WebGLRenderer;
 
     private player: Player;
     private skyMesh: Mesh;
 
     // private clock = new Clock();
-    private dirLight = new DirectionalLight(0xFFFFEE, 0.5);
+    private dirLight = new DirectionalLight(0xffffee, 0.5);
 
     private floor: Mesh;
 
@@ -35,8 +40,8 @@ export default class App {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this.renderer.gammaInput = true;
-        this.renderer.gammaOutput = true;
+        // this.renderer.gammaInput = true;
+        // this.renderer.gammaOutput = true;
 
         // dirlight
         this.dirLight.castShadow = true;
@@ -46,10 +51,10 @@ export default class App {
         this.scene.add(this.dirLight);
 
         // hemisphere light
-        const ambient = new THREE.HemisphereLight(0xFFFFFF, 0x000000, .1);
+        const ambient = new THREE.HemisphereLight(0xffffff, 0x000000, 0.1);
         this.scene.add(ambient);
 
-        this.scene.fog = new THREE.FogExp2(0xFFFFFF, 0.0006);
+        this.scene.fog = new THREE.FogExp2(0xffffff, 0.0006);
 
         // this.camera.position.z = 5;
         this.camera.position.z = 300;
@@ -65,10 +70,16 @@ export default class App {
         // floor
         this.floor = new THREE.Mesh(
             new THREE.CircleGeometry(10000, 10),
-            new THREE.MeshPhongMaterial({ color: 0x000000, side: THREE.DoubleSide, specular: 0x000000, shininess: 0, transparent: true }),
+            new THREE.MeshPhongMaterial({
+                color: 0x000000,
+                side: THREE.DoubleSide,
+                specular: 0x000000,
+                shininess: 0,
+                transparent: true,
+            }),
         );
         this.floor.receiveShadow = true;
-        this.floor.rotation.x = -Math.PI * .5;
+        this.floor.rotation.x = -Math.PI * 0.5;
         this.floor.position.x = 3.5;
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
@@ -94,13 +105,12 @@ export default class App {
     }
 
     public render = () => {
-        const skyShaderMat = (this.skyMesh.material as SkyShader);
+        const skyShaderMat = this.skyMesh.material as SkyShader;
         this.renderer.render(this.scene, this.camera);
 
         // update everything which need an update in the scene
         for (const item of this.scene.children as any) {
-            if (item.hasOwnProperty("render")) {
-
+            if (item.hasOwnProperty('render')) {
                 switch (true) {
                     case item instanceof Player:
                         item.render(this.collidingElements);
@@ -120,7 +130,7 @@ export default class App {
         skyShaderMat.setSunAngle(70);
         skyShaderMat.render();
         // skyShaderMat.render(this.clock);
-        (this.scene.fog as IFog).color.copy(skyShaderMat.getFogColor());
+        (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
         // // this.fogColor = (this.skyMesh.material as SkyShader).getFogColor();
         skyShaderMat.setTimeOfDay(0.6, [20, 55], 0, [195, 230], 0);
         const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
@@ -129,5 +139,5 @@ export default class App {
         this.dirLight.intensity = lightInfo.intensity;
         this.dirLight.color.copy(lightInfo.color);
         this.dirLight.target.position.set(this.camera.position.x, 0, 0);
-    }
+    };
 }

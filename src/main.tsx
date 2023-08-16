@@ -1,10 +1,8 @@
-import "./styles/main.scss";
-import "./Menu/crossBrowser";
-import React from "react";
-import ReactDOM from "react-dom";
-import MainApp from "./MainApp";
+import './styles/main.scss';
+import './Menu/crossBrowser';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import MainApp from './MainApp';
 
-ReactDOM.render(
-    <MainApp />,
-    document.querySelector("#root"),
-);
+const root = createRoot(document.querySelector('#root')!);
+root.render(<MainApp />);

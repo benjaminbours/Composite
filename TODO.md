@@ -1,0 +1,1 @@
+- Fix bug about pulse fast animation for shadow in Menu

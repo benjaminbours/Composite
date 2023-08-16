@@ -1,49 +1,56 @@
-const path = require("path");
+const path = require('path');
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const ouputPath = path.resolve(__dirname, "./dist/");
+const ouputPath = path.resolve(__dirname, './dist/');
 
 module.exports = {
-    context: path.resolve(__dirname, "./src"),
-    devtool: "source-map",
+    context: path.resolve(__dirname, './src'),
+    mode: 'development',
+    devtool: 'source-map',
     entry: {
-        "app": "./main.tsx",
+        app: './main.tsx',
     },
     module: {
         rules: [
             {
                 exclude: [/node_modules/],
-                loader: "ts-loader",
+                loader: 'ts-loader',
                 test: /\.(ts|tsx|js|jsx)$/,
             },
             {
                 test: /\.(sass|scss)$/,
                 use: [
-                    "style-loader",
+                    // 'style-loader',
                     MiniCssExtractPlugin.loader,
-                    { loader: "css-loader", options: { importLoaders: 1 } },
-                    {
-                        loader: "postcss-loader",
-                        options: {
-                            ident: "postcss",
-                            plugins: (loader) => [
-                                require("autoprefixer"),
-                                require("cssnano"),
-                            ],
-                        },
-                    },
-                    "sass-loader",
+                    'css-loader',
+                    // {
+                    //     loader: 'postcss-loader',
+                    //     options: {
+                    //         postcssOptions: {
+                    //             plugins: (loader) => [
+                    //                 require('autoprefixer'),
+                    //                 require('cssnano'),
+                    //             ],
+                    //             ident: 'postcss',
+                    //         },
+                    //     },
+                    // },
+                    'sass-loader',
                 ],
             },
             {
-                loader: "file-loader?limit=20000&name=images/[name].[ext]",
+                loader: 'file-loader',
+                options: {
+                    limit: 20_000,
+                    name: 'images/[name].[ext]',
+                },
                 test: /\.(png|jpg|jpeg|svg)$/,
             },
             {
                 test: /\.glsl$/,
                 loader: 'webpack-glsl-loader',
-            }
+            },
             // {
             //     test: /\.(woff|woff2|eot|ttf)$/,
             //     loader: "url-loader?limit=20000&name=fonts/[name].[ext]"
@@ -51,21 +58,25 @@ module.exports = {
         ],
     },
     output: {
-        chunkFilename: "[name].chunk.js",
-        filename: "[name].bundle.js",
+        chunkFilename: '[name].chunk.js',
+        filename: '[name].bundle.js',
         path: ouputPath,
-        publicPath: "dist/",
+        publicPath: 'dist/',
     },
     plugins: [
         // new BundleAnalyzerPlugin(),
         new MiniCssExtractPlugin({
-            filename: "stylesheets/style.css",
+            filename: 'stylesheets/style.css',
         }),
     ],
     resolve: {
-        extensions: [".ts", ".tsx", ".js", ".json"],
+        extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     devServer: {
-        host: '0.0.0.0',  
+        host: '0.0.0.0',
+        static: {
+            directory: '.',
+            watch: true,
+        },
     },
 };
