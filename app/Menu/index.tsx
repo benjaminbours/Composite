@@ -51,8 +51,6 @@ function Menu() {
     }, []);
 
     const initAnimations = useCallback((animation: typeof Animation) => {
-        animation.initMouseEnterButtonPlay();
-        animation.initMouseLeaveButtonPlay();
         animation.initHomeToLevel(() => {
             onTransition.current = false;
             setState((prev) => ({

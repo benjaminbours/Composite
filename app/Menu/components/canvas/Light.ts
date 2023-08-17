@@ -98,8 +98,6 @@ export default class Light {
     private width: number = 450;
     private img: HTMLImageElement;
 
-    private pulsesFastAnimation: GSAPTimeline[] = [];
-
     private readonly ctx: CanvasRenderingContext2D;
 
     constructor(ctx: CanvasRenderingContext2D) {
@@ -158,6 +156,7 @@ export default class Light {
                 this.width,
             );
             this.ctx.restore();
+            // this condition make only one pulsation rendered if the pulsing fast mode is disabled
             if (!this.isPulsingFast && i === 0) {
                 // TODO: desactivate the render smoothly
                 break;
@@ -181,16 +180,14 @@ export default class Light {
         animation.fromTo(
             pulseOptions,
             {
-                duration: pulseOptions.pulsingTime / 2,
                 scale: pulseOptions.startScale,
                 ease: 'power3.easeOut',
             },
             {
+                duration: pulseOptions.pulsingTime / 2,
                 opacity: 0,
                 scale: pulseOptions.maxScale,
             },
         );
-
-        this.pulsesFastAnimation.push(animation);
     }
 }

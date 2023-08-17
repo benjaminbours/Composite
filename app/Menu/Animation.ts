@@ -41,9 +41,6 @@ interface IAnimationCanvasComps {
     titleFaction: TextDrawer;
 }
 export default class Animation {
-    public static mouseEnterButtonPlay: GSAPTween;
-    public static mouseLeaveButtonPlay: GSAPTween;
-
     public static homeToLevel: GSAPTimeline;
     public static levelToHome: GSAPTimeline;
     public static levelToFaction: GSAPTimeline;
@@ -96,9 +93,7 @@ export default class Animation {
             .timeline({
                 paused: true,
                 onComplete: () => {
-                    curve.mouseIsHoverButton = false;
-                    light.isPulsingFast = false;
-                    this.mouseLeaveButtonPlay.play();
+                    this.playMouseLeaveButtonPlay();
                     onComplete();
                 },
             })
@@ -190,30 +185,6 @@ export default class Animation {
             .add(factionIn());
     }
 
-    public static initMouseEnterButtonPlay() {
-        const { shadow } = this.canvasComponents;
-
-        this.mouseEnterButtonPlay = gsap.to(shadow, {
-            duration: 1,
-            paused: true,
-            rotationSpeed: 0.02,
-            ease: 'power3.easeOut',
-            // overwrite: "all",
-        });
-    }
-
-    public static initMouseLeaveButtonPlay() {
-        const { shadow } = this.canvasComponents;
-
-        this.mouseLeaveButtonPlay = gsap.to(shadow, {
-            duration: 1,
-            paused: true,
-            rotationSpeed: 0.005,
-            ease: 'power3.easeOut',
-            // overwrite: "all",
-        });
-    }
-
     public static playHomeToLevel() {
         this.setWaveInMoveMode();
         this.homeToLevel.play(0);
@@ -245,25 +216,39 @@ export default class Animation {
     }
 
     public static playMouseLeaveButtonPlay() {
-        const { curve, light } = this.canvasComponents;
+        const { curve, light, shadow } = this.canvasComponents;
 
+        // curve
         curve.mouseIsHoverButton = false;
-        light.isPulsingFast = false;
         this.setWaveInDefaultMode();
-        this.mouseLeaveButtonPlay.play();
+        // light
+        light.isPulsingFast = false;
+        // shadow
+        gsap.to(shadow, {
+            duration: 1,
+            rotationSpeed: 0.005,
+            ease: 'power3.easeOut',
+        });
     }
 
     public static playMouseEnterButtonPlay() {
-        const { curve, light } = this.canvasComponents;
+        const { curve, light, shadow } = this.canvasComponents;
 
+        // curve
         curve.mouseIsHoverButton = true;
         Curve.setWaveOptions({
             randomRange: 300,
             amplitudeRange: 50,
             speed: 0.1,
         });
+        // light
         light.isPulsingFast = true;
-        this.mouseEnterButtonPlay.play();
+        // shadow
+        gsap.to(shadow, {
+            duration: 1,
+            rotationSpeed: 0.02,
+            ease: 'power3.easeOut',
+        });
     }
 
     public static setWaveInMoveMode() {
