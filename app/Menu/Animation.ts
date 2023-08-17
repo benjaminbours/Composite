@@ -1,7 +1,5 @@
 import { gsap } from 'gsap';
 import React, { RefObject } from 'react';
-import Canvases from './comps/Canvases';
-import { bothComponents } from './comps/Canvases/bothComponents';
 import {
     Light,
     MainTitle,
@@ -25,6 +23,8 @@ import {
     queueOut,
     homeIn,
 } from './tweens';
+import { createBothSideComponents } from './comps/Canvases/bothComponents';
+import { Scene, Side } from './types';
 
 interface IAnimationComps {
     homeInterface: RefObject<HTMLDivElement>;
@@ -63,24 +63,32 @@ export default class Animation {
     };
 
     public static canvasComponents: IAnimationCanvasComps;
+    public static faction: Side;
+    public static isMobileDevice: boolean;
 
-    public static initComponents() {
+    public static initComponents(
+        canvasBlack: CanvasBlack,
+        canvasWhite: CanvasWhite,
+        currentScene: Scene,
+        faction: Side,
+        isMobileDevice: boolean,
+    ) {
+        const bothSideComponents = createBothSideComponents(currentScene);
+        this.faction = faction;
+        this.isMobileDevice = isMobileDevice;
         this.canvasComponents = {
-            curve: (Canvases.layers.black as CanvasBlack).curve,
-            light: (Canvases.layers.black as CanvasBlack).light,
-            shadow: (Canvases.layers.white as CanvasWhite).shadow,
-            canvas: (Canvases.layers.white as CanvasWhite).ctx.canvas,
-            mainTitle: bothComponents.home.mainTitle,
-            subtitleHome: bothComponents.home.title,
-            titleFaction: bothComponents.faction.title,
+            curve: canvasBlack.curve,
+            light: canvasBlack.light,
+            shadow: canvasWhite.shadow,
+            canvas: canvasWhite.ctx.canvas,
+            mainTitle: bothSideComponents.home.mainTitle,
+            subtitleHome: bothSideComponents.home.title,
+            titleFaction: bothSideComponents.faction.title,
         };
     }
 
     public static initHomeToLevel(onComplete: () => void) {
         const { curve, light } = this.canvasComponents;
-
-        // console.log(lightToStep("level"), "here dude");
-        // console.log(shadowToStep("level"), "here dude");
         this.homeToLevel = gsap
             .timeline({
                 paused: true,
@@ -281,5 +289,31 @@ export default class Animation {
         Curve.setWaveOptions({
             ...defaultWaveOptions,
         });
+    }
+
+    public static runMethodForAllBothSideComponents(
+        property: string,
+        params: any[],
+    ) {
+        Object.values(this.canvasComponents)
+            .filter((component) => component.isBothSide)
+            .forEach((component) => {
+                if (component.hasOwnProperty(property)) {
+                    if (property === 'render') {
+                        if (component.isMount || component.onTransition) {
+                            component[property](...params);
+                        }
+                    } else {
+                        component[property](...params);
+                    }
+                }
+            });
+        // for (const sceneName in bothSideComponents) {
+        //     if (bothSideComponents[sceneName]) {
+        //         const scene = bothSideComponents[sceneName];
+        //         for (const comp in scene) {
+        //         }
+        //     }
+        // }
     }
 }

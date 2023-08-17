@@ -1,19 +1,20 @@
-import React from "react";
+import React from 'react';
+import { Scene, Side } from './types';
 
-export interface IState {
-    currentScene: "home" | "level" | "faction" | "queue";
-    faction: "light" | "shadow";
+export interface IContext {
+    currentScene: Scene;
+    side: Side;
     handleMouseEnterPlay: () => void;
     handleMouseLeavePlay: () => void;
     handleClickOnPlay: () => void;
     handleClickOnBack: () => void;
     handleClickOnLevel: (name: string) => void;
-    handleClickOnFaction: (side: string) => void;
+    handleClickOnFaction: (side: Side) => void;
 }
 
-export const defaultState: IState = {
-    currentScene: "home",
-    faction: "shadow",
+export const defaultState: IContext = {
+    currentScene: 'home',
+    side: 'black',
     handleMouseEnterPlay: () => {
         //
     },

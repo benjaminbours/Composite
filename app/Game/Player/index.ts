@@ -4,23 +4,30 @@ import {
     SphereGeometry,
     MeshBasicMaterial,
     Mesh,
-} from "three";
-import { getNearestObjects, INearestObjects } from "./physics/raycaster";
-import { CollidingElem } from "../types";
-import { jumpIfPossible, applyGravity, applyAscension, updateDelta, moveLeft, moveRight, useVelocity, delta } from "./physics/movementHelpers";
-import { MysticPlace } from "../Elements/MysticPlace";
+    Vector2,
+} from 'three';
+import { getNearestObjects, INearestObjects } from './physics/raycaster';
+import { CollidingElem } from '../types';
+import {
+    jumpIfPossible,
+    applyGravity,
+    applyAscension,
+    updateDelta,
+    moveLeft,
+    moveRight,
+    useVelocity,
+    delta,
+} from './physics/movementHelpers';
+import { MysticPlace } from '../Elements/MysticPlace';
 
 // TODO: Can optimize with an enum
-type PlayerState = "onFloor" | "inside" | "inAir" | "projected" | "ascend";
+type PlayerState = 'onFloor' | 'inside' | 'inAir' | 'projected' | 'ascend';
 
 export default class Player extends Object3D {
-    public velocity = {
-        x: 0,
-        y: 0,
-    };
+    public velocity = new Vector2(0, 0);
 
     public range = new Vector3(20, 20, 0);
-    public state: PlayerState = "onFloor";
+    public state: PlayerState = 'onFloor';
 
     private currentMysticPlace: MysticPlace | undefined;
     private distanceFromFloor: number = 0;
@@ -45,18 +52,18 @@ export default class Player extends Object3D {
 
         jumpIfPossible(this);
 
-        if (this.state === "inAir") {
+        if (this.state === 'inAir') {
             applyGravity(this.velocity);
         }
 
-        if (this.state === "ascend") {
+        if (this.state === 'ascend') {
             applyAscension(this.velocity);
             // applyAscension(this.velocity, this.distanceFromFloor);
         }
 
         useVelocity(this);
         // console.log(this.state);
-    }
+    };
 
     // mutate value
     private handleCollision = (nearestObjects: INearestObjects) => {
@@ -66,28 +73,35 @@ export default class Player extends Object3D {
             // console.log(nearestObjects.down);
 
             // when the player touch the floor
-            if (this.position.y + this.velocity.y < this.range.y + nearestObjects.down.point.y) {
+            if (
+                this.position.y + this.velocity.y <
+                this.range.y + nearestObjects.down.point.y
+            ) {
                 this.velocity.y = 0;
                 this.position.y = nearestObjects.down.point.y + 20;
 
                 if (parent instanceof MysticPlace) {
                     this.currentMysticPlace = parent;
                     parent.playerIsOn = true;
-                    this.state = "ascend";
+                    this.state = 'ascend';
                 } else {
-                    if (this.state !== "onFloor") {
-                        this.state = "onFloor";
+                    if (this.state !== 'onFloor') {
+                        this.state = 'onFloor';
                     }
                 }
-            } else { // when the player is not toucher the floor
+            } else {
+                // when the player is not toucher the floor
                 // if (parent instanceof MysticPlace) {
-                if (parent instanceof MysticPlace && nearestObjects.down.distance <= 600) {
+                if (
+                    parent instanceof MysticPlace &&
+                    nearestObjects.down.distance <= 600
+                ) {
                     this.currentMysticPlace = parent;
                     parent.playerIsOn = true;
-                    this.state = "ascend";
+                    this.state = 'ascend';
                 } else {
-                    if (this.state !== "inAir") {
-                        this.state = "inAir";
+                    if (this.state !== 'inAir') {
+                        this.state = 'inAir';
                     }
                 }
             }
@@ -95,20 +109,28 @@ export default class Player extends Object3D {
             if (!(parent instanceof MysticPlace) && this.currentMysticPlace) {
                 this.currentMysticPlace.playerIsOn = false;
                 this.currentMysticPlace = undefined;
-                console.log("out");
+                console.log('out');
             }
 
             this.distanceFromFloor = nearestObjects.down.distance;
         }
 
-        if (nearestObjects.right && this.position.x + this.velocity.x + this.range.x > nearestObjects.right.point.x) {
+        if (
+            nearestObjects.right &&
+            this.position.x + this.velocity.x + this.range.x >
+                nearestObjects.right.point.x
+        ) {
             this.velocity.x = 0;
             this.position.x = nearestObjects.right.point.x - 20;
         }
 
-        if (nearestObjects.left && this.position.x + this.velocity.x < this.range.x + nearestObjects.left.point.x) {
+        if (
+            nearestObjects.left &&
+            this.position.x + this.velocity.x <
+                this.range.x + nearestObjects.left.point.x
+        ) {
             this.velocity.x = 0;
             this.position.x = nearestObjects.left.point.x + 20;
         }
-    }
+    };
 }

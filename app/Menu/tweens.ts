@@ -1,11 +1,11 @@
 import { gsap } from 'gsap';
 import Animation from './Animation';
-import { app } from '.';
+import { Scene } from './context';
 
 /**
  * Curve
  */
-export function curveToStep(step: string) {
+export function curveToStep(step: Scene) {
     const { canvas, curve } = Animation.canvasComponents;
 
     return gsap.to(curve, {
@@ -13,8 +13,8 @@ export function curveToStep(step: string) {
         origin: curve.resizeOptions[step](
             canvas.width,
             canvas.height,
-            app.isMobileDevice,
-            app.state.faction,
+            Animation.isMobileDevice,
+            Animation.faction,
         ),
         onComplete: Animation.setWaveInDefaultMode,
     });
@@ -23,13 +23,13 @@ export function curveToStep(step: string) {
 /**
  * Light
  */
-export function lightToStep(step: string) {
+export function lightToStep(step: Scene) {
     const { canvas, light } = Animation.canvasComponents;
     const coordinate = light.resizeOptions[step](
         canvas.width,
         canvas.height,
-        app.isMobileDevice,
-        app.state.faction,
+        Animation.isMobileDevice,
+        Animation.faction,
     );
 
     return gsap.to(light, {
@@ -43,13 +43,13 @@ export function lightToStep(step: string) {
 /**
  * Shadow
  */
-export function shadowToStep(step: string) {
+export function shadowToStep(step: Scene) {
     const { canvas, shadow } = Animation.canvasComponents;
     const coordinate = shadow.resizeOptions[step](
         canvas.width,
         canvas.height,
-        app.isMobileDevice,
-        app.state.faction,
+        Animation.isMobileDevice,
+        Animation.faction,
     );
 
     return gsap.to(shadow, {

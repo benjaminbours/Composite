@@ -1,8 +1,15 @@
-export type Side = "black" | "white";
+export type Side = 'black' | 'white';
+export type Scene = 'home' | 'level' | 'faction' | 'queue';
 
 export interface ICoordinate {
     x: number;
     y: number;
+}
+
+export interface ResizeOptions {
+    isMobileDevice: boolean;
+    currentScene: Scene;
+    side: Side;
 }
 
 export interface IWaveOptions {

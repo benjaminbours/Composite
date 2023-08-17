@@ -1,8 +1,7 @@
-import { app } from "../../../..";
-import shadowPath from "./shadow.png";
+import { ResizeOptions } from '../../../../types';
 
 const shadow = new Image();
-shadow.src = shadowPath;
+shadow.src = '/shadow.png';
 
 export default class Shadow {
     public startY: number = 30;
@@ -39,8 +38,13 @@ export default class Shadow {
                 y: height * 0.5,
             };
         },
-        queue(width: number, height: number, isOnMobile: boolean, faction: string) {
-            const positionX = faction === "shadow" ? 0.5 : 1.5;
+        queue(
+            width: number,
+            height: number,
+            isOnMobile: boolean,
+            faction: string,
+        ) {
+            const positionX = faction === 'shadow' ? 0.5 : 1.5;
             const positionY = 0.5;
             return {
                 x: width * positionX,
@@ -69,24 +73,31 @@ export default class Shadow {
         this.ctx.translate(this.startX, this.startY);
         this.ctx.rotate(this.rotation);
         this.rotation -= this.rotationSpeed;
-        this.ctx.drawImage(this.img, -this.width / 2, -this.width / 2, this.width, this.width);
+        this.ctx.drawImage(
+            this.img,
+            -this.width / 2,
+            -this.width / 2,
+            this.width,
+            this.width,
+        );
         this.ctx.restore();
-    }
+    };
 
-    public resize = () => {
-        if (app) {
-            const coordinate = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, app.isMobileDevice, app.state.faction);
-            this.startX = coordinate.x;
-            this.startY = coordinate.y;
-
-            this.width = 600;
-            if (window.innerHeight < 700 || window.innerWidth <= 768) {
-                this.width = 500;
-            }
-
-            if (window.innerWidth > 2000) {
-                this.width = 800;
-            }
+    public resize = (options: ResizeOptions) => {
+        const coordinate = this.resizeOptions[options.currentScene](
+            this.ctx.canvas.width,
+            this.ctx.canvas.height,
+            options.isMobileDevice,
+            options.side,
+        );
+        this.startX = coordinate.x;
+        this.startY = coordinate.y;
+        this.width = 600;
+        if (window.innerHeight < 700 || window.innerWidth <= 768) {
+            this.width = 500;
         }
-    }
+        if (window.innerWidth > 2000) {
+            this.width = 800;
+        }
+    };
 }

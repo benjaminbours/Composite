@@ -1,5 +1,4 @@
-import { Side } from "../types";
-import TextDrawer from "./TextDrawer";
+import TextDrawer from './TextDrawer';
 
 const coordinate = {
     x: 0.5,
@@ -18,5 +17,5 @@ export default class TitleFaction extends TextDrawer {
         if (window.innerWidth <= 768) {
             this.iy = 0.5;
         }
-    }
+    };
 }

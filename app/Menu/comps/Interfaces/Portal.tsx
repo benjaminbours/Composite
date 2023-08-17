@@ -1,5 +1,5 @@
-import React from "react";
-import { Context } from "../../context";
+import React from 'react';
+import { Context } from '../../context';
 
 interface IProps {
     name: string;
@@ -16,7 +16,10 @@ export default function Portal(props: IProps) {
                     onClick={() => handleClickOnLevel(name)}
                 >
                     <div className="image-container">
-                        <img src={img} alt={`screenshot of the level ${name}`} />
+                        <img
+                            src={img}
+                            alt={`screenshot of the level ${name}`}
+                        />
                         <h3>{name}</h3>
                     </div>
                 </div>

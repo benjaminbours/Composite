@@ -1,7 +1,7 @@
-import { Clock } from "three";
-import * as R from "ramda";
-import Player from "../index";
-import Inputs from "../Inputs";
+import { Clock, Vector2 } from 'three';
+import * as R from 'ramda';
+import Player from '../index';
+import Inputs from '../Inputs';
 
 const MAX_VELOCITY_X = 15;
 const MAX_FALL_SPEED = 20;
@@ -11,25 +11,24 @@ const GRAVITY = 20;
 const SPEED = 20; // less is faster
 const CLOCK = new Clock();
 export let delta = CLOCK.getDelta();
-export const updateDelta = () => delta = CLOCK.getDelta();
+export const updateDelta = () => (delta = CLOCK.getDelta());
 
 export const useVelocity = (player: Player) => {
-    player.position.x += (player.velocity.x * delta) * 60;
-    player.position.y += (player.velocity.y * delta) * 60;
+    player.position.x += player.velocity.x * delta * 60;
+    player.position.y += player.velocity.y * delta * 60;
 };
 
 // Gravity helpers
-const hasReachedMaxFallSpeed = R.propSatisfies(
-    (y: number) => {
-        // console.log(y <= -MAX_FALL_SPEED);
-        return y <= -MAX_FALL_SPEED;
-    },
-    "y",
-);
-const setToMaxFallSpeed = (velocity) => velocity.y = -MAX_FALL_SPEED;
-const increaseFallSpeed = (velocity) => velocity.y -= GRAVITY * delta;
+const hasReachedMaxFallSpeed = R.propSatisfies((y: number) => {
+    // console.log(y <= -MAX_FALL_SPEED);
+    return y <= -MAX_FALL_SPEED;
+}, 'y');
+const setToMaxFallSpeed = (velocity: Vector2) => (velocity.y = -MAX_FALL_SPEED);
+const increaseFallSpeed = (velocity: Vector2) =>
+    (velocity.y -= GRAVITY * delta);
 
-const updateVelocityX = (target: number) => (velocity) => velocity.x += (target - velocity.x) / ((SPEED * delta) * 60);
+const updateVelocityX = (target: number) => (velocity: Vector2) =>
+    (velocity.x += (target - velocity.x) / (SPEED * delta * 60));
 // const updateVelocityY = (target: number) => (velocity) => velocity.y += (target - velocity.y) / ((SPEED * delta) * 60);
 
 export const applyGravity = R.ifElse(
@@ -38,19 +37,17 @@ export const applyGravity = R.ifElse(
     increaseFallSpeed,
 );
 
-const hasReachedMaxAscendSpeed = R.propSatisfies(
-    (y: number) => {
-        // console.log(y >= MAX_FALL_SPEED);
-        return y >= MAX_ASCEND_SPEED;
-    },
-    "y",
-);
-const setToMaxAscendSpeed = (velocity) => velocity.y = MAX_ASCEND_SPEED;
-const increaseAscendSpeed = (velocity) => {
+const hasReachedMaxAscendSpeed = R.propSatisfies((y: number) => {
+    // console.log(y >= MAX_FALL_SPEED);
+    return y >= MAX_ASCEND_SPEED;
+}, 'y');
+const setToMaxAscendSpeed = (velocity: Vector2) =>
+    (velocity.y = MAX_ASCEND_SPEED);
+const increaseAscendSpeed = (velocity: Vector2) => {
     // console.log(delta * GRAVITY);
     // return velocity.y += GRAVITY * delta;
     // console.log(velocity.y += GRAVITY / 1000);
-    return velocity.y += GRAVITY / 1000;
+    return (velocity.y += GRAVITY / 1000);
     // return velocity.y += GRAVITY * (delta < 0.03 ? 0.03 : delta);
 };
 
@@ -70,18 +67,18 @@ export const applyAscension = R.ifElse(
 // }
 
 // Jump helpers
-const isJumpPossible = (player: Player) => Inputs.jumpIsActive && player.state === "onFloor";
+const isJumpPossible = (player: Player) =>
+    Inputs.jumpIsActive && player.state === 'onFloor';
 // const isJumpPossible = (player: Player) => Inputs.jumpIsActive && player.state === "onFloor";
-const setToJumpPower = (player: Player) => player.velocity.y = JUMP_POWER;
+const setToJumpPower = (player: Player) => (player.velocity.y = JUMP_POWER);
 
-export const jumpIfPossible = R.when(
-    isJumpPossible,
-    setToJumpPower,
-);
+export const jumpIfPossible = R.when(isJumpPossible, setToJumpPower);
 
 // Left / Right helpers
-const hasReachedMaxLeftSpeed = (velocity) => Inputs.leftIsActive && velocity.x > -MAX_VELOCITY_X;
-const hasReachedMaxRightSpeed = (velocity) => Inputs.rightIsActive && velocity.x < MAX_VELOCITY_X;
+const hasReachedMaxLeftSpeed = (velocity: Vector2) =>
+    Inputs.leftIsActive && velocity.x > -MAX_VELOCITY_X;
+const hasReachedMaxRightSpeed = (velocity: Vector2) =>
+    Inputs.rightIsActive && velocity.x < MAX_VELOCITY_X;
 
 export const moveLeft = R.ifElse(
     hasReachedMaxLeftSpeed,

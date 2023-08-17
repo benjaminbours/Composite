@@ -1,16 +1,17 @@
-import React, { Component } from 'react';
-import Menu from './Menu';
-import Game from './Game';
+import React from 'react';
+// import Game from './Game';
+import dynamic from 'next/dynamic';
 
-export default class MainApp extends Component {
-    // public state = {
+const Menu = dynamic(() => import('./Menu'), {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+});
 
-    // };
-
-    public render() {
-        return (
-            // <Game />
-            <Menu />
-        );
-    }
+function MainApp() {
+    return (
+        // <Game />
+        <Menu />
+    );
 }
+
+export default MainApp;

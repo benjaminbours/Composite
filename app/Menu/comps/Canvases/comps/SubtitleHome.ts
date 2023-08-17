@@ -1,5 +1,5 @@
-import { Side } from "../types";
-import TextDrawer from "./TextDrawer";
+import { Side } from '../../../types';
+import TextDrawer from './TextDrawer';
 
 const coordinate = {
     x: 0.5,
@@ -18,9 +18,11 @@ export default class SubtitleHome extends TextDrawer {
 
         super.render(ctx, color);
         return true;
-    }
+    };
 
     public resize = (ctx: CanvasRenderingContext2D) => {
+        console.log('HERE resize subtitle');
+
         super.resize(ctx);
         this.iy = coordinate.y;
 
@@ -48,5 +50,5 @@ export default class SubtitleHome extends TextDrawer {
         if (window.innerWidth <= 400) {
             this.fontSize = 15;
         }
-    }
+    };
 }

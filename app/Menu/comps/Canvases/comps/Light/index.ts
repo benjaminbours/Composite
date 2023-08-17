@@ -1,12 +1,10 @@
-import { gsap } from "gsap";
-import { app } from "../../../..";
-import lightPath from "./light.png";
-import lightHaloPath from "./light_halo.png";
+import { gsap } from 'gsap';
+import { ResizeOptions } from '../../../../types';
 
 const light = new Image();
-light.src = lightPath;
+light.src = '/light.png';
 const lightHalo = new Image();
-lightHalo.src = lightHaloPath;
+lightHalo.src = '/light_halo.png';
 
 export interface IPulseOptions {
     startScale: number;
@@ -82,8 +80,13 @@ export default class Light {
                 y: height * 0.5,
             };
         },
-        queue(width: number, height: number, isOnMobile: boolean, faction: string) {
-            const positionX = faction === "light" ? 0.5 : -0.5;
+        queue(
+            width: number,
+            height: number,
+            isOnMobile: boolean,
+            faction: string,
+        ) {
+            const positionX = faction === 'light' ? 0.5 : -0.5;
             const positionY = 0.5;
             return {
                 x: width * positionX,
@@ -112,28 +115,34 @@ export default class Light {
     public render = () => {
         this.ctx.save();
         this.ctx.translate(this.startX, this.startY);
-        this.ctx.drawImage(this.img, -this.width / 2, -this.width / 2, this.width, this.width);
+        this.ctx.drawImage(
+            this.img,
+            -this.width / 2,
+            -this.width / 2,
+            this.width,
+            this.width,
+        );
         this.renderLightHalo();
         this.ctx.restore();
-    }
+    };
 
-    public resize = () => {
-        if (app) {
-            const coordinate = this.resizeOptions[app.state.currentScene](this.ctx.canvas.width, this.ctx.canvas.height, app.isMobileDevice, app.state.faction);
-
-            this.startX = coordinate.x;
-            this.startY = coordinate.y;
-
-            this.width = 450;
-            if (window.innerHeight < 700 || window.innerWidth <= 768) {
-                this.width = 400;
-            }
-
-            if (window.innerWidth > 2000) {
-                this.width = 600;
-            }
+    public resize = (options: ResizeOptions) => {
+        const coordinate = this.resizeOptions[options.currentScene](
+            this.ctx.canvas.width,
+            this.ctx.canvas.height,
+            options.isMobileDevice,
+            options.side,
+        );
+        this.startX = coordinate.x;
+        this.startY = coordinate.y;
+        this.width = 450;
+        if (window.innerHeight < 700 || window.innerWidth <= 768) {
+            this.width = 400;
         }
-    }
+        if (window.innerWidth > 2000) {
+            this.width = 600;
+        }
+    };
 
     private renderLightHalo = () => {
         for (let i = 0; i < this.pulsesOptions.length; i++) {
@@ -141,14 +150,20 @@ export default class Light {
             this.ctx.save();
             this.ctx.scale(pulse.scale, pulse.scale);
             this.ctx.globalAlpha = pulse.opacity;
-            this.ctx.drawImage(lightHalo, -this.width / 2, -this.width / 2, this.width, this.width);
+            this.ctx.drawImage(
+                lightHalo,
+                -this.width / 2,
+                -this.width / 2,
+                this.width,
+                this.width,
+            );
             this.ctx.restore();
             if (!this.isPulsingFast && i === 0) {
                 // TODO: desactivate the render smoothly
                 break;
             }
         }
-    }
+    };
 
     private createAnimation(pulseOptions: IPulseOptions) {
         const animation = gsap.timeline({
@@ -157,18 +172,24 @@ export default class Light {
                 this.restart();
             },
         });
-        animation.to(pulseOptions, pulseOptions.pulsingTime / 2, {
+        animation.to(pulseOptions, {
+            duration: pulseOptions.pulsingTime / 2,
             opacity: 1,
-            ease: "power3.easeOut",
+            ease: 'power3.easeOut',
         });
 
-        animation.fromTo(pulseOptions, pulseOptions.pulsingTime / 2, {
-            scale: pulseOptions.startScale,
-            ease: "power3.easeOut",
-        }, {
+        animation.fromTo(
+            pulseOptions,
+            {
+                duration: pulseOptions.pulsingTime / 2,
+                scale: pulseOptions.startScale,
+                ease: 'power3.easeOut',
+            },
+            {
                 opacity: 0,
                 scale: pulseOptions.maxScale,
-            });
+            },
+        );
 
         this.pulsesFastAnimation.push(animation);
     }

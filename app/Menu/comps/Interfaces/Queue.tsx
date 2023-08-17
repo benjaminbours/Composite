@@ -12,7 +12,7 @@ export default class Queue extends Component {
     public render() {
         return (
             <Context.Consumer>
-                {({ faction, currentScene }) => (
+                {({ side: faction, currentScene }) => (
                     <div ref={Animation.components.queueInterface} className={`queue-container ${currentScene !== "queue" ? "unmount" : ""}`}>
                         <ButtonBack color={faction === "light" ? "white" : "black"} />
                         <h2 className={faction}>{text[faction]}</h2>

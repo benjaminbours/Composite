@@ -1,7 +1,7 @@
-import { TweenMax } from "gsap";
-import { ICoordinate, Side } from "../types";
+import { ICoordinate, Side } from '../../../types';
 
 export default class TextDrawer {
+    public isBothSide: boolean = true;
     public isMount: boolean = true;
     public onTransition: boolean = false;
 
@@ -19,7 +19,11 @@ export default class TextDrawer {
 
     private content: string;
 
-    constructor(content: string, isMount: boolean, initialCoordinate: ICoordinate) {
+    constructor(
+        content: string,
+        isMount: boolean,
+        initialCoordinate: ICoordinate,
+    ) {
         this.isMount = isMount;
         if (!isMount) {
             this.opacity = 0;
@@ -34,7 +38,7 @@ export default class TextDrawer {
 
     public render(ctx: CanvasRenderingContext2D, color: Side) {
         ctx.save();
-        ctx.textAlign = "center";
+        ctx.textAlign = 'center';
         // ctx.canvas.style.letterSpacing = `${this.letterSpacing}px`;
         ctx.font = `${this.fontWeight} ${this.fontSize}px sans-serif`;
         ctx.fillStyle = color;
@@ -42,16 +46,16 @@ export default class TextDrawer {
         // this.width = ctx.measureText(this.content).width;
         // this.x = (ctx.canvas.width * this.ix) - this.width / 2;
         // this.x = (ctx.canvas.width / 2);
-        this.x = (ctx.canvas.width / 2) + 10;
+        this.x = ctx.canvas.width / 2 + 10;
         // this.x = (ctx.canvas.width * this.ix);
-        this.y = (ctx.canvas.height * this.iy);
+        this.y = ctx.canvas.height * this.iy;
         // ctx.fillText(this.content, this.x, this.y);
         ctx.renderText(this.content, this.x, this.y, this.letterSpacing);
         ctx.restore();
     }
 
     public resize(ctx: CanvasRenderingContext2D) {
-        ctx.textAlign = "center";
+        ctx.textAlign = 'center';
         this.fontSize = 30;
         this.letterSpacing = 20;
         this.fontWeight = 400;

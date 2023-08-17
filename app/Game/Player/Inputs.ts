@@ -9,13 +9,13 @@ export default class Inputs {
     public static jumpIsActive = false;
 
     public static init() {
-        window.addEventListener("keydown", this.handleKeydown.bind(this));
-        window.addEventListener("keyup", this.handleKeyup.bind(this));
+        window.addEventListener('keydown', this.handleKeydown.bind(this));
+        window.addEventListener('keyup', this.handleKeyup.bind(this));
     }
 
     private static keydownOptions = {
         // left
-        37() {
+        KeyA() {
             if (!Inputs.leftIsActive) {
                 Inputs.leftIsPressed = true;
                 Inputs.leftIsActive = true;
@@ -24,7 +24,7 @@ export default class Inputs {
             }
         },
         // right
-        39() {
+        KeyD() {
             if (!Inputs.rightIsActive) {
                 Inputs.rightIsPressed = true;
                 Inputs.rightIsActive = true;
@@ -33,7 +33,7 @@ export default class Inputs {
             }
         },
         // space
-        32() {
+        Space() {
             if (!Inputs.jumpIsActive) {
                 Inputs.jumpIsPressed = true;
                 Inputs.jumpIsActive = true;
@@ -44,28 +44,30 @@ export default class Inputs {
     };
 
     private static keyupOptions = {
-        37() {
+        KeyA() {
             Inputs.leftIsActive = false;
         },
-        39() {
+        KeyD() {
             Inputs.rightIsActive = false;
         },
-        32() {
+        Space() {
             Inputs.jumpIsActive = false;
         },
     };
 
     private static handleKeydown(e: KeyboardEvent) {
-        const { keyCode } = e;
-        if (this.keydownOptions[keyCode]) {
-            this.keydownOptions[keyCode]();
+        const { code } = e;
+        const key = code as 'KeyA' | 'KeyD' | 'Space';
+        if (this.keydownOptions[key]) {
+            this.keydownOptions[key]();
         }
     }
 
     private static handleKeyup(e: KeyboardEvent) {
-        const { keyCode } = e;
-        if (this.keyupOptions[keyCode]) {
-            this.keyupOptions[keyCode]();
+        const { code } = e;
+        const key = code as 'KeyA' | 'KeyD' | 'Space';
+        if (this.keyupOptions[key]) {
+            this.keyupOptions[key]();
         }
     }
 }
