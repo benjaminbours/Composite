@@ -1,5 +1,5 @@
-import { ResizeOptions } from '../../../types';
-import Shadow from '../comps/Shadow';
+import { ResizeOptions } from '../../types';
+import Shadow from './Shadow';
 import Canvas from './Canvas';
 
 export default class CanvasWhite extends Canvas {

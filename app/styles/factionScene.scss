@@ -6,7 +6,7 @@
     transition: all 0.3s;
     text-transform: uppercase;
 
-    &.light {
+    &.white {
         background: white;
         color: black;
         left: calc(25% - 45px);
@@ -24,7 +24,7 @@
 
     }
 
-    &.shadow {
+    &.black {
         background: black;
         color: white;
         left: calc(75% - 45px);

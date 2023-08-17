@@ -1,5 +1,5 @@
-import Mouse from '../../Mouse';
-import Curve from './index';
+import Mouse from './Mouse';
+import Curve from './Curve';
 
 export default class Point {
     public isAnimating: boolean = false;

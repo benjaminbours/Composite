@@ -1,6 +1,6 @@
 'use client';
-import * as STATS from 'stats.js';
 import { gsap } from 'gsap';
+import * as STATS from 'stats.js';
 import React, {
     useCallback,
     useEffect,
@@ -9,16 +9,22 @@ import React, {
     useState,
 } from 'react';
 import type Animation from './Animation';
-import Interfaces from './comps/Interfaces';
+import Interfaces from './components/dom';
 import { Context } from './context';
-import CanvasBlack from './comps/Canvases/layers/CanvasBlack';
-import CanvasWhite from './comps/Canvases/layers/CanvasWhite';
-import Mouse from './comps/Canvases/Mouse';
+import CanvasBlack from './components/canvas/CanvasBlack';
+import CanvasWhite from './components/canvas/CanvasWhite';
+import Mouse from './components/canvas/Mouse';
 import { Side, Scene } from './types';
 
-const stats = new STATS.default();
-stats.showPanel(1);
-document.body.appendChild(stats.dom);
+const stats = (() => {
+    if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        const stats = new STATS.default();
+        stats.showPanel(1);
+        document.body.appendChild(stats.dom);
+        return stats;
+    }
+    return undefined;
+})();
 
 interface State {
     currentScene: Scene;
@@ -127,10 +133,10 @@ function Menu() {
             ]);
             Mouse.init();
             const canvasLoop = () => {
-                stats.begin();
+                stats?.begin();
                 blackCanvas.current!.render();
                 whiteCanvas.current!.render();
-                stats.end();
+                stats?.end();
             };
             gsap.ticker.add(canvasLoop);
             resize();

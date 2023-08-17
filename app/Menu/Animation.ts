@@ -1,15 +1,8 @@
 import { gsap } from 'gsap';
 import React, { RefObject } from 'react';
-import {
-    Light,
-    MainTitle,
-    Shadow,
-    SubtitleHome,
-    TextDrawer,
-} from './comps/Canvases/comps';
-import Curve, { defaultWaveOptions } from './comps/Canvases/comps/Curve';
-import CanvasBlack from './comps/Canvases/layers/CanvasBlack';
-import CanvasWhite from './comps/Canvases/layers/CanvasWhite';
+import Curve, { defaultWaveOptions } from './components/canvas/Curve';
+import CanvasBlack from './components/canvas/CanvasBlack';
+import CanvasWhite from './components/canvas/CanvasWhite';
 import {
     homeOut,
     curveToStep,
@@ -23,8 +16,13 @@ import {
     queueOut,
     homeIn,
 } from './tweens';
-import { createBothSideComponents } from './comps/Canvases/bothComponents';
 import { Scene, Side } from './types';
+import Shadow from './components/canvas/Shadow';
+import Light from './components/canvas/Light';
+import MainTitle from './components/canvas/MainTitle';
+import SubtitleHome from './components/canvas/SubtitleHome';
+import TextDrawer from './components/canvas/TextDrawer';
+import TitleFaction from './components/canvas/TitleFaction';
 
 interface IAnimationComps {
     homeInterface: RefObject<HTMLDivElement>;
@@ -73,7 +71,6 @@ export default class Animation {
         faction: Side,
         isMobileDevice: boolean,
     ) {
-        const bothSideComponents = createBothSideComponents(currentScene);
         this.faction = faction;
         this.isMobileDevice = isMobileDevice;
         this.canvasComponents = {
@@ -81,9 +78,15 @@ export default class Animation {
             light: canvasBlack.light,
             shadow: canvasWhite.shadow,
             canvas: canvasWhite.ctx.canvas,
-            mainTitle: bothSideComponents.home.mainTitle,
-            subtitleHome: bothSideComponents.home.title,
-            titleFaction: bothSideComponents.faction.title,
+            mainTitle: new MainTitle(currentScene === 'home'),
+            subtitleHome: new SubtitleHome(
+                'THINK BOTH WAYS',
+                currentScene === 'home',
+            ),
+            titleFaction: new TitleFaction(
+                'SELECT A SIDE',
+                currentScene === 'faction',
+            ),
         };
     }
 
@@ -260,11 +263,6 @@ export default class Animation {
             speed: 0.1,
         });
         light.isPulsingFast = true;
-        // TweenLite.set(waveOptions, {
-        //   randomRange: 300,
-        //   amplitudeRange: 50,
-        //   speed: 0.1,
-        // });
         this.mouseEnterButtonPlay.play();
     }
 

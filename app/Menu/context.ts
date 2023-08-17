@@ -12,7 +12,7 @@ export interface IContext {
     handleClickOnFaction: (side: Side) => void;
 }
 
-export const defaultState: IContext = {
+export const defaultContext: IContext = {
     currentScene: 'home',
     side: 'black',
     handleMouseEnterPlay: () => {
@@ -35,4 +35,4 @@ export const defaultState: IContext = {
     },
 };
 
-export const Context = React.createContext(defaultState);
+export const Context = React.createContext(defaultContext);

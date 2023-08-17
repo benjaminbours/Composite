@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import { ResizeOptions } from '../../../../types';
+import { ResizeOptions } from '../../types';
 
 const light = new Image();
 light.src = '/light.png';

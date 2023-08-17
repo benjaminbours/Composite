@@ -1,6 +1,6 @@
-import { ResizeOptions } from '../../../types';
-import Curve from '../comps/Curve';
-import Light from '../comps/Light';
+import { ResizeOptions } from '../../types';
+import Curve from './Curve';
+import Light from './Light';
 import Canvas from './Canvas';
 
 export default class CanvasBlack extends Canvas {

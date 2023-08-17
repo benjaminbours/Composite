@@ -1,4 +1,4 @@
-import { Side } from '../../../../types';
+import { Side } from '../../types';
 
 const mainTitleWhite = new Image();
 mainTitleWhite.src = '/composite_white.svg';
@@ -31,19 +31,14 @@ export default class MainTitle {
         const img = color === 'black' ? mainTitleBlack : mainTitleWhite;
         ctx.save();
         ctx.globalAlpha = this.opacity;
-        // console.log(this.startY);
-
         ctx.drawImage(img, this.startX, this.startY, this.width, this.height);
         ctx.restore();
         return true;
     };
 
     public resize = (ctx: CanvasRenderingContext2D) => {
-        console.log('HERE resize main title');
         this.width = ctx.canvas.width * 0.8;
         this.iy = 0.3;
-
-        console.log(window.innerWidth);
 
         if (window.innerHeight < 800 || window.innerHeight > 1000) {
             this.iy = 0.18;
@@ -69,12 +64,8 @@ export default class MainTitle {
         //     this.width = ctx.canvas.width * 0.95;
         // }
 
-        console.log(this.startX);
-        console.log(this.startY);
-
         this.startX = (ctx.canvas.width - this.width) / 2;
         this.height = this.width / this.ratio;
         this.startY = ctx.canvas.height * this.iy - this.height / 2;
-        console.log(this.startY);
     };
 }

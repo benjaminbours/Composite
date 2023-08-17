@@ -60,8 +60,8 @@ export default class Interfaces extends Component<IProps> {
                     }`}
                 >
                     <ButtonBack color={'white'} />
-                    <ButtonFaction faction="light" />
-                    <ButtonFaction faction="shadow" />
+                    <ButtonFaction side="white" />
+                    <ButtonFaction side="black" />
                 </div>
                 <Queue />
             </>

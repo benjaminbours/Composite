@@ -1,4 +1,4 @@
-import { Side } from '../../../types';
+import { Side } from '../../types';
 import TextDrawer from './TextDrawer';
 
 const coordinate = {
@@ -21,8 +21,6 @@ export default class SubtitleHome extends TextDrawer {
     };
 
     public resize = (ctx: CanvasRenderingContext2D) => {
-        console.log('HERE resize subtitle');
-
         super.resize(ctx);
         this.iy = coordinate.y;
 

@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import Animation from './Animation';
-import { Scene } from './context';
+import { Scene } from './types';
 
 /**
  * Curve
