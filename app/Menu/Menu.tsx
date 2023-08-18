@@ -16,16 +16,6 @@ import { Side, Scene } from './types';
 import ButtonBack from './ButtonBack';
 import Portal from './Portal';
 
-const stats = (() => {
-    if (process.env.NEXT_PUBLIC_STAGE === 'development') {
-        const stats = new STATS.default();
-        stats.showPanel(1);
-        document.body.appendChild(stats.dom);
-        return stats;
-    }
-    return undefined;
-})();
-
 interface State {
     currentScene: Scene;
     side: Side;
@@ -140,6 +130,15 @@ export function Menu() {
                 blackCanvas.current.ctx,
             ]);
             Mouse.init();
+            const stats = (() => {
+                if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+                    const stats = new STATS.default();
+                    stats.showPanel(1);
+                    document.body.appendChild(stats.dom);
+                    return stats;
+                }
+                return undefined;
+            })();
             const canvasLoop = () => {
                 stats?.begin();
                 blackCanvas.current!.render();
