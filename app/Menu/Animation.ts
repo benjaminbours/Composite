@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import React, { RefObject } from 'react';
+import { RefObject } from 'react';
 import Curve, { defaultWaveOptions } from './canvas/Curve';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
@@ -16,7 +16,8 @@ import {
     queueOut,
     homeIn,
 } from './tweens';
-import { Scene, Side } from './types';
+import { Scene } from './types';
+import { Side } from '../types';
 import Shadow from './canvas/Shadow';
 import Light from './canvas/Light';
 import MainTitle from './canvas/MainTitle';

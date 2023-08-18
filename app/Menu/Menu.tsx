@@ -12,7 +12,8 @@ import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
-import { Side, Scene } from './types';
+import { Scene } from './types';
+import { Side } from '../types';
 import ButtonBack from './ButtonBack';
 import Portal from './Portal';
 

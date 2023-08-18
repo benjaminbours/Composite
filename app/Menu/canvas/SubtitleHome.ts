@@ -1,4 +1,4 @@
-import { Side } from '../types';
+import type { Side } from '../../types';
 import TextDrawer from './TextDrawer';
 
 const coordinate = {

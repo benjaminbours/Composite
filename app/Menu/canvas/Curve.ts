@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import Point from './Point';
-import { IWaveOptions, ResizeOptions, Side } from '../types';
+import { IWaveOptions, ResizeOptions } from '../types';
+import type { Side } from '../../types';
 
 export const defaultWaveOptions: IWaveOptions = {
     viscosity: 340,

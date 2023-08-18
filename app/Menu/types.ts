@@ -1,4 +1,5 @@
-export type Side = 'black' | 'white';
+import { Side } from '../types';
+
 export type Scene = 'home' | 'level' | 'faction' | 'queue';
 
 export interface ICoordinate {

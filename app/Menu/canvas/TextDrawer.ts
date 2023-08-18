@@ -1,4 +1,5 @@
-import { ICoordinate, Side } from '../types';
+import { ICoordinate } from '../types';
+import type { Side } from '../../types';
 
 export default class TextDrawer {
     public isBothSide: boolean = true;
