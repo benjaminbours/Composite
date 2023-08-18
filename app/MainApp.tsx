@@ -1,5 +1,4 @@
 import React from 'react';
-// import Game from './Game';
 import dynamic from 'next/dynamic';
 
 const Menu = dynamic(() => import('./Menu'), {
@@ -7,10 +6,15 @@ const Menu = dynamic(() => import('./Menu'), {
     ssr: false,
 });
 
+const Game = dynamic(() => import('./Game'), {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+});
+
 function MainApp() {
     return (
-        // <Game />
-        <Menu />
+        <Game />
+        // <Menu />
     );
 }
 

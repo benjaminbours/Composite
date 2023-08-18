@@ -15,18 +15,6 @@ const float powerRotationGlobal=1.;// impact direction of the rotation
 const vec3 axisRotationGlobal=vec3(-1.,0.,0.);
 const float angleRotationGlobal=(PI/2.)*powerRotationGlobal;
 
-// cosinus hyperbolic => check hyperbolic geometry, a non-Euclidean geometry
-float cosh(float x)
-{
-    return exp(x)+exp(-x)/2.;
-}
-
-// tangente hyperbolic
-float tanh(float x)
-{
-    return(exp(x)-exp(-x))/exp(x)+exp(-x);
-}
-
 mat4 rotationMatrix(vec3 axis,float angle)
 {
     axis=normalize(axis);

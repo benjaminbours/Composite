@@ -1,40 +1,39 @@
-import { gsap } from "gsap";
-import * as STATS from "stats.js";
-import React, { Component, RefObject } from "react";
-import App from "./App";
-import { startLoading } from "./assetsLoader";
+'use client';
+import { gsap } from 'gsap';
+import * as STATS from 'stats.js';
+import React, { useEffect, useRef } from 'react';
+import App from './App';
+import { startLoading } from './assetsLoader';
 
-export default class Game extends Component {
-    private stats = new STATS.default();
-    private canvas: RefObject<HTMLCanvasElement> = React.createRef();
-    private app: App | undefined;
-
-    constructor(props: {}) {
-        super(props);
-        this.stats.showPanel(1);
-        document.body.appendChild(this.stats.dom);
-        gsap.ticker.add(this.gameLoop);
+const stats = (() => {
+    if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        const stats = new STATS.default();
+        stats.showPanel(1);
+        document.body.appendChild(stats.dom);
+        return stats;
     }
+    return undefined;
+})();
 
-    public componentDidMount() {
-        // startLoading();
-        if (this.canvas.current) {
-            this.app = new App(this.canvas.current);
-            this.gameLoop();
+function Game() {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const appRef = useRef<App>();
+
+    useEffect(() => {
+        if (!canvasRef.current) {
+            return;
         }
-    }
+        appRef.current = new App(canvasRef.current);
+        const gameLoop = () => {
+            stats?.begin();
+            appRef.current?.render();
+            stats?.end();
+        };
+        gsap.ticker.add(gameLoop);
+        gameLoop();
+    }, []);
 
-    public render() {
-        return (
-            <canvas ref={this.canvas} id="game" style={{ zIndex: -4 }}></canvas>
-        );
-    }
-
-    private gameLoop = () => {
-        this.stats.begin();
-        if (this.app) {
-            this.app.render();
-        }
-        this.stats.end();
-    }
+    return <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }}></canvas>;
 }
+
+export default Game;
