@@ -1,4 +1,4 @@
-import { ResizeOptions } from '../../types';
+import { ResizeOptions } from '../types';
 import Shadow from './Shadow';
 import Canvas from './Canvas';
 

@@ -1,4 +1,4 @@
-import { ResizeOptions, Side } from '../../types';
+import { ResizeOptions, Side } from '../types';
 
 const shadow = new Image();
 shadow.src = '/shadow.png';

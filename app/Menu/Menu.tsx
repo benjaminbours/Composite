@@ -9,12 +9,12 @@ import React, {
     useState,
 } from 'react';
 import type Animation from './Animation';
-import CanvasBlack from './components/canvas/CanvasBlack';
-import CanvasWhite from './components/canvas/CanvasWhite';
-import Mouse from './components/canvas/Mouse';
+import CanvasBlack from './canvas/CanvasBlack';
+import CanvasWhite from './canvas/CanvasWhite';
+import Mouse from './canvas/Mouse';
 import { Side, Scene } from './types';
-import ButtonBack from './components/dom/ButtonBack';
-import Portal from './components/dom/Portal';
+import ButtonBack from './ButtonBack';
+import Portal from './Portal';
 
 const stats = (() => {
     if (process.env.NEXT_PUBLIC_STAGE === 'development') {

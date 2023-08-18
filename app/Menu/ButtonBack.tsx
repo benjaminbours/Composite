@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Side } from '../../types';
+import type { Side } from './types';
 
 interface IProps {
     color: Side;

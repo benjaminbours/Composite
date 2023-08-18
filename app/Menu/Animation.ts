@@ -1,8 +1,8 @@
 import { gsap } from 'gsap';
 import React, { RefObject } from 'react';
-import Curve, { defaultWaveOptions } from './components/canvas/Curve';
-import CanvasBlack from './components/canvas/CanvasBlack';
-import CanvasWhite from './components/canvas/CanvasWhite';
+import Curve, { defaultWaveOptions } from './canvas/Curve';
+import CanvasBlack from './canvas/CanvasBlack';
+import CanvasWhite from './canvas/CanvasWhite';
 import {
     homeOut,
     curveToStep,
@@ -17,12 +17,12 @@ import {
     homeIn,
 } from './tweens';
 import { Scene, Side } from './types';
-import Shadow from './components/canvas/Shadow';
-import Light from './components/canvas/Light';
-import MainTitle from './components/canvas/MainTitle';
-import SubtitleHome from './components/canvas/SubtitleHome';
-import TextDrawer from './components/canvas/TextDrawer';
-import TitleFaction from './components/canvas/TitleFaction';
+import Shadow from './canvas/Shadow';
+import Light from './canvas/Light';
+import MainTitle from './canvas/MainTitle';
+import SubtitleHome from './canvas/SubtitleHome';
+import TextDrawer from './canvas/TextDrawer';
+import TitleFaction from './canvas/TitleFaction';
 
 interface IAnimationComps {
     homeInterface: RefObject<HTMLDivElement>;

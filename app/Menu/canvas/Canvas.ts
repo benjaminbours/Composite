@@ -1,5 +1,5 @@
-import Animation from '../../Animation';
-import { ResizeOptions } from '../../types';
+import Animation from '../Animation';
+import { ResizeOptions } from '../types';
 
 export default class Canvas {
     public ctx: CanvasRenderingContext2D;

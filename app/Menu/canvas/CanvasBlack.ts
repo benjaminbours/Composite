@@ -1,4 +1,4 @@
-import { ResizeOptions } from '../../types';
+import { ResizeOptions } from '../types';
 import Curve from './Curve';
 import Light from './Light';
 import Canvas from './Canvas';

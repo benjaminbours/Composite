@@ -1,4 +1,4 @@
-import { Side } from '../../types';
+import { Side } from '../types';
 
 const mainTitleWhite = new Image();
 mainTitleWhite.src = '/composite_white.svg';
