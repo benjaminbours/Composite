@@ -31,7 +31,7 @@ interface State {
     side: Side;
 }
 
-function Menu() {
+export function Menu() {
     const [state, setState] = useState<State>({
         currentScene: 'home',
         side: 'black',
@@ -42,6 +42,10 @@ function Menu() {
     const whiteCanvas = useRef<CanvasWhite>();
     const onTransition = useRef(false);
     const animation = useRef<typeof Animation>();
+    const homeRef = useRef<HTMLDivElement>(null);
+    const levelRef = useRef<HTMLDivElement>(null);
+    const sideRef = useRef<HTMLDivElement>(null);
+    const queueRef = useRef<HTMLDivElement>(null);
 
     const isMobileDevice = useMemo(() => {
         if (!window) {
@@ -119,6 +123,12 @@ function Menu() {
                 whiteCanvasDomElement.current as HTMLCanvasElement,
             );
             Animation.initComponents(
+                {
+                    homeInterface: homeRef,
+                    levelInterface: levelRef,
+                    factionInterface: sideRef,
+                    queueInterface: queueRef,
+                },
                 blackCanvas.current,
                 whiteCanvas.current,
                 state.currentScene,
@@ -252,9 +262,13 @@ function Menu() {
                 style={{ zIndex: -2 }}
                 ref={blackCanvasDomElement}
             />
-            <Interfaces currentScene={state.currentScene} />
+            <Interfaces
+                currentScene={state.currentScene}
+                homeRef={homeRef}
+                levelRef={levelRef}
+                factionRef={sideRef}
+                queueRef={queueRef}
+            />
         </Context.Provider>
     );
 }
-
-export default Menu;

@@ -21,50 +21,59 @@ const levels = [
     },
 ];
 
-interface IProps {
+interface Props {
     currentScene: string;
+    homeRef: React.RefObject<HTMLDivElement>;
+    levelRef: React.RefObject<HTMLDivElement>;
+    factionRef: React.RefObject<HTMLDivElement>;
+    queueRef: React.RefObject<HTMLDivElement>;
 }
 
-export default class Interfaces extends Component<IProps> {
-    public render() {
-        const { currentScene } = this.props;
-        return (
-            <>
-                <div
-                    ref={Animation.components.homeInterface}
-                    className={`home-container ${
-                        currentScene !== 'home' ? 'unmount' : ''
-                    }`}
-                >
-                    <h2>Think both ways</h2>
-                    <ButtonPlay />
+function Interfaces({
+    currentScene,
+    homeRef,
+    levelRef,
+    factionRef,
+    queueRef,
+}: Props) {
+    return (
+        <>
+            <div
+                ref={homeRef}
+                className={`home-container ${
+                    currentScene !== 'home' ? 'unmount' : ''
+                }`}
+            >
+                <h2>Think both ways</h2>
+                <ButtonPlay />
+            </div>
+            <div
+                ref={levelRef}
+                className={`level-container ${
+                    currentScene !== 'level' ? 'unmount' : ''
+                }`}
+            >
+                <ButtonBack color={'white'} />
+                <div className="level-list">
+                    <h2>Select a&nbsp;level</h2>
+                    {levels.map((item) => (
+                        <Portal {...item} key={item.name} />
+                    ))}
                 </div>
-                <div
-                    ref={Animation.components.levelInterface}
-                    className={`level-container ${
-                        currentScene !== 'level' ? 'unmount' : ''
-                    }`}
-                >
-                    <ButtonBack color={'white'} />
-                    <div className="level-list">
-                        <h2>Select a&nbsp;level</h2>
-                        {levels.map((item) => (
-                            <Portal {...item} key={item.name} />
-                        ))}
-                    </div>
-                </div>
-                <div
-                    ref={Animation.components.factionInterface}
-                    className={`faction-container ${
-                        currentScene !== 'faction' ? 'unmount' : ''
-                    }`}
-                >
-                    <ButtonBack color={'white'} />
-                    <ButtonFaction side="white" />
-                    <ButtonFaction side="black" />
-                </div>
-                <Queue />
-            </>
-        );
-    }
+            </div>
+            <div
+                ref={factionRef}
+                className={`faction-container ${
+                    currentScene !== 'faction' ? 'unmount' : ''
+                }`}
+            >
+                <ButtonBack color={'white'} />
+                <ButtonFaction side="white" />
+                <ButtonFaction side="black" />
+            </div>
+            <Queue queueRef={queueRef} />
+        </>
+    );
 }
+
+export default Interfaces;

@@ -31,7 +31,7 @@ interface IAnimationComps {
     queueInterface: RefObject<HTMLDivElement>;
 }
 
-interface IAnimationCanvasComps {
+interface AnimationCanvasComponents {
     canvas: HTMLCanvasElement;
     curve: Curve;
     shadow: Shadow;
@@ -50,18 +50,13 @@ export default class Animation {
     public static factionToQueueLight: GSAPTimeline;
     public static queueToFaction: GSAPTimeline;
 
-    public static components: IAnimationComps = {
-        homeInterface: React.createRef(),
-        levelInterface: React.createRef(),
-        factionInterface: React.createRef(),
-        queueInterface: React.createRef(),
-    };
-
-    public static canvasComponents: IAnimationCanvasComps;
+    public static components: IAnimationComps | undefined;
+    public static canvasComponents: AnimationCanvasComponents;
     public static faction: Side;
     public static isMobileDevice: boolean;
 
     public static initComponents(
+        domElements: IAnimationComps,
         canvasBlack: CanvasBlack,
         canvasWhite: CanvasWhite,
         currentScene: Scene,
@@ -70,6 +65,7 @@ export default class Animation {
     ) {
         this.faction = faction;
         this.isMobileDevice = isMobileDevice;
+        this.components = domElements;
         this.canvasComponents = {
             curve: canvasBlack.curve,
             light: canvasBlack.light,
@@ -88,7 +84,6 @@ export default class Animation {
     }
 
     public static initHomeToLevel(onComplete: () => void) {
-        const { curve, light } = this.canvasComponents;
         this.homeToLevel = gsap
             .timeline({
                 paused: true,
@@ -97,11 +92,8 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add(curveToStep('level'))
-            .add(
-                [lightToStep('level'), shadowToStep('level'), homeOut()],
-                '-=0.5',
-            )
+            .add([curveToStep('level'), ...homeOut()])
+            .add([lightToStep('level'), shadowToStep('level')], '-=0.5')
             .add(levelIn());
     }
 

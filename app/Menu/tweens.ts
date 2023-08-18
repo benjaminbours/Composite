@@ -65,52 +65,65 @@ export function shadowToStep(step: Scene) {
  */
 export function homeOut() {
     const { mainTitle, subtitleHome } = Animation.canvasComponents;
-    const homeInterface = Animation.components.homeInterface
+    const homeInterface = Animation.components?.homeInterface
         .current as HTMLDivElement;
 
-    return gsap.to([mainTitle, subtitleHome, homeInterface], {
-        duration: 0.5,
-        opacity: 0,
-        onComplete: () => {
-            mainTitle.onTransition = false;
-            mainTitle.isMount = false;
-
-            subtitleHome.onTransition = false;
-            subtitleHome.isMount = false;
-
-            homeInterface.style.display = 'none';
-        },
-    });
+    return [
+        gsap.to(homeInterface, {
+            duration: 0.5,
+            opacity: 0,
+            onComplete: () => {
+                homeInterface.style.display = 'none';
+            },
+        }),
+        gsap.to([mainTitle, subtitleHome], {
+            duration: 0.5,
+            opacity: 0,
+            onComplete: () => {
+                mainTitle.onTransition = false;
+                mainTitle.isMount = false;
+                subtitleHome.onTransition = false;
+                subtitleHome.isMount = false;
+            },
+        }),
+    ];
 }
 
 export function homeIn() {
     const { mainTitle, subtitleHome } = Animation.canvasComponents;
-    const homeInterface = Animation.components.homeInterface
+    const homeInterface = Animation.components?.homeInterface
         .current as HTMLDivElement;
 
-    return gsap.to([mainTitle, subtitleHome, homeInterface], 0.5, {
-        opacity: 1,
-        onStart: () => {
-            mainTitle.onTransition = true;
-            subtitleHome.onTransition = true;
-
-            homeInterface.style.display = 'block';
-        },
-        onComplete: () => {
-            mainTitle.onTransition = false;
-            mainTitle.isMount = true;
-
-            subtitleHome.onTransition = false;
-            subtitleHome.isMount = true;
-        },
-    });
+    return [
+        gsap.to([mainTitle, subtitleHome], {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                mainTitle.onTransition = true;
+                subtitleHome.onTransition = true;
+            },
+            onComplete: () => {
+                mainTitle.onTransition = false;
+                mainTitle.isMount = true;
+                subtitleHome.onTransition = false;
+                subtitleHome.isMount = true;
+            },
+        }),
+        gsap.to(homeInterface, {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                homeInterface.style.display = 'block';
+            },
+        }),
+    ];
 }
 
 /**
  * Level
  */
 export function levelOut() {
-    const levelInterface = Animation.components.levelInterface
+    const levelInterface = Animation.components?.levelInterface
         .current as HTMLElement;
 
     return gsap.to(levelInterface, {
@@ -123,7 +136,7 @@ export function levelOut() {
 }
 
 export function levelIn() {
-    const levelInterface = Animation.components.levelInterface
+    const levelInterface = Animation.components?.levelInterface
         .current as HTMLElement;
 
     return gsap.to(levelInterface, {
@@ -140,7 +153,7 @@ export function levelIn() {
  */
 export function factionOut() {
     const { titleFaction } = Animation.canvasComponents;
-    const factionInterface = Animation.components.factionInterface
+    const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
     return gsap.to([titleFaction, factionInterface], {
@@ -159,7 +172,7 @@ export function factionOut() {
 
 export function factionIn() {
     const { titleFaction } = Animation.canvasComponents;
-    const factionInterface = Animation.components.factionInterface
+    const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
     return gsap.to([titleFaction, factionInterface], {
@@ -180,7 +193,7 @@ export function factionIn() {
  * Queue
  */
 export function queueIn() {
-    const queueInterface = Animation.components.queueInterface
+    const queueInterface = Animation.components?.queueInterface
         .current as HTMLElement;
 
     return gsap.to(queueInterface, {
@@ -193,7 +206,7 @@ export function queueIn() {
 }
 
 export function queueOut() {
-    const queueInterface = Animation.components.queueInterface
+    const queueInterface = Animation.components?.queueInterface
         .current as HTMLElement;
 
     return gsap.to(queueInterface, {

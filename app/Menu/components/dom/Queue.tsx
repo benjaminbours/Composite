@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import Animation from '../../Animation';
+import React from 'react';
 import { Context } from '../../context';
 import ButtonBack from './ButtonBack';
 
@@ -8,22 +7,26 @@ const text = {
     black: 'No light here',
 };
 
-export default class Queue extends Component {
-    public render() {
-        return (
-            <Context.Consumer>
-                {({ side: faction, currentScene }) => (
-                    <div
-                        ref={Animation.components.queueInterface}
-                        className={`queue-container ${
-                            currentScene !== 'queue' ? 'unmount' : ''
-                        }`}
-                    >
-                        <ButtonBack color={faction} />
-                        <h2 className={faction}>{text[faction]}</h2>
-                    </div>
-                )}
-            </Context.Consumer>
-        );
-    }
+interface Props {
+    queueRef: React.RefObject<HTMLDivElement>;
 }
+
+function Queue({ queueRef }: Props) {
+    return (
+        <Context.Consumer>
+            {({ side: faction, currentScene }) => (
+                <div
+                    ref={queueRef}
+                    className={`queue-container ${
+                        currentScene !== 'queue' ? 'unmount' : ''
+                    }`}
+                >
+                    <ButtonBack color={faction} />
+                    <h2 className={faction}>{text[faction]}</h2>
+                </div>
+            )}
+        </Context.Consumer>
+    );
+}
+
+export default Queue;
