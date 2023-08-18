@@ -108,6 +108,9 @@ export default class App {
         const skyShaderMat = this.skyMesh.material as SkyShader;
         this.renderer.render(this.scene, this.camera);
 
+        // make the floor follow the player to be infinite
+        this.floor.position.set(this.player.position.x, 0, 0);
+
         // update everything which need an update in the scene
         for (const item of this.scene.children as any) {
             if (item.hasOwnProperty('render')) {
