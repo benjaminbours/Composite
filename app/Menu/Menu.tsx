@@ -226,16 +226,13 @@ export function Menu() {
         if (!animation.current) {
             return;
         }
-        setState((prev) => ({
-            ...prev,
-            faction: side,
-        }));
+        animation.current.faction = side;
+        setState({
+            side,
+            currentScene: 'queue',
+        });
         animation.current.initFactionToQueue(() => {
             onTransition.current = true;
-            setState((prev) => ({
-                ...prev,
-                currentScene: 'queue',
-            }));
         });
         animation.current.playFactionToQueue();
     }, []);
@@ -309,7 +306,7 @@ export function Menu() {
                             {...item}
                             key={item.name}
                             onClick={handleClickOnLevel}
-            />
+                        />
                     ))}
                 </div>
             </div>

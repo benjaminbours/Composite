@@ -156,18 +156,26 @@ export function factionOut() {
     const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
-    return gsap.to([titleFaction, factionInterface], {
-        duration: 0.5,
-        opacity: 0,
-        onStart: () => {
-            titleFaction.onTransition = true;
-        },
-        onComplete: () => {
-            titleFaction.onTransition = false;
-            titleFaction.isMount = false;
-            factionInterface.style.display = 'none';
-        },
-    });
+    return [
+        gsap.to(titleFaction, {
+            duration: 0.5,
+            opacity: 0,
+            onStart: () => {
+                titleFaction.onTransition = true;
+            },
+            onComplete: () => {
+                titleFaction.onTransition = false;
+                titleFaction.isMount = false;
+            },
+        }),
+        gsap.to(factionInterface, {
+            duration: 0.5,
+            opacity: 0,
+            onComplete: () => {
+                factionInterface.style.display = 'none';
+            },
+        }),
+    ];
 }
 
 export function factionIn() {
@@ -175,18 +183,26 @@ export function factionIn() {
     const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
-    return gsap.to([titleFaction, factionInterface], {
-        duration: 0.5,
-        opacity: 1,
-        onStart: () => {
-            factionInterface.style.display = 'block';
-            titleFaction.onTransition = true;
-        },
-        onComplete: () => {
-            titleFaction.onTransition = false;
-            titleFaction.isMount = true;
-        },
-    });
+    return [
+        gsap.to(titleFaction, {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                titleFaction.onTransition = true;
+            },
+            onComplete: () => {
+                titleFaction.onTransition = false;
+                titleFaction.isMount = true;
+            },
+        }),
+        gsap.to(factionInterface, {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                factionInterface.style.display = 'block';
+            },
+        }),
+    ];
 }
 
 /**

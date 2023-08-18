@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import { ResizeOptions } from '../../types';
+import { ResizeOptions, Side } from '../../types';
 
 const light = new Image();
 light.src = '/light.png';
@@ -84,9 +84,9 @@ export default class Light {
             width: number,
             height: number,
             isOnMobile: boolean,
-            faction: string,
+            faction: Side,
         ) {
-            const positionX = faction === 'light' ? 0.5 : -0.5;
+            const positionX = faction === 'white' ? 0.5 : -0.5;
             const positionY = 0.5;
             return {
                 x: width * positionX,

@@ -1,4 +1,4 @@
-import { ResizeOptions } from '../../types';
+import { ResizeOptions, Side } from '../../types';
 
 const shadow = new Image();
 shadow.src = '/shadow.png';
@@ -42,9 +42,9 @@ export default class Shadow {
             width: number,
             height: number,
             isOnMobile: boolean,
-            faction: string,
+            faction: Side,
         ) {
-            const positionX = faction === 'shadow' ? 0.5 : 1.5;
+            const positionX = faction === 'black' ? 0.5 : 1.5;
             const positionY = 0.5;
             return {
                 x: width * positionX,

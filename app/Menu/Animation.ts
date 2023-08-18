@@ -139,7 +139,7 @@ export default class Animation {
             })
             .add(curveToStep('level'))
             .add(
-                [lightToStep('level'), shadowToStep('level'), factionOut()],
+                [lightToStep('level'), shadowToStep('level'), ...factionOut()],
                 '-=0.5',
             )
             .add(levelIn());
@@ -155,7 +155,7 @@ export default class Animation {
             })
             .add(curveToStep('queue'))
             .add(
-                [lightToStep('queue'), shadowToStep('queue'), factionOut()],
+                [lightToStep('queue'), shadowToStep('queue'), ...factionOut()],
                 '-=0.5',
             )
             .add(queueIn());

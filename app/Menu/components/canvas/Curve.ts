@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import Point from './Point';
-import { IWaveOptions, ResizeOptions } from '../../types';
+import { IWaveOptions, ResizeOptions, Side } from '../../types';
 
 export const defaultWaveOptions: IWaveOptions = {
     viscosity: 340,
@@ -55,9 +55,9 @@ export default class Curve {
             width: number,
             height: number,
             isOnMobile: boolean,
-            faction: string,
+            faction: Side,
         ) {
-            const position = faction === 'light' ? 1.2 : -0.2;
+            const position = faction === 'white' ? 1.2 : -0.2;
             if (isOnMobile) {
                 return height * position;
             }
