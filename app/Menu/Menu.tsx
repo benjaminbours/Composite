@@ -9,12 +9,12 @@ import React, {
     useState,
 } from 'react';
 import type Animation from './Animation';
-import Interfaces from './components/dom';
-import { Context } from './context';
 import CanvasBlack from './components/canvas/CanvasBlack';
 import CanvasWhite from './components/canvas/CanvasWhite';
 import Mouse from './components/canvas/Mouse';
 import { Side, Scene } from './types';
+import ButtonBack from './components/dom/ButtonBack';
+import Portal from './components/dom/Portal';
 
 const stats = (() => {
     if (process.env.NEXT_PUBLIC_STAGE === 'development') {
@@ -240,18 +240,34 @@ export function Menu() {
         animation.current.playFactionToQueue();
     }, []);
 
+    const levels = useMemo(
+        () => [
+            {
+                name: 'Crack the door',
+                img: '/crack_the_door.png',
+            },
+            {
+                name: 'Learn to fly',
+                img: '/learn_to_fly.png',
+            },
+            {
+                name: 'The hight spheres',
+                img: '/the_hight_spheres.png',
+            },
+        ],
+        [],
+    );
+
+    const queueText = useMemo(
+        () => ({
+            white: 'No shadow here',
+            black: 'No light here',
+        }),
+        [],
+    );
+
     return (
-        <Context.Provider
-            value={{
-                ...state,
-                handleClickOnBack,
-                handleClickOnFaction,
-                handleClickOnPlay,
-                handleClickOnLevel,
-                handleMouseEnterPlay,
-                handleMouseLeavePlay,
-            }}
-        >
+        <>
             <canvas
                 id="white"
                 style={{ zIndex: -3 }}
@@ -262,13 +278,76 @@ export function Menu() {
                 style={{ zIndex: -2 }}
                 ref={blackCanvasDomElement}
             />
-            <Interfaces
-                currentScene={state.currentScene}
-                homeRef={homeRef}
-                levelRef={levelRef}
-                factionRef={sideRef}
-                queueRef={queueRef}
+            <div
+                ref={homeRef}
+                className={`home-container ${
+                    state.currentScene !== 'home' ? 'unmount' : ''
+                }`}
+            >
+                <h2>Think both ways</h2>
+                <button
+                    className="buttonCircle"
+                    id="buttonPlay"
+                    onMouseEnter={handleMouseEnterPlay}
+                    onMouseLeave={handleMouseLeavePlay}
+                    onClick={handleClickOnPlay}
+                >
+                    Play
+                </button>
+            </div>
+            <div
+                ref={levelRef}
+                className={`level-container ${
+                    state.currentScene !== 'level' ? 'unmount' : ''
+                }`}
+            >
+                <ButtonBack color="white" onClick={handleClickOnBack} />
+                <div className="level-list">
+                    <h2>Select a&nbsp;level</h2>
+                    {levels.map((item) => (
+                        <Portal
+                            {...item}
+                            key={item.name}
+                            onClick={handleClickOnLevel}
             />
-        </Context.Provider>
+                    ))}
+                </div>
+            </div>
+            <div
+                ref={sideRef}
+                className={`faction-container ${
+                    state.currentScene !== 'faction' ? 'unmount' : ''
+                }`}
+            >
+                <ButtonBack color="white" onClick={handleClickOnBack} />
+                <button
+                    className="buttonCircle factionButton white"
+                    // TODO: had same interaction as on home page
+                    // onMouseEnter={handleMouseEnterPlay}
+                    // onMouseLeave={handleMouseLeavePlay}
+                    onClick={() => handleClickOnFaction('white')}
+                >
+                    light
+                </button>
+                <button
+                    className="buttonCircle factionButton black"
+                    // TODO: had same interaction as on home page
+                    // onMouseEnter={handleMouseEnterPlay}
+                    // onMouseLeave={handleMouseLeavePlay}
+                    onClick={() => handleClickOnFaction('black')}
+                >
+                    shadow
+                </button>
+            </div>
+            <div
+                ref={queueRef}
+                className={`queue-container ${
+                    state.currentScene !== 'queue' ? 'unmount' : ''
+                }`}
+            >
+                <ButtonBack color={state.side} onClick={handleClickOnBack} />
+                <h2 className={state.side}>{queueText[state.side]}</h2>
+            </div>
+        </>
     );
 }

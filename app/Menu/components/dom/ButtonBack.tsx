@@ -1,21 +1,14 @@
-import React from "react";
-import { Context } from "../../context";
+import React from 'react';
 
 interface IProps {
-    color: "black" | "white";
+    color: 'black' | 'white';
+    onClick: () => void;
 }
 
-export default function ButtonBack(props: IProps) {
+export default function ButtonBack({ color, onClick }: IProps) {
     return (
-        <Context.Consumer>
-            {({ handleClickOnBack }) => (
-                <div
-                    className={`buttonRect back ${props.color}`}
-                    onClick={handleClickOnBack}
-                >
-                    Back
-                </div>
-            )}
-        </Context.Consumer>
+        <div className={`buttonRect back ${color}`} onClick={onClick}>
+            Back
+        </div>
     );
 }
