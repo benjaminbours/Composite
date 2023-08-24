@@ -13,7 +13,7 @@ function Game() {
         if (!canvasRef.current) {
             return;
         }
-        appRef.current = new App(canvasRef.current);
+        appRef.current = new App(canvasRef.current, ['white']);
         const stats = (() => {
             if (process.env.NEXT_PUBLIC_STAGE === 'development') {
                 const stats = new STATS.default();
@@ -26,6 +26,7 @@ function Game() {
 
         const gameLoop = () => {
             stats?.begin();
+            appRef.current?.update();
             appRef.current?.render();
             stats?.end();
         };

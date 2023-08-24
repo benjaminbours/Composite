@@ -1,5 +1,5 @@
 import { Vector3, Raycaster, Intersection } from 'three';
-import Player from '../index';
+import { Player } from '../Player';
 import { CollidingElem } from '../../types';
 
 export interface INearestObjects {

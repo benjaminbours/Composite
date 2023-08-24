@@ -1,6 +1,6 @@
 import { Clock, Vector2 } from 'three';
 import * as R from 'ramda';
-import Player from '../index';
+import { Player, PlayerState } from '../Player';
 import Inputs from '../Inputs';
 
 const MAX_VELOCITY_X = 15;
@@ -68,7 +68,7 @@ export const applyAscension = R.ifElse(
 
 // Jump helpers
 const isJumpPossible = (player: Player) =>
-    Inputs.jumpIsActive && player.state === 'onFloor';
+    Inputs.jumpIsActive && player.state === PlayerState.onFloor;
 // const isJumpPossible = (player: Player) => Inputs.jumpIsActive && player.state === "onFloor";
 const setToJumpPower = (player: Player) => (player.velocity.y = JUMP_POWER);
 
