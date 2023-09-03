@@ -1,13 +1,23 @@
-import { Mesh, Group } from "three";
-import { MysticPlace } from "./Elements/MysticPlace";
+import type { Mesh, Group, BoxGeometry, Object3D } from 'three';
+import type { MysticPlace } from './Elements/MysticPlace';
 
-export interface IAsset {
-    type: "jsonObj" | "texture";
+export type Geometries = 'border' | 'platform' | 'wall' | 'mountain';
+
+export type GeometriesRegistry = {
+    [key: string]: unknown | BoxGeometry;
+    // [key in Geometries]?: unknown | BoxGeometry;
+};
+export interface AssetInfo {
+    type: 'jsonObj' | 'texture';
     url: string;
-    name: string;
+    name: Geometries;
+    /**
+     * Raw object loaded
+     */
+    raw?: unknown;
 }
 
-export type CollidingElem = Mesh | Group | MysticPlace;
+export type CollidingElem = Mesh | Group | MysticPlace | Object3D;
 // export type InteractElem = MysticPlace;
 
 // TODO: revoir l'utilité de ce fichier, la façon de load les assets à changers.

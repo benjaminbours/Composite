@@ -1,61 +1,67 @@
-import { ObjectLoader, FileLoader, LoadingManager } from 'three';
-import { IAsset } from './types';
+import { LoadingManager, Mesh } from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { AssetInfo, GeometriesRegistry } from './types';
 
-const assets: IAsset[] = [
-    {
-        type: 'jsonObj',
-        url: './assets/geometry/mountain.json',
-        name: 'mountain',
-    },
-];
+export async function startLoadingAssets(geometries: GeometriesRegistry) {
+    return new Promise((resolve) => {
+        // loaded from public folder
+        // TODO: Update this type, its not relevant anymore
+        const assets: AssetInfo[] = [
+            // {
+            //     type: 'jsonObj',
+            //     url: '/assets/geometry/mountain.json',
+            //     name: 'mountain',
+            // },
+            {
+                type: 'jsonObj',
+                url: '/assets/geometry/assets.glb',
+                name: 'wall',
+            },
+        ];
 
-const manager = new LoadingManager();
+        const manager = new LoadingManager();
 
-manager.onStart = (url, itemsLoaded, itemsTotal) => {
-    console.log(
-        'Started loading file: ' +
-            url +
-            '.\nLoaded ' +
-            itemsLoaded +
-            ' of ' +
-            itemsTotal +
-            ' files.',
-    );
-};
+        manager.onStart = (url, itemsLoaded, itemsTotal) => {
+            console.log(
+                'Started loading file: ' +
+                    url +
+                    '.\nLoaded ' +
+                    itemsLoaded +
+                    ' of ' +
+                    itemsTotal +
+                    ' files.',
+            );
+        };
 
-manager.onLoad = () => {
-    console.log('Loading complete!');
-};
+        // when all assets are load callback
+        manager.onLoad = () => {
+            console.log('Loading complete!');
+            resolve(true);
+        };
 
-manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    console.log(
-        'Loading file: ' +
-            url +
-            '.\nLoaded ' +
-            itemsLoaded +
-            ' of ' +
-            itemsTotal +
-            ' files.',
-    );
-};
+        manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+            console.log(
+                'Loading file: ' +
+                    url +
+                    '.\nLoaded ' +
+                    itemsLoaded +
+                    ' of ' +
+                    itemsTotal +
+                    ' files.',
+            );
+        };
 
-manager.onError = (url) => {
-    console.log('There was an error loading ' + url);
-};
+        manager.onError = (url) => {
+            console.log('There was an error loading ' + url);
+        };
 
-const assetsLoader = new FileLoader(manager);
-// const assetsLoader = new ObjectLoader(manager);
-
-function onAssetLoaded(response: any): void {
-    // function onAssetLoaded(object): void {
-    console.log(arguments);
-    console.log(JSON.parse(response));
-}
-
-export function startLoading() {
-    console.log('YO');
-    for (const asset of assets) {
-        console.log(asset);
-        assetsLoader.load(asset.url, onAssetLoaded);
-    }
+        const assetsLoader = new GLTFLoader(manager);
+        for (const asset of assets) {
+            assetsLoader.load(asset.url, (object: any) => {
+                object.scene.children.forEach((mesh: Mesh) => {
+                    geometries[mesh.name] = mesh.geometry;
+                });
+            });
+        }
+    });
 }
