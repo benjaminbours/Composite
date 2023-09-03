@@ -1,8 +1,8 @@
 import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Scene } from 'three';
-import { gridSize } from '../Mesh/Grid';
 import { TestLevel } from './TestLevel';
 import { PositionLevel } from './PositionLevel';
 import { CollidingElem, Geometries } from '../types';
+import { gridSize } from './levels.utils';
 
 type Level = 'testLevel' | 'positionLevel';
 

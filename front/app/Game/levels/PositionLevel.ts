@@ -1,5 +1,5 @@
 import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Vector3 } from 'three';
-import { createWall } from './levels.utils';
+import { createArchGroup, createWall } from './levels.utils';
 import { CollidingElem } from '../types';
 
 export class PositionLevel extends Group {
@@ -15,5 +15,17 @@ export class PositionLevel extends Group {
         );
         this.add(wallBlockingLeftPath);
         this.collidingElements.push(wallBlockingLeftPath);
+
+        const arches = [
+            createArchGroup(1, new Vector3(2, 0, 0)),
+            createArchGroup(2, new Vector3(4, 0, 0)),
+            createArchGroup(3, new Vector3(6, 0, 0)),
+        ];
+
+        arches.forEach((arch) => {
+            this.add(arch);
+            // TODO: Add only the platform to the list of colliding elements
+            this.collidingElements.push(arch);
+        });
     }
 }

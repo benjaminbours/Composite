@@ -13,11 +13,11 @@ import {
     MeshPhongMaterial,
 } from 'three';
 import { getRange } from '../helpers/math';
-import { positionOnGrid, gridSize } from '../Mesh/Grid';
 
 import VS from '../glsl/mysticPlace_vs.glsl';
 import FS from '../glsl/mysticPlace_fs.glsl';
 import { gsap } from 'gsap';
+import { gridSize, positionOnGrid } from '../levels/levels.utils';
 
 const clock = new Clock();
 
