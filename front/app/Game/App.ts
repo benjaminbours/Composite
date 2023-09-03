@@ -1,20 +1,20 @@
 import {
     Mesh,
-    Fog,
+    // Fog,
     // Clock,
-    DirectionalLight,
-    Object3D,
+    // DirectionalLight,
+    // Object3D,
     // Group,
     Scene,
     WebGLRenderer,
-    PCFSoftShadowMap,
-    HemisphereLight,
-    FogExp2,
-    IcosahedronGeometry,
+    // PCFSoftShadowMap,
+    // HemisphereLight,
+    // FogExp2,
+    // IcosahedronGeometry,
     MeshPhongMaterial,
     CircleGeometry,
     WebGLRenderTarget,
-    AmbientLight,
+    // AmbientLight,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -22,13 +22,13 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 // import SkyShader from './SkyShader';
 import Inputs from './Player/Inputs';
 import { LightPlayer, Player } from './Player';
-// import Level from './Level';
 import CustomCamera from './CustomCamera';
 import { CollidingElem } from './types';
 import { MysticPlace } from './Elements/MysticPlace';
 import { Side } from '../types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
+import LevelController from './levels/levels.controller';
 
 export default class App {
     private width = window.innerWidth;
@@ -52,11 +52,10 @@ export default class App {
     private floor!: Mesh;
 
     private collidingElements: CollidingElem[] = [];
+    private levelController = new LevelController(this.collidingElements);
     // private interactElements: InteractElem[] = [];
 
     private volumetricLightPass!: ShaderPass;
-    // private effectAdditiveBlending!: ShaderPass;
-    // public occlusionRenderTarget!: WebGLRenderTarget;
     private occlusionComposer!: EffectComposer;
     private mainComposer!: EffectComposer;
 
@@ -95,9 +94,9 @@ export default class App {
         // this.scene.add(this.skyMesh);
 
         // level
-        // const level = new Level();
         // this.scene.add(level);
         // this.collidingElements.push(level);
+        this.scene.add(this.levelController.levels.positionLevel);
 
         this.setupScene(playersConfig);
         // console.log(this.scene.children);

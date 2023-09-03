@@ -13,7 +13,7 @@ import {
     MeshPhongMaterial,
 } from 'three';
 import { getRange } from '../helpers/math';
-import { putMeshOnGrid, gridSize } from '../Mesh/Grid';
+import { positionOnGrid, gridSize } from '../Mesh/Grid';
 
 import VS from '../glsl/mysticPlace_vs.glsl';
 import FS from '../glsl/mysticPlace_fs.glsl';
@@ -128,7 +128,7 @@ export class MysticPlace extends Object3D {
         const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockmat);
         this.add(whiteBlock);
 
-        putMeshOnGrid(this, new Vector3(1, 0, 0));
+        positionOnGrid(this, new Vector3(1, 0, 0));
 
         this.particles.frustumCulled = false;
     }
