@@ -3,7 +3,9 @@ import { createWall } from './levels.utils';
 import { CollidingElem } from '../types';
 
 export class PositionLevel extends Group {
-    constructor(collidingElements: CollidingElem[]) {
+    public collidingElements: CollidingElem[] = [];
+
+    constructor() {
         super();
 
         const wallBlockingLeftPath = createWall(
@@ -12,6 +14,6 @@ export class PositionLevel extends Group {
             new Vector3(0, 90, 0),
         );
         this.add(wallBlockingLeftPath);
-        collidingElements.push(wallBlockingLeftPath);
+        this.collidingElements.push(wallBlockingLeftPath);
     }
 }

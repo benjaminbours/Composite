@@ -1,7 +1,10 @@
 import { Group, BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
 import { createMeshForGrid, multiplyByGridSize } from '../Mesh/Grid';
+import { CollidingElem } from '../types';
 
 export class TestLevel extends Group {
+    public collidingElements: CollidingElem[] = [];
+
     constructor() {
         super();
 

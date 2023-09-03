@@ -51,8 +51,8 @@ export default class App {
 
     private floor!: Mesh;
 
+    private levelController = new LevelController();
     private collidingElements: CollidingElem[] = [];
-    private levelController = new LevelController(this.collidingElements);
     // private interactElements: InteractElem[] = [];
 
     private volumetricLightPass!: ShaderPass;
@@ -96,7 +96,8 @@ export default class App {
         // level
         // this.scene.add(level);
         // this.collidingElements.push(level);
-        this.scene.add(this.levelController.levels.positionLevel);
+        this.levelController.loadLevel('positionLevel', this.scene);
+        // this.scene.add(this.levelController.levels.positionLevel);
 
         this.setupScene(playersConfig);
         // console.log(this.scene.children);
@@ -182,7 +183,14 @@ export default class App {
             if (item.hasOwnProperty('update')) {
                 switch (true) {
                     case item instanceof Player:
-                        item.update(this.collidingElements);
+                        const currentLevelCollidingElements =
+                            this.levelController.levels[
+                                this.levelController.currentLevel!
+                            ].collidingElements;
+                        item.update([
+                            ...this.collidingElements,
+                            ...currentLevelCollidingElements,
+                        ]);
                         break;
                     default:
                         item.update();
