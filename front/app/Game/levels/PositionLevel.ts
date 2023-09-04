@@ -1,9 +1,19 @@
 import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Vector3 } from 'three';
-import { createArchGroup, createWall } from './levels.utils';
+import {
+    createArchGroup,
+    createWall,
+    positionInsideGridBox,
+} from './levels.utils';
 import { CollidingElem } from '../types';
 
 export class PositionLevel extends Group {
     public collidingElements: CollidingElem[] = [];
+    public name = 'position-level';
+
+    public startPosition = {
+        light: new Vector3(1626, 775, 0),
+        shadow: new Vector3(15, 20, 0),
+    };
 
     constructor() {
         super();

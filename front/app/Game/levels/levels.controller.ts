@@ -1,8 +1,17 @@
-import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Scene } from 'three';
+import {
+    Group,
+    BoxGeometry,
+    MeshBasicMaterial,
+    Mesh,
+    Scene,
+    Vector2,
+    Vector3,
+} from 'three';
 import { TestLevel } from './TestLevel';
 import { PositionLevel } from './PositionLevel';
 import { CollidingElem, Geometries } from '../types';
 import { gridSize } from './levels.utils';
+import { LightPlayer, Player } from '../Player';
 
 type Level = 'testLevel' | 'positionLevel';
 
@@ -30,7 +39,7 @@ export default class LevelController {
         };
     }
 
-    loadLevel = (level: Level, scene: Scene) => {
+    loadLevel = (level: Level, scene: Scene, players: Player[]) => {
         // unmount from scene the previously mounted level
         if (this.currentLevel) {
             scene.remove(this.levels[this.currentLevel]);
@@ -38,5 +47,13 @@ export default class LevelController {
         // mount the new one
         this.currentLevel = level;
         scene.add(this.levels[level]);
+
+        // set position of the players
+        players.forEach((player) => {
+            if (player instanceof LightPlayer) {
+                const position = this.levels[level].startPosition.light;
+                player.position.set(position.x, position.y, position.z);
+            }
+        });
     };
 }

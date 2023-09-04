@@ -96,7 +96,6 @@ export default class App {
         // level
         // this.scene.add(level);
         // this.collidingElements.push(level);
-        this.levelController.loadLevel('positionLevel', this.scene);
         // this.scene.add(this.levelController.levels.positionLevel);
 
         this.setupScene(playersConfig);
@@ -149,6 +148,12 @@ export default class App {
         // camera
         this.camera.position.z = 300;
         this.camera.position.y = 10;
+
+        this.levelController.loadLevel(
+            'positionLevel',
+            this.scene,
+            this.players,
+        );
     };
 
     setupPostProcessing = () => {

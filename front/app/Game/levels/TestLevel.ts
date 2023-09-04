@@ -1,9 +1,15 @@
-import { Group, BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
+import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Vector3 } from 'three';
 import { CollidingElem } from '../types';
 import { createMeshForGrid, multiplyByGridSize } from './levels.utils';
 
 export class TestLevel extends Group {
     public collidingElements: CollidingElem[] = [];
+    public name = 'test-level';
+
+    public startPosition = {
+        light: new Vector3(10, 20, 0),
+        shadow: new Vector3(15, 20, 0),
+    };
 
     constructor() {
         super();
