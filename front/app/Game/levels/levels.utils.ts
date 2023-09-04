@@ -58,7 +58,10 @@ export function positionOnGrid(
     }
 }
 
-function positionInsideGridBox(element: Mesh | Object3D, position: Vector3) {
+export function positionInsideGridBox(
+    element: Mesh | Object3D,
+    position: Vector3,
+) {
     const coordinate = position.multiplyScalar(gridSizeSmall);
     element.position.add(coordinate);
 }

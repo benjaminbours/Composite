@@ -16,3 +16,5 @@
 ## Nice to have
 
 - make floating animation for player
+- Rethink the way the level are built, everything could be imported from Blender or other tool to generate
+  level

@@ -37,5 +37,28 @@ export class PositionLevel extends Group {
             // TODO: Add only the platform to the list of colliding elements
             this.collidingElements.push(arch);
         });
+
+        const templeRoof = createWall(
+            new Vector3(2, 6, 0),
+            new Vector3(8, 3, 0),
+            new Vector3(90, 0, -90),
+        );
+        this.add(templeRoof);
+        this.collidingElements.push(templeRoof);
+
+        const templeEndWall = createWall(
+            new Vector3(3, 5, 0),
+            new Vector3(13, 0, 1),
+            new Vector3(0, 90, 0),
+        );
+        this.add(templeEndWall);
+        this.collidingElements.push(templeEndWall);
+
+        const wallInsideTemple = createWall(
+            new Vector3(6, 3, 0),
+            new Vector3(9, 0, -1),
+            new Vector3(0, 0, 0),
+        );
+        this.add(wallInsideTemple);
     }
 }
