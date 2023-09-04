@@ -82,33 +82,21 @@ export function createWall(
     size: Vector3,
     position: Vector3,
     rotation: Vector3,
-    ambientOcclusionMap?: any,
 ) {
-    const group = new Object3D();
-
-    for (var i = 0; i < size.x; i++) {
-        const wallPiece = (() => {
-            return createMeshForGrid(geometries.wall as any, materials.phong);
-        })();
-        positionOnGrid(wallPiece, new Vector3(i, 0, 0));
-        group.add(wallPiece);
-
-        if (size.y) {
-            for (var j = 1; j < size.y; j++) {
-                const wallFloor = createMeshForGrid(
-                    geometries.wall as any,
-                    materials.phong,
-                );
-                positionOnGrid(wallFloor, new Vector3(i, j, 0));
-                group.add(wallFloor);
-            }
-        }
-    }
-
+    const wallDepth = 34;
+    const sizeForGrid = size.multiplyScalar(gridSize);
+    const wall = createMeshForGrid(
+        new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth).translate(
+            sizeForGrid.x / 2,
+            sizeForGrid.y / 2,
+            wallDepth / 2,
+        ),
+        materials.phong,
+    );
     // position the whole group
-    positionOnGrid(group, position, rotation);
+    positionOnGrid(wall, position, rotation);
 
-    return group;
+    return wall;
 }
 
 export function createArchGroup(

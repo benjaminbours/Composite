@@ -19,8 +19,8 @@ export class PositionLevel extends Group {
         super();
 
         const wallBlockingLeftPath = createWall(
-            new Vector3(3, 2, 0),
-            new Vector3(-2, 0, 1),
+            new Vector3(4, 2, 0),
+            new Vector3(-2, 0, 2),
             new Vector3(0, 90, 0),
         );
         this.add(wallBlockingLeftPath);
@@ -40,15 +40,15 @@ export class PositionLevel extends Group {
 
         const templeRoof = createWall(
             new Vector3(2, 6, 0),
-            new Vector3(8, 3, 0),
+            new Vector3(8, 3, 0.5),
             new Vector3(90, 0, -90),
         );
         this.add(templeRoof);
         this.collidingElements.push(templeRoof);
 
         const templeEndWall = createWall(
-            new Vector3(3, 5, 0),
-            new Vector3(13, 0, 1),
+            new Vector3(4, 5, 0),
+            new Vector3(13, 0, 2),
             new Vector3(0, 90, 0),
         );
         this.add(templeEndWall);
