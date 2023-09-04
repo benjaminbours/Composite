@@ -1,7 +1,8 @@
-import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Vector3 } from 'three';
+import { Group, Vector3 } from 'three';
 import {
     createArchGroup,
     createWall,
+    createWallDoor,
     positionInsideGridBox,
 } from './levels.utils';
 import { CollidingElem } from '../types';
@@ -11,6 +12,7 @@ export class PositionLevel extends Group {
     public name = 'position-level';
 
     public startPosition = {
+        // light: new Vector3(10, 20, 0),
         light: new Vector3(1626, 775, 0),
         shadow: new Vector3(15, 20, 0),
     };
@@ -38,14 +40,6 @@ export class PositionLevel extends Group {
             this.collidingElements.push(arch);
         });
 
-        const templeRoof = createWall(
-            new Vector3(2, 6, 0),
-            new Vector3(8, 3, 0.5),
-            new Vector3(90, 0, -90),
-        );
-        this.add(templeRoof);
-        this.collidingElements.push(templeRoof);
-
         const templeEndWall = createWall(
             new Vector3(4, 5, 0),
             new Vector3(13, 0, 2),
@@ -60,5 +54,24 @@ export class PositionLevel extends Group {
             new Vector3(0, 0, 0),
         );
         this.add(wallInsideTemple);
+
+        // wall door
+        const wallDoorGroundFloor = createWallDoor(
+            new Vector3(3, 3, 0),
+            new Vector3(9, 0, 0),
+            new Vector3(0, 0, 0),
+            'vertical',
+        );
+        this.add(wallDoorGroundFloor);
+        this.collidingElements.push(wallDoorGroundFloor);
+
+        const wallDoorRoof = createWallDoor(
+            new Vector3(2, 6, 0),
+            new Vector3(8, 3, 0),
+            new Vector3(0, 3, 0),
+            'horizontal',
+        );
+        this.add(wallDoorRoof);
+        this.collidingElements.push(wallDoorRoof);
     }
 }

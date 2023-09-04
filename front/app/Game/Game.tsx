@@ -32,6 +32,8 @@ function Game() {
                 appRef.current?.render();
                 stats?.end();
             };
+            // https://greensock.com/docs/v3/GSAP/gsap.ticker
+            // gsap.ticker.fps(90);
             gsap.ticker.add(gameLoop);
         });
     }, []);

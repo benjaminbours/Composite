@@ -1,6 +1,11 @@
 import { Group, BoxGeometry, MeshBasicMaterial, Mesh, Vector3 } from 'three';
 import { CollidingElem } from '../types';
-import { createMeshForGrid, multiplyByGridSize } from './levels.utils';
+import {
+    createMeshForGrid,
+    createWall,
+    createWallDoor,
+    multiplyByGridSize,
+} from './levels.utils';
 
 export class TestLevel extends Group {
     public collidingElements: CollidingElem[] = [];
@@ -25,8 +30,19 @@ export class TestLevel extends Group {
             multiplyByGridSize(1),
         );
         const material = new MeshBasicMaterial({ color: 0xffff00 });
-        const sizeBox = createMeshForGrid(geometry, material);
-        // this.add(wall);
-        this.add(sizeBox);
+        // const sizeBox = createMeshForGrid(geometry, material);
+        const wall = createWall(
+            new Vector3(1, 1, 0),
+            new Vector3(0, 0, 0),
+            new Vector3(),
+        );
+        this.add(wall);
+
+        // wall door
+        // const wallDoorGroundFloor = createWallDoor(
+        //     new Vector3(2, 0, 0),
+        //     'vertical',
+        // );
+        // this.add(wallDoorGroundFloor);
     }
 }

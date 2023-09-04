@@ -8,12 +8,13 @@ import {
     Object3D,
     Vector3,
 } from 'three';
-import { Geometries, GeometriesRegistry } from '../types';
+import { GeometriesRegistry } from '../types';
 import { degreesToRadians } from '../helpers/math';
 
 export const gridSize = 250;
 const gridSizeMedium = gridSize / 2;
 const gridSizeSmall = gridSizeMedium / 2;
+const wallDepth = 34;
 
 // TODO: Its not clear the fact is instantiated here then populate with more
 // geometry later when loading assets. Lets make the loading function return a proper
@@ -83,7 +84,6 @@ export function createWall(
     position: Vector3,
     rotation: Vector3,
 ) {
-    const wallDepth = 34;
     const sizeForGrid = size.multiplyScalar(gridSize);
     const wall = createMeshForGrid(
         new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth).translate(
@@ -97,6 +97,72 @@ export function createWall(
     positionOnGrid(wall, position, rotation);
 
     return wall;
+}
+
+export function createWallDoor(
+    size: Vector3,
+    position: Vector3,
+    doorPosition: Vector3,
+    orientation: 'horizontal' | 'vertical',
+) {
+    const group = new Object3D();
+    // wall left to the door
+    const wallLeft = createWall(
+        new Vector3(0.5, size.y, 0),
+        new Vector3(0.5, 0, 0),
+        new Vector3(),
+    );
+    const wallRight = createWall(
+        new Vector3(0.5, size.y, 0),
+        new Vector3(-1, 0, 0),
+        new Vector3(),
+    );
+    group.add(wallLeft, wallRight);
+
+    for (let i = 0; i < size.y; i++) {
+        if (i === doorPosition.y) {
+            const wallDoor = createMeshForGrid(
+                geometries.wallDoor as any,
+                materials.phong,
+            );
+            wallDoor.translateY(i * gridSize);
+            wallDoor.translateZ(wallDepth / 2);
+            const doorLeft = createMeshForGrid(
+                geometries.doorLeft as any,
+                materials.phong,
+            );
+            doorLeft.translateY(i * gridSize);
+            doorLeft.translateZ(wallDepth / 2);
+            doorLeft.name = 'doorLeft';
+            const doorRight = createMeshForGrid(
+                geometries.doorRight as any,
+                materials.phong,
+            );
+            doorRight.translateY(i * gridSize);
+            doorRight.translateZ(wallDepth / 2);
+            doorRight.name = 'doorRight';
+
+            group.add(wallDoor, doorLeft, doorRight);
+        } else {
+            const wall = createWall(
+                new Vector3(1, 1, 0),
+                new Vector3(-0.5, i, 0),
+                new Vector3(),
+            );
+            group.add(wall);
+        }
+    }
+
+    switch (orientation) {
+        case 'horizontal':
+            positionOnGrid(group, position, new Vector3(90, 0, -90));
+            break;
+        case 'vertical':
+            positionOnGrid(group, position, new Vector3(0, 90, 0));
+            break;
+    }
+
+    return group;
 }
 
 export function createArchGroup(
