@@ -42,6 +42,7 @@ void main() {
     float y = rxy * sin(hxy);
     // mod stand for modulo
     float cyclePosition = mod((time + (delay * 2.0) * speed) * 0.1, 1.0);
+    // on the next line, 20 means the height of the particle column
     float z = (r * (tan(hz) + 20.)) * cyclePosition;
     
     vec3 dPosition = vec3(x,y,z) + direction;

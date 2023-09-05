@@ -97,7 +97,7 @@ export class Player extends Object3D {
                     }
                 }
             } else {
-                // when the player is not toucher the floor
+                // when the player is not touching the floor
                 // if (parent instanceof MysticPlace) {
                 if (
                     parent instanceof MysticPlace &&
@@ -138,6 +138,15 @@ export class Player extends Object3D {
         ) {
             this.velocity.x = 0;
             this.position.x = nearestObjects.left.point.x + 20;
+        }
+
+        if (
+            nearestObjects.up &&
+            this.position.y + this.velocity.y + this.range.y >
+                nearestObjects.up.point.y
+        ) {
+            this.velocity.y = 0;
+            this.position.y = nearestObjects.up.point.y - 20;
         }
     };
 }
