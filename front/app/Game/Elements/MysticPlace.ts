@@ -102,7 +102,6 @@ export class MysticPlace extends Object3D {
         const particlesMat = new ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },
-                opacity: { value: 0.5 },
             },
             vertexShader: VS,
             fragmentShader: FS,
