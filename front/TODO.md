@@ -12,6 +12,7 @@
 
 - Fix bug when you change tab your player move a lot of distance due to velocity management
 - Fix bug where collision from top border are not handled
+- Restore occlusion with the light if some element are in front of the camera
 
 ## Nice to have
 

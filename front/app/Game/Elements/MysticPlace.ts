@@ -13,7 +13,6 @@ import {
     MeshPhongMaterial,
 } from 'three';
 import { getRange } from '../helpers/math';
-
 import VS from '../glsl/mysticPlace_vs.glsl';
 import FS from '../glsl/mysticPlace_fs.glsl';
 import { gsap } from 'gsap';
@@ -113,11 +112,10 @@ export class MysticPlace extends Object3D {
         });
 
         this.particles = new Points(particlesGeo, particlesMat);
-        // this.particles.position.set(0, 30, 0);
         this.add(this.particles);
 
         const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
-        const whiteBlockmat = new MeshPhongMaterial({
+        const whiteBlockMat = new MeshPhongMaterial({
             color: 0xffffff,
             side: DoubleSide,
             specular: 0x000000,
@@ -125,15 +123,13 @@ export class MysticPlace extends Object3D {
             transparent: true,
         });
 
-        const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockmat);
+        const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockMat);
         this.add(whiteBlock);
-
-        positionOnGrid(this, new Vector3(1, 0, 0));
 
         this.particles.frustumCulled = false;
     }
 
-    public render = () => {
+    public update = () => {
         const delta = clock.getDelta();
         const particlesMat = this.particles.material as ShaderMaterial;
         if (this.playerIsOn && !this.isFast) {

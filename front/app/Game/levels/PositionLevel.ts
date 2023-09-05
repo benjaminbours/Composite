@@ -4,16 +4,18 @@ import {
     createWall,
     createWallDoor,
     positionInsideGridBox,
+    positionOnGrid,
 } from './levels.utils';
 import { CollidingElem } from '../types';
+import { MysticPlace } from '../elements/MysticPlace';
 
 export class PositionLevel extends Group {
     public collidingElements: CollidingElem[] = [];
     public name = 'position-level';
 
     public startPosition = {
-        // light: new Vector3(10, 20, 0),
-        light: new Vector3(1626, 775, 0),
+        light: new Vector3(10, 20, 0),
+        // light: new Vector3(1626, 775, 0),
         shadow: new Vector3(15, 20, 0),
     };
 
@@ -73,5 +75,10 @@ export class PositionLevel extends Group {
         );
         this.add(wallDoorRoof);
         this.collidingElements.push(wallDoorRoof);
+
+        const mysticPlace = new MysticPlace(300);
+        this.add(mysticPlace);
+        this.collidingElements.push(mysticPlace);
+        positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
     }
 }

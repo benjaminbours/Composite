@@ -18,7 +18,7 @@ import {
     useVelocity,
     // delta,
 } from './physics/movementHelpers';
-import { MysticPlace } from '../Elements/MysticPlace';
+import { MysticPlace } from '../elements/MysticPlace';
 
 export enum PlayerState {
     onFloor,

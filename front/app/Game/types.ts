@@ -1,5 +1,5 @@
 import type { Mesh, Group, BoxGeometry, Object3D } from 'three';
-import type { MysticPlace } from './Elements/MysticPlace';
+import type { MysticPlace } from './elements/MysticPlace';
 
 export type Geometries = 'border' | 'platform' | 'wall' | 'mountain';
 

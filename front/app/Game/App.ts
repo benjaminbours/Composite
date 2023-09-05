@@ -14,6 +14,7 @@ import {
     MeshPhongMaterial,
     CircleGeometry,
     WebGLRenderTarget,
+    Object3D,
     // AmbientLight,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
@@ -24,7 +25,6 @@ import Inputs from './Player/Inputs';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
 import { CollidingElem } from './types';
-import { MysticPlace } from './Elements/MysticPlace';
 import { Side } from '../types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
@@ -93,13 +93,7 @@ export default class App {
         // this.skyMesh.rotation.set(0, 1, 0);
         // this.scene.add(this.skyMesh);
 
-        // level
-        // this.scene.add(level);
-        // this.collidingElements.push(level);
-        // this.scene.add(this.levelController.levels.positionLevel);
-
         this.setupScene(playersConfig);
-        // console.log(this.scene.children);
         this.setupPostProcessing();
     }
 
@@ -121,11 +115,6 @@ export default class App {
 
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
-
-        // mystic place test
-        // const mysticPlace = new MysticPlace(200);
-        // this.scene.add(mysticPlace);
-        // this.collidingElements.push(mysticPlace);
 
         // // player
         playersConfig.forEach((side) => {
@@ -182,9 +171,9 @@ export default class App {
         this.mainComposer.addPass(mixPass);
     };
 
-    public update = () => {
-        // update everything which need an update in the scene
-        for (const item of this.scene.children as any) {
+    public updateChildren = (object: Object3D) => {
+        for (let i = 0; i < object.children.length; i++) {
+            const item = object.children[i] as any;
             if (item.hasOwnProperty('update')) {
                 switch (true) {
                     case item instanceof Player:
@@ -196,13 +185,22 @@ export default class App {
                             ...this.collidingElements,
                             ...currentLevelCollidingElements,
                         ]);
+                        // console.log(item.position);
                         break;
                     default:
                         item.update();
                         break;
                 }
             }
+            if (item.children?.length) {
+                this.updateChildren(item);
+            }
         }
+    };
+
+    public update = () => {
+        // update everything which need an update in the scene
+        this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         this.floor.position.set(this.players[0].position.x, 0, 0);
 
