@@ -29,6 +29,7 @@ import { Side } from '../types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
+import { collisionSystem, updateDelta } from './Player/physics/movementHelpers';
 
 export default class App {
     private width = window.innerWidth;
@@ -175,22 +176,7 @@ export default class App {
         for (let i = 0; i < object.children.length; i++) {
             const item = object.children[i] as any;
             if (item.hasOwnProperty('update')) {
-                switch (true) {
-                    case item instanceof Player:
-                        const currentLevelCollidingElements =
-                            this.levelController.levels[
-                                this.levelController.currentLevel!
-                            ].collidingElements;
-                        item.update([
-                            ...this.collidingElements,
-                            ...currentLevelCollidingElements,
-                        ]);
-                        // console.log(item.position);
-                        break;
-                    default:
-                        item.update();
-                        break;
-                }
+                item.update();
             }
             if (item.children?.length) {
                 this.updateChildren(item);
@@ -199,7 +185,17 @@ export default class App {
     };
 
     public update = () => {
+        // TODO: Multiple clocks are used in various places (movement helper, mysticPlace)
+        // Lets use just one store in the app
+        updateDelta();
         // update everything which need an update in the scene
+        const currentLevelCollidingElements =
+            this.levelController.levels[this.levelController.currentLevel!]
+                .collidingElements;
+        collisionSystem(this.players, [
+            ...this.collidingElements,
+            ...currentLevelCollidingElements,
+        ]);
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         this.floor.position.set(this.players[0].position.x, 0, 0);

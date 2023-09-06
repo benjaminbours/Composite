@@ -1,5 +1,4 @@
 import { Vector3, Raycaster, Intersection } from 'three';
-import { Player } from '../Player';
 import { CollidingElem } from '../../types';
 
 export interface INearestObjects {
@@ -19,7 +18,7 @@ const RAYS = {
 const RAYCASTER = new Raycaster();
 
 export function getNearestObjects(
-    player: Player,
+    position: Vector3,
     obstacles: CollidingElem[],
 ): INearestObjects {
     const nearestObjects: INearestObjects = {};
@@ -27,7 +26,7 @@ export function getNearestObjects(
     const directions = Object.keys(RAYS) as (keyof typeof RAYS)[];
     for (const direction of directions) {
         const ray = RAYS[direction];
-        RAYCASTER.set(player.position, ray);
+        RAYCASTER.set(position, ray);
 
         const intersectObjects = RAYCASTER.intersectObjects(obstacles, true);
         const nearestObject = intersectObjects[0];

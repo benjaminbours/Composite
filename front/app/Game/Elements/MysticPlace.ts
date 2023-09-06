@@ -16,18 +16,17 @@ import { getRange } from '../helpers/math';
 import VS from '../glsl/mysticPlace_vs.glsl';
 import FS from '../glsl/mysticPlace_fs.glsl';
 import { gsap } from 'gsap';
-import { gridSize, positionOnGrid } from '../levels/levels.utils';
+import { gridSize } from '../levels/levels.utils';
 
 const clock = new Clock();
 
 export class MysticPlace extends Object3D {
-    public playerIsOn: boolean = false;
-    private isFast: boolean = false;
+    public shouldActivate: boolean = false;
+    public isActive: boolean = false;
     private speedModifier: number = 0.5;
-
     private particles: Points;
 
-    constructor(particlesNumber: number, position?: Vector3) {
+    constructor(particlesNumber: number) {
         super();
 
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
@@ -131,16 +130,16 @@ export class MysticPlace extends Object3D {
     public update = () => {
         const delta = clock.getDelta();
         const particlesMat = this.particles.material as ShaderMaterial;
-        if (this.playerIsOn && !this.isFast) {
-            this.isFast = true;
+        if (this.shouldActivate && !this.isActive) {
+            this.isActive = true;
             gsap.to(this, {
                 duration: 2,
                 speedModifier: 2.5,
             });
         }
 
-        if (!this.playerIsOn && this.isFast) {
-            this.isFast = false;
+        if (!this.shouldActivate && this.isActive) {
+            this.isActive = false;
             gsap.to(this, {
                 duration: 2,
                 speedModifier: 0.2,
