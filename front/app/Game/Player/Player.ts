@@ -23,6 +23,7 @@ export class Player extends Object3D implements MovableComponent {
     public range = new Vector3(20, 20, 0);
     public state: MovableComponentState = MovableComponentState.onFloor;
     public currentMysticPlace = undefined;
+    public currentDoorOpener = undefined;
     // + positions from Object3D
     // end properties used on collision systems
 

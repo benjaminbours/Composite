@@ -5,6 +5,7 @@ import Inputs from '../Inputs';
 import { getNearestObjects } from './raycaster';
 import { MysticPlace } from '../../elements/MysticPlace';
 import { CollidingElem } from '../../types';
+import { DoorOpener } from '../../elements/DoorOpener';
 
 const MAX_VELOCITY_X = 15;
 const MAX_FALL_SPEED = 20;
@@ -114,6 +115,12 @@ export interface MovableComponent {
     state: MovableComponentState;
     // We have to keep in memory a reference to the last activated mystic place in order to deactivate it when we leave
     currentMysticPlace: MysticPlace | undefined;
+    currentDoorOpener: DoorOpener | undefined;
+}
+
+export interface InteractiveComponent {
+    shouldActivate: boolean;
+    isActive: boolean;
 }
 
 export function collisionSystem(
@@ -137,14 +144,24 @@ export function collisionSystem(
                 velocity.y = 0;
                 position.y = nearestObjects.down.point.y + 20;
 
-                if (parent instanceof MysticPlace) {
-                    component.currentMysticPlace = parent;
-                    parent.shouldActivate = true;
-                    component.state = MovableComponentState.ascend;
-                } else {
-                    if (component.state !== MovableComponentState.onFloor) {
-                        component.state = MovableComponentState.onFloor;
-                    }
+                switch (true) {
+                    case parent instanceof MysticPlace:
+                        component.currentMysticPlace = parent as MysticPlace;
+                        (parent as MysticPlace).shouldActivate = true;
+                        component.state = MovableComponentState.ascend;
+                        break;
+                    case parent instanceof DoorOpener:
+                        component.currentDoorOpener = parent as DoorOpener;
+                        (parent as DoorOpener).shouldActivate = true;
+                        if (component.state !== MovableComponentState.onFloor) {
+                            component.state = MovableComponentState.onFloor;
+                        }
+                        break;
+                    default:
+                        if (component.state !== MovableComponentState.onFloor) {
+                            component.state = MovableComponentState.onFloor;
+                        }
+                        break;
                 }
             }
 
@@ -174,6 +191,14 @@ export function collisionSystem(
             ) {
                 component.currentMysticPlace.shouldActivate = false;
                 component.currentMysticPlace = undefined;
+            }
+
+            if (
+                !(parent instanceof DoorOpener) &&
+                component.currentDoorOpener
+            ) {
+                component.currentDoorOpener.shouldActivate = false;
+                component.currentDoorOpener = undefined;
             }
 
             // this.distanceFromFloor = nearestObjects.down.distance;

@@ -8,6 +8,7 @@ import {
 } from './levels.utils';
 import { CollidingElem } from '../types';
 import { MysticPlace } from '../elements/MysticPlace';
+import { DoorOpener } from '../elements/DoorOpener';
 
 export class PositionLevel extends Group {
     public collidingElements: CollidingElem[] = [];
@@ -76,9 +77,13 @@ export class PositionLevel extends Group {
         this.add(wallDoorRoof);
         this.collidingElements.push(wallDoorRoof);
 
-        const mysticPlace = new MysticPlace(300);
-        this.add(mysticPlace);
-        this.collidingElements.push(mysticPlace);
-        positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
+        // const mysticPlace = new MysticPlace(300);
+        // this.add(mysticPlace);
+        // this.collidingElements.push(mysticPlace);
+        // positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
+
+        const doorOpener = new DoorOpener();
+        this.collidingElements.push(doorOpener);
+        this.add(doorOpener);
     }
 }

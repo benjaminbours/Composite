@@ -17,10 +17,11 @@ import VS from '../glsl/mysticPlace_vs.glsl';
 import FS from '../glsl/mysticPlace_fs.glsl';
 import { gsap } from 'gsap';
 import { gridSize } from '../levels/levels.utils';
+import { InteractiveComponent } from '../Player/physics/movementHelpers';
 
 const clock = new Clock();
 
-export class MysticPlace extends Object3D {
+export class MysticPlace extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
     private speedModifier: number = 0.5;
