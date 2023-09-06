@@ -7,11 +7,18 @@ import {
     MeshStandardMaterial,
     Object3D,
     RectAreaLight,
+    Vector3,
 } from 'three';
 import { gsap } from 'gsap';
 import { gridSize } from '../levels/levels.utils';
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib';
 import { InteractiveComponent } from '../Player/physics/movementHelpers';
+
+interface DoorInfo {
+    cameraPosition: Vector3;
+    doorLeft: Object3D;
+    doorRight: Object3D;
+}
 
 export class DoorOpener extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;
@@ -19,7 +26,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
 
     private rectLight: RectAreaLight;
 
-    constructor() {
+    constructor(private doorInfo: DoorInfo) {
         super();
 
         RectAreaLightUniformsLib.init();
@@ -50,7 +57,11 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
                 duration: 1,
                 intensity: 5,
                 power: 100,
+                // onComplete: () => {
+                //     console.log(this.doorInfo.doorRight.position);
+                // },
             });
+            this.openTheDoor();
         }
 
         if (!this.shouldActivate && this.isActive) {
@@ -59,6 +70,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
                 duration: 1,
                 intensity: 0,
             });
+            this.closeTheDoor();
         }
     };
 
@@ -119,33 +131,25 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     //     return linkedDoor;
     // }
 
-    // openTheDoor() {
-    //     // TODO: les portes se refermes si elles ne se sont pas ouvertes completement.
+    openTheDoor() {
+        gsap.to(this.doorInfo.doorLeft.position, {
+            duration: 1,
+            x: -100,
+        });
+        gsap.to(this.doorInfo.doorRight.position, {
+            duration: 1,
+            x: 100,
+        });
+    }
 
-    //     if (this.linkedDoor.doorRight.position.z >= -70) {
-    //         this.linkedDoor.doorRight.position.z -= 5;
-    //     } else {
-    //         this.doorOpen = true;
-    //     }
-
-    //     if (this.linkedDoor.doorLeft.position.z <= 70) {
-    //         this.linkedDoor.doorLeft.position.z += 5;
-    //     } else {
-    //         this.doorOpen = true;
-    //     }
-    // }
-
-    // closeTheDoor() {
-    //     if (this.linkedDoor.doorRight.position.z <= 0) {
-    //         this.linkedDoor.doorRight.position.z += 15;
-    //     } else {
-    //         this.doorOpen = false;
-    //     }
-
-    //     if (this.linkedDoor.doorLeft.position.z >= 0) {
-    //         this.linkedDoor.doorLeft.position.z -= 15;
-    //     } else {
-    //         this.doorOpen = false;
-    //     }
-    // }
+    // TODO: Fix bug where door stay close sometimes when leaving the opener zone
+    closeTheDoor() {
+        gsap.to(
+            [this.doorInfo.doorLeft.position, this.doorInfo.doorRight.position],
+            {
+                duration: 0.5,
+                x: 0,
+            },
+        );
+    }
 }

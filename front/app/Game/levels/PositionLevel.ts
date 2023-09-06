@@ -15,8 +15,8 @@ export class PositionLevel extends Group {
     public name = 'position-level';
 
     public startPosition = {
-        light: new Vector3(10, 20, 0),
-        // light: new Vector3(1626, 775, 0),
+        // light: new Vector3(10, 20, 0),
+        light: new Vector3(2200, 775, 0),
         shadow: new Vector3(15, 20, 0),
     };
 
@@ -82,8 +82,19 @@ export class PositionLevel extends Group {
         // this.collidingElements.push(mysticPlace);
         // positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
 
-        const doorOpener = new DoorOpener();
-        this.collidingElements.push(doorOpener);
-        this.add(doorOpener);
+        const roofDoorLeft = wallDoorRoof.children.find(
+            (child) => child.name === 'doorLeft',
+        );
+        const roofDoorRight = wallDoorRoof.children.find(
+            (child) => child.name === 'doorRight',
+        );
+        const roofDoorOpener = new DoorOpener({
+            cameraPosition: new Vector3(roofDoorLeft!.position.x + 50, -1500),
+            doorLeft: roofDoorLeft!,
+            doorRight: roofDoorRight!,
+        });
+        this.collidingElements.push(roofDoorOpener);
+        positionOnGrid(roofDoorOpener, new Vector3(10, 3, 0));
+        this.add(roofDoorOpener);
     }
 }
