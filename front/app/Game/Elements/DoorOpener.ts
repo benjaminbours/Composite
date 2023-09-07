@@ -57,9 +57,6 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
                 duration: 1,
                 intensity: 5,
                 power: 100,
-                // onComplete: () => {
-                //     console.log(this.doorInfo.doorRight.position);
-                // },
             });
             this.openTheDoor();
         }
@@ -74,82 +71,27 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
         }
     };
 
-    // update() {
-    //     var delta = this.clock.getDelta();
-
-    //     this.floating.material.uniforms.time.value += delta * 2;
-
-    //     // if (this.floating.material.uniforms.time.value >= 50) {
-
-    //     // let deltaReset = this.clock.getDelta();
-    //     // this.floating.material.uniforms.time.value= 0.0
-    //     // this.floating.material.uniforms.time.value += delta * 2;
-
-    //     // }
-
-    //     //////////////////////////////////////////
-
-    //     if (this.playerOn || this.otherPlayerOn) {
-    //         if (this.playerOn) {
-    //             this.camera.targetCamera(this.linkedDoor.cameraPosition, 20);
-    //             this.socketManager.emitOnMysticPlace(this.linkedDoor.name);
-    //         }
-
-    //         if (this.otherPlayerOn) {
-    //         }
-    //     } else {
-    //         this.doorOpen = false;
-    //         this.closeTheDoor();
-    //     }
-    // }
-
-    // setLinkedDoorCamera(vector) {
-    //     this.linkedDoor.cameraPosition.copy(vector);
-    // }
-
-    // getDoorLinked(linkedDoorName) {
-    //     let doorLeft;
-    //     let doorRight;
-
-    //     for (let i in this.decor[linkedDoorName].children) {
-    //         if (this.decor[linkedDoorName].children[i].name == 'doorLeft') {
-    //             doorLeft = this.decor[linkedDoorName].children[i];
-    //         }
-
-    //         if (this.decor[linkedDoorName].children[i].name == 'doorRight') {
-    //             doorRight = this.decor[linkedDoorName].children[i];
-    //         }
-    //     }
-
-    //     const linkedDoor = {
-    //         doorLeft: doorLeft,
-    //         doorRight: doorRight,
-    //         name: linkedDoorName,
-    //         cameraPosition: new THREE.Vector3(),
-    //     };
-
-    //     return linkedDoor;
-    // }
-
-    openTheDoor() {
+    openTheDoor = () => {
         gsap.to(this.doorInfo.doorLeft.position, {
             duration: 1,
             x: -100,
+            overwrite: true,
         });
         gsap.to(this.doorInfo.doorRight.position, {
             duration: 1,
             x: 100,
+            overwrite: true,
         });
-    }
+    };
 
-    // TODO: Fix bug where door stay close sometimes when leaving the opener zone
-    closeTheDoor() {
+    closeTheDoor = () => {
         gsap.to(
             [this.doorInfo.doorLeft.position, this.doorInfo.doorRight.position],
             {
                 duration: 0.5,
                 x: 0,
+                overwrite: true,
             },
         );
-    }
+    };
 }
