@@ -108,7 +108,7 @@ export function createWallDoor(
     const group = new Object3D();
     // wall left to the door
     const wallLeft = createWall(
-        new Vector3(0.5, size.y, 0),
+        new Vector3(1.5, size.y, 0),
         new Vector3(0.5, 0, 0),
         new Vector3(),
     );

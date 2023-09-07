@@ -31,13 +31,13 @@ export class PositionLevel extends Group {
         this.add(wallBlockingLeftPath);
         this.collidingElements.push(wallBlockingLeftPath);
 
-        const arches = [
+        const outsideArches = [
             createArchGroup(1, new Vector3(2, 0, 0)),
             createArchGroup(2, new Vector3(4, 0, 0)),
             createArchGroup(3, new Vector3(6, 0, 0)),
         ];
 
-        arches.forEach((arch) => {
+        outsideArches.forEach((arch) => {
             this.add(arch);
             // TODO: Add only the platform to the list of colliding elements
             this.collidingElements.push(arch);
@@ -53,14 +53,14 @@ export class PositionLevel extends Group {
 
         const wallInsideTemple = createWall(
             new Vector3(6, 3, 0),
-            new Vector3(9, 0, -1),
+            new Vector3(9, 0, -2),
             new Vector3(0, 0, 0),
         );
         this.add(wallInsideTemple);
 
-        // wall door
+        // ground door
         const wallDoorGroundFloor = createWallDoor(
-            new Vector3(3, 3, 0),
+            new Vector3(0, 3, 0),
             new Vector3(9, 0, 0),
             new Vector3(0, 0, 0),
             'vertical',
@@ -68,6 +68,27 @@ export class PositionLevel extends Group {
         this.add(wallDoorGroundFloor);
         this.collidingElements.push(wallDoorGroundFloor);
 
+        const groundFloorDoorLeft = wallDoorGroundFloor.children.find(
+            (child) => child.name === 'doorLeft',
+        );
+        const groundFloorDoorRight = wallDoorGroundFloor.children.find(
+            (child) => child.name === 'doorRight',
+        );
+        const groundFloorDoorWorldPosition =
+            groundFloorDoorLeft!.getWorldPosition(new Vector3());
+        const groundFloorDoorOpener = new DoorOpener({
+            cameraPosition: new Vector3(
+                groundFloorDoorWorldPosition.x,
+                groundFloorDoorWorldPosition.y + 50,
+            ),
+            doorLeft: groundFloorDoorLeft!,
+            doorRight: groundFloorDoorRight!,
+        });
+        this.collidingElements.push(groundFloorDoorOpener);
+        positionOnGrid(groundFloorDoorOpener, new Vector3(10, 1.02, 0));
+        this.add(groundFloorDoorOpener);
+
+        // roof door
         const wallDoorRoof = createWallDoor(
             new Vector3(2, 6, 0),
             new Vector3(8, 3, 0),
@@ -77,22 +98,19 @@ export class PositionLevel extends Group {
         this.add(wallDoorRoof);
         this.collidingElements.push(wallDoorRoof);
 
-        // const mysticPlace = new MysticPlace(300);
-        // this.add(mysticPlace);
-        // this.collidingElements.push(mysticPlace);
-        // positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
-
         const roofDoorLeft = wallDoorRoof.children.find(
             (child) => child.name === 'doorLeft',
         );
         const roofDoorRight = wallDoorRoof.children.find(
             (child) => child.name === 'doorRight',
         );
-        const doorWorldPosition = roofDoorLeft!.getWorldPosition(new Vector3());
+        const roofDoorWorldPosition = roofDoorLeft!.getWorldPosition(
+            new Vector3(),
+        );
         const roofDoorOpener = new DoorOpener({
             cameraPosition: new Vector3(
-                doorWorldPosition.x,
-                doorWorldPosition.y + 50,
+                roofDoorWorldPosition.x,
+                roofDoorWorldPosition.y + 50,
             ),
             doorLeft: roofDoorLeft!,
             doorRight: roofDoorRight!,
@@ -100,5 +118,20 @@ export class PositionLevel extends Group {
         this.collidingElements.push(roofDoorOpener);
         positionOnGrid(roofDoorOpener, new Vector3(10, 3, 0));
         this.add(roofDoorOpener);
+        // const mysticPlace = new MysticPlace(300);
+        // this.add(mysticPlace);
+        // this.collidingElements.push(mysticPlace);
+        // positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
+
+        const insideArches = [
+            createArchGroup(1, new Vector3(10, 0, 0)),
+            createArchGroup(2, new Vector3(12, 0, 0)),
+        ];
+
+        insideArches.forEach((arch) => {
+            this.add(arch);
+            // TODO: Add only the platform to the list of colliding elements
+            this.collidingElements.push(arch);
+        });
     }
 }
