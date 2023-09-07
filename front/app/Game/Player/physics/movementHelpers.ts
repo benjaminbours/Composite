@@ -1,4 +1,4 @@
-import { Clock, Vector2, Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 import * as R from 'ramda';
 import { Player } from '../Player';
 import Inputs from '../Inputs';
@@ -13,11 +13,8 @@ const MAX_ASCEND_SPEED = 10;
 const JUMP_POWER = 15;
 const GRAVITY = 20;
 const SPEED = 20; // less is faster
-const CLOCK = new Clock();
-export let delta = CLOCK.getDelta();
-export const updateDelta = () => (delta = CLOCK.getDelta());
 
-export const useVelocity = (player: Player) => {
+export const useVelocity = (delta: number, player: Player) => {
     player.position.x += player.velocity.x * delta * 60;
     player.position.y += player.velocity.y * delta * 60;
 };
@@ -30,14 +27,15 @@ const hasReachedMaxFallSpeed = R.propSatisfies(
     'y',
 );
 const setToMaxFallSpeed = (velocity: Vector2) => (velocity.y = -MAX_FALL_SPEED);
-const increaseFallSpeed = (velocity: Vector2) =>
+const increaseFallSpeed = (delta: number) => (velocity: Vector2) =>
     (velocity.y -= GRAVITY * delta);
 
-export const applyGravity = R.ifElse(
-    hasReachedMaxFallSpeed,
-    setToMaxFallSpeed,
-    increaseFallSpeed,
-);
+export const applyGravity = (delta: number) =>
+    R.ifElse(
+        hasReachedMaxFallSpeed,
+        setToMaxFallSpeed,
+        increaseFallSpeed(delta),
+    );
 
 // Ascension helpers
 const hasReachedMaxAscendSpeed = R.propSatisfies(
@@ -85,20 +83,23 @@ const hasReachedMaxLeftSpeed = (velocity: Vector2) =>
     Inputs.leftIsActive && velocity.x > -MAX_VELOCITY_X;
 const hasReachedMaxRightSpeed = (velocity: Vector2) =>
     Inputs.rightIsActive && velocity.x < MAX_VELOCITY_X;
-const updateVelocityX = (target: number) => (velocity: Vector2) =>
-    (velocity.x += (target - velocity.x) / (SPEED * delta * 60));
+const updateVelocityX =
+    (delta: number, target: number) => (velocity: Vector2) =>
+        (velocity.x += (target - velocity.x) / (SPEED * delta * 60));
 
-export const moveLeft = R.ifElse(
-    hasReachedMaxLeftSpeed,
-    updateVelocityX(-MAX_VELOCITY_X),
-    updateVelocityX(0),
-);
+export const moveLeft = (delta: number) =>
+    R.ifElse(
+        hasReachedMaxLeftSpeed,
+        updateVelocityX(delta, -MAX_VELOCITY_X),
+        updateVelocityX(delta, 0),
+    );
 
-export const moveRight = R.ifElse(
-    hasReachedMaxRightSpeed,
-    updateVelocityX(MAX_VELOCITY_X),
-    updateVelocityX(0),
-);
+export const moveRight = (delta: number) =>
+    R.ifElse(
+        hasReachedMaxRightSpeed,
+        updateVelocityX(delta, MAX_VELOCITY_X),
+        updateVelocityX(delta, 0),
+    );
 
 export enum MovableComponentState {
     onFloor,

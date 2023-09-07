@@ -15,6 +15,7 @@ import {
     CircleGeometry,
     WebGLRenderTarget,
     Object3D,
+    Clock,
     // AmbientLight,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
@@ -29,7 +30,7 @@ import { Side } from '../types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
-import { collisionSystem, updateDelta } from './Player/physics/movementHelpers';
+import { collisionSystem } from './Player/physics/movementHelpers';
 import { DoorOpener } from './elements/DoorOpener';
 
 export default class App {
@@ -48,7 +49,8 @@ export default class App {
     private players: Player[] = [];
     // private skyMesh: Mesh;
 
-    // private clock = new Clock();
+    private clock = new Clock();
+    private delta = this.clock.getDelta();
     // private dirLight = new DirectionalLight(0xffffee, 0.5);
 
     private floor!: Mesh;
@@ -185,7 +187,7 @@ export default class App {
                 if (item instanceof DoorOpener) {
                     item.update(this.camera);
                 } else {
-                    item.update();
+                    item.update(this.delta);
                 }
             }
             if (item.children?.length) {
@@ -195,9 +197,7 @@ export default class App {
     };
 
     public update = () => {
-        // TODO: Multiple clocks are used in various places (movement helper, mysticPlace)
-        // Lets use just one store in the app
-        updateDelta();
+        this.delta = this.clock.getDelta();
         // update everything which need an update in the scene
         const currentLevelCollidingElements =
             this.levelController.levels[this.levelController.currentLevel!]

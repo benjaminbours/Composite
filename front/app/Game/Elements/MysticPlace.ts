@@ -19,8 +19,6 @@ import { gsap } from 'gsap';
 import { gridSize } from '../levels/levels.utils';
 import { InteractiveComponent } from '../Player/physics/movementHelpers';
 
-const clock = new Clock();
-
 export class MysticPlace extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
@@ -128,8 +126,7 @@ export class MysticPlace extends Object3D implements InteractiveComponent {
         this.particles.frustumCulled = false;
     }
 
-    public update = () => {
-        const delta = clock.getDelta();
+    public update = (delta: number) => {
         const particlesMat = this.particles.material as ShaderMaterial;
         if (this.shouldActivate && !this.isActive) {
             this.isActive = true;

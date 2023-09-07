@@ -38,15 +38,16 @@ export class Player extends Object3D implements MovableComponent {
         this.add(this.mesh);
     }
 
-    public update = () => {
+    // TODO: When we create a second player, we don't want this update function to run, its meaningful only for the playing one
+    public update = (delta: number) => {
         // possible to find a way to avoid this duplication
-        moveRight(this.velocity);
-        moveLeft(this.velocity);
+        moveRight(delta)(this.velocity);
+        moveLeft(delta)(this.velocity);
 
         jumpIfPossible(this);
 
         if (this.state === MovableComponentState.inAir) {
-            applyGravity(this.velocity);
+            applyGravity(delta)(this.velocity);
         }
 
         if (this.state === MovableComponentState.ascend) {
@@ -54,6 +55,6 @@ export class Player extends Object3D implements MovableComponent {
             // applyAscension(this.velocity, this.distanceFromFloor);
         }
 
-        useVelocity(this);
+        useVelocity(delta, this);
     };
 }
