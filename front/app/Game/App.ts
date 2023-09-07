@@ -30,6 +30,7 @@ import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
 import { collisionSystem, updateDelta } from './Player/physics/movementHelpers';
+import { DoorOpener } from './elements/DoorOpener';
 
 export default class App {
     private width = window.innerWidth;
@@ -67,6 +68,9 @@ export default class App {
         // render
         this.renderer = new WebGLRenderer({
             canvas: canvasDom,
+            // powerPreference: "high-performance",
+            // precision: "highp",
+            // antialias: true,
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         // this.renderer.shadowMap.enabled = true;
@@ -132,6 +136,8 @@ export default class App {
             player.mesh.layers.set(Layer.OCCLUSION);
         });
 
+        this.camera.setDefaultTarget(this.players[0].position);
+
         // const ambient = new AmbientLight();
         // this.scene.add(ambient);
 
@@ -176,7 +182,11 @@ export default class App {
         for (let i = 0; i < object.children.length; i++) {
             const item = object.children[i] as any;
             if (item.hasOwnProperty('update')) {
-                item.update();
+                if (item instanceof DoorOpener) {
+                    item.update(this.camera);
+                } else {
+                    item.update();
+                }
             }
             if (item.children?.length) {
                 this.updateChildren(item);
@@ -205,7 +215,7 @@ export default class App {
         ).get2dLightPosition(this.camera);
 
         // update camera
-        this.camera.update(this.players[0].position, 10);
+        this.camera.update(10);
     };
 
     public render = () => {

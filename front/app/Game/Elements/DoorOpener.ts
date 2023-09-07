@@ -13,6 +13,9 @@ import { gsap } from 'gsap';
 import { gridSize } from '../levels/levels.utils';
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib';
 import { InteractiveComponent } from '../Player/physics/movementHelpers';
+import CustomCamera from '../CustomCamera';
+
+RectAreaLightUniformsLib.init();
 
 interface DoorInfo {
     cameraPosition: Vector3;
@@ -28,8 +31,6 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
 
     constructor(private doorInfo: DoorInfo) {
         super();
-
-        RectAreaLightUniformsLib.init();
 
         const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
         const whiteBlockMat = new MeshStandardMaterial({
@@ -50,7 +51,9 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
         this.add(this.rectLight);
     }
 
-    public update = () => {
+    // TODO: Think about using a door opening system to manage this logic
+    // I don't like the fact its the element door opener who set the camera target
+    public update = (camera: CustomCamera) => {
         if (this.shouldActivate && !this.isActive) {
             this.isActive = true;
             gsap.to(this.rectLight, {
@@ -58,6 +61,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
                 intensity: 5,
                 power: 100,
             });
+            camera.setTarget(this.doorInfo.cameraPosition);
             this.openTheDoor();
         }
 
@@ -67,6 +71,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
                 duration: 1,
                 intensity: 0,
             });
+            camera.setTarget(undefined);
             this.closeTheDoor();
         }
     };

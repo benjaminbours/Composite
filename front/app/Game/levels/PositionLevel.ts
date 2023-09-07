@@ -88,8 +88,12 @@ export class PositionLevel extends Group {
         const roofDoorRight = wallDoorRoof.children.find(
             (child) => child.name === 'doorRight',
         );
+        const doorWorldPosition = roofDoorLeft!.getWorldPosition(new Vector3());
         const roofDoorOpener = new DoorOpener({
-            cameraPosition: new Vector3(roofDoorLeft!.position.x + 50, -1500),
+            cameraPosition: new Vector3(
+                doorWorldPosition.x,
+                doorWorldPosition.y + 50,
+            ),
             doorLeft: roofDoorLeft!,
             doorRight: roofDoorRight!,
         });
