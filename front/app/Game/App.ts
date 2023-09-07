@@ -49,7 +49,7 @@ export default class App {
     private players: Player[] = [];
     // private skyMesh: Mesh;
 
-    private clock = new Clock();
+    public clock = new Clock();
     private delta = this.clock.getDelta();
     // private dirLight = new DirectionalLight(0xffffee, 0.5);
 

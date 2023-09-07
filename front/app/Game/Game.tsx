@@ -26,15 +26,37 @@ function Game() {
                 return undefined;
             })();
 
+            const handleVisibilityChange = () => {
+                if (document.visibilityState === 'hidden') {
+                    appRef.current?.clock.stop();
+                } else {
+                    appRef.current?.clock.start();
+                }
+            };
+
+            document.addEventListener(
+                'visibilitychange',
+                handleVisibilityChange,
+            );
+
             const gameLoop = () => {
                 stats?.begin();
-                appRef.current?.update();
+                if (appRef.current?.clock.running) {
+                    appRef.current?.update();
+                }
                 appRef.current?.render();
                 stats?.end();
             };
             // https://greensock.com/docs/v3/GSAP/gsap.ticker
             // gsap.ticker.fps(90);
             gsap.ticker.add(gameLoop);
+
+            return () => {
+                document.removeEventListener(
+                    'visibilitychange',
+                    handleVisibilityChange,
+                );
+            };
         });
     }, []);
 
