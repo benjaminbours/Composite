@@ -32,6 +32,7 @@ import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
 import { collisionSystem } from './Player/physics/movementHelpers';
 import { DoorOpener } from './elements/DoorOpener';
+import { Elevator } from './elements/Elevator';
 
 export default class App {
     private width = window.innerWidth;
@@ -185,7 +186,7 @@ export default class App {
             const item = object.children[i] as any;
             if (item.hasOwnProperty('update')) {
                 if (item instanceof DoorOpener) {
-                    item.update(this.camera);
+                    item.update(this.delta, this.camera);
                 } else {
                     item.update(this.delta);
                 }

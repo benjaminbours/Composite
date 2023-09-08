@@ -9,6 +9,7 @@ import {
 import { CollidingElem } from '../types';
 import { MysticPlace } from '../elements/MysticPlace';
 import { DoorOpener } from '../elements/DoorOpener';
+import { Elevator } from '../elements/Elevator';
 
 export class PositionLevel extends Group {
     public collidingElements: CollidingElem[] = [];
@@ -76,14 +77,18 @@ export class PositionLevel extends Group {
         );
         const groundFloorDoorWorldPosition =
             groundFloorDoorLeft!.getWorldPosition(new Vector3());
-        const groundFloorDoorOpener = new DoorOpener({
-            cameraPosition: new Vector3(
-                groundFloorDoorWorldPosition.x,
-                groundFloorDoorWorldPosition.y + 50,
-            ),
-            doorLeft: groundFloorDoorLeft!,
-            doorRight: groundFloorDoorRight!,
-        });
+        const groundFloorDoorOpener = new DoorOpener(
+            {
+                cameraPosition: new Vector3(
+                    groundFloorDoorWorldPosition.x + 50,
+                    groundFloorDoorWorldPosition.y + 150,
+                ),
+                doorLeft: groundFloorDoorLeft!,
+                doorRight: groundFloorDoorRight!,
+            },
+            200,
+            20,
+        );
         this.collidingElements.push(groundFloorDoorOpener);
         positionOnGrid(groundFloorDoorOpener, new Vector3(10, 1.02, 0));
         this.add(groundFloorDoorOpener);
@@ -107,21 +112,21 @@ export class PositionLevel extends Group {
         const roofDoorWorldPosition = roofDoorLeft!.getWorldPosition(
             new Vector3(),
         );
-        const roofDoorOpener = new DoorOpener({
-            cameraPosition: new Vector3(
-                roofDoorWorldPosition.x,
-                roofDoorWorldPosition.y + 50,
-            ),
-            doorLeft: roofDoorLeft!,
-            doorRight: roofDoorRight!,
-        });
+        const roofDoorOpener = new DoorOpener(
+            {
+                cameraPosition: new Vector3(
+                    roofDoorWorldPosition.x,
+                    roofDoorWorldPosition.y + 50,
+                ),
+                doorLeft: roofDoorLeft!,
+                doorRight: roofDoorRight!,
+            },
+            200,
+            20,
+        );
         this.collidingElements.push(roofDoorOpener);
         positionOnGrid(roofDoorOpener, new Vector3(10, 3, 0));
         this.add(roofDoorOpener);
-        // const mysticPlace = new MysticPlace(300);
-        // this.add(mysticPlace);
-        // this.collidingElements.push(mysticPlace);
-        // positionOnGrid(mysticPlace, new Vector3(1, 0, 0));
 
         const insideArches = [
             createArchGroup(1, new Vector3(10, 0, 0)),
@@ -133,5 +138,10 @@ export class PositionLevel extends Group {
             // TODO: Add only the platform to the list of colliding elements
             this.collidingElements.push(arch);
         });
+
+        const mysticPlace = new Elevator(300, 40);
+        this.add(mysticPlace);
+        this.collidingElements.push(mysticPlace);
+        positionOnGrid(mysticPlace, new Vector3(9, 3, 0));
     }
 }

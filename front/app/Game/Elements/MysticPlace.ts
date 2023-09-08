@@ -7,7 +7,6 @@ import {
     AdditiveBlending,
     DoubleSide,
     Points,
-    Clock,
     BoxGeometry,
     Mesh,
     MeshPhongMaterial,
@@ -22,10 +21,10 @@ import { InteractiveComponent } from '../Player/physics/movementHelpers';
 export class MysticPlace extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
-    private speedModifier: number = 0.5;
-    private particles: Points;
+    protected speedModifier: number = 0.5;
+    protected particles: Points;
 
-    constructor(particlesNumber: number) {
+    constructor(particlesNumber: number, height: number) {
         super();
 
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
@@ -100,6 +99,7 @@ export class MysticPlace extends Object3D implements InteractiveComponent {
         const particlesMat = new ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },
+                // height: { value: height },
             },
             vertexShader: VS,
             fragmentShader: FS,
@@ -126,23 +126,41 @@ export class MysticPlace extends Object3D implements InteractiveComponent {
         this.particles.frustumCulled = false;
     }
 
-    public update = (delta: number) => {
-        const particlesMat = this.particles.material as ShaderMaterial;
+    protected detectActivation = (
+        cbActivation?: () => void,
+        cbDeactivation?: () => void,
+    ) => {
         if (this.shouldActivate && !this.isActive) {
             this.isActive = true;
-            gsap.to(this, {
-                duration: 2,
-                speedModifier: 2.5,
-            });
+            if (cbActivation) {
+                cbActivation();
+            }
         }
 
         if (!this.shouldActivate && this.isActive) {
             this.isActive = false;
-            gsap.to(this, {
-                duration: 2,
-                speedModifier: 0.2,
-            });
+            if (cbDeactivation) {
+                cbDeactivation();
+            }
         }
+    };
+
+    protected activateVFX = () => {
+        gsap.to(this, {
+            duration: 2,
+            speedModifier: 2.5,
+        });
+    };
+
+    protected deactivateVFX = () => {
+        gsap.to(this, {
+            duration: 2,
+            speedModifier: 0.2,
+        });
+    };
+
+    protected updateShader = (delta: number) => {
+        const particlesMat = this.particles.material as ShaderMaterial;
         particlesMat.uniforms.time.value += delta * this.speedModifier;
     };
 }

@@ -6,6 +6,7 @@ import { getNearestObjects } from './raycaster';
 import { MysticPlace } from '../../elements/MysticPlace';
 import { CollidingElem } from '../../types';
 import { DoorOpener } from '../../elements/DoorOpener';
+import { Elevator } from '../../elements/Elevator';
 
 const MAX_VELOCITY_X = 15;
 const MAX_FALL_SPEED = 20;
@@ -115,7 +116,7 @@ export interface MovableComponent {
     velocity: Vector2;
     state: MovableComponentState;
     // We have to keep in memory a reference to the last activated mystic place in order to deactivate it when we leave
-    currentMysticPlace: MysticPlace | undefined;
+    currentElevator: Elevator | undefined;
     currentDoorOpener: DoorOpener | undefined;
 }
 
@@ -146,9 +147,9 @@ export function collisionSystem(
                 position.y = nearestObjects.down.point.y + 20;
 
                 switch (true) {
-                    case parent instanceof MysticPlace:
-                        component.currentMysticPlace = parent as MysticPlace;
-                        (parent as MysticPlace).shouldActivate = true;
+                    case parent instanceof Elevator:
+                        component.currentElevator = parent as Elevator;
+                        (parent as Elevator).shouldActivate = true;
                         component.state = MovableComponentState.ascend;
                         break;
                     case parent instanceof DoorOpener:
@@ -173,10 +174,10 @@ export function collisionSystem(
                 // it should probably not stay in the collision and player logic
                 // think about a system that could be apply to anything with velocity, not just the player
                 if (
-                    parent instanceof MysticPlace &&
+                    parent instanceof Elevator &&
                     nearestObjects.down.distance <= 600
                 ) {
-                    component.currentMysticPlace = parent;
+                    component.currentElevator = parent;
                     parent.shouldActivate = true;
                     component.state = MovableComponentState.ascend;
                 } else {
@@ -186,12 +187,9 @@ export function collisionSystem(
                 }
             }
 
-            if (
-                !(parent instanceof MysticPlace) &&
-                component.currentMysticPlace
-            ) {
-                component.currentMysticPlace.shouldActivate = false;
-                component.currentMysticPlace = undefined;
+            if (!(parent instanceof Elevator) && component.currentElevator) {
+                component.currentElevator.shouldActivate = false;
+                component.currentElevator = undefined;
             }
 
             if (
