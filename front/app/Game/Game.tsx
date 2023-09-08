@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from 'react';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { geometries } from './levels/levels.utils';
+import Inputs from './Player/Inputs';
 
 function Game() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,6 +29,7 @@ function Game() {
 
             const handleVisibilityChange = () => {
                 if (document.visibilityState === 'hidden') {
+                    Inputs.reset();
                     appRef.current?.clock.stop();
                 } else {
                     appRef.current?.clock.start();

@@ -13,6 +13,15 @@ export default class Inputs {
         window.addEventListener('keyup', this.handleKeyup.bind(this));
     }
 
+    public static reset() {
+        this.leftIsPressed = false;
+        this.leftIsActive = false;
+        this.rightIsPressed = false;
+        this.rightIsActive = false;
+        this.jumpIsPressed = false;
+        this.jumpIsActive = false;
+    }
+
     private static keydownOptions = {
         // left
         KeyA() {
