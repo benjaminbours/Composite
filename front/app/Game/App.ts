@@ -32,7 +32,7 @@ import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
 import { collisionSystem } from './Player/physics/movementHelpers';
 import { DoorOpener } from './elements/DoorOpener';
-import { Elevator } from './elements/Elevator';
+// import { Elevator } from './elements/Elevator';
 
 export default class App {
     private width = window.innerWidth;
@@ -200,12 +200,10 @@ export default class App {
     public update = () => {
         this.delta = this.clock.getDelta();
         // update everything which need an update in the scene
-        const currentLevelCollidingElements =
-            this.levelController.levels[this.levelController.currentLevel!]
-                .collidingElements;
         collisionSystem(this.players, [
             ...this.collidingElements,
-            ...currentLevelCollidingElements,
+            ...this.levelController.levels[this.levelController.currentLevel!]
+                .collidingElements,
         ]);
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite

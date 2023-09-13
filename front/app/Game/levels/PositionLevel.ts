@@ -9,7 +9,7 @@ import {
 import { CollidingElem } from '../types';
 import { MysticPlace } from '../elements/MysticPlace';
 import { DoorOpener } from '../elements/DoorOpener';
-import { Elevator } from '../elements/Elevator';
+// import { Elevator } from '../elements/Elevator';
 
 export class PositionLevel extends Group {
     public collidingElements: CollidingElem[] = [];
@@ -139,9 +139,14 @@ export class PositionLevel extends Group {
             this.collidingElements.push(arch);
         });
 
-        const mysticPlace = new Elevator(300, 40);
-        this.add(mysticPlace);
-        this.collidingElements.push(mysticPlace);
-        positionOnGrid(mysticPlace, new Vector3(9, 3, 0));
+        // const mysticPlace = new Elevator(1000, 600, new Color('yellow'));
+        // this.add(mysticPlace);
+        // this.collidingElements.push(mysticPlace);
+        // positionOnGrid(mysticPlace, new Vector3(9, 3, 0));
+
+        // const mystic2 = new Elevator(1000, 300, new Color('yellow'));
+        // this.add(mystic2);
+        // this.collidingElements.push(mystic2);
+        // positionOnGrid(mystic2, new Vector3(8, 3, 0));
     }
 }
