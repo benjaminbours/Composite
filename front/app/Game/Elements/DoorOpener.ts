@@ -184,25 +184,28 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     };
 
     activate = (camera: CustomCamera) => () => {
-        // camera.setTarget(this.doorInfo.cameraPosition);
+        camera.focusTarget(
+            this.doorInfo.cameraPosition,
+            new Vector3(0, 0.2, 0),
+        );
         this.activateVFX();
         this.openTheDoor();
     };
 
     deactivate = (camera: CustomCamera) => () => {
-        camera.setTarget(undefined);
+        camera.unfocus();
         this.deactivateVFX();
-        // this.closeTheDoor();
+        this.closeTheDoor();
     };
 
     openTheDoor = () => {
         gsap.to(this.doorInfo.doorLeft.position, {
-            duration: 1,
+            duration: 2,
             x: -100,
             overwrite: true,
         });
         gsap.to(this.doorInfo.doorRight.position, {
-            duration: 1,
+            duration: 2,
             x: 100,
             overwrite: true,
         });

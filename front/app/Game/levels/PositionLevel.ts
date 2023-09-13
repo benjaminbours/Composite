@@ -81,7 +81,7 @@ export class PositionLevel extends Group {
             {
                 cameraPosition: new Vector3(
                     groundFloorDoorWorldPosition.x + 50,
-                    groundFloorDoorWorldPosition.y + 150,
+                    groundFloorDoorWorldPosition.y + 200,
                 ),
                 doorLeft: groundFloorDoorLeft!,
                 doorRight: groundFloorDoorRight!,
@@ -115,7 +115,7 @@ export class PositionLevel extends Group {
             {
                 cameraPosition: new Vector3(
                     roofDoorWorldPosition.x,
-                    roofDoorWorldPosition.y + 50,
+                    roofDoorWorldPosition.y + 100,
                 ),
                 doorLeft: roofDoorLeft!,
                 doorRight: roofDoorRight!,

@@ -214,7 +214,7 @@ export default class App {
         ).get2dLightPosition(this.camera);
 
         // update camera
-        this.camera.update(10);
+        this.camera.update();
     };
 
     public render = () => {

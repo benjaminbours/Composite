@@ -4,7 +4,6 @@ attribute float speed;
 attribute float size;
 uniform float time;
 uniform float organicRatio;
-varying vec4 vPosition;
 
 const float PI = 3.1415926535897932384626433832795;
 
@@ -43,7 +42,6 @@ void main() {
     vec4 dPosition = vec4(x, y, z, 1.0);
 
     // assign values that will be useful in fragment shader
-    vPosition = dPosition;
     gl_PointSize = size - abs(dPosition.y *  0.06);
     gl_Position = projectionMatrix * modelViewMatrix * dPosition;
 }
