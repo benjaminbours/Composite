@@ -1,4 +1,4 @@
-import { Group, Vector3 } from 'three';
+import { Color, Group, Vector3 } from 'three';
 import {
     createArchGroup,
     createWall,
@@ -86,8 +86,7 @@ export class PositionLevel extends Group {
                 doorLeft: groundFloorDoorLeft!,
                 doorRight: groundFloorDoorRight!,
             },
-            200,
-            20,
+            new Color('black'),
         );
         this.collidingElements.push(groundFloorDoorOpener);
         positionOnGrid(groundFloorDoorOpener, new Vector3(10, 1.02, 0));
@@ -121,8 +120,7 @@ export class PositionLevel extends Group {
                 doorLeft: roofDoorLeft!,
                 doorRight: roofDoorRight!,
             },
-            200,
-            20,
+            new Color('white'),
         );
         this.collidingElements.push(roofDoorOpener);
         positionOnGrid(roofDoorOpener, new Vector3(10, 3, 0));
