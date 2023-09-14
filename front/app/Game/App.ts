@@ -124,25 +124,23 @@ export default class App {
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
 
-        // // player
-        playersConfig.forEach((side) => {
+        // player
+        playersConfig.forEach((side, index) => {
             const player = (() => {
                 switch (side) {
                     case 'white':
-                        return new LightPlayer();
+                        const lightPlayer = new LightPlayer(index === 0);
+                        lightPlayer.mesh.layers.set(Layer.OCCLUSION);
+                        return lightPlayer;
                     case 'black':
-                        return new Player();
+                        return new ShadowPlayer(index === 0);
                 }
             })();
             this.players.push(player);
             this.scene.add(player);
-            player.mesh.layers.set(Layer.OCCLUSION);
         });
 
         this.camera.setDefaultTarget(this.players[0].position);
-
-        // const ambient = new AmbientLight();
-        // this.scene.add(ambient);
 
         // camera
         this.camera.position.z = 300;
@@ -184,7 +182,7 @@ export default class App {
     public updateChildren = (object: Object3D) => {
         for (let i = 0; i < object.children.length; i++) {
             const item = object.children[i] as any;
-            if (item.hasOwnProperty('update')) {
+            if (item.update) {
                 if (item instanceof DoorOpener) {
                     item.update(this.delta, this.camera);
                 } else {
@@ -209,9 +207,15 @@ export default class App {
         // update the floor to follow the player to be infinite
         this.floor.position.set(this.players[0].position.x, 0, 0);
 
+        const lightPlayer = this.players.find(
+            (player) => player instanceof LightPlayer,
+        );
+
+        if (lightPlayer) {
         this.volumetricLightPass.material.uniforms.lightPosition.value = (
-            this.players[0] as LightPlayer
+                lightPlayer as LightPlayer
         ).get2dLightPosition(this.camera);
+        }
 
         // update camera
         this.camera.update();

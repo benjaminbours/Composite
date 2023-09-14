@@ -16,9 +16,9 @@ export class PositionLevel extends Group {
     public name = 'position-level';
 
     public startPosition = {
-        // light: new Vector3(10, 20, 0),
-        light: new Vector3(2200, 775, 0),
-        shadow: new Vector3(15, 20, 0),
+        light: new Vector3(10, 20, 0),
+        // light: new Vector3(2200, 775, 0),
+        shadow: new Vector3(200, 20, 0),
     };
 
     constructor() {

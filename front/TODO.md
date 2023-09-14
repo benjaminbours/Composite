@@ -2,7 +2,6 @@
 
 ## Required
 
-- Restore shadow player
 - Restore level loading
 - Restore connection with server
   - Restore ambient occlusion map for elements
@@ -17,3 +16,4 @@
 - make floating animation for player
 - Rethink the way the level are built, everything could be imported from Blender or other tool to generate
   level
+- Check to optimize / improve the shadow player shader

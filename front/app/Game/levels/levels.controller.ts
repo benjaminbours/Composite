@@ -11,7 +11,7 @@ import { TestLevel } from './TestLevel';
 import { PositionLevel } from './PositionLevel';
 import { CollidingElem, Geometries } from '../types';
 import { gridSize } from './levels.utils';
-import { LightPlayer, Player } from '../Player';
+import { LightPlayer, ShadowPlayer, Player } from '../Player';
 
 type Level = 'testLevel' | 'positionLevel';
 
@@ -50,10 +50,16 @@ export default class LevelController {
 
         // set position of the players
         players.forEach((player) => {
-            if (player instanceof LightPlayer) {
-                const position = this.levels[level].startPosition.light;
-                player.position.set(position.x, position.y, position.z);
-            }
+            const position = (() => {
+                if (player instanceof LightPlayer) {
+                    return this.levels[level].startPosition.light;
+                }
+                if (player instanceof ShadowPlayer) {
+                    return this.levels[level].startPosition.shadow;
+                }
+                return new Vector3();
+            })();
+            player.position.set(position.x, position.y, position.z);
         });
     };
 }

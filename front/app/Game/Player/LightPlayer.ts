@@ -1,10 +1,26 @@
-import { Camera, PointLight, Vector3 } from 'three';
+import {
+    Camera,
+    Mesh,
+    MeshBasicMaterial,
+    PointLight,
+    SphereGeometry,
+    Vector3,
+} from 'three';
 import { Player } from './Player';
 
 export class LightPlayer extends Player {
-    constructor() {
-        super();
+    public mesh: Mesh;
+
+    constructor(public isMainPlayer: boolean) {
+        super(isMainPlayer);
+
+        const geometry = new SphereGeometry(5, 32, 32);
+        const material = new MeshBasicMaterial({ color: 0xffffff });
+        this.mesh = new Mesh(geometry, material);
+        this.add(this.mesh);
+
         const pointLight = new PointLight(0x404040, 100, undefined, 0.1);
+        // const pointLight = new PointLight(0x404040, 80, 600, 0.2);
         pointLight.position.set(0, 20, 0);
         this.add(pointLight);
     }
