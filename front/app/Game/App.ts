@@ -2,13 +2,13 @@ import {
     Mesh,
     // Fog,
     // Clock,
-    // DirectionalLight,
+    DirectionalLight,
     // Object3D,
     // Group,
     Scene,
     WebGLRenderer,
     // PCFSoftShadowMap,
-    // HemisphereLight,
+    HemisphereLight,
     // FogExp2,
     // IcosahedronGeometry,
     MeshPhongMaterial,
@@ -16,7 +16,10 @@ import {
     WebGLRenderTarget,
     Object3D,
     Clock,
-    // AmbientLight,
+    FogExp2,
+    PCFSoftShadowMap,
+    IcosahedronGeometry,
+    Fog,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -32,6 +35,8 @@ import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
 import { collisionSystem } from './Player/physics/movementHelpers';
 import { DoorOpener } from './elements/DoorOpener';
+import { ShadowPlayer } from './Player/ShadowPlayer';
+import SkyShader from './SkyShader';
 // import { Elevator } from './elements/Elevator';
 
 export default class App {
@@ -48,11 +53,11 @@ export default class App {
     private renderer: WebGLRenderer;
 
     private players: Player[] = [];
-    // private skyMesh: Mesh;
+    private skyMesh!: Mesh;
 
     public clock = new Clock();
     private delta = this.clock.getDelta();
-    // private dirLight = new DirectionalLight(0xffffee, 0.5);
+    private dirLight = new DirectionalLight(0xffffee, 0.5);
 
     private floor!: Mesh;
 
@@ -76,36 +81,43 @@ export default class App {
             // antialias: true,
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        // this.renderer.shadowMap.enabled = true;
-        // this.renderer.shadowMap.type = PCFSoftShadowMap;
-        // this.renderer.gammaInput = true;
-        // this.renderer.gammaOutput = true;
-
-        // // dirlight
-        // this.dirLight.castShadow = true;
-        // this.dirLight.position.set(-2, 1, 2);
-        // this.dirLight.target = new Object3D();
-        // this.scene.add(this.dirLight.target);
-        // this.scene.add(this.dirLight);
-
-        // hemisphere light
-
-        // this.scene.fog = new FogExp2(0xffffff, 0.0006);
-        // const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
-        // this.scene.add(ambient);
-
-        // sky
-        // const skyShaterMat = new SkyShader(this.camera);
-        // const skyBox = new IcosahedronGeometry(3000, 1);
-        // this.skyMesh = new Mesh(skyBox, skyShaterMat);
-        // this.skyMesh.rotation.set(0, 1, 0);
-        // this.scene.add(this.skyMesh);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = PCFSoftShadowMap;
 
         this.setupScene(playersConfig);
         this.setupPostProcessing();
     }
 
     setupScene = (playersConfig: Side[]) => {
+        this.scene.fog = new FogExp2(0xffffff, 0.0006);
+        const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
+
+        // dirlight
+        this.dirLight.castShadow = true;
+        // this.dirLight.shadow.camera.top = 1000;
+        // this.dirLight.shadow.camera.bottom = -1000;
+        // this.dirLight.shadow.camera.left = 800;
+        // this.dirLight.shadow.camera.right = -800;
+        // this.dirLight.shadow.camera.near = 1500;
+        // this.dirLight.shadow.camera.far = 6000;
+        // this.dirLight.shadow.mapSize.width = 1024;
+        // this.dirLight.shadow.mapSize.height = 1024;
+        // this.dirLight.shadow.camera.near = 1500;
+        // this.dirLight.shadow.camera.far = 6000;
+        // this.dirLight.shadow.mapSize.width = 1024;
+        // this.dirLight.shadow.mapSize.height = 1024;
+        // this.dirLight.shadow.bias = -0.01;
+        this.dirLight.position.set(-2, 1, 2);
+        this.dirLight.target = new Object3D();
+        this.scene.add(this.dirLight.target);
+        this.scene.add(this.dirLight);
+        this.scene.add(ambient);
+        // sky
+        const skyShaterMat = new SkyShader(this.camera);
+        const skyBox = new IcosahedronGeometry(3000, 1);
+        this.skyMesh = new Mesh(skyBox, skyShaterMat);
+        // this.skyMesh.rotation.set(0, 1, 0);
+        this.scene.add(this.skyMesh);
         // floor
         this.floor = new Mesh(
             new CircleGeometry(10000, 10),
@@ -212,10 +224,26 @@ export default class App {
         );
 
         if (lightPlayer) {
-        this.volumetricLightPass.material.uniforms.lightPosition.value = (
+            this.volumetricLightPass.material.uniforms.lightPosition.value = (
                 lightPlayer as LightPlayer
-        ).get2dLightPosition(this.camera);
+            ).get2dLightPosition(this.camera);
         }
+
+        // sky
+        const skyShaderMat = this.skyMesh.material as SkyShader;
+        this.skyMesh.position.set(this.camera.position.x, 0, 0);
+        // (this.skyMesh.material as any).setSunAngle(70);
+        // (this.skyMesh.material as any).render();
+        skyShaderMat.setSunAngle(70);
+        skyShaderMat.render();
+        (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
+        skyShaderMat.setTimeOfDay(0.6, [20, 55], 0, [195, 230], 0);
+        const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
+
+        this.dirLight.position.copy(lightInfo.position);
+        this.dirLight.intensity = lightInfo.intensity;
+        this.dirLight.color.copy(lightInfo.color);
+        this.dirLight.target.position.set(this.camera.position.x, 0, 0);
 
         // update camera
         this.camera.update();
@@ -226,30 +254,13 @@ export default class App {
         this.renderer.setClearColor(0x000000);
         this.occlusionComposer.render();
         this.camera.layers.set(Layer.DEFAULT);
-        this.renderer.setClearColor(0x090611);
+        this.renderer.setClearColor(0x000000);
         this.mainComposer.render();
-        // const skyShaderMat = this.skyMesh.material as SkyShader;
 
         // this.effectAdditiveBlending.uniforms.tAdd.value =
         //     this.occlusionRenderTarget.texture;
         // console.log(this.occlusionRenderTarget.texture.version);
 
         // this.renderer.render(this.scene, this.camera);
-
-        // this.skyMesh.position.set(this.camera.position.x, 0, 0);
-        // // (this.skyMesh.material as any).setSunAngle(70);
-        // // (this.skyMesh.material as any).render();
-        // skyShaderMat.setSunAngle(70);
-        // skyShaderMat.render();
-        // // skyShaderMat.render(this.clock);
-        // (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
-        // // // this.fogColor = (this.skyMesh.material as SkyShader).getFogColor();
-        // skyShaderMat.setTimeOfDay(0.6, [20, 55], 0, [195, 230], 0);
-        // const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
-
-        // this.dirLight.position.copy(lightInfo.position);
-        // this.dirLight.intensity = lightInfo.intensity;
-        // this.dirLight.color.copy(lightInfo.color);
-        // this.dirLight.target.position.set(this.camera.position.x, 0, 0);
     };
 }

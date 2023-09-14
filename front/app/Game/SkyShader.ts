@@ -1,5 +1,4 @@
-import * as THREE from "three";
-import { Vector3, Color, Camera } from "three";
+import { Vector3, Color, Camera, BackSide, ShaderMaterial } from 'three';
 
 interface IOptions {
     time: number;
@@ -10,14 +9,14 @@ interface IOptions {
     horizonLine: Color;
 }
 
-export default class SkyShader extends THREE.ShaderMaterial {
+export default class SkyShader extends ShaderMaterial {
     public options: IOptions = {
         time: 0,
-        sunPosition: new THREE.Vector3(-0.3, 0.4, -1),
-        color: new THREE.Color(0xFFFEED),
-        atmosphere: new THREE.Color(0x2671d3),
-        horizon: new THREE.Color(0xa8cdff),
-        horizonLine: new THREE.Color(0xbff6ff),
+        sunPosition: new Vector3(-0.3, 0.4, -1),
+        color: new Color(0xfffeed),
+        atmosphere: new Color(0x2671d3),
+        horizon: new Color(0xa8cdff),
+        horizonLine: new Color(0xbff6ff),
     };
 
     private cameraLookAt: Vector3;
@@ -33,9 +32,11 @@ export default class SkyShader extends THREE.ShaderMaterial {
             };
         }
 
-        this.side = THREE.BackSide;
+        this.side = BackSide;
 
-        this.cameraLookAt = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+        this.cameraLookAt = new Vector3(0, 0, -1).applyQuaternion(
+            camera.quaternion,
+        );
         this.camera = camera;
 
         this.uniforms = {
@@ -49,8 +50,7 @@ export default class SkyShader extends THREE.ShaderMaterial {
             cameraLookAt: { value: this.cameraLookAt },
         };
 
-        this.vertexShader =
-            `uniform float time;
+        this.vertexShader = `uniform float time;
 
     		varying vec3 vNormal;
             varying vec2 vUv;
@@ -68,8 +68,7 @@ export default class SkyShader extends THREE.ShaderMaterial {
 
             }`;
 
-        this.fragmentShader =
-            `uniform float time;
+        this.fragmentShader = `
             uniform vec3 uColor;
             uniform vec3 uAtmColor;
             uniform vec3 uHorColor;
@@ -197,22 +196,47 @@ export default class SkyShader extends THREE.ShaderMaterial {
     		}`;
     }
 
-    public render(clock?: any) {
-        // if (clock) {
-        //     this.uniforms.time.value = clock.getElapsedTime();
-        // }
-        this.uniforms.cameraLookAt.value = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion);
+    public render() {
+        this.uniforms.cameraLookAt.value = new Vector3(
+            0,
+            0,
+            -1,
+        ).applyQuaternion(this.camera.quaternion);
     }
 
-    public setTimeOfDay(time = 0, sunHue = [20, 55], sunSat = 1, atmHue = [195, 230], atmSat = 1) { // 0 night - 1 noon | hue
-        this.uniforms.uSunPos.value.y = -.1 + time;
+    public setTimeOfDay(
+        time = 0,
+        sunHue = [20, 55],
+        sunSat = 1,
+        atmHue = [195, 230],
+        atmSat = 1,
+    ) {
+        // 0 night - 1 noon | hue
+        this.uniforms.uSunPos.value.y = -0.1 + time;
         this.uniforms.sunInt.value = 1 - time;
         const radial = (sunHue[0] + time * (sunHue[1] - sunHue[0])) / 360;
-        const radialSky = (atmHue[0] + (1 - time) * (atmHue[1] - atmHue[0])) / 360;
-        this.uniforms.uColor.value.setHSL(radial, (.5 + (1 - time) * .4) * sunSat, .5 + time * .4);
-        this.uniforms.uHorHardColor.value.setHSL(radial, (.5 + (1 - time) * .4) * sunSat, .2 + time * .75);
-        this.uniforms.uHorColor.value.setHSL(radialSky, (.5 + (1 - time) * .1) * atmSat, .15 + time * .5);
-        this.uniforms.uAtmColor.value.setHSL(radialSky, (.5 + (1 - time) * .1) * atmSat, time * .5);
+        const radialSky =
+            (atmHue[0] + (1 - time) * (atmHue[1] - atmHue[0])) / 360;
+        this.uniforms.uColor.value.setHSL(
+            radial,
+            (0.5 + (1 - time) * 0.4) * sunSat,
+            0.5 + time * 0.4,
+        );
+        this.uniforms.uHorHardColor.value.setHSL(
+            radial,
+            (0.5 + (1 - time) * 0.4) * sunSat,
+            0.2 + time * 0.75,
+        );
+        this.uniforms.uHorColor.value.setHSL(
+            radialSky,
+            (0.5 + (1 - time) * 0.1) * atmSat,
+            0.15 + time * 0.5,
+        );
+        this.uniforms.uAtmColor.value.setHSL(
+            radialSky,
+            (0.5 + (1 - time) * 0.1) * atmSat,
+            time * 0.5,
+        );
     }
 
     public setSunAngle(angle: number) {
@@ -222,7 +246,10 @@ export default class SkyShader extends THREE.ShaderMaterial {
 
     public getLightInfo(playerPosition: Vector3) {
         const position = this.uniforms.uSunPos.value.clone();
-        const intensity = this.uniforms.uSunPos.value.y > 0 ? this.uniforms.uSunPos.value.y * .8 + .5 : 0;
+        const intensity =
+            this.uniforms.uSunPos.value.y > 0
+                ? this.uniforms.uSunPos.value.y * 0.8 + 0.5
+                : 0;
         position.normalize();
         position.multiplyScalar(4000);
         position.x += playerPosition.x;
@@ -232,9 +259,15 @@ export default class SkyShader extends THREE.ShaderMaterial {
 
     public getFogColor() {
         const fog = this.uniforms.uHorHardColor.value.clone();
-        let alpha = this.uniforms.cameraLookAt.value.distanceTo(this.uniforms.uSunPos.value) * 1.2;
+        let alpha =
+            this.uniforms.cameraLookAt.value.distanceTo(
+                this.uniforms.uSunPos.value,
+            ) * 1.2;
         alpha = alpha > 1 ? 1 : alpha < 0 ? 0 : alpha;
-        fog.lerp(this.uniforms.uHorColor.value, alpha * .5 * (1 + this.uniforms.uSunPos.value.y * .8));
+        fog.lerp(
+            this.uniforms.uHorColor.value,
+            alpha * 0.5 * (1 + this.uniforms.uSunPos.value.y * 0.8),
+        );
         fog.multiplyScalar(1 + (1 - alpha) * 1.3);
         return fog.clone();
     }
