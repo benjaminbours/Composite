@@ -17,11 +17,14 @@ export class LightPlayer extends Player {
         const geometry = new SphereGeometry(5, 32, 32);
         const material = new MeshBasicMaterial({ color: 0xffffff });
         this.mesh = new Mesh(geometry, material);
+        this.mesh.castShadow = false;
+        this.mesh.receiveShadow = false;
         this.add(this.mesh);
 
-        const pointLight = new PointLight(0x404040, 100, undefined, 0.1);
-        // const pointLight = new PointLight(0x404040, 80, 600, 0.2);
+        // const pointLight = new PointLight(0x404040, 100, undefined, 0.1);
+        const pointLight = new PointLight(0x404040, 80, 600, 0.2);
         pointLight.position.set(0, 20, 0);
+        // pointLight.castShadow = true;
         this.add(pointLight);
     }
 

@@ -89,35 +89,6 @@ export default class App {
     }
 
     setupScene = (playersConfig: Side[]) => {
-        this.scene.fog = new FogExp2(0xffffff, 0.0006);
-        const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
-
-        // dirlight
-        this.dirLight.castShadow = true;
-        // this.dirLight.shadow.camera.top = 1000;
-        // this.dirLight.shadow.camera.bottom = -1000;
-        // this.dirLight.shadow.camera.left = 800;
-        // this.dirLight.shadow.camera.right = -800;
-        // this.dirLight.shadow.camera.near = 1500;
-        // this.dirLight.shadow.camera.far = 6000;
-        // this.dirLight.shadow.mapSize.width = 1024;
-        // this.dirLight.shadow.mapSize.height = 1024;
-        // this.dirLight.shadow.camera.near = 1500;
-        // this.dirLight.shadow.camera.far = 6000;
-        // this.dirLight.shadow.mapSize.width = 1024;
-        // this.dirLight.shadow.mapSize.height = 1024;
-        // this.dirLight.shadow.bias = -0.01;
-        this.dirLight.position.set(-2, 1, 2);
-        this.dirLight.target = new Object3D();
-        this.scene.add(this.dirLight.target);
-        this.scene.add(this.dirLight);
-        this.scene.add(ambient);
-        // sky
-        const skyShaterMat = new SkyShader(this.camera);
-        const skyBox = new IcosahedronGeometry(3000, 1);
-        this.skyMesh = new Mesh(skyBox, skyShaterMat);
-        // this.skyMesh.rotation.set(0, 1, 0);
-        this.scene.add(this.skyMesh);
         // floor
         this.floor = new Mesh(
             new CircleGeometry(10000, 10),
@@ -129,6 +100,7 @@ export default class App {
                 // transparent: true,
             }),
         );
+        this.floor.castShadow = false;
         this.floor.receiveShadow = true;
         this.floor.rotation.x = -Math.PI * 0.5;
         this.floor.position.x = 3.5;
@@ -157,6 +129,31 @@ export default class App {
         // camera
         this.camera.position.z = 300;
         this.camera.position.y = 10;
+
+        this.scene.fog = new FogExp2(0xffffff, 0.0006);
+        const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
+
+        // dirlight
+        this.dirLight.castShadow = true;
+        this.dirLight.shadow.camera.top = 1000;
+        this.dirLight.shadow.camera.bottom = -1000;
+        this.dirLight.shadow.camera.left = 800;
+        this.dirLight.shadow.camera.right = -800;
+        this.dirLight.shadow.camera.near = 1500;
+        this.dirLight.shadow.camera.far = 8000;
+        this.dirLight.shadow.mapSize.width = 1024 * 2;
+        this.dirLight.shadow.mapSize.height = 1024 * 2;
+        this.dirLight.position.copy(this.camera.position);
+        this.dirLight.target = new Object3D();
+        this.scene.add(this.dirLight.target);
+        this.scene.add(this.dirLight);
+        this.scene.add(ambient);
+        // sky
+        const skyShaterMat = new SkyShader(this.camera);
+        const skyBox = new IcosahedronGeometry(10000, 1);
+        this.skyMesh = new Mesh(skyBox, skyShaterMat);
+        this.skyMesh.rotation.set(0, 1, 0);
+        this.scene.add(this.skyMesh);
 
         this.levelController.loadLevel(
             'positionLevel',
@@ -232,9 +229,7 @@ export default class App {
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
         this.skyMesh.position.set(this.camera.position.x, 0, 0);
-        // (this.skyMesh.material as any).setSunAngle(70);
-        // (this.skyMesh.material as any).render();
-        skyShaderMat.setSunAngle(70);
+        skyShaderMat.setSunAngle(210);
         skyShaderMat.render();
         (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
         skyShaderMat.setTimeOfDay(0.6, [20, 55], 0, [195, 230], 0);

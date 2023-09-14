@@ -16,7 +16,8 @@ function Game() {
             if (!canvasRef.current) {
                 return;
             }
-            appRef.current = new App(canvasRef.current, ['black', 'white']);
+            appRef.current = new App(canvasRef.current, ['white', 'black']);
+            // appRef.current = new App(canvasRef.current, ['black', 'white']);
             // appRef.current = new App(canvasRef.current, ['white']);
             const stats = (() => {
                 if (process.env.NEXT_PUBLIC_STAGE === 'development') {

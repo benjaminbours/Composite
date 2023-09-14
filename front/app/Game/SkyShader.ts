@@ -1,4 +1,5 @@
 import { Vector3, Color, Camera, BackSide, ShaderMaterial } from 'three';
+import { degreesToRadians } from './helpers/math';
 
 interface IOptions {
     time: number;
@@ -240,8 +241,8 @@ export default class SkyShader extends ShaderMaterial {
     }
 
     public setSunAngle(angle: number) {
-        this.uniforms.uSunPos.value.x = Math.sin((angle / 180) * Math.PI);
-        this.uniforms.uSunPos.value.z = Math.cos((angle / 180) * Math.PI);
+        this.uniforms.uSunPos.value.x = Math.sin(degreesToRadians(angle));
+        this.uniforms.uSunPos.value.z = Math.cos(degreesToRadians(angle));
     }
 
     public getLightInfo(playerPosition: Vector3) {

@@ -28,9 +28,9 @@ const materials = {
     phong: new MeshPhongMaterial({
         color: 0xffffff,
         side: DoubleSide,
-        specular: 0x000000,
-        shininess: 0,
-        transparent: true,
+        // specular: 0x000000,
+        // shininess: 0,
+        // transparent: true,
     }),
     border: new MeshPhongMaterial({
         color: 0xffffff,
