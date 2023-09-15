@@ -18,17 +18,6 @@ export class ShadowPlayer extends Player {
     constructor(public isMainPlayer: boolean) {
         super(isMainPlayer);
 
-        function getPoint(v: Vector3, size: number) {
-            // the 'discard' method, not the most efficient
-            v.x = Math.random() * 2 - 1;
-            v.y = Math.random() * 2 - 1;
-            v.z = Math.random() * 2 - 1;
-            if (v.length() > 1) {
-                return getPoint(v, size);
-            }
-            return v.normalize().multiplyScalar(size);
-        }
-
         const geometry = new SphereGeometry(10, 50, 50);
         const particlesNumber = geometry.attributes.position.array.length / 3;
         const shadowDirection = new Float32Array(particlesNumber * 3);
@@ -37,16 +26,9 @@ export class ShadowPlayer extends Player {
         const shadowAxisRotation = new Float32Array(particlesNumber * 3);
         const shadowAngle = new Float32Array(particlesNumber);
         const shadowSize = new Float32Array(particlesNumber);
-        const shadowSphere = new Float32Array(particlesNumber * 3);
-        var shadowSelection = new Float32Array(particlesNumber);
+        const shadowSelection = new Float32Array(particlesNumber);
 
-        let pointSphere = new Vector3();
         for (let i = 0; i < shadowDirection.length; i = i + 3) {
-            getPoint(pointSphere, 128 / 16);
-            shadowSphere[i] = pointSphere.x;
-            shadowSphere[i + 1] = pointSphere.y;
-            shadowSphere[i + 2] = pointSphere.z;
-
             shadowSelection[i / 3] = i;
 
             let direction = new Vector3(10.0, 10.0, 10.0);
