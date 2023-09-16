@@ -1,0 +1,63 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: composite_db
+    image: postgres:latest
+    restart: always
+    networks:
+      - database
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+
+  adminer:
+    container_name: composite_adminer
+    image: adminer
+    ports:
+      - 8080:8080
+
+  cache:
+    container_name: composite_cache
+    image: redis:latest
+    restart: always
+    networks:
+      - database
+    depends_on:
+      - db
+    ports:
+      - 6379:6379
+    # command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - ./cache:/data
+
+  # traefik:
+  #   image: traefik:latest
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   links:
+  #     - server 
+
+  # api:
+  #   restart: always
+  #   container_name: composite_api
+  #   build:
+  #     context: .
+  #   networks:
+  #     - database
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./test:/app/test
+  #     - ./prisma:/app/prisma
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 3000:3000
+
+networks:
+  database:
