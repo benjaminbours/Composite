@@ -1,11 +1,4 @@
-import {
-    Object3D,
-    Vector3,
-    SphereGeometry,
-    MeshBasicMaterial,
-    Mesh,
-    Vector2,
-} from 'three';
+import { Object3D, Vector3, Vector2 } from 'three';
 import {
     jumpIfPossible,
     applyGravity,
@@ -24,6 +17,7 @@ export class Player extends Object3D implements MovableComponent {
     public state: MovableComponentState = MovableComponentState.onFloor;
     public currentElevator = undefined;
     public currentDoorOpener = undefined;
+    public currentEndLevel = undefined;
     // + positions from Object3D
     // end properties used on collision systems
 

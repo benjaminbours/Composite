@@ -33,7 +33,7 @@ import { Side } from '../types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
-import { collisionSystem } from './Player/physics/movementHelpers';
+import { collisionSystem } from './Player/physics/collision.system';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';

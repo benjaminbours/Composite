@@ -137,10 +137,10 @@ export class PositionLevel extends Group {
             this.collidingElements.push(arch);
         });
 
-        // const mysticPlace = new Elevator(1000, 600, new Color('yellow'));
-        // this.add(mysticPlace);
-        // this.collidingElements.push(mysticPlace);
-        // positionOnGrid(mysticPlace, new Vector3(9, 3, 0));
+        const endLevel = new EndLevel(new Color('white'));
+        this.add(endLevel);
+        this.collidingElements.push(endLevel);
+        positionOnGrid(endLevel, new Vector3(11, 0, 0));
 
         // const mystic2 = new Elevator(1000, 300, new Color('yellow'));
         // this.add(mystic2);

@@ -22,14 +22,23 @@ import { gridSize } from '../levels/levels.utils';
 const DEFAULT_SPEED_MODIFIER = 0.2;
 const FAST_SPEED_MODIFIER = 2;
 
-const DEFAULT_ORGANIC_RATIO = 1;
-const FAST_ORGANIC_RATIO = 0.2;
+const DEFAULT_ORGANIC_RATIO = 0;
+const FAST_ORGANIC_RATIO = 1;
 
+// TODO: shouldActive and activate are not used anymore because we need dedicated one
+// for each player here
+// TODO: Naming can be improved as well, organic ratio is not correct in this context
+// its more an interpolation ratio
 export class EndLevel extends Object3D implements InteractiveComponent {
-    public shouldActivate: boolean = false;
-    public isActive: boolean = false;
-    protected speedModifier: number = DEFAULT_SPEED_MODIFIER;
-    protected organicRatio = DEFAULT_ORGANIC_RATIO;
+    public shouldActivate = false;
+    public shouldActivateLight = false;
+    public shouldActivateShadow = false;
+    public isActive = false;
+    public isActiveLight = false;
+    public isActiveShadow = false;
+    protected speedModifier = DEFAULT_SPEED_MODIFIER;
+    protected organicRatioLight = DEFAULT_ORGANIC_RATIO;
+    protected organicRatioShadow = DEFAULT_ORGANIC_RATIO;
 
     protected particles: Points;
 
@@ -40,14 +49,15 @@ export class EndLevel extends Object3D implements InteractiveComponent {
         const particlesGeo = new BufferGeometry();
         const particlesVertices = new Float32Array(particlesNumber * 3);
         const particlesDirection = new Float32Array(particlesNumber * 3);
+        const particlesAxisRotation = new Float32Array(particlesNumber * 3);
         const particlesDelay = new Float32Array(particlesNumber);
-        const particlesRadius = new Float32Array(particlesNumber);
-        const particlesAngle = new Float32Array(particlesNumber);
+        const particlesAngleRotation = new Float32Array(particlesNumber);
         const particlesSpeed = new Float32Array(particlesNumber);
         const particlesSize = new Float32Array(particlesNumber);
 
         for (let i = 0; i < particlesVertices.length; i = i + 3) {
-            const directionRange = new Vector3(10.0, 10.0, 10.0);
+            const range = 300;
+            const directionRange = new Vector3(range, range, range);
             particlesDirection[i] = getRange(
                 -directionRange.x,
                 directionRange.x,
@@ -62,18 +72,18 @@ export class EndLevel extends Object3D implements InteractiveComponent {
             );
 
             particlesVertices[i] = 0.0;
-            particlesVertices[i + 1] = 100.0;
+            particlesVertices[i + 1] = 0.0;
             particlesVertices[i + 2] = 0.0;
+
+            particlesAxisRotation[i] = getRange(0, 1); // x
+            particlesAxisRotation[i + 1] = getRange(0, 1); // y
+            particlesAxisRotation[i + 2] = getRange(0, 1); // z
 
             particlesDelay[i / 3] = getRange(0, 50);
             particlesSpeed[i / 3] = getRange(0.05, 0.5);
 
             particlesSize[i / 3] = getRange(5.0, 10.0);
-            // particlesRadius[i / 3] = getRange(5, 100);
-            // particlesAngle[i / 3] = getRange(
-            //     degreesToRadians(0),
-            //     degreesToRadians(360),
-            // );
+            particlesAngleRotation[i / 3] = getRange(0, Math.PI * 2);
         }
 
         particlesGeo.setAttribute(
@@ -85,12 +95,12 @@ export class EndLevel extends Object3D implements InteractiveComponent {
             new BufferAttribute(particlesDirection, 3),
         );
         particlesGeo.setAttribute(
-            'radius',
-            new BufferAttribute(particlesRadius, 1),
+            'axisRotation',
+            new BufferAttribute(particlesAxisRotation, 3),
         );
         particlesGeo.setAttribute(
-            'angle',
-            new BufferAttribute(particlesAngle, 1),
+            'angleRotation',
+            new BufferAttribute(particlesAngleRotation, 1),
         );
         particlesGeo.setAttribute(
             'delay',
@@ -109,7 +119,8 @@ export class EndLevel extends Object3D implements InteractiveComponent {
             uniforms: {
                 time: { value: 0.0 },
                 color: { value: color },
-                organicRatio: { value: DEFAULT_ORGANIC_RATIO },
+                organicRatioLight: { value: DEFAULT_ORGANIC_RATIO },
+                organicRatioShadow: { value: DEFAULT_ORGANIC_RATIO },
             },
             vertexShader: VS,
             fragmentShader: FS,
@@ -133,8 +144,6 @@ export class EndLevel extends Object3D implements InteractiveComponent {
         this.particles.frustumCulled = false;
     }
 
-    // TODO: Think about using a door opening system to manage this logic
-    // I don't like the fact its the element door opener who set the camera target
     public update = (delta: number, camera: CustomCamera) => {
         this.detectActivation(this.activate(camera), this.deactivate(camera));
         this.updateShader(delta);
@@ -142,66 +151,101 @@ export class EndLevel extends Object3D implements InteractiveComponent {
 
     protected updateShader = (delta: number) => {
         const particlesMat = this.particles.material as ShaderMaterial;
-        particlesMat.uniforms.organicRatio.value = this.organicRatio;
+        particlesMat.uniforms.organicRatioLight.value = this.organicRatioLight;
+        particlesMat.uniforms.organicRatioShadow.value =
+            this.organicRatioShadow;
         particlesMat.uniforms.time.value += delta * this.speedModifier;
-        // console.log(particlesMat.uniforms.time.value);
     };
 
     protected detectActivation = (
-        cbActivation?: () => void,
-        cbDeactivation?: () => void,
+        cbActivation?: (side: 'shadow' | 'light') => void,
+        cbDeactivation?: (side: 'shadow' | 'light') => void,
     ) => {
-        if (this.shouldActivate && !this.isActive) {
-            this.isActive = true;
+        // activations
+        if (this.shouldActivateShadow && !this.isActiveShadow) {
+            this.isActiveShadow = true;
+
             if (cbActivation) {
-                cbActivation();
+                cbActivation('shadow');
             }
         }
 
-        if (!this.shouldActivate && this.isActive) {
-            this.isActive = false;
+        if (this.shouldActivateLight && !this.isActiveLight) {
+            this.isActiveLight = true;
+            if (cbActivation) {
+                cbActivation('light');
+            }
+        }
+
+        // deactivations
+        if (!this.shouldActivateShadow && this.isActiveShadow) {
+            this.isActiveShadow = false;
             if (cbDeactivation) {
-                cbDeactivation();
+                cbDeactivation('shadow');
+            }
+        }
+
+        if (!this.shouldActivateLight && this.isActiveLight) {
+            this.isActiveLight = false;
+            if (cbDeactivation) {
+                cbDeactivation('light');
             }
         }
     };
 
-    protected activateVFX = () => {
-        gsap.to(this, {
-            duration: 2,
-            speedModifier: FAST_SPEED_MODIFIER,
-        });
+    protected activateShadow = () => {
         gsap.to(this, {
             delay: 1,
             duration: 5,
-            organicRatio: FAST_ORGANIC_RATIO,
+            organicRatioShadow: FAST_ORGANIC_RATIO,
         });
     };
 
-    protected deactivateVFX = () => {
-        // gsap.to(this, {
-        //     duration: 2,
-        //     speedModifier: DEFAULT_SPEED_MODIFIER,
-        // });
-        // gsap.to(this, {
-        //     duration: 5,
-        //     delay: 1,
-        //     organicRatio: DEFAULT_ORGANIC_RATIO,
-        // });
+    protected activateLight = () => {
+        gsap.to(this, {
+            delay: 1,
+            duration: 5,
+            organicRatioLight: FAST_ORGANIC_RATIO,
+        });
     };
 
-    activate = (camera: CustomCamera) => () => {
+    protected deactivateShadow = () => {
+        gsap.to(this, {
+            duration: 5,
+            delay: 1,
+            organicRatioShadow: DEFAULT_ORGANIC_RATIO,
+        });
+    };
+
+    protected deactivateLight = () => {
+        gsap.to(this, {
+            duration: 5,
+            delay: 1,
+            organicRatioLight: DEFAULT_ORGANIC_RATIO,
+        });
+    };
+
+    activate = (camera: CustomCamera) => (side: 'shadow' | 'light') => {
         // camera.focusTarget(
         //     this.doorInfo.cameraPosition,
         //     new Vector3(0, 0.2, 0),
         // );
-        this.activateVFX();
+        if (side === 'shadow') {
+            this.activateShadow();
+        } else {
+            this.activateLight();
+        }
         // this.openTheDoor();
     };
 
-    deactivate = (camera: CustomCamera) => () => {
+    deactivate = (camera: CustomCamera) => (side: 'shadow' | 'light') => {
         // camera.unfocus();
-        this.deactivateVFX();
+        // this.deactivateVFX();
+        if (side === 'shadow') {
+            this.deactivateShadow();
+        } else {
+            this.deactivateLight();
+        }
         // this.closeTheDoor();
     };
 

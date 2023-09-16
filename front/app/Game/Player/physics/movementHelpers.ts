@@ -6,6 +6,7 @@ import { getNearestObjects } from './raycaster';
 import { MysticPlace } from '../../elements/MysticPlace';
 import { CollidingElem } from '../../types';
 import { DoorOpener } from '../../elements/DoorOpener';
+import { EndLevel } from '../../elements/EndLevel';
 // import { Elevator } from '../../elements/Elevator';
 
 const MAX_VELOCITY_X = 15;
@@ -118,117 +119,10 @@ export interface MovableComponent {
     // We have to keep in memory a reference to the last activated mystic place in order to deactivate it when we leave
     // currentElevator: Elevator | undefined;
     currentDoorOpener: DoorOpener | undefined;
+    currentEndLevel: EndLevel | undefined;
 }
 
 export interface InteractiveComponent {
     shouldActivate: boolean;
     isActive: boolean;
-}
-
-export function collisionSystem(
-    components: MovableComponent[],
-    obstacles: CollidingElem[],
-) {
-    for (let i = 0; i < components.length; i++) {
-        const component = components[i];
-        const { position, velocity, range } = component;
-
-        const nearestObjects = getNearestObjects(position, obstacles);
-
-        if (nearestObjects.down) {
-            const { parent } = nearestObjects.down.object;
-
-            const clearCurrentDoorOpener = () => {
-                if (component.currentDoorOpener) {
-                    component.currentDoorOpener.shouldActivate = false;
-                    component.currentDoorOpener = undefined;
-                }
-            };
-
-            // when the component touch the floor
-            if (
-                position.y + velocity.y <=
-                range.y + nearestObjects.down.point.y
-            ) {
-                velocity.y = 0;
-                position.y = nearestObjects.down.point.y + 20;
-
-                switch (true) {
-                    // case parent instanceof Elevator:
-                    //     component.currentElevator = parent as Elevator;
-                    //     (parent as Elevator).shouldActivate = true;
-                    //     component.state = MovableComponentState.ascend;
-                    //     break;
-                    case parent instanceof DoorOpener:
-                        component.currentDoorOpener = parent as DoorOpener;
-                        (parent as DoorOpener).shouldActivate = true;
-                        if (component.state !== MovableComponentState.onFloor) {
-                            component.state = MovableComponentState.onFloor;
-                        }
-                        break;
-                    default:
-                        if (component.state !== MovableComponentState.onFloor) {
-                            component.state = MovableComponentState.onFloor;
-                        }
-                        break;
-                }
-            } else {
-                // when the component is not touching the floor
-                // TODO: Think about how to manage the two different mystic place logics
-                // the pulsing flow and the door opening
-                // it should probably not stay in the collision and player logic
-                // think about a system that could be apply to anything with velocity, not just the player
-                // if (
-                //     parent instanceof Elevator &&
-                //     nearestObjects.down.distance <= parent.height
-                // ) {
-                //     component.currentElevator = parent;
-                //     parent.shouldActivate = true;
-                //     component.state = MovableComponentState.ascend;
-                // } else {
-                //     if (component.state !== MovableComponentState.inAir) {
-                //         component.state = MovableComponentState.inAir;
-                //     }
-                // }
-                if (component.state !== MovableComponentState.inAir) {
-                    component.state = MovableComponentState.inAir;
-                }
-
-                clearCurrentDoorOpener();
-            }
-
-            // if (!(parent instanceof Elevator) && component.currentElevator) {
-            //     component.currentElevator.shouldActivate = false;
-            //     component.currentElevator = undefined;
-            // }
-
-            if (!(parent instanceof DoorOpener)) {
-                clearCurrentDoorOpener();
-            }
-        }
-
-        if (
-            nearestObjects.right &&
-            position.x + velocity.x + range.x > nearestObjects.right.point.x
-        ) {
-            velocity.x = 0;
-            position.x = nearestObjects.right.point.x - 20;
-        }
-
-        if (
-            nearestObjects.left &&
-            position.x + velocity.x < range.x + nearestObjects.left.point.x
-        ) {
-            velocity.x = 0;
-            position.x = nearestObjects.left.point.x + 20;
-        }
-
-        if (
-            nearestObjects.up &&
-            position.y + velocity.y + range.y > nearestObjects.up.point.y
-        ) {
-            velocity.y = 0;
-            position.y = nearestObjects.up.point.y - 20;
-        }
-    }
 }
