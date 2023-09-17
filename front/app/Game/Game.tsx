@@ -1,4 +1,3 @@
-'use client';
 import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, { useEffect, useRef } from 'react';

@@ -1,5 +1,7 @@
-import React from 'react';
+'use client';
+import React, { useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import type { SocketController } from './SocketController';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -12,9 +14,19 @@ const Game = dynamic(() => import('./Game'), {
 });
 
 function MainApp() {
+    const socketController = useRef<SocketController>();
+
+    const establishConnection = useCallback(() => {
+        import('./SocketController')
+            .then((mod) => mod.SocketController)
+            .then((SocketController) => {
+                socketController.current = new SocketController();
+            });
+    }, []);
+
     return (
-        <Game />
-        // <Menu />
+        // <Game />
+        <Menu establishConnection={establishConnection} />
     );
 }
 

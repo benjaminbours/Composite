@@ -1,4 +1,3 @@
-'use client';
 import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, {
@@ -20,11 +19,17 @@ import Portal from './Portal';
 interface State {
     currentScene: Scene;
     side: Side;
+    selectedLevel: string | undefined;
 }
 
-export function Menu() {
+interface Props {
+    establishConnection: () => void;
+}
+
+export function Menu({ establishConnection }: Props) {
     const [state, setState] = useState<State>({
         currentScene: 'home',
+        selectedLevel: undefined,
         side: 'black',
     });
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -218,6 +223,10 @@ export function Menu() {
         if (!animation.current) {
             return;
         }
+        setState((prev) => ({
+            ...prev,
+            selectedLevel: name,
+        }));
         onTransition.current = true;
         animation.current.playLevelToFaction();
     }, []);
@@ -227,14 +236,16 @@ export function Menu() {
             return;
         }
         animation.current.faction = side;
-        setState({
+        setState((prev) => ({
+            ...prev,
             side,
             currentScene: 'queue',
-        });
+        }));
         animation.current.initFactionToQueue(() => {
             onTransition.current = true;
         });
         animation.current.playFactionToQueue();
+        establishConnection();
     }, []);
 
     const levels = useMemo(
