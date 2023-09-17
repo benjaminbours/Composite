@@ -268,8 +268,8 @@ export function Menu({ establishConnection }: Props) {
 
     const queueText = useMemo(
         () => ({
-            white: 'No shadow here',
-            black: 'No light here',
+            white: 'Finding a shadow',
+            black: 'Finding a light',
         }),
         [],
     );

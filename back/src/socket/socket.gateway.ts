@@ -4,7 +4,7 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import type { Socket } from 'socket.io';
-import { ENVIRONMENT } from '../environment';
+// import { ENVIRONMENT } from '../environment';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -13,10 +13,12 @@ import { ENVIRONMENT } from '../environment';
     // whether to skip middlewares upon successful recovery
     skipMiddlewares: true,
   },
+  credentials: true,
   // transports: ['websocket'],
-  cors: {
-    origin: [ENVIRONMENT.CLIENT_URL],
-  },
+  // disable while cors is managed in load balancer
+  // cors: {
+  //   origin: [ENVIRONMENT.CLIENT_URL],
+  // },
 })
 export class SocketGateway {
   @SubscribeMessage('connection')

@@ -4,7 +4,8 @@ const REQUIRED_ENV_VARS = [
   // API variables
   'PORT',
   'REDIS_URL',
-  'CLIENT_URL',
+  // disable while cors is managed in load balancer
+  // 'CLIENT_URL',
 ] as const;
 
 const OPTIONAL_ENV_VARS = [''] as const;

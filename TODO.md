@@ -8,6 +8,16 @@
 - Communication between the 2 players should be as stateless as possible from a server point of view
   - benefits from redis, socket.io redis-adapter
 
+- Dans la grande box qu'est le fait de pouvoir start plusieurs instance de mon api, j'ai deja:
+  - un load balancer => traefik
+  - un cache => redis
+  - un adapter => redis et socket io
+- J'ai verifie que:
+  - Le load balance fonctionne
+- Je n'ai pas encore verifie que:
+  - La partie avec le cache + l'adapter fonctionne
+  - Que l'on peut recover une session, etc => https://socket.io/docs/v4/connection-state-recovery
+
 ## Required
 
 - Restore level loading
