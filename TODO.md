@@ -1,5 +1,13 @@
 # TODO
 
+## About communication front - back
+
+- When the client load, he should ask the server information about the current state
+  - How many players currently playing and pending
+  - What did they selected as level and side
+- Communication between the 2 players should be as stateless as possible from a server point of view
+  - benefits from redis, socket.io redis-adapter
+
 ## Required
 
 - Restore level loading
