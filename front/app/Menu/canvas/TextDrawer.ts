@@ -1,5 +1,7 @@
+// our libs
+import { Side } from 'composite-core';
+// local
 import { ICoordinate } from '../types';
-import type { Side } from '../../types';
 
 export default class TextDrawer {
     public isBothSide: boolean = true;
@@ -42,7 +44,7 @@ export default class TextDrawer {
         ctx.textAlign = 'center';
         // ctx.canvas.style.letterSpacing = `${this.letterSpacing}px`;
         ctx.font = `${this.fontWeight} ${this.fontSize}px sans-serif`;
-        ctx.fillStyle = color;
+        ctx.fillStyle = color === Side.SHADOW ? 'back' : 'white';
         ctx.globalAlpha = this.opacity;
         // this.width = ctx.measureText(this.content).width;
         // this.x = (ctx.canvas.width * this.ix) - this.width / 2;

@@ -1,3 +1,4 @@
+// vendors
 import {
     Mesh,
     // Fog,
@@ -24,12 +25,14 @@ import {
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+// our libs
+import { Side } from 'composite-core';
+// local
 // import SkyShader from './SkyShader';
 import Inputs from './Player/Inputs';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
 import { CollidingElem } from './types';
-import { Side } from '../types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
@@ -112,11 +115,11 @@ export default class App {
         playersConfig.forEach((side, index) => {
             const player = (() => {
                 switch (side) {
-                    case 'white':
+                    case Side.LIGHT:
                         const lightPlayer = new LightPlayer(index === 0);
                         lightPlayer.mesh.layers.set(Layer.OCCLUSION);
                         return lightPlayer;
-                    case 'black':
+                    case Side.SHADOW:
                         return new ShadowPlayer(index === 0);
                 }
             })();

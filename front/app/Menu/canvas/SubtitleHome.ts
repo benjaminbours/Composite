@@ -1,4 +1,6 @@
-import type { Side } from '../../types';
+// our libs
+import { Side } from 'composite-core';
+// local
 import TextDrawer from './TextDrawer';
 
 const coordinate = {

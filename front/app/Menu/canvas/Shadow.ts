@@ -1,5 +1,7 @@
+// our libs
+import { Side } from 'composite-core';
+// local
 import { ResizeOptions } from '../types';
-import type { Side } from '../../types';
 
 const shadow = new Image();
 shadow.src = '/shadow.png';
@@ -45,7 +47,7 @@ export default class Shadow {
             isOnMobile: boolean,
             faction: Side,
         ) {
-            const positionX = faction === 'black' ? 0.5 : 1.5;
+            const positionX = faction === Side.SHADOW ? 0.5 : 1.5;
             const positionY = 0.5;
             return {
                 x: width * positionX,

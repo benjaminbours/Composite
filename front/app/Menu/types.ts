@@ -1,4 +1,4 @@
-import { Side } from '../types';
+import { Side } from 'composite-core';
 
 export type Scene = 'home' | 'level' | 'faction' | 'queue';
 

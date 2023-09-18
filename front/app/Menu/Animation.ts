@@ -1,5 +1,9 @@
+// vendors
 import { gsap } from 'gsap';
 import { RefObject } from 'react';
+// our libs
+import { Side } from 'composite-core';
+// local
 import Curve, { defaultWaveOptions } from './canvas/Curve';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
@@ -17,7 +21,6 @@ import {
     homeIn,
 } from './tweens';
 import { Scene } from './types';
-import { Side } from '../types';
 import Shadow from './canvas/Shadow';
 import Light from './canvas/Light';
 import MainTitle from './canvas/MainTitle';

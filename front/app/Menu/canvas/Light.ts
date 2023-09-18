@@ -1,6 +1,9 @@
+// vendors
 import { gsap } from 'gsap';
+// our libs
+import { Side } from 'composite-core';
+// local
 import { ResizeOptions } from '../types';
-import type { Side } from '../../types';
 
 const light = new Image();
 light.src = '/light.png';
@@ -87,7 +90,7 @@ export default class Light {
             isOnMobile: boolean,
             faction: Side,
         ) {
-            const positionX = faction === 'white' ? 0.5 : -0.5;
+            const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
             const positionY = 0.5;
             return {
                 x: width * positionX,

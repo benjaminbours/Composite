@@ -1,6 +1,9 @@
+// vendors
 import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, { useEffect, useRef } from 'react';
+// our libs
+import { Side } from 'composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { geometries } from './levels/levels.utils';
@@ -15,7 +18,10 @@ function Game() {
             if (!canvasRef.current) {
                 return;
             }
-            appRef.current = new App(canvasRef.current, ['white', 'black']);
+            appRef.current = new App(canvasRef.current, [
+                Side.LIGHT,
+                Side.SHADOW,
+            ]);
             // appRef.current = new App(canvasRef.current, ['black', 'white']);
             // appRef.current = new App(canvasRef.current, ['white']);
             const stats = (() => {

@@ -1,4 +1,5 @@
-import type { Side } from '../../types';
+// our libs
+import { Side } from 'composite-core';
 
 const mainTitleWhite = new Image();
 mainTitleWhite.src = '/composite_white.svg';
@@ -25,10 +26,10 @@ export default class MainTitle {
     }
 
     public render = (ctx: CanvasRenderingContext2D, color: Side): boolean => {
-        if (ctx.canvas.width <= 768 && color === 'black') {
+        if (ctx.canvas.width <= 768 && color === Side.SHADOW) {
             return false;
         }
-        const img = color === 'black' ? mainTitleBlack : mainTitleWhite;
+        const img = color === Side.SHADOW ? mainTitleBlack : mainTitleWhite;
         ctx.save();
         ctx.globalAlpha = this.opacity;
         ctx.drawImage(img, this.startX, this.startY, this.width, this.height);

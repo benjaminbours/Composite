@@ -1,8 +1,8 @@
+// vendors
 import React from 'react';
-import type { Side } from '../types';
 
 interface IProps {
-    color: Side;
+    color: string;
     onClick: () => void;
 }
 

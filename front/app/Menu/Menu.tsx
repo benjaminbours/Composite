@@ -12,7 +12,7 @@ import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { Scene } from './types';
-import type { MatchMakingInfo, Side } from 'composite-core';
+import { MatchMakingInfo, Side } from 'composite-core';
 import ButtonBack from './ButtonBack';
 import Portal from './Portal';
 
@@ -30,7 +30,7 @@ export function Menu({ establishConnection }: Props) {
     const [state, setState] = useState<State>({
         currentScene: 'home',
         selectedLevel: undefined,
-        side: 'black',
+        side: Side.SHADOW,
     });
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -274,8 +274,8 @@ export function Menu({ establishConnection }: Props) {
 
     const queueText = useMemo(
         () => ({
-            white: 'Finding a shadow',
-            black: 'Finding a light',
+            0: 'Finding a light',
+            1: 'Finding a shadow',
         }),
         [],
     );
@@ -339,7 +339,7 @@ export function Menu({ establishConnection }: Props) {
                     // TODO: had same interaction as on home page
                     // onMouseEnter={handleMouseEnterPlay}
                     // onMouseLeave={handleMouseLeavePlay}
-                    onClick={() => handleClickOnFaction('white')}
+                    onClick={() => handleClickOnFaction(Side.LIGHT)}
                 >
                     light
                 </button>
@@ -348,7 +348,7 @@ export function Menu({ establishConnection }: Props) {
                     // TODO: had same interaction as on home page
                     // onMouseEnter={handleMouseEnterPlay}
                     // onMouseLeave={handleMouseLeavePlay}
-                    onClick={() => handleClickOnFaction('black')}
+                    onClick={() => handleClickOnFaction(Side.SHADOW)}
                 >
                     shadow
                 </button>
@@ -359,8 +359,10 @@ export function Menu({ establishConnection }: Props) {
                     state.currentScene !== 'queue' ? 'unmount' : ''
                 }`}
             >
-                <ButtonBack color={state.side} onClick={handleClickOnBack} />
-                <h2 className={state.side}>{queueText[state.side]}</h2>
+                <ButtonBack color={state.side === Side.SHADOW ? 'black' : 'white'} onClick={handleClickOnBack} />
+                <h2 className={state.side === Side.SHADOW ? 'black' : 'white'}>
+                    {queueText[state.side]}
+                </h2>
             </div>
         </>
     );

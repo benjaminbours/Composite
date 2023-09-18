@@ -1,4 +1,7 @@
-export type Side = 'black' | 'white';
+export enum Side {
+  SHADOW,
+  LIGHT,
+}
 
 export interface MatchMakingInfo {
     side: Side;
@@ -7,9 +10,9 @@ export interface MatchMakingInfo {
 
 export enum SocketEventType {
     // send automatically by socket io after successful connection with server
-    CONNECT = 'connect',
+  CONNECT = "connect",
     // send only by the client after connect
-    MATCHMAKING_INFO = 'MATCHMAKING_INFO',
+  MATCHMAKING_INFO = "MATCHMAKING_INFO",
 }
 
 export type MatchMakingEvent = [
