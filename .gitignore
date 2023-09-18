@@ -3,3 +3,5 @@ data-backup
 .vscode/*.log
 **/.DS_Store
 .DS_Store
+data
+cache

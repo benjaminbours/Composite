@@ -1,6 +1,9 @@
 start:
 	docker-compose up --scale api=2
 
+build:
+	docker-compose build
+
 # start_db:
 # 	docker-compose up -d db adminer cache
 

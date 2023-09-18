@@ -5,7 +5,8 @@ RUN apk add --update --no-cache openssl1.1-compat
 WORKDIR /app
 COPY . .
 
-RUN npm i
+RUN npm i -w packages -w back
+RUN npm run build -w packages
 RUN npx prisma generate
 
-ENTRYPOINT ["npm", "run", "start:dev"]
+ENTRYPOINT ["npm", "run", "start:dev", "-w", "back"]

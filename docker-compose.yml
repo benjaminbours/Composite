@@ -12,7 +12,7 @@ services:
     # ports:
     #   - 5432:5432
     env_file:
-      - .env
+      - ./back/.env
 
   adminer:
     container_name: composite_adminer
@@ -37,7 +37,7 @@ services:
     container_name: composite_gateway
     image: traefik:latest
     command:
-      - "--log.level=DEBUG"
+      # - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -55,17 +55,18 @@ services:
     restart: always
     build:
       context: .
+      dockerfile: Dockerfile.back
     networks:
       - database
     depends_on:
       - db
     volumes:
-      - ./.env:/app/.env
-      - ./src:/app/src
-      - ./test:/app/test
-      - ./prisma:/app/prisma
+      - ./back/.env:/app/.env
+      - ./back/src:/app/src
+      - ./back/test:/app/test
+      - ./back/prisma:/app/prisma
     env_file:
-      - .env
+      - ./back/.env
     # ports:
       # - 3002:3002
     labels:

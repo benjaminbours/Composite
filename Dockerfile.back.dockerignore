@@ -1,0 +1,12 @@
+*
+
+# node_modules
+# data
+# dist
+# package.json
+
+!back
+back/node_modules
+!packages/core
+packages/core/node_modules
+!./package.json
