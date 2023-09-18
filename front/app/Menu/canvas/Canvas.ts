@@ -1,3 +1,6 @@
+// our libs
+import { Side } from 'composite-core';
+// local
 import Animation from '../Animation';
 import { ResizeOptions } from '../types';
 
@@ -11,7 +14,7 @@ export default class Canvas {
         this.resize = this.resize.bind(this);
     }
 
-    protected renderBothComponents(color: string) {
+    protected renderBothComponents(color: Side) {
         Animation.runMethodForAllBothSideComponents('render', [
             this.ctx,
             color,

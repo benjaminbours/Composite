@@ -12,14 +12,14 @@ import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { Scene } from './types';
-import { MatchMakingInfo, Side } from 'composite-core';
+import { Levels, MatchMakingInfo, Side } from 'composite-core';
 import ButtonBack from './ButtonBack';
 import Portal from './Portal';
 
 interface State {
     currentScene: Scene;
     side: Side;
-    selectedLevel: string | undefined;
+    selectedLevel: Levels | undefined;
 }
 
 interface Props {
@@ -219,13 +219,13 @@ export function Menu({ establishConnection }: Props) {
         }
     }, [state]);
 
-    const handleClickOnLevel = useCallback((name: string) => {
+    const handleClickOnLevel = useCallback((levelId: Levels) => {
         if (!animation.current) {
             return;
         }
         setState((prev) => ({
             ...prev,
-            selectedLevel: name,
+            selectedLevel: levelId,
         }));
         onTransition.current = true;
         animation.current.playLevelToFaction();
@@ -240,7 +240,7 @@ export function Menu({ establishConnection }: Props) {
             // side effect, not the best place
             establishConnection({
                 side,
-                selectedLevel: prev.selectedLevel as string,
+                selectedLevel: prev.selectedLevel as Levels,
             });
             return {
                 ...prev,
@@ -257,14 +257,17 @@ export function Menu({ establishConnection }: Props) {
     const levels = useMemo(
         () => [
             {
+                id: Levels.CRACK_THE_DOOR,
                 name: 'Crack the door',
                 img: '/crack_the_door.png',
             },
             {
+                id: Levels.LEARN_TO_FLY,
                 name: 'Learn to fly',
                 img: '/learn_to_fly.png',
             },
             {
+                id: Levels.THE_HIGH_SPHERES,
                 name: 'The hight spheres',
                 img: '/the_hight_spheres.png',
             },
@@ -359,7 +362,10 @@ export function Menu({ establishConnection }: Props) {
                     state.currentScene !== 'queue' ? 'unmount' : ''
                 }`}
             >
-                <ButtonBack color={state.side === Side.SHADOW ? 'black' : 'white'} onClick={handleClickOnBack} />
+                <ButtonBack
+                    color={state.side === Side.SHADOW ? 'black' : 'white'}
+                    onClick={handleClickOnBack}
+                />
                 <h2 className={state.side === Side.SHADOW ? 'black' : 'white'}>
                     {queueText[state.side]}
                 </h2>

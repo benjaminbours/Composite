@@ -3,21 +3,27 @@ export enum Side {
   LIGHT,
 }
 
+export enum Levels {
+  CRACK_THE_DOOR,
+  LEARN_TO_FLY,
+  THE_HIGH_SPHERES,
+}
+
 export interface MatchMakingInfo {
-    side: Side;
-    selectedLevel: string;
+  side: Side;
+  selectedLevel: Levels;
 }
 
 export enum SocketEventType {
-    // send automatically by socket io after successful connection with server
+  // send automatically by socket io after successful connection with server
   CONNECT = "connect",
-    // send only by the client after connect
+  // send only by the client after connect
   MATCHMAKING_INFO = "MATCHMAKING_INFO",
 }
 
 export type MatchMakingEvent = [
-    type: SocketEventType.MATCHMAKING_INFO,
-    payload: MatchMakingInfo,
+  type: SocketEventType.MATCHMAKING_INFO,
+  payload: MatchMakingInfo,
 ];
 
 export type SocketEvent = MatchMakingEvent;
