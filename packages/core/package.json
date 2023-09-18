@@ -1,0 +1,26 @@
+{
+  "name": "composite-core",
+  "version": "0.0.1",
+  "description": "What is shared between front and back",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit",
+    "prepack": "npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "api": "^6.1.1",
+    "back": "^1.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "publishConfig": {
+    "registry": "https://github.com/benjaminbours/Composite.git"
+  },
+  "repository": "https://github.com/benjaminbours/Composite.git"
+}

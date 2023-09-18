@@ -12,7 +12,7 @@ import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { Scene } from './types';
-import { Side } from '../types';
+import type { MatchMakingInfo, Side } from 'composite-core';
 import ButtonBack from './ButtonBack';
 import Portal from './Portal';
 
@@ -23,7 +23,7 @@ interface State {
 }
 
 interface Props {
-    establishConnection: () => void;
+    establishConnection: (data: MatchMakingInfo) => void;
 }
 
 export function Menu({ establishConnection }: Props) {
@@ -236,16 +236,22 @@ export function Menu({ establishConnection }: Props) {
             return;
         }
         animation.current.faction = side;
-        setState((prev) => ({
-            ...prev,
-            side,
-            currentScene: 'queue',
-        }));
+        setState((prev) => {
+            // side effect, not the best place
+            establishConnection({
+                side,
+                selectedLevel: prev.selectedLevel as string,
+            });
+            return {
+                ...prev,
+                side,
+                currentScene: 'queue',
+            };
+        });
         animation.current.initFactionToQueue(() => {
             onTransition.current = true;
         });
         animation.current.playFactionToQueue();
-        establishConnection();
     }, []);
 
     const levels = useMemo(
