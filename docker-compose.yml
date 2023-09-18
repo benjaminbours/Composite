@@ -61,10 +61,11 @@ services:
     depends_on:
       - db
     volumes:
-      - ./back/.env:/app/.env
-      - ./back/src:/app/src
-      - ./back/test:/app/test
-      - ./back/prisma:/app/prisma
+      - ./back/.env:/app/back/.env
+      - ./back/src:/app/back/src
+      - ./back/test:/app/back/test
+      - ./back/prisma:/app/back/prisma
+      - ./packages/core/build:/app/packages/core/build
     env_file:
       - ./back/.env
     # ports:

@@ -17,6 +17,8 @@ export interface MatchMakingInfo {
 export enum SocketEventType {
   // send automatically by socket io after successful connection with server
   CONNECT = "connect",
+  // receive automatically by the server when losing connection with a client
+  DISCONNECT = "disconnect",
   // send only by the client after connect
   MATCHMAKING_INFO = "MATCHMAKING_INFO",
 }
