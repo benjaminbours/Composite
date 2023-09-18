@@ -1,20 +1,22 @@
+// vendors
 import { Socket, io } from 'socket.io-client';
-
-enum SocketEvents {
-    CONNECT = 'connect',
-}
+// our libs
+import { SocketEventType, SocketEvent } from 'composite-core';
 
 export class SocketController {
+    private socket: Socket;
+
     constructor() {
-        const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+        this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
         });
-        this.subscribeToMenuEvents(socket);
+
+        this.socket.on(SocketEventType.CONNECT, () => {
+            console.log('connected', this.socket.id);
+        });
     }
 
-    subscribeToMenuEvents = (socket: Socket) => {
-        socket.on(SocketEvents.CONNECT, () => {
-            console.log('connected', socket.id);
-        });
+    emit = (event: SocketEvent) => {
+        this.socket.emit(...event);
     };
 }
