@@ -7,19 +7,40 @@ import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import type { Socket } from 'socket.io';
-// our libs
-import { SocketEventType, MatchMakingInfo, Side, Levels } from 'composite-core';
+import type { Server, Socket } from 'socket.io';
+import { GameStatus, Level } from '@prisma/client';
 import { RedisStore } from 'cache-manager-redis-store';
 import { RedisClientType } from 'redis';
+// our libs
+import { SocketEventType, MatchMakingInfo, Side, Levels } from 'composite-core';
+// local
+import { PrismaService } from '../prisma.service';
 
 const REDIS_MATCH_MAKING_LIST_KEY = 'matchMakingQueue';
 
-interface QueueItem {
-  side: Side;
-  selectedLevel: Levels;
+enum PlayerStatus {
+  IS_PLAYING,
+  IS_PENDING,
+}
+
+class Player {
+  /**
+   * key use with redis to store game id (the name of the room with socket io)
+   */
+  public gameId?: string;
+  constructor(
+    public status: PlayerStatus,
+    public side: Side,
+    public currentLevel: Levels,
+  ) {}
+}
+
+interface PlayerFoundInQueue {
   socketId: string;
+  player: Player;
+  indexToClear: number;
 }
 
 @WebSocketGateway({
@@ -36,15 +57,19 @@ interface QueueItem {
   // },
 })
 export class SocketGateway {
+  @WebSocketServer() server: Server;
   private redisClient: RedisClientType;
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private prismaService: PrismaService,
+  ) {
     this.redisClient = (
       this.cacheManager.store as unknown as RedisStore
     ).getClient();
   }
 
-  @SubscribeMessage('connection')
+  @SubscribeMessage(SocketEventType.CONNECTION)
   async handleConnection(socket: Socket) {
     if (socket.recovered) {
       console.log('Successful recovery');
@@ -55,28 +80,67 @@ export class SocketGateway {
     }
   }
 
+  @SubscribeMessage(SocketEventType.MATCHMAKING_INFO)
+  async handleMatchMakingInfo(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: MatchMakingInfo,
+  ) {
+    console.log('matchmaking info', socket.id, data);
+    const playerFound = await this.findMatch(data, 0);
+    if (!playerFound) {
+      console.log('no match, add to queue');
+      this.addToQueue(socket.id, data);
+    } else {
+      this.createGame(playerFound, {
+        socketId: socket.id,
+        player: new Player(
+          PlayerStatus.IS_PLAYING,
+          data.side,
+          data.currentLevel,
+        ),
+      });
+    }
+  }
+
+  @SubscribeMessage(SocketEventType.DISCONNECT)
+  async handleDisconnect(@ConnectedSocket() socket: Socket) {
+    console.log('disconnect', socket.id);
+    const player = await this.getPlayer(socket.id);
+    // TODO: Investigate if in case of recovery session, I should not keep the data for a while
+    const actions = [this.redisClient.DEL(socket.id)] as Promise<any>[];
+    // try to remove from queue only if in the queue
+    if (player.status === PlayerStatus.IS_PENDING) {
+      actions.push(this.removeFromQueue(socket.id, 0));
+    }
+    await Promise.all(actions);
+  }
+
+  // utils
+
   async addToQueue(socketId: string, data: MatchMakingInfo) {
+    const player = new Player(
+      PlayerStatus.IS_PENDING,
+      data.side,
+      data.currentLevel,
+    );
     await Promise.all([
-      this.redisClient.HSET(socketId, Object.entries(data).flat()),
+      this.redisClient.HSET(socketId, Object.entries(player).flat()),
       this.redisClient.RPUSH(REDIS_MATCH_MAKING_LIST_KEY, socketId),
     ]);
   }
 
   async removeFromQueue(socketId: string, indexToClear: number) {
-    await Promise.all([
-      this.redisClient.DEL(socketId),
-      this.redisClient.LREM(
-        REDIS_MATCH_MAKING_LIST_KEY,
-        indexToClear,
-        socketId,
-      ),
-    ]);
+    return this.redisClient.LREM(
+      REDIS_MATCH_MAKING_LIST_KEY,
+      indexToClear,
+      socketId,
+    );
   }
 
   async findMatch(
     data: MatchMakingInfo,
     index: number,
-  ): Promise<{ player: QueueItem; indexToClear: number } | undefined> {
+  ): Promise<PlayerFoundInQueue | undefined> {
     const increaseRangeFactor = 5;
     const ids: string[] = await this.redisClient
       .LRANGE(REDIS_MATCH_MAKING_LIST_KEY, index, index + increaseRangeFactor)
@@ -84,26 +148,21 @@ export class SocketGateway {
         console.log(err);
         return [];
       });
-    // console.log('list', ids);
+    console.log('list', ids);
 
     for (const id of ids) {
-      const matchingInfo = (await this.redisClient.HGETALL(
-        id,
-      )) as unknown as MatchMakingInfo;
-      // console.log('id processing', id);
-      // console.log('data retrieved', matchingInfo);
-      // console.log('data retrieved', matchingInfo.selectedLevel);
+      const player = await this.getPlayer(id);
+      console.log('id processing', id);
+      console.log('data retrieved', player);
+      console.log('data retrieved', player.currentLevel);
 
-      const isSameLevel =
-        data.selectedLevel === Number(matchingInfo.selectedLevel);
-      const isOppositeSide = data.side !== Number(matchingInfo.side);
+      const isSameLevel = data.currentLevel === Number(player.currentLevel);
+      const isOppositeSide = data.side !== Number(player.side);
 
       if (isSameLevel && isOppositeSide) {
         return {
-          player: {
-            socketId: id,
-            ...matchingInfo,
-          },
+          socketId: id,
+          player,
           indexToClear: index,
         };
       }
@@ -116,28 +175,72 @@ export class SocketGateway {
     return this.findMatch(data, index + increaseRangeFactor);
   }
 
-  @SubscribeMessage(SocketEventType.MATCHMAKING_INFO)
-  async handleMatchMakingInfo(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() data: MatchMakingInfo,
-  ) {
-    console.log('matchmaking info', socket.id, data);
-    const match = await this.findMatch(data, 0);
-
-    if (!match) {
-      console.log('no match, add to queue');
-      await this.addToQueue(socket.id, data);
-    } else {
-      // remove match from queue
-      await this.removeFromQueue(match.player.socketId, match.indexToClear);
-      console.log('match, remove from queue');
-    }
+  async getPlayer(socketId: string) {
+    return this.redisClient.HGETALL(socketId) as unknown as Player;
   }
 
-  @SubscribeMessage(SocketEventType.DISCONNECT)
-  async handleDisconnect(@ConnectedSocket() socket: Socket) {
-    // TODO: If socket disconnect but are actually playing, not in the queue, do not remove them from queue
-    console.log('disconnect', socket.id);
-    await this.removeFromQueue(socket.id, 0);
+  /**
+   * Change the status of the player found in queue to playing
+   * and remove him from the queue
+   *
+   * Store data for the new player arriving
+   *
+   * Store persistent game data and use the game id as room id
+   *
+   * Emit game start to the room
+   */
+  async createGame(
+    playerFoundInQueue: PlayerFoundInQueue,
+    playerArriving: { socketId: string; player: Player },
+  ) {
+    const dbLevel = (() => {
+      switch (Number(playerFoundInQueue.player.currentLevel)) {
+        case Levels.CRACK_THE_DOOR:
+          return Level.CRACK_THE_DOOR;
+        case Levels.LEARN_TO_FLY:
+          return Level.LEARN_TO_FLY;
+        case Levels.THE_HIGH_SPHERES:
+          return Level.THE_HIGH_SPHERES;
+      }
+    })();
+
+    const [game] = await Promise.all([
+      // store persistent game data
+      this.prismaService.game.create({
+        data: {
+          level: dbLevel,
+          status: GameStatus.STARTED,
+        },
+      }),
+      // remove player found in queue from queue
+      this.removeFromQueue(
+        playerFoundInQueue.socketId,
+        playerFoundInQueue.indexToClear,
+      ),
+      // update player found in queue status and add partner
+      this.redisClient.HSET(playerFoundInQueue.socketId, [
+        'status',
+        PlayerStatus.IS_PLAYING,
+      ]),
+      // store new player data
+      this.redisClient.HSET(
+        playerArriving.socketId,
+        Object.entries(playerArriving.player).flat(),
+      ),
+    ]);
+    const roomName = String(game.id);
+    this.addSocketToRoom(playerFoundInQueue.socketId, roomName);
+    this.addSocketToRoom(playerArriving.socketId, roomName);
+    this.server.to(roomName).emit(SocketEventType.GAME_START);
+  }
+
+  // TODO: As a room is equivalent to a game, lets make a proper
+  // room rotation (leave the last one and add to next one) while finishing
+  // a game and going into another one
+  addSocketToRoom(socketId: string, room: string) {
+    const socket = this.server.sockets.sockets.get(socketId);
+    console.log('HERE rooms before join', socket.rooms);
+    socket.join(room);
+    console.log('HERE rooms after join', socket.rooms);
   }
 }

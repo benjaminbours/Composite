@@ -3,12 +3,12 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SocketGateway } from './socket/socket.gateway';
 import { ENVIRONMENT } from './environment';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
-    SocketGateway,
+    SocketModule,
     CacheModule.registerAsync<any>({
       isGlobal: true,
       useFactory: async () => {
