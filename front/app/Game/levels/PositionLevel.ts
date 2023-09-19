@@ -9,6 +9,7 @@ import {
 import { CollidingElem } from '../types';
 import { MysticPlace } from '../elements/MysticPlace';
 import { DoorOpener } from '../elements/DoorOpener';
+import { EndLevel } from '../elements/EndLevel';
 // import { Elevator } from '../elements/Elevator';
 
 export class PositionLevel extends Group {
@@ -16,9 +17,11 @@ export class PositionLevel extends Group {
     public name = 'position-level';
 
     public startPosition = {
-        light: new Vector3(10, 20, 0),
-        // light: new Vector3(2200, 775, 0),
-        shadow: new Vector3(200, 20, 0),
+        // light: new Vector3(10, 20, 0), // start level
+        // light: new Vector3(2200, 775, 0), // on the floor
+        // shadow: new Vector3(200, 20, 0),
+        light: new Vector3(2500, 20, 0), // end level
+        shadow: new Vector3(2500, 20, 0), // end level
     };
 
     constructor() {

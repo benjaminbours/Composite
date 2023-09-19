@@ -88,7 +88,7 @@ export default class Light {
             width: number,
             height: number,
             isOnMobile: boolean,
-            faction: Side,
+            faction?: Side,
         ) {
             const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
             const positionY = 0.5;

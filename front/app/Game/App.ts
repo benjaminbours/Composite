@@ -1,17 +1,10 @@
 // vendors
 import {
     Mesh,
-    // Fog,
-    // Clock,
     DirectionalLight,
-    // Object3D,
-    // Group,
     Scene,
     WebGLRenderer,
-    // PCFSoftShadowMap,
     HemisphereLight,
-    // FogExp2,
-    // IcosahedronGeometry,
     MeshPhongMaterial,
     CircleGeometry,
     WebGLRenderTarget,
@@ -26,7 +19,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 // our libs
-import { Side } from 'composite-core';
+import { Levels, Side, SocketEventType } from 'composite-core';
 // local
 // import SkyShader from './SkyShader';
 import Inputs from './Player/Inputs';
@@ -40,7 +33,18 @@ import { collisionSystem } from './Player/physics/collision.system';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
-// import { Elevator } from './elements/Elevator';
+import { SocketController } from '../SocketController';
+
+function throttle(fn: (args: any[]) => any, wait: number) {
+    let shouldWait = false;
+    return function () {
+        if (!shouldWait) {
+            fn([arguments]);
+            shouldWait = true;
+            setTimeout(() => (shouldWait = false), wait);
+        }
+    };
+}
 
 export default class App {
     private width = window.innerWidth;
@@ -64,7 +68,7 @@ export default class App {
 
     private floor!: Mesh;
 
-    private levelController = new LevelController();
+    private levelController: LevelController;
     private collidingElements: CollidingElem[] = [];
     // private interactElements: InteractElem[] = [];
 
@@ -72,10 +76,17 @@ export default class App {
     private occlusionComposer!: EffectComposer;
     private mainComposer!: EffectComposer;
 
-    constructor(canvasDom: HTMLCanvasElement, playersConfig: Side[]) {
+    constructor(
+        canvasDom: HTMLCanvasElement,
+        currentLevel: Levels,
+        playersConfig: Side[],
+        private socketController?: SocketController,
+    ) {
         // inputs
         Inputs.init();
 
+        // levels
+        this.levelController = new LevelController(currentLevel);
         // render
         this.renderer = new WebGLRenderer({
             canvas: canvasDom,
@@ -126,6 +137,9 @@ export default class App {
             this.players.push(player);
             this.scene.add(player);
         });
+        if (this.socketController) {
+            this.socketController.secondPlayer = this.players[1];
+        }
 
         this.camera.setDefaultTarget(this.players[0].position);
 
@@ -159,7 +173,7 @@ export default class App {
         this.scene.add(this.skyMesh);
 
         this.levelController.loadLevel(
-            'positionLevel',
+            this.levelController.currentLevel,
             this.scene,
             this.players,
         );
@@ -207,17 +221,34 @@ export default class App {
         }
     };
 
+    // TODO: This is not really optimized and will scale poorly.
+    // A better approach would be to emit only user inputs
+    // do a prediction on the client to keep fluidity, calculate an authoritative position on the server
+    // then validate or correct the initial prediction made on the client.
+    private emitPlayerPosition = throttle(() => {
+        if (this.socketController) {
+            this.socketController.emit([
+                SocketEventType.GAME_POSITION,
+                {
+                    x: this.players[0].position.x,
+                    y: this.players[0].position.y,
+                },
+            ]);
+        }
+    }, 25);
+
     public update = () => {
         this.delta = this.clock.getDelta();
         // update everything which need an update in the scene
         collisionSystem(this.players, [
             ...this.collidingElements,
-            ...this.levelController.levels[this.levelController.currentLevel!]
+            ...this.levelController.levels[this.levelController.currentLevel]!
                 .collidingElements,
         ]);
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         this.floor.position.set(this.players[0].position.x, 0, 0);
+        this.emitPlayerPosition();
 
         const lightPlayer = this.players.find(
             (player) => player instanceof LightPlayer,

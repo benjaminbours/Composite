@@ -59,7 +59,7 @@ export default class Curve {
             width: number,
             height: number,
             isOnMobile: boolean,
-            faction: Side,
+            faction?: Side,
         ) {
             const position = faction === Side.LIGHT ? 1.2 : -0.2;
             if (isOnMobile) {

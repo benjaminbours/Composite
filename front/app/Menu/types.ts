@@ -10,7 +10,7 @@ export interface ICoordinate {
 export interface ResizeOptions {
     isMobileDevice: boolean;
     currentScene: Scene;
-    side: Side;
+    side?: Side;
 }
 
 export interface IWaveOptions {

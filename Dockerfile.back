@@ -7,6 +7,6 @@ COPY . .
 
 RUN npm i -w packages -w back
 RUN npm run build -w packages
-RUN npx prisma generate
+RUN cd back && npx prisma generate
 
 ENTRYPOINT ["npm", "run", "start:dev", "-w", "back"]

@@ -1,5 +1,5 @@
 start:
-	docker-compose up --scale api=2
+	docker-compose up
 
 build:
 	docker-compose build

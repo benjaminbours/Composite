@@ -9,11 +9,6 @@ export enum Levels {
   THE_HIGH_SPHERES,
 }
 
-export interface MatchMakingInfo {
-  side: Side;
-  currentLevel: Levels;
-}
-
 export enum SocketEventType {
   // send automatically by socket io after successful connection with server
   CONNECT = "connect",
@@ -25,11 +20,28 @@ export enum SocketEventType {
   MATCHMAKING_INFO = "MATCHMAKING_INFO",
   // send by the server when 2 players connects and a game start
   GAME_START = "GAME_START",
+  // send by the 2 clients to the server and to each others during the game is on going
+  GAME_POSITION = "GAME_POSITION",
+}
+
+export interface MatchMakingPayload {
+  side: Side;
+  selectedLevel: Levels;
 }
 
 export type MatchMakingEvent = [
   type: SocketEventType.MATCHMAKING_INFO,
-  payload: MatchMakingInfo,
+  payload: MatchMakingPayload,
 ];
 
-export type SocketEvent = MatchMakingEvent;
+export interface GamePositionPayload {
+  x: number;
+  y: number;
+}
+
+export type GamePositionEvent = [
+  type: SocketEventType.GAME_POSITION,
+  payload: GamePositionPayload,
+];
+
+export type SocketEvent = MatchMakingEvent | GamePositionEvent;

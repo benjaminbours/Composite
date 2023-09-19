@@ -64,10 +64,8 @@ export default class Animation {
         canvasBlack: CanvasBlack,
         canvasWhite: CanvasWhite,
         currentScene: Scene,
-        faction: Side,
         isMobileDevice: boolean,
     ) {
-        this.faction = faction;
         this.isMobileDevice = isMobileDevice;
         this.components = domElements;
         this.canvasComponents = {

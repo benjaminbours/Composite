@@ -3,13 +3,21 @@ import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, { useEffect, useRef } from 'react';
 // our libs
-import { Side } from 'composite-core';
+import { Levels, Side } from 'composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { geometries } from './levels/levels.utils';
 import Inputs from './Player/Inputs';
+import { SocketController } from '../SocketController';
 
-function Game() {
+interface Props {
+    side: Side;
+    selectedLevel: Levels;
+    // can be undefined for dev purpose
+    socketController?: SocketController;
+}
+
+function Game({ side, selectedLevel, socketController }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const appRef = useRef<App>();
 
@@ -18,10 +26,12 @@ function Game() {
             if (!canvasRef.current) {
                 return;
             }
-            appRef.current = new App(canvasRef.current, [
-                Side.LIGHT,
-                Side.SHADOW,
-            ]);
+            appRef.current = new App(
+                canvasRef.current,
+                selectedLevel,
+                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                socketController,
+            );
             // appRef.current = new App(canvasRef.current, ['black', 'white']);
             // appRef.current = new App(canvasRef.current, ['white']);
             const stats = (() => {

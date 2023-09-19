@@ -12,26 +12,18 @@ import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { Scene } from './types';
-import { Levels, MatchMakingInfo, Side } from 'composite-core';
+import { Levels, Side } from 'composite-core';
 import ButtonBack from './ButtonBack';
 import Portal from './Portal';
-
-interface State {
-    currentScene: Scene;
-    side: Side;
-    selectedLevel: Levels | undefined;
-}
+import { MainState } from '../MainApp';
 
 interface Props {
-    establishConnection: (data: MatchMakingInfo) => void;
+    mainState: MainState;
+    setMainState: React.Dispatch<React.SetStateAction<MainState>>;
 }
 
-export function Menu({ establishConnection }: Props) {
-    const [state, setState] = useState<State>({
-        currentScene: 'home',
-        selectedLevel: undefined,
-        side: Side.SHADOW,
-    });
+export function Menu({ setMainState, mainState }: Props) {
+    const [currentScene, setCurrentScene] = useState<Scene>('home');
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const blackCanvas = useRef<CanvasBlack>();
@@ -53,31 +45,19 @@ export function Menu({ establishConnection }: Props) {
     const initAnimations = useCallback((animation: typeof Animation) => {
         animation.initHomeToLevel(() => {
             onTransition.current = false;
-            setState((prev) => ({
-                ...prev,
-                currentScene: 'level',
-            }));
+            setCurrentScene('level');
         });
         animation.initLevelToHome(() => {
             onTransition.current = false;
-            setState((prev) => ({
-                ...prev,
-                currentScene: 'home',
-            }));
+            setCurrentScene('home');
         });
         animation.initLevelToFaction(() => {
             onTransition.current = false;
-            setState((prev) => ({
-                ...prev,
-                currentScene: 'faction',
-            }));
+            setCurrentScene('faction');
         });
         animation.initFactionToLevel(() => {
             onTransition.current = false;
-            setState((prev) => ({
-                ...prev,
-                currentScene: 'level',
-            }));
+            setCurrentScene('level');
         });
     }, []);
 
@@ -92,19 +72,19 @@ export function Menu({ establishConnection }: Props) {
         const isMobileDevice = window.innerWidth <= 768;
         blackCanvas.current.resize({
             isMobileDevice,
-            currentScene: state.currentScene,
-            side: state.side,
+            currentScene,
+            side: mainState.side,
         });
         whiteCanvas.current.resize({
             isMobileDevice,
-            currentScene: state.currentScene,
-            side: state.side,
+            currentScene,
+            side: mainState.side,
         });
         animation.current.runMethodForAllBothSideComponents('resize', [
             blackCanvas.current.ctx,
         ]);
         initAnimations(animation.current);
-    }, [isMobileDevice, state.currentScene]);
+    }, [isMobileDevice, currentScene, mainState.side]);
 
     useEffect(() => {
         Promise.all([
@@ -127,8 +107,7 @@ export function Menu({ establishConnection }: Props) {
                 },
                 blackCanvas.current,
                 whiteCanvas.current,
-                state.currentScene,
-                state.side,
+                currentScene,
                 isMobileDevice,
             );
             initAnimations(Animation);
@@ -203,27 +182,23 @@ export function Menu({ establishConnection }: Props) {
                 animation.current!.playQueueToFaction();
             },
         };
-        const { currentScene } = state;
         onTransition.current = true;
         if (currentScene === 'queue') {
             animation.current.initQueueToFaction(() => {
                 onTransition.current = false;
-                setState((prev) => ({
-                    ...prev,
-                    currentScene: 'faction',
-                }));
+                setCurrentScene('faction');
             });
         }
         if (currentScene !== 'home') {
             backOptions[currentScene]();
         }
-    }, [state]);
+    }, [currentScene]);
 
     const handleClickOnLevel = useCallback((levelId: Levels) => {
         if (!animation.current) {
             return;
         }
-        setState((prev) => ({
+        setMainState((prev) => ({
             ...prev,
             selectedLevel: levelId,
         }));
@@ -236,18 +211,8 @@ export function Menu({ establishConnection }: Props) {
             return;
         }
         animation.current.faction = side;
-        setState((prev) => {
-            // side effect, not the best place
-            establishConnection({
-                side,
-                selectedLevel: prev.selectedLevel as Levels,
-            });
-            return {
-                ...prev,
-                side,
-                currentScene: 'queue',
-            };
-        });
+        setCurrentScene('queue');
+        setMainState((prev) => ({ ...prev, side }));
         animation.current.initFactionToQueue(() => {
             onTransition.current = true;
         });
@@ -298,7 +263,7 @@ export function Menu({ establishConnection }: Props) {
             <div
                 ref={homeRef}
                 className={`home-container ${
-                    state.currentScene !== 'home' ? 'unmount' : ''
+                    currentScene !== 'home' ? 'unmount' : ''
                 }`}
             >
                 <h2>Think both ways</h2>
@@ -315,7 +280,7 @@ export function Menu({ establishConnection }: Props) {
             <div
                 ref={levelRef}
                 className={`level-container ${
-                    state.currentScene !== 'level' ? 'unmount' : ''
+                    currentScene !== 'level' ? 'unmount' : ''
                 }`}
             >
                 <ButtonBack color="white" onClick={handleClickOnBack} />
@@ -333,7 +298,7 @@ export function Menu({ establishConnection }: Props) {
             <div
                 ref={sideRef}
                 className={`faction-container ${
-                    state.currentScene !== 'faction' ? 'unmount' : ''
+                    currentScene !== 'faction' ? 'unmount' : ''
                 }`}
             >
                 <ButtonBack color="white" onClick={handleClickOnBack} />
@@ -358,17 +323,26 @@ export function Menu({ establishConnection }: Props) {
             </div>
             <div
                 ref={queueRef}
+                // TODO: find a prettier way than this umount class condition
                 className={`queue-container ${
-                    state.currentScene !== 'queue' ? 'unmount' : ''
+                    currentScene !== 'queue' ? 'unmount' : ''
                 }`}
             >
                 <ButtonBack
-                    color={state.side === Side.SHADOW ? 'black' : 'white'}
+                    color={mainState.side === Side.SHADOW ? 'black' : 'white'}
                     onClick={handleClickOnBack}
                 />
-                <h2 className={state.side === Side.SHADOW ? 'black' : 'white'}>
-                    {queueText[state.side]}
-                </h2>
+                {mainState.side && (
+                    <h2
+                        className={
+                            (mainState.side as Side) === Side.SHADOW
+                                ? 'black'
+                                : 'white'
+                        }
+                    >
+                        {queueText[mainState.side]}
+                    </h2>
+                )}
             </div>
         </>
     );

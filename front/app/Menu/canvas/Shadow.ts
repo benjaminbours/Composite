@@ -45,7 +45,7 @@ export default class Shadow {
             width: number,
             height: number,
             isOnMobile: boolean,
-            faction: Side,
+            faction?: Side,
         ) {
             const positionX = faction === Side.SHADOW ? 0.5 : 1.5;
             const positionY = 0.5;

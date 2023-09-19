@@ -14,7 +14,13 @@ import { GameStatus, Level } from '@prisma/client';
 import { RedisStore } from 'cache-manager-redis-store';
 import { RedisClientType } from 'redis';
 // our libs
-import { SocketEventType, MatchMakingInfo, Side, Levels } from 'composite-core';
+import {
+  SocketEventType,
+  MatchMakingPayload,
+  Side,
+  Levels,
+  GamePositionPayload,
+} from 'composite-core';
 // local
 import { PrismaService } from '../prisma.service';
 
@@ -33,7 +39,7 @@ class Player {
   constructor(
     public status: PlayerStatus,
     public side: Side,
-    public currentLevel: Levels,
+    public selectedLevel: Levels,
   ) {}
 }
 
@@ -81,9 +87,9 @@ export class SocketGateway {
   }
 
   @SubscribeMessage(SocketEventType.MATCHMAKING_INFO)
-  async handleMatchMakingInfo(
+  async handleMatchMakingPayload(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data: MatchMakingInfo,
+    @MessageBody() data: MatchMakingPayload,
   ) {
     console.log('matchmaking info', socket.id, data);
     const playerFound = await this.findMatch(data, 0);
@@ -96,17 +102,26 @@ export class SocketGateway {
         player: new Player(
           PlayerStatus.IS_PLAYING,
           data.side,
-          data.currentLevel,
+          data.selectedLevel,
         ),
       });
     }
+  }
+
+  @SubscribeMessage(SocketEventType.GAME_POSITION)
+  async handleGamePosition(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: GamePositionPayload,
+  ) {
+    const gameRoom = Array.from(socket.rooms)[1];
+    socket.to(gameRoom).emit(SocketEventType.GAME_POSITION, data);
   }
 
   @SubscribeMessage(SocketEventType.DISCONNECT)
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
     console.log('disconnect', socket.id);
     const player = await this.getPlayer(socket.id);
-    // TODO: Investigate if in case of recovery session, I should not keep the data for a while
+    // TODO: Investigate if in case of recovery session, I should better keep the data for a while
     const actions = [this.redisClient.DEL(socket.id)] as Promise<any>[];
     // try to remove from queue only if in the queue
     if (player.status === PlayerStatus.IS_PENDING) {
@@ -117,11 +132,11 @@ export class SocketGateway {
 
   // utils
 
-  async addToQueue(socketId: string, data: MatchMakingInfo) {
+  async addToQueue(socketId: string, data: MatchMakingPayload) {
     const player = new Player(
       PlayerStatus.IS_PENDING,
       data.side,
-      data.currentLevel,
+      data.selectedLevel,
     );
     await Promise.all([
       this.redisClient.HSET(socketId, Object.entries(player).flat()),
@@ -138,7 +153,7 @@ export class SocketGateway {
   }
 
   async findMatch(
-    data: MatchMakingInfo,
+    data: MatchMakingPayload,
     index: number,
   ): Promise<PlayerFoundInQueue | undefined> {
     const increaseRangeFactor = 5;
@@ -154,9 +169,9 @@ export class SocketGateway {
       const player = await this.getPlayer(id);
       console.log('id processing', id);
       console.log('data retrieved', player);
-      console.log('data retrieved', player.currentLevel);
+      console.log('data retrieved', player.selectedLevel);
 
-      const isSameLevel = data.currentLevel === Number(player.currentLevel);
+      const isSameLevel = data.selectedLevel === Number(player.selectedLevel);
       const isOppositeSide = data.side !== Number(player.side);
 
       if (isSameLevel && isOppositeSide) {
@@ -194,7 +209,7 @@ export class SocketGateway {
     playerArriving: { socketId: string; player: Player },
   ) {
     const dbLevel = (() => {
-      switch (Number(playerFoundInQueue.player.currentLevel)) {
+      switch (Number(playerFoundInQueue.player.selectedLevel)) {
         case Levels.CRACK_THE_DOOR:
           return Level.CRACK_THE_DOOR;
         case Levels.LEARN_TO_FLY:
@@ -239,8 +254,6 @@ export class SocketGateway {
   // a game and going into another one
   addSocketToRoom(socketId: string, room: string) {
     const socket = this.server.sockets.sockets.get(socketId);
-    console.log('HERE rooms before join', socket.rooms);
     socket.join(room);
-    console.log('HERE rooms after join', socket.rooms);
   }
 }

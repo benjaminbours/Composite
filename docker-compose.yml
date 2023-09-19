@@ -53,6 +53,9 @@ services:
 
   api:
     restart: always
+    deploy:
+      mode: replicated
+      replicas: 2
     build:
       context: .
       dockerfile: Dockerfile.back

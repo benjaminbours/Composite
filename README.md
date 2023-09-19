@@ -1,36 +1,27 @@
-# Bequest workspaces
+# Composite - 3D coop platformer on the web
 
-## Graphical representation of the workspace
+## Development
 
-![Graph](./deps.svg)
+### Requirements
 
-## Requirements
+- Docker
+- docker-compose
+- Makefile
 
-[nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### How to run the application
 
-## Init the workspaces
+Start DB
 
-Use proper nodeJS version:
-`nvm use`
+`make start_db`
 
-Install latest version of npm:
-`npm i -g npm`
+Start all the containers
 
-Run this command at the root of the workspaces to install all the dependencies of all modules and create symlinks between shared packages:
-`npm i`
+`make start`
 
-Configure `.env` for each apps. To do that, you can copy paste the content of the file `.env.template` into your file `.env` and you are supposed to have a config ready for the local development.
+Give it some time for the DB to be ready then run
 
-Run this command to initialize the database. Make sure your local database is running
-`npm run prisma:migrate:reset -w api`
+`make initial_db_setup`
 
-Run this command to build all packages locally
-`npm run build -w packages`
+To access API logs, use
 
-### Other commands
-
-Command
-`npm run graph`
-
-require you previously installed this on your machine
-`brew install graphviz`
+`make display_api_logs`
