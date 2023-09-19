@@ -17,6 +17,7 @@
 - Je n'ai pas encore verifie que:
   - La partie avec le cache + l'adapter fonctionne
   - Que l'on peut recover une session, etc => https://socket.io/docs/v4/connection-state-recovery
+- Add arrow on the HUD to indicate position of your team mate when he is far
 
 ## Required
 

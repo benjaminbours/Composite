@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String  @unique
+  name  String?
+}
+
+enum Level {
+  CRACK_THE_DOOR
+  LEARN_TO_FLY
+  THE_HIGH_SPHERES
+}
+
+enum GameStatus {
+  STARTED
+  FINISHED
+  NOT_FINISHED
+}
+
+model Game {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  level   Level
+  status  GameStatus
+  endTime DateTime?
+}
+
+// enum PlayerSide {
+//   SHADOW
+//   LIGHT
+// }
+
+// enum PlayerState {
+//   IS_PLAYING
+//   IS_PENDING
+// }
+
+// model Player {
+//   id        Int      @id @default(autoincrement())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   side PlayerSide
+//   state PlayerState
+//   currentLevel Level
+//   // title       String   @unique
+//   // description String
+//   // releaseDate DateTime
+
+//   // // relations
+//   // genre Genre[]
+// }
