@@ -45,3 +45,22 @@ export type GamePositionEvent = [
 ];
 
 export type SocketEvent = MatchMakingEvent | GamePositionEvent;
+
+export class QueueInfo {
+  constructor(
+    public all = 0,
+    public light = 0,
+    public shadow = 0
+  ) {}
+}
+
+export class AllQueueInfo extends QueueInfo {
+  constructor(
+    public levels: QueueInfo[],
+    public all = 0,
+    public light = 0,
+    public shadow = 0
+  ) {
+    super(all, light, shadow);
+  }
+}

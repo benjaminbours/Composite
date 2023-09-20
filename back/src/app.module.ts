@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ENVIRONMENT } from './environment';
 import { SocketModule } from './socket/socket.module';
+import { TemporaryStorageService } from './temporary-storage.service';
 
 @Module({
   imports: [
@@ -22,6 +23,6 @@ import { SocketModule } from './socket/socket.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TemporaryStorageService],
 })
 export class AppModule {}
