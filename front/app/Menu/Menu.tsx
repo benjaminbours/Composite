@@ -1,3 +1,4 @@
+// vendors
 import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, {
@@ -7,15 +8,20 @@ import React, {
     useRef,
     useState,
 } from 'react';
+// our libs
+import { AllQueueInfo, Levels, Side } from 'composite-core';
+// local
 import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { Scene } from './types';
-import { Levels, Side } from 'composite-core';
 import ButtonBack from './ButtonBack';
-import Portal from './Portal';
+import LevelItem from './LevelItem';
 import { MainState } from '../MainApp';
+import { QueueInfoText } from './QueueInfo';
+import { QueueScene } from './QueueScene';
+import { SideScene } from './SideScene';
 
 interface Props {
     mainState: MainState;
@@ -24,6 +30,7 @@ interface Props {
 
 export function Menu({ setMainState, mainState }: Props) {
     const [currentScene, setCurrentScene] = useState<Scene>('home');
+    const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const blackCanvas = useRef<CanvasBlack>();
@@ -133,6 +140,16 @@ export function Menu({ setMainState, mainState }: Props) {
             gsap.ticker.add(canvasLoop);
             resize();
         });
+        const fetchQueueInfo = () => {
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/queue-info`)
+                .then((res) => res.json())
+                .then((data: AllQueueInfo) => setAllQueueInfo(data));
+        };
+        fetchQueueInfo();
+        const intervalId = setInterval(fetchQueueInfo, 2000);
+        return () => {
+            clearInterval(intervalId);
+        };
     }, []);
 
     // on resize
@@ -240,14 +257,6 @@ export function Menu({ setMainState, mainState }: Props) {
         [],
     );
 
-    const queueText = useMemo(
-        () => ({
-            0: 'Finding a light',
-            1: 'Finding a shadow',
-        }),
-        [],
-    );
-
     return (
         <>
             <canvas
@@ -267,6 +276,18 @@ export function Menu({ setMainState, mainState }: Props) {
                 }`}
             >
                 <h2>Think both ways</h2>
+                {allQueueInfo && (
+                    <>
+                        <QueueInfoText
+                            side="light"
+                            value={allQueueInfo.light}
+                        />
+                        <QueueInfoText
+                            side="shadow"
+                            value={allQueueInfo.shadow}
+                        />
+                    </>
+                )}
                 <button
                     className="buttonCircle"
                     id="buttonPlay"
@@ -287,63 +308,37 @@ export function Menu({ setMainState, mainState }: Props) {
                 <div className="level-list">
                     <h2>Select a&nbsp;level</h2>
                     {levels.map((item) => (
-                        <Portal
+                        <LevelItem
                             {...item}
                             key={item.name}
                             onClick={handleClickOnLevel}
+                            queueInfo={allQueueInfo?.levels[item.id]}
                         />
                     ))}
                 </div>
             </div>
-            <div
-                ref={sideRef}
-                className={`faction-container ${
-                    currentScene !== 'faction' ? 'unmount' : ''
-                }`}
-            >
-                <ButtonBack color="white" onClick={handleClickOnBack} />
-                <button
-                    className="buttonCircle factionButton white"
-                    // TODO: had same interaction as on home page
-                    // onMouseEnter={handleMouseEnterPlay}
-                    // onMouseLeave={handleMouseLeavePlay}
-                    onClick={() => handleClickOnFaction(Side.LIGHT)}
-                >
-                    light
-                </button>
-                <button
-                    className="buttonCircle factionButton black"
-                    // TODO: had same interaction as on home page
-                    // onMouseEnter={handleMouseEnterPlay}
-                    // onMouseLeave={handleMouseLeavePlay}
-                    onClick={() => handleClickOnFaction(Side.SHADOW)}
-                >
-                    shadow
-                </button>
-            </div>
-            <div
-                ref={queueRef}
-                // TODO: find a prettier way than this umount class condition
-                className={`queue-container ${
-                    currentScene !== 'queue' ? 'unmount' : ''
-                }`}
-            >
-                <ButtonBack
-                    color={mainState.side === Side.SHADOW ? 'black' : 'white'}
-                    onClick={handleClickOnBack}
-                />
-                {mainState.side && (
-                    <h2
-                        className={
-                            (mainState.side as Side) === Side.SHADOW
-                                ? 'black'
-                                : 'white'
-                        }
-                    >
-                        {queueText[mainState.side]}
-                    </h2>
-                )}
-            </div>
+            <SideScene
+                sideRef={sideRef}
+                currentScene={currentScene}
+                selectedLevel={mainState.selectedLevel}
+                levelName={
+                    levels.find((level) => level.id === mainState.selectedLevel)
+                        ?.name
+                }
+                handleClickOnFaction={handleClickOnFaction}
+                handleClickOnBack={handleClickOnBack}
+                allQueueInfo={allQueueInfo}
+            />
+            <QueueScene
+                queueRef={queueRef}
+                currentScene={currentScene}
+                side={mainState.side}
+                levelName={
+                    levels.find((level) => level.id === mainState.selectedLevel)
+                        ?.name
+                }
+                handleClickOnBack={handleClickOnBack}
+            />
         </>
     );
 }

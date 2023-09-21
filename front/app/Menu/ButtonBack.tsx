@@ -1,4 +1,5 @@
 // vendors
+import classNames from 'classnames';
 import React from 'react';
 
 interface IProps {
@@ -7,9 +8,14 @@ interface IProps {
 }
 
 export default function ButtonBack({ color, onClick }: IProps) {
+    const cssClass = classNames({
+        buttonRect: true,
+        back: true,
+        ...(color ? { [color]: true } : {}),
+    });
     return (
-        <div className={`buttonRect back ${color}`} onClick={onClick}>
+        <button className={cssClass} onClick={onClick}>
             Back
-        </div>
+        </button>
     );
 }

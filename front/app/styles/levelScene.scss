@@ -18,28 +18,27 @@
     }
 }
 
-.portal {
+.level-item {
     overflow: hidden;
     position: relative;
     margin: 50px 0;
     cursor: pointer;
+    background: black;
+    height: 200px;
+    display: flex;
+    align-items: center;
 
-    .image-container {
-        position: relative;
-        background: black;
-        height: 200px;
-
-        &::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translateX(-50%) translateY(-50%);
-            border: solid rgba(255, 255, 255, 0.0) 1px;
-            width: 95%;
-            height: 85%;
-            transition: 0.7s;
-        }
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        border: solid rgba(255, 255, 255, 0) 1px;
+        width: 95%;
+        height: 85%;
+        transition: 0.7s;
+        z-index: 10;
     }
 
     img {
@@ -58,15 +57,14 @@
     }
 
     h3 {
-        position: absolute;
-        top: 50%;
-        transform: translate(0, -50%);
+        position: relative;
+        flex: 2;
+        z-index: 10;
         color: white;
         text-transform: uppercase;
         letter-spacing: 5px;
         font-size: 24px;
         font-weight: 100;
-        font-family: sans-serif;
         width: 100%;
         text-align: center;
         padding: 0 10px;
@@ -77,15 +75,29 @@
         }
     }
 
+    .queue-space {
+        flex: 1;
+    }
+
+    .queue-count {
+        position: relative;
+        z-index: 10;
+        text-align: right;
+        margin-right: 15%;
+    }
+
     @media (min-width: 769px) {
         &:hover {
             img {
                 transform: translate(-50%, -50%) scale(1.1);
                 opacity: 0.7;
-                transition: opacity 0.7s, transform 6s;
+                transition:
+                    opacity 0.7s,
+                    transform 6s;
             }
-            .image-container::after {
-                border-color: rgba(255, 255, 255, 1.0);
+
+            &::after {
+                border-color: rgba(255, 255, 255, 1);
                 transition: 0.7s;
             }
         }

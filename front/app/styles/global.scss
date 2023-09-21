@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap');
-
 html {
     overflow-y: scroll;
 }
@@ -7,6 +5,7 @@ html {
 body {
     padding: 0;
     margin: 0;
+    font-family: sans-serif;
 }
 
 canvas {
@@ -27,7 +26,6 @@ canvas {
 
 h2 {
     text-transform: uppercase;
-    font-family: sans-serif;
     font-weight: 400;
     font-size: 30px;
     letter-spacing: 20px;
@@ -48,12 +46,15 @@ h2 {
     }
 }
 
+button {
+    all: unset;
+}
+
 .buttonRect {
     width: auto;
     text-align: center;
     border: solid transparent 1px;
     padding: 20px;
-    font-family: sans-serif;
     letter-spacing: 5px;
     text-transform: uppercase;
     transition: 0.7s;
@@ -116,4 +117,12 @@ h2 {
 .unmount {
     opacity: 0;
     display: none;
+}
+
+.queue-count {
+    
+    font-weight: 100;
+    letter-spacing: 2px;
+    color: white;
+
 }

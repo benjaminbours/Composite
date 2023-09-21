@@ -8,13 +8,13 @@
     background-repeat: no-repeat;
 }
 
-@mixin centerAbsoluteHori() {
+@mixin centerAbsoluteHorizontal() {
 	position: absolute;
 	left: 50%;
 	transform: translateX(-50%);
 }
 
-@mixin centerAbsoluteVert() {
+@mixin centerAbsoluteVertical() {
 	position: absolute;
 	top: 50%;
 	transform: translateY(-50%);

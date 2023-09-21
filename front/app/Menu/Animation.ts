@@ -246,12 +246,6 @@ export default class Animation {
     }
 
     public static setWaveInMoveMode() {
-        // const { curve } = this.canvasComponents;
-        // TweenLite.set(waveOptions, {
-        //   viscosity: 40,
-        //   damping: 0.2,
-        //   overwrite: "all",
-        // });
         Curve.setWaveOptions({
             viscosity: 40,
             damping: 0.2,
@@ -259,10 +253,6 @@ export default class Animation {
     }
 
     public static setWaveInDefaultMode() {
-        // const { curve } = this.canvasComponents;
-        // TweenLite.set(waveOptions, {
-        //   ...defaultWaveOptions,
-        // });
         Curve.setWaveOptions({
             ...defaultWaveOptions,
         });
@@ -285,12 +275,5 @@ export default class Animation {
                     }
                 }
             });
-        // for (const sceneName in bothSideComponents) {
-        //     if (bothSideComponents[sceneName]) {
-        //         const scene = bothSideComponents[sceneName];
-        //         for (const comp in scene) {
-        //         }
-        //     }
-        // }
     }
 }

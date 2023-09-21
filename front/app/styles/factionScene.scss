@@ -1,8 +1,28 @@
+.faction-container {
+    .queue-count {
+        position: absolute;
+        bottom: 15%;
+        text-align: center;
+
+        &--light {
+            left: 0;
+            right: 50%;
+            color: white;
+        }
+
+        &--shadow {
+            left: 50%;
+            right: 0;
+            color: black;
+        }
+    }
+}
+
 .factionButton {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    font-family: "Inconsolata";
+    font-weight: 400;
     transition: all 0.3s;
     text-transform: uppercase;
 
@@ -21,7 +41,6 @@
                 color: white;
             }
         }
-
     }
 
     &.black {
@@ -46,7 +65,7 @@
     }
 
     @media (max-width: 768px) {
-       left: 50% !important;
-       transform: translateX(-50%);
+        left: 50% !important;
+        transform: translateX(-50%);
     }
 }
