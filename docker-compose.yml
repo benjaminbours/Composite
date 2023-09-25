@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -25,12 +25,10 @@ services:
     image: redis:latest
     restart: always
     networks:
-      - database
+      - main
     depends_on:
       - db
-    # ports:
-    #   - 6379:6379
-    volumes: 
+    volumes:
       - ./cache:/data
 
   traefik:
@@ -48,8 +46,10 @@ services:
       - "80:80"
       # The Web UI (enabled by --api.insecure=true)
       - "8081:8080"
+    # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
     networks:
-      - database 
+      - main
+      - database
 
   api:
     restart: always
@@ -58,8 +58,10 @@ services:
       replicas: 2
     build:
       context: .
-      dockerfile: Dockerfile.back
+      dockerfile: ./back/Dockerfile.back
+      target: dev
     networks:
+      - main
       - database
     depends_on:
       - db
@@ -71,17 +73,37 @@ services:
       - ./packages/core/build:/app/packages/core/build
     env_file:
       - ./back/.env
-    # ports:
-      # - 3002:3002
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`api.localhost`)
+      # https://community.traefik.io/t/solved-strange-504-gateway-timeout-behaviour/10573
+      # TODO: Verify if its efficient...
+      - traefik.docker.network=main
       - traefik.http.services.api.loadbalancer.server.port=3002
       - traefik.http.services.api.loadBalancer.sticky.cookie.name=server_id
       - traefik.http.services.api.loadBalancer.sticky.cookie.httpOnly=true
-      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://localhost:3000
+      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://front.localhost
       - traefik.http.middlewares.testheader.headers.accessControlAllowCredentials=true
       - traefik.http.routers.api.middlewares=testheader
 
+  front:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./front/Dockerfile.front
+      target: dev
+    volumes:
+      - ./front/.env:/app/front/.env
+      - ./front:/app/front
+    env_file:
+      - ./front/.env
+    networks:
+      - main
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`front.localhost`)"
+      - traefik.http.services.front.loadbalancer.server.port=3000
+
 networks:
+  main:
   database:
