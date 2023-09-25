@@ -2,7 +2,7 @@
 import classNames from 'classnames';
 import React from 'react';
 // our libs
-import { AllQueueInfo, Levels, Side } from 'composite-core';
+import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
 // local
 import ButtonBack from './ButtonBack';
 import { QueueInfoText } from './QueueInfo';

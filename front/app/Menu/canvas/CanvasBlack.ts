@@ -1,5 +1,5 @@
 // our libs
-import { Side } from 'composite-core';
+import { Side } from '@benjaminbours/composite-core';
 // local
 import { ResizeOptions } from '../types';
 import Curve from './Curve';

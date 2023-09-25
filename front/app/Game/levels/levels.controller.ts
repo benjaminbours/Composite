@@ -9,7 +9,7 @@ import {
     Vector3,
 } from 'three';
 // our libs
-import { Levels } from 'composite-core';
+import { Levels } from '@benjaminbours/composite-core';
 // local
 import { TestLevel } from './TestLevel';
 import { PositionLevel } from './PositionLevel';

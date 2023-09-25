@@ -9,7 +9,7 @@ import React, {
     useState,
 } from 'react';
 // our libs
-import { AllQueueInfo, Levels, Side } from 'composite-core';
+import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
 // local
 import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';

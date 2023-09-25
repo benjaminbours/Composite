@@ -5,3 +5,6 @@ data-backup
 .DS_Store
 data
 cache
+.npmrc
+
+.env.staging

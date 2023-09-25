@@ -32,7 +32,7 @@
     "@socket.io/redis-streams-adapter": "^0.1.0",
     "cache-manager": "^5.2.3",
     "cache-manager-redis-store": "^3.0.1",
-    "composite-core": "^0.1.0-next.0",
+    "@benjaminbours/composite-core": "^0.1.0-next.0",
     "env-cmd": "^10.1.0",
     "redis": "^4.6.9",
     "reflect-metadata": "^0.1.13",

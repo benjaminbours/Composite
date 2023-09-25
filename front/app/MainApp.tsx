@@ -8,7 +8,7 @@ import {
     MatchMakingPayload,
     Side,
     SocketEventType,
-} from 'composite-core';
+} from '@benjaminbours/composite-core';
 // local
 import type { SocketController } from './SocketController';
 

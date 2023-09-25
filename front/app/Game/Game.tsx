@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, { useEffect, useRef } from 'react';
 // our libs
-import { Levels, Side } from 'composite-core';
+import { Levels, Side } from '@benjaminbours/composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { geometries } from './levels/levels.utils';

@@ -1,7 +1,7 @@
 // vendors
 import { Controller, Get } from '@nestjs/common';
 // our libs
-import { AllQueueInfo } from 'composite-core';
+import { AllQueueInfo } from '@benjaminbours/composite-core';
 // local
 import { AppService } from './app.service';
 import { TemporaryStorageService } from './temporary-storage.service';

@@ -2,7 +2,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useState } from 'react';
 // our libs
-import { Side } from 'composite-core';
+import { Side } from '@benjaminbours/composite-core';
 // local
 import ButtonBack from './ButtonBack';
 import { CopyToClipBoardIcon } from './CopyToClipboardIcon';

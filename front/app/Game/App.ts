@@ -19,7 +19,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 // our libs
-import { Levels, Side, SocketEventType } from 'composite-core';
+import { Levels, Side, SocketEventType } from '@benjaminbours/composite-core';
 // local
 // import SkyShader from './SkyShader';
 import Inputs from './Player/Inputs';

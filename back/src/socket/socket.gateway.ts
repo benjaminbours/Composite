@@ -14,7 +14,7 @@ import {
   MatchMakingPayload,
   Levels,
   GamePositionPayload,
-} from 'composite-core';
+} from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
 import {

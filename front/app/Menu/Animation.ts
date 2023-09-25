@@ -2,7 +2,7 @@
 import { gsap } from 'gsap';
 import { RefObject } from 'react';
 // our libs
-import { Side } from 'composite-core';
+import { Side } from '@benjaminbours/composite-core';
 // local
 import Curve, { defaultWaveOptions } from './canvas/Curve';
 import CanvasBlack from './canvas/CanvasBlack';

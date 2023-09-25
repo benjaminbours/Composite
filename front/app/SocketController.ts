@@ -5,7 +5,7 @@ import {
     SocketEventType,
     SocketEvent,
     GamePositionPayload,
-} from 'composite-core';
+} from '@benjaminbours/composite-core';
 import { Player } from './Game/Player';
 
 export class SocketController {

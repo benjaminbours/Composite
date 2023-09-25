@@ -1,4 +1,4 @@
-import { Levels, QueueInfo } from 'composite-core';
+import { Levels, QueueInfo } from '@benjaminbours/composite-core';
 import React from 'react';
 import { QueueInfoText } from './QueueInfo';
 

@@ -11,7 +11,7 @@ import {
   MatchMakingPayload,
   QueueInfo,
   Side,
-} from 'composite-core';
+} from '@benjaminbours/composite-core';
 // local
 
 export enum PlayerStatus {

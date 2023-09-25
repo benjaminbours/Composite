@@ -1,4 +1,4 @@
-import { Side } from 'composite-core';
+import { Side } from '@benjaminbours/composite-core';
 
 export type Scene = 'home' | 'level' | 'faction' | 'queue';
 
