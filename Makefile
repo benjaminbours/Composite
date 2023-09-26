@@ -4,8 +4,8 @@ start:
 build:
 	docker-compose build
 
-# start_db:
-# 	docker-compose up -d db adminer cache
+build_workspace:
+	docker build -t composite-workspace .
 
 # initial_db_setup:
 # 	docker exec hitech_api npx prisma migrate deploy
