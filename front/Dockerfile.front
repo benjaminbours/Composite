@@ -1,4 +1,16 @@
-FROM node:18-alpine as base
+# Dev
+FROM boursbenjamin/composite-workspace as dev
+ENTRYPOINT ["npm", "run", "dev", "-w", "front"]
+
+# Staging
+
+FROM dev as build-staging
+
+WORKDIR /app
+ENV NODE_ENV production
+RUN npm run build:staging -w front
+
+FROM node:18-alpine AS base
 WORKDIR /app
 RUN apk add --update --no-cache \
     make \
@@ -11,42 +23,27 @@ RUN apk add --update --no-cache \
     autoconf \
     automake
 
-
-# Dev
-FROM base as dev
-WORKDIR /app
-COPY . .
-
-RUN npm i -w packages -w front
-RUN npm run build -w packages
-
-ENTRYPOINT ["npm", "run", "dev", "-w", "front"]
-
-# Staging
-
-FROM dev as build-staging
-
-WORKDIR /app
-ENV NODE_ENV production
-RUN npm run build:staging -w front
-
 FROM base as staging
 
 WORKDIR /app
 ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-COPY --from=build-staging /app/public ./public
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+COPY --from=build-staging /app/front/public ./public
+COPY --from=build-staging /app/front/package*.json ./
+COPY --from=build-staging /app/front/.npmrc ./
+COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next ./.next
+COPY --from=build-staging --chown=nextjs:nodejs /app/front/next.config.js ./
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=build-staging --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=build-staging --chown=nextjs:nodejs /app/.next/static ./.next/static
+RUN npm i --omit=dev
 
 USER nextjs
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+# COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next/standalone ./
+# COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next/static ./.next/static
 
-ENTRYPOINT ["node", "server.js"]
+# ENTRYPOINT ["node", "server.js"]
+
+ENTRYPOINT ["npm", "start"]

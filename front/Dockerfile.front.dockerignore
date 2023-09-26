@@ -3,6 +3,7 @@
 !front
 front/node_modules
 front/.next
+
 !packages/core
 packages/core/node_modules
 !./package.json
