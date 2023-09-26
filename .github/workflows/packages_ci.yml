@@ -1,0 +1,24 @@
+name: Install and build packages
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'packages/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - run: npm install -w packages
+    - run: npm run build -w packages

@@ -1,0 +1,109 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: composite_db
+    image: postgres:latest
+    restart: always
+    networks:
+      - database
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file:
+      - ./back/.env
+
+  adminer:
+    container_name: composite_adminer
+    image: adminer
+    ports:
+      - 8080:8080
+
+  cache:
+    container_name: composite_cache
+    image: redis:latest
+    restart: always
+    networks:
+      - main
+    depends_on:
+      - db
+    volumes:
+      - ./cache:/data
+
+  traefik:
+    container_name: composite_gateway
+    image: traefik:latest
+    command:
+      # - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8081:8080"
+    # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
+    networks:
+      - main
+      - database
+
+  api:
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 2
+    build:
+      context: .
+      dockerfile: ./back/Dockerfile.back
+      target: dev
+    networks:
+      - main
+      - database
+    depends_on:
+      - db
+    volumes:
+      - ./back/.env:/app/back/.env
+      - ./back/src:/app/back/src
+      - ./back/test:/app/back/test
+      - ./back/prisma:/app/back/prisma
+      - ./packages/core/build:/app/packages/core/build
+    env_file:
+      - ./back/.env
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`api.localhost`)
+      # https://community.traefik.io/t/solved-strange-504-gateway-timeout-behaviour/10573
+      # TODO: Verify if its efficient...
+      - traefik.docker.network=main
+      - traefik.http.services.api.loadbalancer.server.port=3002
+      - traefik.http.services.api.loadBalancer.sticky.cookie.name=server_id
+      - traefik.http.services.api.loadBalancer.sticky.cookie.httpOnly=true
+      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://front.localhost
+      - traefik.http.middlewares.testheader.headers.accessControlAllowCredentials=true
+      - traefik.http.routers.api.middlewares=testheader
+
+  front:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./front/Dockerfile.front
+      target: dev
+    volumes:
+      - ./front/.env:/app/front/.env
+      - ./front:/app/front
+    env_file:
+      - ./front/.env
+    networks:
+      - main
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`front.localhost`)"
+      - traefik.http.services.front.loadbalancer.server.port=3000
+
+networks:
+  main:
+  database:

@@ -1,33 +1,14 @@
-#-----------------------------------------------------------------------
-# Frontend
-#-----------------------------------------------------------------------
+start:
+	docker-compose up
 
-install-dev-js:
-	npm i -D typescript tslint ts-loader
+build:
+	docker-compose build
 
-install-dev-bundler:
-	npm i -D webpack @types/webpack webpack-cli webpack-dev-server file-loader
+build_workspace:
+	docker build -t composite-workspace .
 
-init-npm:
-	npm init -y
+# initial_db_setup:
+# 	docker exec hitech_api npx prisma migrate deploy
 
-install-dev-front: init-npm install-dev-js install-dev-bundler
-
-#-----------------------------------------------------------------------
-# Deploy
-#-----------------------------------------------------------------------
-
-deploy:
-	rsync -avhpz --exclude-from=.syncignore ./ pi@192.168.1.2:Public/composite2/
-
-deploy-test:
-	rsync -avhpzn --exclude-from=.syncignore ./ pi@192.168.1.2:Public/composite2/
-
-# backup-live:
-# 	rsync -avhpz trainthetrainerbe.insideapp.be:www/ ./backup
-
-# backup-live-test:
-# 	rsync -avhpzn trainthetrainerbe.insideapp.be:www/ ./backup
-
-get-shaders:
-	rsync -avhpz pi@boursbenjamin.ddns.net:tfeProduction/build/glsl ./
+# display_api_logs:
+# 	docker logs -f hitech_api

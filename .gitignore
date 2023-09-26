@@ -1,3 +1,9 @@
 node_modules
-dist
-waaark.js
+data-backup
+.vscode/*.log
+**/.DS_Store
+.DS_Store
+data
+cache
+
+.env.staging

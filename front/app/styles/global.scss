@@ -1,0 +1,128 @@
+html {
+    overflow-y: scroll;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.home-page {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+}
+
+h2 {
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: 20px;
+    text-align: center;
+
+    @media (min-width: 2000px) {
+        font-size: 40px;
+    }
+
+    @media (max-width: 768px) {
+        font-size: 25px;
+        letter-spacing: 15px;
+    }
+
+    @media (max-width: 580px) {
+        font-size: 20px;
+        line-height: 1.5;
+    }
+}
+
+button {
+    all: unset;
+}
+
+.buttonRect {
+    width: auto;
+    text-align: center;
+    border: solid transparent 1px;
+    padding: 20px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    transition: 0.7s;
+    cursor: pointer;
+
+    &.white {
+        color: white;
+
+        &:hover {
+            border-color: white;
+        }
+    }
+
+    &.black {
+        color: black;
+
+        &:hover {
+            border-color: black;
+        }
+    }
+
+    &:hover {
+        transition: 0.7s;
+    }
+}
+
+.buttonCircle {
+    text-align: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 100px;
+    line-height: 90px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 100;
+    border: none;
+
+    &:focus {
+        outline: none;
+    }
+
+    @media (max-height: 700px), (max-width: 768px) {
+        width: 80px;
+        height: 80px;
+        font-size: 18px;
+        line-height: 80px;
+        font-weight: 500;
+    }
+
+    @media (min-width: 2000px) {
+        width: 120px;
+        height: 120px;
+        font-size: 30px;
+        line-height: 120px;
+    }
+}
+
+.unmount {
+    opacity: 0;
+    display: none;
+}
+
+.queue-count {
+    
+    font-weight: 100;
+    letter-spacing: 2px;
+    color: white;
+
+}

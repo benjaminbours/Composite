@@ -1,0 +1,52 @@
+FROM node:18-alpine as base
+WORKDIR /app
+RUN apk add --update --no-cache \
+    make \
+    g++ \
+    jpeg-dev \
+    cairo-dev \
+    giflib-dev \
+    pango-dev \
+    libtool \
+    autoconf \
+    automake
+
+
+# Dev
+FROM base as dev
+WORKDIR /app
+COPY . .
+
+RUN npm i -w packages -w front
+RUN npm run build -w packages
+
+ENTRYPOINT ["npm", "run", "dev", "-w", "front"]
+
+# Staging
+
+FROM dev as build-staging
+
+WORKDIR /app
+ENV NODE_ENV production
+RUN npm run build:staging -w front
+
+FROM base as staging
+
+WORKDIR /app
+ENV NODE_ENV production
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+COPY --from=build-staging /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=build-staging --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build-staging --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+ENTRYPOINT ["node", "server.js"]

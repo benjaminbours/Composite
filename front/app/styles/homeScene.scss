@@ -1,0 +1,77 @@
+.home-container {
+    h2 {
+        width: 90%;
+        @include centerAbsoluteHorizontal;
+        top: 40%;
+        color: white;
+        display: none;
+
+        @media (max-width: 768px) {
+            display: block;
+        }
+
+        @media (max-width: 400px) {
+            font-size: 18px;
+        }
+
+        @media (max-width: 400px) and (min-height: 800px) {
+            top: 30%;
+        }
+
+        @media (max-height: 800px) {
+            top: 30%;
+        }
+
+        @media (max-height: 600px) {
+            top: 25%;
+        }
+
+        @media (min-height: 1000px) {
+            top: 30%;
+        }
+    }
+
+    .queue-count {
+        position: absolute;
+        top: calc(75% - 25px);
+
+        &--light {
+            left: 10%;
+            color: white;
+        }
+
+        &--shadow {
+            right: 10%;
+            color: black;
+        }
+    }
+}
+
+#buttonPlay {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    top: calc(75% - 45px);
+    background: black;
+    color: white;
+    font-weight: 100;
+    font-size: 20px;
+    transition: 0.3s ease-out;
+    overflow: hidden;
+
+    @media (min-width: 769px) {
+        &:hover {
+            background: white;
+            color: black;
+            transition: 0.3s ease-out;
+        }
+    }
+
+    @media (max-height: 700px), (max-width: 768px) {
+        top: calc(75% - 40px);
+    }
+
+    @media (min-width: 2000px) {
+        top: calc(75% - 60px);
+    }
+}

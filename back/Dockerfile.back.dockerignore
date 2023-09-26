@@ -1,0 +1,9 @@
+*
+
+!back
+back/node_modules
+back/dist
+
+!packages/core
+packages/core/node_modules
+!./package.json

@@ -1,0 +1,71 @@
+.faction-container {
+    .queue-count {
+        position: absolute;
+        bottom: 15%;
+        text-align: center;
+
+        &--light {
+            left: 0;
+            right: 50%;
+            color: white;
+        }
+
+        &--shadow {
+            left: 50%;
+            right: 0;
+            color: black;
+        }
+    }
+}
+
+.factionButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 400;
+    transition: all 0.3s;
+    text-transform: uppercase;
+
+    &.white {
+        background: white;
+        color: black;
+        left: calc(25% - 45px);
+
+        @media (max-width: 768px) {
+            top: calc(25% - 40px);
+        }
+
+        @media (min-width: 769px) {
+            &:hover {
+                background: black;
+                color: white;
+            }
+        }
+    }
+
+    &.black {
+        background: black;
+        color: white;
+        left: calc(75% - 45px);
+
+        @media (max-width: 768px) {
+            top: calc(75% - 40px);
+        }
+
+        @media (min-width: 769px) {
+            &:hover {
+                background: white;
+                color: black;
+            }
+        }
+    }
+
+    &:hover {
+        transition: all 0.3s;
+    }
+
+    @media (max-width: 768px) {
+        left: 50% !important;
+        transform: translateX(-50%);
+    }
+}

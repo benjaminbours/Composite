@@ -1,0 +1,12 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "composite-back": "0.0.1",
+    "composite-front": "1.0.0",
+    "composite-core": "0.0.1"
+  },
+  "changesets": [
+    "sharp-peas-obey"
+  ]
+}
