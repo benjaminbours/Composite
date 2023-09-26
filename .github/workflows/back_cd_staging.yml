@@ -34,3 +34,7 @@ jobs:
         target: staging
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/composite-back:latest
+        build-args: |
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}

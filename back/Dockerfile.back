@@ -6,7 +6,16 @@ ENTRYPOINT ["npm", "run", "start:dev", "-w", "back"]
 # Staging
 FROM dev as build-staging
 ENV NODE_ENV production
-RUN npm run build:staging -w back
+ARG POSTGRES_USER
+ENV POSTGRES_USER ${POSTGRES_USER}
+ARG POSTGRES_PASSWORD
+ENV POSTGRES_PASSWORD ${POSTGRES_PASSWORD}
+ARG POSTGRES_DB
+ENV POSTGRES_DB ${POSTGRES_DB}
+ENV DATABASE_URL postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+ENV REDIS_URL redis://cache:6379
+
+RUN npm run build -w back
 
 FROM node:18-alpine AS base
 WORKDIR /app
