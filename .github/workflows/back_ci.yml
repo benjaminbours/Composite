@@ -1,0 +1,59 @@
+name: Install, test and build API
+
+# on: [pull_request, workflow_dispatch]
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'back/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      PORT: 3002
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://cache:6379
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        # npm cache files are stored in `~/.npm` on Linux/macOS
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm list -w back
+
+    - name: Install dependencies
+      run: npm install -w packages -w back && cd back && npx prisma generate
+
+    - name: Build packages
+      run: npm run build -w packages
+
+    - name: Lint
+      run: npm run lint -w back
+
+    - name: Build the project
+      run: npm run build -w back

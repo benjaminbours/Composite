@@ -1,14 +1,5 @@
-FROM node:18-alpine AS base
-
-WORKDIR /app
-RUN apk add --update --no-cache openssl1.1-compat
-
 # Dev
-FROM base as dev
-WORKDIR /app
-COPY . .
-RUN npm i -w packages -w back
-RUN npm run build -w packages
+FROM boursbenjamin/composite-workspace as dev
 RUN cd back && npx prisma generate
 ENTRYPOINT ["npm", "run", "start:dev", "-w", "back"]
 
@@ -17,12 +8,17 @@ FROM dev as build-staging
 ENV NODE_ENV production
 RUN npm run build:staging -w back
 
+FROM node:18-alpine AS base
+WORKDIR /app
+RUN apk add --update --no-cache openssl1.1-compat
+
 FROM base AS staging
 ENV NODE_ENV production
 WORKDIR /app
 COPY --from=build-staging /app/back/dist ./dist
+COPY --from=build-staging /app/back/prisma ./prisma
 COPY --from=build-staging /app/back/package*.json ./
-COPY --from=build-staging /app/.npmrc ./
+COPY --from=build-staging /app/back/.npmrc ./
 RUN npm i --omit=dev
 RUN npx prisma generate
 
