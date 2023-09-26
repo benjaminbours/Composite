@@ -41,6 +41,7 @@ export function Menu({ setMainState, mainState }: Props) {
     const levelRef = useRef<HTMLDivElement>(null);
     const sideRef = useRef<HTMLDivElement>(null);
     const queueRef = useRef<HTMLDivElement>(null);
+    const menuStarted = useRef(false);
 
     const isMobileDevice = useMemo(() => {
         if (!window) {
@@ -93,11 +94,16 @@ export function Menu({ setMainState, mainState }: Props) {
         initAnimations(animation.current);
     }, [isMobileDevice, currentScene, mainState.side]);
 
+    // effect to start to render the menu animation
     useEffect(() => {
+        let canvasLoop: (() => void) | undefined = undefined;
         Promise.all([
             import('./Animation').then((mod) => mod.default),
             import('./crossBrowser'),
         ]).then(([Animation]) => {
+            if (menuStarted.current) {
+                return;
+            }
             animation.current = Animation;
             blackCanvas.current = new CanvasBlack(
                 blackCanvasDomElement.current as HTMLCanvasElement,
@@ -118,10 +124,6 @@ export function Menu({ setMainState, mainState }: Props) {
                 isMobileDevice,
             );
             initAnimations(Animation);
-            Animation.runMethodForAllBothSideComponents('resize', [
-                blackCanvas.current.ctx,
-            ]);
-            Mouse.init();
             const stats = (() => {
                 if (process.env.NEXT_PUBLIC_STAGE === 'development') {
                     const stats = new STATS.default();
@@ -131,15 +133,28 @@ export function Menu({ setMainState, mainState }: Props) {
                 }
                 return undefined;
             })();
-            const canvasLoop = () => {
+            canvasLoop = () => {
                 stats?.begin();
                 blackCanvas.current!.render();
                 whiteCanvas.current!.render();
                 stats?.end();
             };
-            gsap.ticker.add(canvasLoop);
+            Mouse.init();
             resize();
+            gsap.ticker.add(canvasLoop);
+            menuStarted.current = true;
         });
+
+        return () => {
+            if (canvasLoop) {
+                gsap.ticker.remove(canvasLoop);
+            }
+            Mouse.destroy();
+        };
+    }, []);
+
+    // effect to fetch queue info
+    useEffect(() => {
         const fetchQueueInfo = () => {
             fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/queue-info`)
                 .then((res) => res.json())

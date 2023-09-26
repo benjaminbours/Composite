@@ -7,10 +7,18 @@ export default class Mouse {
     public static directionY: number = 0;
     public static speedX: number = 0;
     public static speedY: number = 0;
+    public static timeoutId: number | undefined = undefined;
 
     public static init() {
-        document.addEventListener("mousemove", Mouse.handleMouseMove);
+        document.addEventListener('mousemove', Mouse.handleMouseMove);
         Mouse.detectMouseSpeed();
+    }
+
+    public static destroy() {
+        document.removeEventListener('mousemove', Mouse.handleMouseMove);
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+        }
     }
 
     private static handleMouseMove(e: MouseEvent) {
@@ -22,7 +30,10 @@ export default class Mouse {
         Mouse.speedY = Mouse.y - Mouse.lastY;
         Mouse.lastX = Mouse.x;
         Mouse.lastY = Mouse.y;
-        setTimeout(Mouse.detectMouseSpeed, 50);
+        this.timeoutId = setTimeout(
+            Mouse.detectMouseSpeed,
+            50,
+        ) as unknown as number;
     }
 
     private static detectMouseDirection(e: MouseEvent) {
