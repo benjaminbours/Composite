@@ -80,10 +80,10 @@ export default class App {
         canvasDom: HTMLCanvasElement,
         currentLevel: Levels,
         playersConfig: Side[],
-        private socketController?: SocketController,
+        private socketController: SocketController,
     ) {
         // inputs
-        Inputs.init();
+        Inputs.init(socketController, playersConfig[0]);
 
         // levels
         this.levelController = new LevelController(currentLevel);
@@ -137,9 +137,6 @@ export default class App {
             this.players.push(player);
             this.scene.add(player);
         });
-        if (this.socketController) {
-            this.socketController.secondPlayer = this.players[1];
-        }
 
         this.camera.setDefaultTarget(this.players[0].position);
 
@@ -177,6 +174,14 @@ export default class App {
             this.scene,
             this.players,
         );
+
+        if (this.socketController) {
+            this.socketController.secondPlayer = this.players[1];
+            this.socketController.collidingElements =
+                this.levelController.levels[
+                    this.levelController.currentLevel
+                ]!.collidingElements;
+        }
     };
 
     setupPostProcessing = () => {
@@ -221,34 +226,23 @@ export default class App {
         }
     };
 
-    // TODO: This is not really optimized and will scale poorly.
-    // A better approach would be to emit only user inputs
-    // do a prediction on the client to keep fluidity, calculate an authoritative position on the server
-    // then validate or correct the initial prediction made on the client.
-    private emitPlayerPosition = throttle(() => {
-        if (this.socketController) {
-            this.socketController.emit([
-                SocketEventType.GAME_POSITION,
-                {
-                    x: this.players[0].position.x,
-                    y: this.players[0].position.y,
-                },
-            ]);
-        }
-    }, 25);
-
     public update = () => {
         this.delta = this.clock.getDelta();
         // update everything which need an update in the scene
-        collisionSystem(this.players, [
-            ...this.collidingElements,
-            ...this.levelController.levels[this.levelController.currentLevel]!
-                .collidingElements,
-        ]);
+        collisionSystem(
+            // so far collision system is only for the main player
+            [this.players[0]],
+            [
+                ...this.collidingElements,
+                ...this.levelController.levels[
+                    this.levelController.currentLevel
+                ]!.collidingElements,
+            ],
+            this.socketController,
+        );
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         this.floor.position.set(this.players[0].position.x, 0, 0);
-        this.emitPlayerPosition();
 
         const lightPlayer = this.players.find(
             (player) => player instanceof LightPlayer,

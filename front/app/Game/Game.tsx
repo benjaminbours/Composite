@@ -31,6 +31,9 @@ function Game({ side, selectedLevel, socketController }: Props) {
             if (!canvasRef.current) {
                 return;
             }
+            if (!socketController) {
+                return;
+            }
             appRef.current = new App(
                 canvasRef.current,
                 selectedLevel,
