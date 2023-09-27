@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    env_file:
+      - ./back/.env.staging
+    volumes:
+      # - ./data:/var/lib/postgresql/data
+      - /home/bbo/composite/postgres-data:/var/lib/postgresql/data
+
+  cache:
+    volumes:
+      - /home/bbo/composite/cache:/data
+
+  traefik:
+    container_name: composite_gateway
+    image: traefik:latest
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      # The HTTP port
+      - "80:80"
+
+  api:
+    image: boursbenjamin/composite-back:latest
+    env_file:
+      - ./back/.env.staging
+    labels:
+      - "traefik.http.routers.api.rule=Host(`composite-api.ddns.net`)"
+      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://composite.ddns.net
+
+  front:
+    image: boursbenjamin/composite-front:latest
+    env_file:
+      - ./front/.env.staging
+    labels:
+      - "traefik.http.routers.front.rule=Host(`composite.ddns.net`)"

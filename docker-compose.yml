@@ -34,18 +34,10 @@ services:
   traefik:
     container_name: composite_gateway
     image: traefik:latest
-    command:
-      # - "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      # The HTTP port
       - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8081:8080"
     # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
     networks:
       - main
@@ -59,18 +51,11 @@ services:
     build:
       context: .
       dockerfile: ./back/Dockerfile.back
-      target: dev
     networks:
       - main
       - database
     depends_on:
       - db
-    volumes:
-      - ./back/.env:/app/back/.env
-      - ./back/src:/app/back/src
-      - ./back/test:/app/back/test
-      - ./back/prisma:/app/back/prisma
-      - ./packages/core/build:/app/packages/core/build
     env_file:
       - ./back/.env
     labels:
@@ -91,10 +76,6 @@ services:
     build:
       context: .
       dockerfile: ./front/Dockerfile.front
-      target: dev
-    volumes:
-      - ./front/.env:/app/front/.env
-      - ./front:/app/front
     env_file:
       - ./front/.env
     networks:

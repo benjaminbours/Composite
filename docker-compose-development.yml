@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  traefik:
+    command:
+      # - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8081:8080"
+    # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
+
+  api:
+    build:
+      target: dev
+    volumes:
+      - ./back/.env:/app/back/.env
+      - ./back/src:/app/back/src
+      - ./back/test:/app/back/test
+      - ./back/prisma:/app/back/prisma
+      - ./packages/core/build:/app/packages/core/build
+
+  front:
+    build:
+      target: dev
+    volumes:
+      - ./front/.env:/app/front/.env
+      - ./front:/app/front

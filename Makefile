@@ -1,14 +1,21 @@
+ENVIRONMENT := development
+# DOCKER_FILE_ENVIRONMENT := 
+# ifneq ($(ENVIRONMENT), development)
+DOCKER_FILE_ENVIRONMENT := -f ./docker-compose-$(ENVIRONMENT).yml
+# endif
+
 start:
-	docker-compose up
+	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) config > docker-compose-final.yml
 
 build:
-	docker-compose build
+	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) build
 
 build_workspace:
-	docker build -t composite-workspace .
+	docker build --platform linux/amd64 -t boursbenjamin/composite-workspace .
 
-# initial_db_setup:
-# 	docker exec hitech_api npx prisma migrate deploy
+push_workspace:
+	docker push boursbenjamin/composite-workspace:latest
 
-# display_api_logs:
-# 	docker logs -f hitech_api
+deploy:
+	docker --context staging stack deploy --compose-file docker-compose.yml --compose-file docker-compose-staging.yml composite
+# docker-compose --context $(ENVIRONMENT) -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) up -d
