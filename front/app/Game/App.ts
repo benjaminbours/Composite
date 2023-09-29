@@ -22,14 +22,14 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import {
     GamePlayerInputPayload,
     GameState,
-    Input,
+    Inputs,
     Levels,
     Side,
     SocketEventType,
 } from '@benjaminbours/composite-core';
 // local
 // import SkyShader from './SkyShader';
-import InputsManager from './Player/Inputs';
+import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
 import { CollidingElem } from './types';
@@ -74,12 +74,9 @@ export default class App {
 
     public inputsManager: InputsManager;
 
-    private inputsHistory: {
-        leftIsActive: boolean;
-        rightIsActive: boolean;
-        jumpIsActive: boolean;
+    private inputsHistory: (Inputs & {
         time: number;
-    }[] = [];
+    })[] = [];
     private lastValidatedState: { gameState: GameState; time: number };
     // its a predicted state if we compare it to the last validated state
     private currentState: GameState;
@@ -244,16 +241,14 @@ export default class App {
 
     private processInputs = () => {
         if (
-            this.inputsManager.leftIsActive ||
-            this.inputsManager.rightIsActive ||
-            this.inputsManager.leftIsActive
+            this.inputsManager.inputs.left ||
+            this.inputsManager.inputs.right ||
+            this.inputsManager.inputs.left
         ) {
             const time = Date.now();
             this.inputsHistory.push({
                 time,
-                leftIsActive: this.inputsManager.leftIsActive,
-                rightIsActive: this.inputsManager.rightIsActive,
-                jumpIsActive: this.inputsManager.jumpIsActive,
+                ...this.inputsManager.inputs,
             });
             // emit input to server
             // const payload: GamePlayerInputPayload = {
@@ -280,7 +275,7 @@ export default class App {
         updateGameState(
             this.delta,
             this.playersConfig[0],
-            this.inputsManager,
+            this.inputsManager.inputs,
             [
                 ...this.collidingElements,
                 ...this.levelController.levels[

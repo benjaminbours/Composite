@@ -2,6 +2,7 @@ import { Vector2 } from 'three';
 import { CollidingElem } from '../../types';
 import {
     GameState,
+    Inputs,
     // Input,
     MovableComponentState,
     Side,
@@ -59,11 +60,7 @@ const updateVelocityX = (delta: number, target: number, velocity: Vector2) =>
 export function updateGameState(
     delta: number,
     side: Side,
-    inputs: {
-        leftIsActive: boolean;
-        rightIsActive: boolean;
-        jumpIsActive: boolean;
-    },
+    inputs: Inputs,
     collidingElems: CollidingElem[],
     gameState: GameState,
 ) {
@@ -79,7 +76,7 @@ export function updateGameState(
 
     const hasReachedMaxLeftSpeed = velocity.x < -MAX_VELOCITY_X;
     const hasReachedMaxRightSpeed = velocity.x > MAX_VELOCITY_X;
-    if (inputs.leftIsActive) {
+    if (inputs.left) {
         if (hasReachedMaxLeftSpeed) {
             velocity.x = -MAX_VELOCITY_X;
         } else {
@@ -87,7 +84,7 @@ export function updateGameState(
         }
     }
 
-    if (inputs.rightIsActive) {
+    if (inputs.right) {
         if (hasReachedMaxRightSpeed) {
             velocity.x = MAX_VELOCITY_X;
         } else {
@@ -95,7 +92,7 @@ export function updateGameState(
         }
     }
 
-    if (!inputs.leftIsActive && !inputs.rightIsActive) {
+    if (!inputs.left && !inputs.right) {
         // console.log('HERE decrease');
         updateVelocityX(delta, 0, velocity);
     }
@@ -108,7 +105,7 @@ export function updateGameState(
     );
 
     // jump if possible
-    if (inputs.jumpIsActive && state === MovableComponentState.onFloor) {
+    if (inputs.jump && state === MovableComponentState.onFloor) {
         velocity.y = JUMP_POWER;
     }
 
