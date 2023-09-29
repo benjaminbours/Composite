@@ -10,6 +10,7 @@ import { Player } from './Player';
 
 export class LightPlayer extends Player {
     public mesh: Mesh;
+    public name = 'light-player';
 
     constructor(public isMainPlayer: boolean) {
         super(isMainPlayer);

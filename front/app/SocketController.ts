@@ -4,16 +4,14 @@ import { Socket, io } from 'socket.io-client';
 import {
     SocketEventType,
     SocketEvent,
-    GameActivateElementPayload,
+    GameStateUpdatePayload,
 } from '@benjaminbours/composite-core';
-import { Player } from './Game/Player';
-import { CollidingElem } from './Game/types';
-// import { InteractiveComponent } from './Game/Player/physics/movementHelpers';
 
 export class SocketController {
     private socket: Socket;
-    public secondPlayer?: Player;
-    public collidingElements?: CollidingElem[];
+    // public secondPlayer?: Player;
+    // public collidingElements?: CollidingElem[];
+    // public inputsSended: GamePlayerInputPayload[] = [];
 
     constructor(onGameStart: () => void) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
@@ -28,6 +26,14 @@ export class SocketController {
             console.log('received game start event');
             onGameStart();
         });
+
+        // this.socket.on(
+        //     SocketEventType.GAME_STATE_UPDATE,
+        //     (data: GameStateUpdatePayload) => {
+        //         // console.log('received game state', data);
+        //         // onGameStart();
+        //     },
+        // );
 
         // this.socket.on(
         //     SocketEventType.GAME_ACTIVATE_ELEMENT,

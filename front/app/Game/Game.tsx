@@ -7,7 +7,6 @@ import { Levels, Side } from '@benjaminbours/composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { geometries } from './levels/levels.utils';
-import Inputs from './Player/Inputs';
 import { SocketController } from '../SocketController';
 
 interface Props {
@@ -54,7 +53,7 @@ function Game({ side, selectedLevel, socketController }: Props) {
 
             const handleVisibilityChange = () => {
                 if (document.visibilityState === 'hidden') {
-                    Inputs.reset();
+                    appRef.current?.inputsManager.reset();
                     appRef.current?.clock.stop();
                 } else {
                     appRef.current?.clock.start();
@@ -75,7 +74,7 @@ function Game({ side, selectedLevel, socketController }: Props) {
                 stats?.end();
             };
             // https://greensock.com/docs/v3/GSAP/gsap.ticker
-            // gsap.ticker.fps(90);
+            // gsap.ticker.fps(30);
             gsap.ticker.add(gameLoop);
             gameStarted.current = true;
 

@@ -40,6 +40,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     protected particles: Points;
 
     constructor(
+        public name: string,
         private doorInfo: DoorInfo,
         color: Color,
     ) {

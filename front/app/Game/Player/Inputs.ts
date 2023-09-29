@@ -1,76 +1,48 @@
-import { Input, Side, SocketEventType } from '@benjaminbours/composite-core';
-import { SocketController } from '../../SocketController';
+export default class InputsManager {
+    public leftIsActive = false;
+    public rightIsActive = false;
+    public jumpIsActive = false;
 
-export default class Inputs {
-    private static socketController?: SocketController;
-    private static playerSide?: Side;
-    public static leftIsActive = false;
-    public static rightIsActive = false;
-    public static jumpIsActive = false;
-
-    public static init(socketController: SocketController, playerSide: Side) {
-        this.socketController = socketController;
-        this.playerSide = playerSide;
+    constructor() {
         // TODO: Implements a destroy method
         window.addEventListener('keydown', this.handleKeydown.bind(this));
         window.addEventListener('keyup', this.handleKeyup.bind(this));
     }
 
-    public static reset() {
+    public reset() {
         this.leftIsActive = false;
         this.rightIsActive = false;
         this.jumpIsActive = false;
     }
 
-    private static keydownOptions = {
+    private keydownOptions = {
         // left
         KeyA: () => {
-            Inputs.leftIsActive = true;
-            this.socketController?.emit([
-                SocketEventType.GAME_PLAYER_INPUT,
-                {
-                    player: this.playerSide!,
-                    input: Input.LEFT,
-                },
-            ]);
+            this.leftIsActive = true;
         },
         // right
         KeyD: () => {
-            Inputs.rightIsActive = true;
-            this.socketController?.emit([
-                SocketEventType.GAME_PLAYER_INPUT,
-                {
-                    player: this.playerSide!,
-                    input: Input.RIGHT,
-                },
-            ]);
+            this.rightIsActive = true;
         },
         // space
         Space: () => {
-            Inputs.jumpIsActive = true;
-            this.socketController?.emit([
-                SocketEventType.GAME_PLAYER_INPUT,
-                {
-                    player: this.playerSide!,
-                    input: Input.SPACE,
-                },
-            ]);
+            this.jumpIsActive = true;
         },
     };
 
-    private static keyupOptions = {
-        KeyA() {
-            Inputs.leftIsActive = false;
+    private keyupOptions = {
+        KeyA: () => {
+            this.leftIsActive = false;
         },
-        KeyD() {
-            Inputs.rightIsActive = false;
+        KeyD: () => {
+            this.rightIsActive = false;
         },
-        Space() {
-            Inputs.jumpIsActive = false;
+        Space: () => {
+            this.jumpIsActive = false;
         },
     };
 
-    private static handleKeydown(e: KeyboardEvent) {
+    private handleKeydown(e: KeyboardEvent) {
         const { code } = e;
         const key = code as 'KeyA' | 'KeyD' | 'Space';
         if (this.keydownOptions[key]) {
@@ -78,7 +50,7 @@ export default class Inputs {
         }
     }
 
-    private static handleKeyup(e: KeyboardEvent) {
+    private handleKeyup(e: KeyboardEvent) {
         const { code } = e;
         const key = code as 'KeyA' | 'KeyD' | 'Space';
         if (this.keyupOptions[key]) {

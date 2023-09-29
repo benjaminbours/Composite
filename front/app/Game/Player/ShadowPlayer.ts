@@ -12,6 +12,7 @@ import VS from '../glsl/playerShadow_vs.glsl';
 import FS from '../glsl/playerShadow_fs.glsl';
 
 export class ShadowPlayer extends Player {
+    public name = 'shadow-player';
     protected particles: Points;
     private lastPosition = new Vector3();
 
@@ -96,7 +97,6 @@ export class ShadowPlayer extends Player {
     }
 
     public update(delta: number) {
-        super.update(delta);
         this.lastPosition.add(
             this.lastPosition
                 .clone()

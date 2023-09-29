@@ -19,10 +19,17 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 // our libs
-import { Levels, Side, SocketEventType } from '@benjaminbours/composite-core';
+import {
+    GamePlayerInputPayload,
+    GameState,
+    Input,
+    Levels,
+    Side,
+    SocketEventType,
+} from '@benjaminbours/composite-core';
 // local
 // import SkyShader from './SkyShader';
-import Inputs from './Player/Inputs';
+import InputsManager from './Player/Inputs';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
 import { CollidingElem } from './types';
@@ -34,17 +41,7 @@ import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
-
-function throttle(fn: (args: any[]) => any, wait: number) {
-    let shouldWait = false;
-    return function () {
-        if (!shouldWait) {
-            fn([arguments]);
-            shouldWait = true;
-            setTimeout(() => (shouldWait = false), wait);
-        }
-    };
-}
+import { updateGameState } from './Player/physics/movementHelpers';
 
 export default class App {
     private width = window.innerWidth;
@@ -70,20 +67,39 @@ export default class App {
 
     private levelController: LevelController;
     private collidingElements: CollidingElem[] = [];
-    // private interactElements: InteractElem[] = [];
 
     private volumetricLightPass!: ShaderPass;
     private occlusionComposer!: EffectComposer;
     private mainComposer!: EffectComposer;
 
+    public inputsManager: InputsManager;
+
+    private inputsHistory: {
+        leftIsActive: boolean;
+        rightIsActive: boolean;
+        jumpIsActive: boolean;
+        time: number;
+    }[] = [];
+    private lastValidatedState: { gameState: GameState; time: number };
+    // its a predicted state if we compare it to the last validated state
+    private currentState: GameState;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         currentLevel: Levels,
-        playersConfig: Side[],
+        private playersConfig: Side[],
         private socketController: SocketController,
     ) {
+        // TODO: Make the server send the initial state
+        const initialState = {
+            time: Date.now(),
+            gameState: new GameState(currentLevel, 10, 20, 0, 0, 200, 20, 0, 0),
+        };
+        this.lastValidatedState = initialState;
+        this.currentState = initialState.gameState;
         // inputs
-        Inputs.init(socketController, playersConfig[0]);
+
+        this.inputsManager = new InputsManager();
 
         // levels
         this.levelController = new LevelController(currentLevel);
@@ -175,13 +191,13 @@ export default class App {
             this.players,
         );
 
-        if (this.socketController) {
-            this.socketController.secondPlayer = this.players[1];
-            this.socketController.collidingElements =
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ]!.collidingElements;
-        }
+        // if (this.socketController) {
+        //     this.socketController.secondPlayer = this.players[1];
+        //     this.socketController.collidingElements =
+        //         this.levelController.levels[
+        //             this.levelController.currentLevel
+        //         ]!.collidingElements;
+        // }
     };
 
     setupPostProcessing = () => {
@@ -226,20 +242,64 @@ export default class App {
         }
     };
 
+    private processInputs = () => {
+        if (
+            this.inputsManager.leftIsActive ||
+            this.inputsManager.rightIsActive ||
+            this.inputsManager.leftIsActive
+        ) {
+            const time = Date.now();
+            this.inputsHistory.push({
+                time,
+                leftIsActive: this.inputsManager.leftIsActive,
+                rightIsActive: this.inputsManager.rightIsActive,
+                jumpIsActive: this.inputsManager.jumpIsActive,
+            });
+            // emit input to server
+            // const payload: GamePlayerInputPayload = {
+            //     time,
+            //     input: Input.RIGHT,
+            //     player: this.playersConfig[0],
+            // };
+            // this.socketController?.emit([
+            //     SocketEventType.GAME_PLAYER_INPUT,
+            //     {
+            //         player: this.playersConfig[0],
+            //         input: Input.RIGHT,
+            //         time,
+            //     },
+            // ]);
+        }
+    };
+    // TODO: Reconciliate state accordingly with last state received by server
+
     public update = () => {
         this.delta = this.clock.getDelta();
-        // update everything which need an update in the scene
-        collisionSystem(
-            // so far collision system is only for the main player
-            [this.players[0]],
+
+        this.processInputs();
+        updateGameState(
+            this.delta,
+            this.playersConfig[0],
+            this.inputsManager,
             [
                 ...this.collidingElements,
                 ...this.levelController.levels[
                     this.levelController.currentLevel
                 ]!.collidingElements,
             ],
-            this.socketController,
+            this.currentState,
         );
+
+        const playerKey =
+            this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
+
+        this.players[0].position.set(
+            this.currentState[`${playerKey}_x`],
+            this.currentState[`${playerKey}_y`],
+            0,
+        );
+
+        // update everything which need an update in the scene
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         this.floor.position.set(this.players[0].position.x, 0, 0);
