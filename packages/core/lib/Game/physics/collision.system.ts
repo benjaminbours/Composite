@@ -1,9 +1,5 @@
-import {
-    MovableComponent,
-    MovableComponentState,
-    SocketEventType,
-} from '@benjaminbours/composite-core';
 // import { SocketController } from '../../../SocketController';
+import { MovableComponent, MovableComponentState } from '../../types';
 import { DoorOpener } from '../elements/DoorOpener';
 import { EndLevel } from '../elements/EndLevel';
 import { CollidingElem } from '../types';

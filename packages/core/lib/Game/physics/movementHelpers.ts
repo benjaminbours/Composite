@@ -1,13 +1,7 @@
 import { Vector2 } from 'three';
 import { CollidingElem } from '../types';
-import {
-    GameState,
-    Inputs,
-    // Input,
-    MovableComponentState,
-    Side,
-} from '@benjaminbours/composite-core';
 import { collisionSystem } from './collision.system';
+import { GameState, Inputs, MovableComponentState, Side } from '../../types';
 
 const MAX_VELOCITY_X = 10;
 const MAX_FALL_SPEED = 20;
@@ -15,7 +9,6 @@ const MAX_FALL_SPEED = 20;
 const JUMP_POWER = 15;
 const GRAVITY = 20;
 const SPEED = 20; // less is faster
-export const FPS = 60;
 
 // // Ascension helpers
 // const hasReachedMaxAscendSpeed = R.propSatisfies(
@@ -54,8 +47,11 @@ export interface InteractiveComponent {
     isActive: boolean;
 }
 
-const updateVelocityX = (delta: number, target: number, velocity: Vector2) =>
-    (velocity.x += (target - velocity.x) / (SPEED * delta * FPS));
+const updateVelocityX = (delta: number, target: number, velocity: Vector2) => {
+    // return (velocity.x += (target - velocity.x) / (SPEED * delta * FPS));
+    const speed = SPEED * delta * 60;
+    return (velocity.x += (target - velocity.x) / speed);
+};
 
 export function updateGameState(
     delta: number,
@@ -64,11 +60,13 @@ export function updateGameState(
     collidingElems: CollidingElem[],
     gameState: GameState,
 ) {
+    const deltaInverse = 1 / delta / (60 * 60);
     const playerKey = side === Side.LIGHT ? 'light' : 'shadow';
     const velocity = new Vector2(
         gameState[`${playerKey}_velocity_x`],
         gameState[`${playerKey}_velocity_y`],
     );
+    const velocityOld = velocity.clone();
     const position = new Vector2(
         gameState[`${playerKey}_x`],
         gameState[`${playerKey}_y`],
@@ -80,7 +78,7 @@ export function updateGameState(
         if (hasReachedMaxLeftSpeed) {
             velocity.x = -MAX_VELOCITY_X;
         } else {
-            updateVelocityX(delta, -MAX_VELOCITY_X, velocity);
+            updateVelocityX(deltaInverse, -MAX_VELOCITY_X, velocity);
         }
     }
 
@@ -88,13 +86,12 @@ export function updateGameState(
         if (hasReachedMaxRightSpeed) {
             velocity.x = MAX_VELOCITY_X;
         } else {
-            updateVelocityX(delta, MAX_VELOCITY_X, velocity);
+            updateVelocityX(deltaInverse, MAX_VELOCITY_X, velocity);
         }
     }
 
     if (!inputs.left && !inputs.right) {
-        // console.log('HERE decrease');
-        updateVelocityX(delta, 0, velocity);
+        updateVelocityX(deltaInverse, 0, velocity);
     }
 
     // process collision
@@ -119,9 +116,13 @@ export function updateGameState(
         }
     }
 
+    // What is 60 ?
     // use velocity to update position
-    position.x += velocity.x * delta * FPS;
-    position.y += velocity.y * delta * FPS;
+    position.x += ((velocity.x + velocityOld.x) / 2) * delta * 60;
+    position.y += velocity.y * delta * 60;
+
+    // console.log('pos', position);
+    // console.log('vel', velocity);
 
     // update game state
     gameState[`${playerKey}_velocity_x`] = velocity.x;

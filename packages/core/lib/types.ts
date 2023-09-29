@@ -51,7 +51,7 @@ export interface GamePlayerInputPayload {
 
 export interface GameStateUpdatePayload {
   gameState: GameState;
-  lastProcessedInput: number;
+  time: number;
 }
 
 export interface GameActivateElementPayload {
