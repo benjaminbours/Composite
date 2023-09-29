@@ -1,3 +1,4 @@
+// vendors
 import {
     BoxGeometry,
     BufferAttribute,
@@ -12,8 +13,10 @@ import {
     Vector3,
 } from 'three';
 import { gsap } from 'gsap';
+// our libs
+import type { InteractiveComponent } from '@benjaminbours/composite-core';
+// local
 import CustomCamera from '../CustomCamera';
-import { InteractiveComponent } from '../Player/physics/movementHelpers';
 import { getRange } from '../helpers/math';
 import VS from '../glsl/endLevel_vs.glsl';
 import FS from '../glsl/endLevel_fs.glsl';

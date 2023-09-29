@@ -4,9 +4,9 @@ import {
     SocketEventType,
 } from '@benjaminbours/composite-core';
 // import { SocketController } from '../../../SocketController';
-import { DoorOpener } from '../../elements/DoorOpener';
-import { EndLevel } from '../../elements/EndLevel';
-import { CollidingElem } from '../../types';
+import { DoorOpener } from '../elements/DoorOpener';
+import { EndLevel } from '../elements/EndLevel';
+import { CollidingElem } from '../types';
 // import { LightPlayer } from '../LightPlayer';
 // import { ShadowPlayer } from '../ShadowPlayer';
 // import { MovableComponent, MovableComponentState } from './movementHelpers';

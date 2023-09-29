@@ -26,6 +26,7 @@ import {
     Levels,
     Side,
     SocketEventType,
+    updateGameState,
 } from '@benjaminbours/composite-core';
 // local
 // import SkyShader from './SkyShader';
@@ -36,12 +37,10 @@ import { CollidingElem } from './types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
-import { collisionSystem } from './Player/physics/collision.system';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
-import { updateGameState } from './Player/physics/movementHelpers';
 
 export default class App {
     private width = window.innerWidth;
@@ -74,9 +73,7 @@ export default class App {
 
     public inputsManager: InputsManager;
 
-    private inputsHistory: (Inputs & {
-        time: number;
-    })[] = [];
+    private inputsHistory: GamePlayerInputPayload[] = [];
     private lastValidatedState: { gameState: GameState; time: number };
     // its a predicted state if we compare it to the last validated state
     private currentState: GameState;
@@ -246,24 +243,18 @@ export default class App {
             this.inputsManager.inputs.left
         ) {
             const time = Date.now();
-            this.inputsHistory.push({
+            const payload = {
+                player: this.playersConfig[0],
+                inputs: this.inputsManager.inputs,
+                delta: this.delta,
                 time,
-                ...this.inputsManager.inputs,
-            });
+            };
+            this.inputsHistory.push(payload);
             // emit input to server
-            // const payload: GamePlayerInputPayload = {
-            //     time,
-            //     input: Input.RIGHT,
-            //     player: this.playersConfig[0],
-            // };
-            // this.socketController?.emit([
-            //     SocketEventType.GAME_PLAYER_INPUT,
-            //     {
-            //         player: this.playersConfig[0],
-            //         input: Input.RIGHT,
-            //         time,
-            //     },
-            // ]);
+            this.socketController?.emit([
+                SocketEventType.GAME_PLAYER_INPUT,
+                payload,
+            ]);
         }
     };
     // TODO: Reconciliate state accordingly with last state received by server

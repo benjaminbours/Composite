@@ -1,5 +1,5 @@
 import { Vector2 } from 'three';
-import { CollidingElem } from '../../types';
+import { CollidingElem } from '../types';
 import {
     GameState,
     Inputs,
