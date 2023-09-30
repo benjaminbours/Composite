@@ -1,7 +1,7 @@
 import { Inputs } from '@benjaminbours/composite-core';
 
 export default class InputsManager {
-    public inputs: Inputs = {
+    public inputsActive: Inputs = {
         left: false,
         right: false,
         jump: false,
@@ -14,35 +14,35 @@ export default class InputsManager {
     }
 
     public reset() {
-        this.inputs.left = false;
-        this.inputs.right = false;
-        this.inputs.jump = false;
+        this.inputsActive.left = false;
+        this.inputsActive.right = false;
+        this.inputsActive.jump = false;
     }
 
     private keydownOptions = {
         // left
         KeyA: () => {
-            this.inputs.left = true;
+            this.inputsActive.left = true;
         },
         // right
         KeyD: () => {
-            this.inputs.right = true;
+            this.inputsActive.right = true;
         },
         // space
         Space: () => {
-            this.inputs.jump = true;
+            this.inputsActive.jump = true;
         },
     };
 
     private keyupOptions = {
         KeyA: () => {
-            this.inputs.left = false;
+            this.inputsActive.left = false;
         },
         KeyD: () => {
-            this.inputs.right = false;
+            this.inputsActive.right = false;
         },
         Space: () => {
-            this.inputs.jump = false;
+            this.inputsActive.jump = false;
         },
     };
 

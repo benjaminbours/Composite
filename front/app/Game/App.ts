@@ -26,6 +26,7 @@ import {
     Levels,
     Side,
     SocketEventType,
+    applyInputsUntilNow,
     updateGameState,
 } from '@benjaminbours/composite-core';
 // local
@@ -74,9 +75,10 @@ export default class App {
     public inputsManager: InputsManager;
 
     private inputsHistory: GamePlayerInputPayload[] = [];
-    private lastValidatedState: { gameState: GameState; time: number };
     // its a predicted state if we compare it to the last validated state
     private currentState: GameState;
+
+    private lastInput: GamePlayerInputPayload | undefined;
 
     constructor(
         canvasDom: HTMLCanvasElement,
@@ -85,12 +87,20 @@ export default class App {
         private socketController: SocketController,
     ) {
         // TODO: Make the server send the initial state
-        const initialState = {
-            time: Date.now(),
-            gameState: new GameState(currentLevel, 10, 20, 0, 0, 200, 20, 0, 0),
-        };
-        this.lastValidatedState = initialState;
-        this.currentState = initialState.gameState;
+        const initialState = new GameState(
+            currentLevel,
+            10,
+            20,
+            0,
+            0,
+            200,
+            20,
+            0,
+            0,
+            Date.now(),
+        );
+        // this.lastValidatedState = initialState;
+        this.currentState = initialState;
         // inputs
 
         this.inputsManager = new InputsManager();
@@ -185,13 +195,8 @@ export default class App {
             this.players,
         );
 
-        // if (this.socketController) {
-        //     this.socketController.secondPlayer = this.players[1];
-        //     this.socketController.collidingElements =
-        //         this.levelController.levels[
-        //             this.levelController.currentLevel
-        //         ]!.collidingElements;
-        // }
+        this.socketController.onGameStateUpdate =
+            this.reconciliateWithServerGameState;
     };
 
     setupPostProcessing = () => {
@@ -237,18 +242,18 @@ export default class App {
     };
 
     private processInputs = () => {
+        const time = Date.now();
+        const payload = {
+            player: this.playersConfig[0],
+            inputs: { ...this.inputsManager.inputsActive },
+            delta: this.delta,
+            time,
+        };
         if (
-            this.inputsManager.inputs.left ||
-            this.inputsManager.inputs.right ||
-            this.inputsManager.inputs.left
+            this.inputsManager.inputsActive.left ||
+            this.inputsManager.inputsActive.right ||
+            this.inputsManager.inputsActive.left
         ) {
-            const time = Date.now();
-            const payload = {
-                player: this.playersConfig[0],
-                inputs: this.inputsManager.inputs,
-                delta: this.delta,
-                time,
-            };
             this.inputsHistory.push(payload);
             // emit input to server
             this.socketController?.emit([
@@ -256,32 +261,96 @@ export default class App {
                 payload,
             ]);
         }
+
+        if (this.lastInput) {
+            if (
+                (this.lastInput.inputs.left &&
+                    !this.inputsManager.inputsActive.left) ||
+                (this.lastInput.inputs.right &&
+                    !this.inputsManager.inputsActive.right)
+            ) {
+                // console.log('emit inputs released');
+                this.socketController?.emit([
+                    SocketEventType.GAME_PLAYER_INPUT,
+                    payload,
+                ]);
+            }
+        }
+        this.lastInput = payload;
     };
-    // TODO: Reconciliate state accordingly with last state received by server
+
+    private reconciliateWithServerGameState = (gameState: GameState) => {
+        // console.log(
+        //     'input history before clear',
+        //     JSON.parse(JSON.stringify(this.inputsHistory)),
+        // );
+        // console.log('state received', gameState);
+        // clear old inputs
+        this.inputsHistory = this.inputsHistory.filter(
+            ({ time }) => time > gameState.lastValidatedInput,
+        );
+        // console.log(
+        //     'input history after clear',
+        //     JSON.parse(JSON.stringify(this.inputsHistory)),
+        // );
+
+        // this.lastValidatedState = gameState;
+
+        // reconciliate
+        const nextState = { ...gameState };
+        const playerKey =
+            this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
+        applyInputsUntilNow(
+            {
+                [playerKey]: this.lastInput,
+            },
+            this.inputsHistory,
+            nextState,
+        );
+
+        // console.log(
+        //     `next state computed ${playerKey}`,
+        //     nextState[`${playerKey}_x`],
+        //     nextState[`${playerKey}_velocity_x`],
+        // );
+        // console.log(
+        //     'current state',
+        //     this.currentState[`${playerKey}_x`],
+        //     this.currentState[`${playerKey}_velocity_x`],
+        // );
+        this.currentState = nextState;
+    };
 
     public update = () => {
         this.delta = this.clock.getDelta();
-
         this.processInputs();
         updateGameState(
             this.delta,
             this.playersConfig[0],
-            this.inputsManager.inputs,
+            this.inputsManager.inputsActive,
             [
-                ...this.collidingElements,
-                ...this.levelController.levels[
-                    this.levelController.currentLevel
-                ]!.collidingElements,
+                // ...this.collidingElements,
+                // ...this.levelController.levels[
+                //     this.levelController.currentLevel
+                // ]!.collidingElements,
             ],
             this.currentState,
         );
 
         const playerKey =
             this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
+        const otherPlayerKey =
+            this.playersConfig[0] === Side.LIGHT ? 'shadow' : 'light';
 
         this.players[0].position.set(
             this.currentState[`${playerKey}_x`],
             this.currentState[`${playerKey}_y`],
+            0,
+        );
+
+        this.players[1].position.set(
+            this.currentState[`${otherPlayerKey}_x`],
+            this.currentState[`${otherPlayerKey}_y`],
             0,
         );
 

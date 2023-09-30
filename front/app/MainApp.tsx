@@ -32,7 +32,7 @@ export interface MainState {
 function MainApp() {
     const socketController = useRef<SocketController>();
     const [state, setState] = useState<MainState>({
-        // side: Side.LIGHT,
+        // side: Side.SHADOW,
         // selectedLevel: Levels.CRACK_THE_DOOR,
         side: undefined,
         selectedLevel: undefined,
@@ -44,7 +44,7 @@ function MainApp() {
     }, []);
 
     const establishConnection = useCallback(() => {
-        import('./SocketController')
+        return import('./SocketController')
             .then((mod) => mod.SocketController)
             .then((SocketController) => {
                 socketController.current = new SocketController(
@@ -70,6 +70,9 @@ function MainApp() {
 
         console.log('establish connection');
         establishConnection();
+        // establishConnection().then(() => {
+        //     handleGameStart();
+        // });
     }, [state, establishConnection]);
 
     // return (

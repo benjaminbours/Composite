@@ -1,7 +1,13 @@
 import { Vector2 } from 'three';
 import { CollidingElem } from '../types';
 import { collisionSystem } from './collision.system';
-import { GameState, Inputs, MovableComponentState, Side } from '../../types';
+import {
+    GamePlayerInputPayload,
+    GameState,
+    Inputs,
+    MovableComponentState,
+    Side,
+} from '../../types';
 
 const MAX_VELOCITY_X = 10;
 const MAX_FALL_SPEED = 20;
@@ -48,7 +54,6 @@ export interface InteractiveComponent {
 }
 
 const updateVelocityX = (delta: number, target: number, velocity: Vector2) => {
-    // return (velocity.x += (target - velocity.x) / (SPEED * delta * FPS));
     const speed = SPEED * delta * 60;
     return (velocity.x += (target - velocity.x) / speed);
 };
@@ -66,7 +71,8 @@ export function updateGameState(
         gameState[`${playerKey}_velocity_x`],
         gameState[`${playerKey}_velocity_y`],
     );
-    const velocityOld = velocity.clone();
+    // // TODO: Test is this velocity stuff is very useful
+    // const velocityOld = velocity.clone();
     const position = new Vector2(
         gameState[`${playerKey}_x`],
         gameState[`${playerKey}_y`],
@@ -118,7 +124,7 @@ export function updateGameState(
 
     // What is 60 ?
     // use velocity to update position
-    position.x += ((velocity.x + velocityOld.x) / 2) * delta * 60;
+    position.x += velocity.x * delta * 60;
     position.y += velocity.y * delta * 60;
 
     // console.log('pos', position);
@@ -129,4 +135,94 @@ export function updateGameState(
     gameState[`${playerKey}_velocity_y`] = velocity.y;
     gameState[`${playerKey}_x`] = position.x;
     gameState[`${playerKey}_y`] = position.y;
+}
+
+export function applyInputsUntilNow(
+    lastPlayersInput: {
+        light?: GamePlayerInputPayload;
+        shadow?: GamePlayerInputPayload;
+    },
+    inputs: GamePlayerInputPayload[],
+    gameState: GameState,
+    dev?: boolean,
+) {
+    const targetTime = Date.now();
+    const defaultTimeIncrement = 16.7;
+    const defaultDelta = defaultTimeIncrement / 1000;
+    if (dev) {
+        console.log('inputs', inputs);
+    }
+
+    let counter = 0;
+    for (
+        let i = gameState.lastValidatedInput;
+        // while there are inputs or while we reach the target time
+        i <= targetTime || inputs.length !== 0;
+        i += defaultTimeIncrement
+    ) {
+        counter++;
+        const inputsForTick = inputs.filter(({ time }) => time <= i);
+
+        // if there are inputs for this time tick, we process them
+        if (inputsForTick.length) {
+            inputsForTick.forEach((input) => {
+                const { player, delta, time, inputs } = input;
+                updateGameState(delta, player, inputs, [], gameState);
+                if (dev) {
+                    console.log('applying input', time);
+                }
+                if (player === Side.LIGHT) {
+                    lastPlayersInput.light = input;
+                } else {
+                    lastPlayersInput.shadow = input;
+                }
+            });
+            // then we remove them from the list
+            inputs = inputs.filter((input) => !inputsForTick.includes(input));
+        } else {
+            // if there are no inputs for this tick, we have to deduce / interpolate player position
+            // regarding the last action he did.
+
+            // if the last input is a release right or left key input, we apply deceleration
+            (['light', 'shadow'] as (keyof typeof lastPlayersInput)[]).forEach(
+                (player) => {
+                    if (
+                        lastPlayersInput[player] &&
+                        !lastPlayersInput[player]?.inputs.left &&
+                        !lastPlayersInput[player]?.inputs.right
+                    ) {
+                        if (dev) {
+                            console.log(`${player} apply decelerate`);
+                        }
+                        updateGameState(
+                            // without input received, we have to use the default delta
+                            defaultDelta,
+                            player === 'light' ? Side.LIGHT : Side.SHADOW,
+                            {
+                                left: false,
+                                right: false,
+                                jump: false,
+                            },
+                            [],
+                            gameState,
+                        );
+                    } else {
+                        // if the last input is not a release left or right key, its very likely the player
+                        // has lag or low frame rate and we expect to receive more information about him later
+                        if (dev) {
+                            console.log(
+                                `Nothing to apply for the ${player}, waiting more inputs`,
+                            );
+                        }
+                    }
+                },
+            );
+        }
+        if (dev) {
+            console.log(counter);
+            console.log(i);
+            console.log(gameState.light_x, gameState.light_velocity_x);
+        }
+        gameState.lastValidatedInput = i;
+    }
 }

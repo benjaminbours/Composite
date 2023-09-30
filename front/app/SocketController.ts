@@ -5,6 +5,7 @@ import {
     SocketEventType,
     SocketEvent,
     GameStateUpdatePayload,
+    GameState,
 } from '@benjaminbours/composite-core';
 
 export class SocketController {
@@ -12,6 +13,7 @@ export class SocketController {
     // public secondPlayer?: Player;
     // public collidingElements?: CollidingElem[];
     // public inputsSended: GamePlayerInputPayload[] = [];
+    public onGameStateUpdate?: (gameState: GameState) => void;
 
     constructor(onGameStart: () => void) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
@@ -27,13 +29,14 @@ export class SocketController {
             onGameStart();
         });
 
-        // this.socket.on(
-        //     SocketEventType.GAME_STATE_UPDATE,
-        //     (data: GameStateUpdatePayload) => {
-        //         // console.log('received game state', data);
-        //         // onGameStart();
-        //     },
-        // );
+        this.socket.on(
+            SocketEventType.GAME_STATE_UPDATE,
+            (data: GameStateUpdatePayload) => {
+                if (this.onGameStateUpdate) {
+                    this.onGameStateUpdate(data.gameState);
+                }
+            },
+        );
 
         // this.socket.on(
         //     SocketEventType.GAME_ACTIVATE_ELEMENT,
