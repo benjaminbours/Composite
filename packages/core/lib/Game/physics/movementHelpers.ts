@@ -137,16 +137,16 @@ export function updateGameState(
     gameState[`${playerKey}_y`] = position.y;
 }
 
-export function applyInputsUntilNow(
+export function applyInputsUntilTarget(
     lastPlayersInput: {
         light?: GamePlayerInputPayload;
         shadow?: GamePlayerInputPayload;
     },
     inputs: GamePlayerInputPayload[],
     gameState: GameState,
+    targetTime: number,
     dev?: boolean,
 ) {
-    const targetTime = Date.now();
     const defaultTimeIncrement = 16.7;
     const defaultDelta = defaultTimeIncrement / 1000;
     if (dev) {

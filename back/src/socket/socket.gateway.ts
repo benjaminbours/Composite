@@ -19,7 +19,7 @@ import {
   Side,
   SocketEvent,
   GameState,
-  applyInputsUntilNow,
+  applyInputsUntilTarget,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -237,7 +237,12 @@ export class SocketGateway {
       // Logger.log('INPUTS QUEUE', inputsQueue);
       // Logger.log('INPUTS QUEUE length', inputsQueue.length);
 
-      applyInputsUntilNow(lastPlayersInput, inputsQueue, gameState);
+      applyInputsUntilTarget(
+        lastPlayersInput,
+        inputsQueue,
+        gameState,
+        Date.now(),
+      );
 
       // emit updated game state to room
       this.emit(String(gameId), [

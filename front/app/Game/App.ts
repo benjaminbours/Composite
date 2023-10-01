@@ -14,6 +14,7 @@ import {
     PCFSoftShadowMap,
     IcosahedronGeometry,
     Fog,
+    Vector2,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -22,11 +23,10 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import {
     GamePlayerInputPayload,
     GameState,
-    Inputs,
     Levels,
     Side,
     SocketEventType,
-    applyInputsUntilNow,
+    applyInputsUntilTarget,
     updateGameState,
 } from '@benjaminbours/composite-core';
 // local
@@ -80,6 +80,12 @@ export default class App {
 
     private lastInput: GamePlayerInputPayload | undefined;
 
+    private serverGameStateHistory: GameState[] = [];
+    private shouldInterpolate = false;
+    private interpolationRatio = 0;
+    private localStateAtInterpolationStart: GameState;
+    private targetStateAtInterpolationStart: GameState;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         currentLevel: Levels,
@@ -99,8 +105,9 @@ export default class App {
             0,
             Date.now(),
         );
-        // this.lastValidatedState = initialState;
         this.currentState = initialState;
+        this.localStateAtInterpolationStart = { ...initialState };
+        this.targetStateAtInterpolationStart = { ...initialState };
         // inputs
 
         this.inputsManager = new InputsManager();
@@ -195,8 +202,14 @@ export default class App {
             this.players,
         );
 
-        this.socketController.onGameStateUpdate =
-            this.reconciliateWithServerGameState;
+        this.socketController.onGameStateUpdate = (gameState: GameState) => {
+            this.interpolationRatio = 0;
+            this.shouldInterpolate = true;
+            this.inputsHistory = this.inputsHistory.filter(
+                ({ time }) => time > gameState.lastValidatedInput,
+            );
+            this.serverGameStateHistory.push(gameState);
+        };
     };
 
     setupPostProcessing = () => {
@@ -279,50 +292,90 @@ export default class App {
         this.lastInput = payload;
     };
 
-    private reconciliateWithServerGameState = (gameState: GameState) => {
-        // console.log(
-        //     'input history before clear',
-        //     JSON.parse(JSON.stringify(this.inputsHistory)),
-        // );
-        // console.log('state received', gameState);
-        // clear old inputs
-        this.inputsHistory = this.inputsHistory.filter(
-            ({ time }) => time > gameState.lastValidatedInput,
-        );
-        // console.log(
-        //     'input history after clear',
-        //     JSON.parse(JSON.stringify(this.inputsHistory)),
-        // );
+    private interpolateWithServerUpdate = () => {
+        const serverGameState =
+            this.serverGameStateHistory[this.serverGameStateHistory.length - 1];
 
-        // this.lastValidatedState = gameState;
-
-        // reconciliate
-        const nextState = { ...gameState };
+        this.localStateAtInterpolationStart = { ...this.currentState };
+        const nextStateAtInterpolationTime = { ...serverGameState };
         const playerKey =
             this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
-        applyInputsUntilNow(
+        applyInputsUntilTarget(
             {
                 [playerKey]: this.lastInput,
             },
             this.inputsHistory,
-            nextState,
+            nextStateAtInterpolationTime,
+            Date.now(),
         );
+        this.targetStateAtInterpolationStart = {
+            ...nextStateAtInterpolationTime,
+        };
 
-        // console.log(
-        //     `next state computed ${playerKey}`,
-        //     nextState[`${playerKey}_x`],
-        //     nextState[`${playerKey}_velocity_x`],
-        // );
-        // console.log(
-        //     'current state',
-        //     this.currentState[`${playerKey}_x`],
-        //     this.currentState[`${playerKey}_velocity_x`],
-        // );
-        this.currentState = nextState;
+        this.shouldUpdateInterpolation = true;
+        // this.currentState = nextStateAtInterpolationTime;
+    };
+
+    private shouldUpdateInterpolation = false;
+
+    public updateInterpolation = () => {
+        if (this.interpolationRatio >= 1) {
+            this.shouldUpdateInterpolation = false;
+            return;
+        }
+        this.interpolationRatio += this.delta;
+        // console.log('interpolate');
+        // console.log(this.interpolationRatio);
+
+        const properties = ['position', 'velocity'];
+        for (let i = 0; i < this.playersConfig.length; i++) {
+            const player = this.playersConfig[i];
+            const playerKey = player === Side.LIGHT ? 'light' : 'shadow';
+
+            for (let j = 0; j < properties.length; j++) {
+                const property = properties[j];
+                const key =
+                    property === 'position'
+                        ? `${playerKey}`
+                        : `${playerKey}_velocity`;
+                const vector = new Vector2(
+                    (this.localStateAtInterpolationStart as any)[`${key}_x`],
+                    (this.localStateAtInterpolationStart as any)[`${key}_y`],
+                );
+                const vectorTarget = new Vector2(
+                    (this.targetStateAtInterpolationStart as any)[`${key}_x`],
+                    (this.targetStateAtInterpolationStart as any)[`${key}_y`],
+                );
+                const targetNormalize = vectorTarget
+                    .clone()
+                    .sub(vector)
+                    .normalize();
+                const distance =
+                    vector.distanceTo(vectorTarget) * this.interpolationRatio;
+
+                const displacement = targetNormalize.multiplyScalar(distance);
+                // if (i === 0) {
+                //     console.log('origin', vector);
+                //     console.log('target', vectorTarget);
+                //     console.log('distance', distance);
+                //     console.log('displacement', displacement);
+                // }
+                // vector.add(targetNormalize.multiplyScalar(distance));
+                (this.currentState as any)[`${key}_x`] += displacement.x;
+                (this.currentState as any)[`${key}_y`] += displacement.y;
+            }
+        }
     };
 
     public update = () => {
         this.delta = this.clock.getDelta();
+        if (this.shouldInterpolate) {
+            this.interpolateWithServerUpdate();
+            this.shouldInterpolate = false;
+        }
+        if (this.shouldUpdateInterpolation) {
+            this.updateInterpolation();
+        }
         this.processInputs();
         updateGameState(
             this.delta,

@@ -74,7 +74,7 @@ function Game({ side, selectedLevel, socketController }: Props) {
                 stats?.end();
             };
             // https://greensock.com/docs/v3/GSAP/gsap.ticker
-            // gsap.ticker.fps(60);
+            gsap.ticker.fps(30);
             gsap.ticker.add(gameLoop);
             gameStarted.current = true;
 
