@@ -1,8 +1,8 @@
 // import { SocketController } from '../../../SocketController';
+import { Object3D } from 'three';
 import { MovableComponent, MovableComponentState } from '../../types';
 // import { InteractiveArea } from '../elements/InteractiveArea';
 // import { EndLevel } from '../elements/EndLevel';
-import { CollidingElem } from '../types';
 // import { LightPlayer } from '../LightPlayer';
 // import { ShadowPlayer } from '../ShadowPlayer';
 // import { MovableComponent, MovableComponentState } from './movementHelpers';
@@ -12,7 +12,7 @@ const RANGE = 20;
 
 export function collisionSystem(
     component: MovableComponent,
-    obstacles: CollidingElem[],
+    obstacles: Object3D[],
 ): MovableComponentState {
     let state: MovableComponentState = MovableComponentState.onFloor;
     const { position, velocity } = component;

@@ -1,36 +1,17 @@
 // vendors
-import {
-    Group,
-    BoxGeometry,
-    MeshBasicMaterial,
-    Mesh,
-    Scene,
-    Vector2,
-    Vector3,
-} from 'three';
+import { Scene, Vector3 } from 'three';
 // our libs
-import { Levels, gridSize } from '@benjaminbours/composite-core';
+import { Levels } from '@benjaminbours/composite-core';
 // local
-import { Geometries } from '../types';
 import { LightPlayer, ShadowPlayer, Player } from '../Player';
 import { PositionLevelWithGraphic } from './PositionLevelWithGraphic';
 import { PositionLevel } from '@benjaminbours/composite-core';
 
 export default class LevelController {
     public levels: {
-        // testLevel: TestLevel;
         [Levels.CRACK_THE_DOOR]: PositionLevel;
         [Levels.LEARN_TO_FLY]?: PositionLevel;
         [Levels.THE_HIGH_SPHERES]?: PositionLevel;
-    };
-    public geometries: {
-        [key in Geometries]?: unknown | BoxGeometry;
-        // border: BoxGeometry;
-        // platform: BoxGeometry;
-        // wall?: unknown;
-    } = {
-        border: new BoxGeometry(100, 10, 100),
-        platform: new BoxGeometry(gridSize * 0.65, 10, gridSize * 2.5),
     };
 
     constructor(public currentLevel: Levels) {

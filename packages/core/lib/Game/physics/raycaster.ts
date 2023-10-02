@@ -1,5 +1,4 @@
-import { Vector3, Raycaster, Intersection, Vector2 } from 'three';
-import { CollidingElem } from '../types';
+import { Vector3, Raycaster, Intersection, Vector2, Object3D } from 'three';
 
 export interface INearestObjects {
     right?: Intersection;
@@ -19,7 +18,7 @@ const RAYCASTER = new Raycaster();
 
 export function getNearestObjects(
     position: Vector2,
-    obstacles: CollidingElem[],
+    obstacles: Object3D[],
 ): INearestObjects {
     const nearestObjects: INearestObjects = {};
 

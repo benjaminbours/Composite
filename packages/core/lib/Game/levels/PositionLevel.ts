@@ -1,5 +1,5 @@
 // vendors
-import { Group, Vector3 } from 'three';
+import { Group, Object3D, Vector3 } from 'three';
 // local
 import {
     createArchGroup,
@@ -7,11 +7,10 @@ import {
     createWallDoor,
     positionOnGrid,
 } from './levels.utils';
-import { CollidingElem } from '../types';
 import { InteractiveArea } from '../elements/InteractiveArea';
 
 export class PositionLevel extends Group {
-    public collidingElements: CollidingElem[] = [];
+    public collidingElements: Object3D[] = [];
     public interactiveElements: any[] = [];
     public name = 'position-level';
 

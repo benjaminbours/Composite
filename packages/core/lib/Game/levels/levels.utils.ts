@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import {
     BoxGeometry,
     DoubleSide,
@@ -8,7 +7,6 @@ import {
     Object3D,
     Vector3,
 } from 'three';
-import { GeometriesRegistry } from '../types';
 import { degreesToRadians } from '../helpers/math';
 
 export const gridSize = 250;
@@ -19,7 +17,7 @@ const wallDepth = 34;
 // TODO: Its not clear the fact is instantiated here then populate with more
 // geometry later when loading assets. Lets make the loading function return a proper
 // loading registry
-export const geometries: GeometriesRegistry = {
+export const geometries: { [key: string]: any } = {
     border: new BoxGeometry(100, 10, 100),
     platform: new BoxGeometry(gridSize * 0.65, 10, gridSize * 2.5),
 };

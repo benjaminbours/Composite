@@ -1,5 +1,4 @@
-import { Vector2 } from 'three';
-import { CollidingElem } from '../types';
+import { Object3D, Vector2 } from 'three';
 import { collisionSystem } from './collision.system';
 import {
     GamePlayerInputPayload,
@@ -62,7 +61,7 @@ export function updateGameState(
     delta: number,
     side: Side,
     inputs: Inputs,
-    collidingElems: CollidingElem[],
+    collidingElems: Object3D[],
     gameState: GameState,
 ) {
     const deltaInverse = 1 / delta / (60 * 60);
@@ -137,7 +136,7 @@ export function applyInputsUntilTarget(
         shadow?: GamePlayerInputPayload;
     },
     inputs: GamePlayerInputPayload[],
-    collidingElements: CollidingElem[],
+    collidingElements: Object3D[],
     gameState: GameState,
     targetTime: number,
     dev?: boolean,

@@ -34,7 +34,6 @@ import {
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
-import { CollidingElem } from './types';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
 import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
