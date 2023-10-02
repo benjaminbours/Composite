@@ -287,50 +287,31 @@ export default class App {
             this.shouldUpdateInterpolation = false;
             return;
         }
-        this.interpolationRatio += this.delta;
-        // console.log('interpolate');
-        // console.log(this.interpolationRatio);
+        this.interpolationRatio += this.delta * 10;
 
         const properties = ['position' as 'position', 'velocity' as 'velocity'];
-        for (let i = 0; i < this.playersConfig.length; i++) {
-            const side = this.playersConfig[i];
+        const side = this.playersConfig[1];
 
-            for (let j = 0; j < properties.length; j++) {
-                const property = properties[j];
-                const vector = new Vector2(
-                    this.localStateAtInterpolationStart.players[side][
-                        property
-                    ].x,
-                    this.localStateAtInterpolationStart.players[side][
-                        property
-                    ].y,
-                );
-                const vectorTarget = new Vector2(
-                    this.targetStateAtInterpolationStart.players[side][
-                        property
-                    ].x,
-                    this.targetStateAtInterpolationStart.players[side][
-                        property
-                    ].y,
-                );
-                const targetNormalize = vectorTarget
-                    .clone()
-                    .sub(vector)
-                    .normalize();
-                const distance =
-                    vector.distanceTo(vectorTarget) * this.interpolationRatio;
+        for (let j = 0; j < properties.length; j++) {
+            const property = properties[j];
+            const vector = new Vector2(
+                this.localStateAtInterpolationStart.players[side][property].x,
+                this.localStateAtInterpolationStart.players[side][property].y,
+            );
+            const vectorTarget = new Vector2(
+                this.targetStateAtInterpolationStart.players[side][property].x,
+                this.targetStateAtInterpolationStart.players[side][property].y,
+            );
+            const targetNormalize = vectorTarget
+                .clone()
+                .sub(vector)
+                .normalize();
+            const distance =
+                vector.distanceTo(vectorTarget) * this.interpolationRatio;
 
-                const displacement = targetNormalize.multiplyScalar(distance);
-                // if (i === 0) {
-                //     console.log('origin', vector);
-                //     console.log('target', vectorTarget);
-                //     console.log('distance', distance);
-                //     console.log('displacement', displacement);
-                // }
-                // vector.add(targetNormalize.multiplyScalar(distance));
-                this.currentState.players[side][property].x += displacement.x;
-                this.currentState.players[side][property].y += displacement.y;
-            }
+            const displacement = targetNormalize.multiplyScalar(distance);
+            this.currentState.players[side][property].x += displacement.x;
+            this.currentState.players[side][property].y += displacement.y;
         }
     };
 

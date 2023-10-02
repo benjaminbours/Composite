@@ -214,7 +214,6 @@ export class TemporaryStorageService {
     gameId: number,
     gameState: RedisGameState,
   ) {
-    console.log(gameState);
     const transaction = this.redisClient.MULTI();
     this.removeFromQueue(
       playerFoundInQueue.socketId,
