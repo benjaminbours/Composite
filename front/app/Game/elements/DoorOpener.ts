@@ -1,12 +1,8 @@
 // vendors
 import {
-    BoxGeometry,
     BufferAttribute,
     BufferGeometry,
     Color,
-    DoubleSide,
-    Mesh,
-    MeshPhongMaterial,
     Object3D,
     Points,
     ShaderMaterial,
@@ -14,12 +10,14 @@ import {
 } from 'three';
 import { gsap } from 'gsap';
 // our libs
-import type { InteractiveComponent } from '@benjaminbours/composite-core';
+import {
+    InteractiveArea,
+    getRange,
+    type InteractiveComponent,
+} from '@benjaminbours/composite-core';
 import CustomCamera from '../CustomCamera';
-import { getRange } from '../helpers/math';
 import VS from '../glsl/doorOpener_vs.glsl';
 import FS from '../glsl/doorOpener_fs.glsl';
-import { gridSize } from '../levels/levels.utils';
 
 interface DoorInfo {
     cameraPosition: Vector3;
@@ -33,7 +31,10 @@ const FAST_SPEED_MODIFIER = 2;
 const DEFAULT_ORGANIC_RATIO = 1;
 const FAST_ORGANIC_RATIO = 0.2;
 
-export class DoorOpener extends Object3D implements InteractiveComponent {
+export class DoorOpener
+    extends InteractiveArea
+    implements InteractiveComponent
+{
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
     protected speedModifier: number = DEFAULT_SPEED_MODIFIER;
@@ -43,10 +44,10 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
 
     constructor(
         public name: string,
-        private doorInfo: DoorInfo,
+        public doorInfo: DoorInfo,
         color: Color,
     ) {
-        super();
+        super(name);
         const particlesNumber = 700;
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
         const particlesGeo = new BufferGeometry();
@@ -114,19 +115,6 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
 
         this.particles = new Points(particlesGeo, particlesMat);
         this.add(this.particles);
-
-        const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
-        const whiteBlockMat = new MeshPhongMaterial({
-            color: 0xffffff,
-            side: DoubleSide,
-            specular: 0x000000,
-            shininess: 50,
-            transparent: true,
-        });
-
-        const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockMat);
-        this.add(whiteBlock);
-
         this.particles.frustumCulled = false;
     }
 

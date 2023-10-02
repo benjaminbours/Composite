@@ -1,7 +1,7 @@
 // import { SocketController } from '../../../SocketController';
 import { MovableComponent, MovableComponentState } from '../../types';
-import { DoorOpener } from '../elements/DoorOpener';
-import { EndLevel } from '../elements/EndLevel';
+// import { InteractiveArea } from '../elements/InteractiveArea';
+// import { EndLevel } from '../elements/EndLevel';
 import { CollidingElem } from '../types';
 // import { LightPlayer } from '../LightPlayer';
 // import { ShadowPlayer } from '../ShadowPlayer';
@@ -88,10 +88,10 @@ export function collisionSystem(
                 //     (parent as Elevator).shouldActivate = true;
                 //     component.state = MovableComponentState.ascend;
                 //     break;
-                case parent instanceof DoorOpener:
+                case parent?.name.includes('doorOpener'):
                     // setCurrentDoorOpener();
                     break;
-                case parent instanceof EndLevel:
+                case parent?.name.includes('endLevel'):
                     // setCurrentEndLevel();
                     break;
             }
@@ -127,11 +127,11 @@ export function collisionSystem(
         //     component.currentElevator = undefined;
         // }
 
-        if (!(parent instanceof DoorOpener)) {
+        if (!parent?.name.includes('doorOpener')) {
             // clearCurrentDoorOpener();
         }
 
-        if (!(parent instanceof EndLevel)) {
+        if (!parent?.name.includes('endLevel')) {
             // clearCurrentEndLevel();
         }
     }

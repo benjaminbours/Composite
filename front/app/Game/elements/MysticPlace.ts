@@ -11,12 +11,14 @@ import {
     Mesh,
     MeshPhongMaterial,
 } from 'three';
-import { InteractiveComponent } from '@benjaminbours/composite-core';
-import { getRange } from '../helpers/math';
+import {
+    InteractiveComponent,
+    getRange,
+    gridSize,
+} from '@benjaminbours/composite-core';
 import VS from '../glsl/mysticPlace_vs.glsl';
 import FS from '../glsl/mysticPlace_fs.glsl';
 import { gsap } from 'gsap';
-import { gridSize } from '../levels/levels.utils';
 
 export class MysticPlace extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;

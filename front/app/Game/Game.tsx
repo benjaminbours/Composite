@@ -6,7 +6,6 @@ import React, { useEffect, useRef } from 'react';
 import { Levels, Side } from '@benjaminbours/composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
-import { geometries } from './levels/levels.utils';
 import { SocketController } from '../SocketController';
 
 interface Props {
@@ -23,7 +22,7 @@ function Game({ side, selectedLevel, socketController }: Props) {
 
     useEffect(() => {
         let gameLoop: (() => void) | undefined = undefined;
-        startLoadingAssets(geometries).finally(() => {
+        startLoadingAssets().finally(() => {
             if (gameStarted.current) {
                 return;
             }

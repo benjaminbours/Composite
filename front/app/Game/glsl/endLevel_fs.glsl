@@ -1,4 +1,3 @@
-// uniform vec3 color;
 varying vec4 color;
 
 void main() {

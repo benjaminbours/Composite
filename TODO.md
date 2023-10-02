@@ -14,6 +14,7 @@
 - Orchestrate efficiently the transition between the menu, the game, the state on the server, the connection, etc
 - Fix responsive menu this last changes
 - Ensure all click action on menu are on buttons element to maximize browser compatibility
+- Fix bug where camera of other player have the same behavior as the first one while on interactive element
 
 ## Nice to have
 

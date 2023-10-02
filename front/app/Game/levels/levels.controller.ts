@@ -9,13 +9,12 @@ import {
     Vector3,
 } from 'three';
 // our libs
-import { Levels } from '@benjaminbours/composite-core';
+import { Levels, gridSize } from '@benjaminbours/composite-core';
 // local
-import { TestLevel } from './TestLevel';
-import { PositionLevel } from './PositionLevel';
-import { CollidingElem, Geometries } from '../types';
-import { gridSize } from './levels.utils';
+import { Geometries } from '../types';
 import { LightPlayer, ShadowPlayer, Player } from '../Player';
+import { PositionLevelWithGraphic } from './PositionLevelWithGraphic';
+import { PositionLevel } from '@benjaminbours/composite-core';
 
 export default class LevelController {
     public levels: {

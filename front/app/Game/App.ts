@@ -66,7 +66,6 @@ export default class App {
     private floor!: Mesh;
 
     private levelController: LevelController;
-    private collidingElements: CollidingElem[] = [];
 
     private volumetricLightPass!: ShaderPass;
     private occlusionComposer!: EffectComposer;
@@ -141,13 +140,12 @@ export default class App {
                 // transparent: true,
             }),
         );
+        this.floor.name = 'floor';
         this.floor.castShadow = false;
         this.floor.receiveShadow = true;
-        this.floor.rotation.x = -Math.PI * 0.5;
-        this.floor.position.x = 3.5;
+        this.floor.rotation.x = -Math.PI / 2;
 
         this.scene.add(this.floor);
-        this.collidingElements.push(this.floor);
 
         // player
         playersConfig.forEach((side, index) => {
@@ -305,12 +303,31 @@ export default class App {
                 [playerKey]: this.lastInput,
             },
             this.inputsHistory,
+            [
+                this.floor,
+                ...this.levelController.levels[
+                    this.levelController.currentLevel
+                ]!.collidingElements,
+            ],
             nextStateAtInterpolationTime,
             Date.now(),
         );
+        // console.log(
+        //     `next state computed ${playerKey}`,
+        //     nextStateAtInterpolationTime[`${playerKey}_x`],
+        //     nextStateAtInterpolationTime[`${playerKey}_velocity_x`],
+        // );
+        // console.log(
+        //     'current state',
+        //     this.currentState[`${playerKey}_x`],
+        //     this.currentState[`${playerKey}_velocity_x`],
+        // );
         this.targetStateAtInterpolationStart = {
             ...nextStateAtInterpolationTime,
         };
+
+        // console.log('current state', this.currentState);
+        // console.log('server corrected state', nextStateAtInterpolationTime);
 
         this.shouldUpdateInterpolation = true;
         // this.currentState = nextStateAtInterpolationTime;
@@ -382,10 +399,10 @@ export default class App {
             this.playersConfig[0],
             this.inputsManager.inputsActive,
             [
-                // ...this.collidingElements,
-                // ...this.levelController.levels[
-                //     this.levelController.currentLevel
-                // ]!.collidingElements,
+                this.floor,
+                ...this.levelController.levels[
+                    this.levelController.currentLevel
+                ]!.collidingElements,
             ],
             this.currentState,
         );
@@ -410,7 +427,7 @@ export default class App {
         // update everything which need an update in the scene
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
-        this.floor.position.set(this.players[0].position.x, 0, 0);
+        // this.floor.position.set(this.players[0].position.x, 0, 0);
 
         const lightPlayer = this.players.find(
             (player) => player instanceof LightPlayer,

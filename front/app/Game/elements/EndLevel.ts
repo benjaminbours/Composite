@@ -3,24 +3,25 @@ import {
     BoxGeometry,
     BufferAttribute,
     BufferGeometry,
-    Color,
     DoubleSide,
     Mesh,
     MeshPhongMaterial,
-    Object3D,
     Points,
     ShaderMaterial,
     Vector3,
 } from 'three';
 import { gsap } from 'gsap';
 // our libs
-import type { InteractiveComponent } from '@benjaminbours/composite-core';
+import {
+    InteractiveArea,
+    gridSize,
+    type InteractiveComponent,
+    getRange,
+} from '@benjaminbours/composite-core';
 // local
 import CustomCamera from '../CustomCamera';
-import { getRange } from '../helpers/math';
 import VS from '../glsl/endLevel_vs.glsl';
 import FS from '../glsl/endLevel_fs.glsl';
-import { gridSize } from '../levels/levels.utils';
 
 const DEFAULT_SPEED_MODIFIER = 0.2;
 const FAST_SPEED_MODIFIER = 2;
@@ -32,7 +33,7 @@ const FAST_ORGANIC_RATIO = 1;
 // for each player here
 // TODO: Naming can be improved as well, organic ratio is not correct in this context
 // its more an interpolation ratio
-export class EndLevel extends Object3D implements InteractiveComponent {
+export class EndLevel extends InteractiveArea implements InteractiveComponent {
     public shouldActivate = false;
     public shouldActivateLight = false;
     public shouldActivateShadow = false;
@@ -45,8 +46,8 @@ export class EndLevel extends Object3D implements InteractiveComponent {
 
     protected particles: Points;
 
-    constructor(color: Color) {
-        super();
+    constructor(public name: string) {
+        super(name);
         const particlesNumber = 1000;
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
         const particlesGeo = new BufferGeometry();
@@ -121,7 +122,6 @@ export class EndLevel extends Object3D implements InteractiveComponent {
         const particlesMat = new ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },
-                color: { value: color },
                 organicRatioLight: { value: DEFAULT_ORGANIC_RATIO },
                 organicRatioShadow: { value: DEFAULT_ORGANIC_RATIO },
             },

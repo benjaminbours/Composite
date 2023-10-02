@@ -1,8 +1,10 @@
 import { LoadingManager, Mesh } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { AssetInfo, GeometriesRegistry } from './types';
+// TODO: don't like that much the fact this function set a object inside a lib, we never use
+import { geometries } from '@benjaminbours/composite-core';
+import { AssetInfo } from './types';
 
-export async function startLoadingAssets(geometries: GeometriesRegistry) {
+export async function startLoadingAssets() {
     return new Promise((resolve) => {
         // loaded from public folder
         // TODO: Update this type, its not relevant anymore

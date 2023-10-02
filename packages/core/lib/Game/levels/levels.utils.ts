@@ -24,6 +24,10 @@ export const geometries: GeometriesRegistry = {
     platform: new BoxGeometry(gridSize * 0.65, 10, gridSize * 2.5),
 };
 
+export function addToGeometries(mesh: Mesh) {
+    geometries[mesh.name] = mesh.geometry;
+}
+
 const materials = {
     phong: new MeshPhongMaterial({
         color: 0xffffff,
@@ -37,8 +41,6 @@ const materials = {
         side: DoubleSide,
     }),
 };
-
-export const multiplyByGridSize = R.multiply(gridSize);
 
 export function positionOnGrid(
     mesh: Mesh | Object3D,
@@ -83,6 +85,7 @@ export function createWall(
     size: Vector3,
     position: Vector3,
     rotation: Vector3,
+    name?: string,
 ) {
     const sizeForGrid = size.multiplyScalar(gridSize);
     const wall = createMeshForGrid(
@@ -93,6 +96,9 @@ export function createWall(
         ),
         materials.phong,
     );
+    if (name) {
+        wall.name = name;
+    }
     // position the whole group
     positionOnGrid(wall, position, rotation);
 

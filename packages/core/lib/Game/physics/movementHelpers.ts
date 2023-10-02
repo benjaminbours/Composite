@@ -71,8 +71,6 @@ export function updateGameState(
         gameState[`${playerKey}_velocity_x`],
         gameState[`${playerKey}_velocity_y`],
     );
-    // // TODO: Test is this velocity stuff is very useful
-    // const velocityOld = velocity.clone();
     const position = new Vector2(
         gameState[`${playerKey}_x`],
         gameState[`${playerKey}_y`],
@@ -101,11 +99,7 @@ export function updateGameState(
     }
 
     // process collision
-    const state = collisionSystem(
-        // so far collision system is only for the main player
-        { position, velocity },
-        collidingElems,
-    );
+    const state = collisionSystem({ position, velocity }, collidingElems);
 
     // jump if possible
     if (inputs.jump && state === MovableComponentState.onFloor) {
@@ -143,6 +137,7 @@ export function applyInputsUntilTarget(
         shadow?: GamePlayerInputPayload;
     },
     inputs: GamePlayerInputPayload[],
+    collidingElements: CollidingElem[],
     gameState: GameState,
     targetTime: number,
     dev?: boolean,
@@ -167,7 +162,13 @@ export function applyInputsUntilTarget(
         if (inputsForTick.length) {
             inputsForTick.forEach((input) => {
                 const { player, delta, time, inputs } = input;
-                updateGameState(delta, player, inputs, [], gameState);
+                updateGameState(
+                    delta,
+                    player,
+                    inputs,
+                    collidingElements,
+                    gameState,
+                );
                 if (dev) {
                     console.log('applying input', time);
                 }
@@ -203,7 +204,7 @@ export function applyInputsUntilTarget(
                                 right: false,
                                 jump: false,
                             },
-                            [],
+                            collidingElements,
                             gameState,
                         );
                     } else {

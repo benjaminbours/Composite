@@ -1,3 +1,4 @@
+// vendors
 import {
     Vector3,
     BufferAttribute,
@@ -6,8 +7,10 @@ import {
     Points,
     DoubleSide,
 } from 'three';
+// our lib
+import { getRange } from '@benjaminbours/composite-core';
+// local
 import { Player } from './Player';
-import { getRange } from '../helpers/math';
 import VS from '../glsl/playerShadow_vs.glsl';
 import FS from '../glsl/playerShadow_fs.glsl';
 
