@@ -45,9 +45,9 @@ services:
 
   api:
     restart: always
-    deploy:
-      mode: replicated
-      replicas: 2
+    # deploy:
+    #   mode: replicated
+    #   replicas: 2
     build:
       context: .
       dockerfile: ./back/Dockerfile.back

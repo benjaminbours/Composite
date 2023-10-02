@@ -30,3 +30,4 @@ services:
     volumes:
       - ./front/.env:/app/front/.env
       - ./front:/app/front
+      - ./packages/core/build:/app/packages/core/build
