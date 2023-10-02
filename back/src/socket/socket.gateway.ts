@@ -228,7 +228,7 @@ export class SocketGateway {
     floor.name = 'floor';
     floor.rotation.x = -Math.PI / 2;
     const collidingScene = new Scene();
-    collidingScene.add(positionLevel, ...positionLevel.collidingElements);
+    collidingScene.add(floor, ...positionLevel.collidingElements);
     collidingScene.updateMatrixWorld();
 
     const processInputsQueue = async () => {
@@ -266,7 +266,6 @@ export class SocketGateway {
         collidingScene.children,
         gameState,
         Date.now(),
-        true,
       );
 
       // emit updated game state to room

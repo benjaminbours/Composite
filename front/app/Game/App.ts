@@ -262,7 +262,7 @@ export default class App {
         if (
             this.inputsManager.inputsActive.left ||
             this.inputsManager.inputsActive.right ||
-            this.inputsManager.inputsActive.left
+            this.inputsManager.inputsActive.jump
         ) {
             this.inputsHistory.push(payload);
             // emit input to server

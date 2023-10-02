@@ -1,11 +1,5 @@
-// import { SocketController } from '../../../SocketController';
 import { Object3D } from 'three';
 import { MovableComponent, MovableComponentState } from '../../types';
-// import { InteractiveArea } from '../elements/InteractiveArea';
-// import { EndLevel } from '../elements/EndLevel';
-// import { LightPlayer } from '../LightPlayer';
-// import { ShadowPlayer } from '../ShadowPlayer';
-// import { MovableComponent, MovableComponentState } from './movementHelpers';
 import { getNearestObjects } from './raycaster';
 
 const RANGE = 20;
