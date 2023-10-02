@@ -10,6 +10,7 @@ import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { Logger } from '@nestjs/common';
+import { CircleGeometry, Mesh, MeshPhongMaterial, Scene } from 'three';
 // our libs
 import {
   SocketEventType,
@@ -20,6 +21,7 @@ import {
   SocketEvent,
   GameState,
   applyInputsUntilTarget,
+  PositionLevel,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -199,6 +201,10 @@ export class SocketGateway {
   }
 
   registerGameLoop = (gameId: number) => {
+    // TODO: The following variable declared here and accessible in the process
+    // input queue closure are potential memory leaks.
+    // Let's try to declare them only once somewhere else, or to update
+    // the game state if it should be stored per game and between iteration
     const updateFrequency = 100;
     const lastPlayersInput: {
       light?: GamePlayerInputPayload;
@@ -207,6 +213,23 @@ export class SocketGateway {
       light: undefined,
       shadow: undefined,
     };
+
+    const positionLevel = new PositionLevel();
+    const floor = new Mesh(
+      new CircleGeometry(10000, 10),
+      new MeshPhongMaterial({
+        // color: 0x000000,
+        // side: DoubleSide,
+        // specular: 0x000000,
+        shininess: 0,
+        // transparent: true,
+      }),
+    );
+    floor.name = 'floor';
+    floor.rotation.x = -Math.PI / 2;
+    const collidingScene = new Scene();
+    collidingScene.add(positionLevel, ...positionLevel.collidingElements);
+    collidingScene.updateMatrixWorld();
 
     const processInputsQueue = async () => {
       // const startTime = performance.now();
@@ -240,8 +263,10 @@ export class SocketGateway {
       applyInputsUntilTarget(
         lastPlayersInput,
         inputsQueue,
+        collidingScene.children,
         gameState,
         Date.now(),
+        true,
       );
 
       // emit updated game state to room
