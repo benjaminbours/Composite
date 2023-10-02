@@ -1,4 +1,5 @@
-import type { BoxGeometry, Group, Mesh, Object3D, Vector2 } from 'three';
+import type { Group, Mesh, Object3D, Vector2 } from 'three';
+import { GameState } from './GameState';
 
 export enum Side {
     SHADOW,
@@ -65,7 +66,10 @@ export type MatchMakingEvent = [
     payload: MatchMakingPayload,
 ];
 
-export type GameStartEvent = [type: SocketEventType.GAME_START];
+export type GameStartEvent = [
+    type: SocketEventType.GAME_START,
+    payload: GameStateUpdatePayload,
+];
 
 export type GameStateUpdateEvent = [
     type: SocketEventType.GAME_STATE_UPDATE,
@@ -101,11 +105,7 @@ export type SocketInGameEvent =
     | GameDeactivateElementEvent;
 
 export class QueueInfo {
-    constructor(
-        public all = 0,
-        public light = 0,
-        public shadow = 0,
-    ) {}
+    constructor(public all = 0, public light = 0, public shadow = 0) {}
 }
 
 export class AllQueueInfo extends QueueInfo {
@@ -119,22 +119,6 @@ export class AllQueueInfo extends QueueInfo {
     }
 }
 
-export type Geometries = 'border' | 'platform' | 'wall' | 'mountain';
-
-export type GeometriesRegistry = {
-    [key: string]: unknown | BoxGeometry;
-    // [key in Geometries]?: unknown | BoxGeometry;
-};
-export interface AssetInfo {
-    type: 'jsonObj' | 'texture';
-    url: string;
-    name: Geometries;
-    /**
-     * Raw object loaded
-     */
-    raw?: unknown;
-}
-
 export enum MovableComponentState {
     onFloor,
     inside,
@@ -146,24 +130,6 @@ export enum MovableComponentState {
 export interface MovableComponent {
     position: Vector2;
     velocity: Vector2;
-    // state: MovableComponentState;
 }
 
 export type CollidingElem = Mesh | Group | Object3D;
-
-export class GameState {
-    constructor(
-        public level: Levels,
-        // public light_state: MovableComponentState,
-        public light_x: number,
-        public light_y: number,
-        public light_velocity_x: number,
-        public light_velocity_y: number,
-        // public shadow_state: MovableComponentState,
-        public shadow_x: number,
-        public shadow_y: number,
-        public shadow_velocity_x: number,
-        public shadow_velocity_y: number,
-        public lastValidatedInput: number,
-    ) {}
-}

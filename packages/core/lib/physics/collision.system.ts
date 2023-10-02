@@ -1,5 +1,5 @@
 import { Object3D } from 'three';
-import { MovableComponent, MovableComponentState } from '../../types';
+import { MovableComponent, MovableComponentState } from '../types';
 import { getNearestObjects } from './raycaster';
 
 const RANGE = 20;

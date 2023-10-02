@@ -6,7 +6,7 @@ import {
     Inputs,
     MovableComponentState,
     Side,
-} from '../../types';
+} from '../types';
 
 const MAX_VELOCITY_X = 10;
 const MAX_FALL_SPEED = 20;
