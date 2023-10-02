@@ -2,6 +2,7 @@
 import { Group, Object3D, Vector3 } from 'three';
 // local
 import {
+    ElementName,
     createArchGroup,
     createWall,
     createWallDoor,
@@ -19,14 +20,8 @@ export class PositionLevel extends Group {
         shadow: new Vector3(200, 20, 0),
     };
 
-    protected groundFloorDoorOpener: InteractiveArea;
-    protected roofDoorOpener: InteractiveArea;
-    protected endLevel: InteractiveArea;
-
     constructor() {
         super();
-
-        // TODO: The server collision system does not see the same as the client. Investigate why,
         // use name on mesh to understand better the data
         const wallBlockingLeftPath = createWall(
             new Vector3(4, 2, 0),
@@ -71,17 +66,17 @@ export class PositionLevel extends Group {
             new Vector3(0, 0, 0),
             'vertical',
         );
-        wallDoorGroundFloor.name = 'wallDoorGroundFloor';
+        wallDoorGroundFloor.name = ElementName.WALL_DOOR('GROUND');
         this.add(wallDoorGroundFloor);
         this.collidingElements.push(wallDoorGroundFloor);
 
-        this.groundFloorDoorOpener = new InteractiveArea(
-            'groundDoor_doorOpener',
+        const groundFloorDoorOpener = new InteractiveArea(
+            ElementName.AREA_DOOR_OPENER('GROUND'),
         );
-        this.collidingElements.push(this.groundFloorDoorOpener);
-        this.interactiveElements.push(this.groundFloorDoorOpener);
-        positionOnGrid(this.groundFloorDoorOpener, new Vector3(10, 1.02, 0));
-        this.add(this.groundFloorDoorOpener);
+        this.collidingElements.push(groundFloorDoorOpener);
+        this.interactiveElements.push(groundFloorDoorOpener);
+        positionOnGrid(groundFloorDoorOpener, new Vector3(10, 1.02, 0));
+        this.add(groundFloorDoorOpener);
 
         // roof door
         const wallDoorRoof = createWallDoor(
@@ -90,15 +85,17 @@ export class PositionLevel extends Group {
             new Vector3(0, 3, 0),
             'horizontal',
         );
-        wallDoorRoof.name = 'wallDoorRoof';
+        wallDoorRoof.name = ElementName.WALL_DOOR('ROOF');
         this.add(wallDoorRoof);
         this.collidingElements.push(wallDoorRoof);
 
-        this.roofDoorOpener = new InteractiveArea('roofDoor_doorOpener');
-        this.collidingElements.push(this.roofDoorOpener);
-        this.interactiveElements.push(this.roofDoorOpener);
-        positionOnGrid(this.roofDoorOpener, new Vector3(10, 3, 0));
-        this.add(this.roofDoorOpener);
+        const roofDoorOpener = new InteractiveArea(
+            ElementName.AREA_DOOR_OPENER('ROOF'),
+        );
+        this.collidingElements.push(roofDoorOpener);
+        this.interactiveElements.push(roofDoorOpener);
+        positionOnGrid(roofDoorOpener, new Vector3(10, 3, 0));
+        this.add(roofDoorOpener);
 
         const insideArches = [
             createArchGroup(1, new Vector3(10, 0, 0)),
@@ -111,10 +108,10 @@ export class PositionLevel extends Group {
             this.collidingElements.push(arch);
         });
 
-        this.endLevel = new InteractiveArea('endLevel');
-        this.add(this.endLevel);
-        this.collidingElements.push(this.endLevel);
-        this.interactiveElements.push(this.endLevel);
-        positionOnGrid(this.endLevel, new Vector3(11, 0, 0));
+        const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
+        this.add(endLevel);
+        this.collidingElements.push(endLevel);
+        this.interactiveElements.push(endLevel);
+        positionOnGrid(endLevel, new Vector3(11, 0, 0));
     }
 }

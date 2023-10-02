@@ -5,20 +5,19 @@ import { Levels } from '@benjaminbours/composite-core';
 // local
 import { LightPlayer, ShadowPlayer, Player } from '../Player';
 import { PositionLevelWithGraphic } from './PositionLevelWithGraphic';
-import { PositionLevel } from '@benjaminbours/composite-core';
 
 export default class LevelController {
     public levels: {
-        [Levels.CRACK_THE_DOOR]: PositionLevel;
-        [Levels.LEARN_TO_FLY]?: PositionLevel;
-        [Levels.THE_HIGH_SPHERES]?: PositionLevel;
+        [Levels.CRACK_THE_DOOR]: PositionLevelWithGraphic;
+        [Levels.LEARN_TO_FLY]?: PositionLevelWithGraphic;
+        [Levels.THE_HIGH_SPHERES]?: PositionLevelWithGraphic;
     };
 
     constructor(public currentLevel: Levels) {
         // TODO: Could use dynamic import to load level code only when needed
         this.levels = {
             // [Levels.]: new TestLevel(),
-            [Levels.CRACK_THE_DOOR]: new PositionLevel(),
+            [Levels.CRACK_THE_DOOR]: new PositionLevelWithGraphic(),
         };
     }
 

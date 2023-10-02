@@ -1,11 +1,8 @@
 // vendors
 import {
-    BoxGeometry,
     BufferAttribute,
     BufferGeometry,
-    DoubleSide,
-    Mesh,
-    MeshPhongMaterial,
+    Object3D,
     Points,
     ShaderMaterial,
     Vector3,
@@ -13,8 +10,6 @@ import {
 import { gsap } from 'gsap';
 // our libs
 import {
-    InteractiveArea,
-    gridSize,
     type InteractiveComponent,
     getRange,
 } from '@benjaminbours/composite-core';
@@ -33,7 +28,7 @@ const FAST_ORGANIC_RATIO = 1;
 // for each player here
 // TODO: Naming can be improved as well, organic ratio is not correct in this context
 // its more an interpolation ratio
-export class EndLevel extends InteractiveArea implements InteractiveComponent {
+export class EndLevel extends Object3D implements InteractiveComponent {
     public shouldActivate = false;
     public shouldActivateLight = false;
     public shouldActivateShadow = false;
@@ -46,8 +41,8 @@ export class EndLevel extends InteractiveArea implements InteractiveComponent {
 
     protected particles: Points;
 
-    constructor(public name: string) {
-        super(name);
+    constructor() {
+        super();
         const particlesNumber = 1000;
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
         const particlesGeo = new BufferGeometry();
@@ -131,18 +126,6 @@ export class EndLevel extends InteractiveArea implements InteractiveComponent {
 
         this.particles = new Points(particlesGeo, particlesMat);
         this.add(this.particles);
-
-        const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
-        const whiteBlockMat = new MeshPhongMaterial({
-            color: 0xffffff,
-            side: DoubleSide,
-            specular: 0x000000,
-            shininess: 50,
-            transparent: true,
-        });
-
-        const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockMat);
-        this.add(whiteBlock);
 
         this.particles.frustumCulled = false;
     }

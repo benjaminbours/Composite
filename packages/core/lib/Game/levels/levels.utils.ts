@@ -14,6 +14,14 @@ const gridSizeMedium = gridSize / 2;
 const gridSizeSmall = gridSizeMedium / 2;
 const wallDepth = 34;
 
+export const ElementName = {
+    END_LEVEL: 'END_LEVEL',
+    AREA_END_LEVEL: 'AREA_END_LEVEL',
+    AREA_DOOR_OPENER: (doorName: string) => `${doorName}_AREA_DOOR_OPENER`,
+    DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
+    WALL_DOOR: (doorName: string) => `${doorName}_WALL_DOOR`,
+};
+
 // TODO: Its not clear the fact is instantiated here then populate with more
 // geometry later when loading assets. Lets make the loading function return a proper
 // loading registry

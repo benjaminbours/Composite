@@ -11,7 +11,6 @@ import {
 import { gsap } from 'gsap';
 // our libs
 import {
-    InteractiveArea,
     getRange,
     type InteractiveComponent,
 } from '@benjaminbours/composite-core';
@@ -31,10 +30,7 @@ const FAST_SPEED_MODIFIER = 2;
 const DEFAULT_ORGANIC_RATIO = 1;
 const FAST_ORGANIC_RATIO = 0.2;
 
-export class DoorOpener
-    extends InteractiveArea
-    implements InteractiveComponent
-{
+export class DoorOpener extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
     protected speedModifier: number = DEFAULT_SPEED_MODIFIER;
@@ -47,7 +43,7 @@ export class DoorOpener
         public doorInfo: DoorInfo,
         color: Color,
     ) {
-        super(name);
+        super();
         const particlesNumber = 700;
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
         const particlesGeo = new BufferGeometry();
