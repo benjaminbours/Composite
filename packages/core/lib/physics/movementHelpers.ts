@@ -2,11 +2,11 @@ import { Object3D, Vector2 } from 'three';
 import { collisionSystem } from './collision.system';
 import {
     GamePlayerInputPayload,
-    GameState,
     Inputs,
     MovableComponentState,
     Side,
 } from '../types';
+import { GameState } from '../GameState';
 
 const MAX_VELOCITY_X = 10;
 const MAX_FALL_SPEED = 20;

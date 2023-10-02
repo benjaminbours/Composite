@@ -23,7 +23,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import {
     GamePlayerInputPayload,
     GameState,
-    Levels,
+    FLOOR,
     Side,
     SocketEventType,
     applyInputsUntilTarget,
@@ -61,8 +61,6 @@ export default class App {
     public clock = new Clock();
     private delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 0.5);
-
-    private floor!: Mesh;
 
     private levelController: LevelController;
 
@@ -115,23 +113,7 @@ export default class App {
     }
 
     setupScene = (playersConfig: Side[]) => {
-        // floor
-        this.floor = new Mesh(
-            new CircleGeometry(10000, 10),
-            new MeshPhongMaterial({
-                // color: 0x000000,
-                // side: DoubleSide,
-                // specular: 0x000000,
-                shininess: 0,
-                // transparent: true,
-            }),
-        );
-        this.floor.name = 'floor';
-        this.floor.castShadow = false;
-        this.floor.receiveShadow = true;
-        this.floor.rotation.x = -Math.PI / 2;
-
-        this.scene.add(this.floor);
+        this.scene.add(FLOOR);
 
         // player
         playersConfig.forEach((side, index) => {
@@ -290,7 +272,7 @@ export default class App {
             },
             this.inputsHistory,
             [
-                this.floor,
+                FLOOR,
                 ...this.levelController.levels[
                     this.levelController.currentLevel
                 ]!.collidingElements,
@@ -385,7 +367,7 @@ export default class App {
             this.playersConfig[0],
             this.inputsManager.inputsActive,
             [
-                this.floor,
+                FLOOR,
                 ...this.levelController.levels[
                     this.levelController.currentLevel
                 ]!.collidingElements,

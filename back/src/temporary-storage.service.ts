@@ -257,11 +257,15 @@ export class TemporaryStorageService {
       );
   }
 
-  async updateGameState(gameId: number, state: GameState) {
-    return this.redisClient.HSET(
-      REDIS_KEYS.GAME(gameId),
-      Object.entries(state).flat(),
+  async updateGameStateAndInputsQueue(gameId: number, state: GameState) {
+    const transaction = this.redisClient.MULTI();
+    transaction.HSET(REDIS_KEYS.GAME(gameId), Object.entries(state).flat());
+    transaction.ZREMRANGEBYSCORE(
+      REDIS_KEYS.GAME_INPUTS_QUEUE(gameId),
+      -Infinity,
+      state.lastValidatedInput,
     );
+    return transaction.exec();
   }
 
   // game inputs queue
@@ -272,14 +276,6 @@ export class TemporaryStorageService {
       // input pattern is left,right,jump
       value: `${data.player}:${data.inputs.left},${data.inputs.right},${data.inputs.jump}:${data.delta}:${data.time}`,
     });
-  }
-
-  async removeFromGameInputsQueue(gameId: number, time: number) {
-    return this.redisClient.ZREMRANGEBYSCORE(
-      REDIS_KEYS.GAME_INPUTS_QUEUE(gameId),
-      -Infinity,
-      time,
-    );
   }
 
   async getGameInputsQueue(gameId: number) {

@@ -10,7 +10,7 @@ import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { Logger } from '@nestjs/common';
-import { CircleGeometry, Mesh, MeshPhongMaterial, Scene } from 'three';
+import { Scene } from 'three';
 // our libs
 import {
   SocketEventType,
@@ -22,6 +22,7 @@ import {
   GameState,
   applyInputsUntilTarget,
   PositionLevel,
+  FLOOR,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -70,7 +71,7 @@ export class SocketGateway {
   }
 
   @SubscribeMessage(SocketEventType.MATCHMAKING_INFO)
-  async handleMatchMakingPayload(
+  async handleMatchMakingInfo(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: MatchMakingPayload,
   ) {
@@ -172,16 +173,22 @@ export class SocketGateway {
       },
     });
 
+    const level = (() => {
+      switch (playerFoundInQueue.player.selectedLevel) {
+        case Levels.CRACK_THE_DOOR:
+          return new PositionLevel();
+      }
+    })();
+
     // create initial game data
-    // TODO: Load start position depending of level
     const initialGameState = new GameState(
       playerFoundInQueue.player.selectedLevel,
-      10,
-      20,
+      level.startPosition.light.x,
+      level.startPosition.light.y,
       0,
       0,
-      200,
-      20,
+      level.startPosition.shadow.x,
+      level.startPosition.shadow.y,
       0,
       0,
       Date.now(),
@@ -196,11 +203,14 @@ export class SocketGateway {
     const roomName = String(game.id);
     this.addSocketToRoom(playerFoundInQueue.socketId, roomName);
     this.addSocketToRoom(playerArriving.socketId, roomName);
-    this.emit(roomName, [SocketEventType.GAME_START]);
-    this.registerGameLoop(game.id);
+    this.emit(roomName, [
+      SocketEventType.GAME_START,
+      { gameState: initialGameState },
+    ]);
+    this.registerGameLoop(game.id, level);
   }
 
-  registerGameLoop = (gameId: number) => {
+  registerGameLoop = (gameId: number, level: PositionLevel) => {
     // TODO: The following variable declared here and accessible in the process
     // input queue closure are potential memory leaks.
     // Let's try to declare them only once somewhere else, or to update
@@ -214,25 +224,12 @@ export class SocketGateway {
       shadow: undefined,
     };
 
-    const positionLevel = new PositionLevel();
-    const floor = new Mesh(
-      new CircleGeometry(10000, 10),
-      new MeshPhongMaterial({
-        // color: 0x000000,
-        // side: DoubleSide,
-        // specular: 0x000000,
-        shininess: 0,
-        // transparent: true,
-      }),
-    );
-    floor.name = 'floor';
-    floor.rotation.x = -Math.PI / 2;
     const collidingScene = new Scene();
-    collidingScene.add(floor, ...positionLevel.collidingElements);
+    collidingScene.add(FLOOR, ...level.collidingElements);
     collidingScene.updateMatrixWorld();
 
     const processInputsQueue = async () => {
-      // const startTime = performance.now();
+      const startTime = performance.now();
       const data = await Promise.all([
         this.temporaryStorage.getGameInputsQueue(gameId).then((inputs) =>
           inputs.map((input) => {
@@ -257,9 +254,6 @@ export class SocketGateway {
       ]);
 
       const [inputsQueue, gameState] = data;
-      // Logger.log('INPUTS QUEUE', inputsQueue);
-      // Logger.log('INPUTS QUEUE length', inputsQueue.length);
-
       applyInputsUntilTarget(
         lastPlayersInput,
         inputsQueue,
@@ -274,19 +268,12 @@ export class SocketGateway {
         { gameState },
       ]);
 
-      // TODO: Use transaction to update game state and clean inputs queue
-      // save updated game state
-      this.temporaryStorage.updateGameState(gameId, gameState);
+      // update state and inputs queue
+      this.temporaryStorage.updateGameStateAndInputsQueue(gameId, gameState);
 
-      // clean inputs queue
-      await this.temporaryStorage.removeFromGameInputsQueue(
-        gameId,
-        gameState.lastValidatedInput,
-      );
-      // Logger.log('delete items from queue', deleted);
-      // const endTime = performance.now();
-      // const elapsedTime = endTime - startTime;
-      // Logger.log('execution time in ms', elapsedTime);
+      const endTime = performance.now();
+      const elapsedTime = endTime - startTime;
+      Logger.log('execution time in ms', elapsedTime);
     };
 
     const gameUpdateInterval = setInterval(processInputsQueue, updateFrequency);
