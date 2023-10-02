@@ -23,6 +23,7 @@ import {
   applyInputsUntilTarget,
   PositionLevel,
   FLOOR,
+  RedisGameState,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -182,23 +183,38 @@ export class SocketGateway {
 
     // create initial game data
     const initialGameState = new GameState(
-      playerFoundInQueue.player.selectedLevel,
-      level.startPosition.light.x,
-      level.startPosition.light.y,
-      0,
-      0,
-      level.startPosition.shadow.x,
-      level.startPosition.shadow.y,
-      0,
-      0,
+      [
+        {
+          position: {
+            x: level.startPosition.shadow.x,
+            y: level.startPosition.shadow.y,
+          },
+          velocity: {
+            x: 0,
+            y: 0,
+          },
+        },
+        {
+          position: {
+            x: level.startPosition.light.x,
+            y: level.startPosition.light.y,
+          },
+          velocity: {
+            x: 0,
+            y: 0,
+          },
+        },
+      ],
+      level.state,
       Date.now(),
     );
+
     // store game state and update queue in temporary storage
     await this.temporaryStorage.createGame(
       playerFoundInQueue,
       playerArriving,
       game.id,
-      initialGameState,
+      RedisGameState.parseGameState(initialGameState),
     );
     const roomName = String(game.id);
     this.addSocketToRoom(playerFoundInQueue.socketId, roomName);
@@ -230,7 +246,7 @@ export class SocketGateway {
 
     const processInputsQueue = async () => {
       const startTime = performance.now();
-      const data = await Promise.all([
+      const [inputsQueue, gameState] = await Promise.all([
         this.temporaryStorage.getGameInputsQueue(gameId).then((inputs) =>
           inputs.map((input) => {
             const parts = input.split(':');
@@ -250,10 +266,11 @@ export class SocketGateway {
             return parsedInput;
           }),
         ),
-        this.temporaryStorage.getGameState(gameId),
+        this.temporaryStorage
+          .getGameState(gameId)
+          .then((redisState) => GameState.parseRedisGameState(redisState)),
       ]);
 
-      const [inputsQueue, gameState] = data;
       applyInputsUntilTarget(
         lastPlayersInput,
         inputsQueue,
@@ -269,7 +286,10 @@ export class SocketGateway {
       ]);
 
       // update state and inputs queue
-      this.temporaryStorage.updateGameStateAndInputsQueue(gameId, gameState);
+      this.temporaryStorage.updateGameStateAndInputsQueue(
+        gameId,
+        RedisGameState.parseGameState(gameState),
+      );
 
       const endTime = performance.now();
       const elapsedTime = endTime - startTime;

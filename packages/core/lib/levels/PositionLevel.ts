@@ -9,6 +9,7 @@ import {
     positionOnGrid,
 } from './levels.utils';
 import { InteractiveArea } from '../elements/InteractiveArea';
+import { Levels, PositionLevelState } from '../types';
 
 export class PositionLevel extends Group {
     public collidingElements: Object3D[] = [];
@@ -18,6 +19,13 @@ export class PositionLevel extends Group {
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
         shadow: new Vector3(200, 20, 0),
+    };
+
+    public state: PositionLevelState = {
+        id: Levels.CRACK_THE_DOOR,
+        ground_door: 0,
+        roof_door: 0,
+        end_level: 0,
     };
 
     constructor() {

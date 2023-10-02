@@ -8,10 +8,10 @@ import { RedisStore } from 'cache-manager-redis-store';
 import {
   AllQueueInfo,
   GamePlayerInputPayload,
-  GameState,
   Levels,
   MatchMakingPayload,
   QueueInfo,
+  RedisGameState,
   Side,
 } from '@benjaminbours/composite-core';
 // local
@@ -211,8 +211,9 @@ export class TemporaryStorageService {
     playerFoundInQueue: PlayerFoundInQueue,
     playerArriving: { socketId: string; player: Player },
     gameId: number,
-    gameState: GameState,
+    gameState: RedisGameState,
   ) {
+    console.log(gameState);
     const transaction = this.redisClient.MULTI();
     this.removeFromQueue(
       playerFoundInQueue.socketId,
@@ -233,33 +234,29 @@ export class TemporaryStorageService {
       Object.entries(playerArriving.player).flat(),
     );
     // store initial game data
-    transaction.HSET(REDIS_KEYS.GAME(gameId), Object.entries(gameState).flat());
+    transaction.HSET(
+      REDIS_KEYS.GAME(gameId),
+      Object.entries(gameState)
+        .filter(([, value]) => value !== undefined)
+        .flat(),
+    );
     return transaction.exec();
   }
 
-  async getGameState(gameId: number) {
+  async getGameState(gameId: number): Promise<RedisGameState> {
     return this.redisClient
       .HGETALL(REDIS_KEYS.GAME(gameId))
-      .then(
-        (res) =>
-          new GameState(
-            Number(res.levels),
-            Number(res.light_x),
-            Number(res.light_y),
-            Number(res.light_velocity_x),
-            Number(res.light_velocity_y),
-            Number(res.shadow_x),
-            Number(res.shadow_y),
-            Number(res.shadow_velocity_x),
-            Number(res.shadow_velocity_y),
-            Number(res.lastValidatedInput),
-          ),
-      );
+      .then((state) => state as unknown as RedisGameState);
   }
 
-  async updateGameStateAndInputsQueue(gameId: number, state: GameState) {
+  async updateGameStateAndInputsQueue(gameId: number, state: RedisGameState) {
     const transaction = this.redisClient.MULTI();
-    transaction.HSET(REDIS_KEYS.GAME(gameId), Object.entries(state).flat());
+    transaction.HSET(
+      REDIS_KEYS.GAME(gameId),
+      Object.entries(state)
+        .filter(([, value]) => value !== undefined)
+        .flat(),
+    );
     transaction.ZREMRANGEBYSCORE(
       REDIS_KEYS.GAME_INPUTS_QUEUE(gameId),
       -Infinity,

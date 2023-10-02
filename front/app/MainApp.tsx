@@ -7,6 +7,7 @@ import {
     GameState,
     Levels,
     MatchMakingPayload,
+    PositionLevel,
     Side,
     SocketEventType,
 } from '@benjaminbours/composite-core';
@@ -72,7 +73,34 @@ function MainApp() {
         console.log('establish connection');
         establishConnection();
         // establishConnection().then(() => {
-        //     handleGameStart();
+        //     const level = new PositionLevel();
+        //     const initialGameState = new GameState(
+        //         [
+        //             {
+        //                 position: {
+        //                     x: level.startPosition.shadow.x,
+        //                     y: level.startPosition.shadow.y,
+        //                 },
+        //                 velocity: {
+        //                     x: 0,
+        //                     y: 0,
+        //                 },
+        //             },
+        //             {
+        //                 position: {
+        //                     x: level.startPosition.light.x,
+        //                     y: level.startPosition.light.y,
+        //                 },
+        //                 velocity: {
+        //                     x: 0,
+        //                     y: 0,
+        //                 },
+        //             },
+        //         ],
+        //         level.state,
+        //         Date.now(),
+        //     );
+        //     handleGameStart(initialGameState);
         // });
     }, [state, establishConnection]);
 
@@ -80,14 +108,14 @@ function MainApp() {
     //     <>
     //         {/* {!state.isGameRunning && (
     //             <Menu mainState={state} setMainState={setState} />
+    //         )} */}
+    //         {state.gameState && (
+    //             <Game
+    //                 initialGameState={state.gameState}
+    //                 side={state.side!}
+    //                 socketController={socketController.current}
+    //             />
     //         )}
-    //         {state.isGameRunning && ( */}
-    //         <Game
-    //             selectedLevel={state.selectedLevel!}
-    //             side={state.side!}
-    //             socketController={socketController.current}
-    //         />
-    //         {/* )} */}
     //     </>
     // );
 

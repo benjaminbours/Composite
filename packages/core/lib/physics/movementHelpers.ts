@@ -65,14 +65,13 @@ export function updateGameState(
     gameState: GameState,
 ) {
     const deltaInverse = 1 / delta / (60 * 60);
-    const playerKey = side === Side.LIGHT ? 'light' : 'shadow';
     const velocity = new Vector2(
-        gameState[`${playerKey}_velocity_x`],
-        gameState[`${playerKey}_velocity_y`],
+        gameState.players[side].velocity.x,
+        gameState.players[side].velocity.y,
     );
     const position = new Vector2(
-        gameState[`${playerKey}_x`],
-        gameState[`${playerKey}_y`],
+        gameState.players[side].position.x,
+        gameState.players[side].position.y,
     );
 
     const hasReachedMaxLeftSpeed = velocity.x < -MAX_VELOCITY_X;
@@ -120,14 +119,11 @@ export function updateGameState(
     position.x += velocity.x * delta * 60;
     position.y += velocity.y * delta * 60;
 
-    // console.log('pos', position);
-    // console.log('vel', velocity);
-
     // update game state
-    gameState[`${playerKey}_velocity_x`] = velocity.x;
-    gameState[`${playerKey}_velocity_y`] = velocity.y;
-    gameState[`${playerKey}_x`] = position.x;
-    gameState[`${playerKey}_y`] = position.y;
+    gameState.players[side].velocity.x = velocity.x;
+    gameState.players[side].velocity.y = velocity.y;
+    gameState.players[side].position.x = position.x;
+    gameState.players[side].position.y = position.y;
 }
 
 export function applyInputsUntilTarget(
@@ -221,7 +217,7 @@ export function applyInputsUntilTarget(
         if (dev) {
             console.log(counter);
             console.log(i);
-            console.log(gameState.light_x, gameState.light_velocity_x);
+            // console.log(gameState.light_x, gameState.light_velocity_x);
         }
         gameState.lastValidatedInput = i;
     }

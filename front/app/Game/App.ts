@@ -5,8 +5,6 @@ import {
     Scene,
     WebGLRenderer,
     HemisphereLight,
-    MeshPhongMaterial,
-    CircleGeometry,
     WebGLRenderTarget,
     Object3D,
     Clock,
@@ -76,7 +74,7 @@ export default class App {
 
     private lastInput: GamePlayerInputPayload | undefined;
 
-    private serverGameStateHistory: GameState[] = [];
+    private serverGameState: GameState;
     private shouldInterpolate = false;
     private interpolationRatio = 0;
     private localStateAtInterpolationStart: GameState;
@@ -89,14 +87,15 @@ export default class App {
         private socketController: SocketController,
     ) {
         this.currentState = initialGameState;
-        this.localStateAtInterpolationStart = { ...initialGameState };
-        this.targetStateAtInterpolationStart = { ...initialGameState };
+        this.serverGameState = initialGameState;
+        this.localStateAtInterpolationStart = initialGameState;
+        this.targetStateAtInterpolationStart = initialGameState;
         // inputs
 
         this.inputsManager = new InputsManager();
 
         // levels
-        this.levelController = new LevelController(initialGameState.level);
+        this.levelController = new LevelController(initialGameState.level.id);
         // render
         this.renderer = new WebGLRenderer({
             canvas: canvasDom,
@@ -174,7 +173,7 @@ export default class App {
             this.inputsHistory = this.inputsHistory.filter(
                 ({ time }) => time > gameState.lastValidatedInput,
             );
-            this.serverGameStateHistory.push(gameState);
+            this.serverGameState = gameState;
         };
     };
 
@@ -259,11 +258,8 @@ export default class App {
     };
 
     private interpolateWithServerUpdate = () => {
-        const serverGameState =
-            this.serverGameStateHistory[this.serverGameStateHistory.length - 1];
-
         this.localStateAtInterpolationStart = { ...this.currentState };
-        const nextStateAtInterpolationTime = { ...serverGameState };
+        const nextStateAtInterpolationTime = { ...this.serverGameState };
         const playerKey =
             this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
         applyInputsUntilTarget(
@@ -280,25 +276,12 @@ export default class App {
             nextStateAtInterpolationTime,
             Date.now(),
         );
-        // console.log(
-        //     `next state computed ${playerKey}`,
-        //     nextStateAtInterpolationTime[`${playerKey}_x`],
-        //     nextStateAtInterpolationTime[`${playerKey}_velocity_x`],
-        // );
-        // console.log(
-        //     'current state',
-        //     this.currentState[`${playerKey}_x`],
-        //     this.currentState[`${playerKey}_velocity_x`],
-        // );
-        this.targetStateAtInterpolationStart = {
-            ...nextStateAtInterpolationTime,
-        };
+        this.targetStateAtInterpolationStart = nextStateAtInterpolationTime;
 
         // console.log('current state', this.currentState);
         // console.log('server corrected state', nextStateAtInterpolationTime);
 
         this.shouldUpdateInterpolation = true;
-        // this.currentState = nextStateAtInterpolationTime;
     };
 
     private shouldUpdateInterpolation = false;
@@ -312,24 +295,27 @@ export default class App {
         // console.log('interpolate');
         // console.log(this.interpolationRatio);
 
-        const properties = ['position', 'velocity'];
+        const properties = ['position' as 'position', 'velocity' as 'velocity'];
         for (let i = 0; i < this.playersConfig.length; i++) {
-            const player = this.playersConfig[i];
-            const playerKey = player === Side.LIGHT ? 'light' : 'shadow';
+            const side = this.playersConfig[i];
 
             for (let j = 0; j < properties.length; j++) {
                 const property = properties[j];
-                const key =
-                    property === 'position'
-                        ? `${playerKey}`
-                        : `${playerKey}_velocity`;
                 const vector = new Vector2(
-                    (this.localStateAtInterpolationStart as any)[`${key}_x`],
-                    (this.localStateAtInterpolationStart as any)[`${key}_y`],
+                    this.localStateAtInterpolationStart.players[side][
+                        property
+                    ].x,
+                    this.localStateAtInterpolationStart.players[side][
+                        property
+                    ].y,
                 );
                 const vectorTarget = new Vector2(
-                    (this.targetStateAtInterpolationStart as any)[`${key}_x`],
-                    (this.targetStateAtInterpolationStart as any)[`${key}_y`],
+                    this.targetStateAtInterpolationStart.players[side][
+                        property
+                    ].x,
+                    this.targetStateAtInterpolationStart.players[side][
+                        property
+                    ].y,
                 );
                 const targetNormalize = vectorTarget
                     .clone()
@@ -346,8 +332,8 @@ export default class App {
                 //     console.log('displacement', displacement);
                 // }
                 // vector.add(targetNormalize.multiplyScalar(distance));
-                (this.currentState as any)[`${key}_x`] += displacement.x;
-                (this.currentState as any)[`${key}_y`] += displacement.y;
+                this.currentState.players[side][property].x += displacement.x;
+                this.currentState.players[side][property].y += displacement.y;
             }
         }
     };
@@ -375,23 +361,14 @@ export default class App {
             this.currentState,
         );
 
-        const playerKey =
-            this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
-        const otherPlayerKey =
-            this.playersConfig[0] === Side.LIGHT ? 'shadow' : 'light';
-
-        this.players[0].position.set(
-            this.currentState[`${playerKey}_x`],
-            this.currentState[`${playerKey}_y`],
-            0,
-        );
-
-        this.players[1].position.set(
-            this.currentState[`${otherPlayerKey}_x`],
-            this.currentState[`${otherPlayerKey}_y`],
-            0,
-        );
-
+        for (let i = 0; i < this.playersConfig.length; i++) {
+            const side = this.playersConfig[i];
+            this.players[i].position.set(
+                this.currentState.players[side].position.x,
+                this.currentState.players[side].position.y,
+                0,
+            );
+        }
         // update everything which need an update in the scene
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite

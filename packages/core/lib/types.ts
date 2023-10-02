@@ -12,6 +12,13 @@ export enum Levels {
     THE_HIGH_SPHERES,
 }
 
+export interface PositionLevelState {
+    id: Levels.CRACK_THE_DOOR;
+    ground_door: number;
+    roof_door: number;
+    end_level: number;
+}
+
 export enum SocketEventType {
     // send automatically by socket io after successful connection with server
     CONNECT = 'connect',
