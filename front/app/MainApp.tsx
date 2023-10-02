@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 // our libs
 import {
+    GameState,
     Levels,
     MatchMakingPayload,
     Side,
@@ -26,7 +27,7 @@ const Game = dynamic(() => import('./Game'), {
 export interface MainState {
     side: Side | undefined;
     selectedLevel: Levels | undefined;
-    isGameRunning: boolean;
+    gameState: GameState | undefined;
 }
 
 function MainApp() {
@@ -36,11 +37,11 @@ function MainApp() {
         // selectedLevel: Levels.CRACK_THE_DOOR,
         side: undefined,
         selectedLevel: undefined,
-        isGameRunning: false,
+        gameState: undefined,
     });
 
-    const handleGameStart = useCallback(() => {
-        setState((prev) => ({ ...prev, isGameRunning: true }));
+    const handleGameStart = useCallback((initialGameState: GameState) => {
+        setState((prev) => ({ ...prev, gameState: initialGameState }));
     }, []);
 
     const establishConnection = useCallback(() => {
@@ -92,13 +93,13 @@ function MainApp() {
 
     return (
         <>
-            {!state.isGameRunning && (
+            {!state.gameState && (
                 <Menu mainState={state} setMainState={setState} />
             )}
-            {state.isGameRunning && (
+            {state.gameState && (
                 <Game
-                    selectedLevel={state.selectedLevel!}
                     side={state.side!}
+                    initialGameState={state.gameState}
                     socketController={socketController.current}
                 />
             )}

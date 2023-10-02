@@ -86,32 +86,19 @@ export default class App {
 
     constructor(
         canvasDom: HTMLCanvasElement,
-        currentLevel: Levels,
+        initialGameState: GameState,
         private playersConfig: Side[],
         private socketController: SocketController,
     ) {
-        // TODO: Make the server send the initial state
-        const initialState = new GameState(
-            currentLevel,
-            10,
-            20,
-            0,
-            0,
-            200,
-            20,
-            0,
-            0,
-            Date.now(),
-        );
-        this.currentState = initialState;
-        this.localStateAtInterpolationStart = { ...initialState };
-        this.targetStateAtInterpolationStart = { ...initialState };
+        this.currentState = initialGameState;
+        this.localStateAtInterpolationStart = { ...initialGameState };
+        this.targetStateAtInterpolationStart = { ...initialGameState };
         // inputs
 
         this.inputsManager = new InputsManager();
 
         // levels
-        this.levelController = new LevelController(currentLevel);
+        this.levelController = new LevelController(initialGameState.level);
         // render
         this.renderer = new WebGLRenderer({
             canvas: canvasDom,

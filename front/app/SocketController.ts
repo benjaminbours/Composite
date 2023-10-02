@@ -10,12 +10,9 @@ import {
 
 export class SocketController {
     private socket: Socket;
-    // public secondPlayer?: Player;
-    // public collidingElements?: CollidingElem[];
-    // public inputsSended: GamePlayerInputPayload[] = [];
     public onGameStateUpdate?: (gameState: GameState) => void;
 
-    constructor(onGameStart: () => void) {
+    constructor(onGameStart: (initialGameState: GameState) => void) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
         });
@@ -24,10 +21,13 @@ export class SocketController {
             console.log('connected', this.socket.id);
         });
 
-        this.socket.on(SocketEventType.GAME_START, () => {
-            console.log('received game start event');
-            onGameStart();
-        });
+        this.socket.on(
+            SocketEventType.GAME_START,
+            (data: GameStateUpdatePayload) => {
+                console.log('received game start event');
+                onGameStart(data.gameState);
+            },
+        );
 
         this.socket.on(
             SocketEventType.GAME_STATE_UPDATE,

@@ -3,19 +3,19 @@ import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
 import React, { useEffect, useRef } from 'react';
 // our libs
-import { Levels, Side } from '@benjaminbours/composite-core';
+import { GameState, Side } from '@benjaminbours/composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 
 interface Props {
     side: Side;
-    selectedLevel: Levels;
+    initialGameState: GameState;
     // can be undefined for dev purpose
     socketController?: SocketController;
 }
 
-function Game({ side, selectedLevel, socketController }: Props) {
+function Game({ side, socketController, initialGameState }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
     const appRef = useRef<App>();
@@ -34,12 +34,10 @@ function Game({ side, selectedLevel, socketController }: Props) {
             }
             appRef.current = new App(
                 canvasRef.current,
-                selectedLevel,
+                initialGameState,
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 socketController,
             );
-            // appRef.current = new App(canvasRef.current, ['black', 'white']);
-            // appRef.current = new App(canvasRef.current, ['white']);
             const stats = (() => {
                 if (process.env.NEXT_PUBLIC_STAGE === 'development') {
                     const stats = new STATS.default();
