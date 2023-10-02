@@ -1,4 +1,4 @@
-import { Object3D, Vector2 } from 'three';
+import { Object3D, Vec2 } from 'three';
 import { collisionSystem } from './collision.system';
 import {
     GamePlayerInputPayload,
@@ -52,7 +52,7 @@ export interface InteractiveComponent {
     isActive: boolean;
 }
 
-const updateVelocityX = (delta: number, target: number, velocity: Vector2) => {
+const updateVelocityX = (delta: number, target: number, velocity: Vec2) => {
     const speed = SPEED * delta * 60;
     return (velocity.x += (target - velocity.x) / speed);
 };
@@ -65,14 +65,7 @@ export function updateGameState(
     gameState: GameState,
 ) {
     const deltaInverse = 1 / delta / (60 * 60);
-    const velocity = new Vector2(
-        gameState.players[side].velocity.x,
-        gameState.players[side].velocity.y,
-    );
-    const position = new Vector2(
-        gameState.players[side].position.x,
-        gameState.players[side].position.y,
-    );
+    const { velocity, position } = gameState.players[side];
 
     const hasReachedMaxLeftSpeed = velocity.x < -MAX_VELOCITY_X;
     const hasReachedMaxRightSpeed = velocity.x > MAX_VELOCITY_X;
@@ -118,19 +111,10 @@ export function updateGameState(
     // use velocity to update position
     position.x += velocity.x * delta * 60;
     position.y += velocity.y * delta * 60;
-
-    // update game state
-    gameState.players[side].velocity.x = velocity.x;
-    gameState.players[side].velocity.y = velocity.y;
-    gameState.players[side].position.x = position.x;
-    gameState.players[side].position.y = position.y;
 }
 
 export function applyInputsUntilTarget(
-    lastPlayersInput: {
-        light?: GamePlayerInputPayload;
-        shadow?: GamePlayerInputPayload;
-    },
+    lastPlayersInput: (GamePlayerInputPayload | undefined)[],
     inputs: GamePlayerInputPayload[],
     collidingElements: Object3D[],
     gameState: GameState,
@@ -143,79 +127,68 @@ export function applyInputsUntilTarget(
         console.log('inputs', inputs);
     }
 
-    let counter = 0;
     for (
         let i = gameState.lastValidatedInput;
         // while there are inputs or while we reach the target time
         i <= targetTime || inputs.length !== 0;
         i += defaultTimeIncrement
     ) {
-        counter++;
+        // TODO: Could be optimized
         const inputsForTick = inputs.filter(({ time }) => time <= i);
 
         // if there are inputs for this time tick, we process them
         if (inputsForTick.length) {
-            inputsForTick.forEach((input) => {
-                const { player, delta, time, inputs } = input;
+            for (let j = 0; j < inputsForTick.length; j++) {
+                const input = inputsForTick[j];
                 updateGameState(
-                    delta,
-                    player,
-                    inputs,
+                    input.delta,
+                    input.player,
+                    input.inputs,
                     collidingElements,
                     gameState,
                 );
                 if (dev) {
-                    console.log('applying input', time);
+                    console.log('applying input', input.time);
                 }
-                if (player === Side.LIGHT) {
-                    lastPlayersInput.light = input;
-                } else {
-                    lastPlayersInput.shadow = input;
-                }
-            });
-            // then we remove them from the list
-            inputs = inputs.filter((input) => !inputsForTick.includes(input));
+                lastPlayersInput[input.player] = input;
+                // then we remove it from the list
+                inputs.splice(inputs.indexOf(input), 1);
+            }
         } else {
             // if there are no inputs for this tick, we have to deduce / interpolate player position
             // regarding the last action he did.
 
             // if the last input is a release right or left key input, we apply deceleration
-            (['light', 'shadow'] as (keyof typeof lastPlayersInput)[]).forEach(
-                (player) => {
-                    if (
-                        lastPlayersInput[player] &&
-                        !lastPlayersInput[player]?.inputs.left &&
-                        !lastPlayersInput[player]?.inputs.right
-                    ) {
-                        if (dev) {
-                            console.log(`${player} apply decelerate`);
-                        }
-                        updateGameState(
-                            // without input received, we have to use the default delta
-                            defaultDelta,
-                            player === 'light' ? Side.LIGHT : Side.SHADOW,
-                            {
-                                left: false,
-                                right: false,
-                                jump: false,
-                            },
-                            collidingElements,
-                            gameState,
-                        );
-                    } else {
-                        // if the last input is not a release left or right key, its very likely the player
-                        // has lag or low frame rate and we expect to receive more information about him later
-                        if (dev) {
-                            console.log(
-                                `Nothing to apply for the ${player}, waiting more inputs`,
-                            );
-                        }
+            for (let j = 0; j < lastPlayersInput.length; j++) {
+                const input = lastPlayersInput[j];
+                if (input && !input.inputs.left && !input.inputs.right) {
+                    if (dev) {
+                        console.log(`player ${input.player} apply decelerate`);
                     }
-                },
-            );
+                    updateGameState(
+                        // without input received, we have to use the default delta
+                        defaultDelta,
+                        input.player,
+                        {
+                            left: false,
+                            right: false,
+                            jump: false,
+                        },
+                        collidingElements,
+                        gameState,
+                    );
+                } else {
+                    // if the last input is not a release left or right key, its very likely the player
+                    // has lag or low frame rate and we expect to receive more information about him later
+                    if (dev) {
+                        console.log(
+                            `Nothing to apply for the player ${input?.player}, waiting more inputs`,
+                        );
+                    }
+                }
+            }
         }
         if (dev) {
-            console.log(counter);
             console.log(i);
             // console.log(gameState.light_x, gameState.light_velocity_x);
         }

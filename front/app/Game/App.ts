@@ -260,12 +260,8 @@ export default class App {
     private interpolateWithServerUpdate = () => {
         this.localStateAtInterpolationStart = { ...this.currentState };
         const nextStateAtInterpolationTime = { ...this.serverGameState };
-        const playerKey =
-            this.playersConfig[0] === Side.LIGHT ? 'light' : 'shadow';
         applyInputsUntilTarget(
-            {
-                [playerKey]: this.lastInput,
-            },
+            [this.lastInput],
             this.inputsHistory,
             [
                 FLOOR,

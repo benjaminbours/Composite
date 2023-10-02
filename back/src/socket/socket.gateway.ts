@@ -232,20 +232,16 @@ export class SocketGateway {
     // Let's try to declare them only once somewhere else, or to update
     // the game state if it should be stored per game and between iteration
     const updateFrequency = 100;
-    const lastPlayersInput: {
-      light?: GamePlayerInputPayload;
-      shadow?: GamePlayerInputPayload;
-    } = {
-      light: undefined,
-      shadow: undefined,
-    };
+    const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
+      undefined,
+      undefined,
+    ];
 
     const collidingScene = new Scene();
     collidingScene.add(FLOOR, ...level.collidingElements);
     collidingScene.updateMatrixWorld();
 
     const processInputsQueue = async () => {
-      const startTime = performance.now();
       const [inputsQueue, gameState] = await Promise.all([
         this.temporaryStorage.getGameInputsQueue(gameId).then((inputs) =>
           inputs.map((input) => {
@@ -271,6 +267,7 @@ export class SocketGateway {
           .then((redisState) => GameState.parseRedisGameState(redisState)),
       ]);
 
+      // const startTime = performance.now();
       applyInputsUntilTarget(
         lastPlayersInput,
         inputsQueue,
@@ -278,6 +275,9 @@ export class SocketGateway {
         gameState,
         Date.now(),
       );
+      // const endTime = performance.now();
+      // const elapsedTime = endTime - startTime;
+      // Logger.log('execution time in ms', elapsedTime);
 
       // emit updated game state to room
       this.emit(String(gameId), [
@@ -290,10 +290,6 @@ export class SocketGateway {
         gameId,
         RedisGameState.parseGameState(gameState),
       );
-
-      const endTime = performance.now();
-      const elapsedTime = endTime - startTime;
-      Logger.log('execution time in ms', elapsedTime);
     };
 
     const gameUpdateInterval = setInterval(processInputsQueue, updateFrequency);
