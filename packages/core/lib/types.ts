@@ -22,6 +22,8 @@ export interface PositionLevelState {
 export enum SocketEventType {
     // send automatically by socket io after successful connection with server
     CONNECT = 'connect',
+    // send by client after receiving connect event
+    TIME_SYNC = 'TIME_SYNC',
     // receive automatically by the server after successful connection with a client
     CONNECTION = 'connection',
     // receive automatically by the server when losing connection with a client
@@ -66,7 +68,18 @@ export interface GameActivateElementPayload {
     elementName: string;
 }
 
+export interface TimeSyncPayload {
+    id: number;
+    clientLocalTime: number;
+    serverGameTime?: number;
+}
+
 // events
+
+export type PingEvent = [
+    type: SocketEventType.TIME_SYNC,
+    payload: TimeSyncPayload,
+];
 
 export type MatchMakingEvent = [
     type: SocketEventType.MATCHMAKING_INFO,
@@ -104,7 +117,8 @@ export type SocketEvent =
     | GameStateUpdateEvent
     | GamePlayerInputEvent
     | GameActivateElementEvent
-    | GameDeactivateElementEvent;
+    | GameDeactivateElementEvent
+    | PingEvent;
 
 export type SocketInGameEvent =
     | GamePlayerInputEvent

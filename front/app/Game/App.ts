@@ -133,6 +133,13 @@ export default class App {
             this.serverGameState = gameState;
             this.checkServerState();
         };
+        this.socketController.synchronizeGameTimeWithServer =
+            this.synchronizeGameTimeWithServer;
+    }
+
+    synchronizeGameTimeWithServer = (gameTime: number) => {
+        this.currentState.game_time = gameTime;
+    };
 
     setupScene = (playersConfig: Side[]) => {
         this.scene.add(FLOOR);

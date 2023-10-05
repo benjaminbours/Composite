@@ -22,6 +22,7 @@ import {
   PositionLevel,
   FLOOR,
   RedisGameState,
+  TimeSyncPayload,
   PhysicLoop,
   applyInputs,
 } from '@benjaminbours/composite-core';
@@ -125,6 +126,25 @@ export class SocketGateway {
   //   const gameRoom = Array.from(socket.rooms)[1];
   //   socket.to(gameRoom).emit(SocketEventType.GAME_DEACTIVATE_ELEMENT, data);
   // }
+
+  @SubscribeMessage(SocketEventType.TIME_SYNC)
+  async handleTimeSync(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: TimeSyncPayload,
+  ) {
+    console.log('received time sync event', data);
+    const player = await this.temporaryStorage.getPlayer(socket.id);
+    const gameState = await this.temporaryStorage
+      .getGameState(player.gameId)
+      .then((redisState) => GameState.parseRedisGameState(redisState));
+    this.emit(socket.id, [
+      SocketEventType.TIME_SYNC,
+      {
+        ...data,
+        serverGameTime: gameState.game_time,
+      },
+    ]);
+  }
 
   @SubscribeMessage(SocketEventType.DISCONNECT)
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -284,31 +304,31 @@ export class SocketGateway {
             ({ sequence }) => sequence == gameState.game_time,
           );
           applyInputs(
-        lastPlayersInput,
+            lastPlayersInput,
             inputsForTick,
-        collidingScene.children,
-        gameState,
+            collidingScene.children,
+            gameState,
             true,
-      );
+          );
           // then we remove it from the list
           for (let i = 0; i < inputsForTick.length; i++) {
             const input = inputsForTick[i];
             inputsQueue.splice(inputsQueue.indexOf(input), 1);
           }
         });
-      // emit updated game state to room
-      this.emit(String(gameId), [
-        SocketEventType.GAME_STATE_UPDATE,
-        { gameState },
-      ]);
+        // emit updated game state to room
+        this.emit(String(gameId), [
+          SocketEventType.GAME_STATE_UPDATE,
+          { gameState },
+        ]);
 
         // console.log('inputs queue after', inputsQueue.length);
 
-      // update state and inputs queue
-      this.temporaryStorage.updateGameStateAndInputsQueue(
-        gameId,
-        RedisGameState.parseGameState(gameState),
-      );
+        // update state and inputs queue
+        this.temporaryStorage.updateGameStateAndInputsQueue(
+          gameId,
+          RedisGameState.parseGameState(gameState),
+        );
 
         // previous = now;
       });
