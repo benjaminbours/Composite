@@ -14,6 +14,7 @@ export class RedisGameState {
         public shadow_velocity_x: string,
         public shadow_velocity_y: string,
         public lastValidatedInput: string,
+        public game_time: string,
         public end_level?: string,
         public level_0_ground_door?: string,
         public level_0_roof_door?: string,
@@ -31,6 +32,7 @@ export class RedisGameState {
             String(state.players[0].velocity.x),
             String(state.players[0].velocity.y),
             String(state.lastValidatedInput),
+            String(state.game_time),
             String(state.level.end_level),
             String((state.level as any).ground_door),
             String((state.level as any).roof_door),
@@ -51,6 +53,7 @@ export class GameState {
         }[],
         public level: PositionLevelState | OtherLevel,
         public lastValidatedInput: number,
+        public game_time: number,
     ) {}
 
     // parse from the one level object allowed by redis
@@ -98,6 +101,7 @@ export class GameState {
             ],
             levelState,
             Number(state.lastValidatedInput),
+            Number(state.game_time),
         );
     }
 }

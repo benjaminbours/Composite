@@ -13,6 +13,7 @@ import {
     IcosahedronGeometry,
     Fog,
     Vector2,
+    Vec2,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -24,8 +25,9 @@ import {
     FLOOR,
     Side,
     SocketEventType,
-    applyInputsUntilTarget,
     updateGameState,
+    PhysicLoop,
+    applyInputs,
 } from '@benjaminbours/composite-core';
 // local
 // import SkyShader from './SkyShader';
@@ -68,11 +70,17 @@ export default class App {
 
     public inputsManager: InputsManager;
 
+    private gameStateHistory: GameState[] = [];
     private inputsHistory: GamePlayerInputPayload[] = [];
     // its a predicted state if we compare it to the last validated state
     private currentState: GameState;
+    private shouldReconciliateState = false;
+
+    getCurrentGameState = () => this.currentState;
 
     private lastInput: GamePlayerInputPayload | undefined;
+
+    private physicLoop = new PhysicLoop();
 
     private serverGameState: GameState;
     private shouldInterpolate = false;
@@ -86,10 +94,18 @@ export default class App {
         private playersConfig: Side[],
         private socketController: SocketController,
     ) {
-        this.currentState = initialGameState;
-        this.serverGameState = initialGameState;
-        this.localStateAtInterpolationStart = initialGameState;
-        this.targetStateAtInterpolationStart = initialGameState;
+
+        this.currentState = JSON.parse(JSON.stringify(initialGameState));
+        this.serverGameState = JSON.parse(JSON.stringify(initialGameState));
+        this.localStateAtInterpolationStart = JSON.parse(
+            JSON.stringify(initialGameState),
+        );
+        this.targetStateAtInterpolationStart = JSON.parse(
+            JSON.stringify(initialGameState),
+        );
+        this.gameStateHistory.push(
+            JSON.parse(JSON.stringify(initialGameState)),
+        );
         // inputs
 
         this.inputsManager = new InputsManager();
@@ -109,7 +125,14 @@ export default class App {
 
         this.setupScene(playersConfig);
         this.setupPostProcessing();
-    }
+
+        this.socketController.getCurrentGameState = this.getCurrentGameState;
+        this.socketController.onGameStateUpdate = (gameState: GameState) => {
+            // console.log('received update', gameState);
+            this.shouldReconciliateState = true;
+            this.serverGameState = gameState;
+            this.checkServerState();
+        };
 
     setupScene = (playersConfig: Side[]) => {
         this.scene.add(FLOOR);
@@ -166,15 +189,6 @@ export default class App {
             this.scene,
             this.players,
         );
-
-        this.socketController.onGameStateUpdate = (gameState: GameState) => {
-            this.interpolationRatio = 0;
-            this.shouldInterpolate = true;
-            this.inputsHistory = this.inputsHistory.filter(
-                ({ time }) => time > gameState.lastValidatedInput,
-            );
-            this.serverGameState = gameState;
-        };
     };
 
     setupPostProcessing = () => {
@@ -209,6 +223,8 @@ export default class App {
             if (item.update) {
                 if (item instanceof DoorOpener) {
                     item.update(this.delta, this.camera);
+                } else if (item instanceof Player) {
+                    // do nothing
                 } else {
                     item.update(this.delta);
                 }
@@ -220,17 +236,26 @@ export default class App {
     };
 
     private processInputs = () => {
-        const time = Date.now();
+        const time = this.currentState.game_time;
         const payload = {
             player: this.playersConfig[0],
             inputs: { ...this.inputsManager.inputsActive },
-            delta: this.delta,
-            time,
+            time: Date.now(),
+            sequence: time,
         };
+        const isInputRelease =
+            this.lastInput &&
+            ((this.lastInput.inputs.left &&
+                !this.inputsManager.inputsActive.left) ||
+                (this.lastInput.inputs.right &&
+                    !this.inputsManager.inputsActive.right) ||
+                (this.lastInput.inputs.jump &&
+                    !this.inputsManager.inputsActive.jump));
         if (
             this.inputsManager.inputsActive.left ||
             this.inputsManager.inputsActive.right ||
-            this.inputsManager.inputsActive.jump
+            this.inputsManager.inputsActive.jump ||
+            isInputRelease
         ) {
             this.inputsHistory.push(payload);
             // emit input to server
@@ -239,30 +264,51 @@ export default class App {
                 payload,
             ]);
         }
-
-        if (this.lastInput) {
-            if (
-                (this.lastInput.inputs.left &&
-                    !this.inputsManager.inputsActive.left) ||
-                (this.lastInput.inputs.right &&
-                    !this.inputsManager.inputsActive.right)
-            ) {
-                // console.log('emit inputs released');
-                this.socketController?.emit([
-                    SocketEventType.GAME_PLAYER_INPUT,
-                    payload,
-                ]);
-            }
-        }
         this.lastInput = payload;
     };
 
     private interpolateWithServerUpdate = () => {
-        this.localStateAtInterpolationStart = { ...this.currentState };
-        const nextStateAtInterpolationTime = { ...this.serverGameState };
-        applyInputsUntilTarget(
-            [this.lastInput],
-            this.inputsHistory,
+        // TODO: Can be optimized
+        const lastInputValidated = (() => {
+            const input = this.inputsHistory.find(
+                (input) =>
+                    input.sequence === this.serverGameState.lastValidatedInput,
+            );
+            if (input) {
+                return JSON.parse(JSON.stringify(input));
+            }
+            return undefined;
+        })();
+
+        this.inputsHistory = this.inputsHistory.filter(
+            ({ sequence }) =>
+                sequence >= this.serverGameState.lastValidatedInput,
+        );
+        const localStateAtInterpolationTime: GameState = JSON.parse(
+            JSON.stringify(this.currentState),
+        );
+        const nextStateAtInterpolationTime: GameState = JSON.parse(
+            JSON.stringify(this.serverGameState),
+        );
+
+        const inputsAtInterpolationTime: GamePlayerInputPayload[] = JSON.parse(
+            JSON.stringify(this.inputsHistory),
+        );
+
+        const lastPlayersInput = [lastInputValidated];
+
+        while (
+            nextStateAtInterpolationTime.game_time <
+            localStateAtInterpolationTime.game_time - 1
+        ) {
+            nextStateAtInterpolationTime.game_time++;
+            const inputsForTick = inputsAtInterpolationTime.filter(
+                ({ sequence }) =>
+                    sequence == nextStateAtInterpolationTime.game_time,
+            );
+            applyInputs(
+                lastPlayersInput,
+                inputsForTick,
             [
                 FLOOR,
                 ...this.levelController.levels[
@@ -270,24 +316,63 @@ export default class App {
                 ]!.collidingElements,
             ],
             nextStateAtInterpolationTime,
-            Date.now(),
+                true,
+            );
+            for (let i = 0; i < inputsForTick.length; i++) {
+                const input = inputsForTick[i];
+                inputsAtInterpolationTime.splice(
+                    inputsAtInterpolationTime.indexOf(input),
+                    1,
+                );
+            }
+        }
+        const distanceAfterInputsApply = this.calculateDistance(
+            localStateAtInterpolationTime.players[0].position,
+            nextStateAtInterpolationTime.players[0].position,
         );
-        this.targetStateAtInterpolationStart = nextStateAtInterpolationTime;
+        console.log('distance after inputs apply', distanceAfterInputsApply);
+        // this.targetStateAtInterpolationStart = nextStateAtInterpolationTime;
 
-        // console.log('current state', this.currentState);
-        // console.log('server corrected state', nextStateAtInterpolationTime);
+        // for (let i = 0; i < this.interpolations.length; i++) {
+        //     this.interpolations[i].shouldUpdate = true;
+        // }
+        // for (let i = 0; i < this.interpolations.length; i++) {
+        //     this.interpolations[i].ratio = 0;
+        // }
+        // console.log('distance', this.localStateAtInterpolationStart);
+        // console.log('distance', this.targetStateAtInterpolationStart);
 
-        this.shouldUpdateInterpolation = true;
+        this.gameStateHistory = this.gameStateHistory.filter(
+            ({ game_time }) => game_time > this.serverGameState.game_time,
+        );
+
+        this.currentState.players[this.playersConfig[0]].position =
+            nextStateAtInterpolationTime.players[0].position;
+        this.currentState.players[this.playersConfig[0]].velocity =
+            nextStateAtInterpolationTime.players[0].velocity;
     };
 
-    private shouldUpdateInterpolation = false;
-
-    public updateInterpolation = () => {
-        if (this.interpolationRatio >= 1) {
-            this.shouldUpdateInterpolation = false;
-            return;
+    private checkServerState = () => {
+        const gameStateAtServerTime = this.gameStateHistory.find(
+            (state) => state.game_time === this.serverGameState.game_time,
+        );
+        if (gameStateAtServerTime) {
+            const distance = this.calculateDistance(
+                gameStateAtServerTime.players[0].position,
+                this.serverGameState.players[0].position,
+            );
+            console.log(
+                'distance with server state received before inputs',
+                distance,
+            );
         }
-        this.interpolationRatio += this.delta * 10;
+    };
+
+    private calculateDistance(origin: Vec2, target: Vec2) {
+        const vector = new Vector2(origin.x, origin.y);
+        const vectorTarget = new Vector2(target.x, target.y);
+        return vector.distanceTo(vectorTarget);
+    }
 
         const properties = ['position' as 'position', 'velocity' as 'velocity'];
         const side = this.playersConfig[1];
@@ -315,18 +400,17 @@ export default class App {
         }
     };
 
-    public update = () => {
+    public run = () => {
         this.delta = this.clock.getDelta();
-        if (this.shouldInterpolate) {
+
+        if (this.shouldReconciliateState) {
+            this.shouldReconciliateState = false;
             this.interpolateWithServerUpdate();
-            this.shouldInterpolate = false;
         }
-        if (this.shouldUpdateInterpolation) {
-            this.updateInterpolation();
-        }
+        this.physicLoop.run((delta) => {
         this.processInputs();
         updateGameState(
-            this.delta,
+                delta,
             this.playersConfig[0],
             this.inputsManager.inputsActive,
             [
@@ -337,6 +421,17 @@ export default class App {
             ],
             this.currentState,
         );
+            this.gameStateHistory.push(
+                JSON.parse(JSON.stringify(this.currentState)),
+            );
+            // for (let i = 0; i < this.interpolations.length; i++) {
+            //     if (this.interpolations[i].shouldUpdate) {
+            //         this.interpolations[i].ratio = this.updateInterpolation(
+            //             this.interpolations[i],
+            //             delta,
+            //         );
+            //     }
+            // }
 
         for (let i = 0; i < this.playersConfig.length; i++) {
             const side = this.playersConfig[i];
@@ -346,20 +441,31 @@ export default class App {
                 0,
             );
         }
-        // update everything which need an update in the scene
+            this.updatePlayerGraphics();
+            this.currentState.game_time++;
+        });
+        this.updateWorld();
+    };
+
+    public updatePlayerGraphics = () => {
+        for (let i = 0; i < this.players.length; i++) {
+            const player = this.players[i];
+
+            if (player instanceof LightPlayer) {
+                this.volumetricLightPass.material.uniforms.lightPosition.value =
+                    player.get2dLightPosition(this.camera);
+            }
+
+            if (player instanceof ShadowPlayer) {
+                player.update(this.delta);
+            }
+        }
+    };
+
+    public updateWorld = () => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         // this.floor.position.set(this.players[0].position.x, 0, 0);
-
-        const lightPlayer = this.players.find(
-            (player) => player instanceof LightPlayer,
-        );
-
-        if (lightPlayer) {
-            this.volumetricLightPass.material.uniforms.lightPosition.value = (
-                lightPlayer as LightPlayer
-            ).get2dLightPosition(this.camera);
-        }
 
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
@@ -386,11 +492,5 @@ export default class App {
         this.camera.layers.set(Layer.DEFAULT);
         this.renderer.setClearColor(0x000000);
         this.mainComposer.render();
-
-        // this.effectAdditiveBlending.uniforms.tAdd.value =
-        //     this.occlusionRenderTarget.texture;
-        // console.log(this.occlusionRenderTarget.texture.version);
-
-        // this.renderer.render(this.scene, this.camera);
     };
 }

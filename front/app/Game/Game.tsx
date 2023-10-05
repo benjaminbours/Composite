@@ -65,7 +65,7 @@ function Game({ side, socketController, initialGameState }: Props) {
             gameLoop = () => {
                 stats?.begin();
                 if (appRef.current?.clock.running) {
-                    appRef.current?.update();
+                    appRef.current?.run();
                 }
                 appRef.current?.render();
                 stats?.end();

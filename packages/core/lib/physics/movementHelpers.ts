@@ -113,85 +113,124 @@ export function updateGameState(
     position.y += velocity.y * delta * 60;
 }
 
-export function applyInputsUntilTarget(
+export function applyInputs(
     lastPlayersInput: (GamePlayerInputPayload | undefined)[],
     inputs: GamePlayerInputPayload[],
     collidingElements: Object3D[],
     gameState: GameState,
-    targetTime: number,
     dev?: boolean,
 ) {
-    const defaultTimeIncrement = 16.7;
-    const defaultDelta = defaultTimeIncrement / 1000;
     if (dev) {
-        console.log('inputs', inputs);
+        console.log(gameState.game_time);
     }
+    const tempDelta = 1000 / 60 / 1000;
 
-    for (
-        let i = gameState.lastValidatedInput;
-        // while there are inputs or while we reach the target time
-        i <= targetTime || inputs.length !== 0;
-        i += defaultTimeIncrement
-    ) {
-        // TODO: Could be optimized
-        const inputsForTick = inputs.filter(({ time }) => time <= i);
+    // if there are inputs for this time tick, we process them
+    if (inputs.length) {
+        for (let j = 0; j < inputs.length; j++) {
+            const input = inputs[j];
+            if (dev) {
+                console.log('applying input', input.time, input.sequence);
+                console.log(
+                    'applying input from position',
+                    gameState.players[input.player].position,
+                );
+                console.log(
+                    'applying input from velocity',
+                    gameState.players[input.player].velocity,
+                );
+            }
+            updateGameState(
+                tempDelta,
+                input.player,
+                input.inputs,
+                collidingElements,
+                gameState,
+            );
+            if (dev) {
+                console.log(
+                    'applying input to position',
+                    gameState.players[input.player].position,
+                );
+                console.log(
+                    'applying input to velocity',
+                    gameState.players[input.player].velocity,
+                );
+            }
+            // side effect
+            lastPlayersInput[input.player] = input;
+            // side effect
+            gameState.lastValidatedInput = input.sequence;
+        }
+    } else {
+        // if there are no inputs for this tick, we have to deduce / interpolate player position
+        // regarding the last action he did.
 
-        // if there are inputs for this time tick, we process them
-        if (inputsForTick.length) {
-            for (let j = 0; j < inputsForTick.length; j++) {
-                const input = inputsForTick[j];
+        for (let j = 0; j < lastPlayersInput.length; j++) {
+            const input = lastPlayersInput[j];
+            if (dev) {
+                console.log('last player input', input);
+            }
+
+            if (input) {
+                if (dev) {
+                    console.log(
+                        `no input for player ${input.player} reapply last input`,
+                    );
+                    console.log('applying input', input.time, input.sequence);
+                    console.log(
+                        'applying input from position',
+                        gameState.players[input.player].position,
+                    );
+                    console.log(
+                        'applying input from velocity',
+                        gameState.players[input.player].velocity,
+                    );
+                }
                 updateGameState(
-                    input.delta,
+                    tempDelta,
                     input.player,
                     input.inputs,
                     collidingElements,
                     gameState,
                 );
                 if (dev) {
-                    console.log('applying input', input.time);
-                }
-                lastPlayersInput[input.player] = input;
-                // then we remove it from the list
-                inputs.splice(inputs.indexOf(input), 1);
-            }
-        } else {
-            // if there are no inputs for this tick, we have to deduce / interpolate player position
-            // regarding the last action he did.
-
-            // if the last input is a release right or left key input, we apply deceleration
-            for (let j = 0; j < lastPlayersInput.length; j++) {
-                const input = lastPlayersInput[j];
-                if (input && !input.inputs.left && !input.inputs.right) {
-                    if (dev) {
-                        console.log(`player ${input.player} apply decelerate`);
-                    }
-                    updateGameState(
-                        // without input received, we have to use the default delta
-                        defaultDelta,
-                        input.player,
-                        {
-                            left: false,
-                            right: false,
-                            jump: false,
-                        },
-                        collidingElements,
-                        gameState,
+                    console.log(
+                        'applying input to position',
+                        gameState.players[input.player].position,
                     );
-                } else {
-                    // if the last input is not a release left or right key, its very likely the player
-                    // has lag or low frame rate and we expect to receive more information about him later
-                    if (dev) {
-                        console.log(
-                            `Nothing to apply for the player ${input?.player}, waiting more inputs`,
-                        );
-                    }
+                    console.log(
+                        'applying input to velocity',
+                        gameState.players[input.player].velocity,
+                    );
                 }
+                // side effect
+                gameState.lastValidatedInput = input.sequence;
             }
         }
-        if (dev) {
-            console.log(i);
-            // console.log(gameState.light_x, gameState.light_velocity_x);
-        }
-        gameState.lastValidatedInput = i;
     }
+}
+
+export class PhysicLoop {
+    public loops = 0;
+    private tick_rate = 60;
+    private skip_ticks = 1000 / this.tick_rate;
+    public delta = this.skip_ticks / 1000;
+    private max_frame_skip = 10;
+    private next_game_tick = performance.now();
+    public total_loops = 0;
+
+    public run = (callback: (delta: number) => void) => {
+        this.loops = 0;
+
+        while (
+            performance.now() > this.next_game_tick &&
+            this.loops < this.max_frame_skip
+        ) {
+            callback(this.delta);
+            this.next_game_tick += this.skip_ticks;
+            this.loops++;
+            this.total_loops++;
+        }
+    };
 }

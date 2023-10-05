@@ -54,7 +54,7 @@ export interface GamePlayerInputPayload {
     player: Side;
     inputs: Inputs;
     // TODO: Implement protection against position hacking
-    delta: number;
+    sequence: number;
     time: number;
 }
 

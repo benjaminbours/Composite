@@ -8,7 +8,6 @@ import {
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
-import { SchedulerRegistry } from '@nestjs/schedule';
 import { Logger } from '@nestjs/common';
 import { Scene } from 'three';
 // our libs
@@ -20,10 +19,11 @@ import {
   Side,
   SocketEvent,
   GameState,
-  applyInputsUntilTarget,
   PositionLevel,
   FLOOR,
   RedisGameState,
+  PhysicLoop,
+  applyInputs,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -48,12 +48,12 @@ import {
   // },
 })
 export class SocketGateway {
+  private gameLoopsRegistry: Record<string, NodeJS.Timeout> = {};
   @WebSocketServer() server: Server;
 
   constructor(
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
-    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   emit = (roomName: string, event: SocketEvent) => {
@@ -133,7 +133,7 @@ export class SocketGateway {
     const player = await this.temporaryStorage.getPlayer(socket.id);
     if (player.gameId) {
       try {
-        this.schedulerRegistry.deleteInterval(`game:${player.gameId}`);
+        clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
       } catch (error) {
         Logger.error(error);
       }
@@ -206,7 +206,8 @@ export class SocketGateway {
         },
       ],
       level.state,
-      Date.now(),
+      0,
+      0,
     );
 
     // store game state and update queue in temporary storage
@@ -231,7 +232,6 @@ export class SocketGateway {
     // input queue closure are potential memory leaks.
     // Let's try to declare them only once somewhere else, or to update
     // the game state if it should be stored per game and between iteration
-    const updateFrequency = 100;
     const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
       undefined,
       undefined,
@@ -241,8 +241,19 @@ export class SocketGateway {
     collidingScene.add(FLOOR, ...level.collidingElements);
     collidingScene.updateMatrixWorld();
 
-    const processInputsQueue = async () => {
-      const [inputsQueue, gameState] = await Promise.all([
+    const TICK_RATE = 10;
+    // let tick = 0;
+    // let previous = hrtimeMs();
+    const tickLengthMs = 1000 / TICK_RATE;
+    const physicLoop = new PhysicLoop();
+
+    const networkUpdateLoop = () => {
+      const timerId = setTimeout(networkUpdateLoop, tickLengthMs);
+      this.gameLoopsRegistry[`game:${gameId}`] = timerId;
+      // const now = hrtimeMs();
+      // const delta = (now - previous) / 1000;
+      // console.log('delta', delta);
+      Promise.all([
         this.temporaryStorage.getGameInputsQueue(gameId).then((inputs) =>
           inputs.map((input) => {
             const parts = input.split(':');
@@ -250,13 +261,13 @@ export class SocketGateway {
             const inputs = parts[1]
               .split(',')
               .map((val) => (val === 'true' ? true : false));
-            const delta = Number(parts[2]);
+            const sequence = Number(parts[2]);
             const time = Number(parts[3]);
 
             const parsedInput: GamePlayerInputPayload = {
               time,
-              delta,
               inputs: { left: inputs[0], right: inputs[1], jump: inputs[2] },
+              sequence,
               player,
             };
             return parsedInput;
@@ -265,38 +276,45 @@ export class SocketGateway {
         this.temporaryStorage
           .getGameState(gameId)
           .then((redisState) => GameState.parseRedisGameState(redisState)),
-      ]);
-
-      // const startTime = performance.now();
-      applyInputsUntilTarget(
+      ]).then(([inputsQueue, gameState]) => {
+        // console.log('inputs queue before', inputsQueue.length);
+        physicLoop.run(() => {
+          gameState.game_time++;
+          const inputsForTick = inputsQueue.filter(
+            ({ sequence }) => sequence == gameState.game_time,
+          );
+          applyInputs(
         lastPlayersInput,
-        inputsQueue,
+            inputsForTick,
         collidingScene.children,
         gameState,
-        Date.now(),
+            true,
       );
-      // const endTime = performance.now();
-      // const elapsedTime = endTime - startTime;
-      // Logger.log('execution time in ms', elapsedTime);
-
+          // then we remove it from the list
+          for (let i = 0; i < inputsForTick.length; i++) {
+            const input = inputsForTick[i];
+            inputsQueue.splice(inputsQueue.indexOf(input), 1);
+          }
+        });
       // emit updated game state to room
       this.emit(String(gameId), [
         SocketEventType.GAME_STATE_UPDATE,
         { gameState },
       ]);
 
+        // console.log('inputs queue after', inputsQueue.length);
+
       // update state and inputs queue
       this.temporaryStorage.updateGameStateAndInputsQueue(
         gameId,
         RedisGameState.parseGameState(gameState),
       );
+
+        // previous = now;
+      });
     };
 
-    const gameUpdateInterval = setInterval(processInputsQueue, updateFrequency);
-    this.schedulerRegistry.addInterval(`game:${gameId}`, gameUpdateInterval);
-    // setTimeout(() => {
-    //   this.schedulerRegistry.deleteInterval(`game:${gameId}`);
-    // }, 3000);
+    networkUpdateLoop();
   };
 
   // TODO: As a room is equivalent to a game, lets make a proper

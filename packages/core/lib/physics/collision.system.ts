@@ -16,11 +16,6 @@ export function collisionSystem(
     if (nearestObjects.down) {
         const { parent } = nearestObjects.down.object;
 
-        // const setMovableComponentState = (state: MovableComponentState) => {
-        //     if (component.state !== state) {
-        //         component.state = state;
-        //     }
-        // };
         // const setCurrentDoorOpener = () => {
         //     const elem = parent as DoorOpener;
         //     component.currentDoorOpener = elem;
@@ -89,7 +84,6 @@ export function collisionSystem(
                     // setCurrentEndLevel();
                     break;
             }
-            // setMovableComponentState(MovableComponentState.onFloor);
             state = MovableComponentState.onFloor;
         } else {
             // when the component is not touching the floor
@@ -110,7 +104,6 @@ export function collisionSystem(
             //         component.state = MovableComponentState.inAir;
             //     }
             // }
-            // setMovableComponentState(MovableComponentState.inAir);
             state = MovableComponentState.inAir;
             // clearCurrentDoorOpener();
             // clearCurrentEndLevel();
