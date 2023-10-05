@@ -42,6 +42,12 @@ import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
 
+interface InterpolationConfig {
+    ratio: number;
+    increment: number;
+    shouldUpdate: boolean;
+}
+
 export default class App {
     private width = window.innerWidth;
     private height = window.innerHeight;
@@ -81,31 +87,24 @@ export default class App {
     private lastInput: GamePlayerInputPayload | undefined;
 
     private physicLoop = new PhysicLoop();
-
-    private serverGameState: GameState;
-    private shouldInterpolate = false;
-    private interpolationRatio = 0;
-    private localStateAtInterpolationStart: GameState;
-    private targetStateAtInterpolationStart: GameState;
+    // used only for other players
+    private interpolation: InterpolationConfig = {
+        ratio: 0,
+        increment: 10,
+        shouldUpdate: false,
+    };
 
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
         private playersConfig: Side[],
-        private socketController: SocketController,
+        public socketController: SocketController,
     ) {
-
         this.currentState = JSON.parse(JSON.stringify(initialGameState));
         this.serverGameState = JSON.parse(JSON.stringify(initialGameState));
-        this.localStateAtInterpolationStart = JSON.parse(
-            JSON.stringify(initialGameState),
-        );
-        this.targetStateAtInterpolationStart = JSON.parse(
-            JSON.stringify(initialGameState),
-        );
-        this.gameStateHistory.push(
-            JSON.parse(JSON.stringify(initialGameState)),
-        );
+        // this.gameStateHistory.push(
+        //     JSON.parse(JSON.stringify(initialGameState)),
+        // );
         // inputs
 
         this.inputsManager = new InputsManager();
@@ -129,10 +128,13 @@ export default class App {
 
         this.socketController.getCurrentGameState = this.getCurrentGameState;
         this.socketController.onGameStateUpdate = (gameState: GameState) => {
-            // console.log('received update', gameState);
+            const gameTimeDelta =
+                this.currentState.game_time - gameState.game_time;
+            console.log('received update', gameState);
+            console.log('time delta', gameTimeDelta);
             this.shouldReconciliateState = true;
             this.serverGameState = gameState;
-            this.checkServerState();
+            // this.checkServerState();
         };
         this.socketController.synchronizeGameTimeWithServer =
             this.synchronizeGameTimeWithServer;
@@ -275,7 +277,7 @@ export default class App {
         this.lastInput = payload;
     };
 
-    private interpolateWithServerUpdate = () => {
+    private reconciliateState = () => {
         // TODO: Can be optimized
         const lastInputValidated = (() => {
             const input = this.inputsHistory.find(
@@ -335,7 +337,7 @@ export default class App {
                 ]!.collidingElements,
             ],
             nextStateAtInterpolationTime,
-                true,
+                // true,
             );
             for (let i = 0; i < inputsForTick.length; i++) {
                 const input = inputsForTick[i];
@@ -345,47 +347,48 @@ export default class App {
                 );
             }
         }
-        const distanceAfterInputsApply = this.calculateDistance(
-            localStateAtInterpolationTime.players[0].position,
-            nextStateAtInterpolationTime.players[0].position,
-        );
-        console.log('distance after inputs apply', distanceAfterInputsApply);
-        // this.targetStateAtInterpolationStart = nextStateAtInterpolationTime;
+        // const distanceAfterInputsApply = this.calculateDistance(
+        //     localStateAtInterpolationTime.players[this.playersConfig[0]]
+        //         .position,
+        //     nextStateAtInterpolationTime.players[this.playersConfig[0]]
+        //         .position,
+        // );
+        // console.log('distance after inputs apply', distanceAfterInputsApply);
 
-        // for (let i = 0; i < this.interpolations.length; i++) {
-        //     this.interpolations[i].shouldUpdate = true;
-        // }
-        // for (let i = 0; i < this.interpolations.length; i++) {
-        //     this.interpolations[i].ratio = 0;
-        // }
-        // console.log('distance', this.localStateAtInterpolationStart);
-        // console.log('distance', this.targetStateAtInterpolationStart);
+        // this.gameStateHistory = this.gameStateHistory.filter(
+        //     ({ game_time }) => game_time > this.serverGameState.game_time,
+        // );
 
-        this.gameStateHistory = this.gameStateHistory.filter(
-            ({ game_time }) => game_time > this.serverGameState.game_time,
-        );
-
+        // main player update
         this.currentState.players[this.playersConfig[0]].position =
-            nextStateAtInterpolationTime.players[0].position;
+            nextStateAtInterpolationTime.players[
+                this.playersConfig[0]
+            ].position;
         this.currentState.players[this.playersConfig[0]].velocity =
-            nextStateAtInterpolationTime.players[0].velocity;
+            nextStateAtInterpolationTime.players[
+                this.playersConfig[0]
+            ].velocity;
+
+        // other players interpolation
+        this.interpolation.shouldUpdate = true;
+        this.interpolation.ratio = 0;
     };
 
-    private checkServerState = () => {
-        const gameStateAtServerTime = this.gameStateHistory.find(
-            (state) => state.game_time === this.serverGameState.game_time,
-        );
-        if (gameStateAtServerTime) {
-            const distance = this.calculateDistance(
-                gameStateAtServerTime.players[0].position,
-                this.serverGameState.players[0].position,
-            );
-            console.log(
-                'distance with server state received before inputs',
-                distance,
-            );
-        }
-    };
+    // private checkServerState = () => {
+    //     const gameStateAtServerTime = this.gameStateHistory.find(
+    //         (state) => state.game_time === this.serverGameState.game_time,
+    //     );
+    //     if (gameStateAtServerTime) {
+    //         const distance = this.calculateDistance(
+    //             gameStateAtServerTime.players[1].position,
+    //             this.serverGameState.players[1].position,
+    //         );
+    //         console.log(
+    //             'distance with server state received before inputs',
+    //             distance,
+    //         );
+    //     }
+    // };
 
     private calculateDistance(origin: Vec2, target: Vec2) {
         const vector = new Vector2(origin.x, origin.y);
@@ -393,30 +396,36 @@ export default class App {
         return vector.distanceTo(vectorTarget);
     }
 
-        const properties = ['position' as 'position', 'velocity' as 'velocity'];
-        const side = this.playersConfig[1];
+    public updateInterpolation = (
+        { ratio, shouldUpdate, increment }: InterpolationConfig,
+        delta: number,
+    ) => {
+        ratio += delta * increment;
+        if (ratio >= 1) {
+            shouldUpdate = false;
+            return 1;
+        }
 
-        for (let j = 0; j < properties.length; j++) {
-            const property = properties[j];
             const vector = new Vector2(
-                this.localStateAtInterpolationStart.players[side][property].x,
-                this.localStateAtInterpolationStart.players[side][property].y,
+            this.currentState.players[this.playersConfig[1]].position.x,
+            this.currentState.players[this.playersConfig[1]].position.y,
             );
             const vectorTarget = new Vector2(
-                this.targetStateAtInterpolationStart.players[side][property].x,
-                this.targetStateAtInterpolationStart.players[side][property].y,
+            this.serverGameState.players[this.playersConfig[1]].position.x,
+            this.serverGameState.players[this.playersConfig[1]].position.y,
             );
-            const targetNormalize = vectorTarget
-                .clone()
-                .sub(vector)
-                .normalize();
-            const distance =
-                vector.distanceTo(vectorTarget) * this.interpolationRatio;
+        const targetNormalize = vectorTarget.clone().sub(vector).normalize();
+        const distance = vector.distanceTo(vectorTarget) * ratio;
 
             const displacement = targetNormalize.multiplyScalar(distance);
-            this.currentState.players[side][property].x += displacement.x;
-            this.currentState.players[side][property].y += displacement.y;
-        }
+        // side effect
+        this.currentState.players[this.playersConfig[1]].position.x +=
+            displacement.x;
+        this.currentState.players[this.playersConfig[1]].position.y +=
+            displacement.y;
+
+        // console.log('ratio', ratio);
+        return ratio;
     };
 
     public run = () => {
@@ -424,7 +433,7 @@ export default class App {
 
         if (this.shouldReconciliateState) {
             this.shouldReconciliateState = false;
-            this.interpolateWithServerUpdate();
+            this.reconciliateState();
         }
         this.physicLoop.run((delta) => {
         this.processInputs();
@@ -440,18 +449,15 @@ export default class App {
             ],
             this.currentState,
         );
-            this.gameStateHistory.push(
-                JSON.parse(JSON.stringify(this.currentState)),
-            );
-            // for (let i = 0; i < this.interpolations.length; i++) {
-            //     if (this.interpolations[i].shouldUpdate) {
-            //         this.interpolations[i].ratio = this.updateInterpolation(
-            //             this.interpolations[i],
-            //             delta,
-            //         );
-            //     }
-            // }
-
+            // this.gameStateHistory.push(
+            //     JSON.parse(JSON.stringify(this.currentState)),
+            // );
+            if (this.interpolation.shouldUpdate) {
+                this.interpolation.ratio = this.updateInterpolation(
+                    this.interpolation,
+                    delta,
+                );
+            }
         for (let i = 0; i < this.playersConfig.length; i++) {
             const side = this.playersConfig[i];
             this.players[i].position.set(
