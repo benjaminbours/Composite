@@ -303,8 +303,19 @@ export default class App {
             JSON.stringify(this.inputsHistory),
         );
 
-        const lastPlayersInput = [lastInputValidated];
+        // console.log(JSON.parse(JSON.stringify(localStateAtInterpolationTime)));
+        // console.log(JSON.parse(JSON.stringify(nextStateAtInterpolationTime)));
+        // console.log(JSON.parse(JSON.stringify(inputsAtInterpolationTime)));
 
+        const lastPlayersInput = [];
+        lastPlayersInput[0] =
+            this.playersConfig[0] === Side.SHADOW
+                ? lastInputValidated
+                : undefined;
+        lastPlayersInput[1] =
+            this.playersConfig[0] === Side.LIGHT
+                ? lastInputValidated
+                : undefined;
         while (
             nextStateAtInterpolationTime.game_time <
             localStateAtInterpolationTime.game_time - 1
