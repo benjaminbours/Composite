@@ -29,19 +29,5 @@ export default class LevelController {
         // mount the new one
         this.currentLevel = level;
         scene.add(this.levels[level]!);
-
-        // set position of the players
-        players.forEach((player) => {
-            const position = (() => {
-                if (player instanceof LightPlayer) {
-                    return this.levels[level]!.startPosition.light;
-                }
-                if (player instanceof ShadowPlayer) {
-                    return this.levels[level]!.startPosition.shadow;
-                }
-                return new Vector3();
-            })();
-            player.position.set(position.x, position.y, position.z);
-        });
     };
 }

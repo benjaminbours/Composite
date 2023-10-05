@@ -124,6 +124,7 @@ export default class App {
         this.renderer.shadowMap.type = PCFSoftShadowMap;
 
         this.setupScene(playersConfig);
+        this.scene.updateMatrixWorld();
         this.setupPostProcessing();
 
         this.socketController.getCurrentGameState = this.getCurrentGameState;
