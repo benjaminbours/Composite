@@ -224,8 +224,9 @@ export class PhysicLoop {
         this.loops = 0;
 
         while (
-            performance.now() > this.next_game_tick &&
-            this.loops < this.max_frame_skip
+            performance.now() > this.next_game_tick
+            //  &&
+            // this.loops < this.max_frame_skip
         ) {
             callback(this.delta);
             this.next_game_tick += this.skip_ticks;
