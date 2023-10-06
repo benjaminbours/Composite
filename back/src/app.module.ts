@@ -6,11 +6,9 @@ import { AppService } from './app.service';
 import { ENVIRONMENT } from './environment';
 import { SocketModule } from './socket/socket.module';
 import { TemporaryStorageService } from './temporary-storage.service';
-import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
     SocketModule,
     CacheModule.registerAsync<any>({
       isGlobal: true,
