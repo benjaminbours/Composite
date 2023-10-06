@@ -1,5 +1,7 @@
+// vendors
 import { Vector3, Color, Camera, BackSide, ShaderMaterial } from 'three';
-import { degreesToRadians } from './helpers/math';
+// our libs
+import { degreesToRadians } from '@benjaminbours/composite-core';
 
 interface IOptions {
     time: number;

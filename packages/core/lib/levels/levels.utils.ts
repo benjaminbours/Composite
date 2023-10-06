@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import {
     BoxGeometry,
     DoubleSide,
@@ -8,7 +7,6 @@ import {
     Object3D,
     Vector3,
 } from 'three';
-import { GeometriesRegistry } from '../types';
 import { degreesToRadians } from '../helpers/math';
 
 export const gridSize = 250;
@@ -16,13 +14,25 @@ const gridSizeMedium = gridSize / 2;
 const gridSizeSmall = gridSizeMedium / 2;
 const wallDepth = 34;
 
+export const ElementName = {
+    END_LEVEL: 'END_LEVEL',
+    AREA_END_LEVEL: 'AREA_END_LEVEL',
+    AREA_DOOR_OPENER: (doorName: string) => `${doorName}_AREA_DOOR_OPENER`,
+    DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
+    WALL_DOOR: (doorName: string) => `${doorName}_WALL_DOOR`,
+};
+
 // TODO: Its not clear the fact is instantiated here then populate with more
 // geometry later when loading assets. Lets make the loading function return a proper
 // loading registry
-export const geometries: GeometriesRegistry = {
+export const geometries: { [key: string]: any } = {
     border: new BoxGeometry(100, 10, 100),
     platform: new BoxGeometry(gridSize * 0.65, 10, gridSize * 2.5),
 };
+
+export function addToGeometries(mesh: Mesh) {
+    geometries[mesh.name] = mesh.geometry;
+}
 
 const materials = {
     phong: new MeshPhongMaterial({
@@ -37,8 +47,6 @@ const materials = {
         side: DoubleSide,
     }),
 };
-
-export const multiplyByGridSize = R.multiply(gridSize);
 
 export function positionOnGrid(
     mesh: Mesh | Object3D,
@@ -83,6 +91,7 @@ export function createWall(
     size: Vector3,
     position: Vector3,
     rotation: Vector3,
+    name?: string,
 ) {
     const sizeForGrid = size.multiplyScalar(gridSize);
     const wall = createMeshForGrid(
@@ -93,6 +102,9 @@ export function createWall(
         ),
         materials.phong,
     );
+    if (name) {
+        wall.name = name;
+    }
     // position the whole group
     positionOnGrid(wall, position, rotation);
 

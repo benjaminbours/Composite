@@ -4,8 +4,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 // our libs
 import {
+    GameState,
     Levels,
     MatchMakingPayload,
+    PositionLevel,
     Side,
     SocketEventType,
 } from '@benjaminbours/composite-core';
@@ -26,25 +28,26 @@ const Game = dynamic(() => import('./Game'), {
 export interface MainState {
     side: Side | undefined;
     selectedLevel: Levels | undefined;
-    isGameRunning: boolean;
+    gameState: GameState | undefined;
 }
 
 function MainApp() {
     const socketController = useRef<SocketController>();
     const [state, setState] = useState<MainState>({
-        // side: Side.LIGHT,
+        // side: Side.SHADOW,
         // selectedLevel: Levels.CRACK_THE_DOOR,
         side: undefined,
         selectedLevel: undefined,
-        isGameRunning: false,
+        gameState: undefined,
     });
+    const [tabIsHidden, setTabIsHidden] = useState(false);
 
-    const handleGameStart = useCallback(() => {
-        setState((prev) => ({ ...prev, isGameRunning: true }));
+    const handleGameStart = useCallback((initialGameState: GameState) => {
+        setState((prev) => ({ ...prev, gameState: initialGameState }));
     }, []);
 
     const establishConnection = useCallback(() => {
-        import('./SocketController')
+        return import('./SocketController')
             .then((mod) => mod.SocketController)
             .then((SocketController) => {
                 socketController.current = new SocketController(
@@ -56,6 +59,24 @@ function MainApp() {
                 ]);
             });
     }, [handleGameStart, state]);
+
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'hidden') {
+            setTabIsHidden(true);
+        } else {
+            setTabIsHidden(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener(
+                'visibilitychange',
+                handleVisibilityChange,
+            );
+        };
+    }, []);
 
     useEffect(() => {
         if (
@@ -70,33 +91,64 @@ function MainApp() {
 
         console.log('establish connection');
         establishConnection();
+        // establishConnection().then(() => {
+        //     const level = new PositionLevel();
+        //     const initialGameState = new GameState(
+        //         [
+        //             {
+        //                 position: {
+        //                     x: level.startPosition.shadow.x,
+        //                     y: level.startPosition.shadow.y,
+        //                 },
+        //                 velocity: {
+        //                     x: 0,
+        //                     y: 0,
+        //                 },
+        //             },
+        //             {
+        //                 position: {
+        //                     x: level.startPosition.light.x,
+        //                     y: level.startPosition.light.y,
+        //                 },
+        //                 velocity: {
+        //                     x: 0,
+        //                     y: 0,
+        //                 },
+        //             },
+        //         ],
+        //         level.state,
+        //         Date.now(),
+        //     );
+        //     handleGameStart(initialGameState);
+        // });
     }, [state, establishConnection]);
 
     // return (
     //     <>
     //         {/* {!state.isGameRunning && (
     //             <Menu mainState={state} setMainState={setState} />
+    //         )} */}
+    //         {state.gameState && (
+    //             <Game
+    //                 initialGameState={state.gameState}
+    //                 side={state.side!}
+    //                 socketController={socketController.current}
+    //             />
     //         )}
-    //         {state.isGameRunning && ( */}
-    //         <Game
-    //             selectedLevel={state.selectedLevel!}
-    //             side={state.side!}
-    //             socketController={socketController.current}
-    //         />
-    //         {/* )} */}
     //     </>
     // );
 
     return (
         <>
-            {!state.isGameRunning && (
+            {!state.gameState && (
                 <Menu mainState={state} setMainState={setState} />
             )}
-            {state.isGameRunning && (
+            {state.gameState && (
                 <Game
-                    selectedLevel={state.selectedLevel!}
                     side={state.side!}
+                    initialGameState={state.gameState}
                     socketController={socketController.current}
+                    tabIsHidden={tabIsHidden}
                 />
             )}
         </>

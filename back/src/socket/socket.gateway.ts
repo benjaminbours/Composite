@@ -8,12 +8,23 @@ import {
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
+import { Logger } from '@nestjs/common';
+import { Scene } from 'three';
 // our libs
 import {
   SocketEventType,
   MatchMakingPayload,
   Levels,
-  GamePositionPayload,
+  GamePlayerInputPayload,
+  Side,
+  SocketEvent,
+  GameState,
+  PositionLevel,
+  FLOOR,
+  RedisGameState,
+  TimeSyncPayload,
+  PhysicLoop,
+  applyInputs,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -38,12 +49,17 @@ import {
   // },
 })
 export class SocketGateway {
+  private gameLoopsRegistry: Record<string, NodeJS.Timeout> = {};
   @WebSocketServer() server: Server;
 
   constructor(
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
   ) {}
+
+  emit = (roomName: string, event: SocketEvent) => {
+    this.server.to(roomName).emit(event[0], event[1]);
+  };
 
   @SubscribeMessage(SocketEventType.CONNECTION)
   async handleConnection(socket: Socket) {
@@ -57,12 +73,12 @@ export class SocketGateway {
   }
 
   @SubscribeMessage(SocketEventType.MATCHMAKING_INFO)
-  async handleMatchMakingPayload(
+  async handleMatchMakingInfo(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: MatchMakingPayload,
   ) {
     console.log('matchmaking info', socket.id, data);
-    const playerFound = await this.temporaryStorage.findMatch(data, 0);
+    const playerFound = await this.temporaryStorage.findMatchInQueue(data, 0);
     if (!playerFound) {
       console.log('no match, add to queue');
       const player = new Player(
@@ -84,20 +100,65 @@ export class SocketGateway {
     }
   }
 
-  @SubscribeMessage(SocketEventType.GAME_POSITION)
-  async handleGamePosition(
+  @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
+  async handleGamePlayerInput(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data: GamePositionPayload,
+    @MessageBody() data: GamePlayerInputPayload,
   ) {
-    const gameRoom = Array.from(socket.rooms)[1];
-    socket.to(gameRoom).emit(SocketEventType.GAME_POSITION, data);
+    const player = await this.temporaryStorage.getPlayer(socket.id);
+    await this.temporaryStorage.addToGameInputsQueue(player.gameId, data);
+  }
+
+  // @SubscribeMessage(SocketEventType.GAME_ACTIVATE_ELEMENT)
+  // async handleGameActivateElement(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() data: GameActivateElementPayload,
+  // ) {
+  //   const gameRoom = Array.from(socket.rooms)[1];
+  //   socket.to(gameRoom).emit(SocketEventType.GAME_ACTIVATE_ELEMENT, data);
+  // }
+
+  // @SubscribeMessage(SocketEventType.GAME_DEACTIVATE_ELEMENT)
+  // async handleGameDeactivateElement(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() data: GameActivateElementPayload,
+  // ) {
+  //   const gameRoom = Array.from(socket.rooms)[1];
+  //   socket.to(gameRoom).emit(SocketEventType.GAME_DEACTIVATE_ELEMENT, data);
+  // }
+
+  @SubscribeMessage(SocketEventType.TIME_SYNC)
+  async handleTimeSync(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: TimeSyncPayload,
+  ) {
+    console.log('received time sync event', data);
+    const player = await this.temporaryStorage.getPlayer(socket.id);
+    const gameState = await this.temporaryStorage
+      .getGameState(player.gameId)
+      .then((redisState) => GameState.parseRedisGameState(redisState));
+    this.emit(socket.id, [
+      SocketEventType.TIME_SYNC,
+      {
+        ...data,
+        serverGameTime: gameState.game_time,
+      },
+    ]);
   }
 
   @SubscribeMessage(SocketEventType.DISCONNECT)
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
     console.log('disconnect', socket.id);
     // TODO: Investigate if in case of recovery session, I should better keep the data for a while
-    this.temporaryStorage.removePlayer(socket.id);
+    const player = await this.temporaryStorage.getPlayer(socket.id);
+    if (player.gameId) {
+      try {
+        clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
+      } catch (error) {
+        Logger.error(error);
+      }
+    }
+    this.temporaryStorage.removePlayer(socket.id, player);
   }
 
   /**
@@ -125,22 +186,156 @@ export class SocketGateway {
       }
     })();
 
-    const [game] = await Promise.all([
-      // store persistent game data
-      this.prismaService.game.create({
-        data: {
-          level: dbLevel,
-          status: GameStatus.STARTED,
+    // store persistent game data
+    const game = await this.prismaService.game.create({
+      data: {
+        level: dbLevel,
+        status: GameStatus.STARTED,
+      },
+    });
+
+    const level = (() => {
+      switch (playerFoundInQueue.player.selectedLevel) {
+        case Levels.CRACK_THE_DOOR:
+          return new PositionLevel();
+      }
+    })();
+
+    // create initial game data
+    const initialGameState = new GameState(
+      [
+        {
+          position: {
+            x: level.startPosition.shadow.x,
+            y: level.startPosition.shadow.y,
+          },
+          velocity: {
+            x: 0,
+            y: 0,
+          },
         },
-      }),
-      // update queue in temporary storage
-      this.temporaryStorage.createGame(playerFoundInQueue, playerArriving),
-    ]);
+        {
+          position: {
+            x: level.startPosition.light.x,
+            y: level.startPosition.light.y,
+          },
+          velocity: {
+            x: 0,
+            y: 0,
+          },
+        },
+      ],
+      level.state,
+      0,
+      0,
+    );
+
+    // store game state and update queue in temporary storage
+    await this.temporaryStorage.createGame(
+      playerFoundInQueue,
+      playerArriving,
+      game.id,
+      RedisGameState.parseGameState(initialGameState),
+    );
     const roomName = String(game.id);
     this.addSocketToRoom(playerFoundInQueue.socketId, roomName);
     this.addSocketToRoom(playerArriving.socketId, roomName);
-    this.server.to(roomName).emit(SocketEventType.GAME_START);
+    this.emit(roomName, [
+      SocketEventType.GAME_START,
+      { gameState: initialGameState },
+    ]);
+    this.registerGameLoop(game.id, level);
   }
+
+  registerGameLoop = (gameId: number, level: PositionLevel) => {
+    // TODO: The following variable declared here and accessible in the process
+    // input queue closure are potential memory leaks.
+    // Let's try to declare them only once somewhere else, or to update
+    // the game state if it should be stored per game and between iteration
+    const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
+      undefined,
+      undefined,
+    ];
+
+    const collidingScene = new Scene();
+    collidingScene.add(FLOOR, ...level.collidingElements);
+    collidingScene.updateMatrixWorld();
+
+    const TICK_RATE = 10;
+    // let tick = 0;
+    // let previous = hrtimeMs();
+    const tickLengthMs = 1000 / TICK_RATE;
+    const physicLoop = new PhysicLoop();
+
+    const networkUpdateLoop = () => {
+      const timerId = setTimeout(networkUpdateLoop, tickLengthMs);
+      this.gameLoopsRegistry[`game:${gameId}`] = timerId;
+      // const now = hrtimeMs();
+      // const delta = (now - previous) / 1000;
+      // console.log('delta', delta);
+      Promise.all([
+        this.temporaryStorage.getGameInputsQueue(gameId).then((inputs) =>
+          inputs.map((input) => {
+            const parts = input.split(':');
+            const player: Side = Number(parts[0]);
+            const inputs = parts[1]
+              .split(',')
+              .map((val) => (val === 'true' ? true : false));
+            const sequence = Number(parts[2]);
+            const time = Number(parts[3]);
+
+            const parsedInput: GamePlayerInputPayload = {
+              time,
+              inputs: { left: inputs[0], right: inputs[1], jump: inputs[2] },
+              sequence,
+              player,
+            };
+            return parsedInput;
+          }),
+        ),
+        this.temporaryStorage
+          .getGameState(gameId)
+          .then((redisState) => GameState.parseRedisGameState(redisState)),
+      ]).then(([inputsQueue, gameState]) => {
+        // console.log('inputs queue before', inputsQueue.length);
+        physicLoop.run(() => {
+          gameState.game_time++;
+          const inputsForTick = inputsQueue.filter(
+            ({ sequence }) => sequence == gameState.game_time,
+          );
+          applyInputs(
+            lastPlayersInput,
+            inputsForTick,
+            collidingScene.children,
+            gameState,
+            // true,
+          );
+          // then we remove it from the list
+          for (let i = 0; i < inputsForTick.length; i++) {
+            const input = inputsForTick[i];
+            inputsQueue.splice(inputsQueue.indexOf(input), 1);
+          }
+        });
+        // emit updated game state to room
+        this.emit(String(gameId), [
+          SocketEventType.GAME_STATE_UPDATE,
+          { gameState },
+        ]);
+
+        // console.log('inputs queue after', inputsQueue.length);
+
+        // update state and inputs queue
+        this.temporaryStorage.updateGameStateAndInputsQueue(
+          gameId,
+          RedisGameState.parseGameState(gameState),
+        );
+
+        // previous = now;
+      });
+    };
+
+    networkUpdateLoop();
+  };
 
   // TODO: As a room is equivalent to a game, lets make a proper
   // room rotation (leave the last one and add to next one) while finishing

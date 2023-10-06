@@ -1,5 +1,4 @@
-import { Vector3, Raycaster, Intersection } from 'three';
-import { CollidingElem } from '../../types';
+import { Vector3, Raycaster, Intersection, Object3D, Vec2 } from 'three';
 
 export interface INearestObjects {
     right?: Intersection;
@@ -18,15 +17,17 @@ const RAYS = {
 const RAYCASTER = new Raycaster();
 
 export function getNearestObjects(
-    position: Vector3,
-    obstacles: CollidingElem[],
+    position: Vec2,
+    obstacles: Object3D[],
 ): INearestObjects {
     const nearestObjects: INearestObjects = {};
 
     const directions = Object.keys(RAYS) as (keyof typeof RAYS)[];
-    for (const direction of directions) {
+    for (let i = 0; i < directions.length; i++) {
+        const direction = directions[i];
+
         const ray = RAYS[direction];
-        RAYCASTER.set(position, ray);
+        RAYCASTER.set(new Vector3(position.x, position.y, 0), ray);
 
         const intersectObjects = RAYCASTER.intersectObjects(obstacles, true);
         const nearestObject = intersectObjects[0];

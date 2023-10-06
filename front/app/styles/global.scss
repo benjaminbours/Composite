@@ -8,7 +8,8 @@ body {
     font-family: sans-serif;
 }
 
-canvas {
+canvas,
+.game-sync-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -120,9 +121,18 @@ button {
 }
 
 .queue-count {
-    
     font-weight: 100;
     letter-spacing: 2px;
     color: white;
+}
 
+.game-sync-overlay {
+    background: black;
+    background-color: rgba($color: #000000, $alpha: 0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }

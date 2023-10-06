@@ -1,24 +1,10 @@
 import { LoadingManager, Mesh } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { AssetInfo, GeometriesRegistry } from './types';
+// TODO: don't like that much the fact this function set a object inside a lib, we never use
+import { geometries } from '@benjaminbours/composite-core';
 
-export async function startLoadingAssets(geometries: GeometriesRegistry) {
+export async function startLoadingAssets() {
     return new Promise((resolve) => {
-        // loaded from public folder
-        // TODO: Update this type, its not relevant anymore
-        const assets: AssetInfo[] = [
-            // {
-            //     type: 'jsonObj',
-            //     url: '/assets/geometry/mountain.json',
-            //     name: 'mountain',
-            // },
-            {
-                type: 'jsonObj',
-                url: '/assets/geometry/assets.glb',
-                name: 'wall',
-            },
-        ];
-
         const manager = new LoadingManager();
 
         manager.onStart = (url, itemsLoaded, itemsTotal) => {
@@ -56,12 +42,10 @@ export async function startLoadingAssets(geometries: GeometriesRegistry) {
         };
 
         const assetsLoader = new GLTFLoader(manager);
-        for (const asset of assets) {
-            assetsLoader.load(asset.url, (object: any) => {
-                object.scene.children.forEach((mesh: Mesh) => {
-                    geometries[mesh.name] = mesh.geometry;
-                });
+        assetsLoader.load('/assets/geometry/assets.glb', (object: any) => {
+            object.scene.children.forEach((mesh: Mesh) => {
+                geometries[mesh.name] = mesh.geometry;
             });
-        }
+        });
     });
 }

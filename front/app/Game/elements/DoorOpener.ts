@@ -1,23 +1,22 @@
+// vendors
 import {
-    BoxGeometry,
     BufferAttribute,
     BufferGeometry,
     Color,
-    DoubleSide,
-    Mesh,
-    MeshPhongMaterial,
     Object3D,
     Points,
     ShaderMaterial,
     Vector3,
 } from 'three';
 import { gsap } from 'gsap';
+// our libs
+import {
+    getRange,
+    type InteractiveComponent,
+} from '@benjaminbours/composite-core';
 import CustomCamera from '../CustomCamera';
-import { InteractiveComponent } from '../Player/physics/movementHelpers';
-import { getRange } from '../helpers/math';
 import VS from '../glsl/doorOpener_vs.glsl';
 import FS from '../glsl/doorOpener_fs.glsl';
-import { gridSize } from '../levels/levels.utils';
 
 interface DoorInfo {
     cameraPosition: Vector3;
@@ -40,7 +39,8 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     protected particles: Points;
 
     constructor(
-        private doorInfo: DoorInfo,
+        public name: string,
+        public doorInfo: DoorInfo,
         color: Color,
     ) {
         super();
@@ -111,19 +111,6 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
 
         this.particles = new Points(particlesGeo, particlesMat);
         this.add(this.particles);
-
-        const whiteBlockGeo = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
-        const whiteBlockMat = new MeshPhongMaterial({
-            color: 0xffffff,
-            side: DoubleSide,
-            specular: 0x000000,
-            shininess: 50,
-            transparent: true,
-        });
-
-        const whiteBlock = new Mesh(whiteBlockGeo, whiteBlockMat);
-        this.add(whiteBlock);
-
         this.particles.frustumCulled = false;
     }
 
