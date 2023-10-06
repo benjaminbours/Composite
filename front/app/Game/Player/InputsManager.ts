@@ -7,11 +7,11 @@ export default class InputsManager {
         jump: false,
     };
 
-    constructor() {
-        // TODO: Implements a destroy method
+    // TODO: Implements a destroy method
+    public registerEventListeners = () => {
         window.addEventListener('keydown', this.handleKeydown.bind(this));
         window.addEventListener('keyup', this.handleKeyup.bind(this));
-    }
+    };
 
     public reset() {
         this.inputsActive.left = false;
