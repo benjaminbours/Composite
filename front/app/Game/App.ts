@@ -129,10 +129,10 @@ export default class App {
 
         this.socketController.getCurrentGameState = this.getCurrentGameState;
         this.socketController.onGameStateUpdate = (gameState: GameState) => {
-            const gameTimeDelta =
-                this.currentState.game_time - gameState.game_time;
-            console.log('received update', gameState);
-            console.log('time delta', gameTimeDelta);
+            // console.log('received update', gameState);
+            // const gameTimeDelta =
+            //     this.currentState.game_time - gameState.game_time;
+            // console.log('time delta', gameTimeDelta);
             this.shouldReconciliateState = true;
             this.serverGameState = gameState;
             // this.checkServerState();

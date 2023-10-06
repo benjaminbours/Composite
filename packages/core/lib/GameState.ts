@@ -1,5 +1,24 @@
-import { Vec2 } from 'three';
-import { Levels, PositionLevelState } from './types';
+import type { Vec2 } from 'three';
+
+export enum Levels {
+    CRACK_THE_DOOR,
+    LEARN_TO_FLY,
+    THE_HIGH_SPHERES,
+}
+
+export interface PositionLevelState {
+    id: Levels.CRACK_THE_DOOR;
+    ground_door: number;
+    roof_door: number;
+    end_level: number;
+}
+
+interface OtherLevelState {
+    id: Levels.LEARN_TO_FLY;
+    end_level: number;
+}
+
+export type LevelState = PositionLevelState | OtherLevelState;
 
 // orders of properties are very important here
 export class RedisGameState {
@@ -40,18 +59,13 @@ export class RedisGameState {
     }
 }
 
-interface OtherLevel {
-    id: Levels.LEARN_TO_FLY;
-    end_level: number;
-}
-
 export class GameState {
     constructor(
         public players: {
             position: Vec2;
             velocity: Vec2;
         }[],
-        public level: PositionLevelState | OtherLevel,
+        public level: LevelState,
         public lastValidatedInput: number,
         public game_time: number,
     ) {}
@@ -75,7 +89,7 @@ export class GameState {
                         end_level: Number(state.end_level),
                     };
             }
-        })() as PositionLevelState | OtherLevel;
+        })() as LevelState;
         return new GameState(
             [
                 {
