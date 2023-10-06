@@ -76,7 +76,7 @@ export default class App {
 
     public inputsManager: InputsManager;
 
-    private gameStateHistory: GameState[] = [];
+    // private gameStateHistory: GameState[] = [];
     private inputsHistory: GamePlayerInputPayload[] = [];
     // its a predicted state if we compare it to the last validated state
     private currentState: GameState;
@@ -87,6 +87,7 @@ export default class App {
     private lastInput: GamePlayerInputPayload | undefined;
 
     private physicLoop = new PhysicLoop();
+    public serverGameState: GameState;
     // used only for other players
     private interpolation: InterpolationConfig = {
         ratio: 0,
@@ -140,7 +141,7 @@ export default class App {
             this.synchronizeGameTimeWithServer;
     }
 
-    synchronizeGameTimeWithServer = (gameTime: number) => {
+    public synchronizeGameTimeWithServer = (gameTime: number) => {
         this.currentState.game_time = gameTime;
     };
 
@@ -330,13 +331,13 @@ export default class App {
             applyInputs(
                 lastPlayersInput,
                 inputsForTick,
-            [
-                FLOOR,
-                ...this.levelController.levels[
-                    this.levelController.currentLevel
-                ]!.collidingElements,
-            ],
-            nextStateAtInterpolationTime,
+                [
+                    FLOOR,
+                    ...this.levelController.levels[
+                        this.levelController.currentLevel
+                    ]!.collidingElements,
+                ],
+                nextStateAtInterpolationTime,
                 // true,
             );
             for (let i = 0; i < inputsForTick.length; i++) {
@@ -406,18 +407,18 @@ export default class App {
             return 1;
         }
 
-            const vector = new Vector2(
+        const vector = new Vector2(
             this.currentState.players[this.playersConfig[1]].position.x,
             this.currentState.players[this.playersConfig[1]].position.y,
-            );
-            const vectorTarget = new Vector2(
+        );
+        const vectorTarget = new Vector2(
             this.serverGameState.players[this.playersConfig[1]].position.x,
             this.serverGameState.players[this.playersConfig[1]].position.y,
-            );
+        );
         const targetNormalize = vectorTarget.clone().sub(vector).normalize();
         const distance = vector.distanceTo(vectorTarget) * ratio;
 
-            const displacement = targetNormalize.multiplyScalar(distance);
+        const displacement = targetNormalize.multiplyScalar(distance);
         // side effect
         this.currentState.players[this.playersConfig[1]].position.x +=
             displacement.x;
@@ -436,19 +437,19 @@ export default class App {
             this.reconciliateState();
         }
         this.physicLoop.run((delta) => {
-        this.processInputs();
-        updateGameState(
+            this.processInputs();
+            updateGameState(
                 delta,
-            this.playersConfig[0],
-            this.inputsManager.inputsActive,
-            [
-                FLOOR,
-                ...this.levelController.levels[
-                    this.levelController.currentLevel
-                ]!.collidingElements,
-            ],
-            this.currentState,
-        );
+                this.playersConfig[0],
+                this.inputsManager.inputsActive,
+                [
+                    FLOOR,
+                    ...this.levelController.levels[
+                        this.levelController.currentLevel
+                    ]!.collidingElements,
+                ],
+                this.currentState,
+            );
             // this.gameStateHistory.push(
             //     JSON.parse(JSON.stringify(this.currentState)),
             // );
@@ -458,14 +459,14 @@ export default class App {
                     delta,
                 );
             }
-        for (let i = 0; i < this.playersConfig.length; i++) {
-            const side = this.playersConfig[i];
-            this.players[i].position.set(
-                this.currentState.players[side].position.x,
-                this.currentState.players[side].position.y,
-                0,
-            );
-        }
+            for (let i = 0; i < this.playersConfig.length; i++) {
+                const side = this.playersConfig[i];
+                this.players[i].position.set(
+                    this.currentState.players[side].position.x,
+                    this.currentState.players[side].position.y,
+                    0,
+                );
+            }
             this.updatePlayerGraphics();
             this.currentState.game_time++;
         });

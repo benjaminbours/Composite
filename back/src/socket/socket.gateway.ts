@@ -308,7 +308,7 @@ export class SocketGateway {
             inputsForTick,
             collidingScene.children,
             gameState,
-            true,
+            // true,
           );
           // then we remove it from the list
           for (let i = 0; i < inputsForTick.length; i++) {

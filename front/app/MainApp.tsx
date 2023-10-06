@@ -40,6 +40,7 @@ function MainApp() {
         selectedLevel: undefined,
         gameState: undefined,
     });
+    const [tabIsHidden, setTabIsHidden] = useState(false);
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         setState((prev) => ({ ...prev, gameState: initialGameState }));
@@ -58,6 +59,24 @@ function MainApp() {
                 ]);
             });
     }, [handleGameStart, state]);
+
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'hidden') {
+            setTabIsHidden(true);
+        } else {
+            setTabIsHidden(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener(
+                'visibilitychange',
+                handleVisibilityChange,
+            );
+        };
+    }, []);
 
     useEffect(() => {
         if (
@@ -129,6 +148,7 @@ function MainApp() {
                     side={state.side!}
                     initialGameState={state.gameState}
                     socketController={socketController.current}
+                    tabIsHidden={tabIsHidden}
                 />
             )}
         </>

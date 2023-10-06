@@ -1,7 +1,7 @@
 // vendors
 import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // our libs
 import { GameState, Side } from '@benjaminbours/composite-core';
 import App from './App';
@@ -13,12 +13,19 @@ interface Props {
     initialGameState: GameState;
     // can be undefined for dev purpose
     socketController?: SocketController;
+    tabIsHidden: boolean;
 }
 
-function Game({ side, socketController, initialGameState }: Props) {
+function Game({
+    side,
+    socketController,
+    initialGameState,
+    tabIsHidden,
+}: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
     const appRef = useRef<App>();
+    const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
 
     useEffect(() => {
         let gameLoop: (() => void) | undefined = undefined;
@@ -48,19 +55,26 @@ function Game({ side, socketController, initialGameState }: Props) {
                 return undefined;
             })();
 
-            const handleVisibilityChange = () => {
-                if (document.visibilityState === 'hidden') {
-                    appRef.current?.inputsManager.reset();
-                    appRef.current?.clock.stop();
-                } else {
-                    appRef.current?.clock.start();
-                }
-            };
+            // const handleVisibilityChange = () => {
+            //     console.log(
+            //         'visibilitychange game time',
+            //         appRef.current?.currentState.game_time,
+            //     );
+            //     setIsSynchronizingTime(true);
+            //     if (document.visibilityState === 'hidden') {
+            //         console.log('visibilitychange hidden');
+            //         appRef.current?.inputsManager.reset();
+            //         appRef.current?.clock.stop();
+            //     } else {
+            //         console.log('visibilitychange seen');
+            //         appRef.current?.clock.start();
+            //     }
+            // };
 
-            document.addEventListener(
-                'visibilitychange',
-                handleVisibilityChange,
-            );
+            // document.addEventListener(
+            //     'visibilitychange',
+            //     handleVisibilityChange,
+            // );
 
             gameLoop = () => {
                 stats?.begin();
@@ -74,20 +88,36 @@ function Game({ side, socketController, initialGameState }: Props) {
             gsap.ticker.fps(30);
             gsap.ticker.add(gameLoop);
             gameStarted.current = true;
+            setIsSynchronizingTime(true);
 
             return () => {
                 if (gameLoop) {
                     gsap.ticker.remove(gameLoop);
                 }
-                document.removeEventListener(
-                    'visibilitychange',
-                    handleVisibilityChange,
-                );
+                // document.removeEventListener(
+                //     'visibilitychange',
+                //     handleVisibilityChange,
+                // );
             };
         });
     }, []);
 
-    return <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }}></canvas>;
+    useEffect(() => {
+        if (!tabIsHidden && isSynchronizingTime && socketController) {
+            socketController.synchronizeTime().then(() => {
+                setIsSynchronizingTime(false);
+            });
+        }
+    }, [isSynchronizingTime, tabIsHidden]);
+
+    return (
+        <>
+            {isSynchronizingTime && (
+                <div className="game-sync-overlay">is Synchronizing</div>
+            )}
+            <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }}></canvas>
+        </>
+    );
 }
 
 export default Game;
