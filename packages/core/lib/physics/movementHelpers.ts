@@ -1,5 +1,5 @@
 import type { Object3D, Vec2 } from 'three';
-import { collisionSystem } from './collision.system';
+import { CollisionResult, collisionSystem } from './collision.system';
 import {
     GamePlayerInputPayload,
     Inputs,
@@ -7,15 +7,14 @@ import {
     Side,
 } from '../types';
 import { GameState } from '../GameState';
+import { computeVelocityX } from './velocity';
 
-const MAX_VELOCITY_X = 10;
 const MAX_FALL_SPEED = 20;
-// const MAX_ASCEND_SPEED = 10;
 const JUMP_POWER = 15;
 const GRAVITY = 20;
-const SPEED = 20; // less is faster
 
 // // Ascension helpers
+// const MAX_ASCEND_SPEED = 10;
 // const hasReachedMaxAscendSpeed = R.propSatisfies(
 //     // predicate
 //     (y: number) => y >= MAX_ASCEND_SPEED,
@@ -47,54 +46,38 @@ const SPEED = 20; // less is faster
 //     // }
 // }
 
-export interface InteractiveComponent {
-    shouldActivate: boolean;
-    isActive: boolean;
-}
-
-const updateVelocityX = (delta: number, target: number, velocity: Vec2) => {
-    const speed = SPEED * delta * 60;
-    return (velocity.x += (target - velocity.x) / speed);
-};
-
-export function updateGameState(
+// full of side effect
+function applyCollisionCorrection(
     delta: number,
-    side: Side,
-    inputs: Inputs,
-    collidingElems: Object3D[],
-    gameState: GameState,
+    input: Inputs,
+    collisionResult: CollisionResult,
+    player: { position: Vec2; velocity: Vec2 },
 ) {
-    const deltaInverse = 1 / delta / (60 * 60);
-    const { level, players } = gameState;
-    const { velocity, position } = players[side];
+    const { state, colliding } = collisionResult;
+    const { velocity, position } = player;
 
-    const hasReachedMaxLeftSpeed = velocity.x < -MAX_VELOCITY_X;
-    const hasReachedMaxRightSpeed = velocity.x > MAX_VELOCITY_X;
-    if (inputs.left) {
-        if (hasReachedMaxLeftSpeed) {
-            velocity.x = -MAX_VELOCITY_X;
-        } else {
-            updateVelocityX(deltaInverse, -MAX_VELOCITY_X, velocity);
-        }
+    if (colliding.leftPointX) {
+        velocity.x = 0;
+        position.x = colliding.leftPointX;
     }
 
-    if (inputs.right) {
-        if (hasReachedMaxRightSpeed) {
-            velocity.x = MAX_VELOCITY_X;
-        } else {
-            updateVelocityX(deltaInverse, MAX_VELOCITY_X, velocity);
-        }
+    if (colliding.rightPointX) {
+        velocity.x = 0;
+        position.x = colliding.rightPointX;
     }
 
-    if (!inputs.left && !inputs.right) {
-        updateVelocityX(deltaInverse, 0, velocity);
+    if (colliding.topPointY) {
+        velocity.y = 0;
+        position.y = colliding.topPointY;
     }
 
-    // process collision
-    const state = collisionSystem(players, side, level, collidingElems);
+    if (colliding.bottomPointY) {
+        velocity.y = 0;
+        position.y = colliding.bottomPointY;
+    }
 
     // jump if possible
-    if (inputs.jump && state === MovableComponentState.onFloor) {
+    if (input.jump && state === MovableComponentState.onFloor) {
         velocity.y = JUMP_POWER;
     }
 
@@ -108,10 +91,39 @@ export function updateGameState(
         }
     }
 
-    // What is 60 ?
     // use velocity to update position
     position.x += velocity.x * delta * 60;
     position.y += velocity.y * delta * 60;
+}
+
+export interface InteractiveComponent {
+    shouldActivate: boolean;
+    isActive: boolean;
+}
+
+export function updateGameState(
+    delta: number,
+    side: Side,
+    inputs: Inputs,
+    collidingElems: Object3D[],
+    gameState: GameState,
+) {
+    // side effect
+    gameState.players[side].velocity.x = computeVelocityX(
+        delta,
+        inputs,
+        gameState.players[side].velocity.x,
+    );
+
+    // compute collision
+    const collisionResult = collisionSystem(side, collidingElems, gameState);
+
+    applyCollisionCorrection(
+        delta,
+        inputs,
+        collisionResult,
+        gameState.players[side],
+    );
 }
 
 export function applyInputs(

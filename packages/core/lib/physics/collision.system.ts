@@ -1,8 +1,9 @@
 import type { Intersection, Object3D, Vec2 } from 'three';
 import { MovableComponent, MovableComponentState, Side } from '../types';
 import { getNearestObjects } from './raycaster';
-import { LevelState } from '../GameState';
-import { AREA_DOOR_OPENER_SUFFIX } from '../levels';
+import { GameState, LevelState } from '../GameState';
+import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
+import { InteractiveArea } from '../elements';
 
 const RANGE = 20;
 
@@ -17,15 +18,23 @@ const isTouchingDoorOpener = (objectDown: Intersection) => {
     return parent?.name.includes(AREA_DOOR_OPENER_SUFFIX) || false;
 };
 
-const activateDoorOpener = (state: LevelState, objectDown: Intersection) => {
-    const elem = objectDown.object.parent as Object3D;
-    const doorName = `${elem.name.replace(AREA_DOOR_OPENER_SUFFIX, '')}`;
+const openTheDoor = (state: LevelState, objectDown: Intersection) => {
+    const elem = objectDown.object.parent as InteractiveArea;
+    const doorName = `${elem.name.replace(`_${AREA_DOOR_OPENER_SUFFIX}`, '')}`;
     // side effect
-    state[`${doorName}_door` as keyof LevelState] = 1;
+    if (state[`${doorName}_door` as keyof LevelState] < 1) {
+        state[`${doorName}_door` as keyof LevelState] += 0.01;
+    }
     // console.log('activate', `${doorName}_door`);
+    // if (elem.wallDoor) {
+    //     openTheDoor(
+    //         elem.wallDoor,
+    //         state[`${doorName}_door` as keyof LevelState],
+    //     );
+    // }
 };
 
-const clearDoorOpener = (
+const closeTheDoor = (
     players: MovableComponent[],
     side: Side,
     levelState: LevelState,
@@ -34,7 +43,7 @@ const clearDoorOpener = (
     // check in the state if there is any door activated
     for (const key in levelState) {
         const doorIsActivated =
-            key.includes('door') && levelState[key as keyof LevelState] === 1;
+            key.includes('door') && levelState[key as keyof LevelState] > 0;
         // if not do nothing
         if (!doorIsActivated) {
             continue;
@@ -69,19 +78,46 @@ const clearDoorOpener = (
 
         // if not deactivate it
         // side effect
-        levelState[key as keyof LevelState] = 0;
-        // console.log('deactivate', key);
+        if (levelState[key as keyof LevelState] > 0) {
+            levelState[key as keyof LevelState] -= 0.05;
+        }
+        // // console.log('deactivate', key);
+        // const wallDoor = obstacles.find(
+        //     (e) => e.name === ElementName.WALL_DOOR(doorName),
+        // );
+
+        // if (wallDoor) {
+        //     closeTheDoor(wallDoor, levelState[key as keyof LevelState]);
+        // }
     }
 };
 
+export interface Colliding {
+    leftPointX?: number;
+    rightPointX?: number;
+    topPointY?: number;
+    bottomPointY?: number;
+}
+
+export interface CollisionResult {
+    state: MovableComponentState;
+    colliding: Colliding;
+}
+
 export function collisionSystem(
-    players: MovableComponent[],
     side: Side,
-    levelState: LevelState,
     obstacles: Object3D[],
-): MovableComponentState {
+    gameState: GameState,
+): CollisionResult {
     let state: MovableComponentState = MovableComponentState.onFloor;
-    const { position, velocity } = players[side];
+    const { position, velocity } = gameState.players[side];
+
+    const colliding: Colliding = {
+        leftPointX: undefined,
+        rightPointX: undefined,
+        topPointY: undefined,
+        bottomPointY: undefined,
+    };
 
     const nearestObjects = getNearestObjects(position, obstacles);
 
@@ -115,8 +151,8 @@ export function collisionSystem(
 
         // when the component touch the floor
         if (isTouchingTheFloor(position, velocity, nearestObjects.down)) {
-            velocity.y = 0;
-            position.y = nearestObjects.down.point.y + 20;
+            colliding.bottomPointY = nearestObjects.down.point.y + RANGE;
+            state = MovableComponentState.onFloor;
 
             switch (true) {
                 // case parent instanceof Elevator:
@@ -125,13 +161,12 @@ export function collisionSystem(
                 //     component.state = MovableComponentState.ascend;
                 //     break;
                 case isTouchingDoorOpener(nearestObjects.down):
-                    activateDoorOpener(levelState, nearestObjects.down);
+                    openTheDoor(gameState.level, nearestObjects.down);
                     break;
                 // case parent?.name.includes('endLevel'):
                 //     // setCurrentEndLevel();
                 //     break;
             }
-            state = MovableComponentState.onFloor;
         } else {
             // when the component is not touching the floor
 
@@ -166,7 +201,7 @@ export function collisionSystem(
                 AREA_DOOR_OPENER_SUFFIX,
             )
         ) {
-            clearDoorOpener(players, side, levelState, obstacles);
+            closeTheDoor(gameState.players, side, gameState.level, obstacles);
         }
 
         // if (!parent?.name.includes('endLevel')) {
@@ -178,25 +213,22 @@ export function collisionSystem(
         nearestObjects.right &&
         position.x + velocity.x + RANGE > nearestObjects.right.point.x
     ) {
-        velocity.x = 0;
-        position.x = nearestObjects.right.point.x - 20;
+        colliding.rightPointX = nearestObjects.right.point.x - RANGE;
     }
 
     if (
         nearestObjects.left &&
         position.x + velocity.x < RANGE + nearestObjects.left.point.x
     ) {
-        velocity.x = 0;
-        position.x = nearestObjects.left.point.x + 20;
+        colliding.leftPointX = nearestObjects.left.point.x + RANGE;
     }
 
     if (
         nearestObjects.up &&
         position.y + velocity.y + RANGE > nearestObjects.up.point.y
     ) {
-        velocity.y = 0;
-        position.y = nearestObjects.up.point.y - 20;
+        colliding.topPointY = nearestObjects.up.point.y - RANGE;
     }
 
-    return state;
+    return { state, colliding };
 }
