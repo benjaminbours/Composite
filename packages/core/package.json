@@ -22,6 +22,6 @@
   "repository": "https://github.com/benjaminbours/Composite.git",
   "peerDependencies": {
     "gsap": "^3.12.2",
-    "three": "^0.156.1"
+    "three": "^0.157.0"
   }
 }
