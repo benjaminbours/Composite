@@ -9,7 +9,7 @@ import {
     positionOnGrid,
 } from './levels.utils';
 import { InteractiveArea } from '../elements/InteractiveArea';
-import { Levels, PositionLevelState } from '../types';
+import { Levels, PositionLevelState } from '../GameState';
 
 export class PositionLevel extends Group {
     public collidingElements: Object3D[] = [];
@@ -18,14 +18,23 @@ export class PositionLevel extends Group {
 
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
-        shadow: new Vector3(200, 20, 0),
+        // shadow: new Vector3(200, 20, 0),
+        shadow: new Vector3(2200, 775, 0), // roof door
     };
 
     public state: PositionLevelState = {
         id: Levels.CRACK_THE_DOOR,
-        ground_door: 0,
-        roof_door: 0,
-        end_level: 0,
+        doors: {
+            ground: {
+                ratio: 0,
+                activators: [],
+            },
+            roof: {
+                ratio: 0,
+                activators: [],
+            },
+        },
+        end_level: [0, 0],
     };
 
     constructor() {
@@ -74,12 +83,12 @@ export class PositionLevel extends Group {
             new Vector3(0, 0, 0),
             'vertical',
         );
-        wallDoorGroundFloor.name = ElementName.WALL_DOOR('GROUND');
+        wallDoorGroundFloor.name = ElementName.WALL_DOOR('ground');
         this.add(wallDoorGroundFloor);
         this.collidingElements.push(wallDoorGroundFloor);
 
         const groundFloorDoorOpener = new InteractiveArea(
-            ElementName.AREA_DOOR_OPENER('GROUND'),
+            ElementName.AREA_DOOR_OPENER('ground'),
         );
         this.collidingElements.push(groundFloorDoorOpener);
         this.interactiveElements.push(groundFloorDoorOpener);
@@ -93,12 +102,12 @@ export class PositionLevel extends Group {
             new Vector3(0, 3, 0),
             'horizontal',
         );
-        wallDoorRoof.name = ElementName.WALL_DOOR('ROOF');
+        wallDoorRoof.name = ElementName.WALL_DOOR('roof');
         this.add(wallDoorRoof);
         this.collidingElements.push(wallDoorRoof);
 
         const roofDoorOpener = new InteractiveArea(
-            ElementName.AREA_DOOR_OPENER('ROOF'),
+            ElementName.AREA_DOOR_OPENER('roof'),
         );
         this.collidingElements.push(roofDoorOpener);
         this.interactiveElements.push(roofDoorOpener);

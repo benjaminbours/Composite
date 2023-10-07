@@ -25,9 +25,10 @@ import {
     FLOOR,
     Side,
     SocketEventType,
-    updateGameState,
+    applySingleInput,
     PhysicLoop,
-    applyInputs,
+    applyInputList,
+    ElementName,
 } from '@benjaminbours/composite-core';
 // local
 // import SkyShader from './SkyShader';
@@ -129,10 +130,10 @@ export default class App {
 
         this.socketController.getCurrentGameState = this.getCurrentGameState;
         this.socketController.onGameStateUpdate = (gameState: GameState) => {
-            const gameTimeDelta =
-                this.currentState.game_time - gameState.game_time;
-            console.log('received update', gameState);
-            console.log('time delta', gameTimeDelta);
+            // console.log('received update', gameState);
+            // const gameTimeDelta =
+            //     this.currentState.game_time - gameState.game_time;
+            // console.log('time delta', gameTimeDelta);
             this.shouldReconciliateState = true;
             this.serverGameState = gameState;
             // this.checkServerState();
@@ -233,7 +234,7 @@ export default class App {
             const item = object.children[i] as any;
             if (item.update) {
                 if (item instanceof DoorOpener) {
-                    item.update(this.delta, this.camera);
+                    // do nothing
                 } else if (item instanceof Player) {
                     // do nothing
                 } else {
@@ -328,7 +329,8 @@ export default class App {
                 ({ sequence }) =>
                     sequence == nextStateAtInterpolationTime.game_time,
             );
-            applyInputs(
+            applyInputList(
+                this.physicLoop.delta,
                 lastPlayersInput,
                 inputsForTick,
                 [
@@ -338,6 +340,7 @@ export default class App {
                     ]!.collidingElements,
                 ],
                 nextStateAtInterpolationTime,
+                'client',
                 // true,
             );
             for (let i = 0; i < inputsForTick.length; i++) {
@@ -373,6 +376,9 @@ export default class App {
         // other players interpolation
         this.interpolation.shouldUpdate = true;
         this.interpolation.ratio = 0;
+
+        // erase level state
+        this.currentState.level = this.serverGameState.level;
     };
 
     // private checkServerState = () => {
@@ -438,7 +444,7 @@ export default class App {
         }
         this.physicLoop.run((delta) => {
             this.processInputs();
-            updateGameState(
+            applySingleInput(
                 delta,
                 this.playersConfig[0],
                 this.inputsManager.inputsActive,
@@ -449,6 +455,7 @@ export default class App {
                     ]!.collidingElements,
                 ],
                 this.currentState,
+                'client',
             );
             // this.gameStateHistory.push(
             //     JSON.parse(JSON.stringify(this.currentState)),
@@ -488,7 +495,39 @@ export default class App {
         }
     };
 
+    private updateWorldPhysic = () => {
+        for (const key in this.currentState.level.doors) {
+            const { activators } = this.currentState.level.doors[key];
+
+            const doorOpener = this.levelController.levels[
+                this.levelController.currentLevel
+            ]!.collidingElements.find(
+                (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
+            )?.children.find(
+                (object) => object.name === ElementName.DOOR_OPENER(key),
+            ) as DoorOpener | undefined;
+
+            if (doorOpener) {
+                const isActivate =
+                    activators.length > 0 && !doorOpener.shouldActivate;
+                const isDeactivating =
+                    activators.length === 0 && doorOpener.shouldActivate;
+                if (isActivate) {
+                    doorOpener.shouldActivate = true;
+                }
+
+                if (isDeactivating) {
+                    doorOpener.shouldActivate = false;
+                }
+            }
+
+            const withFocusCamera = activators.includes(this.playersConfig[0]);
+            doorOpener?.update(this.delta, this.camera, withFocusCamera);
+        }
+    };
+
     public updateWorld = () => {
+        this.updateWorldPhysic();
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         // this.floor.position.set(this.players[0].position.x, 0, 0);

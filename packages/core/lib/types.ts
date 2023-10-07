@@ -1,22 +1,9 @@
 import type { Group, Mesh, Object3D, Vec2 } from 'three';
-import { GameState } from './GameState';
+import { GameState, Levels } from './GameState';
 
 export enum Side {
     SHADOW,
     LIGHT,
-}
-
-export enum Levels {
-    CRACK_THE_DOOR,
-    LEARN_TO_FLY,
-    THE_HIGH_SPHERES,
-}
-
-export interface PositionLevelState {
-    id: Levels.CRACK_THE_DOOR;
-    ground_door: number;
-    roof_door: number;
-    end_level: number;
 }
 
 export enum SocketEventType {

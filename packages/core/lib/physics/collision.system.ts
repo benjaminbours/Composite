@@ -1,151 +1,52 @@
-import { Object3D } from 'three';
-import { MovableComponent, MovableComponentState } from '../types';
-import { getNearestObjects } from './raycaster';
+import type { Object3D, Vec2 } from 'three';
+import { INearestObjects, getNearestObjects } from './raycaster';
+export const RANGE = 20;
 
-const RANGE = 20;
+export type CollidingObjects = INearestObjects;
 
-export function collisionSystem(
-    component: MovableComponent,
+// TODO: The whole function with the raycaster file could be merged / optimized
+export function detectCollidingObjects(
     obstacles: Object3D[],
-): MovableComponentState {
-    let state: MovableComponentState = MovableComponentState.onFloor;
-    const { position, velocity } = component;
+    player: { position: Vec2; velocity: Vec2 },
+): INearestObjects {
+    const { position, velocity } = player;
+
+    const colliding: INearestObjects = {
+        left: undefined,
+        right: undefined,
+        up: undefined,
+        down: undefined,
+    };
 
     const nearestObjects = getNearestObjects(position, obstacles);
 
-    if (nearestObjects.down) {
-        const { parent } = nearestObjects.down.object;
-
-        // const setCurrentDoorOpener = () => {
-        //     const elem = parent as DoorOpener;
-        //     component.currentDoorOpener = elem;
-        //     elem.shouldActivate = true;
-        //     // if (!elem.isActive) {
-        //     //     console.log('HERE SEND');
-        //     //     socketController.emit([
-        //     //         SocketEventType.GAME_ACTIVATE_ELEMENT,
-        //     //         { elementName: parent?.name! },
-        //     //     ]);
-        //     // }
-        // };
-        // const clearCurrentDoorOpener = () => {
-        //     if (component.currentDoorOpener) {
-        //         // socketController.emit([
-        //         //     SocketEventType.GAME_DEACTIVATE_ELEMENT,
-        //         //     { elementName: component.currentDoorOpener.name },
-        //         // ]);
-        //         component.currentDoorOpener.shouldActivate = false;
-        //         component.currentDoorOpener = undefined;
-        //     }
-        // };
-
-        // const setCurrentEndLevel = () => {
-        //     component.currentEndLevel = parent as EndLevel;
-        //     (parent as EndLevel).shouldActivate = true;
-        //     if (component instanceof LightPlayer) {
-        //         (parent as EndLevel).shouldActivateLight = true;
-        //     }
-        //     if (component instanceof ShadowPlayer) {
-        //         (parent as EndLevel).shouldActivateShadow = true;
-        //     }
-        // };
-        // const clearCurrentEndLevel = () => {
-        //     if (component.currentEndLevel) {
-        //         if (component instanceof LightPlayer) {
-        //             (
-        //                 component.currentEndLevel as EndLevel
-        //             ).shouldActivateLight = false;
-        //         }
-        //         if (component instanceof ShadowPlayer) {
-        //             (
-        //                 component.currentEndLevel as EndLevel
-        //             ).shouldActivateShadow = false;
-        //         }
-        //         component.currentEndLevel.shouldActivate = false;
-        //         component.currentEndLevel = undefined;
-        //     }
-        // };
-
-        // when the component touch the floor
-        if (position.y + velocity.y <= RANGE + nearestObjects.down.point.y) {
-            velocity.y = 0;
-            position.y = nearestObjects.down.point.y + 20;
-
-            switch (true) {
-                // case parent instanceof Elevator:
-                //     component.currentElevator = parent as Elevator;
-                //     (parent as Elevator).shouldActivate = true;
-                //     component.state = MovableComponentState.ascend;
-                //     break;
-                case parent?.name.includes('doorOpener'):
-                    // setCurrentDoorOpener();
-                    break;
-                case parent?.name.includes('endLevel'):
-                    // setCurrentEndLevel();
-                    break;
-            }
-            state = MovableComponentState.onFloor;
-        } else {
-            // when the component is not touching the floor
-
-            // TODO: Think about how to manage the two different mystic place logics
-            // the pulsing flow and the door opening
-            // it should probably not stay in the collision and player logic
-            // think about a system that could be apply to anything with velocity, not just the player
-            // if (
-            //     parent instanceof Elevator &&
-            //     nearestObjects.down.distance <= parent.height
-            // ) {
-            //     component.currentElevator = parent;
-            //     parent.shouldActivate = true;
-            //     component.state = MovableComponentState.ascend;
-            // } else {
-            //     if (component.state !== MovableComponentState.inAir) {
-            //         component.state = MovableComponentState.inAir;
-            //     }
-            // }
-            state = MovableComponentState.inAir;
-            // clearCurrentDoorOpener();
-            // clearCurrentEndLevel();
-        }
-
-        // if (!(parent instanceof Elevator) && component.currentElevator) {
-        //     component.currentElevator.shouldActivate = false;
-        //     component.currentElevator = undefined;
-        // }
-
-        if (!parent?.name.includes('doorOpener')) {
-            // clearCurrentDoorOpener();
-        }
-
-        if (!parent?.name.includes('endLevel')) {
-            // clearCurrentEndLevel();
-        }
+    if (
+        nearestObjects.down &&
+        position.y + velocity.y <= RANGE + nearestObjects.down.point.y
+    ) {
+        colliding.down = nearestObjects.down;
     }
 
     if (
         nearestObjects.right &&
         position.x + velocity.x + RANGE > nearestObjects.right.point.x
     ) {
-        velocity.x = 0;
-        position.x = nearestObjects.right.point.x - 20;
+        colliding.right = nearestObjects.right;
     }
 
     if (
         nearestObjects.left &&
         position.x + velocity.x < RANGE + nearestObjects.left.point.x
     ) {
-        velocity.x = 0;
-        position.x = nearestObjects.left.point.x + 20;
+        colliding.left = nearestObjects.left;
     }
 
     if (
         nearestObjects.up &&
         position.y + velocity.y + RANGE > nearestObjects.up.point.y
     ) {
-        velocity.y = 0;
-        position.y = nearestObjects.up.point.y - 20;
+        colliding.up = nearestObjects.up;
     }
 
-    return state;
+    return colliding;
 }

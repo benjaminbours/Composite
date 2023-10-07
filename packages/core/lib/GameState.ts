@@ -1,5 +1,33 @@
-import { Vec2 } from 'three';
-import { Levels, PositionLevelState } from './types';
+import type { Vec2 } from 'three';
+
+export enum Levels {
+    CRACK_THE_DOOR,
+    LEARN_TO_FLY,
+    THE_HIGH_SPHERES,
+}
+
+interface Door {
+    ratio: number;
+    activators: number[];
+}
+
+interface Level {
+    doors: {
+        [key: string]: Door;
+    };
+    // index 0 is shadow, index 1 is light
+    end_level: [number, number];
+}
+
+export interface PositionLevelState extends Level {
+    id: Levels.CRACK_THE_DOOR;
+}
+
+interface OtherLevelState extends Level {
+    id: Levels.LEARN_TO_FLY;
+}
+
+export type LevelState = PositionLevelState | OtherLevelState;
 
 // orders of properties are very important here
 export class RedisGameState {
@@ -15,9 +43,11 @@ export class RedisGameState {
         public shadow_velocity_y: string,
         public lastValidatedInput: string,
         public game_time: string,
-        public end_level?: string,
-        public level_0_ground_door?: string,
-        public level_0_roof_door?: string,
+        public end_level: string,
+        public level_0_door_ground_ratio: string,
+        public level_0_door_ground_activators: string,
+        public level_0_door_roof_ratio: string,
+        public level_0_door_roof_activators: string,
     ) {}
 
     static parseGameState(state: GameState) {
@@ -33,16 +63,20 @@ export class RedisGameState {
             String(state.players[0].velocity.y),
             String(state.lastValidatedInput),
             String(state.game_time),
-            String(state.level.end_level),
-            String((state.level as any).ground_door),
-            String((state.level as any).roof_door),
+            state.level.end_level.join(),
+            String((state.level as PositionLevelState).doors.ground.ratio),
+            (state.level as PositionLevelState).doors.ground.activators.join(),
+            String((state.level as PositionLevelState).doors.roof.ratio),
+            (state.level as PositionLevelState).doors.roof.activators.join(),
         );
     }
 }
 
-interface OtherLevel {
-    id: Levels.LEARN_TO_FLY;
-    end_level: number;
+function parseActivators(str: string) {
+    if (str === '0' || str === '') {
+        return [];
+    }
+    return str.split(',').map((str) => Number(str));
 }
 
 export class GameState {
@@ -51,7 +85,7 @@ export class GameState {
             position: Vec2;
             velocity: Vec2;
         }[],
-        public level: PositionLevelState | OtherLevel,
+        public level: LevelState,
         public lastValidatedInput: number,
         public game_time: number,
     ) {}
@@ -64,18 +98,30 @@ export class GameState {
                 case Levels.CRACK_THE_DOOR:
                     return {
                         id: level,
-                        end_level: Number(state.end_level),
-                        ground_door: Number(state.level_0_ground_door),
-                        roof_door: Number(state.level_0_roof_door),
+                        doors: {
+                            ground: {
+                                ratio: Number(state.level_0_door_ground_ratio),
+                                activators: parseActivators(
+                                    state.level_0_door_ground_activators,
+                                ),
+                            },
+                            roof: {
+                                ratio: Number(state.level_0_door_roof_ratio),
+                                activators: parseActivators(
+                                    state.level_0_door_roof_activators,
+                                ),
+                            },
+                        },
+                        end_level: [0, 0],
                     };
-
                 case Levels.LEARN_TO_FLY:
                     return {
                         id: level,
-                        end_level: Number(state.end_level),
+                        end_level: [0, 0],
+                        doors: {},
                     };
             }
-        })() as PositionLevelState | OtherLevel;
+        })() as LevelState;
         return new GameState(
             [
                 {

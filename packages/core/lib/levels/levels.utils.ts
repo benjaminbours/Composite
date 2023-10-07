@@ -14,10 +14,13 @@ const gridSizeMedium = gridSize / 2;
 const gridSizeSmall = gridSizeMedium / 2;
 const wallDepth = 34;
 
+export const AREA_DOOR_OPENER_SUFFIX = 'AREA_DOOR_OPENER';
+
 export const ElementName = {
     END_LEVEL: 'END_LEVEL',
     AREA_END_LEVEL: 'AREA_END_LEVEL',
-    AREA_DOOR_OPENER: (doorName: string) => `${doorName}_AREA_DOOR_OPENER`,
+    AREA_DOOR_OPENER: (doorName: string) =>
+        `${doorName}_${AREA_DOOR_OPENER_SUFFIX}`,
     DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
     WALL_DOOR: (doorName: string) => `${doorName}_WALL_DOOR`,
 };

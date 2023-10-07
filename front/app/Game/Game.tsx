@@ -105,6 +105,7 @@ function Game({
     useEffect(() => {
         if (!tabIsHidden && isSynchronizingTime && socketController) {
             socketController.synchronizeTime().then(() => {
+                appRef.current?.inputsManager.registerEventListeners();
                 setIsSynchronizingTime(false);
             });
         }
