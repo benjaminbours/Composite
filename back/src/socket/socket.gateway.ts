@@ -24,7 +24,7 @@ import {
   RedisGameState,
   TimeSyncPayload,
   PhysicLoop,
-  applyInputs,
+  applyInputList,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -298,16 +298,18 @@ export class SocketGateway {
           .then((redisState) => GameState.parseRedisGameState(redisState)),
       ]).then(([inputsQueue, gameState]) => {
         // console.log('inputs queue before', inputsQueue.length);
-        physicLoop.run(() => {
+        physicLoop.run((delta) => {
           gameState.game_time++;
           const inputsForTick = inputsQueue.filter(
             ({ sequence }) => sequence == gameState.game_time,
           );
-          applyInputs(
+          applyInputList(
+            delta,
             lastPlayersInput,
             inputsForTick,
             collidingScene.children,
             gameState,
+            'server',
             // true,
           );
           // then we remove it from the list

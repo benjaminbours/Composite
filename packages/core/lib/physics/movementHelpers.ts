@@ -1,5 +1,5 @@
-import type { Object3D, Vec2 } from 'three';
-import { CollisionResult, collisionSystem } from './collision.system';
+import type { Intersection, Object3D, Vec2 } from 'three';
+import { RANGE, detectCollidingObjects } from './collision.system';
 import {
     GamePlayerInputPayload,
     Inputs,
@@ -8,72 +8,45 @@ import {
 } from '../types';
 import { GameState } from '../GameState';
 import { computeVelocityX } from './velocity';
+import { INearestObjects } from './raycaster';
+import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
+import { InteractiveArea } from '../elements';
 
 const MAX_FALL_SPEED = 20;
 const JUMP_POWER = 15;
 const GRAVITY = 20;
 
-// // Ascension helpers
-// const MAX_ASCEND_SPEED = 10;
-// const hasReachedMaxAscendSpeed = R.propSatisfies(
-//     // predicate
-//     (y: number) => y >= MAX_ASCEND_SPEED,
-//     // name of the key on the object that will be used, most likely it will be a velocity object, vec2 or 3
-//     'y',
-// );
-// const setToMaxAscendSpeed = (velocity: Vector2) =>
-//     (velocity.y = MAX_ASCEND_SPEED);
-// const increaseAscendSpeed = (velocity: Vector2) => {
-//     // console.log(delta * GRAVITY);
-//     // return velocity.y += GRAVITY * delta;
-//     // console.log(velocity.y += GRAVITY / 1000);
-//     return (velocity.y += GRAVITY / 1000);
-//     // return velocity.y += GRAVITY * (delta < 0.03 ? 0.03 : delta);
-// };
-
-// // TODO: Inclure la distance par rapport au sol dans le calcule de la poussée vers le haut
-// export const applyAscension = R.ifElse(
-//     hasReachedMaxAscendSpeed,
-//     setToMaxAscendSpeed,
-//     increaseAscendSpeed,
-// );
-
-// const maxAscensionDistance = 600;
-// export function applyAscension(velocity, distanceFromFloor: number) {
-//     // La velocity.y doit être égal à la distanceFromFloor divisé par...
-//     // if (velocity.x >=) {
-
-//     // }
-// }
-
 // full of side effect
-function applyCollisionCorrection(
+function applyPlayerUpdate(
     delta: number,
     input: Inputs,
-    collisionResult: CollisionResult,
+    collisionResult: INearestObjects,
     player: { position: Vec2; velocity: Vec2 },
 ) {
-    const { state, colliding } = collisionResult;
     const { velocity, position } = player;
+    let state: MovableComponentState = MovableComponentState.onFloor;
 
-    if (colliding.leftPointX) {
+    if (collisionResult.left) {
         velocity.x = 0;
-        position.x = colliding.leftPointX;
+        position.x = collisionResult.left.point.x + RANGE;
     }
 
-    if (colliding.rightPointX) {
+    if (collisionResult.right) {
         velocity.x = 0;
-        position.x = colliding.rightPointX;
+        position.x = collisionResult.right.point.x - RANGE;
     }
 
-    if (colliding.topPointY) {
+    if (collisionResult.up) {
         velocity.y = 0;
-        position.y = colliding.topPointY;
+        position.y = collisionResult.up.point.y - RANGE;
     }
 
-    if (colliding.bottomPointY) {
+    if (collisionResult.down) {
+        state = MovableComponentState.onFloor;
         velocity.y = 0;
-        position.y = colliding.bottomPointY;
+        position.y = collisionResult.down.point.y + RANGE;
+    } else {
+        state = MovableComponentState.inAir;
     }
 
     // jump if possible
@@ -101,42 +74,37 @@ export interface InteractiveComponent {
     isActive: boolean;
 }
 
-export function updateGameState(
+type Context = 'client' | 'server';
+
+export function applySingleInput(
     delta: number,
     side: Side,
     inputs: Inputs,
     collidingElems: Object3D[],
     gameState: GameState,
+    context: Context,
 ) {
+    const player = gameState.players[side];
     // side effect
-    gameState.players[side].velocity.x = computeVelocityX(
-        delta,
-        inputs,
-        gameState.players[side].velocity.x,
-    );
+    player.velocity.x = computeVelocityX(delta, inputs, player.velocity.x);
 
-    // compute collision
-    const collisionResult = collisionSystem(side, collidingElems, gameState);
-
-    applyCollisionCorrection(
-        delta,
-        inputs,
-        collisionResult,
-        gameState.players[side],
-    );
+    const collisionResult = detectCollidingObjects(collidingElems, player);
+    applyPlayerUpdate(delta, inputs, collisionResult, player);
+    applyWorldUpdate(side, collidingElems, gameState, collisionResult, context);
 }
 
-export function applyInputs(
+export function applyInputList(
+    delta: number,
     lastPlayersInput: (GamePlayerInputPayload | undefined)[],
     inputs: GamePlayerInputPayload[],
     collidingElements: Object3D[],
     gameState: GameState,
+    context: Context,
     dev?: boolean,
 ) {
     if (dev) {
         console.log(gameState.game_time);
     }
-    const tempDelta = 1000 / 60 / 1000;
 
     // if there are inputs for this time tick, we process them
     if (inputs.length) {
@@ -153,12 +121,13 @@ export function applyInputs(
                     gameState.players[input.player].velocity,
                 );
             }
-            updateGameState(
-                tempDelta,
+            applySingleInput(
+                delta,
                 input.player,
                 input.inputs,
                 collidingElements,
                 gameState,
+                context,
             );
             if (dev) {
                 console.log(
@@ -200,12 +169,13 @@ export function applyInputs(
                         gameState.players[input.player].velocity,
                     );
                 }
-                updateGameState(
-                    tempDelta,
+                applySingleInput(
+                    delta,
                     input.player,
                     input.inputs,
                     collidingElements,
                     gameState,
+                    context,
                 );
                 if (dev) {
                     console.log(
@@ -219,6 +189,92 @@ export function applyInputs(
                 }
                 // side effect
                 gameState.lastValidatedInput = input.sequence;
+            }
+        }
+    }
+}
+
+const isTouchingDoorOpener = (objectDown: Intersection) => {
+    const { parent } = objectDown.object;
+    return parent?.name.includes(AREA_DOOR_OPENER_SUFFIX) || false;
+};
+
+function updateDoor(wallDoor: Object3D, ratio: number) {
+    const doorLeft = wallDoor.children.find(
+        (child) => child.name === 'doorLeft',
+    )!;
+    const doorRight = wallDoor.children.find(
+        (child) => child.name === 'doorRight',
+    )!;
+    doorLeft.position.setX(-100 * ratio);
+    doorRight.position.setX(100 * ratio);
+    wallDoor.updateMatrixWorld();
+}
+
+// we could easily detect the activation area using position precalculated eventually.
+// but if we update the level, we have to update it as well.
+export function applyWorldUpdate(
+    side: Side,
+    obstacles: Object3D[],
+    gameState: GameState,
+    collisionResult: INearestObjects,
+    context: Context,
+) {
+    let doorNameActivating: string | undefined = undefined;
+    if (collisionResult.down && isTouchingDoorOpener(collisionResult.down)) {
+        const elem = collisionResult.down.object.parent as InteractiveArea;
+        doorNameActivating = `${elem.name.replace(
+            `_${AREA_DOOR_OPENER_SUFFIX}`,
+            '',
+        )}`;
+        if (
+            gameState.level.doors[doorNameActivating].activators.indexOf(
+                side,
+            ) === -1
+        ) {
+            gameState.level.doors[doorNameActivating].activators.push(side);
+        }
+        if (gameState.level.doors[doorNameActivating].ratio < 1) {
+            // TODO: If another player is on it as well, make sure its not opening faster
+            // gameState.level.doors[doorNameActivating].ratio += 0.01;
+            gameState.level.doors[doorNameActivating].ratio = 1;
+        }
+    }
+
+    for (const key in gameState.level.doors) {
+        let { ratio } = gameState.level.doors[key];
+        const { activators } = gameState.level.doors[key];
+        const doorIsActivated = ratio > 0;
+
+        // We update the door only if its opening or closing
+        if (!doorIsActivated) {
+            continue;
+        }
+
+        // if this door opener is not the one we are currently activating
+        // remove us from the list of activators
+        if (key !== doorNameActivating) {
+            const index = activators.indexOf(side);
+            if (index !== -1) {
+                activators.splice(index, 1);
+            }
+        }
+
+        // no activator mean its closing
+        if (!activators.length) {
+            // side effect
+            if (ratio > 0) {
+                ratio = 0;
+            }
+        }
+
+        if (context === 'server') {
+            const wallDoor = obstacles.find(
+                (e) => e.name === ElementName.WALL_DOOR(key),
+            );
+            if (wallDoor) {
+                updateDoor(wallDoor, ratio);
+                gameState.level.doors[key].ratio = ratio;
             }
         }
     }

@@ -18,14 +18,23 @@ export class PositionLevel extends Group {
 
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
-        shadow: new Vector3(200, 20, 0),
+        // shadow: new Vector3(200, 20, 0),
+        shadow: new Vector3(2200, 775, 0), // roof door
     };
 
     public state: PositionLevelState = {
         id: Levels.CRACK_THE_DOOR,
-        ground_door: 0,
-        roof_door: 0,
-        end_level: 0,
+        doors: {
+            ground: {
+                ratio: 0,
+                activators: [],
+            },
+            roof: {
+                ratio: 0,
+                activators: [],
+            },
+        },
+        end_level: [0, 0],
     };
 
     constructor() {

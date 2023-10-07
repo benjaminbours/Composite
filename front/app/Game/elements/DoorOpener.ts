@@ -116,8 +116,15 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
 
     // TODO: Think about using a door opening system to manage this logic
     // I don't like the fact its the element door opener who set the camera target
-    public update = (delta: number, camera: CustomCamera) => {
-        this.detectActivation(this.activate(camera), this.deactivate(camera));
+    public update = (
+        delta: number,
+        camera: CustomCamera,
+        withFocusCamera: boolean,
+    ) => {
+        this.detectActivation(
+            this.activate(camera, withFocusCamera),
+            this.deactivate(camera),
+        );
         this.updateShader(delta);
     };
 
@@ -170,16 +177,21 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
         });
     };
 
-    activate = (camera: CustomCamera) => () => {
-        camera.focusTarget(
-            this.doorInfo.cameraPosition,
-            new Vector3(0, 0.2, 0),
-        );
+    activate = (camera: CustomCamera, withFocusCamera: boolean) => () => {
+        console.log('deactivate');
+        if (withFocusCamera) {
+            camera.focusTarget(
+                this.doorInfo.cameraPosition,
+                new Vector3(0, 0.2, 0),
+            );
+        }
         this.activateVFX();
         this.openTheDoor();
     };
 
     deactivate = (camera: CustomCamera) => () => {
+        console.log('deactivate');
+
         camera.unfocus();
         this.deactivateVFX();
         this.closeTheDoor();
