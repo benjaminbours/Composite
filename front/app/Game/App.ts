@@ -41,6 +41,7 @@ import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
+import { EndLevel } from './elements/EndLevel';
 
 interface InterpolationConfig {
     ratio: number;
@@ -234,9 +235,11 @@ export default class App {
         for (let i = 0; i < object.children.length; i++) {
             const item = object.children[i] as any;
             if (item.update) {
-                if (item instanceof DoorOpener) {
-                    // do nothing
-                } else if (item instanceof Player) {
+                if (
+                    item instanceof DoorOpener ||
+                    item instanceof EndLevel ||
+                    item instanceof Player
+                ) {
                     // do nothing
                 } else {
                     item.update(this.delta);
@@ -497,8 +500,10 @@ export default class App {
     };
 
     private updateWorldPhysic = () => {
-        for (const key in this.currentState.level.doors) {
-            const { activators } = this.currentState.level.doors[key];
+        const { doors, end_level } = this.currentState.level;
+        // doors
+        for (const key in doors) {
+            const activators = doors[key];
 
             const doorOpener = this.levelController.levels[
                 this.levelController.currentLevel
@@ -509,21 +514,59 @@ export default class App {
             ) as DoorOpener | undefined;
 
             if (doorOpener) {
-                const isActivate =
-                    activators.length > 0 && !doorOpener.shouldActivate;
-                const isDeactivating =
-                    activators.length === 0 && doorOpener.shouldActivate;
-                if (isActivate) {
+                if (activators.length > 0 && !doorOpener.shouldActivate) {
                     doorOpener.shouldActivate = true;
-                }
-
-                if (isDeactivating) {
+                } else if (
+                    activators.length === 0 &&
+                    doorOpener.shouldActivate
+                ) {
                     doorOpener.shouldActivate = false;
                 }
             }
 
             const withFocusCamera = activators.includes(this.playersConfig[0]);
             doorOpener?.update(this.delta, this.camera, withFocusCamera);
+        }
+
+        // end level
+        const endLevelElement = this.levelController.levels[
+            this.levelController.currentLevel
+        ]!.collidingElements.find(
+            (object) => object.name === ElementName.AREA_END_LEVEL,
+        )?.children.find((object) => object.name === ElementName.END_LEVEL) as
+            | EndLevel
+            | undefined;
+
+        if (endLevelElement) {
+            if (
+                end_level.includes(Side.LIGHT) &&
+                !endLevelElement.shouldActivateLight
+            ) {
+                endLevelElement.shouldActivateLight = true;
+            }
+
+            if (
+                !end_level.includes(Side.LIGHT) &&
+                endLevelElement.shouldActivateLight
+            ) {
+                endLevelElement.shouldActivateLight = false;
+            }
+
+            if (
+                end_level.includes(Side.SHADOW) &&
+                !endLevelElement.shouldActivateShadow
+            ) {
+                endLevelElement.shouldActivateShadow = true;
+            }
+
+            if (
+                !end_level.includes(Side.SHADOW) &&
+                endLevelElement.shouldActivateShadow
+            ) {
+                endLevelElement.shouldActivateShadow = false;
+            }
+
+            endLevelElement.update(this.delta);
         }
     };
 

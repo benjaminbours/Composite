@@ -118,6 +118,7 @@ function MainApp() {
         //         ],
         //         level.state,
         //         Date.now(),
+        //         0,
         //     );
         //     handleGameStart(initialGameState);
         // });
@@ -133,6 +134,7 @@ function MainApp() {
     //                 initialGameState={state.gameState}
     //                 side={state.side!}
     //                 socketController={socketController.current}
+    //                 tabIsHidden={tabIsHidden}
     //             />
     //         )}
     //     </>

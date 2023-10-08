@@ -181,7 +181,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     };
 
     activate = (camera: CustomCamera, withFocusCamera: boolean) => () => {
-        console.log('deactivate');
+        console.log('activate door', this.name);
         if (withFocusCamera) {
             camera.focusTarget(
                 this.doorInfo.cameraPosition,
@@ -193,7 +193,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     };
 
     deactivate = (camera: CustomCamera) => () => {
-        console.log('deactivate');
+        console.log('deactivate door', this.name);
 
         camera.unfocus();
         this.deactivateVFX();

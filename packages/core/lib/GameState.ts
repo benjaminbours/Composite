@@ -6,17 +6,11 @@ export enum Levels {
     THE_HIGH_SPHERES,
 }
 
-interface Door {
-    ratio: number;
-    activators: number[];
-}
-
 interface Level {
     doors: {
-        [key: string]: Door;
+        [key: string]: number[];
     };
-    // index 0 is shadow, index 1 is light
-    end_level: [number, number];
+    end_level: number[];
 }
 
 export interface PositionLevelState extends Level {
@@ -44,10 +38,8 @@ export class RedisGameState {
         public lastValidatedInput: string,
         public game_time: string,
         public end_level: string,
-        public level_0_door_ground_ratio: string,
-        public level_0_door_ground_activators: string,
-        public level_0_door_roof_ratio: string,
-        public level_0_door_roof_activators: string,
+        public level_0_door_ground: string,
+        public level_0_door_roof: string,
     ) {}
 
     static parseGameState(state: GameState) {
@@ -64,16 +56,14 @@ export class RedisGameState {
             String(state.lastValidatedInput),
             String(state.game_time),
             state.level.end_level.join(),
-            String((state.level as PositionLevelState).doors.ground.ratio),
-            (state.level as PositionLevelState).doors.ground.activators.join(),
-            String((state.level as PositionLevelState).doors.roof.ratio),
-            (state.level as PositionLevelState).doors.roof.activators.join(),
+            (state.level as PositionLevelState).doors.ground.join(),
+            (state.level as PositionLevelState).doors.roof.join(),
         );
     }
 }
 
 function parseActivators(str: string) {
-    if (str === '0' || str === '') {
+    if (str === '') {
         return [];
     }
     return str.split(',').map((str) => Number(str));
@@ -99,25 +89,15 @@ export class GameState {
                     return {
                         id: level,
                         doors: {
-                            ground: {
-                                ratio: Number(state.level_0_door_ground_ratio),
-                                activators: parseActivators(
-                                    state.level_0_door_ground_activators,
-                                ),
-                            },
-                            roof: {
-                                ratio: Number(state.level_0_door_roof_ratio),
-                                activators: parseActivators(
-                                    state.level_0_door_roof_activators,
-                                ),
-                            },
+                            ground: parseActivators(state.level_0_door_ground),
+                            roof: parseActivators(state.level_0_door_roof),
                         },
-                        end_level: [0, 0],
+                        end_level: parseActivators(state.end_level),
                     };
                 case Levels.LEARN_TO_FLY:
                     return {
                         id: level,
-                        end_level: [0, 0],
+                        end_level: parseActivators(state.end_level),
                         doors: {},
                     };
             }

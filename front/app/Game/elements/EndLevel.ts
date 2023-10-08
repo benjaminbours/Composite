@@ -9,17 +9,13 @@ import {
 } from 'three';
 import { gsap } from 'gsap';
 // our libs
-import {
-    type InteractiveComponent,
-    getRange,
-} from '@benjaminbours/composite-core';
+import { getRange, ElementName } from '@benjaminbours/composite-core';
 // local
-import CustomCamera from '../CustomCamera';
 import VS from '../glsl/endLevel_vs.glsl';
 import FS from '../glsl/endLevel_fs.glsl';
 
 const DEFAULT_SPEED_MODIFIER = 0.2;
-const FAST_SPEED_MODIFIER = 2;
+// const FAST_SPEED_MODIFIER = 2;
 
 const DEFAULT_ORGANIC_RATIO = 0;
 const FAST_ORGANIC_RATIO = 1;
@@ -28,16 +24,15 @@ const FAST_ORGANIC_RATIO = 1;
 // for each player here
 // TODO: Naming can be improved as well, organic ratio is not correct in this context
 // its more an interpolation ratio
-export class EndLevel extends Object3D implements InteractiveComponent {
-    public shouldActivate = false;
+export class EndLevel extends Object3D {
     public shouldActivateLight = false;
     public shouldActivateShadow = false;
-    public isActive = false;
     public isActiveLight = false;
     public isActiveShadow = false;
     protected speedModifier = DEFAULT_SPEED_MODIFIER;
     protected organicRatioLight = DEFAULT_ORGANIC_RATIO;
     protected organicRatioShadow = DEFAULT_ORGANIC_RATIO;
+    public name = ElementName.END_LEVEL;
 
     protected particles: Points;
 
@@ -55,7 +50,7 @@ export class EndLevel extends Object3D implements InteractiveComponent {
         const particlesSize = new Float32Array(particlesNumber);
 
         for (let i = 0; i < particlesVertices.length; i = i + 3) {
-            const range = 300;
+            const range = 50;
             const directionRange = new Vector3(range, range, range);
             particlesDirection[i] = getRange(
                 -directionRange.x,
@@ -130,8 +125,8 @@ export class EndLevel extends Object3D implements InteractiveComponent {
         this.particles.frustumCulled = false;
     }
 
-    public update = (delta: number, camera: CustomCamera) => {
-        this.detectActivation(this.activate(camera), this.deactivate(camera));
+    public update = (delta: number) => {
+        this.detectActivation(this.activate, this.deactivate);
         this.updateShader(delta);
     };
 
@@ -182,7 +177,7 @@ export class EndLevel extends Object3D implements InteractiveComponent {
     protected activateShadow = () => {
         gsap.to(this, {
             delay: 1,
-            duration: 5,
+            duration: 3,
             organicRatioShadow: FAST_ORGANIC_RATIO,
         });
     };
@@ -190,14 +185,14 @@ export class EndLevel extends Object3D implements InteractiveComponent {
     protected activateLight = () => {
         gsap.to(this, {
             delay: 1,
-            duration: 5,
+            duration: 3,
             organicRatioLight: FAST_ORGANIC_RATIO,
         });
     };
 
     protected deactivateShadow = () => {
         gsap.to(this, {
-            duration: 5,
+            duration: 2,
             delay: 1,
             organicRatioShadow: DEFAULT_ORGANIC_RATIO,
         });
@@ -205,57 +200,27 @@ export class EndLevel extends Object3D implements InteractiveComponent {
 
     protected deactivateLight = () => {
         gsap.to(this, {
-            duration: 5,
+            duration: 2,
             delay: 1,
             organicRatioLight: DEFAULT_ORGANIC_RATIO,
         });
     };
 
-    activate = (camera: CustomCamera) => (side: 'shadow' | 'light') => {
-        // camera.focusTarget(
-        //     this.doorInfo.cameraPosition,
-        //     new Vector3(0, 0.2, 0),
-        // );
+    activate = (side: 'shadow' | 'light') => {
+        console.log('activate end level');
         if (side === 'shadow') {
             this.activateShadow();
         } else {
             this.activateLight();
         }
-        // this.openTheDoor();
     };
 
-    deactivate = (camera: CustomCamera) => (side: 'shadow' | 'light') => {
-        // camera.unfocus();
-        // this.deactivateVFX();
+    deactivate = (side: 'shadow' | 'light') => {
+        console.log('deactivate end level');
         if (side === 'shadow') {
             this.deactivateShadow();
         } else {
             this.deactivateLight();
         }
-        // this.closeTheDoor();
     };
-
-    // openTheDoor = () => {
-    //     gsap.to(this.doorInfo.doorLeft.position, {
-    //         duration: 2,
-    //         x: -100,
-    //         overwrite: true,
-    //     });
-    //     gsap.to(this.doorInfo.doorRight.position, {
-    //         duration: 2,
-    //         x: 100,
-    //         overwrite: true,
-    //     });
-    // };
-
-    // closeTheDoor = () => {
-    //     gsap.to(
-    //         [this.doorInfo.doorLeft.position, this.doorInfo.doorRight.position],
-    //         {
-    //             duration: 0.5,
-    //             x: 0,
-    //             overwrite: true,
-    //         },
-    //     );
-    // };
 }

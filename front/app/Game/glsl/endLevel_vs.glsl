@@ -101,7 +101,7 @@ void main() {
     float angle = computedTime * PI;
     float angle2 = computedTime * PI / 3.;
     vec3 origin = vec3(0., 150., 0.);
-    float radius = distance(direction, origin);
+    float radius = distance(direction, origin) / 2.;
     vec3 coordinates = getSphereCoordinates(radius, angle, angle2, origin);
     vec4 dPosition = vec4(coordinates, 1.0);
     dPosition = (dPosition - vec4(origin, 1.)) * rotation;

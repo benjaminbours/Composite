@@ -199,7 +199,13 @@ const isTouchingDoorOpener = (objectDown: Intersection) => {
     return parent?.name.includes(AREA_DOOR_OPENER_SUFFIX) || false;
 };
 
-function updateDoor(wallDoor: Object3D, ratio: number) {
+const isTouchingEndLevel = (objectDown: Intersection) => {
+    const { parent } = objectDown.object;
+    return parent?.name.includes(ElementName.END_LEVEL) || false;
+};
+
+function updateDoor(wallDoor: Object3D, open: boolean) {
+    const ratio = open ? 1 : 0;
     const doorLeft = wallDoor.children.find(
         (child) => child.name === 'doorLeft',
     )!;
@@ -227,29 +233,13 @@ function applyWorldUpdate(
             `_${AREA_DOOR_OPENER_SUFFIX}`,
             '',
         )}`;
-        if (
-            gameState.level.doors[doorNameActivating].activators.indexOf(
-                side,
-            ) === -1
-        ) {
-            gameState.level.doors[doorNameActivating].activators.push(side);
-        }
-        if (gameState.level.doors[doorNameActivating].ratio < 1) {
-            // TODO: If another player is on it as well, make sure its not opening faster
-            // gameState.level.doors[doorNameActivating].ratio += 0.01;
-            gameState.level.doors[doorNameActivating].ratio = 1;
+        if (gameState.level.doors[doorNameActivating].indexOf(side) === -1) {
+            gameState.level.doors[doorNameActivating].push(side);
         }
     }
 
     for (const key in gameState.level.doors) {
-        let { ratio } = gameState.level.doors[key];
-        const { activators } = gameState.level.doors[key];
-        const doorIsActivated = ratio > 0;
-
-        // We update the door only if its opening or closing
-        if (!doorIsActivated) {
-            continue;
-        }
+        const activators = gameState.level.doors[key];
 
         // if this door opener is not the one we are currently activating
         // remove us from the list of activators
@@ -260,22 +250,22 @@ function applyWorldUpdate(
             }
         }
 
-        // no activator mean its closing
-        if (!activators.length) {
-            // side effect
-            if (ratio > 0) {
-                ratio = 0;
-            }
-        }
-
         if (context === 'server') {
             const wallDoor = obstacles.find(
                 (e) => e.name === ElementName.WALL_DOOR(key),
             );
             if (wallDoor) {
-                updateDoor(wallDoor, ratio);
-                gameState.level.doors[key].ratio = ratio;
+                updateDoor(wallDoor, activators.length > 0);
             }
         }
+    }
+
+    const endLevelIndex = gameState.level.end_level.indexOf(side);
+    if (collisionResult.down && isTouchingEndLevel(collisionResult.down)) {
+        if (endLevelIndex === -1) {
+            gameState.level.end_level.push(side);
+        }
+    } else if (endLevelIndex !== -1) {
+        gameState.level.end_level.splice(endLevelIndex, 1);
     }
 }
