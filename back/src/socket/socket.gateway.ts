@@ -332,6 +332,12 @@ export class SocketGateway {
           RedisGameState.parseGameState(gameState),
         );
 
+        if (gameState.level.end_level.length === 2) {
+          clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
+          console.log('game finished on the server');
+          this.emit(String(gameId), [SocketEventType.GAME_FINISHED]);
+        }
+
         // previous = now;
       });
     };

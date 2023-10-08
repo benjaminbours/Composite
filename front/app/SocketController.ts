@@ -19,6 +19,7 @@ export class SocketController {
     public getCurrentGameState?: () => GameState;
     public synchronizeGameTimeWithServer?: (time: number) => void;
     public onGameStateUpdate?: (gameState: GameState) => void;
+    public onGameFinished?: () => void;
     private isTimeSynced = false;
 
     constructor(onGameStart: (initialGameState: GameState) => void) {
@@ -47,50 +48,11 @@ export class SocketController {
             },
         );
 
-        // this.socket.on(
-        //     SocketEventType.GAME_ACTIVATE_ELEMENT,
-        //     (data: GameActivateElementPayload) => {
-        //         console.log('HERE activate', data);
-
-        //         if (this.collidingElements) {
-        //             const elementToActivate = this.collidingElements.find(
-        //                 (elem) => elem.name === data.elementName,
-        //             );
-        //             if (!elementToActivate) {
-        //                 console.error(
-        //                     'Not found element to activate',
-        //                     data.elementName,
-        //                 );
-        //             }
-        //             (elementToActivate as InteractiveComponent).shouldActivate =
-        //                 true;
-        //             // this.secondPlayer.position.set(data.x, data.y, 0);
-        //         }
-        //     },
-        // );
-
-        // this.socket.on(
-        //     SocketEventType.GAME_DEACTIVATE_ELEMENT,
-        //     (data: GameActivateElementPayload) => {
-        //         console.log('HERE deactivate', data);
-
-        //         if (this.collidingElements) {
-        //             const elementToDeactivate = this.collidingElements.find(
-        //                 (elem) => elem.name === data.elementName,
-        //             );
-        //             if (!elementToDeactivate) {
-        //                 console.error(
-        //                     'Not found element to deactivate',
-        //                     data.elementName,
-        //                 );
-        //             }
-        //             (
-        //                 elementToDeactivate as InteractiveComponent
-        //             ).shouldActivate = false;
-        //             // this.secondPlayer.position.set(data.x, data.y, 0);
-        //         }
-        //     },
-        // );
+        this.socket.on(SocketEventType.GAME_FINISHED, () => {
+            if (this.onGameFinished) {
+                this.onGameFinished();
+            }
+        });
     }
 
     public onTimeSyncReceived =

@@ -25,6 +25,8 @@ export enum SocketEventType {
     GAME_DEACTIVATE_ELEMENT = 'GAME_DEACTIVATE_ELEMENT',
     // send by the server at a defined frequency to update the clients
     GAME_STATE_UPDATE = 'GAME_STATE_UPDATE',
+    // send by the server when the players reach the end level
+    GAME_FINISHED = 'GAME_FINISHED',
 }
 
 export interface Inputs {
@@ -78,6 +80,8 @@ export type GameStartEvent = [
     payload: GameStateUpdatePayload,
 ];
 
+export type GameFinishedEvent = [type: SocketEventType.GAME_FINISHED];
+
 export type GameStateUpdateEvent = [
     type: SocketEventType.GAME_STATE_UPDATE,
     payload: GameStateUpdatePayload,
@@ -101,6 +105,7 @@ export type GameDeactivateElementEvent = [
 export type SocketEvent =
     | MatchMakingEvent
     | GameStartEvent
+    | GameFinishedEvent
     | GameStateUpdateEvent
     | GamePlayerInputEvent
     | GameActivateElementEvent
