@@ -21,3 +21,10 @@ Add this to your `.bashrc` / `.zshrc`:
 Start all the containers
 
 `make start`
+
+### How to deploy
+
+- Use changeset to update core package on github registry
+- build last version of workspace image
+- build other images with github
+- use make deploy to connect by ssh to server and update the stack
