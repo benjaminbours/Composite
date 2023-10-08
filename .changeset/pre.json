@@ -4,9 +4,11 @@
   "initialVersions": {
     "composite-back": "0.0.1",
     "composite-front": "1.0.0",
-    "composite-core": "0.0.1"
+    "composite-core": "0.0.1",
+    "@benjaminbours/composite-core": "0.1.0-next.0"
   },
   "changesets": [
-    "sharp-peas-obey"
+    "sharp-peas-obey",
+    "wild-eggs-visit"
   ]
 }
