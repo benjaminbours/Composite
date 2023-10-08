@@ -1,5 +1,6 @@
 // vendors
 import {
+    // AdditiveBlending,
     BufferAttribute,
     BufferGeometry,
     Color,
@@ -105,6 +106,8 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
                 color: { value: color },
                 organicRatio: { value: DEFAULT_ORGANIC_RATIO },
             },
+            // transparent: true,
+            // blending: AdditiveBlending,
             vertexShader: VS,
             fragmentShader: FS,
         });

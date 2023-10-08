@@ -13,12 +13,12 @@ export class PositionLevelWithGraphic extends PositionLevel {
         const doors = [
             {
                 id: 'ground',
-                color: new Color('black'),
+                color: new Color('#882D2A'),
                 cameraPosition: new Vector3(50, 200),
             },
             {
                 id: 'roof',
-                color: new Color('white'),
+                color: new Color('#882D2A'),
                 cameraPosition: new Vector3(0, 100),
             },
         ];

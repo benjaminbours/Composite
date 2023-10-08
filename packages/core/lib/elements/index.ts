@@ -12,5 +12,6 @@ export const FLOOR = new Mesh(
         // transparent: true,
     }),
 );
+FLOOR.receiveShadow = true;
 FLOOR.name = 'floor';
 FLOOR.rotation.x = -Math.PI / 2;

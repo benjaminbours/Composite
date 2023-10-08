@@ -31,7 +31,6 @@ import {
     ElementName,
 } from '@benjaminbours/composite-core';
 // local
-// import SkyShader from './SkyShader';
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
@@ -67,7 +66,7 @@ export default class App {
 
     public clock = new Clock();
     private delta = this.clock.getDelta();
-    private dirLight = new DirectionalLight(0xffffee, 0.5);
+    private dirLight = new DirectionalLight(0xffffee, 1);
 
     private levelController: LevelController;
 
@@ -168,10 +167,10 @@ export default class App {
         this.camera.setDefaultTarget(this.players[0].position);
 
         // camera
-        this.camera.position.z = 300;
+        this.camera.position.z = 350;
         this.camera.position.y = 10;
 
-        this.scene.fog = new FogExp2(0xffffff, 0.0006);
+        this.scene.fog = new FogExp2(0xffffff, 0.001);
         const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
 
         // dirlight
@@ -184,15 +183,17 @@ export default class App {
         this.dirLight.shadow.camera.far = 8000;
         this.dirLight.shadow.mapSize.width = 1024 * 2;
         this.dirLight.shadow.mapSize.height = 1024 * 2;
-        this.dirLight.position.copy(this.camera.position);
+        this.dirLight.shadow.bias = -0.01;
+        // this.dirLight.position.set(-2, 1, 2);
+        // this.dirLight.position.copy(this.camera.position);
         this.dirLight.target = new Object3D();
         this.scene.add(this.dirLight.target);
         this.scene.add(this.dirLight);
         this.scene.add(ambient);
         // sky
-        const skyShaterMat = new SkyShader(this.camera);
+        const skyShaderMat = new SkyShader(this.camera);
         const skyBox = new IcosahedronGeometry(10000, 1);
-        this.skyMesh = new Mesh(skyBox, skyShaterMat);
+        this.skyMesh = new Mesh(skyBox, skyShaderMat);
         this.skyMesh.rotation.set(0, 1, 0);
         this.scene.add(this.skyMesh);
 
@@ -535,10 +536,11 @@ export default class App {
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
         this.skyMesh.position.set(this.camera.position.x, 0, 0);
-        skyShaderMat.setSunAngle(210);
+        skyShaderMat.setSunAngle(200);
         skyShaderMat.render();
         (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
-        skyShaderMat.setTimeOfDay(0.6, [20, 55], 0, [195, 230], 0);
+        skyShaderMat.setTimeOfDay(0.6, [255, 255], 0, [195, 230], 0);
+        // skyShaderMat.setTimeOfDay(1,[20,55], 0, [195,230], 0);
         const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
 
         this.dirLight.position.copy(lightInfo.position);

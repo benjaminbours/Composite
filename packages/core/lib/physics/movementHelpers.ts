@@ -213,7 +213,7 @@ function updateDoor(wallDoor: Object3D, ratio: number) {
 
 // we could easily detect the activation area using position precalculated eventually.
 // but if we update the level, we have to update it as well.
-export function applyWorldUpdate(
+function applyWorldUpdate(
     side: Side,
     obstacles: Object3D[],
     gameState: GameState,
