@@ -27,7 +27,7 @@ WORKDIR /app
 COPY --from=build-staging /app/back/dist ./dist
 COPY --from=build-staging /app/back/prisma ./prisma
 COPY --from=build-staging /app/back/package*.json ./
-COPY --from=build-staging /app/back/.npmrc ./
+COPY --from=build-staging /app/.npmrc ./
 RUN npm i --omit=dev
 RUN npx prisma generate
 

@@ -32,7 +32,7 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=build-staging /app/front/public ./public
 COPY --from=build-staging /app/front/package*.json ./
-COPY --from=build-staging /app/front/.npmrc ./
+COPY --from=build-staging /app/.npmrc ./
 COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next ./.next
 COPY --from=build-staging --chown=nextjs:nodejs /app/front/next.config.js ./
 
