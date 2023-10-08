@@ -31,3 +31,5 @@ jobs:
         target: staging
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/composite-front:latest
+        build-args: |
+          NPM_TOKEN=${{ secrets.NPM_TOKEN }}

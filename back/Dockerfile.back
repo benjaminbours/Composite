@@ -14,19 +14,34 @@ ARG POSTGRES_DB
 ENV POSTGRES_DB ${POSTGRES_DB}
 ENV DATABASE_URL postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
 ENV REDIS_URL redis://cache:6379
+ARG NPM_TOKEN
+ENV NPM_TOKEN ${NPM_TOKEN}
 
 RUN npm run build -w back
 
 FROM node:18-alpine AS base
 WORKDIR /app
 RUN apk add --update --no-cache openssl1.1-compat
+RUN apk add --update --no-cache \
+    make \
+    g++ \
+    jpeg-dev \
+    cairo-dev \
+    giflib-dev \
+    pango-dev \
+    libtool \
+    autoconf \
+    automake
 
 FROM base AS staging
 ENV NODE_ENV production
+ARG NPM_TOKEN
+ENV NPM_TOKEN ${NPM_TOKEN}
 WORKDIR /app
 COPY --from=build-staging /app/back/dist ./dist
 COPY --from=build-staging /app/back/prisma ./prisma
 COPY --from=build-staging /app/back/package*.json ./
+COPY --from=build-staging /app/back/assets.glb ./
 COPY --from=build-staging /app/.npmrc ./
 RUN npm i --omit=dev
 RUN npx prisma generate
