@@ -300,22 +300,34 @@ export class SocketGateway {
         // console.log('inputs queue before', inputsQueue.length);
         physicLoop.run((delta) => {
           gameState.game_time++;
-          const inputsForTick = inputsQueue.filter(
-            ({ sequence }) => sequence == gameState.game_time,
-          );
-          applyInputList(
-            delta,
-            lastPlayersInput,
-            inputsForTick,
-            collidingScene.children,
-            gameState,
-            'server',
-            // true,
-          );
-          // then we remove it from the list
+          const inputsForTick: GamePlayerInputPayload[][] = [[], []];
+          for (let i = 0; i < inputsQueue.length; i++) {
+            const input = inputsQueue[i];
+            if (input.sequence !== gameState.game_time) {
+              continue;
+            }
+            if (input.player === Side.SHADOW) {
+              inputsForTick[0].push(input);
+            }
+            if (input.player === Side.LIGHT) {
+              inputsForTick[1].push(input);
+            }
+          }
           for (let i = 0; i < inputsForTick.length; i++) {
-            const input = inputsForTick[i];
-            inputsQueue.splice(inputsQueue.indexOf(input), 1);
+            const inputs = inputsForTick[i];
+            lastPlayersInput[i] = applyInputList(
+              delta,
+              lastPlayersInput[i],
+              inputs,
+              collidingScene.children,
+              gameState,
+              'server',
+            );
+            // then we remove it from the list
+            for (let i = 0; i < inputs.length; i++) {
+              const input = inputs[i];
+              inputsQueue.splice(inputsQueue.indexOf(input), 1);
+            }
           }
         });
         // emit updated game state to room

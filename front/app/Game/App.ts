@@ -77,6 +77,7 @@ export default class App {
 
     public inputsManager: InputsManager;
 
+    private lastInputValidated: GamePlayerInputPayload | undefined;
     // private gameStateHistory: GameState[] = [];
     private inputsHistory: GamePlayerInputPayload[] = [];
     // its a predicted state if we compare it to the last validated state
@@ -133,6 +134,8 @@ export default class App {
             // console.log('received update', gameState);
             // const gameTimeDelta =
             //     this.currentState.game_time - gameState.game_time;
+            // console.log('time local', this.currentState.game_time);
+            // console.log('time server', gameState.game_time);
             // console.log('time delta', gameTimeDelta);
             this.shouldReconciliateState = true;
             this.serverGameState = gameState;
@@ -285,16 +288,17 @@ export default class App {
 
     private reconciliateState = () => {
         // TODO: Can be optimized
-        const lastInputValidated = (() => {
-            const input = this.inputsHistory.find(
+        this.lastInputValidated = (() => {
+            const input = this.inputsHistory.findLast(
                 (input) =>
-                    input.sequence === this.serverGameState.lastValidatedInput,
+                    input.sequence <= this.serverGameState.lastValidatedInput,
             );
             if (input) {
                 return JSON.parse(JSON.stringify(input));
             }
-            return undefined;
+            return this.lastInputValidated;
         })();
+        // console.log(JSON.parse(JSON.stringify(this.inputsHistory)));
 
         this.inputsHistory = this.inputsHistory.filter(
             ({ sequence }) =>
@@ -313,17 +317,12 @@ export default class App {
 
         // console.log(JSON.parse(JSON.stringify(localStateAtInterpolationTime)));
         // console.log(JSON.parse(JSON.stringify(nextStateAtInterpolationTime)));
-        // console.log(JSON.parse(JSON.stringify(inputsAtInterpolationTime)));
-
-        const lastPlayersInput = [];
-        lastPlayersInput[0] =
-            this.playersConfig[0] === Side.SHADOW
-                ? lastInputValidated
-                : undefined;
-        lastPlayersInput[1] =
-            this.playersConfig[0] === Side.LIGHT
-                ? lastInputValidated
-                : undefined;
+        let lastInputValidated = undefined;
+        if (this.lastInputValidated) {
+            lastInputValidated = JSON.parse(
+                JSON.stringify(this.lastInputValidated),
+            );
+        }
         while (
             nextStateAtInterpolationTime.game_time <
             localStateAtInterpolationTime.game_time - 1
@@ -333,9 +332,9 @@ export default class App {
                 ({ sequence }) =>
                     sequence == nextStateAtInterpolationTime.game_time,
             );
-            applyInputList(
+            lastInputValidated = applyInputList(
                 this.physicLoop.delta,
-                lastPlayersInput,
+                lastInputValidated,
                 inputsForTick,
                 [
                     FLOOR,

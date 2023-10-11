@@ -18,9 +18,9 @@ export class PositionLevel extends Group {
 
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
-        // shadow: new Vector3(200, 20, 0),
+        shadow: new Vector3(200, 20, 0),
         // shadow: new Vector3(2200, 775, 0), // roof door
-        shadow: new Vector3(2400, 20, 0), // end level
+        // shadow: new Vector3(2400, 20, 0), // end level
     };
 
     public state: PositionLevelState = {

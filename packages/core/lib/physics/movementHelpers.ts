@@ -95,7 +95,7 @@ export function applySingleInput(
 
 export function applyInputList(
     delta: number,
-    lastPlayersInput: (GamePlayerInputPayload | undefined)[],
+    lastPlayerInput: GamePlayerInputPayload | undefined,
     inputs: GamePlayerInputPayload[],
     collidingElements: Object3D[],
     gameState: GameState,
@@ -140,58 +140,56 @@ export function applyInputList(
                 );
             }
             // side effect
-            lastPlayersInput[input.player] = input;
+            lastPlayerInput = input;
             // side effect
             gameState.lastValidatedInput = input.sequence;
         }
     } else {
         // if there are no inputs for this tick, we have to deduce / interpolate player position
         // regarding the last action he did.
+        const input = lastPlayerInput;
+        if (dev) {
+            console.log('last player input', input);
+        }
 
-        for (let j = 0; j < lastPlayersInput.length; j++) {
-            const input = lastPlayersInput[j];
+        if (input) {
             if (dev) {
-                console.log('last player input', input);
-            }
-
-            if (input) {
-                if (dev) {
-                    console.log(
-                        `no input for player ${input.player} reapply last input`,
-                    );
-                    console.log('applying input', input.time, input.sequence);
-                    console.log(
-                        'applying input from position',
-                        gameState.players[input.player].position,
-                    );
-                    console.log(
-                        'applying input from velocity',
-                        gameState.players[input.player].velocity,
-                    );
-                }
-                applySingleInput(
-                    delta,
-                    input.player,
-                    input.inputs,
-                    collidingElements,
-                    gameState,
-                    context,
+                console.log(
+                    `no input for player ${input.player} reapply last input`,
                 );
-                if (dev) {
-                    console.log(
-                        'applying input to position',
-                        gameState.players[input.player].position,
-                    );
-                    console.log(
-                        'applying input to velocity',
-                        gameState.players[input.player].velocity,
-                    );
-                }
-                // side effect
-                gameState.lastValidatedInput = input.sequence;
+                console.log('applying input', input.time, input.sequence);
+                console.log(
+                    'applying input from position',
+                    gameState.players[input.player].position,
+                );
+                console.log(
+                    'applying input from velocity',
+                    gameState.players[input.player].velocity,
+                );
             }
+            applySingleInput(
+                delta,
+                input.player,
+                input.inputs,
+                collidingElements,
+                gameState,
+                context,
+            );
+            if (dev) {
+                console.log(
+                    'applying input to position',
+                    gameState.players[input.player].position,
+                );
+                console.log(
+                    'applying input to velocity',
+                    gameState.players[input.player].velocity,
+                );
+            }
+            // side effect
+            gameState.lastValidatedInput = input.sequence;
         }
     }
+    return lastPlayerInput;
 }
 
 const isTouchingDoorOpener = (objectDown: Intersection) => {
