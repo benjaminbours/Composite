@@ -105,6 +105,7 @@ export function applyInputList(
     if (dev) {
         console.log(gameState.game_time);
     }
+    let lastInput = lastPlayerInput;
 
     // if there are inputs for this time tick, we process them
     if (inputs.length) {
@@ -140,37 +141,36 @@ export function applyInputList(
                 );
             }
             // side effect
-            lastPlayerInput = input;
+            lastInput = input;
             // side effect
             gameState.lastValidatedInput = input.sequence;
         }
     } else {
         // if there are no inputs for this tick, we have to deduce / interpolate player position
         // regarding the last action he did.
-        const input = lastPlayerInput;
         if (dev) {
-            console.log('last player input', input);
+            console.log('last player input', lastInput);
         }
 
-        if (input) {
+        if (lastInput) {
             if (dev) {
                 console.log(
-                    `no input for player ${input.player} reapply last input`,
+                    `no input for player ${lastInput.player} reapply last input`,
                 );
-                console.log('applying input', input.time, input.sequence);
+                console.log('applying input', lastInput.time, lastInput.sequence);
                 console.log(
                     'applying input from position',
-                    gameState.players[input.player].position,
+                    gameState.players[lastInput.player].position,
                 );
                 console.log(
                     'applying input from velocity',
-                    gameState.players[input.player].velocity,
+                    gameState.players[lastInput.player].velocity,
                 );
             }
             applySingleInput(
                 delta,
-                input.player,
-                input.inputs,
+                lastInput.player,
+                lastInput.inputs,
                 collidingElements,
                 gameState,
                 context,
@@ -178,18 +178,18 @@ export function applyInputList(
             if (dev) {
                 console.log(
                     'applying input to position',
-                    gameState.players[input.player].position,
+                    gameState.players[lastInput.player].position,
                 );
                 console.log(
                     'applying input to velocity',
-                    gameState.players[input.player].velocity,
+                    gameState.players[lastInput.player].velocity,
                 );
             }
             // side effect
-            gameState.lastValidatedInput = input.sequence;
+            gameState.lastValidatedInput = lastInput.sequence;
         }
     }
-    return lastPlayerInput;
+    return lastInput;
 }
 
 const isTouchingDoorOpener = (objectDown: Intersection) => {

@@ -51,6 +51,8 @@ services:
     build:
       context: .
       dockerfile: ./back/Dockerfile.back
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
     networks:
       - main
       - database
@@ -76,6 +78,8 @@ services:
     build:
       context: .
       dockerfile: ./front/Dockerfile.front
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
     env_file:
       - ./front/.env
     networks:

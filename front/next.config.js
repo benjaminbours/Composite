@@ -12,6 +12,7 @@ const nextConfig = {
         return config;
     },
     reactStrictMode: true,
+    // productionBrowserSourceMaps: true,
 };
 
 module.exports = withBundleAnalyzer(nextConfig);
