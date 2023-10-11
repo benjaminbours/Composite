@@ -1,5 +1,11 @@
 # composite-core
 
+## 0.1.0-next.3
+
+### Patch Changes
+
+- Fix issue on prod
+
 ## 0.1.0-next.2
 
 ### Patch Changes
