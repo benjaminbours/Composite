@@ -1,5 +1,11 @@
 # composite-core
 
+## 0.1.0-next.2
+
+### Patch Changes
+
+- Fix issue with positions
+
 ## 0.1.0-next.1
 
 ### Minor Changes

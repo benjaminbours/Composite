@@ -8,6 +8,7 @@
     "@benjaminbours/composite-core": "0.1.0-next.0"
   },
   "changesets": [
+    "breezy-crews-compare",
     "sharp-peas-obey",
     "wild-eggs-visit"
   ]
