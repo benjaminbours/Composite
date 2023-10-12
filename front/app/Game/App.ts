@@ -477,9 +477,9 @@ export default class App {
                     0,
                 );
             }
-            this.updatePlayerGraphics();
             this.currentState.game_time++;
         });
+        this.updatePlayerGraphics();
         this.updateWorld();
     };
 
