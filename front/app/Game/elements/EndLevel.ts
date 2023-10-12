@@ -179,6 +179,7 @@ export class EndLevel extends Object3D {
             delay: 1,
             duration: 3,
             organicRatioShadow: FAST_ORGANIC_RATIO,
+            overwrite: true,
         });
     };
 
@@ -187,6 +188,7 @@ export class EndLevel extends Object3D {
             delay: 1,
             duration: 3,
             organicRatioLight: FAST_ORGANIC_RATIO,
+            overwrite: true,
         });
     };
 
@@ -195,6 +197,7 @@ export class EndLevel extends Object3D {
             duration: 2,
             delay: 1,
             organicRatioShadow: DEFAULT_ORGANIC_RATIO,
+            overwrite: true,
         });
     };
 
@@ -203,6 +206,7 @@ export class EndLevel extends Object3D {
             duration: 2,
             delay: 1,
             organicRatioLight: DEFAULT_ORGANIC_RATIO,
+            overwrite: true,
         });
     };
 
