@@ -25,6 +25,5 @@ Start all the containers
 ### How to deploy
 
 - Use changeset to update core package on github registry
-- build last version of workspace image
-- build other images with github
+- build images with github
 - use make deploy to connect by ssh to server and update the stack
