@@ -33,3 +33,6 @@ jobs:
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/composite-front:latest
         build-args: |
           NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+          NEXT_PUBLIC_STAGE=staging
+          NEXT_PUBLIC_BACKEND_URL=http://composite-api.ddns.net
+          NEXT_PUBLIC_URL=http://composite.ddns.net

@@ -1,4 +1,5 @@
 *
+!.npmrc
 
 !front
 front/node_modules
