@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import * as pjson from '../package.json';
 // import { networkInterfaces } from 'os';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
+  getVersion(): string {
     // Piece of code to check the loadbalancer is working well
     // const netInterfaces = networkInterfaces();
     // const [{ address }] = Object.values(netInterfaces).flatMap((netInterface) =>
@@ -11,6 +12,6 @@ export class AppService {
     // );
     // console.log(address);
 
-    return 'Hello World!';
+    return `API version is ${pjson.version}`;
   }
 }

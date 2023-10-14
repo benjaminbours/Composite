@@ -14,8 +14,8 @@ export class AppController {
   ) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getVersion(): string {
+    return this.appService.getVersion();
   }
 
   @Get('/queue-info')

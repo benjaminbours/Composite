@@ -12,7 +12,10 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body>{children}</body>
+            <body data-app-version={process.env.APP_VERSION}>
+                {children}
+                <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
+            </body>
         </html>
     );
 }

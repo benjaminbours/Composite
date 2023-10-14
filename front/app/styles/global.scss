@@ -19,6 +19,13 @@ canvas,
     width: 100%;
 }
 
+.version {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    color: black;
+}
+
 .home-page {
     position: relative;
     height: 100vh;
