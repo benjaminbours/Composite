@@ -4,6 +4,7 @@ attribute float speed;
 attribute float size;
 uniform float time;
 uniform float organicRatio;
+varying vec3 color;
 
 const float PI = 3.1415926535897932384626433832795;
 
@@ -19,7 +20,10 @@ b control the distance between loops
 θ the angle
 **/
 
+const float particlesNumber = 700.;
+
 void main() {
+    float halfParticlesNumber = particlesNumber / 2.;
     float index = float(gl_VertexID);
     float a = PI;
     float b = 5.;
@@ -40,6 +44,12 @@ void main() {
     y = 100. - radius + direction.z * organicRatio;
 
     vec4 dPosition = vec4(x, y, z, 1.0);
+
+    if(index < halfParticlesNumber) {
+        color = vec3(0., 0., 0.);
+    } else {
+        color = vec3(1., 1., 1.);
+    }
 
     // assign values that will be useful in fragment shader
     gl_PointSize = size - abs(dPosition.y *  0.06);

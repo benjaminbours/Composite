@@ -1,4 +1,4 @@
-uniform vec3 color;
+varying vec3 color;
 
 void main() {
     vec2 position = gl_PointCoord - vec2(.5, .5);

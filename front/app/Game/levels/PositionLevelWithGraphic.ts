@@ -1,5 +1,5 @@
 // vendors
-import { Color, Vector3 } from 'three';
+import { Vector3 } from 'three';
 // our libs
 import { ElementName, PositionLevel } from '@benjaminbours/composite-core';
 // local
@@ -13,17 +13,15 @@ export class PositionLevelWithGraphic extends PositionLevel {
         const doors = [
             {
                 id: 'ground',
-                color: new Color('#882D2A'),
                 cameraPosition: new Vector3(50, 200),
             },
             {
                 id: 'roof',
-                color: new Color('#882D2A'),
                 cameraPosition: new Vector3(0, 100),
             },
         ];
 
-        doors.forEach(({ id, color, cameraPosition }) => {
+        doors.forEach(({ id, cameraPosition }) => {
             const wallDoor = this.children.find(
                 (child) => child.name === ElementName.WALL_DOOR(id),
             )!;
@@ -43,7 +41,6 @@ export class PositionLevelWithGraphic extends PositionLevel {
                     doorLeft: groundFloorDoorLeft!,
                     doorRight: groundFloorDoorRight!,
                 },
-                color,
             );
             const area = this.children.find(
                 (child) => child.name === ElementName.AREA_DOOR_OPENER(id),

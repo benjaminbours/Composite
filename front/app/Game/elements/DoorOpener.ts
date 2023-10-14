@@ -42,7 +42,6 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     constructor(
         public name: string,
         public doorInfo: DoorInfo,
-        color: Color,
     ) {
         super();
         const particlesNumber = 700;
@@ -103,7 +102,6 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
         const particlesMat = new ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },
-                color: { value: color },
                 organicRatio: { value: DEFAULT_ORGANIC_RATIO },
             },
             // transparent: true,
