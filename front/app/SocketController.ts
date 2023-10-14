@@ -123,7 +123,12 @@ export class SocketController {
         });
     };
 
-    emit = (event: SocketEvent) => {
+    public emit = (event: SocketEvent) => {
         this.socket.emit(event[0], event[1]);
+    };
+
+    public destroy = () => {
+        console.log('disconnect');
+        this.socket.disconnect();
     };
 }

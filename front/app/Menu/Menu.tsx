@@ -219,6 +219,10 @@ export function Menu({ setMainState, mainState }: Props) {
             animation.current.initQueueToFaction(() => {
                 onTransition.current = false;
                 setCurrentScene('faction');
+                setMainState((prev) => ({
+                    ...prev,
+                    side: undefined,
+                }));
             });
         }
         if (currentScene !== 'home') {

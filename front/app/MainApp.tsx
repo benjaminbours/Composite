@@ -1,6 +1,12 @@
 'use client';
 // vendors
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import dynamic from 'next/dynamic';
 // our libs
 import {
@@ -41,6 +47,11 @@ function MainApp() {
         gameState: undefined,
     });
     const [tabIsHidden, setTabIsHidden] = useState(false);
+    const [isInQueue, setIsInQueue] = useState(false);
+    const shouldBeInQueue = useMemo(
+        () => state.side !== undefined && state.selectedLevel !== undefined,
+        [state],
+    );
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         setState((prev) => ({ ...prev, gameState: initialGameState }));
@@ -57,6 +68,7 @@ function MainApp() {
                     SocketEventType.MATCHMAKING_INFO,
                     state as MatchMakingPayload,
                 ]);
+                setIsInQueue(true);
             });
     }, [handleGameStart, state]);
 
@@ -79,50 +91,46 @@ function MainApp() {
     }, []);
 
     useEffect(() => {
-        if (
-            state.side === undefined ||
-            state.selectedLevel === undefined ||
-            // if already exist a socket controller
-            //  we are already connect and don't want to connect anymore
-            socketController.current
-        ) {
-            return;
+        if (shouldBeInQueue && !isInQueue) {
+            console.log('establish connection');
+            establishConnection();
+            // establishConnection().then(() => {
+            //     const level = new PositionLevel();
+            //     const initialGameState = new GameState(
+            //         [
+            //             {
+            //                 position: {
+            //                     x: level.startPosition.shadow.x,
+            //                     y: level.startPosition.shadow.y,
+            //                 },
+            //                 velocity: {
+            //                     x: 0,
+            //                     y: 0,
+            //                 },
+            //             },
+            //             {
+            //                 position: {
+            //                     x: level.startPosition.light.x,
+            //                     y: level.startPosition.light.y,
+            //                 },
+            //                 velocity: {
+            //                     x: 0,
+            //                     y: 0,
+            //                 },
+            //             },
+            //         ],
+            //         level.state,
+            //         Date.now(),
+            //         0,
+            //     );
+            //     handleGameStart(initialGameState);
+            // });
+        } else if (isInQueue && !shouldBeInQueue) {
+            socketController.current?.destroy();
+            socketController.current = undefined;
+            setIsInQueue(false);
         }
-
-        console.log('establish connection');
-        establishConnection();
-        // establishConnection().then(() => {
-        //     const level = new PositionLevel();
-        //     const initialGameState = new GameState(
-        //         [
-        //             {
-        //                 position: {
-        //                     x: level.startPosition.shadow.x,
-        //                     y: level.startPosition.shadow.y,
-        //                 },
-        //                 velocity: {
-        //                     x: 0,
-        //                     y: 0,
-        //                 },
-        //             },
-        //             {
-        //                 position: {
-        //                     x: level.startPosition.light.x,
-        //                     y: level.startPosition.light.y,
-        //                 },
-        //                 velocity: {
-        //                     x: 0,
-        //                     y: 0,
-        //                 },
-        //             },
-        //         ],
-        //         level.state,
-        //         Date.now(),
-        //         0,
-        //     );
-        //     handleGameStart(initialGameState);
-        // });
-    }, [state, establishConnection]);
+    }, [shouldBeInQueue, isInQueue, establishConnection]);
 
     // return (
     //     <>
