@@ -1,5 +1,22 @@
 # composite-back
 
+## 0.1.0
+
+### Minor Changes
+
+- 3839a7d: First staging release
+
+### Patch Changes
+
+- f393a9f: Fix issue with positions
+- d5237df: Fix issue on prod
+- Release 0.1.0
+- Updated dependencies [f393a9f]
+- Updated dependencies [d5237df]
+- Updated dependencies
+- Updated dependencies [09b4b65]
+  - @benjaminbours/composite-core@0.1.0
+
 ## 0.1.0-next.3
 
 ### Patch Changes

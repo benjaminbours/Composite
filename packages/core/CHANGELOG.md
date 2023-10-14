@@ -1,5 +1,17 @@
 # composite-core
 
+## 0.1.0
+
+### Minor Changes
+
+- 09b4b65: First staging release
+
+### Patch Changes
+
+- f393a9f: Fix issue with positions
+- d5237df: Fix issue on prod
+- Release 0.1.0
+
 ## 0.1.0-next.3
 
 ### Patch Changes
