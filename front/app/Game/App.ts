@@ -29,13 +29,13 @@ import {
     PhysicLoop,
     applyInputList,
     ElementName,
+    Layer,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
 import { mixShader, volumetricLightShader } from './volumetricLightShader';
-import { Layer } from './constants';
 import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';

@@ -8,7 +8,6 @@
 ## Required
 
 - Restore level loading
-- Restore occlusion with the light if some element are in front of the camera
 - Orchestrate efficiently the transition between the menu, the game, the state on the server, the connection, etc
 - Fix responsive menu this last changes
 - Ensure all click action on menu are on buttons element to maximize browser compatibility

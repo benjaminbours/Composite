@@ -6,6 +6,11 @@ export enum Side {
     LIGHT,
 }
 
+export enum Layer {
+    DEFAULT,
+    OCCLUSION,
+}
+
 export enum SocketEventType {
     // send automatically by socket io after successful connection with server
     CONNECT = 'connect',

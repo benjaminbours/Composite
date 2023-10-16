@@ -34,12 +34,10 @@ export class PositionLevel extends Group {
 
     constructor() {
         super();
-        // use name on mesh to understand better the data
         const wallBlockingLeftPath = createWall(
             new Vector3(4, 2, 0),
             new Vector3(-2, 0, 2),
             new Vector3(0, 90, 0),
-            'wall left',
         );
         this.add(wallBlockingLeftPath);
         this.collidingElements.push(wallBlockingLeftPath);

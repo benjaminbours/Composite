@@ -8,6 +8,7 @@ import {
     Vector3,
 } from 'three';
 import { degreesToRadians } from '../helpers/math';
+import { Layer } from '../types';
 
 export const gridSize = 250;
 const gridSizeMedium = gridSize / 2;
@@ -87,6 +88,8 @@ export function createMeshForGrid(geo: BoxGeometry, mat: Material): Mesh {
     const mesh = new Mesh(geo, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    // putting all mesh into occlusion effect creates an interesting effect
+    // mesh.layers.enable(Layer.OCCLUSION);
     return mesh;
 }
 
@@ -94,7 +97,7 @@ export function createWall(
     size: Vector3,
     position: Vector3,
     rotation: Vector3,
-    name?: string,
+    withOcclusion?: boolean,
 ) {
     const sizeForGrid = size.multiplyScalar(gridSize);
     const wall = createMeshForGrid(
@@ -105,11 +108,11 @@ export function createWall(
         ),
         materials.phong,
     );
-    if (name) {
-        wall.name = name;
-    }
     // position the whole group
     positionOnGrid(wall, position, rotation);
+    if (withOcclusion) {
+        wall.layers.enable(Layer.OCCLUSION);
+    }
 
     return wall;
 }
@@ -131,6 +134,7 @@ export function createWallDoor(
         new Vector3(0.5, size.y, 0),
         new Vector3(-1, 0, 0),
         new Vector3(),
+        true,
     );
     group.add(wallLeft, wallRight);
 
@@ -188,8 +192,8 @@ export function createArchGroup(
     const group = new Object3D();
     const columnLeft1 = createColumnGroup(height, 'normal');
     const columnLeft2 = createColumnGroup(height, 'normal');
-    const columnRight1 = createColumnGroup(height, 'normal');
-    const columnRight2 = createColumnGroup(height, 'normal');
+    const columnRight1 = createColumnGroup(height, 'normal', true);
+    const columnRight2 = createColumnGroup(height, 'normal', true);
 
     positionOnGrid(columnLeft1, new Vector3(0, 0, -1));
     group.add(columnLeft1);
@@ -227,6 +231,7 @@ export function createArchGroup(
 export function createColumnGroup(
     size: number,
     columnGeometry: 'normal' | 'big',
+    withOcclusion?: boolean,
 ) {
     // TODO: Fix this any
     const pedestalGeometry = geometries[
@@ -237,11 +242,17 @@ export function createColumnGroup(
 
     const columnStart = createMeshForGrid(pedestalGeometry, materials.phong);
     group.add(columnStart);
+    if (withOcclusion) {
+        columnStart.layers.enable(Layer.OCCLUSION);
+    }
 
     for (let i = 0; i < size; i++) {
         const part = createMeshForGrid(partGeometry, materials.phong);
         positionOnGrid(part, new Vector3(0, i, 0));
         group.add(part);
+        if (withOcclusion) {
+            part.layers.enable(Layer.OCCLUSION);
+        }
     }
 
     const columnEnd = columnStart.clone();
