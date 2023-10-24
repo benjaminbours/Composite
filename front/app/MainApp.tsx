@@ -19,6 +19,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import type { SocketController } from './SocketController';
+import { MenuScene } from './Menu/types';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -37,15 +38,18 @@ export interface MainState {
     gameState: GameState | undefined;
 }
 
+// TODO: Ability to restart a game from the same session without reloading or changing team mate
 function MainApp() {
     const socketController = useRef<SocketController>();
+    const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
     const [state, setState] = useState<MainState>({
-        // side: Side.SHADOW,
+        // side: Side.LIGHT,
         // selectedLevel: Levels.CRACK_THE_DOOR,
         side: undefined,
         selectedLevel: undefined,
         gameState: undefined,
     });
+    const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const [isInQueue, setIsInQueue] = useState(false);
     const shouldBeInQueue = useMemo(
@@ -55,32 +59,40 @@ function MainApp() {
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         setState((prev) => ({ ...prev, gameState: initialGameState }));
+        setGameIsPlaying(true);
+        setMenuScene(MenuScene.END_LEVEL);
     }, []);
 
-    const establishConnection = useCallback(() => {
-        return import('./SocketController')
-            .then((mod) => mod.SocketController)
-            .then((SocketController) => {
-                socketController.current = new SocketController(
-                    handleGameStart,
-                );
-                socketController.current.emit([
-                    SocketEventType.MATCHMAKING_INFO,
-                    state as MatchMakingPayload,
-                ]);
-                setIsInQueue(true);
-            });
-    }, [handleGameStart, state]);
+    const handleGameFinished = useCallback(() => {
+        setGameIsPlaying(false);
+    }, []);
 
-    const handleVisibilityChange = () => {
-        if (document.visibilityState === 'hidden') {
-            setTabIsHidden(true);
-        } else {
-            setTabIsHidden(false);
-        }
-    };
+    const establishConnection = useCallback(
+        () =>
+            import('./SocketController')
+                .then((mod) => mod.SocketController)
+                .then((SocketController) => {
+                    socketController.current = new SocketController(
+                        handleGameStart,
+                        handleGameFinished,
+                    );
+                    socketController.current.emit([
+                        SocketEventType.MATCHMAKING_INFO,
+                        state as MatchMakingPayload,
+                    ]);
+                    setIsInQueue(true);
+                }),
+        [handleGameStart, state],
+    );
 
     useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                setTabIsHidden(true);
+            } else {
+                setTabIsHidden(false);
+            }
+        };
         document.addEventListener('visibilitychange', handleVisibilityChange);
         return () => {
             document.removeEventListener(
@@ -119,7 +131,14 @@ function MainApp() {
             //                 },
             //             },
             //         ],
-            //         level.state,
+            //         {
+            //             ...level.state,
+            //             doors: {
+            //                 ...level.state.doors,
+            //                 ground: [0],
+            //                 roof: [0],
+            //             },
+            //         },
             //         Date.now(),
             //         0,
             //     );
@@ -150,10 +169,15 @@ function MainApp() {
 
     return (
         <>
-            {!state.gameState && (
-                <Menu mainState={state} setMainState={setState} />
+            {!gameIsPlaying && (
+                <Menu
+                    mainState={state}
+                    setMainState={setState}
+                    menuScene={menuScene}
+                    setMenuScene={setMenuScene}
+                />
             )}
-            {state.gameState && (
+            {state.gameState && gameIsPlaying && (
                 <Game
                     side={state.side!}
                     initialGameState={state.gameState}

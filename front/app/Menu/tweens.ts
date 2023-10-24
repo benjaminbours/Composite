@@ -1,11 +1,11 @@
 import { gsap } from 'gsap';
 import Animation from './Animation';
-import { Scene } from './types';
+import { MenuScene } from './types';
 
 /**
  * Curve
  */
-export function curveToStep(step: Scene) {
+export function curveToStep(step: MenuScene) {
     const { canvas, curve } = Animation.canvasComponents;
 
     return gsap.to(curve, {
@@ -23,7 +23,7 @@ export function curveToStep(step: Scene) {
 /**
  * Light
  */
-export function lightToStep(step: Scene) {
+export function lightToStep(step: MenuScene) {
     const { canvas, light } = Animation.canvasComponents;
     const coordinate = light.resizeOptions[step](
         canvas.width,
@@ -43,7 +43,7 @@ export function lightToStep(step: Scene) {
 /**
  * Shadow
  */
-export function shadowToStep(step: Scene) {
+export function shadowToStep(step: MenuScene) {
     const { canvas, shadow } = Animation.canvasComponents;
     const coordinate = shadow.resizeOptions[step](
         canvas.width,

@@ -1,6 +1,12 @@
 import { Side } from '@benjaminbours/composite-core';
 
-export type Scene = 'home' | 'level' | 'faction' | 'queue';
+export enum MenuScene {
+    HOME = 'home',
+    LEVEL = 'level',
+    FACTION = 'faction',
+    QUEUE = 'queue',
+    END_LEVEL = 'end_level',
+}
 
 export interface ICoordinate {
     x: number;
@@ -9,7 +15,7 @@ export interface ICoordinate {
 
 export interface ResizeOptions {
     isMobileDevice: boolean;
-    currentScene: Scene;
+    currentScene: MenuScene;
     side?: Side;
 }
 

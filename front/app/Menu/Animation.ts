@@ -20,7 +20,7 @@ import {
     queueOut,
     homeIn,
 } from './tweens';
-import { Scene } from './types';
+import { MenuScene } from './types';
 import Shadow from './canvas/Shadow';
 import Light from './canvas/Light';
 import MainTitle from './canvas/MainTitle';
@@ -63,7 +63,7 @@ export default class Animation {
         domElements: IAnimationComps,
         canvasBlack: CanvasBlack,
         canvasWhite: CanvasWhite,
-        currentScene: Scene,
+        currentScene: MenuScene,
         isMobileDevice: boolean,
     ) {
         this.isMobileDevice = isMobileDevice;
@@ -73,14 +73,14 @@ export default class Animation {
             light: canvasBlack.light,
             shadow: canvasWhite.shadow,
             canvas: canvasWhite.ctx.canvas,
-            mainTitle: new MainTitle(currentScene === 'home'),
+            mainTitle: new MainTitle(currentScene === MenuScene.HOME),
             subtitleHome: new SubtitleHome(
                 'THINK BOTH WAYS',
-                currentScene === 'home',
+                currentScene === MenuScene.HOME,
             ),
             titleFaction: new TitleFaction(
                 'SELECT A SIDE',
-                currentScene === 'faction',
+                currentScene === MenuScene.FACTION,
             ),
         };
     }
@@ -94,8 +94,11 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add([curveToStep('level'), ...homeOut()])
-            .add([lightToStep('level'), shadowToStep('level')], '-=0.5')
+            .add([curveToStep(MenuScene.LEVEL), ...homeOut()])
+            .add(
+                [lightToStep(MenuScene.LEVEL), shadowToStep(MenuScene.LEVEL)],
+                '-=0.5',
+            )
             .add(levelIn());
     }
 
@@ -107,9 +110,13 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add(curveToStep('home'))
+            .add(curveToStep(MenuScene.HOME))
             .add(
-                [lightToStep('home'), shadowToStep('home'), levelOut()],
+                [
+                    lightToStep(MenuScene.HOME),
+                    shadowToStep(MenuScene.HOME),
+                    levelOut(),
+                ],
                 '-=0.5',
             )
             .add(homeIn());
@@ -123,9 +130,13 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add(curveToStep('faction'))
+            .add(curveToStep(MenuScene.FACTION))
             .add(
-                [lightToStep('faction'), shadowToStep('faction'), levelOut()],
+                [
+                    lightToStep(MenuScene.FACTION),
+                    shadowToStep(MenuScene.FACTION),
+                    levelOut(),
+                ],
                 '-=0.5',
             )
             .add(factionIn());
@@ -139,9 +150,13 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add(curveToStep('level'))
+            .add(curveToStep(MenuScene.LEVEL))
             .add(
-                [lightToStep('level'), shadowToStep('level'), ...factionOut()],
+                [
+                    lightToStep(MenuScene.LEVEL),
+                    shadowToStep(MenuScene.LEVEL),
+                    ...factionOut(),
+                ],
                 '-=0.5',
             )
             .add(levelIn());
@@ -155,9 +170,13 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add(curveToStep('queue'))
+            .add(curveToStep(MenuScene.QUEUE))
             .add(
-                [lightToStep('queue'), shadowToStep('queue'), ...factionOut()],
+                [
+                    lightToStep(MenuScene.QUEUE),
+                    shadowToStep(MenuScene.QUEUE),
+                    ...factionOut(),
+                ],
                 '-=0.5',
             )
             .add(queueIn());
@@ -171,9 +190,13 @@ export default class Animation {
                     onComplete();
                 },
             })
-            .add(curveToStep('faction'))
+            .add(curveToStep(MenuScene.FACTION))
             .add(
-                [lightToStep('faction'), shadowToStep('faction'), queueOut()],
+                [
+                    lightToStep(MenuScene.FACTION),
+                    shadowToStep(MenuScene.FACTION),
+                    queueOut(),
+                ],
                 '-=0.5',
             )
             .add(factionIn());

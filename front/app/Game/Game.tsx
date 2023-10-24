@@ -1,7 +1,7 @@
 // vendors
 import { gsap } from 'gsap';
 import * as STATS from 'stats.js';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // our libs
 import { GameState, Side } from '@benjaminbours/composite-core';
 import App from './App';
@@ -26,11 +26,6 @@ function Game({
     const gameStarted = useRef(false);
     const appRef = useRef<App>();
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
-    const [isFinished, setIsFinished] = useState(false);
-
-    const handleGameFinished = useCallback(() => {
-        setIsFinished(true);
-    }, []);
 
     useEffect(() => {
         let gameLoop: (() => void) | undefined = undefined;
@@ -50,7 +45,6 @@ function Game({
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 socketController,
             );
-            socketController.onGameFinished = handleGameFinished;
             const stats = (() => {
                 if (process.env.NEXT_PUBLIC_STAGE === 'development') {
                     const stats = new STATS.default();
@@ -60,27 +54,6 @@ function Game({
                 }
                 return undefined;
             })();
-
-            // const handleVisibilityChange = () => {
-            //     console.log(
-            //         'visibilitychange game time',
-            //         appRef.current?.currentState.game_time,
-            //     );
-            //     setIsSynchronizingTime(true);
-            //     if (document.visibilityState === 'hidden') {
-            //         console.log('visibilitychange hidden');
-            //         appRef.current?.inputsManager.reset();
-            //         appRef.current?.clock.stop();
-            //     } else {
-            //         console.log('visibilitychange seen');
-            //         appRef.current?.clock.start();
-            //     }
-            // };
-
-            // document.addEventListener(
-            //     'visibilitychange',
-            //     handleVisibilityChange,
-            // );
 
             gameLoop = () => {
                 stats?.begin();
@@ -100,10 +73,6 @@ function Game({
                 if (gameLoop) {
                     gsap.ticker.remove(gameLoop);
                 }
-                // document.removeEventListener(
-                //     'visibilitychange',
-                //     handleVisibilityChange,
-                // );
             };
         });
     }, []);
@@ -121,9 +90,6 @@ function Game({
         <>
             {isSynchronizingTime && (
                 <div className="game-sync-overlay">is Synchronizing</div>
-            )}
-            {isFinished && (
-                <div className="game-sync-overlay">Well done you dit it</div>
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }}></canvas>
         </>

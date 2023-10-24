@@ -13,6 +13,7 @@ interface Props {
     currentScene: string;
     side?: Side;
     levelName?: string;
+    handleClickOnPlay: () => void;
 }
 
 export const EndLevelScene: React.FC<Props> = ({
@@ -20,6 +21,7 @@ export const EndLevelScene: React.FC<Props> = ({
     currentScene,
     side,
     levelName,
+    handleClickOnPlay,
 }) => {
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
@@ -43,11 +45,11 @@ export const EndLevelScene: React.FC<Props> = ({
                 <h2>{`Well done!\nYou just finished the level\n${levelName}!`}</h2>
             )}
             <button
-                className="buttonCircle white end-level-container__play-button"
+                className={`buttonCircle ${color} end-level-container__play-button`}
                 // TODO: had same interaction as on home page
                 // onMouseEnter={handleMouseEnterPlay}
                 // onMouseLeave={handleMouseLeavePlay}
-                // onClick={() => handleClickOnFaction(Side.LIGHT)}
+                onClick={handleClickOnPlay}
             >
                 Play
             </button>

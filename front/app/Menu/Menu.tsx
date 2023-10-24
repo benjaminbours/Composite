@@ -15,21 +15,28 @@ import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
-import { Scene } from './types';
+import { MenuScene } from './types';
 import ButtonBack from './ButtonBack';
 import LevelItem from './LevelItem';
 import { MainState } from '../MainApp';
 import { QueueInfoText } from './QueueInfo';
 import { QueueScene } from './QueueScene';
 import { SideScene } from './SideScene';
+import { EndLevelScene } from './EndLevelScene';
 
 interface Props {
     mainState: MainState;
     setMainState: React.Dispatch<React.SetStateAction<MainState>>;
+    menuScene: MenuScene;
+    setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>;
 }
 
-export function Menu({ setMainState, mainState }: Props) {
-    const [currentScene, setCurrentScene] = useState<Scene>('home');
+export function Menu({
+    setMainState,
+    mainState,
+    menuScene,
+    setMenuScene,
+}: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -41,6 +48,7 @@ export function Menu({ setMainState, mainState }: Props) {
     const levelRef = useRef<HTMLDivElement>(null);
     const sideRef = useRef<HTMLDivElement>(null);
     const queueRef = useRef<HTMLDivElement>(null);
+    const endLevelRef = useRef<HTMLDivElement>(null);
     const menuStarted = useRef(false);
 
     const isMobileDevice = useMemo(() => {
@@ -53,19 +61,19 @@ export function Menu({ setMainState, mainState }: Props) {
     const initAnimations = useCallback((animation: typeof Animation) => {
         animation.initHomeToLevel(() => {
             onTransition.current = false;
-            setCurrentScene('level');
+            setMenuScene(MenuScene.LEVEL);
         });
         animation.initLevelToHome(() => {
             onTransition.current = false;
-            setCurrentScene('home');
+            setMenuScene(MenuScene.HOME);
         });
         animation.initLevelToFaction(() => {
             onTransition.current = false;
-            setCurrentScene('faction');
+            setMenuScene(MenuScene.FACTION);
         });
         animation.initFactionToLevel(() => {
             onTransition.current = false;
-            setCurrentScene('level');
+            setMenuScene(MenuScene.LEVEL);
         });
     }, []);
 
@@ -80,19 +88,19 @@ export function Menu({ setMainState, mainState }: Props) {
         const isMobileDevice = window.innerWidth <= 768;
         blackCanvas.current.resize({
             isMobileDevice,
-            currentScene,
+            currentScene: menuScene,
             side: mainState.side,
         });
         whiteCanvas.current.resize({
             isMobileDevice,
-            currentScene,
+            currentScene: menuScene,
             side: mainState.side,
         });
         animation.current.runMethodForAllBothSideComponents('resize', [
             blackCanvas.current.ctx,
         ]);
         initAnimations(animation.current);
-    }, [isMobileDevice, currentScene, mainState.side]);
+    }, [isMobileDevice, menuScene, mainState.side]);
 
     // effect to start to render the menu animation
     useEffect(() => {
@@ -120,7 +128,7 @@ export function Menu({ setMainState, mainState }: Props) {
                 },
                 blackCanvas.current,
                 whiteCanvas.current,
-                currentScene,
+                menuScene,
                 isMobileDevice,
             );
             initAnimations(Animation);
@@ -215,20 +223,21 @@ export function Menu({ setMainState, mainState }: Props) {
             },
         };
         onTransition.current = true;
-        if (currentScene === 'queue') {
+        if (menuScene === 'queue') {
             animation.current.initQueueToFaction(() => {
                 onTransition.current = false;
-                setCurrentScene('faction');
+                setMenuScene(MenuScene.FACTION);
                 setMainState((prev) => ({
                     ...prev,
                     side: undefined,
                 }));
             });
         }
-        if (currentScene !== 'home') {
-            backOptions[currentScene]();
+        // there is no back button on home scene or on end level scene
+        if (menuScene !== MenuScene.HOME && menuScene !== MenuScene.END_LEVEL) {
+            backOptions[menuScene]();
         }
-    }, [currentScene]);
+    }, [menuScene]);
 
     const handleClickOnLevel = useCallback((levelId: Levels) => {
         if (!animation.current) {
@@ -247,7 +256,7 @@ export function Menu({ setMainState, mainState }: Props) {
             return;
         }
         animation.current.faction = side;
-        setCurrentScene('queue');
+        setMenuScene(MenuScene.QUEUE);
         setMainState((prev) => ({ ...prev, side }));
         animation.current.initFactionToQueue(() => {
             onTransition.current = true;
@@ -294,7 +303,7 @@ export function Menu({ setMainState, mainState }: Props) {
             <div
                 ref={homeRef}
                 className={`home-container ${
-                    currentScene !== 'home' ? 'unmount' : ''
+                    menuScene !== 'home' ? 'unmount' : ''
                 }`}
             >
                 <h2>Think both ways</h2>
@@ -323,7 +332,7 @@ export function Menu({ setMainState, mainState }: Props) {
             <div
                 ref={levelRef}
                 className={`level-container ${
-                    currentScene !== 'level' ? 'unmount' : ''
+                    menuScene !== 'level' ? 'unmount' : ''
                 }`}
             >
                 <ButtonBack color="white" onClick={handleClickOnBack} />
@@ -341,7 +350,7 @@ export function Menu({ setMainState, mainState }: Props) {
             </div>
             <SideScene
                 sideRef={sideRef}
-                currentScene={currentScene}
+                currentScene={menuScene}
                 selectedLevel={mainState.selectedLevel}
                 levelName={
                     levels.find((level) => level.id === mainState.selectedLevel)
@@ -353,13 +362,23 @@ export function Menu({ setMainState, mainState }: Props) {
             />
             <QueueScene
                 queueRef={queueRef}
-                currentScene={currentScene}
+                currentScene={menuScene}
                 side={mainState.side}
                 levelName={
                     levels.find((level) => level.id === mainState.selectedLevel)
                         ?.name
                 }
                 handleClickOnBack={handleClickOnBack}
+            />
+            <EndLevelScene
+                endLevelRef={endLevelRef}
+                currentScene={menuScene}
+                side={mainState.side}
+                levelName={
+                    levels.find((level) => level.id === mainState.selectedLevel)
+                        ?.name
+                }
+                handleClickOnPlay={handleClickOnPlay}
             />
         </>
     );

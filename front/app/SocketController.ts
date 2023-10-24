@@ -19,10 +19,12 @@ export class SocketController {
     public getCurrentGameState?: () => GameState;
     public synchronizeGameTimeWithServer?: (time: number) => void;
     public onGameStateUpdate?: (gameState: GameState) => void;
-    public onGameFinished?: () => void;
     private isTimeSynced = false;
 
-    constructor(onGameStart: (initialGameState: GameState) => void) {
+    constructor(
+        onGameStart: (initialGameState: GameState) => void,
+        onGameFinish: () => void,
+    ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
         });
@@ -49,9 +51,7 @@ export class SocketController {
         );
 
         this.socket.on(SocketEventType.GAME_FINISHED, () => {
-            if (this.onGameFinished) {
-                this.onGameFinished();
-            }
+            onGameFinish();
         });
     }
 

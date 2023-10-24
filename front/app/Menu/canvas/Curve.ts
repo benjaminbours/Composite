@@ -67,6 +67,18 @@ export default class Curve {
             }
             return width * position;
         },
+        end_level(
+            width: number,
+            height: number,
+            isOnMobile: boolean,
+            faction?: Side,
+        ) {
+            const position = faction === Side.LIGHT ? 1.2 : -0.2;
+            if (isOnMobile) {
+                return height * position;
+            }
+            return width * position;
+        },
     };
 
     private origin: number = 0;
