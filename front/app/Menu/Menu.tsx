@@ -280,8 +280,8 @@ export function Menu({
             },
             {
                 id: Levels.THE_HIGH_SPHERES,
-                name: 'The hight spheres',
-                img: '/the_hight_spheres.png',
+                name: 'The high spheres',
+                img: '/the_high_spheres.png',
                 disabled: true,
             },
         ],
