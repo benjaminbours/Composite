@@ -10,6 +10,7 @@ import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
 import { Logger } from '@nestjs/common';
 import { Scene } from 'three';
+import * as uuid from 'uuid';
 // our libs
 import {
   SocketEventType,
@@ -21,7 +22,6 @@ import {
   GameState,
   PositionLevel,
   FLOOR,
-  RedisGameState,
   TimeSyncPayload,
   PhysicLoop,
   applyInputList,
@@ -29,11 +29,10 @@ import {
 // local
 import { PrismaService } from '../prisma.service';
 import {
-  Player,
   PlayerFoundInQueue,
-  PlayerStatus,
   TemporaryStorageService,
 } from '../temporary-storage.service';
+import { PlayerState, PlayerStatus } from 'src/PlayerState';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -81,7 +80,7 @@ export class SocketGateway {
     const playerFound = await this.temporaryStorage.findMatchInQueue(data, 0);
     if (!playerFound) {
       console.log('no match, add to queue');
-      const player = new Player(
+      const player = new PlayerState(
         PlayerStatus.IS_PENDING,
         data.side,
         data.selectedLevel,
@@ -91,7 +90,7 @@ export class SocketGateway {
     } else {
       this.createGame(playerFound, {
         socketId: socket.id,
-        player: new Player(
+        player: new PlayerState(
           PlayerStatus.IS_PLAYING,
           data.side,
           data.selectedLevel,
@@ -134,9 +133,7 @@ export class SocketGateway {
   ) {
     console.log('received time sync event', data);
     const player = await this.temporaryStorage.getPlayer(socket.id);
-    const gameState = await this.temporaryStorage
-      .getGameState(player.gameId)
-      .then((redisState) => GameState.parseRedisGameState(redisState));
+    const gameState = await this.temporaryStorage.getGameState(player.gameId);
     this.emit(socket.id, [
       SocketEventType.TIME_SYNC,
       {
@@ -173,7 +170,7 @@ export class SocketGateway {
    */
   async createGame(
     playerFoundInQueue: PlayerFoundInQueue,
-    playerArriving: { socketId: string; player: Player },
+    playerArriving: { socketId: string; player: PlayerState },
   ) {
     const dbLevel = (() => {
       switch (Number(playerFoundInQueue.player.selectedLevel)) {
@@ -230,17 +227,29 @@ export class SocketGateway {
       0,
     );
 
+    const teamRoomName = uuid.v4();
+    const gameRoomName = String(game.id);
+    // update players state
+    playerFoundInQueue.player.status = PlayerStatus.IS_PLAYING;
+    playerFoundInQueue.player.gameId = game.id;
+    playerFoundInQueue.player.roomName = teamRoomName;
+    // already set before could be remove but its consistent to have it here
+    playerArriving.player.status = PlayerStatus.IS_PLAYING;
+    playerArriving.player.gameId = game.id;
+    playerArriving.player.roomName = teamRoomName;
+
     // store game state and update queue in temporary storage
     await this.temporaryStorage.createGame(
       playerFoundInQueue,
       playerArriving,
       game.id,
-      RedisGameState.parseGameState(initialGameState),
+      initialGameState,
     );
-    const roomName = String(game.id);
-    this.addSocketToRoom(playerFoundInQueue.socketId, roomName);
-    this.addSocketToRoom(playerArriving.socketId, roomName);
-    this.emit(roomName, [
+    this.addSocketToRoom(playerFoundInQueue.socketId, teamRoomName);
+    this.addSocketToRoom(playerArriving.socketId, teamRoomName);
+    this.addSocketToRoom(playerFoundInQueue.socketId, gameRoomName);
+    this.addSocketToRoom(playerArriving.socketId, gameRoomName);
+    this.emit(teamRoomName, [
       SocketEventType.GAME_START,
       { gameState: initialGameState },
     ]);
@@ -293,9 +302,7 @@ export class SocketGateway {
             return parsedInput;
           }),
         ),
-        this.temporaryStorage
-          .getGameState(gameId)
-          .then((redisState) => GameState.parseRedisGameState(redisState)),
+        this.temporaryStorage.getGameState(gameId),
       ]).then(([inputsQueue, gameState]) => {
         // console.log('inputs queue before', inputsQueue.length);
         physicLoop.run((delta) => {
@@ -339,18 +346,13 @@ export class SocketGateway {
         // console.log('inputs queue after', inputsQueue.length);
 
         // update state and inputs queue
-        this.temporaryStorage.updateGameStateAndInputsQueue(
-          gameId,
-          RedisGameState.parseGameState(gameState),
-        );
+        this.temporaryStorage.updateGameStateAndInputsQueue(gameId, gameState);
 
         if (gameState.level.end_level.length === 2) {
           clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
           console.log('game finished on the server');
           this.emit(String(gameId), [SocketEventType.GAME_FINISHED]);
         }
-
-        // previous = now;
       });
     };
 

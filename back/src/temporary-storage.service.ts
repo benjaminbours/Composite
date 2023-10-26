@@ -8,6 +8,7 @@ import { RedisStore } from 'cache-manager-redis-store';
 import {
   AllQueueInfo,
   GamePlayerInputPayload,
+  GameState,
   Levels,
   MatchMakingPayload,
   QueueInfo,
@@ -15,23 +16,7 @@ import {
   Side,
 } from '@benjaminbours/composite-core';
 // local
-
-export enum PlayerStatus {
-  IS_PLAYING,
-  IS_PENDING,
-}
-
-export class Player {
-  /**
-   * key use with redis to store game state (the name of the room with socket io)
-   */
-  constructor(
-    public status: PlayerStatus,
-    public side: Side,
-    public selectedLevel: Levels,
-    public gameId?: number,
-  ) {}
-}
+import { PlayerState, RedisPlayerState, PlayerStatus } from './PlayerState';
 
 const REDIS_KEYS = {
   // List
@@ -49,7 +34,7 @@ const REDIS_KEYS = {
 
 export interface PlayerFoundInQueue {
   socketId: string;
-  player: Player;
+  player: PlayerState;
   indexToClear: number;
 }
 
@@ -64,7 +49,11 @@ export class TemporaryStorageService {
   }
 
   // players
-  async setPlayer(socketId: string, data: Partial<Player>, transaction?: any) {
+  async setPlayer(
+    socketId: string,
+    data: Partial<RedisPlayerState>,
+    transaction?: any,
+  ) {
     const client = transaction ? transaction : this.redisClient;
     return client.HSET(socketId, Object.entries(data).flat());
   }
@@ -72,18 +61,12 @@ export class TemporaryStorageService {
   async getPlayer(socketId: string) {
     return this.redisClient
       .HGETALL(REDIS_KEYS.PLAYER(socketId))
-      .then(
-        (res) =>
-          new Player(
-            Number(res.status),
-            Number(res.side),
-            Number(res.selectedLevel),
-            res.gameId ? Number(res.gameId) : undefined,
-          ),
+      .then((res) =>
+        PlayerState.parseRedisPlayerState(res as unknown as RedisPlayerState),
       );
   }
 
-  async removePlayer(socketId: string, player: Player) {
+  async removePlayer(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     transaction.DEL(REDIS_KEYS.PLAYER(socketId));
     if (player.status === PlayerStatus.IS_PENDING) {
@@ -94,14 +77,14 @@ export class TemporaryStorageService {
   }
 
   // match making queue
-  async addToQueue(socketId: string, player: Player) {
+  async addToQueue(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     // TODO: Probably a bad idea to use the socketId. I should better use a session id => https://socket.io/docs/v4/client-socket-instance/
     console.log(socketId, player);
 
     transaction.HSET(
       socketId,
-      Object.entries(player)
+      Object.entries(RedisPlayerState.parsePlayerState(player))
         .filter(([, value]) => value !== undefined)
         .flat(),
     );
@@ -139,7 +122,7 @@ export class TemporaryStorageService {
 
   private updateQueueInfo(
     operation: 'add' | 'subtract',
-    player: Player,
+    player: PlayerState,
     transaction: any,
   ) {
     const incrementValue = operation === 'add' ? 1 : -1;
@@ -210,9 +193,9 @@ export class TemporaryStorageService {
   // games
   async createGame(
     playerFoundInQueue: PlayerFoundInQueue,
-    playerArriving: { socketId: string; player: Player },
+    playerArriving: { socketId: string; player: PlayerState },
     gameId: number,
-    gameState: RedisGameState,
+    gameState: GameState,
   ) {
     const transaction = this.redisClient.MULTI();
     this.removeFromQueue(
@@ -221,39 +204,43 @@ export class TemporaryStorageService {
       transaction,
     );
     this.updateQueueInfo('subtract', playerFoundInQueue.player, transaction);
-    transaction.HSET(playerFoundInQueue.socketId, [
-      'status',
-      PlayerStatus.IS_PLAYING,
-      'gameId',
-      gameId,
-    ]);
-    // store new player data
-    playerArriving.player.gameId = gameId;
+    transaction.HSET(
+      playerFoundInQueue.socketId,
+      Object.entries(
+        RedisPlayerState.parsePlayerState(playerFoundInQueue.player),
+      )
+        .filter(([, value]) => value !== undefined)
+        .flat(),
+    );
     transaction.HSET(
       REDIS_KEYS.PLAYER(playerArriving.socketId),
-      Object.entries(playerArriving.player).flat(),
+      Object.entries(RedisPlayerState.parsePlayerState(playerArriving.player))
+        .filter(([, value]) => value !== undefined)
+        .flat(),
     );
     // store initial game data
     transaction.HSET(
       REDIS_KEYS.GAME(gameId),
-      Object.entries(gameState)
+      Object.entries(RedisGameState.parseGameState(gameState))
         .filter(([, value]) => value !== undefined)
         .flat(),
     );
     return transaction.exec();
   }
 
-  async getGameState(gameId: number): Promise<RedisGameState> {
+  async getGameState(gameId: number): Promise<GameState> {
     return this.redisClient
       .HGETALL(REDIS_KEYS.GAME(gameId))
-      .then((state) => state as unknown as RedisGameState);
+      .then((state) =>
+        GameState.parseRedisGameState(state as unknown as RedisGameState),
+      );
   }
 
-  async updateGameStateAndInputsQueue(gameId: number, state: RedisGameState) {
+  async updateGameStateAndInputsQueue(gameId: number, state: GameState) {
     const transaction = this.redisClient.MULTI();
     transaction.HSET(
       REDIS_KEYS.GAME(gameId),
-      Object.entries(state)
+      Object.entries(RedisGameState.parseGameState(state))
         .filter(([, value]) => value !== undefined)
         .flat(),
     );
