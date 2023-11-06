@@ -211,3 +211,31 @@ button {
         fill: white;
     }
 }
+
+.inline-link {
+    color: white;
+    position: relative;
+
+    &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 70px;
+        height: 70px;
+        border-radius: 100px;
+        border: solid white 1px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: 0.3s ease-in;
+    }
+
+    @media (min-width: 769px) {
+        &:hover {
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+}

@@ -26,8 +26,9 @@ export const EndLevelScene: React.FC<Props> = ({
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
+        'content-container': true,
         'end-level-container': true,
-        [`end-level-container--${color}`]: side ? true : false,
+        [`end-level-container--${color}`]: side !== undefined ? true : false,
         ...(currentScene !== MenuScene.END_LEVEL ? { unmount: true } : {}),
     });
 
@@ -41,9 +42,11 @@ export const EndLevelScene: React.FC<Props> = ({
 
     return (
         <div ref={endLevelRef} className={cssClass}>
-            {side !== undefined && (
-                <h2>{`Well done!\nYou just finished the level\n${levelName}!`}</h2>
-            )}
+            <h2>Well done!</h2>
+            <h3>
+                <span className="menu-label">You just finished the level:</span>{' '}
+                {levelName}
+            </h3>
             <button
                 className={`buttonCircle ${color} end-level-container__play-button`}
                 // TODO: had same interaction as on home page
@@ -56,8 +59,14 @@ export const EndLevelScene: React.FC<Props> = ({
             {/* <p className=''>{`You team mate wants to continue the run!\nJoin him.`}</p> */}
             <div className="end-level-container__share">
                 <div className="text-container">
-                    <p>{`If you liked the experience and you want it to reach its full potential, the best thing you can do is to talk about it.`}</p>
-                    <p>Thank you 🙏</p>
+                    <p>
+                        If you liked the experience and you want it to reach its{' '}
+                        <a className="inline-link" href="/about">
+                            full potential
+                        </a>
+                        , the best thing you can do is to talk about it.
+                    </p>
+                    <h3>Thank you 🙏</h3>
                 </div>
                 <div>
                     <a
@@ -111,11 +120,11 @@ export const EndLevelScene: React.FC<Props> = ({
                     >
                         Support me!
                     </a>
+                    <Script
+                        async
+                        src="https://c6.patreon.com/becomePatronButton.bundle.js"
+                    />
                 </div>
-                <Script
-                    async
-                    src="https://c6.patreon.com/becomePatronButton.bundle.js"
-                />
             </div>
         </div>
     );

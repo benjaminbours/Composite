@@ -47,7 +47,7 @@ export default class Shadow {
             isOnMobile: boolean,
             faction?: Side,
         ) {
-            const positionX = faction === Side.SHADOW ? 0.5 : 1.;
+            const positionX = faction === Side.SHADOW ? 0.5 : 1;
             const positionY = 0.5;
             if (isOnMobile) {
                 return {
@@ -63,11 +63,17 @@ export default class Shadow {
         end_level(
             width: number,
             height: number,
-            _isOnMobile: boolean,
+            isOnMobile: boolean,
             faction?: Side,
         ) {
-            const positionX = faction === Side.SHADOW ? 0.5 : 1.;
+            const positionX = faction === Side.SHADOW ? 0.5 : 1;
             const positionY = 0.5;
+            if (isOnMobile) {
+                return {
+                    x: width * 0.5,
+                    y: height * 0.85,
+                };
+            }
             return {
                 x: width * positionX,
                 y: height * positionY,

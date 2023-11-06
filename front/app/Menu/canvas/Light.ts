@@ -106,11 +106,17 @@ export default class Light {
         end_level(
             width: number,
             height: number,
-            _isOnMobile: boolean,
+            isOnMobile: boolean,
             faction?: Side,
         ) {
             const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
             const positionY = 0.5;
+            if (isOnMobile) {
+                return {
+                    x: width * 0.5,
+                    y: height * 0.85,
+                };
+            }
             return {
                 x: width * positionX,
                 y: height * positionY,
