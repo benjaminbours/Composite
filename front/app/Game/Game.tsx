@@ -28,6 +28,19 @@ function Game({
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
 
     useEffect(() => {
+        const onResize = () => {
+            if (!appRef.current) {
+                return;
+            }
+            appRef.current.resize();
+        };
+        window.addEventListener('resize', onResize);
+        return () => {
+            window.removeEventListener('resize', onResize);
+        };
+    }, []);
+
+    useEffect(() => {
         let gameLoop: (() => void) | undefined = undefined;
         startLoadingAssets().finally(() => {
             if (gameStarted.current) {

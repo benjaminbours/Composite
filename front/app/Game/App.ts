@@ -145,6 +145,12 @@ export default class App {
             this.synchronizeGameTimeWithServer;
     }
 
+    public resize = () => {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
     public synchronizeGameTimeWithServer = (gameTime: number) => {
         this.currentState.game_time = gameTime;
     };
