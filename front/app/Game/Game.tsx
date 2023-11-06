@@ -7,6 +7,7 @@ import { GameState, Side } from '@benjaminbours/composite-core';
 import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
+import { MobileHUD } from './MobileHUD';
 
 interface Props {
     side: Side;
@@ -26,6 +27,8 @@ function Game({
     const gameStarted = useRef(false);
     const appRef = useRef<App>();
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
+
+    const isMobile = window.innerWidth <= 768;
 
     useEffect(() => {
         const onResize = () => {
@@ -103,6 +106,9 @@ function Game({
         <>
             {isSynchronizingTime && (
                 <div className="game-sync-overlay">is Synchronizing</div>
+            )}
+            {isMobile && appRef.current && (
+                <MobileHUD inputsManager={appRef.current.inputsManager} />
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }}></canvas>
         </>
