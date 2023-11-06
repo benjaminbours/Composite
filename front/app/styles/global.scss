@@ -6,6 +6,7 @@ body {
     padding: 0;
     margin: 0;
     font-family: sans-serif;
+    line-height: 1.5;
 }
 
 canvas,
@@ -28,30 +29,41 @@ canvas,
 
 .home-page {
     position: relative;
-    height: 100vh;
     width: 100%;
 }
 
-h2 {
+.title-h1 {
     text-transform: uppercase;
-    font-weight: 400;
-    font-size: 30px;
+    font-weight: 900;
+    font-size: 50px;
     letter-spacing: 20px;
     text-align: center;
+    text-indent: 20px;
 
-    @media (min-width: 2000px) {
-        font-size: 40px;
+    @media (max-width: 580px) {
+        font-size: 30px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 420px) {
+        font-size: 25px;
+    }
+}
+
+.title-h2 {
+    color: white;
+
+    &--black {
+        color: black;
     }
 
     @media (max-width: 768px) {
-        font-size: 25px;
-        letter-spacing: 15px;
-    }
-
-    @media (max-width: 580px) {
         font-size: 20px;
-        line-height: 1.5;
     }
+}
+
+.menu-label {
+    font-weight: 300;
 }
 
 button {
@@ -84,8 +96,9 @@ button {
         }
     }
 
-    &:hover {
-        transition: 0.7s;
+    @media (max-width: 768px) {
+        padding: 10px;
+        font-size: 12px;
     }
 }
 
@@ -142,4 +155,40 @@ button {
     justify-content: center;
     text-transform: uppercase;
     letter-spacing: 2px;
+}
+
+.content-container {
+    width: 80%;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        width: 90%;
+    }
+}
+
+.back {
+    margin-top: 25px;
+    font-size: 12px;
+
+    @media (max-width: 768px) {
+        margin-top: 10px;
+    }
+}
+
+.menu-state-info {
+    color: white;
+
+    &--black {
+        color: black;
+    }
+
+    > * {
+        display: flex;
+        justify-content: space-between;
+        width: 300px;
+
+        @media (max-width: 768px) {
+            width: 100%;
+        }
+    }
 }

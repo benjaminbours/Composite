@@ -17,6 +17,6 @@ export const QueueInfoText: React.FC<Props> = ({ side, value }) => {
         [`queue-count--${side}`]: true,
     });
     const plural = value === 1 ? '' : 's';
-    const text = `${value} ${side}${plural} waiting for you`;
-    return <p className={cssClass}>{text}</p>;
+    const text = `${value} ${side}${plural} in matchmaking`;
+    return <span className={cssClass}>{text}</span>;
 };

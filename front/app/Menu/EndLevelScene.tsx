@@ -53,6 +53,7 @@ export const EndLevelScene: React.FC<Props> = ({
             >
                 Play
             </button>
+            {/* <p className=''>{`You team mate wants to continue the run!\nJoin him.`}</p> */}
             <div className="end-level-container__share">
                 <div className="text-container">
                     <p>{`If you liked the experience and you want it to reach its full potential, the best thing you can do is to talk about it.`}</p>

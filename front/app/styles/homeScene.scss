@@ -1,38 +1,70 @@
 .home-container {
-    h2 {
-        width: 90%;
-        @include centerAbsoluteHorizontal;
-        top: 40%;
-        color: white;
+    .title-h1 {
         display: none;
+        color: white;
+        margin-top: 100px;
 
         @media (max-width: 768px) {
             display: block;
         }
+    }
 
+    .main-subtitle {
+        text-transform: uppercase;
+        font-weight: 400;
+        font-size: 30px;
+        letter-spacing: 20px;
+        text-indent: 20px;
+        text-align: center;
+        width: 90%;
+        color: white;
+        display: none;
+        text-align: center;
+
+        @media (min-width: 2000px) {
+            font-size: 40px;
+        }
+
+        @media (max-width: 768px) {
+            font-size: 25px;
+            letter-spacing: 15px;
+            text-indent: 15px;
+            display: block;
+            position: static;
+            top: 0;
+            left: 0;
+            transform: none;
+            width: 100%;
+            margin-top: 50px;
+        }
         @media (max-width: 400px) {
             font-size: 18px;
         }
 
-        @media (max-width: 400px) and (min-height: 800px) {
-            top: 30%;
+        @media (max-width: 580px) {
+            font-size: 16px;
+            line-height: 1.5;
         }
 
-        @media (max-height: 800px) {
-            top: 30%;
-        }
+        // @media (max-width: 400px) and (min-height: 800px) {
+        //     top: 30%;
+        // }
 
-        @media (max-height: 600px) {
-            top: 25%;
-        }
+        // @media (max-height: 800px) {
+        //     top: 30%;
+        // }
 
-        @media (min-height: 1000px) {
-            top: 30%;
-        }
+        // @media (max-height: 600px) {
+        //     top: 25%;
+        // }
+
+        // @media (min-height: 1000px) {
+        //     top: 30%;
+        // }
     }
 
     .queue-count {
-        position: absolute;
+        position: fixed;
         top: calc(75% - 25px);
 
         &--light {
@@ -44,11 +76,19 @@
             right: 10%;
             color: black;
         }
+
+        @media (max-width: 768px) {
+            position: static;
+            display: block;
+            margin: 30px 0;
+            text-align: center;
+            color: white;
+        }
     }
 }
 
 #buttonPlay {
-    position: absolute;
+    position: fixed;
     left: 50%;
     transform: translate(-50%, 0%);
     top: calc(75% - 45px);

@@ -6,6 +6,7 @@ import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
 // local
 import ButtonBack from './ButtonBack';
 import { QueueInfoText } from './QueueInfo';
+import { MenuStateInfo } from './MenuStateInfo';
 
 interface Props {
     sideRef: React.RefObject<HTMLDivElement>;
@@ -27,6 +28,7 @@ export const SideScene: React.FC<Props> = ({
     allQueueInfo,
 }) => {
     const cssClass = classNames({
+        'content-container': true,
         'faction-container': true,
         ...(currentScene !== 'queue' ? { unmount: true } : {}),
     });
@@ -34,6 +36,8 @@ export const SideScene: React.FC<Props> = ({
     return (
         <div ref={sideRef} className={cssClass}>
             <ButtonBack color="white" onClick={handleClickOnBack} />
+            <MenuStateInfo levelName={levelName} />
+            <h2 className="title-h2">Select a&nbsp;side</h2>
             {/* <p>{`Selected level: ${levelName}`}</p> */}
             <button
                 className="buttonCircle factionButton white"

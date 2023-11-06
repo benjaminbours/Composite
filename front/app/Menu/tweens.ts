@@ -152,22 +152,10 @@ export function levelIn() {
  * Faction
  */
 export function factionOut() {
-    const { titleFaction } = Animation.canvasComponents;
     const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
     return [
-        gsap.to(titleFaction, {
-            duration: 0.5,
-            opacity: 0,
-            onStart: () => {
-                titleFaction.onTransition = true;
-            },
-            onComplete: () => {
-                titleFaction.onTransition = false;
-                titleFaction.isMount = false;
-            },
-        }),
         gsap.to(factionInterface, {
             duration: 0.5,
             opacity: 0,
@@ -179,22 +167,10 @@ export function factionOut() {
 }
 
 export function factionIn() {
-    const { titleFaction } = Animation.canvasComponents;
     const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
     return [
-        gsap.to(titleFaction, {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                titleFaction.onTransition = true;
-            },
-            onComplete: () => {
-                titleFaction.onTransition = false;
-                titleFaction.isMount = true;
-            },
-        }),
         gsap.to(factionInterface, {
             duration: 0.5,
             opacity: 1,

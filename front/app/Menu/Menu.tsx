@@ -306,7 +306,8 @@ export function Menu({
                     menuScene !== 'home' ? 'unmount' : ''
                 }`}
             >
-                <h2>Think both ways</h2>
+                <h1 className="title-h1">Composite</h1>
+                <h2 className="main-subtitle">Think both ways</h2>
                 {allQueueInfo && (
                     <>
                         <QueueInfoText
@@ -331,22 +332,20 @@ export function Menu({
             </div>
             <div
                 ref={levelRef}
-                className={`level-container ${
+                className={`content-container level-container ${
                     menuScene !== 'level' ? 'unmount' : ''
                 }`}
             >
                 <ButtonBack color="white" onClick={handleClickOnBack} />
-                <div className="level-list">
-                    <h2>Select a&nbsp;level</h2>
-                    {levels.map((item) => (
-                        <LevelItem
-                            {...item}
-                            key={item.name}
-                            onClick={handleClickOnLevel}
-                            queueInfo={allQueueInfo?.levels[item.id]}
-                        />
-                    ))}
-                </div>
+                <h2 className="title-h2">Select a&nbsp;level</h2>
+                {levels.map((item) => (
+                    <LevelItem
+                        {...item}
+                        key={item.name}
+                        onClick={handleClickOnLevel}
+                        queueInfo={allQueueInfo?.levels[item.id]}
+                    />
+                ))}
             </div>
             <SideScene
                 sideRef={sideRef}
@@ -369,6 +368,7 @@ export function Menu({
                         ?.name
                 }
                 handleClickOnBack={handleClickOnBack}
+                isInQueue={menuScene === MenuScene.QUEUE}
             />
             <EndLevelScene
                 endLevelRef={endLevelRef}

@@ -26,7 +26,7 @@ export default class MainTitle {
     }
 
     public render = (ctx: CanvasRenderingContext2D, color: Side): boolean => {
-        if (ctx.canvas.width <= 768 && color === Side.SHADOW) {
+        if (ctx.canvas.width <= 768) {
             return false;
         }
         const img = color === Side.SHADOW ? mainTitleBlack : mainTitleWhite;

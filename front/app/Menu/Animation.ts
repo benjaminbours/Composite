@@ -25,8 +25,6 @@ import Shadow from './canvas/Shadow';
 import Light from './canvas/Light';
 import MainTitle from './canvas/MainTitle';
 import SubtitleHome from './canvas/SubtitleHome';
-import TextDrawer from './canvas/TextDrawer';
-import TitleFaction from './canvas/TitleFaction';
 
 interface IAnimationComps {
     homeInterface: RefObject<HTMLDivElement>;
@@ -42,7 +40,6 @@ interface AnimationCanvasComponents {
     light: Light;
     mainTitle: MainTitle;
     subtitleHome: SubtitleHome;
-    titleFaction: TextDrawer;
 }
 export default class Animation {
     public static homeToLevel: GSAPTimeline;
@@ -77,10 +74,6 @@ export default class Animation {
             subtitleHome: new SubtitleHome(
                 'THINK BOTH WAYS',
                 currentScene === MenuScene.HOME,
-            ),
-            titleFaction: new TitleFaction(
-                'SELECT A SIDE',
-                currentScene === MenuScene.FACTION,
             ),
         };
     }

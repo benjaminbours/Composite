@@ -1,11 +1,12 @@
 // vendors
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
 import ButtonBack from './ButtonBack';
 import { CopyToClipBoardIcon } from './CopyToClipboardIcon';
+import { MenuStateInfo } from './MenuStateInfo';
 
 interface Props {
     queueRef: React.RefObject<HTMLDivElement>;
@@ -13,6 +14,7 @@ interface Props {
     side?: Side;
     levelName?: string;
     handleClickOnBack: () => void;
+    isInQueue: boolean;
 }
 
 export const QueueScene: React.FC<Props> = ({
@@ -21,10 +23,13 @@ export const QueueScene: React.FC<Props> = ({
     side,
     levelName,
     handleClickOnBack,
+    isInQueue,
 }) => {
+    const [queueTime, setQueueTime] = useState(0);
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
+        'content-container': true,
         'queue-container': true,
         [`queue-container--${color}`]: side ? true : false,
         ...(currentScene !== 'queue' ? { unmount: true } : {}),
@@ -32,8 +37,8 @@ export const QueueScene: React.FC<Props> = ({
 
     const queueText = useMemo(
         () => ({
-            0: `${levelName}\nWaiting for a light`,
-            1: `${levelName}\nWaiting for a shadow`,
+            0: `Waiting for a light`,
+            1: `Waiting for a shadow`,
         }),
         [levelName],
     );
@@ -46,10 +51,34 @@ export const QueueScene: React.FC<Props> = ({
         }, 3000);
     }, []);
 
+    useEffect(() => {
+        if (!isInQueue) {
+            setQueueTime(0);
+            return;
+        }
+        const interval = setInterval(() => {
+            setQueueTime((prev) => prev + 1);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [side]);
+
     return (
         <div ref={queueRef} className={cssClass}>
             <ButtonBack color={color} onClick={handleClickOnBack} />
-            {side !== undefined && <h2>{queueText[side]}</h2>}
+            <MenuStateInfo levelName={levelName} side={side} />
+            {side !== undefined && (
+                <h2
+                    className={`title-h2${
+                        side === Side.SHADOW ? ' title-h2--black' : ''
+                    }`}
+                >
+                    {queueText[side]}
+                </h2>
+            )}
+            <h3 className="queue-time">
+                <span className="menu-label">Time in queue:</span> {queueTime}
+            </h3>
             <div className="queue-container__share">
                 <p>{`Waiting time is too long?`}</p>
                 <p>{`Share this link with your friends`}</p>

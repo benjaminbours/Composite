@@ -33,7 +33,7 @@ export default class Shadow {
             if (isOnMobile) {
                 return {
                     x: width * 0.5,
-                    y: height * 0.75,
+                    y: height * 0.65,
                 };
             }
             return {
@@ -47,8 +47,14 @@ export default class Shadow {
             isOnMobile: boolean,
             faction?: Side,
         ) {
-            const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
+            const positionX = faction === Side.SHADOW ? 0.5 : 1.;
             const positionY = 0.5;
+            if (isOnMobile) {
+                return {
+                    x: width * 0.5,
+                    y: height * 0.85,
+                };
+            }
             return {
                 x: width * positionX,
                 y: height * positionY,
@@ -57,10 +63,10 @@ export default class Shadow {
         end_level(
             width: number,
             height: number,
-            isOnMobile: boolean,
+            _isOnMobile: boolean,
             faction?: Side,
         ) {
-            const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
+            const positionX = faction === Side.SHADOW ? 0.5 : 1.;
             const positionY = 0.5;
             return {
                 x: width * positionX,

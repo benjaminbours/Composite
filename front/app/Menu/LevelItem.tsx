@@ -34,12 +34,11 @@ export default function LevelItem({
             }}
         >
             <img src={img} alt={`screenshot of the level ${name}`} />
-            <div className="queue-space" />
             <div className="level-item__center">
                 <h3>{name}</h3>
                 {disabled && <p>Coming soong</p>}
             </div>
-            <div className="queue-space">
+            <div className="level-item__queue-space">
                 {queueInfo && (
                     <QueueInfoText side="light" value={queueInfo.light} />
                 )}
