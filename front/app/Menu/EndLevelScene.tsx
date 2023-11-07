@@ -1,7 +1,7 @@
 // vendors
 import Script from 'next/script';
 import classNames from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
@@ -38,6 +38,32 @@ export const EndLevelScene: React.FC<Props> = ({
         setTimeout(() => {
             setShouldDisplayIsCopied(false);
         }, 3000);
+    }, []);
+
+    // effect to trigger script coming with buttons
+    useEffect(() => {
+        if ((window as any).twttr?.widgets) {
+            (window as any).twttr.widgets.load();
+        }
+        let scriptElement: HTMLElement | undefined;
+        fetch('https://c6.patreon.com/becomePatronButton.bundle.js').then(
+            async (res) => {
+                console.log(res);
+                console.log('loaded');
+                const b = await res.blob();
+                let ou = URL.createObjectURL(b),
+                    scriptElement = document.createElement('script');
+                scriptElement.setAttribute('src', ou);
+                scriptElement.setAttribute('type', 'text/javascript');
+                document.body.appendChild(scriptElement);
+            },
+        );
+
+        return () => {
+            if (scriptElement) {
+                document.body.removeChild(scriptElement);
+            }
+        };
     }, []);
 
     return (
@@ -120,10 +146,6 @@ export const EndLevelScene: React.FC<Props> = ({
                     >
                         Support me!
                     </a>
-                    <Script
-                        async
-                        src="https://c6.patreon.com/becomePatronButton.bundle.js"
-                    />
                 </div>
             </div>
         </div>
