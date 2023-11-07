@@ -1,5 +1,16 @@
 # composite-front
 
+## 0.1.1
+
+### Patch Changes
+
+- Fix light occlusion with environment
+  - Create proper end level scene for menu
+  - Make menu responsive
+  - Make game responsive, add mobile HUD
+- Updated dependencies
+  - @benjaminbours/composite-core@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
