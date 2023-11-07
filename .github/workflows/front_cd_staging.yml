@@ -10,8 +10,8 @@ jobs:
 
     env:
       NEXT_PUBLIC_STAGE: staging
-      NEXT_PUBLIC_BACKEND_URL: http://composite-api.ddns.net
-      NEXT_PUBLIC_URL: http://composite.ddns.net
+      NEXT_PUBLIC_BACKEND_URL: http://composite-apis.ddns.net
+      NEXT_PUBLIC_URL: http://composite-s.ddns.net
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
@@ -34,5 +34,5 @@ jobs:
         build-args: |
           NPM_TOKEN=${{ secrets.NPM_TOKEN }}
           NEXT_PUBLIC_STAGE=staging
-          NEXT_PUBLIC_BACKEND_URL=http://composite-api.ddns.net
-          NEXT_PUBLIC_URL=http://composite.ddns.net
+          NEXT_PUBLIC_BACKEND_URL=http://composite-apis.ddns.net
+          NEXT_PUBLIC_URL=http://composite-s.ddns.net
