@@ -1,4 +1,8 @@
-# Composite - 3D coop platformer on the web
+# Composite - 2.5D coop platformer on the web
+
+The development of this project is streamed on this [Twitch channel](https://www.twitch.tv/elboursico). Take a look and support me if you like it 🙏
+
+Last released of the project => http://composite-s.ddns.net/
 
 ## Development
 
