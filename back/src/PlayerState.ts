@@ -2,6 +2,8 @@ import { Levels, Side } from '@benjaminbours/composite-core';
 
 export enum PlayerStatus {
   IS_PLAYING,
+  IS_IN_QUEUE,
+  IS_WAITING_TEAMMATE,
   IS_PENDING,
 }
 
@@ -10,7 +12,13 @@ export class RedisPlayerState {
     public status: string,
     public side: string,
     public selectedLevel: string,
+    /**
+     * its also the name of the game instance room
+     */
     public gameId?: string,
+    /**
+     * Team room name
+     */
     public roomName?: string,
   ) {}
 

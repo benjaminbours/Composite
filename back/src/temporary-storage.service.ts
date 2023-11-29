@@ -58,18 +58,20 @@ export class TemporaryStorageService {
     return client.HSET(socketId, Object.entries(data).flat());
   }
 
-  async getPlayer(socketId: string) {
-    return this.redisClient
-      .HGETALL(REDIS_KEYS.PLAYER(socketId))
-      .then((res) =>
-        PlayerState.parseRedisPlayerState(res as unknown as RedisPlayerState),
-      );
+  async getPlayer(socketId: string): Promise<PlayerState | undefined> {
+    return this.redisClient.HGETALL(REDIS_KEYS.PLAYER(socketId)).then((res) => {
+      const redisPlayerState = res as unknown as RedisPlayerState;
+      if (!redisPlayerState.status) {
+        return undefined;
+      }
+      return PlayerState.parseRedisPlayerState(redisPlayerState);
+    });
   }
 
   async removePlayer(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     transaction.DEL(REDIS_KEYS.PLAYER(socketId));
-    if (player.status === PlayerStatus.IS_PENDING) {
+    if (player.status === PlayerStatus.IS_IN_QUEUE) {
       this.removeFromQueue(socketId, 0, transaction);
       this.updateQueueInfo('subtract', player, transaction);
     }
@@ -192,32 +194,23 @@ export class TemporaryStorageService {
 
   // games
   async createGame(
-    playerFoundInQueue: PlayerFoundInQueue,
-    playerArriving: { socketId: string; player: PlayerState },
+    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
     gameId: number,
     gameState: GameState,
   ) {
     const transaction = this.redisClient.MULTI();
-    this.removeFromQueue(
-      playerFoundInQueue.socketId,
-      playerFoundInQueue.indexToClear,
-      transaction,
-    );
-    this.updateQueueInfo('subtract', playerFoundInQueue.player, transaction);
-    transaction.HSET(
-      playerFoundInQueue.socketId,
-      Object.entries(
-        RedisPlayerState.parsePlayerState(playerFoundInQueue.player),
-      )
-        .filter(([, value]) => value !== undefined)
-        .flat(),
-    );
-    transaction.HSET(
-      REDIS_KEYS.PLAYER(playerArriving.socketId),
-      Object.entries(RedisPlayerState.parsePlayerState(playerArriving.player))
-        .filter(([, value]) => value !== undefined)
-        .flat(),
-    );
+    players.forEach(({ socketId, player, indexToClear }) => {
+      if (indexToClear !== undefined) {
+        this.removeFromQueue(socketId, indexToClear, transaction);
+        this.updateQueueInfo('subtract', player, transaction);
+      }
+      transaction.HSET(
+        REDIS_KEYS.PLAYER(socketId),
+        Object.entries(RedisPlayerState.parsePlayerState(player))
+          .filter(([, value]) => value !== undefined)
+          .flat(),
+      );
+    });
     // store initial game data
     transaction.HSET(
       REDIS_KEYS.GAME(gameId),

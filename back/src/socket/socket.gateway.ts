@@ -28,10 +28,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
-import {
-  PlayerFoundInQueue,
-  TemporaryStorageService,
-} from '../temporary-storage.service';
+import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus } from 'src/PlayerState';
 
 @WebSocketGateway({
@@ -77,25 +74,63 @@ export class SocketGateway {
     @MessageBody() data: MatchMakingPayload,
   ) {
     console.log('matchmaking info', socket.id, data);
+    const player = await this.temporaryStorage.getPlayer(socket.id);
+    console.log('player', player);
+    // if the player is already in a team room
+    if (player && player.roomName) {
+      await this.temporaryStorage.setPlayer(socket.id, {
+        selectedLevel: String(data.selectedLevel),
+        side: String(data.side),
+        status: String(PlayerStatus.IS_WAITING_TEAMMATE),
+      });
+
+      const teamMateSocketId = await this.server
+        .in(String(player.roomName))
+        .fetchSockets()
+        .then((sockets) => sockets.find(({ id }) => id !== socket.id).id);
+
+      const teamMatePlayer =
+        await this.temporaryStorage.getPlayer(teamMateSocketId);
+
+      if (
+        teamMatePlayer.status === PlayerStatus.IS_WAITING_TEAMMATE &&
+        teamMatePlayer.side !== player.side &&
+        teamMatePlayer.selectedLevel === player.selectedLevel
+      ) {
+        this.createGame([
+          { player, socketId: socket.id },
+          { player: teamMatePlayer, socketId: teamMateSocketId },
+        ]);
+        return;
+      }
+
+      console.log('no match, teammate info');
+      socket.to(player.roomName).emit(SocketEventType.TEAMMATE_INFO, data);
+      return;
+    }
+
     const playerFound = await this.temporaryStorage.findMatchInQueue(data, 0);
     if (!playerFound) {
       console.log('no match, add to queue');
       const player = new PlayerState(
-        PlayerStatus.IS_PENDING,
+        PlayerStatus.IS_IN_QUEUE,
         data.side,
         data.selectedLevel,
       );
       this.temporaryStorage.addToQueue(socket.id, player);
       return;
     } else {
-      this.createGame(playerFound, {
-        socketId: socket.id,
-        player: new PlayerState(
-          PlayerStatus.IS_PLAYING,
-          data.side,
-          data.selectedLevel,
-        ),
-      });
+      this.createGame([
+        playerFound,
+        {
+          socketId: socket.id,
+          player: new PlayerState(
+            PlayerStatus.IS_PLAYING,
+            data.side,
+            data.selectedLevel,
+          ),
+        },
+      ]);
     }
   }
 
@@ -105,6 +140,10 @@ export class SocketGateway {
     @MessageBody() data: GamePlayerInputPayload,
   ) {
     const player = await this.temporaryStorage.getPlayer(socket.id);
+    if (!player) {
+      return;
+    }
+
     await this.temporaryStorage.addToGameInputsQueue(player.gameId, data);
   }
 
@@ -133,6 +172,10 @@ export class SocketGateway {
   ) {
     console.log('received time sync event', data);
     const player = await this.temporaryStorage.getPlayer(socket.id);
+    if (!player) {
+      return;
+    }
+
     const gameState = await this.temporaryStorage.getGameState(player.gameId);
     this.emit(socket.id, [
       SocketEventType.TIME_SYNC,
@@ -177,11 +220,10 @@ export class SocketGateway {
    * Emit game start to the room
    */
   async createGame(
-    playerFoundInQueue: PlayerFoundInQueue,
-    playerArriving: { socketId: string; player: PlayerState },
+    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
   ) {
     const dbLevel = (() => {
-      switch (Number(playerFoundInQueue.player.selectedLevel)) {
+      switch (Number(players[0].player.selectedLevel)) {
         case Levels.CRACK_THE_DOOR:
           return Level.CRACK_THE_DOOR;
         case Levels.LEARN_TO_FLY:
@@ -200,7 +242,7 @@ export class SocketGateway {
     });
 
     const level = (() => {
-      switch (playerFoundInQueue.player.selectedLevel) {
+      switch (players[0].player.selectedLevel) {
         case Levels.CRACK_THE_DOOR:
           return new PositionLevel();
       }
@@ -237,27 +279,17 @@ export class SocketGateway {
 
     const teamRoomName = uuid.v4();
     const gameRoomName = String(game.id);
-    // update players state
-    playerFoundInQueue.player.status = PlayerStatus.IS_PLAYING;
-    playerFoundInQueue.player.gameId = game.id;
-    playerFoundInQueue.player.roomName = teamRoomName;
-    // already set before could be remove but its consistent to have it here
-    playerArriving.player.status = PlayerStatus.IS_PLAYING;
-    playerArriving.player.gameId = game.id;
-    playerArriving.player.roomName = teamRoomName;
+    players.forEach(({ player, socketId }) => {
+      player.status = PlayerStatus.IS_PLAYING;
+      player.gameId = game.id;
+      player.roomName = teamRoomName;
+      this.addSocketToRoom(socketId, teamRoomName);
+      this.addSocketToRoom(socketId, gameRoomName);
+    });
 
     // store game state and update queue in temporary storage
-    await this.temporaryStorage.createGame(
-      playerFoundInQueue,
-      playerArriving,
-      game.id,
-      initialGameState,
-    );
-    this.addSocketToRoom(playerFoundInQueue.socketId, teamRoomName);
-    this.addSocketToRoom(playerArriving.socketId, teamRoomName);
-    this.addSocketToRoom(playerFoundInQueue.socketId, gameRoomName);
-    this.addSocketToRoom(playerArriving.socketId, gameRoomName);
-    this.emit(teamRoomName, [
+    await this.temporaryStorage.createGame(players, game.id, initialGameState);
+    this.emit(gameRoomName, [
       SocketEventType.GAME_START,
       { gameState: initialGameState },
     ]);
@@ -357,9 +389,21 @@ export class SocketGateway {
         this.temporaryStorage.updateGameStateAndInputsQueue(gameId, gameState);
 
         if (gameState.level.end_level.length === 2) {
+          const gameRoomName = String(gameId);
           clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
           console.log('game finished on the server');
-          this.emit(String(gameId), [SocketEventType.GAME_FINISHED]);
+          this.emit(gameRoomName, [SocketEventType.GAME_FINISHED]);
+          this.server
+            .in(gameRoomName)
+            .fetchSockets()
+            .then((sockets) => {
+              sockets.forEach(({ id }) => {
+                this.temporaryStorage.setPlayer(id, {
+                  status: String(PlayerStatus.IS_PENDING),
+                });
+              });
+            });
+          // this.server.socketsLeave(gameRoomName);
         }
       });
     };
