@@ -7,6 +7,7 @@ import {
     GameStateUpdatePayload,
     GameState,
     TimeSyncPayload,
+    TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
 
 const TIME_SAMPLE_COUNT = 10;
@@ -24,6 +25,8 @@ export class SocketController {
     constructor(
         onGameStart: (initialGameState: GameState) => void,
         onGameFinish: () => void,
+        onTeamMateDisconnect: () => void,
+        onTeamMateInfo: (data: TeammateInfoPayload) => void,
     ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
@@ -50,9 +53,12 @@ export class SocketController {
             },
         );
 
-        this.socket.on(SocketEventType.GAME_FINISHED, () => {
-            onGameFinish();
-        });
+        this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
+        this.socket.on(SocketEventType.TEAMMATE_INFO, onTeamMateInfo);
+        this.socket.on(
+            SocketEventType.TEAMMATE_DISCONNECT,
+            onTeamMateDisconnect,
+        );
     }
 
     public onTimeSyncReceived =

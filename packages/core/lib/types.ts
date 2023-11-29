@@ -32,6 +32,10 @@ export enum SocketEventType {
     GAME_STATE_UPDATE = 'GAME_STATE_UPDATE',
     // send by the server when the players reach the end level
     GAME_FINISHED = 'GAME_FINISHED',
+    // send by the server to inform a team mate made a choice
+    TEAMMATE_INFO = 'TEAMMATE_INFO',
+    // send by the server to inform a team mate disconnected
+    TEAMMATE_DISCONNECT = 'TEAMMATE_DISCONNECT',
 }
 
 export interface Inputs {
@@ -42,6 +46,11 @@ export interface Inputs {
 
 // payloads
 export interface MatchMakingPayload {
+    side: Side;
+    selectedLevel: Levels;
+}
+
+export interface TeammateInfoPayload {
     side: Side;
     selectedLevel: Levels;
 }
@@ -80,6 +89,11 @@ export type MatchMakingEvent = [
     payload: MatchMakingPayload,
 ];
 
+export type TeammateInfoEvent = [
+    type: SocketEventType.TEAMMATE_INFO,
+    payload: TeammateInfoPayload,
+];
+
 export type GameStartEvent = [
     type: SocketEventType.GAME_START,
     payload: GameStateUpdatePayload,
@@ -109,6 +123,7 @@ export type GameDeactivateElementEvent = [
 
 export type SocketEvent =
     | MatchMakingEvent
+    | TeammateInfoEvent
     | GameStartEvent
     | GameFinishedEvent
     | GameStateUpdateEvent
@@ -116,11 +131,6 @@ export type SocketEvent =
     | GameActivateElementEvent
     | GameDeactivateElementEvent
     | PingEvent;
-
-export type SocketInGameEvent =
-    | GamePlayerInputEvent
-    | GameActivateElementEvent
-    | GameDeactivateElementEvent;
 
 export class QueueInfo {
     constructor(public all = 0, public light = 0, public shadow = 0) {}

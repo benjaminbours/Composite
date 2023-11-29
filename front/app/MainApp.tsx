@@ -16,6 +16,7 @@ import {
     PositionLevel,
     Side,
     SocketEventType,
+    TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
 // local
 import type { SocketController } from './SocketController';
@@ -51,6 +52,7 @@ function MainApp() {
         gameState: undefined,
     });
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
+    const [teamMateDisconnect, setTeamMateDisconnect] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const shouldEstablishConnection = useMemo(
         () =>
@@ -73,19 +75,25 @@ function MainApp() {
         setGameIsPlaying(false);
     }, []);
 
-    const establishConnection = useCallback(
-        () =>
-            import('./SocketController')
-                .then((mod) => mod.SocketController)
-                .then((SocketController) => {
-                    socketController.current = new SocketController(
-                        handleGameStart,
-                        handleGameFinished,
-                    );
-                    return;
-                }),
-        [handleGameStart, state],
-    );
+    const handleTeamMateDisconnect = useCallback(() => {
+        setMenuMode(MenuMode.DEFAULT);
+        setTeamMateDisconnect(true);
+    }, []);
+
+    const handleTeamMateInfo = useCallback((data: TeammateInfoPayload) => {
+        console.log('HERE team mate info', data);
+    }, []);
+
+    const handleClickFindAnotherTeamMate = useCallback(() => {
+        import('./Menu/Animation')
+            .then((mod) => mod.default)
+            .then((Animation) => {
+                Animation.goToStep(MenuScene.HOME, () => {
+                    setMenuScene(MenuScene.HOME);
+                    setTeamMateDisconnect(false);
+                });
+            });
+    }, []);
 
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -112,7 +120,18 @@ function MainApp() {
             ]);
         };
         if (shouldEstablishConnection) {
-            establishConnection().then(sendMatchMakingInfo);
+            import('./SocketController')
+                .then((mod) => mod.SocketController)
+                .then((SocketController) => {
+                    socketController.current = new SocketController(
+                        handleGameStart,
+                        handleGameFinished,
+                        handleTeamMateDisconnect,
+                        handleTeamMateInfo,
+                    );
+                    return;
+                })
+                .then(sendMatchMakingInfo);
             // establishConnection().then(() => {
             //     const level = new PositionLevel();
             //     const initialGameState = new GameState(
@@ -152,7 +171,7 @@ function MainApp() {
             //     handleGameStart(initialGameState);
             // });
         }
-    }, [gameIsPlaying, establishConnection]);
+    }, [gameIsPlaying, shouldEstablishConnection]);
 
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
@@ -178,6 +197,18 @@ function MainApp() {
 
     return (
         <>
+            {teamMateDisconnect && (
+                // TODO: Make appear disappear animation
+                <div className="team-mate-disconnect">
+                    <p>Your team mate disconnected or has quit the room</p>
+                    <button
+                        className="buttonRect white"
+                        onClick={handleClickFindAnotherTeamMate}
+                    >
+                        Find another team mate
+                    </button>
+                </div>
+            )}
             {!gameIsPlaying && (
                 <Menu
                     mainState={state}

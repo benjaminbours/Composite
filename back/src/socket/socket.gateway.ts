@@ -148,13 +148,21 @@ export class SocketGateway {
     console.log('disconnect', socket.id);
     // TODO: Investigate if in case of recovery session, I should better keep the data for a while
     const player = await this.temporaryStorage.getPlayer(socket.id);
+    if (!player) {
+      return;
+    }
+
     if (player.gameId) {
       try {
         clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
+        this.server
+          .to(String(player.roomName))
+          .emit(SocketEventType.TEAMMATE_DISCONNECT);
       } catch (error) {
         Logger.error(error);
       }
     }
+
     this.temporaryStorage.removePlayer(socket.id, player);
   }
 

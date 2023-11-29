@@ -241,3 +241,17 @@ button {
         margin-right: 10px;
     }
 }
+
+.team-mate-disconnect {
+    background: black;
+    border: solid white 1px;
+    color: white;
+    position: fixed;
+    top: 2.5%;
+    right: 2.5%;
+    padding: 20px;
+
+    button {
+        font-size: 10px;
+    }
+}
