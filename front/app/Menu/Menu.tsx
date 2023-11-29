@@ -58,25 +58,6 @@ export function Menu({
         return window.innerWidth <= 768;
     }, []);
 
-    const initAnimations = useCallback((animation: typeof Animation) => {
-        animation.initHomeToLevel(() => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.LEVEL);
-        });
-        animation.initLevelToHome(() => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.HOME);
-        });
-        animation.initLevelToFaction(() => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.FACTION);
-        });
-        animation.initFactionToLevel(() => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.LEVEL);
-        });
-    }, []);
-
     const resize = useCallback(() => {
         if (
             !animation.current ||
@@ -99,7 +80,6 @@ export function Menu({
         animation.current.runMethodForAllBothSideComponents('resize', [
             blackCanvas.current.ctx,
         ]);
-        initAnimations(animation.current);
     }, [isMobileDevice, menuScene, mainState.side]);
 
     // effect to start to render the menu animation
@@ -131,7 +111,6 @@ export function Menu({
                 menuScene,
                 isMobileDevice,
             );
-            initAnimations(Animation);
             const stats = (() => {
                 if (process.env.NEXT_PUBLIC_STAGE === 'development') {
                     const stats = new STATS.default();
@@ -181,7 +160,7 @@ export function Menu({
         return () => {
             window.removeEventListener('resize', resize);
         };
-    }, [initAnimations, resize]);
+    }, [resize]);
 
     const handleMouseEnterPlay = useCallback(() => {
         if (!animation.current) {
@@ -204,7 +183,12 @@ export function Menu({
             return;
         }
         onTransition.current = true;
-        animation.current.playHomeToLevel();
+        animation.current.goToStep(MenuScene.LEVEL, () => {
+            onTransition.current = false;
+            setMenuScene(MenuScene.LEVEL);
+        });
+    }, []);
+
     }, []);
 
     const handleClickOnBack = useCallback(() => {
@@ -213,18 +197,27 @@ export function Menu({
         }
         const backOptions = {
             level() {
-                animation.current!.playLevelToHome();
+                animation.current!.goToStep(MenuScene.HOME, () => {
+                    onTransition.current = false;
+                    setMenuScene(MenuScene.HOME);
+                });
             },
             faction() {
-                animation.current!.playFactionToLevel();
+                animation.current!.goToStep(MenuScene.LEVEL, () => {
+                    onTransition.current = false;
+                    setMenuScene(MenuScene.LEVEL);
+                });
             },
             queue() {
-                animation.current!.playQueueToFaction();
+                animation.current!.goToStep(MenuScene.FACTION, () => {
+                    onTransition.current = false;
+                    setMenuScene(MenuScene.FACTION);
+                });
             },
         };
         onTransition.current = true;
         if (menuScene === 'queue') {
-            animation.current.initQueueToFaction(() => {
+            animation.current!.goToStep(MenuScene.FACTION, () => {
                 onTransition.current = false;
                 setMenuScene(MenuScene.FACTION);
                 setMainState((prev) => ({
@@ -248,20 +241,23 @@ export function Menu({
             selectedLevel: levelId,
         }));
         onTransition.current = true;
-        animation.current.playLevelToFaction();
+        animation.current.goToStep(MenuScene.FACTION, () => {
+            onTransition.current = false;
+            setMenuScene(MenuScene.FACTION);
+        });
     }, []);
 
     const handleClickOnFaction = useCallback((side: Side) => {
         if (!animation.current) {
             return;
         }
-        animation.current.faction = side;
-        setMenuScene(MenuScene.QUEUE);
         setMainState((prev) => ({ ...prev, side }));
-        animation.current.initFactionToQueue(() => {
-            onTransition.current = true;
+        animation.current.faction = side;
+        onTransition.current = true;
+        animation.current.goToStep(MenuScene.QUEUE, () => {
+            onTransition.current = false;
+            setMenuScene(MenuScene.QUEUE);
         });
-        animation.current.playFactionToQueue();
     }, []);
 
     const levels = useMemo(

@@ -8,17 +8,14 @@ import Curve, { defaultWaveOptions } from './canvas/Curve';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import {
-    homeOut,
     curveToStep,
     lightToStep,
     shadowToStep,
-    levelOut,
     levelIn,
     factionIn,
-    factionOut,
     queueIn,
-    queueOut,
     homeIn,
+    allMenuScenesOut,
 } from './tweens';
 import { MenuScene } from './types';
 import Shadow from './canvas/Shadow';
@@ -42,15 +39,6 @@ interface AnimationCanvasComponents {
     subtitleHome: SubtitleHome;
 }
 export default class Animation {
-    public static homeToLevel: GSAPTimeline;
-    public static levelToHome: GSAPTimeline;
-    public static levelToFaction: GSAPTimeline;
-    public static factionToLevel: GSAPTimeline;
-    public static factionToQueue: GSAPTimeline;
-    public static factionToQueueShadow: GSAPTimeline;
-    public static factionToQueueLight: GSAPTimeline;
-    public static queueToFaction: GSAPTimeline;
-
     public static components: IAnimationComps | undefined;
     public static canvasComponents: AnimationCanvasComponents;
     public static faction: Side;
@@ -78,151 +66,37 @@ export default class Animation {
         };
     }
 
-    public static initHomeToLevel(onComplete: () => void) {
-        this.homeToLevel = gsap
-            .timeline({
-                paused: true,
-                onComplete: () => {
-                    this.playMouseLeaveButtonPlay();
-                    onComplete();
-                },
-            })
-            .add([curveToStep(MenuScene.LEVEL), ...homeOut()])
-            .add(
-                [lightToStep(MenuScene.LEVEL), shadowToStep(MenuScene.LEVEL)],
-                '-=0.5',
-            )
-            .add(levelIn());
-    }
-
-    public static initLevelToHome(onComplete: () => void) {
-        this.levelToHome = gsap
-            .timeline({
-                paused: true,
-                onComplete: () => {
-                    onComplete();
-                },
-            })
-            .add(curveToStep(MenuScene.HOME))
+    public static goToStep(targetStep: MenuScene, onComplete: () => void) {
+        const inAnimation = (() => {
+            switch (targetStep) {
+                case MenuScene.HOME:
+                    return homeIn;
+                case MenuScene.LEVEL:
+                    return levelIn;
+                case MenuScene.FACTION:
+                    return factionIn;
+                case MenuScene.QUEUE:
+                    return queueIn;
+                default:
+                    return homeIn;
+            }
+        })();
+        this.setWaveInMoveMode();
+        gsap.timeline({
+            onComplete: () => {
+                onComplete();
+            },
+        })
+            .add(curveToStep(targetStep))
             .add(
                 [
-                    lightToStep(MenuScene.HOME),
-                    shadowToStep(MenuScene.HOME),
-                    levelOut(),
+                    lightToStep(targetStep),
+                    shadowToStep(targetStep),
+                    ...allMenuScenesOut(),
                 ],
                 '-=0.5',
             )
-            .add(homeIn());
-    }
-
-    public static initLevelToFaction(onComplete: () => void) {
-        this.levelToFaction = gsap
-            .timeline({
-                paused: true,
-                onComplete: () => {
-                    onComplete();
-                },
-            })
-            .add(curveToStep(MenuScene.FACTION))
-            .add(
-                [
-                    lightToStep(MenuScene.FACTION),
-                    shadowToStep(MenuScene.FACTION),
-                    levelOut(),
-                ],
-                '-=0.5',
-            )
-            .add(factionIn());
-    }
-
-    public static initFactionToLevel(onComplete: () => void) {
-        this.factionToLevel = gsap
-            .timeline({
-                paused: true,
-                onComplete: () => {
-                    onComplete();
-                },
-            })
-            .add(curveToStep(MenuScene.LEVEL))
-            .add(
-                [
-                    lightToStep(MenuScene.LEVEL),
-                    shadowToStep(MenuScene.LEVEL),
-                    ...factionOut(),
-                ],
-                '-=0.5',
-            )
-            .add(levelIn());
-    }
-
-    public static initFactionToQueue(onComplete: () => void) {
-        this.factionToQueue = gsap
-            .timeline({
-                paused: true,
-                onComplete: () => {
-                    onComplete();
-                },
-            })
-            .add(curveToStep(MenuScene.QUEUE))
-            .add(
-                [
-                    lightToStep(MenuScene.QUEUE),
-                    shadowToStep(MenuScene.QUEUE),
-                    ...factionOut(),
-                ],
-                '-=0.5',
-            )
-            .add(queueIn());
-    }
-
-    public static initQueueToFaction(onComplete: () => void) {
-        this.queueToFaction = gsap
-            .timeline({
-                paused: true,
-                onComplete: () => {
-                    onComplete();
-                },
-            })
-            .add(curveToStep(MenuScene.FACTION))
-            .add(
-                [
-                    lightToStep(MenuScene.FACTION),
-                    shadowToStep(MenuScene.FACTION),
-                    queueOut(),
-                ],
-                '-=0.5',
-            )
-            .add(factionIn());
-    }
-
-    public static playHomeToLevel() {
-        this.setWaveInMoveMode();
-        this.homeToLevel.play(0);
-    }
-
-    public static playLevelToHome() {
-        this.setWaveInMoveMode();
-        this.levelToHome.play(0);
-    }
-
-    public static playLevelToFaction() {
-        this.setWaveInMoveMode();
-        this.levelToFaction.play(0);
-    }
-
-    public static playFactionToLevel() {
-        this.setWaveInMoveMode();
-        this.factionToLevel.play(0);
-    }
-
-    public static playFactionToQueue() {
-        this.setWaveInMoveMode();
-        this.factionToQueue.play(0);
-    }
-
-    public static playQueueToFaction() {
-        this.setWaveInMoveMode();
-        this.queueToFaction.play(0);
+            .add(inAnimation());
     }
 
     public static playMouseLeaveButtonPlay() {

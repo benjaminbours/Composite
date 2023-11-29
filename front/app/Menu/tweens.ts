@@ -63,7 +63,7 @@ export function shadowToStep(step: MenuScene) {
 /**
  * Home
  */
-export function homeOut() {
+function homeOut() {
     const { mainTitle, subtitleHome } = Animation.canvasComponents;
     const homeInterface = Animation.components?.homeInterface
         .current as HTMLDivElement;
@@ -122,7 +122,7 @@ export function homeIn() {
 /**
  * Level
  */
-export function levelOut() {
+function levelOut() {
     const levelInterface = Animation.components?.levelInterface
         .current as HTMLElement;
 
@@ -151,19 +151,17 @@ export function levelIn() {
 /**
  * Faction
  */
-export function factionOut() {
+function factionOut() {
     const factionInterface = Animation.components?.factionInterface
         .current as HTMLElement;
 
-    return [
-        gsap.to(factionInterface, {
-            duration: 0.5,
-            opacity: 0,
-            onComplete: () => {
-                factionInterface.style.display = 'none';
-            },
-        }),
-    ];
+    return gsap.to(factionInterface, {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            factionInterface.style.display = 'none';
+        },
+    });
 }
 
 export function factionIn() {
@@ -197,7 +195,7 @@ export function queueIn() {
     });
 }
 
-export function queueOut() {
+function queueOut() {
     const queueInterface = Animation.components?.queueInterface
         .current as HTMLElement;
 
@@ -208,4 +206,9 @@ export function queueOut() {
             queueInterface.style.display = 'none';
         },
     });
+}
+
+export function allMenuScenesOut() {
+    // TODO: end level out
+    return [...homeOut(), levelOut(), factionOut(), queueOut()];
 }
