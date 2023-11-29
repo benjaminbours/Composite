@@ -53,6 +53,7 @@ function MainApp() {
     });
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [teamMateDisconnect, setTeamMateDisconnect] = useState(false);
+    const [teamMateInfo, setTeamMateInfo] = useState<TeammateInfoPayload>();
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const shouldEstablishConnection = useMemo(
         () =>
@@ -61,6 +62,13 @@ function MainApp() {
             state.side !== undefined &&
             state.selectedLevel !== undefined &&
             !socketController.current,
+        [state, menuMode, menuScene],
+    );
+    const shouldSendMatchMakingInfo = useMemo(
+        () =>
+            menuScene === MenuScene.QUEUE &&
+            state.side !== undefined &&
+            state.selectedLevel !== undefined,
         [state, menuMode, menuScene],
     );
 
@@ -81,7 +89,7 @@ function MainApp() {
     }, []);
 
     const handleTeamMateInfo = useCallback((data: TeammateInfoPayload) => {
-        console.log('HERE team mate info', data);
+        setTeamMateInfo(data);
     }, []);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {
@@ -119,6 +127,7 @@ function MainApp() {
                 state as MatchMakingPayload,
             ]);
         };
+
         if (shouldEstablishConnection) {
             import('./SocketController')
                 .then((mod) => mod.SocketController)
@@ -170,14 +179,34 @@ function MainApp() {
             //     );
             //     handleGameStart(initialGameState);
             // });
+        } else if (shouldSendMatchMakingInfo) {
+            sendMatchMakingInfo();
         }
-    }, [gameIsPlaying, shouldEstablishConnection]);
+    }, [gameIsPlaying, shouldEstablishConnection, shouldSendMatchMakingInfo]);
 
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
         socketController.current = undefined;
         setMenuMode(MenuMode.DEFAULT);
     }, [menuMode]);
+
+    const handleClickOnJoinTeamMate = useCallback(() => {
+        if (!teamMateInfo) {
+            return;
+        }
+        const matchMakingInfo = {
+            side: teamMateInfo.side === Side.SHADOW ? Side.LIGHT : Side.SHADOW,
+            selectedLevel: teamMateInfo.selectedLevel,
+        };
+        setState((prev) => ({
+            ...prev,
+            ...matchMakingInfo,
+        }));
+        socketController.current?.emit([
+            SocketEventType.MATCHMAKING_INFO,
+            matchMakingInfo,
+        ]);
+    }, [teamMateInfo]);
 
     // return (
     //     <>
@@ -217,6 +246,10 @@ function MainApp() {
                     mode={menuMode}
                     setMenuScene={setMenuScene}
                     destroyConnection={handleDestroyConnection}
+                    teamMate={{
+                        info: teamMateInfo,
+                        onJoin: handleClickOnJoinTeamMate,
+                    }}
                 />
             )}
             {state.gameState && gameIsPlaying && (

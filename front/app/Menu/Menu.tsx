@@ -9,7 +9,12 @@ import React, {
     useState,
 } from 'react';
 // our libs
-import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
+import {
+    AllQueueInfo,
+    Levels,
+    Side,
+    TeammateInfoPayload,
+} from '@benjaminbours/composite-core';
 // local
 import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';
@@ -31,6 +36,10 @@ interface Props {
     mode: MenuMode;
     setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>;
     destroyConnection: () => void;
+    teamMate: {
+        info: TeammateInfoPayload | undefined;
+        onJoin: () => void;
+    };
 }
 
 export function Menu({
@@ -40,6 +49,7 @@ export function Menu({
     mode,
     setMenuScene,
     destroyConnection,
+    teamMate,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -301,6 +311,10 @@ export function Menu({
         [],
     );
 
+    const levelName = levels.find(
+        (level) => level.id === mainState.selectedLevel,
+    )?.name;
+
     return (
         <>
             <canvas
@@ -357,9 +371,13 @@ export function Menu({
                             ? handleClickOnQuitTeam
                             : undefined
                     }
-                    onJoinTeam={
-                        mode === MenuMode.IN_TEAM ? () => {} : undefined
-                    }
+                    teamMate={{
+                        ...teamMate,
+                        levelName: levels.find(
+                            (level) =>
+                                level.id === teamMate.info?.selectedLevel,
+                        )?.name,
+                    }}
                 />
                 <h2 className="title-h2">Select a&nbsp;level</h2>
                 {levels.map((item) => (
@@ -382,14 +400,18 @@ export function Menu({
                                 ? handleClickOnQuitTeam
                                 : undefined
                         }
+                        teamMate={{
+                            ...teamMate,
+                            levelName: levels.find(
+                                (level) =>
+                                    level.id === teamMate.info?.selectedLevel,
+                            )?.name,
+                        }}
                     />
                 }
                 currentScene={menuScene}
                 selectedLevel={mainState.selectedLevel}
-                levelName={
-                    levels.find((level) => level.id === mainState.selectedLevel)
-                        ?.name
-                }
+                levelName={levelName}
                 handleClickOnFaction={handleClickOnFaction}
                 allQueueInfo={allQueueInfo}
             />
@@ -397,10 +419,7 @@ export function Menu({
                 queueRef={queueRef}
                 currentScene={menuScene}
                 side={mainState.side}
-                levelName={
-                    levels.find((level) => level.id === mainState.selectedLevel)
-                        ?.name
-                }
+                levelName={levelName}
                 isInQueue={menuScene === MenuScene.QUEUE}
                 actions={
                     <Actions
@@ -413,6 +432,13 @@ export function Menu({
                                 ? handleClickOnQuitTeam
                                 : undefined
                         }
+                        teamMate={{
+                            ...teamMate,
+                            levelName: levels.find(
+                                (level) =>
+                                    level.id === teamMate.info?.selectedLevel,
+                            )?.name,
+                        }}
                     />
                 }
             />
@@ -420,10 +446,7 @@ export function Menu({
                 endLevelRef={endLevelRef}
                 currentScene={menuScene}
                 side={mainState.side}
-                levelName={
-                    levels.find((level) => level.id === mainState.selectedLevel)
-                        ?.name
-                }
+                levelName={levelName}
                 handleClickOnPlay={handleClickOnPlay}
                 actions={
                     <Actions
@@ -435,6 +458,13 @@ export function Menu({
                                 ? handleClickOnQuitTeam
                                 : undefined
                         }
+                        teamMate={{
+                            ...teamMate,
+                            levelName: levels.find(
+                                (level) =>
+                                    level.id === teamMate.info?.selectedLevel,
+                            )?.name,
+                        }}
                     />
                 }
             />
