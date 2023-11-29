@@ -19,7 +19,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import type { SocketController } from './SocketController';
-import { MenuScene } from './Menu/types';
+import { MenuMode, MenuScene } from './Menu/types';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -42,6 +42,7 @@ export interface MainState {
 function MainApp() {
     const socketController = useRef<SocketController>();
     const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
+    const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
     const [state, setState] = useState<MainState>({
         // side: Side.LIGHT,
         // selectedLevel: Levels.CRACK_THE_DOOR,
@@ -51,16 +52,21 @@ function MainApp() {
     });
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);
-    const [isInQueue, setIsInQueue] = useState(false);
-    const shouldBeInQueue = useMemo(
-        () => state.side !== undefined && state.selectedLevel !== undefined,
-        [state],
+    const shouldEstablishConnection = useMemo(
+        () =>
+            menuMode === MenuMode.DEFAULT &&
+            menuScene === MenuScene.QUEUE &&
+            state.side !== undefined &&
+            state.selectedLevel !== undefined &&
+            !socketController.current,
+        [state, menuMode, menuScene],
     );
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         setState((prev) => ({ ...prev, gameState: initialGameState }));
         setGameIsPlaying(true);
         setMenuScene(MenuScene.END_LEVEL);
+        setMenuMode(MenuMode.IN_TEAM);
     }, []);
 
     const handleGameFinished = useCallback(() => {
@@ -76,11 +82,7 @@ function MainApp() {
                         handleGameStart,
                         handleGameFinished,
                     );
-                    socketController.current.emit([
-                        SocketEventType.MATCHMAKING_INFO,
-                        state as MatchMakingPayload,
-                    ]);
-                    setIsInQueue(true);
+                    return;
                 }),
         [handleGameStart, state],
     );
@@ -103,9 +105,14 @@ function MainApp() {
     }, []);
 
     useEffect(() => {
-        if (shouldBeInQueue && !isInQueue) {
-            console.log('establish connection');
-            establishConnection();
+        const sendMatchMakingInfo = () => {
+            socketController.current?.emit([
+                SocketEventType.MATCHMAKING_INFO,
+                state as MatchMakingPayload,
+            ]);
+        };
+        if (shouldEstablishConnection) {
+            establishConnection().then(sendMatchMakingInfo);
             // establishConnection().then(() => {
             //     const level = new PositionLevel();
             //     const initialGameState = new GameState(
@@ -144,12 +151,14 @@ function MainApp() {
             //     );
             //     handleGameStart(initialGameState);
             // });
-        } else if (isInQueue && !shouldBeInQueue) {
-            socketController.current?.destroy();
-            socketController.current = undefined;
-            setIsInQueue(false);
         }
-    }, [shouldBeInQueue, isInQueue, establishConnection]);
+    }, [gameIsPlaying, establishConnection]);
+
+    const handleDestroyConnection = useCallback(() => {
+        socketController.current?.destroy();
+        socketController.current = undefined;
+        setMenuMode(MenuMode.DEFAULT);
+    }, [menuMode]);
 
     // return (
     //     <>
@@ -174,7 +183,9 @@ function MainApp() {
                     mainState={state}
                     setMainState={setState}
                     menuScene={menuScene}
+                    mode={menuMode}
                     setMenuScene={setMenuScene}
+                    destroyConnection={handleDestroyConnection}
                 />
             )}
             {state.gameState && gameIsPlaying && (

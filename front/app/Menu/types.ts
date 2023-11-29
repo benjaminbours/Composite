@@ -8,6 +8,15 @@ export enum MenuScene {
     END_LEVEL = 'end_level',
 }
 
+export enum MenuMode {
+    // basically, when not in queue
+    DEFAULT = 'DEFAULT',
+    // when you are already connected by websocket, and with a team mate
+    // After you finished the first level and you want to play another one with your friend.
+    // or if you have invited a team mate by link (coming soon feature)
+    IN_TEAM = 'IN_TEAM',
+}
+
 export interface ICoordinate {
     x: number;
     y: number;

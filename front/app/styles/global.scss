@@ -166,15 +166,6 @@ button {
     }
 }
 
-.back {
-    margin-top: 25px;
-    font-size: 12px;
-
-    @media (max-width: 768px) {
-        margin-top: 10px;
-    }
-}
-
 .menu-state-info {
     color: white;
 
@@ -237,5 +228,16 @@ button {
                 opacity: 1;
             }
         }
+    }
+}
+
+.menu-actions {
+    margin-top: 25px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+
+    * {
+        margin-right: 10px;
     }
 }

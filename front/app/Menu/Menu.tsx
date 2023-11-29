@@ -15,27 +15,31 @@ import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
-import { MenuScene } from './types';
-import ButtonBack from './ButtonBack';
+import { MenuMode, MenuScene } from './types';
 import LevelItem from './LevelItem';
 import { MainState } from '../MainApp';
 import { QueueInfoText } from './QueueInfo';
 import { QueueScene } from './QueueScene';
 import { SideScene } from './SideScene';
 import { EndLevelScene } from './EndLevelScene';
+import { Actions } from './Actions';
 
 interface Props {
     mainState: MainState;
     setMainState: React.Dispatch<React.SetStateAction<MainState>>;
     menuScene: MenuScene;
+    mode: MenuMode;
     setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>;
+    destroyConnection: () => void;
 }
 
 export function Menu({
     setMainState,
     mainState,
     menuScene,
+    mode,
     setMenuScene,
+    destroyConnection,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -186,9 +190,19 @@ export function Menu({
         animation.current.goToStep(MenuScene.LEVEL, () => {
             onTransition.current = false;
             setMenuScene(MenuScene.LEVEL);
+            animation.current?.playMouseLeaveButtonPlay();
         });
     }, []);
 
+    const handleClickOnQuitTeam = useCallback(() => {
+        if (!animation.current) {
+            return;
+        }
+        animation.current.goToStep(MenuScene.HOME, () => {
+            onTransition.current = false;
+            setMenuScene(MenuScene.HOME);
+            destroyConnection();
+        });
     }, []);
 
     const handleClickOnBack = useCallback(() => {
@@ -224,13 +238,16 @@ export function Menu({
                     ...prev,
                     side: undefined,
                 }));
+                if (mode === MenuMode.DEFAULT) {
+                    destroyConnection();
+                }
             });
         }
         // there is no back button on home scene or on end level scene
         if (menuScene !== MenuScene.HOME && menuScene !== MenuScene.END_LEVEL) {
             backOptions[menuScene]();
         }
-    }, [menuScene]);
+    }, [menuScene, destroyConnection]);
 
     const handleClickOnLevel = useCallback((levelId: Levels) => {
         if (!animation.current) {
@@ -252,11 +269,11 @@ export function Menu({
             return;
         }
         setMainState((prev) => ({ ...prev, side }));
+        setMenuScene(MenuScene.QUEUE);
         animation.current.faction = side;
         onTransition.current = true;
         animation.current.goToStep(MenuScene.QUEUE, () => {
             onTransition.current = false;
-            setMenuScene(MenuScene.QUEUE);
         });
     }, []);
 
@@ -332,7 +349,18 @@ export function Menu({
                     menuScene !== 'level' ? 'unmount' : ''
                 }`}
             >
-                <ButtonBack color="white" onClick={handleClickOnBack} />
+                <Actions
+                    color="white"
+                    onBack={handleClickOnBack}
+                    onQuitTeam={
+                        mode === MenuMode.IN_TEAM
+                            ? handleClickOnQuitTeam
+                            : undefined
+                    }
+                    onJoinTeam={
+                        mode === MenuMode.IN_TEAM ? () => {} : undefined
+                    }
+                />
                 <h2 className="title-h2">Select a&nbsp;level</h2>
                 {levels.map((item) => (
                     <LevelItem
@@ -345,6 +373,17 @@ export function Menu({
             </div>
             <SideScene
                 sideRef={sideRef}
+                actions={
+                    <Actions
+                        color="white"
+                        onBack={handleClickOnBack}
+                        onQuitTeam={
+                            mode === MenuMode.IN_TEAM
+                                ? handleClickOnQuitTeam
+                                : undefined
+                        }
+                    />
+                }
                 currentScene={menuScene}
                 selectedLevel={mainState.selectedLevel}
                 levelName={
@@ -352,7 +391,6 @@ export function Menu({
                         ?.name
                 }
                 handleClickOnFaction={handleClickOnFaction}
-                handleClickOnBack={handleClickOnBack}
                 allQueueInfo={allQueueInfo}
             />
             <QueueScene
@@ -363,8 +401,20 @@ export function Menu({
                     levels.find((level) => level.id === mainState.selectedLevel)
                         ?.name
                 }
-                handleClickOnBack={handleClickOnBack}
                 isInQueue={menuScene === MenuScene.QUEUE}
+                actions={
+                    <Actions
+                        color={
+                            mainState.side === Side.SHADOW ? 'black' : 'white'
+                        }
+                        onBack={handleClickOnBack}
+                        onQuitTeam={
+                            mode === MenuMode.IN_TEAM
+                                ? handleClickOnQuitTeam
+                                : undefined
+                        }
+                    />
+                }
             />
             <EndLevelScene
                 endLevelRef={endLevelRef}
@@ -375,6 +425,18 @@ export function Menu({
                         ?.name
                 }
                 handleClickOnPlay={handleClickOnPlay}
+                actions={
+                    <Actions
+                        color={
+                            mainState.side === Side.SHADOW ? 'black' : 'white'
+                        }
+                        onQuitTeam={
+                            mode === MenuMode.IN_TEAM
+                                ? handleClickOnQuitTeam
+                                : undefined
+                        }
+                    />
+                }
             />
         </>
     );

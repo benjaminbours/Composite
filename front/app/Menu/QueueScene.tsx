@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import ButtonBack from './ButtonBack';
 import { CopyToClipBoardIcon } from './CopyToClipboardIcon';
 import { MenuStateInfo } from './MenuStateInfo';
 
@@ -13,8 +12,8 @@ interface Props {
     currentScene: string;
     side?: Side;
     levelName?: string;
-    handleClickOnBack: () => void;
     isInQueue: boolean;
+    actions: React.ReactNode;
 }
 
 export const QueueScene: React.FC<Props> = ({
@@ -22,8 +21,8 @@ export const QueueScene: React.FC<Props> = ({
     currentScene,
     side,
     levelName,
-    handleClickOnBack,
     isInQueue,
+    actions,
 }) => {
     const [queueTime, setQueueTime] = useState(0);
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
@@ -65,7 +64,7 @@ export const QueueScene: React.FC<Props> = ({
 
     return (
         <div ref={queueRef} className={cssClass}>
-            <ButtonBack color={color} onClick={handleClickOnBack} />
+            {actions}
             <MenuStateInfo levelName={levelName} side={side} />
             {side !== undefined && (
                 <h2

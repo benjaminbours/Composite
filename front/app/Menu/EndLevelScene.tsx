@@ -14,6 +14,7 @@ interface Props {
     side?: Side;
     levelName?: string;
     handleClickOnPlay: () => void;
+    actions: React.ReactNode;
 }
 
 export const EndLevelScene: React.FC<Props> = ({
@@ -22,6 +23,7 @@ export const EndLevelScene: React.FC<Props> = ({
     side,
     levelName,
     handleClickOnPlay,
+    actions,
 }) => {
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
@@ -68,6 +70,7 @@ export const EndLevelScene: React.FC<Props> = ({
 
     return (
         <div ref={endLevelRef} className={cssClass}>
+            {actions}
             <h2>Well done!</h2>
             <h3>
                 <span className="menu-label">You just finished the level:</span>{' '}
@@ -87,7 +90,11 @@ export const EndLevelScene: React.FC<Props> = ({
                 <div className="text-container">
                     <p>
                         If you liked the experience and you want it to reach its{' '}
-                        <a className="inline-link" href="/about">
+                        <a
+                            className="inline-link"
+                            href="/about"
+                            target="_blank"
+                        >
                             full potential
                         </a>
                         , the best thing you can do is to talk about it.

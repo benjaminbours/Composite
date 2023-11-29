@@ -4,7 +4,6 @@ import React from 'react';
 // our libs
 import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
 // local
-import ButtonBack from './ButtonBack';
 import { QueueInfoText } from './QueueInfo';
 import { MenuStateInfo } from './MenuStateInfo';
 
@@ -13,9 +12,9 @@ interface Props {
     currentScene: string;
     selectedLevel?: Levels;
     levelName?: string;
-    handleClickOnBack: () => void;
     handleClickOnFaction: (side: Side) => void;
     allQueueInfo?: AllQueueInfo;
+    actions: React.ReactNode;
 }
 
 export const SideScene: React.FC<Props> = ({
@@ -23,9 +22,9 @@ export const SideScene: React.FC<Props> = ({
     currentScene,
     selectedLevel,
     levelName,
-    handleClickOnBack,
     handleClickOnFaction,
     allQueueInfo,
+    actions,
 }) => {
     const cssClass = classNames({
         'content-container': true,
@@ -35,7 +34,7 @@ export const SideScene: React.FC<Props> = ({
 
     return (
         <div ref={sideRef} className={cssClass}>
-            <ButtonBack color="white" onClick={handleClickOnBack} />
+            {actions}
             <MenuStateInfo levelName={levelName} />
             <h2 className="title-h2">Select a&nbsp;side</h2>
             {/* <p>{`Selected level: ${levelName}`}</p> */}
