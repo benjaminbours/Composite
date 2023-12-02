@@ -40,6 +40,8 @@ interface Props {
         info: TeammateInfoPayload | undefined;
         onJoin: () => void;
     };
+    teamMateDisconnected: boolean;
+    setTeamMateDisconnected: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function Menu({
@@ -50,6 +52,8 @@ export function Menu({
     setMenuScene,
     destroyConnection,
     teamMate,
+    teamMateDisconnected,
+    setTeamMateDisconnected,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -196,13 +200,16 @@ export function Menu({
         if (!animation.current) {
             return;
         }
+        if (teamMateDisconnected) {
+            setTeamMateDisconnected(false);
+        }
         onTransition.current = true;
         animation.current.goToStep(MenuScene.LEVEL, () => {
             onTransition.current = false;
             setMenuScene(MenuScene.LEVEL);
             animation.current?.playMouseLeaveButtonPlay();
         });
-    }, []);
+    }, [teamMateDisconnected, setTeamMateDisconnected]);
 
     const handleClickOnQuitTeam = useCallback(() => {
         if (!animation.current) {
@@ -259,33 +266,45 @@ export function Menu({
         }
     }, [menuScene, destroyConnection]);
 
-    const handleClickOnLevel = useCallback((levelId: Levels) => {
-        if (!animation.current) {
-            return;
-        }
-        setMainState((prev) => ({
-            ...prev,
-            selectedLevel: levelId,
-        }));
-        onTransition.current = true;
-        animation.current.goToStep(MenuScene.FACTION, () => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.FACTION);
-        });
-    }, []);
+    const handleClickOnLevel = useCallback(
+        (levelId: Levels) => {
+            if (!animation.current) {
+                return;
+            }
+            if (teamMateDisconnected) {
+                setTeamMateDisconnected(false);
+            }
+            setMainState((prev) => ({
+                ...prev,
+                selectedLevel: levelId,
+            }));
+            onTransition.current = true;
+            animation.current.goToStep(MenuScene.FACTION, () => {
+                onTransition.current = false;
+                setMenuScene(MenuScene.FACTION);
+            });
+        },
+        [teamMateDisconnected, setTeamMateDisconnected],
+    );
 
-    const handleClickOnFaction = useCallback((side: Side) => {
-        if (!animation.current) {
-            return;
-        }
-        setMainState((prev) => ({ ...prev, side }));
-        setMenuScene(MenuScene.QUEUE);
-        animation.current.faction = side;
-        onTransition.current = true;
-        animation.current.goToStep(MenuScene.QUEUE, () => {
-            onTransition.current = false;
-        });
-    }, []);
+    const handleClickOnFaction = useCallback(
+        (side: Side) => {
+            if (!animation.current) {
+                return;
+            }
+            if (teamMateDisconnected) {
+                setTeamMateDisconnected(false);
+            }
+            setMainState((prev) => ({ ...prev, side }));
+            setMenuScene(MenuScene.QUEUE);
+            animation.current.faction = side;
+            onTransition.current = true;
+            animation.current.goToStep(MenuScene.QUEUE, () => {
+                onTransition.current = false;
+            });
+        },
+        [teamMateDisconnected, setTeamMateDisconnected],
+    );
 
     const levels = useMemo(
         () => [

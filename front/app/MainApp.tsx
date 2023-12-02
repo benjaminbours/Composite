@@ -52,7 +52,7 @@ function MainApp() {
         gameState: undefined,
     });
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
-    const [teamMateDisconnect, setTeamMateDisconnect] = useState(false);
+    const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [teamMateInfo, setTeamMateInfo] = useState<TeammateInfoPayload>();
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const shouldEstablishConnection = useMemo(
@@ -83,12 +83,19 @@ function MainApp() {
         setGameIsPlaying(false);
     }, []);
 
-    const handleTeamMateDisconnect = useCallback(() => {
+    const handleDestroyConnection = useCallback(() => {
+        socketController.current?.destroy();
+        socketController.current = undefined;
         setMenuMode(MenuMode.DEFAULT);
-        setTeamMateDisconnect(true);
+    }, [menuMode]);
+
+    const handleTeamMateDisconnect = useCallback(() => {
+        setTeamMateDisconnected(true);
+        handleDestroyConnection();
     }, []);
 
     const handleTeamMateInfo = useCallback((data: TeammateInfoPayload) => {
+        console.log('HERE receive team mate info');
         setTeamMateInfo(data);
     }, []);
 
@@ -98,10 +105,29 @@ function MainApp() {
             .then((Animation) => {
                 Animation.goToStep(MenuScene.HOME, () => {
                     setMenuScene(MenuScene.HOME);
-                    setTeamMateDisconnect(false);
+                    setTeamMateDisconnected(false);
                 });
             });
     }, []);
+
+    const handleClickOnJoinTeamMate = useCallback(() => {
+        if (!teamMateInfo) {
+            return;
+        }
+        const matchMakingInfo = {
+            side: teamMateInfo.side === Side.SHADOW ? Side.LIGHT : Side.SHADOW,
+            selectedLevel: teamMateInfo.selectedLevel,
+        };
+        setState((prev) => ({
+            ...prev,
+            ...matchMakingInfo,
+        }));
+        setTeamMateInfo(undefined);
+        socketController.current?.emit([
+            SocketEventType.MATCHMAKING_INFO,
+            matchMakingInfo,
+        ]);
+    }, [teamMateInfo]);
 
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -180,33 +206,10 @@ function MainApp() {
             //     handleGameStart(initialGameState);
             // });
         } else if (shouldSendMatchMakingInfo) {
+            console.log('HERE send match making info');
             sendMatchMakingInfo();
         }
     }, [gameIsPlaying, shouldEstablishConnection, shouldSendMatchMakingInfo]);
-
-    const handleDestroyConnection = useCallback(() => {
-        socketController.current?.destroy();
-        socketController.current = undefined;
-        setMenuMode(MenuMode.DEFAULT);
-    }, [menuMode]);
-
-    const handleClickOnJoinTeamMate = useCallback(() => {
-        if (!teamMateInfo) {
-            return;
-        }
-        const matchMakingInfo = {
-            side: teamMateInfo.side === Side.SHADOW ? Side.LIGHT : Side.SHADOW,
-            selectedLevel: teamMateInfo.selectedLevel,
-        };
-        setState((prev) => ({
-            ...prev,
-            ...matchMakingInfo,
-        }));
-        socketController.current?.emit([
-            SocketEventType.MATCHMAKING_INFO,
-            matchMakingInfo,
-        ]);
-    }, [teamMateInfo]);
 
     // return (
     //     <>
@@ -226,7 +229,7 @@ function MainApp() {
 
     return (
         <>
-            {teamMateDisconnect && (
+            {teamMateDisconnected && (
                 // TODO: Make appear disappear animation
                 <div className="team-mate-disconnect">
                     <p>Your team mate disconnected or has quit the room</p>
@@ -250,6 +253,8 @@ function MainApp() {
                         info: teamMateInfo,
                         onJoin: handleClickOnJoinTeamMate,
                     }}
+                    teamMateDisconnected={teamMateDisconnected}
+                    setTeamMateDisconnected={setTeamMateDisconnected}
                 />
             )}
             {state.gameState && gameIsPlaying && (
