@@ -66,21 +66,22 @@ function MainApp() {
     );
     const shouldSendMatchMakingInfo = useMemo(
         () =>
+            !gameIsPlaying &&
             menuScene === MenuScene.QUEUE &&
             state.side !== undefined &&
             state.selectedLevel !== undefined,
-        [state, menuMode, menuScene],
+        [state, menuMode, menuScene, gameIsPlaying],
     );
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         setState((prev) => ({ ...prev, gameState: initialGameState }));
         setGameIsPlaying(true);
-        setMenuScene(MenuScene.END_LEVEL);
         setMenuMode(MenuMode.IN_TEAM);
     }, []);
 
     const handleGameFinished = useCallback(() => {
         setGameIsPlaying(false);
+        setMenuScene(MenuScene.END_LEVEL);
     }, []);
 
     const handleDestroyConnection = useCallback(() => {
