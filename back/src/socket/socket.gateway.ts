@@ -78,6 +78,10 @@ export class SocketGateway {
     console.log('player', player);
     // if the player is already in a team room
     if (player && player.roomName) {
+      // update local instance of fetched player
+      player.selectedLevel = data.selectedLevel;
+      player.side = data.side;
+      // update player store in storage
       await this.temporaryStorage.setPlayer(socket.id, {
         selectedLevel: String(data.selectedLevel),
         side: String(data.side),
