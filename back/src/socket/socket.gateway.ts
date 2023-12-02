@@ -357,6 +357,7 @@ export class SocketGateway {
             if (input.sequence !== gameState.game_time) {
               continue;
             }
+            // filter by player
             if (input.player === Side.SHADOW) {
               inputsForTick[0].push(input);
             }
@@ -364,6 +365,7 @@ export class SocketGateway {
               inputsForTick[1].push(input);
             }
           }
+          // each player after another
           for (let i = 0; i < inputsForTick.length; i++) {
             const inputs = inputsForTick[i];
             lastPlayersInput[i] = applyInputList(
@@ -389,6 +391,7 @@ export class SocketGateway {
 
         // console.log('inputs queue after', inputsQueue.length);
 
+        gameState.lastValidatedInput = gameState.game_time;
         // update state and inputs queue
         this.temporaryStorage.updateGameStateAndInputsQueue(gameId, gameState);
 

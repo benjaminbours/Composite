@@ -142,8 +142,6 @@ export function applyInputList(
             }
             // side effect
             lastInput = input;
-            // side effect
-            gameState.lastValidatedInput = input.sequence;
         }
     } else {
         // if there are no inputs for this tick, we have to deduce / interpolate player position
@@ -157,7 +155,11 @@ export function applyInputList(
                 console.log(
                     `no input for player ${lastInput.player} reapply last input`,
                 );
-                console.log('applying input', lastInput.time, lastInput.sequence);
+                console.log(
+                    'applying input',
+                    lastInput.time,
+                    lastInput.sequence,
+                );
                 console.log(
                     'applying input from position',
                     gameState.players[lastInput.player].position,
@@ -185,8 +187,6 @@ export function applyInputList(
                     gameState.players[lastInput.player].velocity,
                 );
             }
-            // side effect
-            gameState.lastValidatedInput = lastInput.sequence;
         }
     }
     return lastInput;
