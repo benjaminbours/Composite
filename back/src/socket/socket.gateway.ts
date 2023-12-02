@@ -396,21 +396,32 @@ export class SocketGateway {
         this.temporaryStorage.updateGameStateAndInputsQueue(gameId, gameState);
 
         if (gameState.level.end_level.length === 2) {
-          const gameRoomName = String(gameId);
-          clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
-          console.log('game finished on the server');
-          this.emit(gameRoomName, [SocketEventType.GAME_FINISHED]);
-          this.server
-            .in(gameRoomName)
-            .fetchSockets()
-            .then((sockets) => {
-              sockets.forEach(({ id }) => {
-                this.temporaryStorage.setPlayer(id, {
-                  status: String(PlayerStatus.IS_PENDING),
+          // if there is already an ongoing timeout, do not create another one
+          if (this.gameLoopsRegistry[`game:${gameId}:endGame`]) {
+            return;
+          }
+
+          // if there is not, create one
+          this.gameLoopsRegistry[`game:${gameId}:endGame`] = setTimeout(() => {
+            const gameRoomName = String(gameId);
+            clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
+            delete this.gameLoopsRegistry[`game:${gameId}`];
+            console.log('game finished on the server');
+            this.emit(gameRoomName, [SocketEventType.GAME_FINISHED]);
+            this.server
+              .in(gameRoomName)
+              .fetchSockets()
+              .then((sockets) => {
+                sockets.forEach(({ id }) => {
+                  this.temporaryStorage.setPlayer(id, {
+                    status: String(PlayerStatus.IS_PENDING),
+                  });
                 });
               });
-            });
-          // this.server.socketsLeave(gameRoomName);
+          }, 5000);
+        } else {
+          clearTimeout(this.gameLoopsRegistry[`game:${gameId}:endGame`]);
+          delete this.gameLoopsRegistry[`game:${gameId}:endGame`];
         }
       });
     };
