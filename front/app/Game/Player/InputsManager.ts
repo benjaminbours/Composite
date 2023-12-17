@@ -7,10 +7,15 @@ export default class InputsManager {
         jump: false,
     };
 
-    // TODO: Implements a destroy method
     public registerEventListeners = () => {
         window.addEventListener('keydown', this.handleKeydown.bind(this));
         window.addEventListener('keyup', this.handleKeyup.bind(this));
+    };
+
+    public destroyEventListeners = () => {
+        window.removeEventListener('keydown', this.handleKeydown.bind(this));
+        window.removeEventListener('keyup', this.handleKeyup.bind(this));
+        this.reset();
     };
 
     public reset() {

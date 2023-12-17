@@ -91,6 +91,10 @@ function Game({
                 setIsSynchronizingTime(false);
             });
         }
+
+        return () => {
+            appRef.current?.inputsManager.destroyEventListeners();
+        };
     }, [isSynchronizingTime, tabIsHidden]);
 
     return (
