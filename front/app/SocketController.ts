@@ -91,9 +91,12 @@ export class SocketController {
                 console.log('finished gathering ping info', found);
 
                 if (this.synchronizeGameTimeWithServer) {
-                    const gameTimeDelta = Math.ceil(
-                        (found?.gameTimeDelta || 0) / 2,
-                    );
+                    // const gameTimeDelta = Math.ceil(
+                    //     (found?.gameTimeDelta || 0) / 2,
+                    // );
+                    const gameTimeDelta = (found?.rtt || 0) + 10;
+                    console.log('set game time delta', gameTimeDelta);
+
                     this.synchronizeGameTimeWithServer(
                         data.serverGameTime! + gameTimeDelta,
                     );
@@ -108,8 +111,10 @@ export class SocketController {
 
     public synchronizeTime = () => {
         return new Promise((resolve) => {
+            this.isTimeSynced = false;
             // remove previous time samples in case of resynchronization
             this.timeSamples = [];
+            this.timeSamplesSent = [];
             // register listener for time sync event
             this.socket.on(
                 SocketEventType.TIME_SYNC,
