@@ -21,6 +21,7 @@ import {
   SocketEvent,
   GameState,
   PositionLevel,
+  ProjectionLevel,
   FLOOR,
   TimeSyncPayload,
   PhysicLoop,
@@ -249,6 +250,8 @@ export class SocketGateway {
       switch (players[0].player.selectedLevel) {
         case Levels.CRACK_THE_DOOR:
           return new PositionLevel();
+        case Levels.LEARN_TO_FLY:
+          return new ProjectionLevel();
       }
     })();
 
@@ -300,7 +303,10 @@ export class SocketGateway {
     this.registerGameLoop(game.id, level);
   }
 
-  registerGameLoop = (gameId: number, level: PositionLevel) => {
+  registerGameLoop = (
+    gameId: number,
+    level: PositionLevel | ProjectionLevel,
+  ) => {
     // TODO: The following variable declared here and accessible in the process
     // input queue closure are potential memory leaks.
     // Let's try to declare them only once somewhere else, or to update

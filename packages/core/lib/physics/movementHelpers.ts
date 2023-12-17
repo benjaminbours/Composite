@@ -6,7 +6,12 @@ import {
     MovableComponentState,
     Side,
 } from '../types';
-import { GameState } from '../GameState';
+import {
+    GameState,
+    LevelState,
+    Levels,
+    PositionLevelState,
+} from '../GameState';
 import { computeVelocityX } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
@@ -224,36 +229,46 @@ function applyWorldUpdate(
     collisionResult: INearestObjects,
     context: Context,
 ) {
-    let doorNameActivating: string | undefined = undefined;
-    if (collisionResult.down && isTouchingDoorOpener(collisionResult.down)) {
-        const elem = collisionResult.down.object.parent as InteractiveArea;
-        doorNameActivating = `${elem.name.replace(
-            `_${AREA_DOOR_OPENER_SUFFIX}`,
-            '',
-        )}`;
-        if (gameState.level.doors[doorNameActivating].indexOf(side) === -1) {
-            gameState.level.doors[doorNameActivating].push(side);
-        }
-    }
+    const isPositionLevel = (value: LevelState): value is PositionLevelState =>
+        Boolean((value as PositionLevelState).doors);
 
-    for (const key in gameState.level.doors) {
-        const activators = gameState.level.doors[key];
-
-        // if this door opener is not the one we are currently activating
-        // remove us from the list of activators
-        if (key !== doorNameActivating) {
-            const index = activators.indexOf(side);
-            if (index !== -1) {
-                activators.splice(index, 1);
+    if (isPositionLevel(gameState.level)) {
+        let doorNameActivating: string | undefined = undefined;
+        if (
+            collisionResult.down &&
+            isTouchingDoorOpener(collisionResult.down)
+        ) {
+            const elem = collisionResult.down.object.parent as InteractiveArea;
+            doorNameActivating = `${elem.name.replace(
+                `_${AREA_DOOR_OPENER_SUFFIX}`,
+                '',
+            )}`;
+            if (
+                gameState.level.doors[doorNameActivating].indexOf(side) === -1
+            ) {
+                gameState.level.doors[doorNameActivating].push(side);
             }
         }
 
-        if (context === 'server') {
-            const wallDoor = obstacles.find(
-                (e) => e.name === ElementName.WALL_DOOR(key),
-            );
-            if (wallDoor) {
-                updateDoor(wallDoor, activators.length > 0);
+        for (const key in gameState.level.doors) {
+            const activators = gameState.level.doors[key];
+
+            // if this door opener is not the one we are currently activating
+            // remove us from the list of activators
+            if (key !== doorNameActivating) {
+                const index = activators.indexOf(side);
+                if (index !== -1) {
+                    activators.splice(index, 1);
+                }
+            }
+
+            if (context === 'server') {
+                const wallDoor = obstacles.find(
+                    (e) => e.name === ElementName.WALL_DOOR(key),
+                );
+                if (wallDoor) {
+                    updateDoor(wallDoor, activators.length > 0);
+                }
             }
         }
     }

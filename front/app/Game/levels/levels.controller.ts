@@ -1,7 +1,7 @@
 // vendors
 import { Scene, Vector3 } from 'three';
 // our libs
-import { Levels } from '@benjaminbours/composite-core';
+import { Levels, ProjectionLevel } from '@benjaminbours/composite-core';
 // local
 import { LightPlayer, ShadowPlayer, Player } from '../Player';
 import { PositionLevelWithGraphic } from './PositionLevelWithGraphic';
@@ -9,7 +9,7 @@ import { PositionLevelWithGraphic } from './PositionLevelWithGraphic';
 export default class LevelController {
     public levels: {
         [Levels.CRACK_THE_DOOR]: PositionLevelWithGraphic;
-        [Levels.LEARN_TO_FLY]?: PositionLevelWithGraphic;
+        [Levels.LEARN_TO_FLY]: ProjectionLevel;
         [Levels.THE_HIGH_SPHERES]?: PositionLevelWithGraphic;
     };
 
@@ -18,6 +18,7 @@ export default class LevelController {
         this.levels = {
             // [Levels.]: new TestLevel(),
             [Levels.CRACK_THE_DOOR]: new PositionLevelWithGraphic(),
+            [Levels.LEARN_TO_FLY]: new ProjectionLevel(),
         };
     }
 

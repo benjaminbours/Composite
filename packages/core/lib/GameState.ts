@@ -7,21 +7,28 @@ export enum Levels {
 }
 
 interface Level {
-    doors: {
-        [key: string]: number[];
-    };
     end_level: number[];
 }
 
 export interface PositionLevelState extends Level {
+    doors: {
+        [key: string]: number[];
+    };
     id: Levels.CRACK_THE_DOOR;
+}
+
+export interface ProjectionLevelState extends Level {
+    id: Levels.LEARN_TO_FLY;
 }
 
 interface OtherLevelState extends Level {
     id: Levels.LEARN_TO_FLY;
 }
 
-export type LevelState = PositionLevelState | OtherLevelState;
+export type LevelState =
+    | PositionLevelState
+    | ProjectionLevelState
+    | OtherLevelState;
 
 // orders of properties are very important here
 export class RedisGameState {
@@ -43,6 +50,22 @@ export class RedisGameState {
     ) {}
 
     static parseGameState(state: GameState) {
+        // TODO: Remove code duplication, function is copy pasted from apply world update
+        const isPositionLevel = (
+            value: LevelState,
+        ): value is PositionLevelState =>
+            Boolean((value as PositionLevelState).doors);
+
+        const doors: [string, string] = (() => {
+            if (isPositionLevel(state.level)) {
+                return [
+                    state.level.doors.ground.join(),
+                    state.level.doors.roof.join(),
+                ];
+            }
+            return ['', ''];
+        })();
+
         return new RedisGameState(
             String(state.level.id),
             String(state.players[1].position.x),
@@ -56,8 +79,7 @@ export class RedisGameState {
             String(state.lastValidatedInput),
             String(state.game_time),
             state.level.end_level.join(),
-            (state.level as PositionLevelState).doors.ground.join(),
-            (state.level as PositionLevelState).doors.roof.join(),
+            ...doors,
         );
     }
 }
@@ -98,7 +120,6 @@ export class GameState {
                     return {
                         id: level,
                         end_level: parseActivators(state.end_level),
-                        doors: {},
                     };
             }
         })() as LevelState;

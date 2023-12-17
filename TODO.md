@@ -36,3 +36,4 @@
 ## To fix
 
 - manage disconnect event while in game
+- Fix issue when you finished first level and then you go with your team mate in the second one
