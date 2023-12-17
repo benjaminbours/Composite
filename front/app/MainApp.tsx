@@ -8,6 +8,7 @@ import React, {
     useState,
 } from 'react';
 import dynamic from 'next/dynamic';
+import * as STATS from 'stats.js';
 // our libs
 import {
     GameState,
@@ -55,6 +56,8 @@ function MainApp() {
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [teamMateInfo, setTeamMateInfo] = useState<TeammateInfoPayload>();
     const [tabIsHidden, setTabIsHidden] = useState(false);
+    const statsRef = useRef<Stats>();
+
     const shouldEstablishConnection = useMemo(
         () =>
             menuMode === MenuMode.DEFAULT &&
@@ -131,6 +134,12 @@ function MainApp() {
     }, [teamMateInfo]);
 
     useEffect(() => {
+        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+            const stats = new STATS.default();
+            stats.showPanel(1);
+            document.body.appendChild(stats.dom);
+            statsRef.current = stats;
+        }
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'hidden') {
                 setTabIsHidden(true);
@@ -140,6 +149,9 @@ function MainApp() {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
         return () => {
+            if (statsRef.current) {
+                document.body.removeChild(statsRef.current.dom);
+            }
             document.removeEventListener(
                 'visibilitychange',
                 handleVisibilityChange,
@@ -256,6 +268,7 @@ function MainApp() {
                     }}
                     teamMateDisconnected={teamMateDisconnected}
                     setTeamMateDisconnected={setTeamMateDisconnected}
+                    stats={statsRef}
                 />
             )}
             {state.gameState && gameIsPlaying && (
@@ -264,6 +277,7 @@ function MainApp() {
                     initialGameState={state.gameState}
                     socketController={socketController.current}
                     tabIsHidden={tabIsHidden}
+                    stats={statsRef}
                 />
             )}
         </>

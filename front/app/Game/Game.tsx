@@ -1,7 +1,6 @@
 // vendors
 import { gsap } from 'gsap';
-import * as STATS from 'stats.js';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 // our libs
 import { GameState, Side } from '@benjaminbours/composite-core';
 import App from './App';
@@ -15,6 +14,7 @@ interface Props {
     // can be undefined for dev purpose
     socketController?: SocketController;
     tabIsHidden: boolean;
+    stats: React.MutableRefObject<Stats | undefined>;
 }
 
 function Game({
@@ -22,6 +22,7 @@ function Game({
     socketController,
     initialGameState,
     tabIsHidden,
+    stats,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
@@ -29,6 +30,15 @@ function Game({
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
 
     const isMobile = window.innerWidth <= 768;
+
+    const gameLoop = useCallback(() => {
+        stats.current?.begin();
+        if (appRef.current?.clock.running) {
+            appRef.current?.run();
+        }
+        appRef.current?.render();
+        stats.current?.end();
+    }, []);
 
     useEffect(() => {
         const onResize = () => {
@@ -44,53 +54,34 @@ function Game({
     }, []);
 
     useEffect(() => {
-        let gameLoop: (() => void) | undefined = undefined;
-        startLoadingAssets().finally(() => {
-            if (gameStarted.current) {
-                return;
-            }
-            if (!canvasRef.current) {
-                return;
-            }
-            if (!socketController) {
-                return;
-            }
-            appRef.current = new App(
-                canvasRef.current,
-                initialGameState,
-                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                socketController,
-            );
-            const stats = (() => {
-                if (process.env.NEXT_PUBLIC_STAGE === 'development') {
-                    const stats = new STATS.default();
-                    stats.showPanel(1);
-                    document.body.appendChild(stats.dom);
-                    return stats;
+        if (!appRef.current) {
+            startLoadingAssets().finally(() => {
+                if (gameStarted.current) {
+                    return;
                 }
-                return undefined;
-            })();
+                if (!canvasRef.current) {
+                    return;
+                }
+                if (!socketController) {
+                    return;
+                }
+                appRef.current = new App(
+                    canvasRef.current,
+                    initialGameState,
+                    [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                    socketController,
+                );
+                // https://greensock.com/docs/v3/GSAP/gsap.ticker
+                gsap.ticker.fps(60);
+                gsap.ticker.add(gameLoop);
+                gameStarted.current = true;
+                setIsSynchronizingTime(true);
+            });
+        }
 
-            gameLoop = () => {
-                stats?.begin();
-                if (appRef.current?.clock.running) {
-                    appRef.current?.run();
-                }
-                appRef.current?.render();
-                stats?.end();
-            };
-            // https://greensock.com/docs/v3/GSAP/gsap.ticker
-            gsap.ticker.fps(60);
-            gsap.ticker.add(gameLoop);
-            gameStarted.current = true;
-            setIsSynchronizingTime(true);
-
-            return () => {
-                if (gameLoop) {
-                    gsap.ticker.remove(gameLoop);
-                }
-            };
-        });
+        return () => {
+            gsap.ticker.remove(gameLoop);
+        };
     }, []);
 
     useEffect(() => {

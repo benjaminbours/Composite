@@ -1,6 +1,5 @@
 // vendors
 import { gsap } from 'gsap';
-import * as STATS from 'stats.js';
 import React, {
     useCallback,
     useEffect,
@@ -42,6 +41,7 @@ interface Props {
     };
     teamMateDisconnected: boolean;
     setTeamMateDisconnected: React.Dispatch<React.SetStateAction<boolean>>;
+    stats: React.MutableRefObject<Stats | undefined>;
 }
 
 export function Menu({
@@ -54,6 +54,7 @@ export function Menu({
     teamMate,
     teamMateDisconnected,
     setTeamMateDisconnected,
+    stats,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -100,9 +101,15 @@ export function Menu({
         ]);
     }, [isMobileDevice, menuScene, mainState.side]);
 
+    const canvasLoop = useCallback(() => {
+        stats.current?.begin();
+        blackCanvas.current?.render();
+        whiteCanvas.current?.render();
+        stats.current?.end();
+    }, []);
+
     // effect to start to render the menu animation
     useEffect(() => {
-        let canvasLoop: (() => void) | undefined = undefined;
         Promise.all([
             import('./Animation').then((mod) => mod.default),
             import('./crossBrowser'),
@@ -129,21 +136,6 @@ export function Menu({
                 menuScene,
                 isMobileDevice,
             );
-            const stats = (() => {
-                if (process.env.NEXT_PUBLIC_STAGE === 'development') {
-                    const stats = new STATS.default();
-                    stats.showPanel(1);
-                    document.body.appendChild(stats.dom);
-                    return stats;
-                }
-                return undefined;
-            })();
-            canvasLoop = () => {
-                stats?.begin();
-                blackCanvas.current!.render();
-                whiteCanvas.current!.render();
-                stats?.end();
-            };
             Mouse.init();
             resize();
             gsap.ticker.add(canvasLoop);
@@ -151,9 +143,7 @@ export function Menu({
         });
 
         return () => {
-            if (canvasLoop) {
-                gsap.ticker.remove(canvasLoop);
-            }
+            gsap.ticker.remove(canvasLoop);
             Mouse.destroy();
         };
     }, []);
