@@ -39,3 +39,10 @@
 - Fix issue when you finished first level and then you go with your team mate in the second one
 - Collision system issue, especially with bounce element, it's easy to enter inside and get stuck
 - Move from raycaster to overlap for collision detection
+
+## Potential game play suggestion
+
+- L3Gl0N__:
+  - black hole, potential impact on gravity
+  - Dash for the light
+  - shadow can avoid gravity for a while, or go through spaces the light can't, the main idea is about not having movement constraints for a duration
