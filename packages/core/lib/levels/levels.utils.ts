@@ -8,7 +8,8 @@ import {
     Vector3,
 } from 'three';
 import { degreesToRadians } from '../helpers/math';
-import { Layer } from '../types';
+import { Layer, Side } from '../types';
+import { ElementToBounce } from '../elements';
 
 export const gridSize = 250;
 const gridSizeMedium = gridSize / 2;
@@ -260,4 +261,25 @@ export function createColumnGroup(
     group.add(columnEnd);
 
     return group;
+}
+
+export function createBounce(position: Vector3, rotation: Vector3, side: Side) {
+    const bounce = new ElementToBounce();
+    // if (side === Side.LIGHT) {
+    //     bounce = new ElementToBounce(
+    //         this.geometryLib.border,
+    //         this.materialLib.lightMaterial,
+    //         side,
+    //     );
+    // } else {
+    //     bounce = new ElementToBounce(
+    //         this.geometryLib.border,
+    //         this.materialLib.phong,
+    //         side,
+    //     );
+    // }
+
+    // bounce.position.set(0, 100, 0);
+    positionOnGrid(bounce, position, rotation);
+    return bounce;
 }
