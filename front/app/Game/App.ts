@@ -30,6 +30,8 @@ import {
     applyInputList,
     ElementName,
     Layer,
+    PositionLevelState,
+    LevelState,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -487,6 +489,7 @@ export default class App {
         });
         this.updatePlayerGraphics();
         this.updateWorld();
+        // console.log(this.currentState.players[this.playersConfig[0]].position);
     };
 
     public updatePlayerGraphics = () => {
@@ -505,32 +508,42 @@ export default class App {
     };
 
     private updateWorldPhysic = () => {
-        const { doors, end_level } = this.currentState.level;
+        // TODO: Remove code duplication, function is copy pasted from apply world update
+        const isPositionLevel = (
+            value: LevelState,
+        ): value is PositionLevelState =>
+            Boolean((value as PositionLevelState).doors);
+
         // doors
-        for (const key in doors) {
-            const activators = doors[key];
+        if (isPositionLevel(this.currentState.level)) {
+            for (const key in this.currentState.level.doors) {
+                const activators = this.currentState.level.doors[key];
 
-            const doorOpener = this.levelController.levels[
-                this.levelController.currentLevel
-            ]!.collidingElements.find(
-                (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
-            )?.children.find(
-                (object) => object.name === ElementName.DOOR_OPENER(key),
-            ) as DoorOpener | undefined;
+                const doorOpener = this.levelController.levels[
+                    this.levelController.currentLevel
+                ]!.collidingElements.find(
+                    (object) =>
+                        object.name === ElementName.AREA_DOOR_OPENER(key),
+                )?.children.find(
+                    (object) => object.name === ElementName.DOOR_OPENER(key),
+                ) as DoorOpener | undefined;
 
-            if (doorOpener) {
-                if (activators.length > 0 && !doorOpener.shouldActivate) {
-                    doorOpener.shouldActivate = true;
-                } else if (
-                    activators.length === 0 &&
-                    doorOpener.shouldActivate
-                ) {
-                    doorOpener.shouldActivate = false;
+                if (doorOpener) {
+                    if (activators.length > 0 && !doorOpener.shouldActivate) {
+                        doorOpener.shouldActivate = true;
+                    } else if (
+                        activators.length === 0 &&
+                        doorOpener.shouldActivate
+                    ) {
+                        doorOpener.shouldActivate = false;
+                    }
                 }
-            }
 
-            const withFocusCamera = activators.includes(this.playersConfig[0]);
-            doorOpener?.update(this.delta, this.camera, withFocusCamera);
+                const withFocusCamera = activators.includes(
+                    this.playersConfig[0],
+                );
+                doorOpener?.update(this.delta, this.camera, withFocusCamera);
+            }
         }
 
         // end level
@@ -544,28 +557,28 @@ export default class App {
 
         if (endLevelElement) {
             if (
-                end_level.includes(Side.LIGHT) &&
+                this.currentState.level.end_level.includes(Side.LIGHT) &&
                 !endLevelElement.shouldActivateLight
             ) {
                 endLevelElement.shouldActivateLight = true;
             }
 
             if (
-                !end_level.includes(Side.LIGHT) &&
+                !this.currentState.level.end_level.includes(Side.LIGHT) &&
                 endLevelElement.shouldActivateLight
             ) {
                 endLevelElement.shouldActivateLight = false;
             }
 
             if (
-                end_level.includes(Side.SHADOW) &&
+                this.currentState.level.end_level.includes(Side.SHADOW) &&
                 !endLevelElement.shouldActivateShadow
             ) {
                 endLevelElement.shouldActivateShadow = true;
             }
 
             if (
-                !end_level.includes(Side.SHADOW) &&
+                !this.currentState.level.end_level.includes(Side.SHADOW) &&
                 endLevelElement.shouldActivateShadow
             ) {
                 endLevelElement.shouldActivateShadow = false;
