@@ -86,10 +86,16 @@ function Game({
 
     useEffect(() => {
         if (!tabIsHidden && isSynchronizingTime && socketController) {
-            socketController.synchronizeTime().then(() => {
+            const onTimeSynchronized = () => {
                 appRef.current?.inputsManager.registerEventListeners();
                 setIsSynchronizingTime(false);
-            });
+            };
+
+            if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
+                onTimeSynchronized();
+            } else {
+                socketController.synchronizeTime().then(onTimeSynchronized);
+            }
         }
 
         return () => {
