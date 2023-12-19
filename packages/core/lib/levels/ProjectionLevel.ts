@@ -1,15 +1,7 @@
 // vendors
 import { Group, Object3D, Vector3 } from 'three';
 // local
-import {
-    ElementName,
-    createArchGroup,
-    createBounce,
-    createWall,
-    createWallDoor,
-    positionOnGrid,
-} from './levels.utils';
-import { InteractiveArea } from '../elements/InteractiveArea';
+import { createArchGroup, createBounce, createWall } from './levels.utils';
 import { Levels, ProjectionLevelState } from '../GameState';
 import { Side } from '../types';
 
@@ -33,7 +25,7 @@ export class ProjectionLevel extends Group {
         super();
         const wallBlockingLeftPath = createWall(
             new Vector3(4, 2, 0),
-            new Vector3(-2, 0, 2),
+            new Vector3(-3.5, 0, 2),
             new Vector3(0, 90, 0),
         );
         this.add(wallBlockingLeftPath);
@@ -55,7 +47,7 @@ export class ProjectionLevel extends Group {
         const bounce = createBounce(
             new Vector3(4.5, 2, 0),
             new Vector3(0, 90, 0),
-            Side.LIGHT,
+            Side.SHADOW,
         );
         this.add(bounce);
         this.collidingElements.push(bounce);

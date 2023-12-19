@@ -160,3 +160,7 @@ export interface MovableComponent {
 }
 
 export type CollidingElem = Mesh | Group | Object3D;
+
+export interface ElementToBounce extends Mesh {
+    bounce: true;
+}

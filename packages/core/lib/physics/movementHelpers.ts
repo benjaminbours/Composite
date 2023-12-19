@@ -5,6 +5,7 @@ import {
     Inputs,
     MovableComponentState,
     Side,
+    ElementToBounce,
 } from '../types';
 import {
     GameState,
@@ -15,7 +16,7 @@ import {
 import { computeVelocityX } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
-import { ElementToBounce, InteractiveArea } from '../elements';
+import { InteractiveArea } from '../elements';
 
 const MAX_FALL_SPEED = 20;
 const JUMP_POWER = 15;
@@ -33,7 +34,7 @@ function applyPlayerUpdate(
     let state: MovableComponentState = MovableComponentState.onFloor;
 
     if (collisionResult.left) {
-        if ((collisionResult.left.object.parent as ElementToBounce).bounce) {
+        if ((collisionResult.left.object as ElementToBounce).bounce) {
             velocity.y = BOUNCE_POWER;
             velocity.x = 10;
         } else {
@@ -43,7 +44,7 @@ function applyPlayerUpdate(
     }
 
     if (collisionResult.right) {
-        if ((collisionResult.right.object.parent as ElementToBounce).bounce) {
+        if ((collisionResult.right.object as ElementToBounce).bounce) {
             velocity.y = BOUNCE_POWER;
             velocity.x = -10;
         } else {
@@ -53,7 +54,7 @@ function applyPlayerUpdate(
     }
 
     if (collisionResult.up) {
-        if ((collisionResult.up.object.parent as ElementToBounce).bounce) {
+        if ((collisionResult.up.object as ElementToBounce).bounce) {
             velocity.y = -BOUNCE_POWER;
         } else {
             velocity.y = 0;
@@ -62,7 +63,7 @@ function applyPlayerUpdate(
     }
 
     if (collisionResult.down) {
-        if ((collisionResult.down.object.parent as ElementToBounce).bounce) {
+        if ((collisionResult.down.object as ElementToBounce).bounce) {
             velocity.y = BOUNCE_POWER;
         } else {
             state = MovableComponentState.onFloor;

@@ -4,12 +4,12 @@ import {
     Material,
     Mesh,
     MeshPhongMaterial,
+    MeshBasicMaterial,
     Object3D,
     Vector3,
 } from 'three';
 import { degreesToRadians } from '../helpers/math';
-import { Layer, Side } from '../types';
-import { ElementToBounce } from '../elements';
+import { Layer, Side, ElementToBounce } from '../types';
 
 export const gridSize = 250;
 const gridSizeMedium = gridSize / 2;
@@ -21,10 +21,11 @@ export const AREA_DOOR_OPENER_SUFFIX = 'AREA_DOOR_OPENER';
 export const ElementName = {
     END_LEVEL: 'END_LEVEL',
     AREA_END_LEVEL: 'AREA_END_LEVEL',
+    DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
     AREA_DOOR_OPENER: (doorName: string) =>
         `${doorName}_${AREA_DOOR_OPENER_SUFFIX}`,
-    DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
     WALL_DOOR: (doorName: string) => `${doorName}_WALL_DOOR`,
+    BOUNCE: (side: Side) => `${side}_BOUNCE`,
 };
 
 // TODO: Its not clear the fact is instantiated here then populate with more
@@ -46,6 +47,12 @@ const materials = {
         // specular: 0x000000,
         // shininess: 0,
         // transparent: true,
+    }),
+    skinBounceShadow: new MeshBasicMaterial({
+        color: 0x000000,
+        fog: false,
+        side: DoubleSide,
+        // name: 'skin-bounce-shadow',
     }),
     border: new MeshPhongMaterial({
         color: 0xffffff,
@@ -99,20 +106,34 @@ export function createWall(
     position: Vector3,
     rotation: Vector3,
     withOcclusion?: boolean,
+    withBounce?: {
+        side: Side;
+    },
 ) {
     const sizeForGrid = size.multiplyScalar(gridSize);
+    const material = (() => {
+        if (withBounce) {
+            if (withBounce.side === Side.SHADOW) {
+                return materials.skinBounceShadow;
+            }
+        }
+        return materials.phong;
+    })();
     const wall = createMeshForGrid(
         new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth).translate(
             sizeForGrid.x / 2,
             sizeForGrid.y / 2,
             wallDepth / 2,
         ),
-        materials.phong,
+        material,
     );
     // position the whole group
     positionOnGrid(wall, position, rotation);
     if (withOcclusion) {
         wall.layers.enable(Layer.OCCLUSION);
+    }
+    if (withBounce) {
+        (wall as ElementToBounce).bounce = true;
     }
 
     return wall;
@@ -264,22 +285,16 @@ export function createColumnGroup(
 }
 
 export function createBounce(position: Vector3, rotation: Vector3, side: Side) {
-    const bounce = new ElementToBounce();
-    // if (side === Side.LIGHT) {
-    //     bounce = new ElementToBounce(
-    //         this.geometryLib.border,
-    //         this.materialLib.lightMaterial,
-    //         side,
-    //     );
-    // } else {
-    //     bounce = new ElementToBounce(
-    //         this.geometryLib.border,
-    //         this.materialLib.phong,
-    //         side,
-    //     );
-    // }
-
-    // bounce.position.set(0, 100, 0);
-    positionOnGrid(bounce, position, rotation);
-    return bounce;
+    const wall = createWall(
+        new Vector3(1, 1, 0),
+        new Vector3(0, 0, 0),
+        new Vector3(0, 0, 0),
+        false,
+        {
+            side,
+        },
+    ) as ElementToBounce;
+    wall.name = ElementName.BOUNCE(side);
+    positionOnGrid(wall, position, rotation);
+    return wall;
 }

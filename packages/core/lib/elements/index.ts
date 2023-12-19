@@ -1,7 +1,6 @@
 import { CircleGeometry, Mesh, MeshPhongMaterial } from 'three';
 
 export * from './InteractiveArea';
-export * from './BounceElement';
 
 export const FLOOR = new Mesh(
     new CircleGeometry(10000, 10),
