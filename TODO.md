@@ -37,3 +37,5 @@
 
 - manage disconnect event while in game
 - Fix issue when you finished first level and then you go with your team mate in the second one
+- Collision system issue, especially with bounce element, it's easy to enter inside and get stuck
+- Move from raycaster to overlap for collision detection

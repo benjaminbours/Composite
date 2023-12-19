@@ -15,10 +15,11 @@ import {
 import { computeVelocityX } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
-import { InteractiveArea } from '../elements';
+import { ElementToBounce, InteractiveArea } from '../elements';
 
 const MAX_FALL_SPEED = 20;
 const JUMP_POWER = 15;
+const BOUNCE_POWER = 15;
 const GRAVITY = 20;
 
 // full of side effect
@@ -32,24 +33,42 @@ function applyPlayerUpdate(
     let state: MovableComponentState = MovableComponentState.onFloor;
 
     if (collisionResult.left) {
-        velocity.x = 0;
-        position.x = collisionResult.left.point.x + RANGE;
+        if ((collisionResult.left.object.parent as ElementToBounce).bounce) {
+            velocity.y = BOUNCE_POWER;
+            velocity.x = 10;
+        } else {
+            velocity.x = 0;
+            position.x = collisionResult.left.point.x + RANGE;
+        }
     }
 
     if (collisionResult.right) {
-        velocity.x = 0;
-        position.x = collisionResult.right.point.x - RANGE;
+        if ((collisionResult.right.object.parent as ElementToBounce).bounce) {
+            velocity.y = BOUNCE_POWER;
+            velocity.x = -10;
+        } else {
+            velocity.x = 0;
+            position.x = collisionResult.right.point.x - RANGE;
+        }
     }
 
     if (collisionResult.up) {
-        velocity.y = 0;
+        if ((collisionResult.up.object.parent as ElementToBounce).bounce) {
+            velocity.y = -BOUNCE_POWER;
+        } else {
+            velocity.y = 0;
+        }
         position.y = collisionResult.up.point.y - RANGE;
     }
 
     if (collisionResult.down) {
-        state = MovableComponentState.onFloor;
-        velocity.y = 0;
-        position.y = collisionResult.down.point.y + RANGE;
+        if ((collisionResult.down.object.parent as ElementToBounce).bounce) {
+            velocity.y = BOUNCE_POWER;
+        } else {
+            state = MovableComponentState.onFloor;
+            velocity.y = 0;
+            position.y = collisionResult.down.point.y + RANGE;
+        }
     } else {
         state = MovableComponentState.inAir;
     }

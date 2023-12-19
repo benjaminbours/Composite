@@ -149,10 +149,9 @@ export class AllQueueInfo extends QueueInfo {
 
 export enum MovableComponentState {
     onFloor,
-    inside,
+    // inside,
     inAir,
-    projected,
-    ascend,
+    // ascend,
 }
 
 export interface MovableComponent {

@@ -18,6 +18,25 @@ export function detectCollidingObjects(
         down: undefined,
     };
 
+    // const playerBB = new Box3().setFromCenterAndSize(
+    //     new Vector3(position.x, position.y),
+    //     new Vector3(RANGE, RANGE),
+    // );
+
+    // for (let i = 0; i < obstacles.length; i++) {
+    //     const obstacle = obstacles[i];
+    //     const obstacleBB = new Box3().setFromObject(obstacle);
+
+    //     if (playerBB.intersectsBox(obstacleBB)) {
+    //         // console.log('HERE detect overlap style collision', obstacle);
+    //         // console.log(obstacle.position);
+    //         const intersectBB = playerBB.clone().intersect(obstacleBB);
+    //         console.log('player box', playerBB);
+    //         console.log('obstacle box', obstacleBB);
+    //         console.log('intersect box', intersectBB);
+    //     }
+    // }
+
     const nearestObjects = getNearestObjects(position, obstacles);
 
     if (
