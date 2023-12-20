@@ -352,7 +352,8 @@ export default class App {
                 ],
                 nextStateAtInterpolationTime,
                 'client',
-                // true,
+                false,
+                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
             for (let i = 0; i < inputsForTick.length; i++) {
                 const input = inputsForTick[i];
@@ -467,7 +468,9 @@ export default class App {
                 ],
                 this.currentState,
                 'client',
+                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
+
             // this.gameStateHistory.push(
             //     JSON.parse(JSON.stringify(this.currentState)),
             // );

@@ -30,6 +30,7 @@ function applyPlayerUpdate(
     input: Inputs,
     collisionResult: INearestObjects,
     player: { position: Vec2; velocity: Vec2 },
+    freeMovementMode?: boolean,
 ) {
     const { velocity, position } = player;
     let state: MovableComponentState = MovableComponentState.onFloor;
@@ -80,10 +81,7 @@ function applyPlayerUpdate(
         velocity.y = JUMP_POWER;
     }
 
-    if (
-        state === MovableComponentState.inAir &&
-        !process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE
-    ) {
+    if (state === MovableComponentState.inAir && !freeMovementMode) {
         // apply gravity
         const hasReachedMaxFallSpeed = velocity.y <= -MAX_FALL_SPEED;
         if (hasReachedMaxFallSpeed) {
@@ -112,16 +110,25 @@ export function applySingleInput(
     collidingElems: Object3D[],
     gameState: GameState,
     context: Context,
+    freeMovementMode?: boolean,
 ) {
     const player = gameState.players[side];
     // side effect
     player.velocity.x = computeVelocityX(delta, inputs, player.velocity.x);
-    if (process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE) {
-        player.velocity.y = computeVelocityY(delta, inputs as InputsDev, player.velocity.y);
+    if (freeMovementMode) {
+        player.velocity.y = computeVelocityY(
+            delta,
+            inputs as InputsDev,
+            player.velocity.y,
+        );
     }
 
-    const collisionResult = detectCollidingObjects(collidingElems, player);
-    applyPlayerUpdate(delta, inputs, collisionResult, player);
+    const collisionResult = detectCollidingObjects(
+        collidingElems,
+        player,
+        freeMovementMode,
+    );
+    applyPlayerUpdate(delta, inputs, collisionResult, player, freeMovementMode);
     applyWorldUpdate(side, collidingElems, gameState, collisionResult, context);
 }
 
@@ -133,6 +140,7 @@ export function applyInputList(
     gameState: GameState,
     context: Context,
     dev?: boolean,
+    freeMovementMode?: boolean,
 ) {
     if (dev) {
         console.log(gameState.game_time);
@@ -161,6 +169,7 @@ export function applyInputList(
                 collidingElements,
                 gameState,
                 context,
+                freeMovementMode,
             );
             if (dev) {
                 console.log(
@@ -208,6 +217,7 @@ export function applyInputList(
                 collidingElements,
                 gameState,
                 context,
+                freeMovementMode,
             );
             if (dev) {
                 console.log(

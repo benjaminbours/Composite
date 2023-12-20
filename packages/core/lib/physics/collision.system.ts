@@ -8,6 +8,7 @@ export type CollidingObjects = INearestObjects;
 export function detectCollidingObjects(
     obstacles: Object3D[],
     player: { position: Vec2; velocity: Vec2 },
+    freeMovementMode?: boolean,
 ): INearestObjects {
     const { position, velocity } = player;
 
@@ -18,7 +19,7 @@ export function detectCollidingObjects(
         down: undefined,
     };
 
-    if (process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE) {
+    if (freeMovementMode) {
         return colliding;
     }
 
