@@ -1,10 +1,12 @@
-import { Inputs } from '@benjaminbours/composite-core';
+import { Inputs, InputsDev } from '@benjaminbours/composite-core';
 
 export default class InputsManager {
-    public inputsActive: Inputs = {
+    public inputsActive: Inputs | InputsDev = {
         left: false,
         right: false,
         jump: false,
+        top: false,
+        bottom: false,
     };
 
     public registerEventListeners = () => {
@@ -25,6 +27,14 @@ export default class InputsManager {
     }
 
     private keydownOptions = {
+        // top
+        KeyW: () => {
+            (this.inputsActive as InputsDev).top = true;
+        },
+        // bottom
+        KeyS: () => {
+            (this.inputsActive as InputsDev).bottom = true;
+        },
         // left
         KeyA: () => {
             this.inputsActive.left = true;
@@ -40,6 +50,14 @@ export default class InputsManager {
     };
 
     private keyupOptions = {
+        // top
+        KeyW: () => {
+            (this.inputsActive as InputsDev).top = false;
+        },
+        // bottom
+        KeyS: () => {
+            (this.inputsActive as InputsDev).bottom = false;
+        },
         KeyA: () => {
             this.inputsActive.left = false;
         },
@@ -53,8 +71,14 @@ export default class InputsManager {
 
     private handleKeydown(e: KeyboardEvent) {
         const { code } = e;
-        const key = code as 'KeyA' | 'KeyD' | 'Space';
+        const key = code as 'KeyA' | 'KeyD' | 'Space' | 'KeyW' | 'KeyS';
         if (this.keydownOptions[key]) {
+            if (
+                (key === 'KeyS' || key === 'KeyW') &&
+                !process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE
+            ) {
+                return;
+            }
             this.keydownOptions[key]();
         }
     }

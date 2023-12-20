@@ -6,6 +6,7 @@ import {
     MovableComponentState,
     Side,
     ElementToBounce,
+    InputsDev,
 } from '../types';
 import {
     GameState,
@@ -13,7 +14,7 @@ import {
     Levels,
     PositionLevelState,
 } from '../GameState';
-import { computeVelocityX } from './velocity';
+import { computeVelocityX, computeVelocityY } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
 import { InteractiveArea } from '../elements';
@@ -79,7 +80,10 @@ function applyPlayerUpdate(
         velocity.y = JUMP_POWER;
     }
 
-    if (state === MovableComponentState.inAir) {
+    if (
+        state === MovableComponentState.inAir &&
+        !process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE
+    ) {
         // apply gravity
         const hasReachedMaxFallSpeed = velocity.y <= -MAX_FALL_SPEED;
         if (hasReachedMaxFallSpeed) {
@@ -112,6 +116,9 @@ export function applySingleInput(
     const player = gameState.players[side];
     // side effect
     player.velocity.x = computeVelocityX(delta, inputs, player.velocity.x);
+    if (process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE) {
+        player.velocity.y = computeVelocityY(delta, inputs as InputsDev, player.velocity.y);
+    }
 
     const collisionResult = detectCollidingObjects(collidingElems, player);
     applyPlayerUpdate(delta, inputs, collisionResult, player);

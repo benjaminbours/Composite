@@ -1,11 +1,11 @@
-import { Inputs } from '../types';
+import { Inputs, InputsDev } from '../types';
 
-const MAX_VELOCITY_X = 10;
+const MAX_VELOCITY = 10;
 const SPEED = 20;
 
-const updateVelocityX = (delta: number, target: number, velocityX: number) => {
+const updateVelocity = (delta: number, target: number, velocity: number) => {
     const speed = SPEED * delta * 60;
-    return (velocityX += (target - velocityX) / speed);
+    return (velocity += (target - velocity) / speed);
 };
 
 export function computeVelocityX(
@@ -14,35 +14,58 @@ export function computeVelocityX(
     velocityX: number,
 ) {
     const deltaInverse = 1 / delta / (60 * 60);
-    const hasReachedMaxLeftSpeed = velocityX < -MAX_VELOCITY_X;
-    const hasReachedMaxRightSpeed = velocityX > MAX_VELOCITY_X;
+    const hasReachedMaxLeftSpeed = velocityX < -MAX_VELOCITY;
+    const hasReachedMaxRightSpeed = velocityX > MAX_VELOCITY;
     if (input.left) {
         if (hasReachedMaxLeftSpeed) {
-            velocityX = -MAX_VELOCITY_X;
+            velocityX = -MAX_VELOCITY;
         } else {
-            velocityX = updateVelocityX(
-                deltaInverse,
-                -MAX_VELOCITY_X,
-                velocityX,
-            );
+            velocityX = updateVelocity(deltaInverse, -MAX_VELOCITY, velocityX);
         }
     }
 
     if (input.right) {
         if (hasReachedMaxRightSpeed) {
-            velocityX = MAX_VELOCITY_X;
+            velocityX = MAX_VELOCITY;
         } else {
-            velocityX = updateVelocityX(
-                deltaInverse,
-                MAX_VELOCITY_X,
-                velocityX,
-            );
+            velocityX = updateVelocity(deltaInverse, MAX_VELOCITY, velocityX);
         }
     }
 
     if (!input.left && !input.right) {
-        velocityX = updateVelocityX(deltaInverse, 0, velocityX);
+        velocityX = updateVelocity(deltaInverse, 0, velocityX);
     }
 
     return velocityX;
+}
+
+export function computeVelocityY(
+    delta: number,
+    input: InputsDev,
+    velocityY: number,
+) {
+    const deltaInverse = 1 / delta / (60 * 60);
+    const hasReachedMaxLeftSpeed = velocityY < -MAX_VELOCITY;
+    const hasReachedMaxRightSpeed = velocityY > MAX_VELOCITY;
+    if (input.bottom) {
+        if (hasReachedMaxLeftSpeed) {
+            velocityY = -MAX_VELOCITY;
+        } else {
+            velocityY = updateVelocity(deltaInverse, -MAX_VELOCITY, velocityY);
+        }
+    }
+
+    if (input.top) {
+        if (hasReachedMaxRightSpeed) {
+            velocityY = MAX_VELOCITY;
+        } else {
+            velocityY = updateVelocity(deltaInverse, MAX_VELOCITY, velocityY);
+        }
+    }
+
+    if (!input.top && !input.bottom) {
+        velocityY = updateVelocity(deltaInverse, 0, velocityY);
+    }
+
+    return velocityY;
 }

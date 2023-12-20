@@ -18,6 +18,10 @@ export function detectCollidingObjects(
         down: undefined,
     };
 
+    if (process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE) {
+        return colliding;
+    }
+
     // const playerBB = new Box3().setFromCenterAndSize(
     //     new Vector3(position.x, position.y),
     //     new Vector3(RANGE, RANGE),

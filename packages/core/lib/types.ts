@@ -43,6 +43,10 @@ export interface Inputs {
     right: boolean;
     jump: boolean;
 }
+export interface InputsDev extends Inputs {
+    top: boolean;
+    bottom: boolean;
+}
 
 // payloads
 export interface MatchMakingPayload {
