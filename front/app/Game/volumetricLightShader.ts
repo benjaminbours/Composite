@@ -1,4 +1,6 @@
 import { Vector2 } from 'three';
+import volumetricLightVS from './glsl/volumetricLight_vs.glsl';
+import volumetricLightFS from './glsl/volumetricLight_fs.glsl';
 
 export const volumetricLightShader = {
     uniforms: {
@@ -11,45 +13,8 @@ export const volumetricLightShader = {
         samples: { value: 100 },
     },
 
-    vertexShader: [
-        'varying vec2 vUv;',
-        'void main() {',
-        'vUv = uv;',
-        'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
-        '}',
-    ].join('\n'),
-
-    fragmentShader: [
-        'varying vec2 vUv;',
-        'uniform sampler2D tDiffuse;',
-        'uniform vec2 lightPosition;',
-        'uniform float exposure;',
-        'uniform float decay;',
-        'uniform float density;',
-        'uniform float weight;',
-        'uniform int samples;',
-        'const int MAX_SAMPLES = 100;',
-        'void main()',
-        '{',
-        'vec2 texCoord = vUv;',
-        'vec2 deltaTextCoord = texCoord - lightPosition;',
-        'deltaTextCoord *= 1.0 / float(samples) * density;',
-        'vec4 color = texture2D(tDiffuse, texCoord);',
-        'float illuminationDecay = 1.0;',
-        'for(int i=0; i < MAX_SAMPLES; i++)',
-        '{',
-        'if(i == samples){',
-        'break;',
-        '}',
-        'texCoord -= deltaTextCoord;',
-        'vec4 sampleFixed = texture2D(tDiffuse, texCoord);',
-        'sampleFixed *= illuminationDecay * weight;',
-        'color += sampleFixed;',
-        'illuminationDecay *= decay;',
-        '}',
-        'gl_FragColor = color * exposure;',
-        '}',
-    ].join('\n'),
+    vertexShader: volumetricLightVS,
+    fragmentShader: volumetricLightFS,
 };
 
 export const additiveBlendingShader = {
