@@ -5,7 +5,6 @@ import {
     Inputs,
     MovableComponentState,
     Side,
-    ElementToBounce,
     InputsDev,
 } from '../types';
 import {
@@ -17,7 +16,7 @@ import {
 import { computeVelocityX, computeVelocityY } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
-import { InteractiveArea } from '../elements';
+import { ElementToBounce, InteractiveArea } from '../elements';
 
 const MAX_FALL_SPEED = 20;
 const JUMP_POWER = 15;

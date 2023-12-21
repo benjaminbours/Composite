@@ -46,3 +46,7 @@
   - black hole, potential impact on gravity
   - Dash for the light
   - shadow can avoid gravity for a while, or go through spaces the light can't, the main idea is about not having movement constraints for a duration
+
+## Twitch
+
+- Alert follow volume is too loud

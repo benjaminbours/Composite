@@ -73,9 +73,10 @@ export default class App {
 
     private levelController: LevelController;
 
-    private volumetricLightPass!: ShaderPass;
-    private occlusionComposer!: EffectComposer;
     private mainComposer!: EffectComposer;
+
+    private occlusionComposers: EffectComposer[] = [];
+    private volumetricLightPasses: ShaderPass[] = [];
 
     public inputsManager: InputsManager;
 
@@ -218,28 +219,42 @@ export default class App {
 
     setupPostProcessing = () => {
         const renderScale = 1;
-        const occlusionRenderTarget = new WebGLRenderTarget(
-            this.width * renderScale,
-            this.height * renderScale,
-        );
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.volumetricLightPass = new ShaderPass(volumetricLightShader);
-        this.volumetricLightPass.needsSwap = false;
-
-        this.occlusionComposer = new EffectComposer(
-            this.renderer,
-            occlusionRenderTarget,
-        );
-        this.occlusionComposer.renderToScreen = false;
-        this.occlusionComposer.addPass(renderPass);
-        this.occlusionComposer.addPass(this.volumetricLightPass);
-
-        const mixPass = new ShaderPass(mixShader, 'baseTexture');
-        mixPass.uniforms.addTexture.value = occlusionRenderTarget.texture;
-
         this.mainComposer = new EffectComposer(this.renderer);
+
+        const renderPass = new RenderPass(this.scene, this.camera);
         this.mainComposer.addPass(renderPass);
-        this.mainComposer.addPass(mixPass);
+
+        const lightBounces =
+            (
+                this.levelController.levels[
+                    this.levelController.currentLevel
+                ] as any
+            ).lightBounces || [];
+
+        for (let i = 0; i < lightBounces.length; i++) {
+            const occlusionRenderTarget = new WebGLRenderTarget(
+                this.width * renderScale,
+                this.height * renderScale,
+            );
+            const volumetricLightPass = new ShaderPass(volumetricLightShader);
+            volumetricLightPass.needsSwap = false;
+
+            const occlusionComposer = new EffectComposer(
+                this.renderer,
+                occlusionRenderTarget,
+            );
+            occlusionComposer.renderToScreen = false;
+            occlusionComposer.addPass(renderPass);
+            occlusionComposer.addPass(volumetricLightPass);
+
+            const mixPass = new ShaderPass(mixShader, 'baseTexture');
+            mixPass.uniforms.addTexture.value = occlusionRenderTarget.texture;
+
+            this.mainComposer.addPass(mixPass);
+
+            this.occlusionComposers.push(occlusionComposer);
+            this.volumetricLightPasses.push(volumetricLightPass);
+        }
     };
 
     public updateChildren = (object: Object3D) => {
@@ -619,7 +634,34 @@ export default class App {
     public render = () => {
         this.camera.layers.set(Layer.OCCLUSION);
         this.renderer.setClearColor(0x000000);
-        this.occlusionComposer.render();
+        // one occlusion composer by bounce
+        for (let i = 0; i < this.occlusionComposers.length; i++) {
+            if (i > 0) {
+                const previousLightBounce = (
+                    this.levelController.levels[
+                        this.levelController.currentLevel
+                    ] as any
+                ).lightBounces[i - 1];
+                previousLightBounce.layers.disable(Layer.OCCLUSION);
+                console.log('here disabled');
+            }
+            const lightBounce = (
+                this.levelController.levels[
+                    this.levelController.currentLevel
+                ] as any
+            ).lightBounces[i];
+            lightBounce.layers.enable(Layer.OCCLUSION);
+            this.volumetricLightPasses[
+                i
+            ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
+                this.camera,
+            );
+            const occlusionComposer = this.occlusionComposers[i];
+            occlusionComposer.render();
+            if (i === this.occlusionComposers.length - 1) {
+                lightBounce.layers.disable(Layer.OCCLUSION);
+            }
+        }
         this.camera.layers.set(Layer.DEFAULT);
         this.renderer.setClearColor(0x000000);
         this.mainComposer.render();

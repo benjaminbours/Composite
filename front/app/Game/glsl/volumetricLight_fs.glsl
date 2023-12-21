@@ -10,8 +10,8 @@ const int MAX_SAMPLES = 100;
 
 void main() {
     vec2 texCoord = vUv;
-    vec2 deltaTextCoord = texCoord - lightPosition;
-    deltaTextCoord *= 1.0 / float(samples) * density;
+    vec2 deltaTextCoord = texCoord - lightPosition + vec2(-0.02, -0.2);
+    deltaTextCoord *= 1. / float(samples) * density;
 
     vec4 color = texture2D(tDiffuse, texCoord);
     float illuminationDecay = 1.0;

@@ -3,12 +3,22 @@ import volumetricLightVS from './glsl/volumetricLight_vs.glsl';
 import volumetricLightFS from './glsl/volumetricLight_fs.glsl';
 
 export const volumetricLightShader = {
+    // uniforms: {
+    //     tDiffuse: { value: null },
+    //     lightPosition: { value: new Vector2(0.5, 0.5) },
+    //     exposure: { value: 0.18 },
+    //     decay: { value: 0.97 },
+    //     density: { value: 0.8 },
+    //     weight: { value: 0.5 },
+    //     samples: { value: 100 },
+    // },
+
     uniforms: {
         tDiffuse: { value: null },
         lightPosition: { value: new Vector2(0.5, 0.5) },
         exposure: { value: 0.18 },
-        decay: { value: 0.97 },
-        density: { value: 0.8 },
+        decay: { value: 0.90 },
+        density: { value: 0.5 },
         weight: { value: 0.5 },
         samples: { value: 100 },
     },

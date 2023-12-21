@@ -9,7 +9,8 @@ import {
     Vector3,
 } from 'three';
 import { degreesToRadians } from '../helpers/math';
-import { Layer, Side, ElementToBounce } from '../types';
+import { Layer, Side } from '../types';
+import { ElementToBounce } from '../elements';
 
 export const gridSize = 250;
 const gridSizeMedium = gridSize / 2;
@@ -54,6 +55,11 @@ const materials = {
         side: DoubleSide,
         // name: 'skin-bounce-shadow',
     }),
+    skinBounceLight: new MeshBasicMaterial({
+        color: 0xffffff,
+        fog: false,
+        side: DoubleSide,
+    }),
     border: new MeshPhongMaterial({
         color: 0xffffff,
         side: DoubleSide,
@@ -87,13 +93,22 @@ export function positionInsideGridBox(
     element.position.add(coordinate);
 }
 
-export function createMeshForGrid(geo: BoxGeometry, mat: Material): Mesh {
+export function createMeshForGrid(
+    geo: BoxGeometry,
+    mat: Material,
+    withBounce?: boolean,
+): Mesh {
     // geo.translate(
     //     geo.parameters.width / 2,
     //     geo.parameters.height / 2,
     //     geo.parameters.depth / 2,
     // );
-    const mesh = new Mesh(geo, mat);
+    const mesh = (() => {
+        if (withBounce) {
+            return new ElementToBounce(geo, mat);
+        }
+        return new Mesh(geo, mat);
+    })();
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     // putting all mesh into occlusion effect creates an interesting effect
@@ -116,9 +131,13 @@ export function createWall(
             if (withBounce.side === Side.SHADOW) {
                 return materials.skinBounceShadow;
             }
+            if (withBounce.side === Side.LIGHT) {
+                return materials.skinBounceLight;
+            }
         }
         return materials.phong;
     })();
+
     const wall = createMeshForGrid(
         new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth).translate(
             sizeForGrid.x / 2,
@@ -126,16 +145,13 @@ export function createWall(
             wallDepth / 2,
         ),
         material,
+        Boolean(withBounce),
     );
     // position the whole group
     positionOnGrid(wall, position, rotation);
     if (withOcclusion) {
         wall.layers.enable(Layer.OCCLUSION);
     }
-    if (withBounce) {
-        (wall as ElementToBounce).bounce = true;
-    }
-
     return wall;
 }
 

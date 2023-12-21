@@ -19,7 +19,7 @@ export class ProjectionLevelWithGraphic extends ProjectionLevel {
                 const side = Number(child.name.replace('_BOUNCE', '')) as Side;
 
                 if (side === Side.LIGHT) {
-                    console.log('apply skin light');
+                    // initialization of the skin is done with postprocessing, it is spread around the App class, at the root of the game rendering
                 }
 
                 if (side === Side.SHADOW) {
