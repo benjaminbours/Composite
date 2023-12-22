@@ -37,7 +37,9 @@ import {
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
-import { mixShader, volumetricLightShader } from './volumetricLightShader';
+import volumetricLightVS from './glsl/volumetricLight_vs.glsl';
+import volumetricLightBounceFS from './glsl/volumetricLightBounce_fs.glsl';
+import volumetricLightPlayerFS from './glsl/volumetricLightPlayer_fs.glsl';
 import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
@@ -77,6 +79,9 @@ export default class App {
 
     private occlusionComposers: EffectComposer[] = [];
     private volumetricLightPasses: ShaderPass[] = [];
+
+    private playerOcclusionComposer!: EffectComposer;
+    private playerVolumetricLightPass!: ShaderPass;
 
     public inputsManager: InputsManager;
 
@@ -167,7 +172,7 @@ export default class App {
                 switch (side) {
                     case Side.LIGHT:
                         const lightPlayer = new LightPlayer(index === 0);
-                        lightPlayer.mesh.layers.set(Layer.OCCLUSION);
+                        lightPlayer.mesh.layers.set(Layer.OCCLUSION_PLAYER);
                         return lightPlayer;
                     case Side.SHADOW:
                         return new ShadowPlayer(index === 0);
@@ -217,6 +222,61 @@ export default class App {
         );
     };
 
+    createOcclusionRenderTarget = (renderScale: number) => {
+        return new WebGLRenderTarget(
+            this.width * renderScale,
+            this.height * renderScale,
+        );
+    };
+
+    createOcclusionComposer = (
+        renderPass: RenderPass,
+        lightPass: ShaderPass,
+        occlusionRenderTarget: WebGLRenderTarget,
+    ) => {
+        const occlusionComposer = new EffectComposer(
+            this.renderer,
+            occlusionRenderTarget,
+        );
+        occlusionComposer.renderToScreen = false;
+        occlusionComposer.addPass(renderPass);
+        occlusionComposer.addPass(lightPass);
+
+        return occlusionComposer;
+    };
+
+    createMixPass = (occlusionRenderTarget: WebGLRenderTarget) => {
+        const mixPass = new ShaderPass(
+            {
+                uniforms: {
+                    baseTexture: { value: null },
+                    addTexture: { value: null },
+                },
+
+                vertexShader: [
+                    'varying vec2 vUv;',
+                    'void main() {',
+                    'vUv = uv;',
+                    'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+                    '}',
+                ].join('\n'),
+
+                fragmentShader: [
+                    'uniform sampler2D baseTexture;',
+                    'uniform sampler2D addTexture;',
+                    'varying vec2 vUv;',
+                    'void main() {',
+                    'gl_FragColor = ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( addTexture, vUv ) );',
+                    '}',
+                ].join('\n'),
+            },
+            'baseTexture',
+        );
+        mixPass.uniforms.addTexture.value = occlusionRenderTarget.texture;
+
+        return mixPass;
+    };
+
     setupPostProcessing = () => {
         const renderScale = 1;
         this.mainComposer = new EffectComposer(this.renderer);
@@ -224,6 +284,33 @@ export default class App {
         const renderPass = new RenderPass(this.scene, this.camera);
         this.mainComposer.addPass(renderPass);
 
+        // create occlusion render for player light
+        const occlusionRenderTarget =
+            this.createOcclusionRenderTarget(renderScale);
+        this.playerVolumetricLightPass = new ShaderPass({
+            uniforms: {
+                tDiffuse: { value: null },
+                lightPosition: { value: new Vector2(0.5, 0.5) },
+                exposure: { value: 0.18 },
+                decay: { value: 0.97 },
+                density: { value: 0.8 },
+                weight: { value: 0.5 },
+                samples: { value: 100 },
+            },
+            vertexShader: volumetricLightVS,
+            fragmentShader: volumetricLightPlayerFS,
+        });
+        this.playerVolumetricLightPass.needsSwap = false;
+        this.playerOcclusionComposer = this.createOcclusionComposer(
+            renderPass,
+            this.playerVolumetricLightPass,
+            occlusionRenderTarget,
+        );
+        const mixPass = this.createMixPass(occlusionRenderTarget);
+
+        this.mainComposer.addPass(mixPass);
+
+        // create occlusion render for each light bounce element
         const lightBounces =
             (
                 this.levelController.levels[
@@ -232,26 +319,30 @@ export default class App {
             ).lightBounces || [];
 
         for (let i = 0; i < lightBounces.length; i++) {
-            const occlusionRenderTarget = new WebGLRenderTarget(
-                this.width * renderScale,
-                this.height * renderScale,
-            );
-            const volumetricLightPass = new ShaderPass(volumetricLightShader);
+            const occlusionRenderTarget =
+                this.createOcclusionRenderTarget(renderScale);
+            const volumetricLightPass = new ShaderPass({
+                uniforms: {
+                    tDiffuse: { value: null },
+                    lightPosition: { value: new Vector2(0.5, 0.5) },
+                    exposure: { value: 0.18 },
+                    decay: { value: 0.9 },
+                    density: { value: 0.5 },
+                    weight: { value: 0.5 },
+                    samples: { value: 100 },
+                },
+                vertexShader: volumetricLightVS,
+                fragmentShader: volumetricLightBounceFS,
+            });
             volumetricLightPass.needsSwap = false;
-
-            const occlusionComposer = new EffectComposer(
-                this.renderer,
+            const occlusionComposer = this.createOcclusionComposer(
+                renderPass,
+                volumetricLightPass,
                 occlusionRenderTarget,
             );
-            occlusionComposer.renderToScreen = false;
-            occlusionComposer.addPass(renderPass);
-            occlusionComposer.addPass(volumetricLightPass);
-
-            const mixPass = new ShaderPass(mixShader, 'baseTexture');
-            mixPass.uniforms.addTexture.value = occlusionRenderTarget.texture;
+            const mixPass = this.createMixPass(occlusionRenderTarget);
 
             this.mainComposer.addPass(mixPass);
-
             this.occlusionComposers.push(occlusionComposer);
             this.volumetricLightPasses.push(volumetricLightPass);
         }
@@ -515,7 +606,7 @@ export default class App {
             const player = this.players[i];
 
             if (player instanceof LightPlayer) {
-                this.volumetricLightPass.material.uniforms.lightPosition.value =
+                this.playerVolumetricLightPass.material.uniforms.lightPosition.value =
                     player.get2dLightPosition(this.camera);
             }
 
@@ -632,9 +723,11 @@ export default class App {
     };
 
     public render = () => {
-        this.camera.layers.set(Layer.OCCLUSION);
+        this.camera.layers.set(Layer.OCCLUSION_PLAYER);
         this.renderer.setClearColor(0x000000);
+        this.playerOcclusionComposer.render();
         // one occlusion composer by bounce
+        this.camera.layers.set(Layer.OCCLUSION);
         for (let i = 0; i < this.occlusionComposers.length; i++) {
             if (i > 0) {
                 const previousLightBounce = (

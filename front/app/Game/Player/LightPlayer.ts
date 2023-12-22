@@ -16,7 +16,7 @@ export class LightPlayer extends Player {
         super(isMainPlayer);
 
         const geometry = new SphereGeometry(5, 32, 32);
-        const material = new MeshBasicMaterial({ color: 0xffffff });
+        const material = new MeshBasicMaterial({ color: 0xffffff, fog: false });
         this.mesh = new Mesh(geometry, material);
         this.mesh.castShadow = false;
         this.mesh.receiveShadow = false;
@@ -30,19 +30,12 @@ export class LightPlayer extends Player {
     }
 
     // TODO: Rename this function, its unclear
-    get2dLightPosition(camera: Camera) {
-        // let delta = this.clock.getDelta();
-
-        let p = this.position.clone(),
-            // pSphere = this.sphere.position.clone(),
-            vector = p.project(camera),
-            // vectorSphere = pSphere.project(this.camera),
-
-            x = (vector.x + 1) / 2,
-            y = (vector.y + 1) / 2,
-            z = (vector.z + 1) / 2;
-
-        return new Vector3(x, y, z);
-        // this.volumetricLightUniforms.time.value += delta;
-    }
+    // TODO: Duplicate function with element to bounce
+    public get2dLightPosition = (camera: Camera) => {
+        const p = this.position.clone();
+        const vector = p.project(camera);
+        const x = (vector.x + 1) / 2;
+        const y = (vector.y + 1) / 2;
+        return new Vector3(x, y);
+    };
 }

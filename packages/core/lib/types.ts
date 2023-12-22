@@ -9,6 +9,7 @@ export enum Side {
 export enum Layer {
     DEFAULT,
     OCCLUSION,
+    OCCLUSION_PLAYER
 }
 
 export enum SocketEventType {

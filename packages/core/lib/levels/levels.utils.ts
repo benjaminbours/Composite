@@ -155,6 +155,7 @@ export function createWall(
     positionOnGrid(wall, position, rotation);
     if (withOcclusion) {
         wall.layers.enable(Layer.OCCLUSION);
+        // wall.layers.enable(Layer.OCCLUSION_PLAYER);
     }
     return wall;
 }
@@ -272,6 +273,7 @@ export function createArchGroup(
     platformMeshOcclusion.position.copy(platformMesh.position);
     group.add(platformMeshOcclusion);
     platformMeshOcclusion.layers.set(Layer.OCCLUSION);
+    platformMeshOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
 
     positionOnGrid(group, position);
 
@@ -294,6 +296,7 @@ export function createColumnGroup(
     group.add(columnStart);
     if (withOcclusion) {
         columnStart.layers.enable(Layer.OCCLUSION);
+        columnStart.layers.enable(Layer.OCCLUSION_PLAYER);
     }
 
     for (let i = 0; i < size; i++) {
@@ -302,6 +305,7 @@ export function createColumnGroup(
         group.add(part);
         if (withOcclusion) {
             part.layers.enable(Layer.OCCLUSION);
+            part.layers.enable(Layer.OCCLUSION_PLAYER);
         }
     }
 
