@@ -42,8 +42,12 @@ export class ProjectionLevel extends Group {
 
         arches.forEach((arch) => {
             this.add(arch);
-            // TODO: Add only the platform to the list of colliding elements
-            this.collidingElements.push(arch);
+            const platform = arch.children.find(
+                (child) => child.name === 'platform',
+            );
+            if (platform) {
+                this.collidingElements.push(platform);
+            }
         });
 
         const bounce = createBounce(

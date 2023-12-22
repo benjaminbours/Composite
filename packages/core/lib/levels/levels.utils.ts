@@ -262,6 +262,7 @@ export function createArchGroup(
         gridSize * 2.5,
     );
     const platformMesh = createMeshForGrid(geometryPlatform, materials.phong);
+    platformMesh.name = 'platform';
     const platformMeshOcclusion = createMeshForGrid(
         geometryPlatform,
         materials.occlusion,
