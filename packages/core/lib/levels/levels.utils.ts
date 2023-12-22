@@ -49,6 +49,10 @@ const materials = {
         // shininess: 0,
         // transparent: true,
     }),
+    occlusion: new MeshPhongMaterial({
+        color: 0x000000,
+        fog: false,
+    }),
     skinBounceShadow: new MeshBasicMaterial({
         color: 0x000000,
         fog: false,
@@ -257,9 +261,17 @@ export function createArchGroup(
         gridSize * 2.5,
     );
     const platformMesh = createMeshForGrid(geometryPlatform, materials.phong);
+    const platformMeshOcclusion = createMeshForGrid(
+        geometryPlatform,
+        materials.occlusion,
+    );
 
     positionOnGrid(platformMesh, new Vector3(0, height, 0));
     group.add(platformMesh);
+
+    platformMeshOcclusion.position.copy(platformMesh.position);
+    group.add(platformMeshOcclusion);
+    platformMeshOcclusion.layers.set(Layer.OCCLUSION);
 
     positionOnGrid(group, position);
 
@@ -305,7 +317,7 @@ export function createBounce(position: Vector3, rotation: Vector3, side: Side) {
         new Vector3(1, 1, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
-        false,
+        true,
         {
             side,
         },

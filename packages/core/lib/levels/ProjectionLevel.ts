@@ -4,11 +4,13 @@ import { Group, Object3D, Vector3 } from 'three';
 import { createArchGroup, createBounce, createWall } from './levels.utils';
 import { Levels, ProjectionLevelState } from '../GameState';
 import { Side } from '../types';
+import { ElementToBounce } from '../elements';
 
 export class ProjectionLevel extends Group {
     public collidingElements: Object3D[] = [];
     public interactiveElements: any[] = [];
     public name = 'projection-level';
+    public lightBounces: ElementToBounce[] = [];
 
     public startPosition = {
         // light: new Vector3(10, 20, 0), // start level

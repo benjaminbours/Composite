@@ -643,7 +643,6 @@ export default class App {
                     ] as any
                 ).lightBounces[i - 1];
                 previousLightBounce.layers.disable(Layer.OCCLUSION);
-                console.log('here disabled');
             }
             const lightBounce = (
                 this.levelController.levels[
