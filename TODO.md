@@ -39,6 +39,7 @@
 - Fix issue when you finished first level and then you go with your team mate in the second one
 - Collision system issue, especially with bounce element, it's easy to enter inside and get stuck
 - Move from raycaster to overlap for collision detection
+- Fix crash when you are in game, your team mate leave and you click to find another teammate, HomeInterface is null
 
 ## Potential game play suggestion
 
@@ -46,3 +47,13 @@
   - black hole, potential impact on gravity
   - Dash for the light
   - shadow can avoid gravity for a while, or go through spaces the light can't, the main idea is about not having movement constraints for a duration
+- uchinara:
+  - Player bounce against each other
+  - onde / particles
+
+## Think about bounce mechanism
+
+- si le player light peut rentrer dans le bounce light, quand pas de player inside, does it bounce?
+- Est ce que on ne voudrait pas des elements qui ont un skin shadow + light (kind of) ou n'importe lequel des players peut rentrer a l'interieur ?
+- Est ce que on ne voudrait pas simplement des bounces "classique" qui n'ont pas besoin de player ? Si uniquement des bounces avec player, ca limite un peu
+- Est ce que les players se repoussent ? OUI
