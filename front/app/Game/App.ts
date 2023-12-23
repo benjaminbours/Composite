@@ -14,6 +14,9 @@ import {
     Fog,
     Vector2,
     Vec2,
+    Box3,
+    Vector3,
+    Box3Helper,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -32,6 +35,7 @@ import {
     Layer,
     PositionLevelState,
     LevelState,
+    RANGE_COLLISION,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -104,6 +108,8 @@ export default class App {
         increment: 10,
         shouldUpdate: false,
     };
+
+    private playerHelper?: Box3;
 
     constructor(
         canvasDom: HTMLCanvasElement,
@@ -220,6 +226,10 @@ export default class App {
             this.scene,
             this.players,
         );
+        if (process.env.NEXT_PUBLIC_PLAYER_BBOX_HELPER) {
+            this.playerHelper = new Box3();
+            this.scene.add(new Box3Helper(this.playerHelper, 0xffff00));
+        }
     };
 
     createOcclusionRenderTarget = (renderScale: number) => {
@@ -576,7 +586,6 @@ export default class App {
                 'client',
                 Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
-
             // this.gameStateHistory.push(
             //     JSON.parse(JSON.stringify(this.currentState)),
             // );
@@ -592,6 +601,12 @@ export default class App {
                     this.currentState.players[side].position.x,
                     this.currentState.players[side].position.y,
                     0,
+                );
+            }
+            if (this.playerHelper) {
+                this.playerHelper.setFromCenterAndSize(
+                    this.players[0].position,
+                    new Vector3(RANGE_COLLISION, RANGE_COLLISION),
                 );
             }
             this.currentState.game_time++;
