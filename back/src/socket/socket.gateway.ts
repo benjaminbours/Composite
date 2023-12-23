@@ -9,7 +9,6 @@ import {
 import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
 import { Logger } from '@nestjs/common';
-import { Scene } from 'three';
 import * as uuid from 'uuid';
 // our libs
 import {
@@ -316,9 +315,8 @@ export class SocketGateway {
       undefined,
     ];
 
-    const collidingScene = new Scene();
-    collidingScene.add(FLOOR, ...level.collidingElements);
-    collidingScene.updateMatrixWorld();
+    const collidingElements = [FLOOR, ...level.collidingElements];
+    level.updateMatrixWorld(true);
 
     const TICK_RATE = 10;
     // let tick = 0;
@@ -378,7 +376,7 @@ export class SocketGateway {
               delta,
               lastPlayersInput[i],
               inputs,
-              collidingScene.children,
+              collidingElements,
               gameState,
               'server',
             );
