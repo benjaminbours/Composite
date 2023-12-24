@@ -30,5 +30,7 @@ export default class LevelController {
         // mount the new one
         this.currentLevel = level;
         scene.add(this.levels[level]!);
+        // this line is the best to visualize what the server see when loading the level
+        // scene.add(...this.levels[level]!.collidingElements);
     };
 }
