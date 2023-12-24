@@ -35,7 +35,6 @@ import {
     Layer,
     PositionLevelState,
     LevelState,
-    RANGE_COLLISION,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -606,7 +605,7 @@ export default class App {
             if (this.playerHelper) {
                 this.playerHelper.setFromCenterAndSize(
                     this.players[0].position,
-                    new Vector3(RANGE_COLLISION, RANGE_COLLISION),
+                    new Vector3(40, 40),
                 );
             }
             this.currentState.game_time++;
