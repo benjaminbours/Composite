@@ -50,6 +50,8 @@
 - uchinara:
   - Player bounce against each other
   - onde / particles
+- rumpleplays:
+  - Open a dedicated discord, bitch
 
 ## Think about bounce mechanism
 
