@@ -1,4 +1,5 @@
 import type { Vec2 } from 'three';
+import { MovableComponentState } from './types';
 
 export enum Levels {
     CRACK_THE_DOOR,
@@ -38,10 +39,12 @@ export class RedisGameState {
         public light_y: string,
         public light_velocity_x: string,
         public light_velocity_y: string,
+        public light_state: string,
         public shadow_x: string,
         public shadow_y: string,
         public shadow_velocity_x: string,
         public shadow_velocity_y: string,
+        public shadow_state: string,
         public lastValidatedInput: string,
         public game_time: string,
         public end_level: string,
@@ -72,10 +75,12 @@ export class RedisGameState {
             String(state.players[1].position.y),
             String(state.players[1].velocity.x),
             String(state.players[1].velocity.y),
+            String(state.players[1].state),
             String(state.players[0].position.x),
             String(state.players[0].position.y),
             String(state.players[0].velocity.x),
             String(state.players[0].velocity.y),
+            String(state.players[0].state),
             String(state.lastValidatedInput),
             String(state.game_time),
             state.level.end_level.join(),
@@ -96,6 +101,7 @@ export class GameState {
         public players: {
             position: Vec2;
             velocity: Vec2;
+            state: MovableComponentState;
         }[],
         public level: LevelState,
         public lastValidatedInput: number,
@@ -134,6 +140,7 @@ export class GameState {
                         x: Number(state.shadow_velocity_x),
                         y: Number(state.shadow_velocity_y),
                     },
+                    state: Number(state.shadow_state) as MovableComponentState,
                 },
                 {
                     position: {
@@ -144,6 +151,7 @@ export class GameState {
                         x: Number(state.light_velocity_x),
                         y: Number(state.light_velocity_y),
                     },
+                    state: Number(state.light_state) as MovableComponentState,
                 },
             ],
             levelState,

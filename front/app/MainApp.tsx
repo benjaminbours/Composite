@@ -14,6 +14,7 @@ import {
     GameState,
     Levels,
     MatchMakingPayload,
+    MovableComponentState,
     PositionLevel,
     ProjectionLevel,
     Side,
@@ -200,6 +201,7 @@ function MainApp() {
                                     x: 0,
                                     y: 0,
                                 },
+                                state: MovableComponentState.onFloor,
                             },
                             {
                                 position: {
@@ -210,6 +212,7 @@ function MainApp() {
                                     x: 0,
                                     y: 0,
                                 },
+                                state: MovableComponentState.onFloor,
                             },
                         ],
                         {
