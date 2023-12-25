@@ -1,7 +1,7 @@
-import { Inputs, InputsDev } from '@benjaminbours/composite-core';
+import { Inputs } from '@benjaminbours/composite-core';
 
 export default class InputsManager {
-    public inputsActive: Inputs | InputsDev = {
+    public inputsActive: Inputs = {
         left: false,
         right: false,
         jump: false,
@@ -29,11 +29,11 @@ export default class InputsManager {
     private keydownOptions = {
         // top
         KeyW: () => {
-            (this.inputsActive as InputsDev).top = true;
+            this.inputsActive.top = true;
         },
         // bottom
         KeyS: () => {
-            (this.inputsActive as InputsDev).bottom = true;
+            this.inputsActive.bottom = true;
         },
         // left
         KeyA: () => {
@@ -52,11 +52,11 @@ export default class InputsManager {
     private keyupOptions = {
         // top
         KeyW: () => {
-            (this.inputsActive as InputsDev).top = false;
+            this.inputsActive.top = false;
         },
         // bottom
         KeyS: () => {
-            (this.inputsActive as InputsDev).bottom = false;
+            this.inputsActive.bottom = false;
         },
         KeyA: () => {
             this.inputsActive.left = false;
@@ -73,19 +73,13 @@ export default class InputsManager {
         const { code } = e;
         const key = code as 'KeyA' | 'KeyD' | 'Space' | 'KeyW' | 'KeyS';
         if (this.keydownOptions[key]) {
-            if (
-                (key === 'KeyS' || key === 'KeyW') &&
-                !process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE
-            ) {
-                return;
-            }
             this.keydownOptions[key]();
         }
     }
 
     private handleKeyup(e: KeyboardEvent) {
         const { code } = e;
-        const key = code as 'KeyA' | 'KeyD' | 'Space';
+        const key = code as 'KeyA' | 'KeyD' | 'Space' | 'KeyW' | 'KeyS';
         if (this.keyupOptions[key]) {
             this.keyupOptions[key]();
         }

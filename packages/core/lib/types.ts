@@ -43,8 +43,6 @@ export interface Inputs {
     left: boolean;
     right: boolean;
     jump: boolean;
-}
-export interface InputsDev extends Inputs {
     top: boolean;
     bottom: boolean;
 }

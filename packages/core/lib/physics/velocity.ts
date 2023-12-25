@@ -1,4 +1,4 @@
-import { Inputs, InputsDev } from '../types';
+import { Inputs } from '../types';
 
 const MAX_VELOCITY = 10;
 const SPEED = 20;
@@ -41,7 +41,7 @@ export function computeVelocityX(
 
 export function computeVelocityY(
     delta: number,
-    input: InputsDev,
+    input: Inputs,
     velocityY: number,
 ) {
     const deltaInverse = 1 / delta / (60 * 60);

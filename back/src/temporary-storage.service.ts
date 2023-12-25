@@ -251,7 +251,7 @@ export class TemporaryStorageService {
     return this.redisClient.ZADD(REDIS_KEYS.GAME_INPUTS_QUEUE(gameId), {
       score: data.sequence,
       // input pattern is left,right,jump
-      value: `${data.player}:${data.inputs.left},${data.inputs.right},${data.inputs.jump}:${data.sequence}:${data.time}`,
+      value: `${data.player}:${data.inputs.left},${data.inputs.right},${data.inputs.jump},${data.inputs.top},${data.inputs.bottom}:${data.sequence}:${data.time}`,
     });
   }
 

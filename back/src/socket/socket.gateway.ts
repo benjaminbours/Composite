@@ -25,6 +25,7 @@ import {
   TimeSyncPayload,
   PhysicLoop,
   applyInputList,
+  MovableComponentState,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -266,6 +267,7 @@ export class SocketGateway {
             x: 0,
             y: 0,
           },
+          state: MovableComponentState.onFloor,
         },
         {
           position: {
@@ -276,6 +278,7 @@ export class SocketGateway {
             x: 0,
             y: 0,
           },
+          state: MovableComponentState.onFloor,
         },
       ],
       level.state,
@@ -343,7 +346,13 @@ export class SocketGateway {
 
             const parsedInput: GamePlayerInputPayload = {
               time,
-              inputs: { left: inputs[0], right: inputs[1], jump: inputs[2] },
+              inputs: {
+                left: inputs[0],
+                right: inputs[1],
+                jump: inputs[2],
+                top: inputs[3],
+                bottom: inputs[4],
+              },
               sequence,
               player,
             };

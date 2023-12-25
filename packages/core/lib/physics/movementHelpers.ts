@@ -271,10 +271,11 @@ function applyWorldUpdate(
     if (isPositionLevel(gameState.level)) {
         let doorNameActivating: string | undefined = undefined;
         if (
-            collisionResult.down &&
-            isTouchingDoorOpener(collisionResult.down)
+            collisionResult.bottom &&
+            isTouchingDoorOpener(collisionResult.bottom)
         ) {
-            const elem = collisionResult.down.object.parent as InteractiveArea;
+            const elem = collisionResult.bottom.object
+                .parent as InteractiveArea;
             doorNameActivating = `${elem.name.replace(
                 `_${AREA_DOOR_OPENER_SUFFIX}`,
                 '',
@@ -310,7 +311,7 @@ function applyWorldUpdate(
     }
 
     const endLevelIndex = gameState.level.end_level.indexOf(side);
-    if (collisionResult.down && isTouchingEndLevel(collisionResult.down)) {
+    if (collisionResult.bottom && isTouchingEndLevel(collisionResult.bottom)) {
         if (endLevelIndex === -1) {
             gameState.level.end_level.push(side);
         }
