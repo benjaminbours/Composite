@@ -1,9 +1,10 @@
 import { Camera, Mesh, Vector3 } from 'three';
+import { Side } from '../types';
 
 export class ElementToBounce extends Mesh {
     public bounce = true;
 
-    constructor(geometry: any, material: any) {
+    constructor(geometry: any, material: any, public side: Side) {
         super(geometry, material);
     }
 

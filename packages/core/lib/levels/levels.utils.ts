@@ -100,7 +100,9 @@ export function positionInsideGridBox(
 export function createMeshForGrid(
     geo: BoxGeometry,
     mat: Material,
-    withBounce?: boolean,
+    withBounce?: {
+        side: Side;
+    },
 ): Mesh {
     // geo.translate(
     //     geo.parameters.width / 2,
@@ -109,7 +111,7 @@ export function createMeshForGrid(
     // );
     const mesh = (() => {
         if (withBounce) {
-            return new ElementToBounce(geo, mat);
+            return new ElementToBounce(geo, mat, withBounce.side);
         }
         return new Mesh(geo, mat);
     })();
@@ -149,7 +151,7 @@ export function createWall(
             wallDepth / 2,
         ),
         material,
-        Boolean(withBounce),
+        withBounce,
     );
     // position the whole group
     positionOnGrid(wall, position, rotation);
