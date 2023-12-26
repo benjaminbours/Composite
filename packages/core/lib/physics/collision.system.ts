@@ -7,48 +7,28 @@ export type CollidingObjects = INearestObjects;
 // TODO: The whole function with the raycaster file could be merged / optimized
 export function detectCollidingObjects(
     obstacles: Object3D[],
-    player: { position: Vec2; velocity: Vec2 },
+    position: Vec2,
+    velocity: Vec2,
     freeMovementMode?: boolean,
 ): INearestObjects {
-    const { position, velocity } = player;
-
     const colliding: INearestObjects = {
         left: undefined,
         right: undefined,
-        up: undefined,
-        down: undefined,
+        top: undefined,
+        bottom: undefined,
     };
 
     if (freeMovementMode) {
         return colliding;
     }
 
-    // const playerBB = new Box3().setFromCenterAndSize(
-    //     new Vector3(position.x, position.y),
-    //     new Vector3(RANGE, RANGE),
-    // );
-
-    // for (let i = 0; i < obstacles.length; i++) {
-    //     const obstacle = obstacles[i];
-    //     const obstacleBB = new Box3().setFromObject(obstacle);
-
-    //     if (playerBB.intersectsBox(obstacleBB)) {
-    //         // console.log('HERE detect overlap style collision', obstacle);
-    //         // console.log(obstacle.position);
-    //         const intersectBB = playerBB.clone().intersect(obstacleBB);
-    //         console.log('player box', playerBB);
-    //         console.log('obstacle box', obstacleBB);
-    //         console.log('intersect box', intersectBB);
-    //     }
-    // }
-
     const nearestObjects = getNearestObjects(position, obstacles);
 
     if (
-        nearestObjects.down &&
-        position.y + velocity.y <= RANGE + nearestObjects.down.point.y
+        nearestObjects.bottom &&
+        position.y + velocity.y <= RANGE + nearestObjects.bottom.point.y
     ) {
-        colliding.down = nearestObjects.down;
+        colliding.bottom = nearestObjects.bottom;
     }
 
     if (
@@ -66,10 +46,10 @@ export function detectCollidingObjects(
     }
 
     if (
-        nearestObjects.up &&
-        position.y + velocity.y + RANGE > nearestObjects.up.point.y
+        nearestObjects.top &&
+        position.y + velocity.y + RANGE > nearestObjects.top.point.y
     ) {
-        colliding.up = nearestObjects.up;
+        colliding.top = nearestObjects.top;
     }
 
     return colliding;
