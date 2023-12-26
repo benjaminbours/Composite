@@ -31,6 +31,11 @@ export type LevelState =
     | ProjectionLevelState
     | OtherLevelState;
 
+export interface PlayerGameState {
+    position: Vec2;
+    velocity: Vec2;
+    state: MovableComponentState;
+}
 // orders of properties are very important here
 export class RedisGameState {
     constructor(
@@ -98,11 +103,7 @@ function parseActivators(str: string) {
 
 export class GameState {
     constructor(
-        public players: {
-            position: Vec2;
-            velocity: Vec2;
-            state: MovableComponentState;
-        }[],
+        public players: PlayerGameState[],
         public level: LevelState,
         public lastValidatedInput: number,
         public game_time: number,

@@ -35,6 +35,7 @@ import {
     Layer,
     PositionLevelState,
     LevelState,
+    Context,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -466,7 +467,7 @@ export default class App {
                     ]!.collidingElements,
                 ],
                 nextStateAtInterpolationTime,
-                'client',
+                Context.client,
                 false,
                 Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
@@ -582,7 +583,7 @@ export default class App {
                     ]!.collidingElements,
                 ],
                 this.currentState,
-                'client',
+                Context.client,
                 Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
             // this.gameStateHistory.push(

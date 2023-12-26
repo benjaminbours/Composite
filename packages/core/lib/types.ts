@@ -9,7 +9,7 @@ export enum Side {
 export enum Layer {
     DEFAULT,
     OCCLUSION,
-    OCCLUSION_PLAYER
+    OCCLUSION_PLAYER,
 }
 
 export enum SocketEventType {
@@ -152,7 +152,8 @@ export class AllQueueInfo extends QueueInfo {
 
 export enum MovableComponentState {
     onFloor,
-    // inside,
+    inside,
+    collisionInsensitive,
     inAir,
     // ascend,
 }
@@ -163,3 +164,8 @@ export interface MovableComponent {
 }
 
 export type CollidingElem = Mesh | Group | Object3D;
+
+export interface InteractiveComponent {
+    shouldActivate: boolean;
+    isActive: boolean;
+}

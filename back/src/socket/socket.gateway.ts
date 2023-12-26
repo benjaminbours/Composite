@@ -26,6 +26,7 @@ import {
   PhysicLoop,
   applyInputList,
   MovableComponentState,
+  Context,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -387,7 +388,7 @@ export class SocketGateway {
               inputs,
               collidingElements,
               gameState,
-              'server',
+              Context.server,
             );
             // then we remove it from the list
             for (let i = 0; i < inputs.length; i++) {
