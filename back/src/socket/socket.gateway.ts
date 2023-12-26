@@ -320,6 +320,7 @@ export class SocketGateway {
     ];
 
     const collidingElements = [FLOOR, ...level.collidingElements];
+    FLOOR.updateMatrixWorld(true);
     level.updateMatrixWorld(true);
 
     const TICK_RATE = 10;

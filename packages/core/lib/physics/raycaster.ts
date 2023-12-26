@@ -39,13 +39,12 @@ export function getNearestObjects(
 
         // TODO: Investigate if we need the recursive flag enabled
         const intersectObjects = RAYCASTER.intersectObjects(obstacles, true);
-        const nearestObject = intersectObjects[0];
 
         if (!intersectObjects.length) {
             continue;
         }
 
-        nearestObjects[direction] = nearestObject;
+        nearestObjects[direction] = intersectObjects[0];
     }
 
     return nearestObjects;
