@@ -319,17 +319,61 @@ export function createColumnGroup(
     return group;
 }
 
-export function createBounce(position: Vector3, rotation: Vector3, side: Side) {
-    const wall = createWall(
-        new Vector3(1, 1, 0),
-        new Vector3(0, 0, 0),
-        new Vector3(0, 0, 0),
-        true,
-        {
-            side,
-        },
-    ) as ElementToBounce;
+export function createBounce(position: Vector3, rotationY: number, side: Side) {
+    const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize);
+    const positionForGrid = position.multiplyScalar(gridSize);
+    const rotation = new Vector3(
+        degreesToRadians(90),
+        degreesToRadians(90 + rotationY),
+        degreesToRadians(0),
+    );
+    const material = (() => {
+        if (side === Side.SHADOW) {
+            return materials.skinBounceShadow;
+        }
+        if (side === Side.LIGHT) {
+            return materials.skinBounceLight;
+        }
+        return materials.phong;
+    })();
+
+    const geometry = new BoxGeometry(
+        sizeForGrid.x,
+        sizeForGrid.y,
+        wallDepth,
+        30,
+        30,
+        30,
+    );
+
+    const wall = createMeshForGrid(geometry, material, {
+        side,
+    }) as ElementToBounce;
+
+    // TODO: Improve this position logic, and it's duplicate with the particle effect in skin bounce shadow
+    wall.positionApplied = positionForGrid;
+    wall.rotationApplied = rotation;
+    wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
+    wall.rotation.set(rotation.x, rotation.y, rotation.z);
+    wall.updateMatrix();
+    wall.geometry.applyMatrix4(wall.matrix);
+    wall.geometry.translate(sizeForGrid.x / 2, sizeForGrid.y / 2, 0);
+
+    // reset transform
+    wall.position.set(0, 0, 0);
+    wall.rotation.set(0, 0, 0);
+    wall.scale.set(1, 1, 1);
+    wall.updateMatrix();
+
     wall.name = ElementName.BOUNCE(side);
-    positionOnGrid(wall, position, rotation);
     return wall;
+}
+
+export function getCenterPoint(mesh: Mesh) {
+    const geometry = mesh.geometry;
+    geometry.computeBoundingBox();
+    const center = new Vector3();
+    geometry.boundingBox?.getCenter(center);
+    mesh.localToWorld(center);
+    return center;
 }

@@ -38,15 +38,6 @@ function handleDefaultCollision(
     }
 }
 
-function getCenterPoint(mesh: Mesh) {
-    var geometry = mesh.geometry;
-    geometry.computeBoundingBox();
-    var center = new Vector3();
-    geometry.boundingBox?.getCenter(center);
-    mesh.localToWorld(center);
-    return center;
-}
-
 function handleEnterElementToBounce(
     bounceElement: ElementToBounce,
     player: PlayerGameState,

@@ -1,17 +1,23 @@
 import { Camera, Mesh, Vector3 } from 'three';
 import { Side } from '../types';
+import { getCenterPoint } from '../levels';
 
 export class ElementToBounce extends Mesh {
     public bounce = true;
+    // public center: Vector3;
+    public rotationApplied?: Vector3;
+    public positionApplied?: Vector3;
 
     constructor(geometry: any, material: any, public side: Side) {
         super(geometry, material);
+        // this.center = getCenterPoint(this);
     }
 
     // TODO: Rename this function, its unclear
     // TODO: Duplicate function with player
     public get2dPosition = (camera: Camera) => {
-        const p = this.position.clone();
+        // TODO: Try to optimize and save the center somewhere to avoid useless recomputation
+        const p = getCenterPoint(this);
         const vector = p.project(camera);
         const x = (vector.x + 1) / 2;
         const y = (vector.y + 1) / 2;

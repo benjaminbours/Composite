@@ -26,10 +26,6 @@ export class SkinBounceShadow extends Object3D {
             segments,
             segments,
             segments,
-        ).translate(
-            boxParameters.width / 2,
-            boxParameters.height / 2,
-            boxParameters.depth / 2,
         );
 
         const particlesNumber =
@@ -65,8 +61,30 @@ export class SkinBounceShadow extends Object3D {
 
         this.particles = new Points(bufferGeometry, material);
         this.add(this.particles);
-        this.position.copy(bounce.position);
-        this.rotation.copy(bounce.rotation);
+        // TODO: Duplicate with the level utils create bounce logic
+        if (bounce.positionApplied) {
+            this.position.copy(bounce.positionApplied);
+        }
+        if (bounce.rotationApplied) {
+            this.rotation.set(
+                bounce.rotationApplied.x,
+                bounce.rotationApplied.y,
+                bounce.rotationApplied.z,
+            );
+        }
+        this.updateMatrix();
+        bufferGeometry.applyMatrix4(this.matrix);
+        bufferGeometry.translate(
+            boxParameters.width / 2,
+            boxParameters.height / 2,
+            0,
+        );
+
+        // reset transform
+        this.position.set(0, 0, 0);
+        this.rotation.set(0, 0, 0);
+        this.scale.set(1, 1, 1);
+        this.updateMatrix();
     }
 
     update(delta: number) {

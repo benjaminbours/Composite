@@ -14,7 +14,7 @@ export class ProjectionLevel extends Group {
 
     public startPosition = {
         // light: new Vector3(10, 20, 0), // start level
-        shadow: new Vector3(200, 20, 0),
+        shadow: new Vector3(0, 20, 0),
         light: new Vector3(1089, 275, 0), // first platform
     };
 
@@ -50,39 +50,31 @@ export class ProjectionLevel extends Group {
             }
         });
 
-        const bounce = createBounce(
-            new Vector3(4.5, 2, 0),
-            new Vector3(0, 90, 0),
-            Side.SHADOW,
-        );
+        const bounce = createBounce(new Vector3(-1, 1, 0), -45, Side.SHADOW);
         this.add(bounce);
         this.collidingElements.push(bounce);
 
-        const bounceLight = createBounce(
-            new Vector3(3.5, 2, 0),
-            new Vector3(0, 90, 0),
-            Side.LIGHT,
-        );
+        const bounceLight = createBounce(new Vector3(0, 1, 0), 45, Side.LIGHT);
         this.add(bounceLight);
         this.collidingElements.push(bounceLight);
         this.lightBounces.push(bounceLight);
 
-        const bounceLight2 = createBounce(
-            new Vector3(1.5, 2, 0),
-            new Vector3(0, 90, 0),
-            Side.LIGHT,
-        );
-        this.add(bounceLight2);
-        this.collidingElements.push(bounceLight2);
-        this.lightBounces.push(bounceLight2);
+        // const bounceLight2 = createBounce(
+        //     new Vector3(1.5, 2, 0),
+        //     new Vector3(0, 90, 0),
+        //     Side.LIGHT,
+        // );
+        // this.add(bounceLight2);
+        // this.collidingElements.push(bounceLight2);
+        // this.lightBounces.push(bounceLight2);
 
-        const bounceLight3 = createBounce(
-            new Vector3(1.5, 4, 0),
-            new Vector3(0, 90, 0),
-            Side.LIGHT,
-        );
-        this.add(bounceLight3);
-        this.collidingElements.push(bounceLight3);
-        this.lightBounces.push(bounceLight3);
+        // const bounceLight3 = createBounce(
+        //     new Vector3(1.5, 4, 0),
+        //     new Vector3(0, 90, 0),
+        //     Side.LIGHT,
+        // );
+        // this.add(bounceLight3);
+        // this.collidingElements.push(bounceLight3);
+        // this.lightBounces.push(bounceLight3);
     }
 }

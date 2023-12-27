@@ -634,7 +634,11 @@ export default class App {
 
             if (player instanceof LightPlayer) {
                 this.playerVolumetricLightPass.material.uniforms.lightPosition.value =
-                    player.get2dLightPosition(this.camera);
+                    player.get2dLightPosition(
+                        this.camera,
+                        this.currentState.players[this.playersConfig[0]]
+                            .velocity,
+                    );
             }
 
             if (player instanceof ShadowPlayer) {
