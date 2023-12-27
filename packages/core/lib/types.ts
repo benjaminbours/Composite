@@ -8,8 +8,9 @@ export enum Side {
 
 export enum Layer {
     DEFAULT,
-    OCCLUSION,
-    OCCLUSION_PLAYER,
+    OCCLUSION, // platforms, elements
+    OCCLUSION_PLAYER, // only the player
+    PLAYER_INSIDE,
 }
 
 export enum SocketEventType {
