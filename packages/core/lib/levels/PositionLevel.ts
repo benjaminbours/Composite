@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3 } from 'three';
+import { Group, Object3D, Vector3, Mesh } from 'three';
 // local
 import {
     ElementName,
@@ -132,5 +132,11 @@ export class PositionLevel extends Group {
         this.collidingElements.push(endLevel);
         this.interactiveElements.push(endLevel);
         positionOnGrid(endLevel, new Vector3(11, 0, 0));
+
+        this.collidingElements.forEach((element) => {
+            if ((element as Mesh).geometry) {
+                (element as Mesh).geometry.computeBoundsTree();
+            }
+        });
     }
 }

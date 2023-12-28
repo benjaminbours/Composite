@@ -28,6 +28,7 @@
     "socket.io-client": "^4.7.2",
     "stats.js": "^0.17.0",
     "three": "^0.160.0",
+    "three-mesh-bvh": "^0.6.8",
     "utf-8-validate": "^5.0.10"
   },
   "devDependencies": {

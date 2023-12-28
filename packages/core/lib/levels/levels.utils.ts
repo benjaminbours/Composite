@@ -7,10 +7,22 @@ import {
     MeshBasicMaterial,
     Object3D,
     Vector3,
+    BufferGeometry,
 } from 'three';
+import {
+    computeBoundsTree,
+    disposeBoundsTree,
+    acceleratedRaycast,
+} from 'three-mesh-bvh';
 import { degreesToRadians } from '../helpers/math';
 import { Layer, Side } from '../types';
 import { ElementToBounce } from '../elements';
+
+
+// Add the extension functions
+BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+Mesh.prototype.raycast = acceleratedRaycast;
 
 export const gridSize = 250;
 const gridSizeMedium = gridSize / 2;

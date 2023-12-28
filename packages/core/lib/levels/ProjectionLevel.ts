@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3 } from 'three';
+import { Group, Mesh, Object3D, Vector3 } from 'three';
 // local
 import { createArchGroup, createBounce, createWall } from './levels.utils';
 import { Levels, ProjectionLevelState } from '../GameState';
@@ -74,6 +74,12 @@ export class ProjectionLevel extends Group {
 
             if (side === Side.LIGHT) {
                 this.lightBounces.push(bounce);
+            }
+        });
+
+        this.collidingElements.forEach((element) => {
+            if ((element as Mesh).geometry) {
+                (element as Mesh).geometry.computeBoundsTree();
             }
         });
 

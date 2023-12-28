@@ -59,3 +59,16 @@
 - Est ce que on ne voudrait pas des elements qui ont un skin shadow + light (kind of) ou n'importe lequel des players peut rentrer a l'interieur ?
 - Est ce que on ne voudrait pas simplement des bounces "classique" qui n'ont pas besoin de player ? Si uniquement des bounces avec player, ca limite un peu
 - Est ce que les players se repoussent ? OUI
+
+## Credit
+
+- thank you for the mental support and follow up, they sent me so much strength:
+  - L3Gl0N__
+  - uchinara
+
+- thank you for making me discover this lib => https://github.com/gkjohnson/three-mesh-bvh, was a game changer in terms of performance + youtube video about designing puzzle game
+  - uchinara
+
+## If I ever receive one penny for this game
+
+- Support this lib => https://github.com/gkjohnson/three-mesh-bvh

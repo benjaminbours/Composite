@@ -28,6 +28,7 @@
   "repository": "https://github.com/benjaminbours/Composite.git",
   "peerDependencies": {
     "gsap": "^3.12.2",
-    "three": "^0.160.0"
+    "three": "^0.160.0",
+    "three-mesh-bvh": "^0.6.8"
   }
 }

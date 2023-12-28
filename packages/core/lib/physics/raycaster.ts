@@ -23,6 +23,7 @@ const RAYS = {
 };
 
 const RAYCASTER = new Raycaster();
+RAYCASTER.firstHitOnly = true;
 
 export function getNearestObjects(
     position: Vec2,
@@ -38,7 +39,7 @@ export function getNearestObjects(
         RAYCASTER.set(new Vector3(position.x, position.y, 0), ray);
 
         // TODO: Investigate if we need the recursive flag enabled
-        const intersectObjects = RAYCASTER.intersectObjects(obstacles, true);
+        const intersectObjects = RAYCASTER.intersectObjects(obstacles);
 
         if (!intersectObjects.length) {
             continue;
