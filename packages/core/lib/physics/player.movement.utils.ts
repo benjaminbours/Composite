@@ -1,9 +1,13 @@
-import { Mesh, Vector3 } from 'three';
+import { Vector3 } from 'three';
 import { Inputs, MovableComponentState, Side } from '../types';
-import { RANGE } from './collision.system';
 import { PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
 import { INearestObjects } from './raycaster';
+import {
+    COLLISION_DETECTION_RANGE,
+    COLLISION_DETECTION_RANGE_INSIDE,
+} from './collision.system';
+import { getCenterPoint } from '../levels';
 
 export const MAX_FALL_SPEED = 20;
 export const JUMP_POWER = 15;
@@ -15,23 +19,27 @@ function handleDefaultCollision(
     player: PlayerGameState,
     point: Vector3,
 ) {
+    const range =
+        player.state === MovableComponentState.inside
+            ? COLLISION_DETECTION_RANGE_INSIDE
+            : COLLISION_DETECTION_RANGE;
     if (direction === 'left') {
         player.velocity.x = 0;
-        player.position.x = point.x + RANGE;
+        player.position.x = point.x + range;
     }
     if (direction === 'right') {
         player.velocity.x = 0;
-        player.position.x = point.x - RANGE;
+        player.position.x = point.x - range;
     }
 
     if (direction === 'top') {
         player.velocity.y = 0;
-        player.position.y = point.y - RANGE;
+        player.position.y = point.y - range;
     }
 
     if (direction === 'bottom') {
         player.velocity.y = 0;
-        player.position.y = point.y + RANGE;
+        player.position.y = point.y + range;
         if (player.state !== MovableComponentState.inside) {
             player.state = MovableComponentState.onFloor;
         }

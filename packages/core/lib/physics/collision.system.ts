@@ -1,16 +1,20 @@
-import type { Object3D, Vec2 } from 'three';
+import type { Object3D } from 'three';
 import { INearestObjects, getNearestObjects } from './raycaster';
-export const RANGE = 20;
+import { PlayerGameState } from '../GameState';
+import { MovableComponentState } from '../types';
+
+export const COLLISION_DETECTION_RANGE = 20;
+export const COLLISION_DETECTION_RANGE_INSIDE = 10;
 
 export type CollidingObjects = INearestObjects;
 
 // TODO: The whole function with the raycaster file could be merged / optimized
 export function detectCollidingObjects(
     obstacles: Object3D[],
-    position: Vec2,
-    velocity: Vec2,
+    player: PlayerGameState,
     freeMovementMode?: boolean,
 ): INearestObjects {
+    const { position, velocity, state } = player;
     const colliding: INearestObjects = {
         left: undefined,
         right: undefined,
@@ -24,30 +28,39 @@ export function detectCollidingObjects(
 
     const nearestObjects = getNearestObjects(position, obstacles);
 
+    const collisionDetectionRange =
+        state === MovableComponentState.inside
+            ? COLLISION_DETECTION_RANGE_INSIDE
+            : COLLISION_DETECTION_RANGE;
+
     if (
         nearestObjects.bottom &&
-        position.y + velocity.y <= RANGE + nearestObjects.bottom.point.y
+        position.y + velocity.y - collisionDetectionRange <=
+            nearestObjects.bottom.point.y
     ) {
         colliding.bottom = nearestObjects.bottom;
     }
 
     if (
         nearestObjects.right &&
-        position.x + velocity.x + RANGE > nearestObjects.right.point.x
+        position.x + velocity.x + collisionDetectionRange >
+            nearestObjects.right.point.x
     ) {
         colliding.right = nearestObjects.right;
     }
 
     if (
         nearestObjects.left &&
-        position.x + velocity.x < RANGE + nearestObjects.left.point.x
+        position.x + velocity.x - collisionDetectionRange <
+            nearestObjects.left.point.x
     ) {
         colliding.left = nearestObjects.left;
     }
 
     if (
         nearestObjects.top &&
-        position.y + velocity.y + RANGE > nearestObjects.top.point.y
+        position.y + velocity.y + collisionDetectionRange >
+            nearestObjects.top.point.y
     ) {
         colliding.top = nearestObjects.top;
     }
