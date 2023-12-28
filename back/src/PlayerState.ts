@@ -1,4 +1,4 @@
-import { Levels, Side } from '@benjaminbours/composite-core';
+import type { Levels, Side } from '@benjaminbours/composite-core';
 
 export enum PlayerStatus {
   IS_PLAYING,

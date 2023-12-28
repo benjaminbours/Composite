@@ -2,11 +2,17 @@
   "name": "@benjaminbours/composite-core",
   "version": "0.1.1",
   "description": "What is shared between front and back",
-  "main": "build/index.js",
+  "type": "module",
+  "main": "cjs/index.js",
+  "exports": {
+    "require": "./cjs/index.js",
+    "import": "./esm/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "make build",
+    "dev:cjs": "tsc --watch --module commonjs --outDir cjs/",
+    "dev:esm": "tsc --watch --module es2022 --outDir esm/",
     "type-check": "tsc --noEmit",
     "prepack": "npm run build"
   },
