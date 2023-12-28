@@ -40,6 +40,7 @@ export interface PlayerGameState {
     position: Vec2;
     velocity: Vec2;
     state: MovableComponentState;
+    insideElementID: number | undefined;
 }
 // orders of properties are very important here
 export class RedisGameState {
@@ -50,11 +51,13 @@ export class RedisGameState {
         public light_velocity_x: string,
         public light_velocity_y: string,
         public light_state: string,
+        public light_inside_element_id: string | undefined,
         public shadow_x: string,
         public shadow_y: string,
         public shadow_velocity_x: string,
         public shadow_velocity_y: string,
         public shadow_state: string,
+        public shadow_inside_element_id: string | undefined,
         public lastValidatedInput: string,
         public game_time: string,
         public end_level: string,
@@ -103,11 +106,17 @@ export class RedisGameState {
             String(state.players[1].velocity.x),
             String(state.players[1].velocity.y),
             String(state.players[1].state),
+            state.players[1].insideElementID !== undefined
+                ? String(state.players[1].insideElementID)
+                : undefined,
             String(state.players[0].position.x),
             String(state.players[0].position.y),
             String(state.players[0].velocity.x),
             String(state.players[0].velocity.y),
             String(state.players[0].state),
+            state.players[0].insideElementID !== undefined
+                ? String(state.players[0].insideElementID)
+                : undefined,
             String(state.lastValidatedInput),
             String(state.game_time),
             state.level.end_level.join(),
@@ -177,6 +186,10 @@ export class GameState {
                         y: Number(state.shadow_velocity_y),
                     },
                     state: Number(state.shadow_state) as MovableComponentState,
+                    insideElementID:
+                        state.shadow_inside_element_id !== undefined
+                            ? Number(state.shadow_inside_element_id)
+                            : undefined,
                 },
                 {
                     position: {
@@ -188,6 +201,10 @@ export class GameState {
                         y: Number(state.light_velocity_y),
                     },
                     state: Number(state.light_state) as MovableComponentState,
+                    insideElementID:
+                        state.light_inside_element_id !== undefined
+                            ? Number(state.light_inside_element_id)
+                            : undefined,
                 },
             ],
             levelState,

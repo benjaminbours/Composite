@@ -269,6 +269,7 @@ export class SocketGateway {
             y: 0,
           },
           state: MovableComponentState.onFloor,
+          insideElementID: undefined,
         },
         {
           position: {
@@ -280,6 +281,7 @@ export class SocketGateway {
             y: 0,
           },
           state: MovableComponentState.onFloor,
+          insideElementID: undefined,
         },
       ],
       level.state,
