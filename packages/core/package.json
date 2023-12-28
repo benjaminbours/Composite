@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/three": "^0.159.0",
-    "typescript": "^5.2.2"
+    "@types/three": "^0.160.0",
+    "typescript": "^5.3.3"
   },
   "publishConfig": {
     "registry": "https://github.com/benjaminbours/Composite.git"
@@ -22,6 +22,6 @@
   "repository": "https://github.com/benjaminbours/Composite.git",
   "peerDependencies": {
     "gsap": "^3.12.2",
-    "three": "^0.159.0"
+    "three": "^0.160.0"
   }
 }

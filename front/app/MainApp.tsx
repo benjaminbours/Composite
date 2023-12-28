@@ -202,6 +202,7 @@ function MainApp() {
                                     y: 0,
                                 },
                                 state: MovableComponentState.onFloor,
+                                insideElementID: undefined,
                             },
                             {
                                 position: {
@@ -213,6 +214,7 @@ function MainApp() {
                                     y: 0,
                                 },
                                 state: MovableComponentState.onFloor,
+                                insideElementID: undefined,
                             },
                         ],
                         {
