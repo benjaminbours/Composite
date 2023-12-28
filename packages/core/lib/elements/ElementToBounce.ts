@@ -8,7 +8,12 @@ export class ElementToBounce extends Mesh {
     public rotationApplied?: Vector3;
     public positionApplied?: Vector3;
 
-    constructor(geometry: any, material: any, public side: Side) {
+    constructor(
+        geometry: any,
+        material: any,
+        public side: Side,
+        public bounceID: number,
+    ) {
         super(geometry, material);
         // this.center = getCenterPoint(this);
     }

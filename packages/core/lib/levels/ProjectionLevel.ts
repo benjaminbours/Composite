@@ -19,6 +19,7 @@ export class ProjectionLevel extends Group {
     };
 
     public state: ProjectionLevelState = {
+        bounces: {},
         id: Levels.LEARN_TO_FLY,
         end_level: [],
     };
@@ -50,14 +51,31 @@ export class ProjectionLevel extends Group {
             }
         });
 
-        const bounce = createBounce(new Vector3(-1, 1, 0), -45, Side.SHADOW);
-        this.add(bounce);
-        this.collidingElements.push(bounce);
+        const bounceList = [
+            {
+                id: 0,
+                side: Side.SHADOW,
+                position: new Vector3(-1, 1, 0),
+                initialRotation: -75,
+            },
+            {
+                id: 1,
+                side: Side.LIGHT,
+                position: new Vector3(0, 1, 0),
+                initialRotation: 45,
+            },
+        ];
 
-        const bounceLight = createBounce(new Vector3(0, 1, 0), 45, Side.LIGHT);
-        this.add(bounceLight);
-        this.collidingElements.push(bounceLight);
-        this.lightBounces.push(bounceLight);
+        bounceList.forEach(({ position, initialRotation, side, id }) => {
+            const bounce = createBounce(position, initialRotation, side, id);
+            this.add(bounce);
+            this.collidingElements.push(bounce);
+            this.state.bounces[id] = { rotationY: 0 };
+
+            if (side === Side.LIGHT) {
+                this.lightBounces.push(bounce);
+            }
+        });
 
         // const bounceLight2 = createBounce(
         //     new Vector3(1.5, 2, 0),

@@ -102,6 +102,7 @@ export function createMeshForGrid(
     mat: Material,
     withBounce?: {
         side: Side;
+        id: number;
     },
 ): Mesh {
     // geo.translate(
@@ -111,7 +112,12 @@ export function createMeshForGrid(
     // );
     const mesh = (() => {
         if (withBounce) {
-            return new ElementToBounce(geo, mat, withBounce.side);
+            return new ElementToBounce(
+                geo,
+                mat,
+                withBounce.side,
+                withBounce.id,
+            );
         }
         return new Mesh(geo, mat);
     })();
@@ -129,6 +135,7 @@ export function createWall(
     withOcclusion?: boolean,
     withBounce?: {
         side: Side;
+        id: number;
     },
 ) {
     const sizeForGrid = size.multiplyScalar(gridSize);
@@ -319,7 +326,12 @@ export function createColumnGroup(
     return group;
 }
 
-export function createBounce(position: Vector3, rotationY: number, side: Side) {
+export function createBounce(
+    position: Vector3,
+    rotationY: number,
+    side: Side,
+    id: number,
+) {
     const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize);
     const positionForGrid = position.multiplyScalar(gridSize);
     const rotation = new Vector3(
@@ -348,6 +360,7 @@ export function createBounce(position: Vector3, rotationY: number, side: Side) {
 
     const wall = createMeshForGrid(geometry, material, {
         side,
+        id,
     }) as ElementToBounce;
 
     // TODO: Improve this position logic, and it's duplicate with the particle effect in skin bounce shadow

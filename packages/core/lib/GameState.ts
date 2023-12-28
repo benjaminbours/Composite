@@ -19,6 +19,11 @@ export interface PositionLevelState extends Level {
 }
 
 export interface ProjectionLevelState extends Level {
+    bounces: {
+        [key: number]: {
+            rotationY: number;
+        };
+    };
     id: Levels.LEARN_TO_FLY;
 }
 
@@ -53,8 +58,10 @@ export class RedisGameState {
         public lastValidatedInput: string,
         public game_time: string,
         public end_level: string,
-        public level_0_door_ground: string,
-        public level_0_door_roof: string,
+        public level_0_door_ground: string | undefined,
+        public level_0_door_roof: string | undefined,
+        public level_1_bounce_0: string | undefined,
+        public level_1_bounce_1: string | undefined,
     ) {}
 
     static parseGameState(state: GameState) {
@@ -64,14 +71,29 @@ export class RedisGameState {
         ): value is PositionLevelState =>
             Boolean((value as PositionLevelState).doors);
 
-        const doors: [string, string] = (() => {
+        const isProjectionLevel = (
+            value: LevelState,
+        ): value is ProjectionLevelState =>
+            Boolean((value as ProjectionLevelState).bounces);
+
+        const doors: [string | undefined, string | undefined] = (() => {
             if (isPositionLevel(state.level)) {
                 return [
                     state.level.doors.ground.join(),
                     state.level.doors.roof.join(),
                 ];
             }
-            return ['', ''];
+            return [undefined, undefined];
+        })();
+
+        const bounces: [string | undefined, string | undefined] = (() => {
+            if (isProjectionLevel(state.level)) {
+                return [
+                    String(state.level.bounces[0].rotationY),
+                    String(state.level.bounces[1].rotationY),
+                ];
+            }
+            return [undefined, undefined];
         })();
 
         return new RedisGameState(
@@ -90,6 +112,7 @@ export class RedisGameState {
             String(state.game_time),
             state.level.end_level.join(),
             ...doors,
+            ...bounces,
         );
     }
 }
@@ -118,13 +141,25 @@ export class GameState {
                     return {
                         id: level,
                         doors: {
-                            ground: parseActivators(state.level_0_door_ground),
-                            roof: parseActivators(state.level_0_door_roof),
+                            ground: parseActivators(
+                                state.level_0_door_ground as string,
+                            ),
+                            roof: parseActivators(
+                                state.level_0_door_roof as string,
+                            ),
                         },
                         end_level: parseActivators(state.end_level),
                     };
                 case Levels.LEARN_TO_FLY:
                     return {
+                        bounces: {
+                            0: {
+                                rotationY: Number(state.level_1_bounce_0),
+                            },
+                            1: {
+                                rotationY: Number(state.level_1_bounce_1),
+                            },
+                        },
                         id: level,
                         end_level: parseActivators(state.end_level),
                     };
