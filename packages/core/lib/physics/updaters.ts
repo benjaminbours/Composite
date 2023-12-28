@@ -20,8 +20,8 @@ import {
     applyGravity,
     handleJump,
     handleCollision,
-    detectSensitivityToCollision,
     detectFalling,
+    clearInsideElementID,
 } from './player.movement.utils';
 
 export enum Context {
@@ -38,14 +38,15 @@ function applyPlayerUpdate(
     player: PlayerGameState,
     freeMovementMode?: boolean,
 ) {
-    detectSensitivityToCollision(collisionResult, player);
+    // console.log('HERE collision result', collisionResult);
+    clearInsideElementID(collisionResult, player);
 
-    if (player.state !== MovableComponentState.collisionInsensitive) {
-        handleCollision(collisionResult, 'right', side, player);
-        handleCollision(collisionResult, 'left', side, player);
-        handleCollision(collisionResult, 'top', side, player);
-        handleCollision(collisionResult, 'bottom', side, player);
-    }
+    // if (player.state !== MovableComponentState.collisionInsensitive) {
+    handleCollision(collisionResult, 'right', side, player);
+    handleCollision(collisionResult, 'left', side, player);
+    handleCollision(collisionResult, 'top', side, player);
+    handleCollision(collisionResult, 'bottom', side, player);
+    // }
 
     detectFalling(collisionResult, player);
     handleJump(input, player);
@@ -166,8 +167,7 @@ export function applySingleInput(
 
     const collisionResult = detectCollidingObjects(
         collidingElems,
-        player.position,
-        player.velocity,
+        player,
         freeMovementMode,
     );
     applyPlayerUpdate(

@@ -154,7 +154,7 @@ export class AllQueueInfo extends QueueInfo {
 export enum MovableComponentState {
     onFloor,
     inside,
-    collisionInsensitive,
+    // collisionInsensitive,
     inAir,
     // ascend,
 }

@@ -52,6 +52,7 @@ function handleEnterElementToBounce(
 ) {
     const center = getCenterPoint(bounceElement);
     player.state = MovableComponentState.inside;
+    player.insideElementID = bounceElement.bounceID;
     player.position.x = center.x;
     player.position.y = center.y;
     player.velocity.x = 0;
@@ -73,6 +74,15 @@ export function handleCollision(
             side === collidingObject.side &&
             player.state !== MovableComponentState.inside;
 
+        const shouldExitElementToBounce =
+            collidingObject.bounce &&
+            player.state !== MovableComponentState.inside &&
+            player.insideElementID === collidingObject.bounceID;
+
+        if (shouldExitElementToBounce) {
+            return;
+        }
+
         if (shouldEnterElementToBounce) {
             handleEnterElementToBounce(collidingObject, player);
             // TODO: is bouncing on opposite element
@@ -93,7 +103,7 @@ export function handleJump(input: Inputs, player: PlayerGameState) {
     if (player.state === MovableComponentState.onFloor) {
         player.velocity.y = JUMP_POWER;
     } else if (player.state === MovableComponentState.inside) {
-        player.state = MovableComponentState.collisionInsensitive;
+        player.state = MovableComponentState.inAir;
 
         if (input.left) {
             player.velocity.x = -BOUNCE_POWER;
@@ -112,36 +122,13 @@ export function handleJump(input: Inputs, player: PlayerGameState) {
 }
 
 export function applyGravity(player: PlayerGameState, delta: number) {
-    if (
-        player.state === MovableComponentState.inAir ||
-        player.state === MovableComponentState.collisionInsensitive
-    ) {
+    if (player.state === MovableComponentState.inAir) {
         const hasReachedMaxFallSpeed = player.velocity.y <= -MAX_FALL_SPEED;
         if (hasReachedMaxFallSpeed) {
             player.velocity.y = -MAX_FALL_SPEED;
         } else {
             player.velocity.y -= GRAVITY * delta;
         }
-    }
-}
-
-export function detectSensitivityToCollision(
-    collisionResult: INearestObjects,
-    player: PlayerGameState,
-) {
-    // when the player is exiting an element he was previously inside
-    // he becomes insensitive to collision for a short period of time
-    // to avoid being stuck inside the element
-    // and then when he is far enough from the element (when no more collision)
-    // he becomes inAir, and then sensitive to collision again
-    if (
-        player.state === MovableComponentState.collisionInsensitive &&
-        !collisionResult.bottom &&
-        !collisionResult.top &&
-        !collisionResult.right &&
-        !collisionResult.left
-    ) {
-        player.state = MovableComponentState.inAir;
     }
 }
 
@@ -153,10 +140,23 @@ export function detectFalling(
         return;
     }
 
-    if (
-        player.state !== MovableComponentState.inside &&
-        player.state !== MovableComponentState.collisionInsensitive
-    ) {
+    if (player.state !== MovableComponentState.inside) {
         player.state = MovableComponentState.inAir;
+    }
+}
+
+export function clearInsideElementID(
+    collisionResult: INearestObjects,
+    player: PlayerGameState,
+) {
+    if (
+        player.insideElementID !== undefined &&
+        player.state !== MovableComponentState.inside &&
+        !collisionResult.bottom &&
+        !collisionResult.top &&
+        !collisionResult.right &&
+        !collisionResult.left
+    ) {
+        player.insideElementID = undefined;
     }
 }
