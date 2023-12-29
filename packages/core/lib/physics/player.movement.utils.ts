@@ -11,7 +11,7 @@ import { getCenterPoint } from '../levels';
 
 export const MAX_FALL_SPEED = 20;
 export const JUMP_POWER = 15;
-export const BOUNCE_POWER = 15;
+export const BOUNCE_POWER = 20;
 export const GRAVITY = 20;
 
 function handleDefaultCollision(
@@ -59,6 +59,27 @@ function handleEnterElementToBounce(
     player.velocity.y = 0;
 }
 
+function handleBounceAgainstElement(
+    normal: Vector3,
+    object: ElementToBounce,
+    player: PlayerGameState,
+) {
+    const global_normal = normal.clone();
+    // a matrix which represents item's movement, rotation and scale on global world
+    const mat = object.matrixWorld;
+
+    // remove parallel movement from the matrix
+    mat.setPosition(new Vector3(0, 0, 0));
+
+    // change local normal into global normal
+    global_normal.applyMatrix4(mat).normalize();
+
+    // multiply by the bounce power
+    const bounceVector = global_normal.multiplyScalar(BOUNCE_POWER);
+    player.velocity.x = bounceVector.x;
+    player.velocity.y = bounceVector.y;
+}
+
 export function handleCollision(
     collisionResult: INearestObjects,
     direction: 'left' | 'right' | 'top' | 'bottom',
@@ -80,15 +101,24 @@ export function handleCollision(
             collidingObject.bounce &&
             player.insideElementID === collidingObject.bounceID;
 
+        const shouldBounceAgainst =
+            collidingObject.bounce && side !== collidingObject.side;
+
         if (shouldExitElementToBounce) {
             return;
         }
 
         if (shouldEnterElementToBounce) {
             handleEnterElementToBounce(collidingObject, player);
-            // TODO: is bouncing on opposite element
-            // velocity.y = BOUNCE_POWER;
-            // velocity.x = 10;
+        } else if (shouldBounceAgainst) {
+            if (collision.normal === undefined) {
+                return;
+            }
+            handleBounceAgainstElement(
+                collision.normal,
+                collidingObject,
+                player,
+            );
         } else {
             // normal collision
             handleDefaultCollision(direction, player, collision.point);
@@ -107,17 +137,17 @@ export function handleJump(input: Inputs, player: PlayerGameState) {
         player.state = MovableComponentState.inAir;
 
         if (input.left) {
-            player.velocity.x = -BOUNCE_POWER;
-            // player.velocity.y = BOUNCE_POWER / 2;
+            player.velocity.x = -JUMP_POWER;
+            // player.velocity.y = JUMP_POWER / 2;
         } else if (input.right) {
-            player.velocity.x = BOUNCE_POWER;
-            // player.velocity.y = BOUNCE_POWER / 2;
+            player.velocity.x = JUMP_POWER;
+            // player.velocity.y = JUMP_POWER / 2;
         }
 
         if (input.top) {
-            player.velocity.y = BOUNCE_POWER;
+            player.velocity.y = JUMP_POWER;
         } else if (input.bottom) {
-            player.velocity.y = -BOUNCE_POWER;
+            player.velocity.y = -JUMP_POWER;
         }
     }
 }
