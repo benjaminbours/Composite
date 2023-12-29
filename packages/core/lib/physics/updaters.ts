@@ -14,7 +14,7 @@ import {
     PositionLevelState,
     ProjectionLevelState,
 } from '../GameState';
-import { computeVelocityX, computeVelocityY } from './velocity';
+import { computeVelocity } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
 import { ElementToBounce, InteractiveArea } from '../elements';
@@ -207,14 +207,21 @@ export function applySingleInput(
 ) {
     const player = gameState.players[side];
     // side effect
-    player.velocity.x = computeVelocityX(
+    player.velocity.x = computeVelocity(
         delta,
         inputs,
         player.state,
         player.velocity.x,
+        'x',
     );
     if (freeMovementMode || player.state === MovableComponentState.inside) {
-        player.velocity.y = computeVelocityY(delta, inputs, player.velocity.y);
+        player.velocity.y = computeVelocity(
+            delta,
+            inputs,
+            player.state,
+            player.velocity.y,
+            'y',
+        );
     }
 
     const collisionResult = detectCollidingObjects(

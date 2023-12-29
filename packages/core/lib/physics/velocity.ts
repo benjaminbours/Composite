@@ -1,6 +1,7 @@
 import { Inputs, MovableComponentState } from '../types';
 
 const MAX_VELOCITY = 10;
+const MIN_VELOCITY = 0.001;
 const SPEED = 20;
 const SPEED_INSIDE = 40;
 
@@ -8,76 +9,74 @@ const updateVelocity = (speed: number, target: number, velocity: number) => {
     return (velocity += (target - velocity) / speed);
 };
 
-export function computeVelocityX(
+export function computeVelocity(
     delta: number,
     input: Inputs,
     state: MovableComponentState,
-    velocityX: number,
+    velocity: number,
+    axis: 'x' | 'y',
 ) {
     const deltaInverse = 1 / delta / (60 * 60);
-    const hasReachedMaxLeftSpeed = velocityX < -MAX_VELOCITY;
-    const hasReachedMaxRightSpeed = velocityX > MAX_VELOCITY;
-    const minimumThreshold = 0.001;
+    const hasReachedMaxSpeed = Math.abs(velocity) > MAX_VELOCITY;
+    const hasReachedMinSpeed = Math.abs(velocity) < MIN_VELOCITY;
     const speed = (() => {
         if (state === MovableComponentState.inside) {
             return SPEED_INSIDE * deltaInverse * 60;
         }
         return SPEED * deltaInverse * 60;
     })();
-    if (input.left) {
-        if (hasReachedMaxLeftSpeed) {
-            velocityX = -MAX_VELOCITY;
-        } else {
-            velocityX = updateVelocity(speed, -MAX_VELOCITY, velocityX);
+
+    if (axis === 'x') {
+        if (input.left) {
+            if (hasReachedMaxSpeed && velocity < 0) {
+                velocity = -MAX_VELOCITY;
+            } else {
+                velocity = updateVelocity(speed, -MAX_VELOCITY, velocity);
+            }
+        }
+
+        if (input.right) {
+            if (hasReachedMaxSpeed && velocity > 0) {
+                velocity = MAX_VELOCITY;
+            } else {
+                velocity = updateVelocity(speed, MAX_VELOCITY, velocity);
+            }
+        }
+
+        if (!input.left && !input.right) {
+            if (hasReachedMinSpeed) {
+                velocity = 0;
+            } else {
+                velocity = updateVelocity(speed, 0, velocity);
+            }
         }
     }
 
-    if (input.right) {
-        if (hasReachedMaxRightSpeed) {
-            velocityX = MAX_VELOCITY;
-        } else {
-            velocityX = updateVelocity(speed, MAX_VELOCITY, velocityX);
+    if (axis === 'y') {
+        if (input.bottom) {
+            if (hasReachedMaxSpeed && velocity < 0) {
+                velocity = -MAX_VELOCITY;
+            } else {
+                velocity = updateVelocity(speed, -MAX_VELOCITY, velocity);
+            }
+        }
+
+        if (input.top) {
+            if (hasReachedMaxSpeed && velocity > 0) {
+                velocity = MAX_VELOCITY;
+            } else {
+                velocity = updateVelocity(speed, MAX_VELOCITY, velocity);
+            }
+        }
+
+        if (!input.top && !input.bottom) {
+            if (hasReachedMinSpeed) {
+                velocity = 0;
+            } else {
+                velocity = updateVelocity(speed, 0, velocity);
+            }
         }
     }
 
-    if (!input.left && !input.right) {
-        velocityX = updateVelocity(speed, 0, velocityX);
-
-        if (Math.abs(velocityX) < minimumThreshold) {
-            velocityX = 0;
-        }
-    }
-
-    return velocityX;
-}
-
-export function computeVelocityY(
-    delta: number,
-    input: Inputs,
-    velocityY: number,
-) {
-    const deltaInverse = 1 / delta / (60 * 60);
-    const hasReachedMaxLeftSpeed = velocityY < -MAX_VELOCITY;
-    const hasReachedMaxRightSpeed = velocityY > MAX_VELOCITY;
-    if (input.bottom) {
-        if (hasReachedMaxLeftSpeed) {
-            velocityY = -MAX_VELOCITY;
-        } else {
-            velocityY = updateVelocity(deltaInverse, -MAX_VELOCITY, velocityY);
-        }
-    }
-
-    if (input.top) {
-        if (hasReachedMaxRightSpeed) {
-            velocityY = MAX_VELOCITY;
-        } else {
-            velocityY = updateVelocity(deltaInverse, MAX_VELOCITY, velocityY);
-        }
-    }
-
-    if (!input.top && !input.bottom) {
-        velocityY = updateVelocity(deltaInverse, 0, velocityY);
-    }
-
-    return velocityY;
+    return velocity;
 }
