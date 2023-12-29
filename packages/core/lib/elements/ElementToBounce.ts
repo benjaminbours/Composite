@@ -6,9 +6,6 @@ import { degreesToRadians } from '../helpers/math';
 
 export class ElementToBounce extends Mesh {
     public bounce = true;
-    // public center: Vector3;
-    public rotationApplied?: Vector3;
-    public positionApplied?: Vector3;
 
     constructor(
         geometry: any,
@@ -17,7 +14,6 @@ export class ElementToBounce extends Mesh {
         public bounceID: number,
     ) {
         super(geometry, material);
-        // this.center = getCenterPoint(this);
     }
 
     // TODO: Rename this function, its unclear

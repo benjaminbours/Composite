@@ -18,7 +18,6 @@ import { degreesToRadians } from '../helpers/math';
 import { Layer, Side } from '../types';
 import { ElementToBounce } from '../elements';
 
-
 // Add the extension functions
 BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -375,21 +374,14 @@ export function createBounce(
         id,
     }) as ElementToBounce;
 
-    // TODO: Improve this position logic, and it's duplicate with the particle effect in skin bounce shadow
-    wall.positionApplied = positionForGrid;
-    wall.rotationApplied = rotation;
-    wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
+    wall.position.set(
+        positionForGrid.x + sizeForGrid.x / 2,
+        positionForGrid.y + sizeForGrid.y / 2,
+        positionForGrid.z,
+    );
     wall.rotation.set(rotation.x, rotation.y, rotation.z);
     wall.updateMatrix();
-    wall.geometry.applyMatrix4(wall.matrix);
-    wall.geometry.translate(sizeForGrid.x / 2, sizeForGrid.y / 2, 0);
-
-    // reset transform
-    wall.position.set(0, 0, 0);
-    wall.rotation.set(0, 0, 0);
-    wall.scale.set(1, 1, 1);
-    wall.updateMatrix();
-
+    wall.geometry.center();
     wall.name = ElementName.BOUNCE(side);
     return wall;
 }
