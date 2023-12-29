@@ -11,7 +11,7 @@ import { getCenterPoint } from '../levels';
 
 export const MAX_FALL_SPEED = 20;
 export const JUMP_POWER = 15;
-export const BOUNCE_POWER = 20;
+export const BOUNCE_POWER = 17;
 export const GRAVITY = 20;
 
 function handleDefaultCollision(
@@ -74,8 +74,10 @@ function handleBounceAgainstElement(
     // change local normal into global normal
     global_normal.applyMatrix4(mat).normalize();
 
+    const bouncePower = normal.z === 0 ? BOUNCE_POWER / 2 : BOUNCE_POWER;
+
     // multiply by the bounce power
-    const bounceVector = global_normal.multiplyScalar(BOUNCE_POWER);
+    const bounceVector = global_normal.multiplyScalar(bouncePower);
     player.velocity.x = bounceVector.x;
     player.velocity.y = bounceVector.y;
 }
