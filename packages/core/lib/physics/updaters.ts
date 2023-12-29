@@ -160,7 +160,12 @@ export function applySingleInput(
 ) {
     const player = gameState.players[side];
     // side effect
-    player.velocity.x = computeVelocityX(delta, inputs, player.velocity.x);
+    player.velocity.x = computeVelocityX(
+        delta,
+        inputs,
+        player.state,
+        player.velocity.x,
+    );
     if (freeMovementMode || player.state === MovableComponentState.inside) {
         player.velocity.y = computeVelocityY(delta, inputs, player.velocity.y);
     }

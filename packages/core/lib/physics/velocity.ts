@@ -1,26 +1,34 @@
-import { Inputs } from '../types';
+import { Inputs, MovableComponentState } from '../types';
 
 const MAX_VELOCITY = 10;
 const SPEED = 20;
+const SPEED_INSIDE = 40;
 
-const updateVelocity = (delta: number, target: number, velocity: number) => {
-    const speed = SPEED * delta * 60;
+const updateVelocity = (speed: number, target: number, velocity: number) => {
     return (velocity += (target - velocity) / speed);
 };
 
 export function computeVelocityX(
     delta: number,
     input: Inputs,
+    state: MovableComponentState,
     velocityX: number,
 ) {
     const deltaInverse = 1 / delta / (60 * 60);
     const hasReachedMaxLeftSpeed = velocityX < -MAX_VELOCITY;
     const hasReachedMaxRightSpeed = velocityX > MAX_VELOCITY;
+    const minimumThreshold = 0.001;
+    const speed = (() => {
+        if (state === MovableComponentState.inside) {
+            return SPEED_INSIDE * deltaInverse * 60;
+        }
+        return SPEED * deltaInverse * 60;
+    })();
     if (input.left) {
         if (hasReachedMaxLeftSpeed) {
             velocityX = -MAX_VELOCITY;
         } else {
-            velocityX = updateVelocity(deltaInverse, -MAX_VELOCITY, velocityX);
+            velocityX = updateVelocity(speed, -MAX_VELOCITY, velocityX);
         }
     }
 
@@ -28,12 +36,16 @@ export function computeVelocityX(
         if (hasReachedMaxRightSpeed) {
             velocityX = MAX_VELOCITY;
         } else {
-            velocityX = updateVelocity(deltaInverse, MAX_VELOCITY, velocityX);
+            velocityX = updateVelocity(speed, MAX_VELOCITY, velocityX);
         }
     }
 
     if (!input.left && !input.right) {
-        velocityX = updateVelocity(deltaInverse, 0, velocityX);
+        velocityX = updateVelocity(speed, 0, velocityX);
+
+        if (Math.abs(velocityX) < minimumThreshold) {
+            velocityX = 0;
+        }
     }
 
     return velocityX;
