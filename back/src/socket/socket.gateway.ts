@@ -27,6 +27,8 @@ import {
   applyInputList,
   MovableComponentState,
   Context,
+  updateServerBounces,
+  ProjectionLevelState,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -393,6 +395,12 @@ export class SocketGateway {
               gameState,
               Context.server,
             );
+            if (gameState.level.id === Levels.LEARN_TO_FLY) {
+              updateServerBounces(
+                (level as ProjectionLevel).bounces,
+                (gameState.level as ProjectionLevelState).bounces,
+              );
+            }
             // then we remove it from the list
             for (let i = 0; i < inputs.length; i++) {
               const input = inputs[i];

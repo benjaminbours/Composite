@@ -65,18 +65,19 @@ export function handleCollision(
     side: Side,
     player: PlayerGameState,
 ) {
+    if (player.state === MovableComponentState.inside) {
+        return;
+    }
+
     const collision = collisionResult[direction];
     if (collision) {
         const collidingObject = collision.object as ElementToBounce;
 
         const shouldEnterElementToBounce =
-            collidingObject.bounce &&
-            side === collidingObject.side &&
-            player.state !== MovableComponentState.inside;
+            collidingObject.bounce && side === collidingObject.side;
 
         const shouldExitElementToBounce =
             collidingObject.bounce &&
-            player.state !== MovableComponentState.inside &&
             player.insideElementID === collidingObject.bounceID;
 
         if (shouldExitElementToBounce) {

@@ -11,11 +11,12 @@ export class ProjectionLevel extends Group {
     public interactiveElements: any[] = [];
     public name = 'projection-level';
     public lightBounces: ElementToBounce[] = [];
+    public bounces: ElementToBounce[] = [];
 
     public startPosition = {
-        // light: new Vector3(10, 20, 0), // start level
+        light: new Vector3(10, 20, 0), // start level
         shadow: new Vector3(0, 20, 0),
-        light: new Vector3(1089, 275, 0), // first platform
+        // light: new Vector3(1089, 275, 0), // first platform
     };
 
     public state: ProjectionLevelState = {
@@ -70,11 +71,12 @@ export class ProjectionLevel extends Group {
             const bounce = createBounce(position, initialRotation, side, id);
             this.add(bounce);
             this.collidingElements.push(bounce);
-            this.state.bounces[id] = { rotationY: 0 };
+            this.state.bounces[id] = { rotationY: initialRotation };
 
             if (side === Side.LIGHT) {
                 this.lightBounces.push(bounce);
             }
+            this.bounces.push(bounce);
         });
 
         this.collidingElements.forEach((element) => {

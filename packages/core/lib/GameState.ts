@@ -18,12 +18,14 @@ export interface PositionLevelState extends Level {
     id: Levels.CRACK_THE_DOOR;
 }
 
-export interface ProjectionLevelState extends Level {
-    bounces: {
-        [key: number]: {
-            rotationY: number;
-        };
+export interface BounceState {
+    [key: number]: {
+        rotationY: number;
     };
+}
+
+export interface ProjectionLevelState extends Level {
+    bounces: BounceState;
     id: Levels.LEARN_TO_FLY;
 }
 

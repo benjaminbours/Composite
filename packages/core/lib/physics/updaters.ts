@@ -7,15 +7,17 @@ import {
     Side,
 } from '../types';
 import {
+    BounceState,
     GameState,
     LevelState,
     PlayerGameState,
     PositionLevelState,
+    ProjectionLevelState,
 } from '../GameState';
 import { computeVelocityX, computeVelocityY } from './velocity';
 import { INearestObjects } from './raycaster';
 import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
-import { InteractiveArea } from '../elements';
+import { ElementToBounce, InteractiveArea } from '../elements';
 import {
     applyGravity,
     handleJump,
@@ -23,6 +25,7 @@ import {
     detectFalling,
     clearInsideElementID,
 } from './player.movement.utils';
+import { degreesToRadians } from '../helpers/math';
 
 export enum Context {
     client,
@@ -41,23 +44,23 @@ function applyPlayerUpdate(
     // console.log('HERE collision result', collisionResult);
     clearInsideElementID(collisionResult, player);
 
-    // if (player.state !== MovableComponentState.collisionInsensitive) {
     handleCollision(collisionResult, 'right', side, player);
     handleCollision(collisionResult, 'left', side, player);
     handleCollision(collisionResult, 'top', side, player);
     handleCollision(collisionResult, 'bottom', side, player);
-    // }
 
-    detectFalling(collisionResult, player);
     handleJump(input, player);
+    if (player.state !== MovableComponentState.inside) {
+        detectFalling(collisionResult, player);
 
-    if (!freeMovementMode) {
-        applyGravity(player, delta);
+        if (!freeMovementMode) {
+            applyGravity(player, delta);
+        }
+
+        // use velocity to update position
+        player.position.x += player.velocity.x * delta * 60;
+        player.position.y += player.velocity.y * delta * 60;
     }
-
-    // use velocity to update position
-    player.position.x += player.velocity.x * delta * 60;
-    player.position.y += player.velocity.y * delta * 60;
 }
 
 // World relate functions
@@ -92,10 +95,15 @@ function applyWorldUpdate(
     obstacles: Object3D[],
     gameState: GameState,
     collisionResult: INearestObjects,
+    player: PlayerGameState,
     context: Context,
 ) {
     const isPositionLevel = (value: LevelState): value is PositionLevelState =>
         Boolean((value as PositionLevelState).doors);
+    const isProjectionLevel = (
+        value: LevelState,
+    ): value is ProjectionLevelState =>
+        Boolean((value as ProjectionLevelState).bounces);
 
     if (isPositionLevel(gameState.level)) {
         let doorNameActivating: string | undefined = undefined;
@@ -128,6 +136,9 @@ function applyWorldUpdate(
                 }
             }
 
+            // TODO: Check if at some point, this kind of update should not be directly inside the component,
+            // not here where we are suppose to manage game state
+            // and have a condition there about updating for server or client
             if (context === Context.server) {
                 const wallDoor = obstacles.find(
                     (e) => e.name === ElementName.WALL_DOOR(key),
@@ -136,6 +147,19 @@ function applyWorldUpdate(
                     updateDoor(wallDoor, activators.length > 0);
                 }
             }
+        }
+    }
+
+    if (isProjectionLevel(gameState.level)) {
+        if (
+            player.state === MovableComponentState.inside &&
+            player.insideElementID !== undefined
+        ) {
+            const rotationY =
+                gameState.level.bounces[player.insideElementID].rotationY +
+                (player.velocity.x / 2) * 1;
+            gameState.level.bounces[player.insideElementID].rotationY =
+                rotationY;
         }
     }
 
@@ -149,6 +173,29 @@ function applyWorldUpdate(
     }
 }
 
+function updateBounce(bounce: ElementToBounce, rotationY: number) {
+    bounce.rotation.set(
+        bounce.rotation.x,
+        degreesToRadians(rotationY),
+        bounce.rotation.z,
+    );
+    bounce.updateMatrixWorld();
+}
+
+export function updateServerBounces(
+    bounces: ElementToBounce[],
+    bounceState: BounceState,
+) {
+    for (let i = 0; i < bounces.length; i++) {
+        const bounce = bounces[i];
+        if (bounce.bounceID in bounceState) {
+            updateBounce(bounce, bounceState[bounce.bounceID].rotationY);
+        }
+    }
+}
+
+// responsible to take a single input and apply it to the game state
+// and the game state only, it should not trigger any 3D changes
 export function applySingleInput(
     delta: number,
     side: Side,
@@ -183,9 +230,18 @@ export function applySingleInput(
         player,
         freeMovementMode,
     );
-    applyWorldUpdate(side, collidingElems, gameState, collisionResult, context);
+    applyWorldUpdate(
+        side,
+        collidingElems,
+        gameState,
+        collisionResult,
+        player,
+        context,
+    );
 }
 
+// responsible to take many inputs and apply them to the game state
+// and the game state only, it should not trigger any 3D changes
 export function applyInputList(
     delta: number,
     lastPlayerInput: GamePlayerInputPayload | undefined,

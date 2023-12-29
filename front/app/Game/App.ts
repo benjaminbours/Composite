@@ -37,6 +37,8 @@ import {
     LevelState,
     Context,
     MovableComponentState,
+    ElementToBounce,
+    ProjectionLevelState,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -380,6 +382,11 @@ export default class App {
                     item instanceof Player
                 ) {
                     // do nothing
+                } else if (item instanceof ElementToBounce) {
+                    const rotationY =
+                        (this.currentState.level as ProjectionLevelState)
+                            .bounces[item.bounceID]?.rotationY || 0;
+                    item.update(rotationY);
                 } else {
                     item.update(this.delta);
                 }
@@ -537,11 +544,11 @@ export default class App {
     //     }
     // };
 
-    private calculateDistance(origin: Vec2, target: Vec2) {
-        const vector = new Vector2(origin.x, origin.y);
-        const vectorTarget = new Vector2(target.x, target.y);
-        return vector.distanceTo(vectorTarget);
-    }
+    // private calculateDistance(origin: Vec2, target: Vec2) {
+    //     const vector = new Vector2(origin.x, origin.y);
+    //     const vectorTarget = new Vector2(target.x, target.y);
+    //     return vector.distanceTo(vectorTarget);
+    // }
 
     public updateInterpolation = (
         { ratio, shouldUpdate, increment }: InterpolationConfig,
