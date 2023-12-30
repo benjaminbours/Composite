@@ -1,5 +1,16 @@
 # composite-front
 
+## 0.2.0
+
+### Minor Changes
+
+- Add second game mechanic and second level
+
+### Patch Changes
+
+- Updated dependencies
+  - @benjaminbours/composite-core@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes

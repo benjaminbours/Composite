@@ -1,6 +1,6 @@
 {
   "name": "composite-back",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "",
   "author": "",
   "private": true,
@@ -21,7 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@benjaminbours/composite-core": "^0.1.1",
+    "@benjaminbours/composite-core": "^0.2.0",
     "@injectit/threejs-nodejs-exporters": "^0.0.2",
     "@nestjs/cache-manager": "^2.1.0",
     "@nestjs/common": "^10.2.7",
