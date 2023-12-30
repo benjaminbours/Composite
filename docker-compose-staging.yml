@@ -29,12 +29,12 @@ services:
     env_file:
       - ./back/.env.staging
     labels:
-      - "traefik.http.routers.api.rule=Host(`composite-apis.ddns.net`)"
-      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://composite-s.ddns.net
+      - "traefik.http.routers.api.rule=Host(`staging.api.compositethegame.com`)"
+      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://staging.compositethegame.com
 
   front:
     image: boursbenjamin/composite-front:latest
     env_file:
       - ./front/.env.staging
     labels:
-      - "traefik.http.routers.front.rule=Host(`composite-s.ddns.net`)"
+      - "traefik.http.routers.front.rule=Host(`staging.compositethegame.com`)"
