@@ -185,7 +185,6 @@ export default class App {
                     case Side.LIGHT:
                         const lightPlayer = new LightPlayer(index === 0);
                         lightPlayer.mesh.layers.set(Layer.OCCLUSION_PLAYER);
-                        lightPlayer.mesh.layers.enable(Layer.PLAYER_INSIDE);
                         return lightPlayer;
                     case Side.SHADOW:
                         const shadowPlayer = new ShadowPlayer(index === 0);
@@ -519,8 +518,12 @@ export default class App {
             nextStateAtInterpolationTime.players[
                 this.playersConfig[0]
             ].velocity;
+        this.currentState.players[this.playersConfig[0]].state =
+            nextStateAtInterpolationTime.players[this.playersConfig[0]].state;
 
         // other players interpolation
+        this.currentState.players[this.playersConfig[1]].state =
+            nextStateAtInterpolationTime.players[this.playersConfig[1]].state;
         this.interpolation.shouldUpdate = true;
         this.interpolation.ratio = 0;
 
@@ -796,8 +799,35 @@ export default class App {
         // player inside
         if (
             this.currentState.players[this.playersConfig[0]].state ===
-            MovableComponentState.inside
+                MovableComponentState.inside ||
+            this.currentState.players[this.playersConfig[1]].state ===
+                MovableComponentState.inside
         ) {
+            if (
+                this.currentState.players[this.playersConfig[0]].state ===
+                MovableComponentState.inside
+            ) {
+                (this.players[0] as any).mesh.layers.enable(
+                    Layer.PLAYER_INSIDE,
+                );
+            } else {
+                (this.players[0] as any).mesh.layers.disable(
+                    Layer.PLAYER_INSIDE,
+                );
+            }
+
+            if (
+                this.currentState.players[this.playersConfig[1]].state ===
+                MovableComponentState.inside
+            ) {
+                (this.players[1] as any).mesh.layers.enable(
+                    Layer.PLAYER_INSIDE,
+                );
+            } else {
+                (this.players[1] as any).mesh.layers.disable(
+                    Layer.PLAYER_INSIDE,
+                );
+            }
             this.camera.layers.set(Layer.PLAYER_INSIDE);
             this.renderer.setClearColor(0x444444);
             this.playerInsideComposer.render();
