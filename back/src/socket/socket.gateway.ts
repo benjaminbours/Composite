@@ -9,7 +9,6 @@ import {
 import type { Server, Socket } from 'socket.io';
 import { GameStatus, Level } from '@prisma/client';
 import { Logger } from '@nestjs/common';
-import { Scene } from 'three';
 import * as uuid from 'uuid';
 // our libs
 import {
@@ -21,10 +20,15 @@ import {
   SocketEvent,
   GameState,
   PositionLevel,
+  ProjectionLevel,
   FLOOR,
   TimeSyncPayload,
   PhysicLoop,
   applyInputList,
+  MovableComponentState,
+  Context,
+  updateServerBounces,
+  ProjectionLevelState,
 } from '@benjaminbours/composite-core';
 // local
 import { PrismaService } from '../prisma.service';
@@ -249,6 +253,8 @@ export class SocketGateway {
       switch (players[0].player.selectedLevel) {
         case Levels.CRACK_THE_DOOR:
           return new PositionLevel();
+        case Levels.LEARN_TO_FLY:
+          return new ProjectionLevel();
       }
     })();
 
@@ -264,6 +270,8 @@ export class SocketGateway {
             x: 0,
             y: 0,
           },
+          state: MovableComponentState.onFloor,
+          insideElementID: undefined,
         },
         {
           position: {
@@ -274,6 +282,8 @@ export class SocketGateway {
             x: 0,
             y: 0,
           },
+          state: MovableComponentState.onFloor,
+          insideElementID: undefined,
         },
       ],
       level.state,
@@ -300,7 +310,10 @@ export class SocketGateway {
     this.registerGameLoop(game.id, level);
   }
 
-  registerGameLoop = (gameId: number, level: PositionLevel) => {
+  registerGameLoop = (
+    gameId: number,
+    level: PositionLevel | ProjectionLevel,
+  ) => {
     // TODO: The following variable declared here and accessible in the process
     // input queue closure are potential memory leaks.
     // Let's try to declare them only once somewhere else, or to update
@@ -310,9 +323,9 @@ export class SocketGateway {
       undefined,
     ];
 
-    const collidingScene = new Scene();
-    collidingScene.add(FLOOR, ...level.collidingElements);
-    collidingScene.updateMatrixWorld();
+    const collidingElements = [FLOOR, ...level.collidingElements];
+    FLOOR.updateMatrixWorld(true);
+    level.updateMatrixWorld(true);
 
     const TICK_RATE = 10;
     // let tick = 0;
@@ -339,7 +352,13 @@ export class SocketGateway {
 
             const parsedInput: GamePlayerInputPayload = {
               time,
-              inputs: { left: inputs[0], right: inputs[1], jump: inputs[2] },
+              inputs: {
+                left: inputs[0],
+                right: inputs[1],
+                jump: inputs[2],
+                top: inputs[3],
+                bottom: inputs[4],
+              },
               sequence,
               player,
             };
@@ -372,10 +391,16 @@ export class SocketGateway {
               delta,
               lastPlayersInput[i],
               inputs,
-              collidingScene.children,
+              collidingElements,
               gameState,
-              'server',
+              Context.server,
             );
+            if (gameState.level.id === Levels.LEARN_TO_FLY) {
+              updateServerBounces(
+                (level as ProjectionLevel).bounces,
+                (gameState.level as ProjectionLevelState).bounces,
+              );
+            }
             // then we remove it from the list
             for (let i = 0; i < inputs.length; i++) {
               const input = inputs[i];

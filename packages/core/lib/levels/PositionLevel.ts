@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3 } from 'three';
+import { Group, Object3D, Vector3, Mesh } from 'three';
 // local
 import {
     ElementName,
@@ -20,6 +20,7 @@ export class PositionLevel extends Group {
         light: new Vector3(10, 20, 0), // start level
         shadow: new Vector3(200, 20, 0),
         // shadow: new Vector3(2200, 775, 0), // roof door
+        // light: new Vector3(2500, 20, 0), // end level
         // shadow: new Vector3(2400, 20, 0), // end level
     };
 
@@ -50,8 +51,12 @@ export class PositionLevel extends Group {
 
         outsideArches.forEach((arch) => {
             this.add(arch);
-            // TODO: Add only the platform to the list of colliding elements
-            this.collidingElements.push(arch);
+            const platform = arch.children.find(
+                (child) => child.name === 'platform',
+            );
+            if (platform) {
+                this.collidingElements.push(platform);
+            }
         });
 
         const templeEndWall = createWall(
@@ -114,8 +119,12 @@ export class PositionLevel extends Group {
 
         insideArches.forEach((arch) => {
             this.add(arch);
-            // TODO: Add only the platform to the list of colliding elements
-            this.collidingElements.push(arch);
+            const platform = arch.children.find(
+                (child) => child.name === 'platform',
+            );
+            if (platform) {
+                this.collidingElements.push(platform);
+            }
         });
 
         const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
@@ -123,5 +132,11 @@ export class PositionLevel extends Group {
         this.collidingElements.push(endLevel);
         this.interactiveElements.push(endLevel);
         positionOnGrid(endLevel, new Vector3(11, 0, 0));
+
+        this.collidingElements.forEach((element) => {
+            if ((element as Mesh).geometry) {
+                (element as Mesh).geometry.computeBoundsTree();
+            }
+        });
     }
 }

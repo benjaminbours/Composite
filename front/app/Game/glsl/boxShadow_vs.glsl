@@ -1,24 +1,12 @@
 attribute float delay;
-attribute float distance;
+attribute float dist;
 
 uniform float time;
 
-varying vec2 vUv;
-
 void main() {
-
-    vec3 vPosition = position;
-    vec3 displacement = vec3(0.);
-
-    // if (selection == 1.) {
-    displacement = normal * distance * 20. * mod(time+delay, 1.);
-    // }
-
-    vPosition += displacement;
+    vec3 displacement = normal * dist * 25. * mod(time+delay, 1.);
+    vec3 vPosition = position + displacement;
 
     gl_PointSize = 8. - length(displacement) / 2.5;
-
-    vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
-
 }

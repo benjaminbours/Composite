@@ -308,7 +308,7 @@ export function Menu({
                 id: Levels.LEARN_TO_FLY,
                 name: 'Learn to fly',
                 img: '/learn_to_fly.png',
-                disabled: true,
+                disabled: false,
             },
             {
                 id: Levels.THE_HIGH_SPHERES,

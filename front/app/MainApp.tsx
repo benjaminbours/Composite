@@ -14,7 +14,9 @@ import {
     GameState,
     Levels,
     MatchMakingPayload,
+    MovableComponentState,
     PositionLevel,
+    ProjectionLevel,
     Side,
     SocketEventType,
     TeammateInfoPayload,
@@ -45,12 +47,19 @@ function MainApp() {
     const socketController = useRef<SocketController>();
     const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
     const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
-    const [state, setState] = useState<MainState>({
-        // side: Side.LIGHT,
-        // selectedLevel: Levels.CRACK_THE_DOOR,
-        side: undefined,
-        selectedLevel: undefined,
-        gameState: undefined,
+    const [state, setState] = useState<MainState>(() => {
+        if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
+            return {
+                side: Side.LIGHT,
+                selectedLevel: Levels.LEARN_TO_FLY,
+                gameState: undefined,
+            };
+        }
+        return {
+            side: undefined,
+            selectedLevel: undefined,
+            gameState: undefined,
+        };
     });
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
@@ -167,7 +176,7 @@ function MainApp() {
             ]);
         };
 
-        if (shouldEstablishConnection) {
+        if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
             import('./SocketController')
                 .then((mod) => mod.SocketController)
                 .then((SocketController) => {
@@ -179,66 +188,94 @@ function MainApp() {
                     );
                     return;
                 })
-                .then(sendMatchMakingInfo);
-            // establishConnection().then(() => {
-            //     const level = new PositionLevel();
-            //     const initialGameState = new GameState(
-            //         [
-            //             {
-            //                 position: {
-            //                     x: level.startPosition.shadow.x,
-            //                     y: level.startPosition.shadow.y,
-            //                 },
-            //                 velocity: {
-            //                     x: 0,
-            //                     y: 0,
-            //                 },
-            //             },
-            //             {
-            //                 position: {
-            //                     x: level.startPosition.light.x,
-            //                     y: level.startPosition.light.y,
-            //                 },
-            //                 velocity: {
-            //                     x: 0,
-            //                     y: 0,
-            //                 },
-            //             },
-            //         ],
-            //         {
-            //             ...level.state,
-            //             doors: {
-            //                 ...level.state.doors,
-            //                 ground: [0],
-            //                 roof: [0],
-            //             },
-            //         },
-            //         Date.now(),
-            //         0,
-            //     );
-            //     handleGameStart(initialGameState);
-            // });
-        } else if (shouldSendMatchMakingInfo) {
-            console.log('HERE send match making info');
-            sendMatchMakingInfo();
+                .then(() => {
+                    const level = new ProjectionLevel();
+                    const initialGameState = new GameState(
+                        [
+                            {
+                                position: {
+                                    x: level.startPosition.shadow.x,
+                                    y: level.startPosition.shadow.y,
+                                },
+                                velocity: {
+                                    x: 0,
+                                    y: 0,
+                                },
+                                state: MovableComponentState.onFloor,
+                                insideElementID: undefined,
+                            },
+                            {
+                                position: {
+                                    x: level.startPosition.light.x,
+                                    y: level.startPosition.light.y,
+                                },
+                                velocity: {
+                                    x: 0,
+                                    y: 0,
+                                },
+                                state: MovableComponentState.onFloor,
+                                insideElementID: undefined,
+                            },
+                        ],
+                        {
+                            ...level.state,
+                        },
+                        Date.now(),
+                        0,
+                    );
+                    handleGameStart(initialGameState);
+                });
+        } else {
+            if (shouldEstablishConnection) {
+                import('./SocketController')
+                    .then((mod) => mod.SocketController)
+                    .then((SocketController) => {
+                        socketController.current = new SocketController(
+                            handleGameStart,
+                            handleGameFinished,
+                            handleTeamMateDisconnect,
+                            handleTeamMateInfo,
+                        );
+                        return;
+                    })
+                    .then(sendMatchMakingInfo);
+            } else if (shouldSendMatchMakingInfo) {
+                console.log('HERE send match making info');
+                sendMatchMakingInfo();
+            }
         }
     }, [gameIsPlaying, shouldEstablishConnection, shouldSendMatchMakingInfo]);
 
-    // return (
-    //     <>
-    //         {/* {!state.isGameRunning && (
-    //             <Menu mainState={state} setMainState={setState} />
-    //         )} */}
-    //         {state.gameState && (
-    //             <Game
-    //                 initialGameState={state.gameState}
-    //                 side={state.side!}
-    //                 socketController={socketController.current}
-    //                 tabIsHidden={tabIsHidden}
-    //             />
-    //         )}
-    //     </>
-    // );
+    if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
+        return (
+            <>
+                {teamMateDisconnected && (
+                    // TODO: Make appear disappear animation
+                    <div className="team-mate-disconnect">
+                        <p>Your team mate disconnected or has quit the room</p>
+                        <button
+                            className="buttonRect white"
+                            onClick={handleClickFindAnotherTeamMate}
+                        >
+                            Find another team mate
+                        </button>
+                    </div>
+                )}
+                {/* {!state.isGameRunning && (
+                    <Menu mainState={state} setMainState={setState} />
+                )} */}
+                {state.gameState && (
+                    <Game
+                        initialGameState={state.gameState}
+                        side={state.side!}
+                        socketController={socketController.current}
+                        tabIsHidden={tabIsHidden}
+                        stats={statsRef}
+                    />
+                )}
+            </>
+        );
+    }
 
     return (
         <>

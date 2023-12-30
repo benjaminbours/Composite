@@ -1,16 +1,8 @@
 uniform float opacity;
-varying float depth;
-varying vec4 vLastPosition;
-varying vec4 vColor;
-varying float vSelection;
-varying vec3 vPosition;
-varying vec3 a;
 
 void main(){
-    vec4 lastPosition = vLastPosition;
     vec2 position = gl_PointCoord - vec2(.5,.5);
     float r = sqrt(dot(position*2.0, position*2.0));
-    float nDepth = abs(depth);
     r = 1.0-r;
     if (r > 0.0){
         // if(vSelection > 512. / 2.0){

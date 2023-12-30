@@ -12,14 +12,6 @@ uniform float uPowerRotationGlobal;
 uniform float uAngleGlobal;
 uniform vec3 shadowLastPosition;
 
-varying vec4 vLastPosition;
-varying float depth;
-varying vec4 vColor;
-varying float vSelection;
-varying vec3 vPosition;
-
-varying vec3 a;
-
 mat4 rotationMatrix(vec3 axis, float angle)
 {
     axis = normalize(axis);
@@ -42,7 +34,6 @@ void main(){
     float elapsedTime = updateTime;
 
     vec3 dPosition;
-    vSelection = selection;
 
     // vec3 sphere = position + spherePosition;
 
@@ -68,7 +59,6 @@ void main(){
         cosX = cos(time + PI * 10.0 * delay);
 
          dPosition.x = amplitudeX * cosX;
-         vPosition = dPosition;
 
     } else {
         dPosition = position;
@@ -115,8 +105,6 @@ void main(){
 
     }
 
-    depth = lastPosition.z;
-    vLastPosition = lastPosition;
     gl_Position = projectionMatrix * mvPosition;
 
 }

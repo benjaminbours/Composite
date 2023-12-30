@@ -22,7 +22,7 @@ services:
       - ./back/src:/app/back/src
       - ./back/test:/app/back/test
       - ./back/prisma:/app/back/prisma
-      - ./packages/core/build:/app/packages/core/build
+      - ./packages/core:/app/packages/core
 
   front:
     build:
@@ -30,4 +30,4 @@ services:
     volumes:
       - ./front/.env:/app/front/.env
       - ./front:/app/front
-      - ./packages/core/build:/app/packages/core/build
+      - ./packages/core:/app/packages/core

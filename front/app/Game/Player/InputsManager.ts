@@ -5,6 +5,8 @@ export default class InputsManager {
         left: false,
         right: false,
         jump: false,
+        top: false,
+        bottom: false,
     };
 
     public registerEventListeners = () => {
@@ -25,6 +27,14 @@ export default class InputsManager {
     }
 
     private keydownOptions = {
+        // top
+        KeyW: () => {
+            this.inputsActive.top = true;
+        },
+        // bottom
+        KeyS: () => {
+            this.inputsActive.bottom = true;
+        },
         // left
         KeyA: () => {
             this.inputsActive.left = true;
@@ -40,6 +50,14 @@ export default class InputsManager {
     };
 
     private keyupOptions = {
+        // top
+        KeyW: () => {
+            this.inputsActive.top = false;
+        },
+        // bottom
+        KeyS: () => {
+            this.inputsActive.bottom = false;
+        },
         KeyA: () => {
             this.inputsActive.left = false;
         },
@@ -53,7 +71,7 @@ export default class InputsManager {
 
     private handleKeydown(e: KeyboardEvent) {
         const { code } = e;
-        const key = code as 'KeyA' | 'KeyD' | 'Space';
+        const key = code as 'KeyA' | 'KeyD' | 'Space' | 'KeyW' | 'KeyS';
         if (this.keydownOptions[key]) {
             this.keydownOptions[key]();
         }
@@ -61,7 +79,7 @@ export default class InputsManager {
 
     private handleKeyup(e: KeyboardEvent) {
         const { code } = e;
-        const key = code as 'KeyA' | 'KeyD' | 'Space';
+        const key = code as 'KeyA' | 'KeyD' | 'Space' | 'KeyW' | 'KeyS';
         if (this.keyupOptions[key]) {
             this.keyupOptions[key]();
         }

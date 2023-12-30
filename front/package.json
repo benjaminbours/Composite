@@ -22,12 +22,13 @@
     "dat.gui": "^0.7.5",
     "env-cmd": "^10.1.0",
     "gsap": "^3.12.2",
-    "next": "^13.5.4",
+    "next": "^14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "socket.io-client": "^4.7.2",
     "stats.js": "^0.17.0",
-    "three": "^0.157.0",
+    "three": "^0.160.0",
+    "three-mesh-bvh": "^0.6.8",
     "utf-8-validate": "^5.0.10"
   },
   "devDependencies": {
@@ -36,7 +37,7 @@
     "@types/react": "^18.2.25",
     "@types/react-dom": "^18.2.11",
     "@types/stats.js": "^0.17.0",
-    "@types/three": "^0.156.0",
+    "@types/three": "^0.160.0",
     "eslint": "^8.51.0",
     "eslint-config-next": "^13.5.4",
     "eslint-config-prettier": "^9.0.0",
@@ -44,7 +45,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^3.0.2",
     "sass": "^1.69.0",
-    "typescript": "^5.1.6",
+    "typescript": "^5.3.3",
     "webpack-glsl-loader": "^1.0.1"
   }
 }

@@ -8,6 +8,7 @@
 ## Required
 
 - Orchestrate efficiently the transition between the menu, the game, the state on the server, the connection, etc => tout en sommes
+- support different type of keyboard layout (qwerty, azerty, blabla)
 
 ### Menu
 
@@ -35,4 +36,40 @@
 
 ## To fix
 
-- manage disconnect event while in game
+- Manage disconnect event while in game
+- Fix crash when you are in game, your team mate leave and you click to find another teammate, HomeInterface is null
+- Fix the fact player can exit bounce element without pressing enter sometimes
+- Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
+
+## Potential game play suggestion
+
+- L3Gl0N__:
+  - black hole, potential impact on gravity
+  - Dash for the light
+  - shadow can avoid gravity for a while, or go through spaces the light can't, the main idea is about not having movement constraints for a duration
+  - End level animation => make the player attracted by the center of the animation, kind of an ascension
+- uchinara:
+  - Player bounce against each other
+  - onde / particles
+- rumpleplays:
+  - Open a dedicated discord, bitch
+
+## Think about bounce mechanism
+
+- si le player light peut rentrer dans le bounce light, quand pas de player inside, does it bounce?
+- Est ce que on ne voudrait pas des elements qui ont un skin shadow + light (kind of) ou n'importe lequel des players peut rentrer a l'interieur ?
+- Est ce que on ne voudrait pas simplement des bounces "classique" qui n'ont pas besoin de player ? Si uniquement des bounces avec player, ca limite un peu
+- Est ce que les players se repoussent ? OUI
+
+## Credit
+
+- thank you for the mental support and follow up, they sent me so much strength:
+  - L3Gl0N__
+  - uchinara
+
+- thank you for making me discover this lib => https://github.com/gkjohnson/three-mesh-bvh, was a game changer in terms of performance + youtube video about designing puzzle game
+  - uchinara
+
+## If I ever receive one penny for this game
+
+- Support this lib => https://github.com/gkjohnson/three-mesh-bvh

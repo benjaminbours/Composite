@@ -14,6 +14,9 @@ import {
     Fog,
     Vector2,
     Vec2,
+    Box3,
+    Vector3,
+    Box3Helper,
 } from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -30,12 +33,22 @@ import {
     applyInputList,
     ElementName,
     Layer,
+    PositionLevelState,
+    LevelState,
+    Context,
+    MovableComponentState,
+    ElementToBounce,
+    ProjectionLevelState,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
-import { mixShader, volumetricLightShader } from './volumetricLightShader';
+import basicPostProdVS from './glsl/basic_postprod_vs.glsl';
+import playerInsideFS from './glsl/playerInside_fs.glsl';
+import mixPassFS from './glsl/mixPass_fs.glsl';
+import volumetricLightBounceFS from './glsl/volumetricLightBounce_fs.glsl';
+import volumetricLightPlayerFS from './glsl/volumetricLightPlayer_fs.glsl';
 import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
@@ -71,9 +84,14 @@ export default class App {
 
     private levelController: LevelController;
 
-    private volumetricLightPass!: ShaderPass;
-    private occlusionComposer!: EffectComposer;
     private mainComposer!: EffectComposer;
+    private playerInsideComposer!: EffectComposer;
+
+    private occlusionComposers: EffectComposer[] = [];
+    private volumetricLightPasses: ShaderPass[] = [];
+
+    private playerOcclusionComposer!: EffectComposer;
+    private playerVolumetricLightPass!: ShaderPass;
 
     public inputsManager: InputsManager;
 
@@ -96,6 +114,8 @@ export default class App {
         increment: 10,
         shouldUpdate: false,
     };
+
+    private playerHelper?: Box3;
 
     constructor(
         canvasDom: HTMLCanvasElement,
@@ -164,10 +184,12 @@ export default class App {
                 switch (side) {
                     case Side.LIGHT:
                         const lightPlayer = new LightPlayer(index === 0);
-                        lightPlayer.mesh.layers.set(Layer.OCCLUSION);
+                        lightPlayer.mesh.layers.set(Layer.OCCLUSION_PLAYER);
                         return lightPlayer;
                     case Side.SHADOW:
-                        return new ShadowPlayer(index === 0);
+                        const shadowPlayer = new ShadowPlayer(index === 0);
+                        shadowPlayer.mesh.layers.set(Layer.PLAYER_INSIDE);
+                        return shadowPlayer;
                 }
             })();
             this.players.push(player);
@@ -177,7 +199,7 @@ export default class App {
         this.camera.setDefaultTarget(this.players[0].position);
 
         // camera
-        this.camera.position.z = 350;
+        this.camera.position.z = 500;
         this.camera.position.y = 10;
 
         this.scene.fog = new FogExp2(0xffffff, 0.001);
@@ -212,32 +234,141 @@ export default class App {
             this.scene,
             this.players,
         );
+        if (process.env.NEXT_PUBLIC_PLAYER_BBOX_HELPER) {
+            this.playerHelper = new Box3();
+            this.scene.add(new Box3Helper(this.playerHelper, 0xffff00));
+        }
+    };
+
+    createRenderTarget = (renderScale: number) => {
+        return new WebGLRenderTarget(
+            this.width * renderScale,
+            this.height * renderScale,
+        );
+    };
+
+    createOcclusionComposer = (
+        renderPass: RenderPass,
+        lightPass: ShaderPass,
+        occlusionRenderTarget: WebGLRenderTarget,
+    ) => {
+        const occlusionComposer = new EffectComposer(
+            this.renderer,
+            occlusionRenderTarget,
+        );
+        occlusionComposer.renderToScreen = false;
+        occlusionComposer.addPass(renderPass);
+        occlusionComposer.addPass(lightPass);
+
+        return occlusionComposer;
+    };
+
+    createMixPass = (addTexture: WebGLRenderTarget) => {
+        const mixPass = new ShaderPass(
+            {
+                uniforms: {
+                    baseTexture: { value: null },
+                    addTexture: { value: null },
+                },
+                vertexShader: basicPostProdVS,
+                fragmentShader: mixPassFS,
+            },
+            'baseTexture',
+        );
+        mixPass.uniforms.addTexture.value = addTexture.texture;
+
+        return mixPass;
     };
 
     setupPostProcessing = () => {
         const renderScale = 1;
-        const occlusionRenderTarget = new WebGLRenderTarget(
-            this.width * renderScale,
-            this.height * renderScale,
-        );
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.volumetricLightPass = new ShaderPass(volumetricLightShader);
-        this.volumetricLightPass.needsSwap = false;
+        this.mainComposer = new EffectComposer(this.renderer);
 
-        this.occlusionComposer = new EffectComposer(
-            this.renderer,
+        const renderPass = new RenderPass(this.scene, this.camera);
+        this.mainComposer.addPass(renderPass);
+
+        // create occlusion render for player light
+        const occlusionRenderTarget = this.createRenderTarget(renderScale);
+        this.playerVolumetricLightPass = new ShaderPass({
+            uniforms: {
+                tDiffuse: { value: null },
+                lightPosition: { value: new Vector2(0.5, 0.5) },
+                exposure: { value: 0.18 },
+                decay: { value: 0.97 },
+                density: { value: 0.8 },
+                weight: { value: 0.5 },
+                samples: { value: 100 },
+            },
+            vertexShader: basicPostProdVS,
+            fragmentShader: volumetricLightPlayerFS,
+        });
+        this.playerVolumetricLightPass.needsSwap = false;
+        this.playerOcclusionComposer = this.createOcclusionComposer(
+            renderPass,
+            this.playerVolumetricLightPass,
             occlusionRenderTarget,
         );
-        this.occlusionComposer.renderToScreen = false;
-        this.occlusionComposer.addPass(renderPass);
-        this.occlusionComposer.addPass(this.volumetricLightPass);
+        const mixPass = this.createMixPass(occlusionRenderTarget);
 
-        const mixPass = new ShaderPass(mixShader, 'baseTexture');
-        mixPass.uniforms.addTexture.value = occlusionRenderTarget.texture;
-
-        this.mainComposer = new EffectComposer(this.renderer);
-        this.mainComposer.addPass(renderPass);
         this.mainComposer.addPass(mixPass);
+
+        // create occlusion render for each light bounce element
+        const lightBounces =
+            (
+                this.levelController.levels[
+                    this.levelController.currentLevel
+                ] as any
+            ).lightBounces || [];
+
+        for (let i = 0; i < lightBounces.length; i++) {
+            const occlusionRenderTarget = this.createRenderTarget(renderScale);
+            const volumetricLightPass = new ShaderPass({
+                uniforms: {
+                    tDiffuse: { value: null },
+                    lightPosition: { value: new Vector2(0.5, 0.5) },
+                    exposure: { value: 0.18 },
+                    decay: { value: 0.9 },
+                    density: { value: 0.5 },
+                    weight: { value: 0.5 },
+                    samples: { value: 100 },
+                },
+                vertexShader: basicPostProdVS,
+                fragmentShader: volumetricLightBounceFS,
+            });
+            volumetricLightPass.needsSwap = false;
+            const occlusionComposer = this.createOcclusionComposer(
+                renderPass,
+                volumetricLightPass,
+                occlusionRenderTarget,
+            );
+            const mixPass = this.createMixPass(occlusionRenderTarget);
+
+            this.mainComposer.addPass(mixPass);
+            this.occlusionComposers.push(occlusionComposer);
+            this.volumetricLightPasses.push(volumetricLightPass);
+        }
+
+        // create a renderer for when a player is inside an element
+        const playerInsideRenderTarget = this.createRenderTarget(renderScale);
+        const playerInsidePass = new ShaderPass({
+            uniforms: {
+                tDiffuse: { value: null },
+            },
+            vertexShader: basicPostProdVS,
+            fragmentShader: playerInsideFS,
+        });
+        playerInsidePass.needsSwap = false;
+        this.playerInsideComposer = new EffectComposer(
+            this.renderer,
+            playerInsideRenderTarget,
+        );
+        this.playerInsideComposer.renderToScreen = false;
+        this.playerInsideComposer.addPass(renderPass);
+        this.playerInsideComposer.addPass(playerInsidePass);
+        const playerInsideMixPass = this.createMixPass(
+            playerInsideRenderTarget,
+        );
+        this.mainComposer.addPass(playerInsideMixPass);
     };
 
     public updateChildren = (object: Object3D) => {
@@ -250,6 +381,11 @@ export default class App {
                     item instanceof Player
                 ) {
                     // do nothing
+                } else if (item instanceof ElementToBounce) {
+                    const rotationY =
+                        (this.currentState.level as ProjectionLevelState)
+                            .bounces[item.bounceID]?.rotationY || 0;
+                    item.update(rotationY);
                 } else {
                     item.update(this.delta);
                 }
@@ -349,8 +485,9 @@ export default class App {
                     ]!.collidingElements,
                 ],
                 nextStateAtInterpolationTime,
-                'client',
-                // true,
+                Context.client,
+                false,
+                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
             for (let i = 0; i < inputsForTick.length; i++) {
                 const input = inputsForTick[i];
@@ -381,8 +518,12 @@ export default class App {
             nextStateAtInterpolationTime.players[
                 this.playersConfig[0]
             ].velocity;
+        this.currentState.players[this.playersConfig[0]].state =
+            nextStateAtInterpolationTime.players[this.playersConfig[0]].state;
 
         // other players interpolation
+        this.currentState.players[this.playersConfig[1]].state =
+            nextStateAtInterpolationTime.players[this.playersConfig[1]].state;
         this.interpolation.shouldUpdate = true;
         this.interpolation.ratio = 0;
 
@@ -406,11 +547,11 @@ export default class App {
     //     }
     // };
 
-    private calculateDistance(origin: Vec2, target: Vec2) {
-        const vector = new Vector2(origin.x, origin.y);
-        const vectorTarget = new Vector2(target.x, target.y);
-        return vector.distanceTo(vectorTarget);
-    }
+    // private calculateDistance(origin: Vec2, target: Vec2) {
+    //     const vector = new Vector2(origin.x, origin.y);
+    //     const vectorTarget = new Vector2(target.x, target.y);
+    //     return vector.distanceTo(vectorTarget);
+    // }
 
     public updateInterpolation = (
         { ratio, shouldUpdate, increment }: InterpolationConfig,
@@ -464,7 +605,8 @@ export default class App {
                     ]!.collidingElements,
                 ],
                 this.currentState,
-                'client',
+                Context.client,
+                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
             // this.gameStateHistory.push(
             //     JSON.parse(JSON.stringify(this.currentState)),
@@ -483,10 +625,17 @@ export default class App {
                     0,
                 );
             }
+            if (this.playerHelper) {
+                this.playerHelper.setFromCenterAndSize(
+                    this.players[0].position,
+                    new Vector3(40, 40),
+                );
+            }
             this.currentState.game_time++;
         });
         this.updatePlayerGraphics();
         this.updateWorld();
+        // console.log(this.currentState.players[this.playersConfig[0]].position);
     };
 
     public updatePlayerGraphics = () => {
@@ -494,8 +643,12 @@ export default class App {
             const player = this.players[i];
 
             if (player instanceof LightPlayer) {
-                this.volumetricLightPass.material.uniforms.lightPosition.value =
-                    player.get2dLightPosition(this.camera);
+                this.playerVolumetricLightPass.material.uniforms.lightPosition.value =
+                    player.get2dLightPosition(
+                        this.camera,
+                        this.currentState.players[this.playersConfig[0]]
+                            .velocity,
+                    );
             }
 
             if (player instanceof ShadowPlayer) {
@@ -505,32 +658,42 @@ export default class App {
     };
 
     private updateWorldPhysic = () => {
-        const { doors, end_level } = this.currentState.level;
+        // TODO: Remove code duplication, function is copy pasted from apply world update
+        const isPositionLevel = (
+            value: LevelState,
+        ): value is PositionLevelState =>
+            Boolean((value as PositionLevelState).doors);
+
         // doors
-        for (const key in doors) {
-            const activators = doors[key];
+        if (isPositionLevel(this.currentState.level)) {
+            for (const key in this.currentState.level.doors) {
+                const activators = this.currentState.level.doors[key];
 
-            const doorOpener = this.levelController.levels[
-                this.levelController.currentLevel
-            ]!.collidingElements.find(
-                (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
-            )?.children.find(
-                (object) => object.name === ElementName.DOOR_OPENER(key),
-            ) as DoorOpener | undefined;
+                const doorOpener = this.levelController.levels[
+                    this.levelController.currentLevel
+                ]!.collidingElements.find(
+                    (object) =>
+                        object.name === ElementName.AREA_DOOR_OPENER(key),
+                )?.children.find(
+                    (object) => object.name === ElementName.DOOR_OPENER(key),
+                ) as DoorOpener | undefined;
 
-            if (doorOpener) {
-                if (activators.length > 0 && !doorOpener.shouldActivate) {
-                    doorOpener.shouldActivate = true;
-                } else if (
-                    activators.length === 0 &&
-                    doorOpener.shouldActivate
-                ) {
-                    doorOpener.shouldActivate = false;
+                if (doorOpener) {
+                    if (activators.length > 0 && !doorOpener.shouldActivate) {
+                        doorOpener.shouldActivate = true;
+                    } else if (
+                        activators.length === 0 &&
+                        doorOpener.shouldActivate
+                    ) {
+                        doorOpener.shouldActivate = false;
+                    }
                 }
-            }
 
-            const withFocusCamera = activators.includes(this.playersConfig[0]);
-            doorOpener?.update(this.delta, this.camera, withFocusCamera);
+                const withFocusCamera = activators.includes(
+                    this.playersConfig[0],
+                );
+                doorOpener?.update(this.delta, this.camera, withFocusCamera);
+            }
         }
 
         // end level
@@ -544,28 +707,28 @@ export default class App {
 
         if (endLevelElement) {
             if (
-                end_level.includes(Side.LIGHT) &&
+                this.currentState.level.end_level.includes(Side.LIGHT) &&
                 !endLevelElement.shouldActivateLight
             ) {
                 endLevelElement.shouldActivateLight = true;
             }
 
             if (
-                !end_level.includes(Side.LIGHT) &&
+                !this.currentState.level.end_level.includes(Side.LIGHT) &&
                 endLevelElement.shouldActivateLight
             ) {
                 endLevelElement.shouldActivateLight = false;
             }
 
             if (
-                end_level.includes(Side.SHADOW) &&
+                this.currentState.level.end_level.includes(Side.SHADOW) &&
                 !endLevelElement.shouldActivateShadow
             ) {
                 endLevelElement.shouldActivateShadow = true;
             }
 
             if (
-                !end_level.includes(Side.SHADOW) &&
+                !this.currentState.level.end_level.includes(Side.SHADOW) &&
                 endLevelElement.shouldActivateShadow
             ) {
                 endLevelElement.shouldActivateShadow = false;
@@ -601,9 +764,79 @@ export default class App {
     };
 
     public render = () => {
-        this.camera.layers.set(Layer.OCCLUSION);
+        this.camera.layers.set(Layer.OCCLUSION_PLAYER);
         this.renderer.setClearColor(0x000000);
-        this.occlusionComposer.render();
+        this.playerOcclusionComposer.render();
+        // one occlusion composer by bounce
+        this.camera.layers.set(Layer.OCCLUSION);
+        for (let i = 0; i < this.occlusionComposers.length; i++) {
+            if (i > 0) {
+                const previousLightBounce = (
+                    this.levelController.levels[
+                        this.levelController.currentLevel
+                    ] as any
+                ).lightBounces[i - 1];
+                previousLightBounce.layers.disable(Layer.OCCLUSION);
+            }
+            const lightBounce = (
+                this.levelController.levels[
+                    this.levelController.currentLevel
+                ] as any
+            ).lightBounces[i];
+            lightBounce.layers.enable(Layer.OCCLUSION);
+            this.volumetricLightPasses[
+                i
+            ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
+                this.camera,
+            );
+            const occlusionComposer = this.occlusionComposers[i];
+            occlusionComposer.render();
+            if (i === this.occlusionComposers.length - 1) {
+                lightBounce.layers.disable(Layer.OCCLUSION);
+            }
+        }
+
+        // player inside
+        if (
+            this.currentState.players[this.playersConfig[0]].state ===
+                MovableComponentState.inside ||
+            this.currentState.players[this.playersConfig[1]].state ===
+                MovableComponentState.inside
+        ) {
+            if (
+                this.currentState.players[this.playersConfig[0]].state ===
+                MovableComponentState.inside
+            ) {
+                (this.players[0] as any).mesh.layers.enable(
+                    Layer.PLAYER_INSIDE,
+                );
+            } else {
+                (this.players[0] as any).mesh.layers.disable(
+                    Layer.PLAYER_INSIDE,
+                );
+            }
+
+            if (
+                this.currentState.players[this.playersConfig[1]].state ===
+                MovableComponentState.inside
+            ) {
+                (this.players[1] as any).mesh.layers.enable(
+                    Layer.PLAYER_INSIDE,
+                );
+            } else {
+                (this.players[1] as any).mesh.layers.disable(
+                    Layer.PLAYER_INSIDE,
+                );
+            }
+            this.camera.layers.set(Layer.PLAYER_INSIDE);
+            this.renderer.setClearColor(0x444444);
+            this.playerInsideComposer.render();
+        } else {
+            this.renderer.setRenderTarget(
+                this.playerInsideComposer.renderTarget1,
+            );
+            this.renderer.clear();
+        }
         this.camera.layers.set(Layer.DEFAULT);
         this.renderer.setClearColor(0x000000);
         this.mainComposer.render();

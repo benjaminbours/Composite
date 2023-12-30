@@ -1,4 +1,4 @@
-import { PerspectiveCamera, Quaternion, Vector3 } from 'three';
+import { PerspectiveCamera, Vector3 } from 'three';
 import { gsap } from 'gsap';
 
 export default class CustomCamera extends PerspectiveCamera {

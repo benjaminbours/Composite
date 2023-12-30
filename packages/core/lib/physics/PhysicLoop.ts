@@ -3,7 +3,7 @@ export class PhysicLoop {
     private tick_rate = 60;
     private skip_ticks = 1000 / this.tick_rate;
     public delta = this.skip_ticks / 1000;
-    private max_frame_skip = 10;
+    // private max_frame_skip = 10;
     private next_game_tick = performance.now();
     public total_loops = 0;
 

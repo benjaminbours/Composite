@@ -6,6 +6,8 @@ import {
     SphereGeometry,
     Points,
     DoubleSide,
+    Mesh,
+    MeshBasicMaterial,
 } from 'three';
 // our lib
 import { getRange } from '@benjaminbours/composite-core';
@@ -15,6 +17,7 @@ import VS from '../glsl/playerShadow_vs.glsl';
 import FS from '../glsl/playerShadow_fs.glsl';
 
 export class ShadowPlayer extends Player {
+    public mesh: Mesh;
     public name = 'shadow-player';
     protected particles: Points;
     private lastPosition = new Vector3();
@@ -22,7 +25,7 @@ export class ShadowPlayer extends Player {
     constructor(public isMainPlayer: boolean) {
         super(isMainPlayer);
 
-        const geometry = new SphereGeometry(10, 50, 50);
+        const geometry = new SphereGeometry(5, 50, 50);
         const particlesNumber = geometry.attributes.position.array.length / 3;
         const shadowDirection = new Float32Array(particlesNumber * 3);
         const shadowDelay = new Float32Array(particlesNumber);
@@ -97,6 +100,16 @@ export class ShadowPlayer extends Player {
 
         this.particles = new Points(geometry, material);
         this.add(this.particles);
+
+        // TODO: check if it can not be added to Player class to avoid duplication
+        const basicMaterial = new MeshBasicMaterial({
+            color: 0xffffff,
+            fog: false,
+        });
+        this.mesh = new Mesh(geometry, basicMaterial);
+        this.mesh.castShadow = false;
+        this.mesh.receiveShadow = false;
+        this.add(this.mesh);
     }
 
     public update(delta: number) {

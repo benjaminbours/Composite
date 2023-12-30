@@ -7,6 +7,9 @@ DOCKER_FILE_ENVIRONMENT := -f ./docker-compose-$(ENVIRONMENT).yml
 start:
 	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) up
 
+stop:
+	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) down
+
 build:
 	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) build
 

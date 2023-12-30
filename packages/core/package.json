@@ -2,19 +2,25 @@
   "name": "@benjaminbours/composite-core",
   "version": "0.1.1",
   "description": "What is shared between front and back",
-  "main": "build/index.js",
+  "type": "module",
+  "main": "cjs/index.js",
+  "exports": {
+    "require": "./cjs/index.js",
+    "import": "./esm/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "make build",
+    "dev:cjs": "tsc --watch --module commonjs --outDir cjs/",
+    "dev:esm": "tsc --watch --module es2022 --outDir esm/",
     "type-check": "tsc --noEmit",
     "prepack": "npm run build"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/three": "^0.156.0",
-    "typescript": "^5.2.2"
+    "@types/three": "^0.160.0",
+    "typescript": "^5.3.3"
   },
   "publishConfig": {
     "registry": "https://github.com/benjaminbours/Composite.git"
@@ -22,6 +28,7 @@
   "repository": "https://github.com/benjaminbours/Composite.git",
   "peerDependencies": {
     "gsap": "^3.12.2",
-    "three": "^0.157.0"
+    "three": "^0.160.0",
+    "three-mesh-bvh": "^0.6.8"
   }
 }

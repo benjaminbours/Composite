@@ -3,18 +3,27 @@ import { Vector3, Raycaster, Intersection, Object3D, Vec2 } from 'three';
 export interface INearestObjects {
     right?: Intersection;
     left?: Intersection;
-    up?: Intersection;
-    down?: Intersection;
+    top?: Intersection;
+    bottom?: Intersection;
+    // bottomRight?: Intersection;
+    // bottomLeft?: Intersection;
+    // topRight?: Intersection;
+    // topLeft?: Intersection;
 }
 
 const RAYS = {
     right: new Vector3(1, 0, 0),
     left: new Vector3(-1, 0, 0),
-    up: new Vector3(0, 1, 0),
-    down: new Vector3(0, -1, 0),
+    top: new Vector3(0, 1, 0),
+    bottom: new Vector3(0, -1, 0),
+    // bottomRight: new Vector3(1, -1, 0),
+    // bottomLeft: new Vector3(-1, -1, 0),
+    // topRight: new Vector3(1, 1, 0),
+    // topLeft: new Vector3(-1, 1, 0),
 };
 
 const RAYCASTER = new Raycaster();
+RAYCASTER.firstHitOnly = true;
 
 export function getNearestObjects(
     position: Vec2,
@@ -30,14 +39,13 @@ export function getNearestObjects(
         RAYCASTER.set(new Vector3(position.x, position.y, 0), ray);
 
         // TODO: Investigate if we need the recursive flag enabled
-        const intersectObjects = RAYCASTER.intersectObjects(obstacles, true);
-        const nearestObject = intersectObjects[0];
+        const intersectObjects = RAYCASTER.intersectObjects(obstacles);
 
         if (!intersectObjects.length) {
             continue;
         }
 
-        nearestObjects[direction] = nearestObject;
+        nearestObjects[direction] = intersectObjects[0];
     }
 
     return nearestObjects;

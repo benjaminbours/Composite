@@ -1,2 +1,2 @@
 export * from './PhysicLoop';
-export * from './movementHelpers';
+export * from './updaters';

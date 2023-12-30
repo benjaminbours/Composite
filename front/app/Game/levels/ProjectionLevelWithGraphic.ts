@@ -1,0 +1,39 @@
+// vendors
+// our libs
+import {
+    ElementName,
+    ElementToBounce,
+    ProjectionLevel,
+    Side,
+} from '@benjaminbours/composite-core';
+// local
+import { SkinBounceShadow } from '../elements/SkinBounceShadow';
+import { EndLevel } from '../elements/EndLevel';
+import { Mesh } from 'three';
+
+export class ProjectionLevelWithGraphic extends ProjectionLevel {
+    constructor() {
+        super();
+
+        this.children.forEach((child) => {
+            if (child.name.includes('BOUNCE')) {
+                const side = Number(child.name.replace('_BOUNCE', '')) as Side;
+
+                if (side === Side.LIGHT) {
+                    // initialization of the skin is done with postprocessing, it is spread around the App class, at the root of the game rendering
+                }
+
+                if (side === Side.SHADOW) {
+                    console.log('apply skin shadow', (child as Mesh).geometry);
+                    this.add(new SkinBounceShadow(child as ElementToBounce));
+                }
+            }
+        });
+
+        const endLevel = new EndLevel();
+        const endArea = this.children.find(
+            (child) => child.name === ElementName.AREA_END_LEVEL,
+        )!;
+        endArea.add(endLevel);
+    }
+}

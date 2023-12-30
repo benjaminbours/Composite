@@ -2,7 +2,7 @@
 FROM node:18-alpine AS dev
 
 WORKDIR /app
-RUN apk add --update --no-cache openssl1.1-compat
+RUN apk add --update --no-cache openssl
 RUN apk add --update --no-cache \
     make \
     g++ \
