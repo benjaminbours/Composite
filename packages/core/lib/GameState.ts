@@ -67,6 +67,8 @@ export class RedisGameState {
         public level_0_door_roof: string | undefined,
         public level_1_bounce_0: string | undefined,
         public level_1_bounce_1: string | undefined,
+        public level_1_bounce_2: string | undefined,
+        public level_1_bounce_3: string | undefined,
     ) {}
 
     static parseGameState(state: GameState) {
@@ -91,14 +93,21 @@ export class RedisGameState {
             return [undefined, undefined];
         })();
 
-        const bounces: [string | undefined, string | undefined] = (() => {
+        const bounces: [
+            string | undefined,
+            string | undefined,
+            string | undefined,
+            string | undefined,
+        ] = (() => {
             if (isProjectionLevel(state.level)) {
                 return [
                     String(state.level.bounces[0].rotationY),
                     String(state.level.bounces[1].rotationY),
+                    String(state.level.bounces[2].rotationY),
+                    String(state.level.bounces[3].rotationY),
                 ];
             }
-            return [undefined, undefined];
+            return [undefined, undefined, undefined, undefined];
         })();
 
         return new RedisGameState(
@@ -169,6 +178,12 @@ export class GameState {
                             },
                             1: {
                                 rotationY: Number(state.level_1_bounce_1),
+                            },
+                            2: {
+                                rotationY: Number(state.level_1_bounce_2),
+                            },
+                            3: {
+                                rotationY: Number(state.level_1_bounce_3),
                             },
                         },
                         id: level,

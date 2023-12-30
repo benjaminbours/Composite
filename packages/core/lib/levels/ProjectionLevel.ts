@@ -1,10 +1,16 @@
 // vendors
 import { Group, Mesh, Object3D, Vector3 } from 'three';
 // local
-import { createArchGroup, createBounce, createWall } from './levels.utils';
+import {
+    ElementName,
+    createArchGroup,
+    createBounce,
+    createWall,
+    positionOnGrid,
+} from './levels.utils';
 import { Levels, ProjectionLevelState } from '../GameState';
 import { Side } from '../types';
-import { ElementToBounce } from '../elements';
+import { ElementToBounce, InteractiveArea } from '../elements';
 
 export class ProjectionLevel extends Group {
     public collidingElements: Object3D[] = [];
@@ -14,9 +20,16 @@ export class ProjectionLevel extends Group {
     public bounces: ElementToBounce[] = [];
 
     public startPosition = {
-        light: new Vector3(10, 20, 0), // start level
+        light: new Vector3(0, 20), // start level
         shadow: new Vector3(0, 20, 0),
-        // light: new Vector3(1089, 275, 0), // first platform
+        // light: new Vector3(400, 900, 0), // first platform
+        // shadow: new Vector3(1089, 20, 0), // first platform
+
+        // light: new Vector3(1300, 1100, 0), // second platform
+        // shadow: new Vector3(1300, 1100, 0), // second platform
+
+        // light: new Vector3(2700, 1100, 0), // third platform
+        // shadow: new Vector3(2700, 1100, 0), // third platform
     };
 
     public state: ProjectionLevelState = {
@@ -36,10 +49,15 @@ export class ProjectionLevel extends Group {
         this.collidingElements.push(wallBlockingLeftPath);
 
         const arches = [
-            createArchGroup(1, new Vector3(4, 0, 0)),
-            createArchGroup(4, new Vector3(5, 0, 0)),
             createArchGroup(3, new Vector3(2, 0, 0)),
-            createArchGroup(4, new Vector3(10, 0, 0)),
+            createArchGroup(4, new Vector3(5, 0, 0)),
+            createArchGroup(2.75, new Vector3(6, 0, 0)),
+            createArchGroup(2.5, new Vector3(9, 0, 0)),
+            createArchGroup(4, new Vector3(10.5, 0, 0)),
+            createArchGroup(4, new Vector3(11.5, 0, 0), false),
+            createArchGroup(4, new Vector3(12.5, 0, 0), false),
+            createArchGroup(4, new Vector3(13.5, 0, 0)),
+            createArchGroup(6.5, new Vector3(10.5, 0, 0)),
         ];
 
         arches.forEach((arch) => {
@@ -56,14 +74,30 @@ export class ProjectionLevel extends Group {
             {
                 id: 0,
                 side: Side.SHADOW,
-                position: new Vector3(-1, 1, 0),
-                initialRotation: -75,
+                position: new Vector3(5, 1, 0),
+                // initialRotation: 0, // success rotation
+                initialRotation: -25,
             },
             {
                 id: 1,
                 side: Side.LIGHT,
-                position: new Vector3(0, 1, 0),
+                position: new Vector3(3, 2.25, 0),
                 initialRotation: 45,
+                // initialRotation: -45, // success rotation
+            },
+            {
+                id: 2,
+                side: Side.SHADOW,
+                position: new Vector3(7, 5, 0),
+                initialRotation: -45,
+                // initialRotation: 0, // success rotation
+            },
+            {
+                id: 3,
+                side: Side.LIGHT,
+                position: new Vector3(12, 5, 0),
+                initialRotation: -45,
+                // initialRotation: 25, // success rotation
             },
         ];
 
@@ -79,28 +113,16 @@ export class ProjectionLevel extends Group {
             this.bounces.push(bounce);
         });
 
+        const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
+        this.add(endLevel);
+        this.collidingElements.push(endLevel);
+        this.interactiveElements.push(endLevel);
+        positionOnGrid(endLevel, new Vector3(10.5, 6.525, 0));
+
         this.collidingElements.forEach((element) => {
             if ((element as Mesh).geometry) {
                 (element as Mesh).geometry.computeBoundsTree();
             }
         });
-
-        // const bounceLight2 = createBounce(
-        //     new Vector3(1.5, 2, 0),
-        //     new Vector3(0, 90, 0),
-        //     Side.LIGHT,
-        // );
-        // this.add(bounceLight2);
-        // this.collidingElements.push(bounceLight2);
-        // this.lightBounces.push(bounceLight2);
-
-        // const bounceLight3 = createBounce(
-        //     new Vector3(1.5, 4, 0),
-        //     new Vector3(0, 90, 0),
-        //     Side.LIGHT,
-        // );
-        // this.add(bounceLight3);
-        // this.collidingElements.push(bounceLight3);
-        // this.lightBounces.push(bounceLight3);
     }
 }

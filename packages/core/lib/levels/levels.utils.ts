@@ -347,7 +347,7 @@ export function createBounce(
     side: Side,
     id: number,
 ) {
-    const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize);
+    const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize / 1.5);
     const positionForGrid = position.multiplyScalar(gridSize);
     const rotation = new Vector3(
         degreesToRadians(90),

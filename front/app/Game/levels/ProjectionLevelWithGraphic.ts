@@ -1,6 +1,7 @@
 // vendors
 // our libs
 import {
+    ElementName,
     ElementToBounce,
     ProjectionLevel,
     Side,
@@ -29,11 +30,10 @@ export class ProjectionLevelWithGraphic extends ProjectionLevel {
             }
         });
 
-        // TODO: Position end level
-        // const endLevel = new EndLevel();
-        // const endArea = this.children.find(
-        //     (child) => child.name === ElementName.AREA_END_LEVEL,
-        // )!;
-        // endArea.add(endLevel);
+        const endLevel = new EndLevel();
+        const endArea = this.children.find(
+            (child) => child.name === ElementName.AREA_END_LEVEL,
+        )!;
+        endArea.add(endLevel);
     }
 }
