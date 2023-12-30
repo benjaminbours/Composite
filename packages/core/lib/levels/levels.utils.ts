@@ -312,8 +312,9 @@ export function createColumnGroup(
     // TODO: Fix this any
     const pedestalGeometry = geometries[
         `column_${columnGeometry}_pedestal`
-    ] as any;
-    const partGeometry = geometries[`column_${columnGeometry}`] as any;
+    ] as BoxGeometry;
+    // pedestalGeometry
+    const partGeometry = geometries[`column_${columnGeometry}`] as BoxGeometry;
     const group = new Object3D();
 
     const columnStart = createMeshForGrid(pedestalGeometry, materials.phong);
@@ -323,9 +324,9 @@ export function createColumnGroup(
         columnStart.layers.enable(Layer.OCCLUSION_PLAYER);
     }
 
-    for (let i = 0; i < size; i++) {
+    if (partGeometry) {
         const part = createMeshForGrid(partGeometry, materials.phong);
-        positionOnGrid(part, new Vector3(0, i, 0));
+        part.scale.set(1, size - 0.02, 1);
         group.add(part);
         if (withOcclusion) {
             part.layers.enable(Layer.OCCLUSION);
