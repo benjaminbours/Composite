@@ -200,7 +200,7 @@ export default class App {
         this.camera.setDefaultTarget(this.players[0].position);
 
         // camera
-        this.camera.position.z = 350;
+        this.camera.position.z = 500;
         this.camera.position.y = 10;
 
         this.scene.fog = new FogExp2(0xffffff, 0.001);
