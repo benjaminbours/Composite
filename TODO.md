@@ -8,6 +8,7 @@
 ## Required
 
 - Orchestrate efficiently the transition between the menu, the game, the state on the server, the connection, etc => tout en sommes
+- support different type of keyboard layout (qwerty, azerty, blabla)
 
 ### Menu
 
@@ -35,11 +36,10 @@
 
 ## To fix
 
-- manage disconnect event while in game
-- Fix issue when you finished first level and then you go with your team mate in the second one
-- Collision system issue, especially with bounce element, it's easy to enter inside and get stuck
-- Move from raycaster to overlap for collision detection
+- Manage disconnect event while in game
 - Fix crash when you are in game, your team mate leave and you click to find another teammate, HomeInterface is null
+- Fix the fact player can exit bounce element without pressing enter sometimes
+- Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
 
 ## Potential game play suggestion
 
@@ -47,6 +47,7 @@
   - black hole, potential impact on gravity
   - Dash for the light
   - shadow can avoid gravity for a while, or go through spaces the light can't, the main idea is about not having movement constraints for a duration
+  - End level animation => make the player attracted by the center of the animation, kind of an ascension
 - uchinara:
   - Player bounce against each other
   - onde / particles
