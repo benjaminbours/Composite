@@ -250,31 +250,34 @@ export function createWallDoor(
 export function createArchGroup(
     height: number,
     position: Vector3,
-    // goInsideName,
+    withColumns = true,
 ) {
     const group = new Object3D();
-    const columnLeft1 = createColumnGroup(height, 'normal');
-    const columnLeft2 = createColumnGroup(height, 'normal');
-    const columnRight1 = createColumnGroup(height, 'normal', true);
-    const columnRight2 = createColumnGroup(height, 'normal', true);
 
-    positionOnGrid(columnLeft1, new Vector3(0, 0, -1));
-    group.add(columnLeft1);
+    if (withColumns) {
+        const columnLeft1 = createColumnGroup(height, 'normal');
+        const columnLeft2 = createColumnGroup(height, 'normal');
+        const columnRight1 = createColumnGroup(height, 'normal', true);
+        const columnRight2 = createColumnGroup(height, 'normal', true);
 
-    positionOnGrid(columnRight1, new Vector3(0, 0, 1));
-    group.add(columnRight1);
+        positionOnGrid(columnLeft1, new Vector3(0, 0, -1));
+        group.add(columnLeft1);
 
-    positionInsideGridBox(columnLeft1, new Vector3(-1, 0, 0));
+        positionOnGrid(columnRight1, new Vector3(0, 0, 1));
+        group.add(columnRight1);
 
-    positionOnGrid(columnLeft2, new Vector3(0, 0, -1));
-    positionInsideGridBox(columnLeft2, new Vector3(1, 0, 0));
-    group.add(columnLeft2);
+        positionInsideGridBox(columnLeft1, new Vector3(-1, 0, 0));
 
-    positionInsideGridBox(columnRight1, new Vector3(-1, 0, 0));
+        positionOnGrid(columnLeft2, new Vector3(0, 0, -1));
+        positionInsideGridBox(columnLeft2, new Vector3(1, 0, 0));
+        group.add(columnLeft2);
 
-    positionOnGrid(columnRight2, new Vector3(0, 0, 1));
-    positionInsideGridBox(columnRight2, new Vector3(1, 0, 0));
-    group.add(columnRight2);
+        positionInsideGridBox(columnRight1, new Vector3(-1, 0, 0));
+
+        positionOnGrid(columnRight2, new Vector3(0, 0, 1));
+        positionInsideGridBox(columnRight2, new Vector3(1, 0, 0));
+        group.add(columnRight2);
+    }
 
     const geometryPlatform = new BoxGeometry(
         gridSize * 1.25,
