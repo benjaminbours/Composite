@@ -8,7 +8,6 @@
 ## Required
 
 - Orchestrate efficiently the transition between the menu, the game, the state on the server, the connection, etc => tout en sommes
-- support different type of keyboard layout (qwerty, azerty, blabla)
 
 ### Menu
 
@@ -77,7 +76,3 @@
 ## Twitch
 
 Give it a try to nightbot, stop being a noob
-
-## To finish
-
-- The update bindings menu is working correctly in game, but has not been tested properly on the menu part.

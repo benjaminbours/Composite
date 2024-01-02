@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import dynamic from 'next/dynamic';
 import * as STATS from 'stats.js';
+import classNames from 'classnames';
 // our libs
 import {
     GameState,
@@ -259,24 +260,57 @@ function MainApp() {
         }
     }, [gameIsPlaying, shouldEstablishConnection, shouldSendMatchMakingInfo]);
 
+    const teamMateDisconnectNotification = useMemo(() => {
+        if (!teamMateDisconnected) {
+            return null;
+        }
+        return (
+            // TODO: Make appear disappear animation
+            <div className="team-mate-disconnect">
+                <p>Your team mate disconnected or has quit the room</p>
+                <button
+                    className="buttonRect white"
+                    onClick={handleClickFindAnotherTeamMate}
+                >
+                    Find another team mate
+                </button>
+            </div>
+        );
+    }, [teamMateDisconnected, handleClickFindAnotherTeamMate]);
+
+    const bottomRightInfo = useMemo(() => {
+        const cssClass = classNames({
+            'bottom-right-info': true,
+            'bottom-right-info--white':
+                (menuScene === MenuScene.QUEUE && state.side === Side.LIGHT) ||
+                (menuScene === MenuScene.END_LEVEL &&
+                    state.side === Side.LIGHT) ||
+                gameIsPlaying,
+            'bottom-right-info--black':
+                menuScene === MenuScene.HOME ||
+                menuScene === MenuScene.LEVEL ||
+                menuScene === MenuScene.FACTION ||
+                (menuScene === MenuScene.QUEUE && state.side === Side.SHADOW) ||
+                (menuScene === MenuScene.END_LEVEL &&
+                    state.side === Side.SHADOW),
+        });
+        return (
+            <div className={cssClass}>
+                <button className="settings" onClick={handleClickOnSettings}>
+                    <CogWheel />
+                </button>
+                <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
+            </div>
+        );
+    }, [handleClickOnCloseSettings, menuScene, state, gameIsPlaying]);
+
     if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
         return (
             <>
-                {teamMateDisconnected && (
-                    // TODO: Make appear disappear animation
-                    <div className="team-mate-disconnect">
-                        <p>Your team mate disconnected or has quit the room</p>
-                        <button
-                            className="buttonRect white"
-                            onClick={handleClickFindAnotherTeamMate}
-                        >
-                            Find another team mate
-                        </button>
-                    </div>
-                )}
                 {/* {!state.isGameRunning && (
                     <Menu mainState={state} setMainState={setState} />
                 )} */}
+                {teamMateDisconnectNotification}
                 {state.gameState && (
                     <Game
                         initialGameState={state.gameState}
@@ -294,33 +328,14 @@ function MainApp() {
                         onClose={handleClickOnCloseSettings}
                     />
                 )}
-                <div className="bottom-right-info bottom-right-info--white">
-                    <button
-                        className="settings"
-                        onClick={handleClickOnSettings}
-                    >
-                        <CogWheel />
-                    </button>
-                    <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
-                </div>
+                {bottomRightInfo}
             </>
         );
     }
 
     return (
         <>
-            {teamMateDisconnected && (
-                // TODO: Make appear disappear animation
-                <div className="team-mate-disconnect">
-                    <p>Your team mate disconnected or has quit the room</p>
-                    <button
-                        className="buttonRect white"
-                        onClick={handleClickFindAnotherTeamMate}
-                    >
-                        Find another team mate
-                    </button>
-                </div>
-            )}
+            {teamMateDisconnectNotification}
             {!gameIsPlaying && (
                 <Menu
                     mainState={state}
@@ -348,6 +363,7 @@ function MainApp() {
                     inputsManager={inputsManager.current}
                 />
             )}
+            {bottomRightInfo}
         </>
     );
 }
