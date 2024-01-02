@@ -379,6 +379,7 @@ export default class App {
                 ) {
                     // do nothing
                 } else if (item instanceof ElementToBounce) {
+                    // TODO: Should probably be in update world physic in terms of naming
                     const rotationY =
                         (this.currentState.level as ProjectionLevelState)
                             .bounces[item.bounceID]?.rotationY || 0;
@@ -525,7 +526,7 @@ export default class App {
         this.interpolation.ratio = 0;
 
         // erase level state
-        this.currentState.level = this.serverGameState.level;
+        this.currentState.level = nextStateAtInterpolationTime.level;
     };
 
     // private checkServerState = () => {

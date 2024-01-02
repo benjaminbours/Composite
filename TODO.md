@@ -32,6 +32,11 @@
 - Check to optimize / improve the shadow player shader
 - Lint front
 - Game state can be optimized about door management
+- Split the enormous game app file into pieces
+  - client graphic + physic updates
+  - Rendering
+  - Post processing
+  - State reconciliation / management
 
 ## To fix
 
