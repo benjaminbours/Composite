@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Cross } from './Game/icons/Cross';
-import InputsManager from './Game/Player/InputsManager';
-import {
+import InputsManager, {
     parseToKeyBindings,
     parseToUIKeyBindings,
-} from '@benjaminbours/composite-core';
+} from './Game/Player/InputsManager';
 
 interface Props {
     inputsManager: InputsManager;
@@ -23,7 +22,6 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
     const handleClickOnKey = useCallback(
         (movementIndex: number, keyIndex: number) => (clickEvent: any) => {
             setCurrentlyEditing([movementIndex, keyIndex]);
-            console.log(clickEvent);
 
             const handleNewKey = (e: KeyboardEvent) => {
                 const nextUIKeyBindings = [...uiKeyBindings];
@@ -31,7 +29,6 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
                 nextUIKeyBindings[movementIndex][1][keyIndex] = e.code;
                 const nextKeyBindings = parseToKeyBindings(nextUIKeyBindings);
                 inputsManager.updateKeyBindings(nextKeyBindings);
-                console.log('HERE update bindings');
 
                 setCurrentlyEditing(undefined);
                 clickEvent.target.blur();
@@ -42,8 +39,6 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
         },
         [],
     );
-
-    console.log(currentlyEditing);
 
     return (
         <div className="settings-menu">

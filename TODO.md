@@ -81,4 +81,3 @@ Give it a try to nightbot, stop being a noob
 ## To finish
 
 - The update bindings menu is working correctly in game, but has not been tested properly on the menu part.
-- At the moment, we are not saving in any kind of storage the user choices. It should be store to avoid users to rebind keys all the time

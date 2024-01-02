@@ -27,9 +27,12 @@ export function parseToKeyBindings(uiKeyBindings: UIKeyBindings) {
     return keyBindings;
 }
 
+export const KEY_BINDINGS_LOCAL_STORAGE_KEY = 'composite-key-bindings';
+
 export default class InputsManager {
+    public keyBindings: KeyBindings;
     constructor(
-        public keyBindings: KeyBindings = {
+        keyBindings: KeyBindings = {
             KeyA: 'left',
             KeyD: 'right',
             Space: 'jump',
@@ -40,7 +43,30 @@ export default class InputsManager {
             ArrowUp: 'top',
             ArrowDown: 'bottom',
         },
-    ) {}
+    ) {
+        if (typeof window === 'undefined') {
+            this.keyBindings = keyBindings;
+            return;
+        }
+
+        const savedBindings = window.localStorage.getItem(
+            KEY_BINDINGS_LOCAL_STORAGE_KEY,
+        );
+
+        if (savedBindings) {
+            try {
+                const savedBindingsParsed = JSON.parse(
+                    savedBindings,
+                ) as KeyBindings;
+                this.keyBindings = savedBindingsParsed;
+            } catch (error) {
+                console.error('Failed to parse saved key bindings', error);
+                this.keyBindings = keyBindings;
+            }
+        } else {
+            this.keyBindings = keyBindings;
+        }
+    }
 
     public inputsActive: Inputs = {
         left: false,
@@ -51,6 +77,10 @@ export default class InputsManager {
     };
 
     public updateKeyBindings(keyBindings: KeyBindings) {
+        window.localStorage.setItem(
+            KEY_BINDINGS_LOCAL_STORAGE_KEY,
+            JSON.stringify(keyBindings),
+        );
         this.keyBindings = keyBindings;
     }
 
