@@ -363,6 +363,12 @@ function MainApp() {
                     inputsManager={inputsManager.current}
                 />
             )}
+            {isSettingsOpen && (
+                <SettingsMenu
+                    inputsManager={inputsManager.current}
+                    onClose={handleClickOnCloseSettings}
+                />
+            )}
             {bottomRightInfo}
         </>
     );
