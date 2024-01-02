@@ -1,5 +1,12 @@
 # composite-front
 
+## 0.2.1
+
+### Patch Changes
+
+- 51623a1: Fix issue with bounce element rotation when dealing with server game state
+- 1abed73: Add UI to change the key bindings of the game
+
 ## 0.2.0
 
 ### Minor Changes
