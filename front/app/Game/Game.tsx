@@ -7,12 +7,14 @@ import App from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
+import InputsManager from './Player/InputsManager';
 
 interface Props {
     side: Side;
     initialGameState: GameState;
     // can be undefined for dev purpose
     socketController?: SocketController;
+    inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
 }
@@ -23,6 +25,7 @@ function Game({
     initialGameState,
     tabIsHidden,
     stats,
+    inputsManager,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
@@ -70,6 +73,7 @@ function Game({
                     initialGameState,
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                     socketController,
+                    inputsManager,
                 );
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);

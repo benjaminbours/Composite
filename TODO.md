@@ -8,7 +8,6 @@
 ## Required
 
 - Orchestrate efficiently the transition between the menu, the game, the state on the server, the connection, etc => tout en sommes
-- support different type of keyboard layout (qwerty, azerty, blabla)
 
 ### Menu
 
@@ -73,3 +72,7 @@
 ## If I ever receive one penny for this game
 
 - Support this lib => https://github.com/gkjohnson/three-mesh-bvh
+
+## Twitch
+
+Give it a try to nightbot, stop being a noob

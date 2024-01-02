@@ -93,8 +93,6 @@ export default class App {
     private playerOcclusionComposer!: EffectComposer;
     private playerVolumetricLightPass!: ShaderPass;
 
-    public inputsManager: InputsManager;
-
     private lastInputValidated: GamePlayerInputPayload | undefined;
     // private gameStateHistory: GameState[] = [];
     private inputsHistory: GamePlayerInputPayload[] = [];
@@ -122,6 +120,7 @@ export default class App {
         initialGameState: GameState,
         private playersConfig: Side[],
         public socketController: SocketController,
+        public inputsManager: InputsManager,
     ) {
         this.currentState = JSON.parse(JSON.stringify(initialGameState));
         this.serverGameState = JSON.parse(JSON.stringify(initialGameState));
@@ -129,8 +128,6 @@ export default class App {
         //     JSON.parse(JSON.stringify(initialGameState)),
         // );
         // inputs
-
-        this.inputsManager = new InputsManager();
 
         // levels
         this.levelController = new LevelController(initialGameState.level.id);
