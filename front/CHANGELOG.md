@@ -1,5 +1,11 @@
 # composite-front
 
+## 0.2.2
+
+### Patch Changes
+
+- fa1b013: Add missing settings menu while not in development mode
+
 ## 0.2.1
 
 ### Patch Changes
