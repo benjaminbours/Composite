@@ -1,0 +1,77 @@
+.settings-menu {
+    position: fixed;
+    right: 15px;
+    bottom: 15px;
+    z-index: 101;
+    padding: 20px;
+    background: black;
+    border: solid white 1px;
+    color: white;
+}
+
+.settings-menu__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    h2 {
+        margin: 0;
+    }
+}
+
+.settings-menu__close-button {
+    cursor: pointer;
+    padding: 5px;
+    transition: 0.3s ease-in;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        transform: rotate(90deg);
+    }
+
+    .cross {
+        width: 30px;
+        fill: white;
+    }
+}
+
+.key-bindings-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.key-bindings-list__item {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+
+    p {
+        margin: 0;
+    }
+}
+
+.key-bindings-list__movement {
+    text-transform: uppercase;
+    margin-right: 15px;
+    flex: 1;
+}
+
+.key-bindings-list__key {
+    margin: 0 10px;
+    padding: 10px;
+    border: solid white 1px;
+    width: 100px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s ease-in;
+
+    &:hover {
+        background: white;
+        color: black;
+    }
+}

@@ -24,6 +24,9 @@ import {
 // local
 import type { SocketController } from './SocketController';
 import { MenuMode, MenuScene } from './Menu/types';
+import { CogWheel } from './Game/icons/CogWheel';
+import { SettingsMenu } from './SettingsMenu';
+import InputsManager from './Game/Player/InputsManager';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -45,6 +48,7 @@ export interface MainState {
 // TODO: Ability to restart a game from the same session without reloading or changing team mate
 function MainApp() {
     const socketController = useRef<SocketController>();
+    const inputsManager = useRef<InputsManager>(new InputsManager());
     const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
     const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
     const [state, setState] = useState<MainState>(() => {
@@ -61,6 +65,7 @@ function MainApp() {
             gameState: undefined,
         };
     });
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [teamMateInfo, setTeamMateInfo] = useState<TeammateInfoPayload>();
@@ -84,6 +89,14 @@ function MainApp() {
             state.selectedLevel !== undefined,
         [state, menuMode, menuScene, gameIsPlaying],
     );
+
+    const handleClickOnSettings = useCallback(() => {
+        setIsSettingsOpen(true);
+    }, []);
+
+    const handleClickOnCloseSettings = useCallback(() => {
+        setIsSettingsOpen(false);
+    }, []);
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         setState((prev) => ({ ...prev, gameState: initialGameState }));
@@ -271,8 +284,25 @@ function MainApp() {
                         socketController={socketController.current}
                         tabIsHidden={tabIsHidden}
                         stats={statsRef}
+                        inputsManager={inputsManager.current}
                     />
                 )}
+                {/* TODO: Don't forget to add it when not in skip matchmaking mode */}
+                {isSettingsOpen && (
+                    <SettingsMenu
+                        inputsManager={inputsManager.current}
+                        onClose={handleClickOnCloseSettings}
+                    />
+                )}
+                <div className="bottom-right-info bottom-right-info--white">
+                    <button
+                        className="settings"
+                        onClick={handleClickOnSettings}
+                    >
+                        <CogWheel />
+                    </button>
+                    <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
+                </div>
             </>
         );
     }
@@ -315,6 +345,7 @@ function MainApp() {
                     socketController={socketController.current}
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
+                    inputsManager={inputsManager.current}
                 />
             )}
         </>
