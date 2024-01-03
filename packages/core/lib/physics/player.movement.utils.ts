@@ -1,6 +1,6 @@
-import { Vector3 } from 'three';
+import { Matrix4, Vector3 } from 'three';
 import { Inputs, MovableComponentState, Side } from '../types';
-import { PlayerGameState } from '../GameState';
+import { LevelState, PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
 import { INearestObjects } from './raycaster';
 import {
@@ -8,10 +8,13 @@ import {
     COLLISION_DETECTION_RANGE_INSIDE,
 } from './collision.system';
 import { getCenterPoint } from '../levels';
+import { isLevelWithBounces } from './updaters';
+import { degreesToRadians } from '../helpers/math';
 
 export const MAX_FALL_SPEED = 20;
 export const JUMP_POWER = 15;
 export const BOUNCE_POWER = 17;
+export const LEAVE_BOUNCE_POWER = 20;
 export const GRAVITY = 20;
 
 function handleDefaultCollision(
@@ -128,29 +131,41 @@ export function handleCollision(
     }
 }
 
-export function handleJump(input: Inputs, player: PlayerGameState) {
+export function handleJump(
+    input: Inputs,
+    player: PlayerGameState,
+    levelState: LevelState,
+) {
     if (!input.jump) {
         return;
     }
 
     if (player.state === MovableComponentState.onFloor) {
         player.velocity.y = JUMP_POWER;
-    } else if (player.state === MovableComponentState.inside) {
+    } else if (
+        player.state === MovableComponentState.inside &&
+        player.insideElementID !== undefined &&
+        isLevelWithBounces(levelState)
+    ) {
+        const rotationY = levelState.bounces[player.insideElementID].rotationY;
+        const vectorToRotate = new Vector3(0, 1, 0);
+
+        // Create the rotation matrix
+        const rotationMatrix = new Matrix4();
+        rotationMatrix.makeRotationAxis(
+            new Vector3(1, 0, 0),
+            degreesToRadians(rotationY),
+        );
+
+        // Apply the rotation to the vector
+        const rotatedVector = vectorToRotate
+            .clone()
+            .applyMatrix4(rotationMatrix)
+            .multiplyScalar(LEAVE_BOUNCE_POWER);
+
         player.state = MovableComponentState.inAir;
-
-        if (input.left) {
-            player.velocity.x = -JUMP_POWER;
-            // player.velocity.y = JUMP_POWER / 2;
-        } else if (input.right) {
-            player.velocity.x = JUMP_POWER;
-            // player.velocity.y = JUMP_POWER / 2;
-        }
-
-        if (input.top) {
-            player.velocity.y = JUMP_POWER;
-        } else if (input.bottom) {
-            player.velocity.y = -JUMP_POWER;
-        }
+        player.velocity.x = -rotatedVector.z;
+        player.velocity.y = rotatedVector.y / 1.35;
     }
 }
 

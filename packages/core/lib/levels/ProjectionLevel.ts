@@ -20,8 +20,8 @@ export class ProjectionLevel extends Group {
     public bounces: ElementToBounce[] = [];
 
     public startPosition = {
-        light: new Vector3(0, 20), // start level
-        shadow: new Vector3(0, 20, 0),
+        light: new Vector3(10, 20), // start level
+        shadow: new Vector3(200, 20, 0),
         // light: new Vector3(400, 900, 0), // first platform
         // shadow: new Vector3(1089, 20, 0), // first platform
 
@@ -51,8 +51,12 @@ export class ProjectionLevel extends Group {
         const arches = [
             createArchGroup(3, new Vector3(2, 0, 0)),
             createArchGroup(4, new Vector3(5, 0, 0)),
-            createArchGroup(2.75, new Vector3(6, 0, 0)),
+            createArchGroup(3.25, new Vector3(6, 0, 0)),
+            createArchGroup(2.5, new Vector3(7, 0, 0), false),
+            createArchGroup(2.5, new Vector3(8, 0, 0), false),
             createArchGroup(2.5, new Vector3(9, 0, 0)),
+            createArchGroup(2.5, new Vector3(10, 0, 0)),
+            createArchGroup(2.5, new Vector3(11, 0, 0)),
             createArchGroup(4, new Vector3(10.5, 0, 0)),
             createArchGroup(4, new Vector3(11.5, 0, 0), false),
             createArchGroup(4, new Vector3(12.5, 0, 0), false),
@@ -74,15 +78,15 @@ export class ProjectionLevel extends Group {
             {
                 id: 0,
                 side: Side.SHADOW,
-                position: new Vector3(5, 1, 0),
+                position: new Vector3(1, 1, 0),
                 // initialRotation: 0, // success rotation
                 initialRotation: -25,
             },
             {
                 id: 1,
                 side: Side.LIGHT,
-                position: new Vector3(3, 2.25, 0),
-                initialRotation: 45,
+                position: new Vector3(3, 1.75, 0),
+                initialRotation: -45,
                 // initialRotation: -45, // success rotation
             },
             {

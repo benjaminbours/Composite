@@ -92,6 +92,5 @@ Give it a try to nightbot, stop being a noob
 - When inside element, jump by default, should make you get out of the element from the top, not just let you down
 - Transition menu from player quit the room to home is not smooth
 - Updating key bindings have some bugs, key disappearing for example
-- uchinara: a mon avis enleve le saut + direction et faut just saut + orientation du block
 - Doing a lot of back and forth from the queue is making the app crash at some point, see on [discord](https://discord.com/channels/1190784529162580009/1192058819161895014/1192059129167093840)
 - Could be a idea to optimize and improve the UI to have a timing indicator about the next fetch of the queue state. That way, the user can trigger by himself faster if he wants, otherwise, he knows when the update will happen, and this allow me to increase the polling rate

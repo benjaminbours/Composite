@@ -39,6 +39,7 @@ function applyPlayerUpdate(
     input: Inputs,
     collisionResult: INearestObjects,
     player: PlayerGameState,
+    levelState: LevelState,
     freeMovementMode?: boolean,
 ) {
     // console.log('HERE collision result', collisionResult);
@@ -49,7 +50,7 @@ function applyPlayerUpdate(
     handleCollision(collisionResult, 'top', side, player);
     handleCollision(collisionResult, 'bottom', side, player);
 
-    handleJump(input, player);
+    handleJump(input, player, levelState);
     if (player.state !== MovableComponentState.inside) {
         detectFalling(collisionResult, player);
 
@@ -88,6 +89,11 @@ function updateDoor(wallDoor: Object3D, open: boolean) {
     wallDoor.updateMatrixWorld();
 }
 
+export const isLevelWithBounces = (
+    value: LevelState,
+): value is ProjectionLevelState =>
+    Boolean((value as ProjectionLevelState).bounces);
+
 // we could easily detect the activation area using position precalculated eventually.
 // but if we update the level, we have to update it as well.
 function applyWorldUpdate(
@@ -100,10 +106,6 @@ function applyWorldUpdate(
 ) {
     const isPositionLevel = (value: LevelState): value is PositionLevelState =>
         Boolean((value as PositionLevelState).doors);
-    const isProjectionLevel = (
-        value: LevelState,
-    ): value is ProjectionLevelState =>
-        Boolean((value as ProjectionLevelState).bounces);
 
     if (isPositionLevel(gameState.level)) {
         let doorNameActivating: string | undefined = undefined;
@@ -150,7 +152,7 @@ function applyWorldUpdate(
         }
     }
 
-    if (isProjectionLevel(gameState.level)) {
+    if (isLevelWithBounces(gameState.level)) {
         if (
             player.state === MovableComponentState.inside &&
             player.insideElementID !== undefined
@@ -235,6 +237,7 @@ export function applySingleInput(
         inputs,
         collisionResult,
         player,
+        gameState.level,
         freeMovementMode,
     );
     applyWorldUpdate(
