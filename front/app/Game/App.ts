@@ -555,6 +555,10 @@ export default class App {
         { ratio, shouldUpdate, increment }: InterpolationConfig,
         delta: number,
     ) => {
+        const otherPlayerPosition =
+            this.currentState.players[this.playersConfig[1]].position;
+        const otherPlayerServerPosition =
+            this.serverGameState.players[this.playersConfig[1]].position;
         ratio += delta * increment;
         if (ratio >= 1) {
             shouldUpdate = false;
@@ -562,22 +566,20 @@ export default class App {
         }
 
         const vector = new Vector2(
-            this.currentState.players[this.playersConfig[1]].position.x,
-            this.currentState.players[this.playersConfig[1]].position.y,
+            otherPlayerPosition.x,
+            otherPlayerPosition.y,
         );
         const vectorTarget = new Vector2(
-            this.serverGameState.players[this.playersConfig[1]].position.x,
-            this.serverGameState.players[this.playersConfig[1]].position.y,
+            otherPlayerServerPosition.x,
+            otherPlayerServerPosition.y,
         );
         const targetNormalize = vectorTarget.clone().sub(vector).normalize();
         const distance = vector.distanceTo(vectorTarget) * ratio;
 
         const displacement = targetNormalize.multiplyScalar(distance);
         // side effect
-        this.currentState.players[this.playersConfig[1]].position.x +=
-            displacement.x;
-        this.currentState.players[this.playersConfig[1]].position.y +=
-            displacement.y;
+        otherPlayerPosition.x += displacement.x;
+        otherPlayerPosition.y += displacement.y;
 
         // console.log('ratio', ratio);
         return ratio;
