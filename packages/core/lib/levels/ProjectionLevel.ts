@@ -49,6 +49,8 @@ export class ProjectionLevel extends Group {
         this.collidingElements.push(wallBlockingLeftPath);
 
         const arches = [
+            createArchGroup(3, new Vector3(0, 0, 0)),
+            createArchGroup(3, new Vector3(1, 0, 0), false),
             createArchGroup(3, new Vector3(2, 0, 0)),
             createArchGroup(4, new Vector3(5, 0, 0)),
             createArchGroup(3.25, new Vector3(6, 0, 0)),
@@ -87,7 +89,7 @@ export class ProjectionLevel extends Group {
                 side: Side.LIGHT,
                 position: new Vector3(3, 1.75, 0),
                 initialRotation: -45,
-                // initialRotation: -45, // success rotation
+                // initialRotation: -25, // success rotation
             },
             {
                 id: 2,

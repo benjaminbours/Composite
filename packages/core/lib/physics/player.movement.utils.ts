@@ -13,8 +13,10 @@ import { degreesToRadians } from '../helpers/math';
 
 export const MAX_FALL_SPEED = 20;
 export const JUMP_POWER = 15;
-export const BOUNCE_POWER = 17;
-export const LEAVE_BOUNCE_POWER = 20;
+export const BOUNCE_POWER = 30;
+export const BOUNCE_POWER_MAX_Y = 17;
+export const LEAVE_BOUNCE_POWER = 30;
+export const LEAVE_BOUNCE_POWER_MAX_Y = 17;
 export const GRAVITY = 20;
 
 function handleDefaultCollision(
@@ -82,7 +84,13 @@ function handleBounceAgainstElement(
     // multiply by the bounce power
     const bounceVector = global_normal.multiplyScalar(bouncePower);
     player.velocity.x = bounceVector.x;
-    player.velocity.y = bounceVector.y;
+
+    if (Math.abs(bounceVector.y) > BOUNCE_POWER_MAX_Y) {
+        const sign = Math.sign(bounceVector.y);
+        player.velocity.y = BOUNCE_POWER_MAX_Y * sign;
+    } else {
+        player.velocity.y = bounceVector.y;
+    }
 }
 
 export function handleCollision(
@@ -165,7 +173,14 @@ export function handleJump(
 
         player.state = MovableComponentState.inAir;
         player.velocity.x = -rotatedVector.z;
-        player.velocity.y = rotatedVector.y / 1.35;
+        if (Math.abs(rotatedVector.y) > LEAVE_BOUNCE_POWER_MAX_Y) {
+            const sign = Math.sign(rotatedVector.y);
+            player.velocity.y = LEAVE_BOUNCE_POWER_MAX_Y * sign;
+        } else {
+            player.velocity.y = rotatedVector.y;
+        }
+
+        console.log(player.velocity);
     }
 }
 
