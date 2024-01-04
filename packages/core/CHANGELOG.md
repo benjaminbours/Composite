@@ -1,5 +1,11 @@
 # composite-core
 
+## 0.2.1
+
+### Patch Changes
+
+- Update player jump behavior inside bounces
+
 ## 0.2.0
 
 ### Minor Changes
