@@ -24,7 +24,6 @@ import {
   TimeSyncPayload,
   PhysicSimulation,
   applyInputListToSimulation,
-  collectInputsForTick,
   Context,
   updateServerBounces,
   ProjectionLevelState,
@@ -367,6 +366,28 @@ export class SocketGateway {
     ]);
   };
 
+  collectInputsForTick(
+    inputsQueue: GamePlayerInputPayload[],
+    gameTime: number,
+  ) {
+    // 2 buffers, one for each player
+    const inputsForTick: GamePlayerInputPayload[][] = [[], []];
+    for (let i = 0; i < inputsQueue.length; i++) {
+      const input = inputsQueue[i];
+      if (input.sequence !== gameTime) {
+        continue;
+      }
+      // filter by player
+      if (input.player === Side.SHADOW) {
+        inputsForTick[0].push(input);
+      }
+      if (input.player === Side.LIGHT) {
+        inputsForTick[1].push(input);
+      }
+    }
+    return inputsForTick;
+  }
+
   registerGameLoop = (
     gameId: number,
     level: PositionLevel | ProjectionLevel,
@@ -398,7 +419,7 @@ export class SocketGateway {
         physicSimulation.run((delta) => {
           gameState.game_time++;
           // 2 buffers, one for each player
-          const inputsForTick = collectInputsForTick(
+          const inputsForTick = this.collectInputsForTick(
             inputsQueue,
             gameState.game_time,
           );

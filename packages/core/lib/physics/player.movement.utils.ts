@@ -8,7 +8,7 @@ import {
     COLLISION_DETECTION_RANGE_INSIDE,
 } from './collision.system';
 import { getCenterPoint } from '../levels';
-import { isLevelWithBounces } from './updaters';
+import { isLevelWithBounces } from './simulation.updaters';
 import { degreesToRadians } from '../helpers/math';
 
 export const MAX_FALL_SPEED = 20;

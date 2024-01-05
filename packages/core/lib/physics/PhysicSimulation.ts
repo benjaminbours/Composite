@@ -1,4 +1,4 @@
-export class PhysicLoop {
+export class PhysicSimulation {
     public loops = 0;
     private tick_rate = 60;
     private skip_ticks = 1000 / this.tick_rate;
