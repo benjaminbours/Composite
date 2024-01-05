@@ -69,6 +69,7 @@ export interface GamePlayerInputPayload {
 
 export interface GameStateUpdatePayload {
     gameState: GameState;
+    lastInputs: [GamePlayerInputPayload | undefined, GamePlayerInputPayload | undefined];
 }
 
 export interface GameActivateElementPayload {
@@ -180,4 +181,3 @@ export class KeyBindings {
 }
 
 export type UIKeyBindings = [Movement, string[]][];
-

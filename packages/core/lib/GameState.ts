@@ -148,6 +148,9 @@ export class GameState {
     constructor(
         public players: PlayerGameState[],
         public level: LevelState,
+        /**
+         * Just a sequence number of the last processed input
+         */
         public lastValidatedInput: number,
         public game_time: number,
     ) {}

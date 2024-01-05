@@ -218,7 +218,7 @@ export class SocketGateway {
     const initialGameState = await this.createGame(players, dbGame.id);
     this.emit(gameRoomName, [
       SocketEventType.GAME_START,
-      { gameState: initialGameState },
+      { gameState: initialGameState, lastInputs: [undefined, undefined] },
     ]);
   };
 
@@ -452,7 +452,7 @@ export class SocketGateway {
         // emit updated game state to room
         this.emit(String(gameId), [
           SocketEventType.GAME_STATE_UPDATE,
-          { gameState },
+          { gameState, lastInputs: [lastPlayersInput[0], lastPlayersInput[1]] },
         ]);
 
         // console.log('inputs queue after', inputsQueue.length);
