@@ -1,5 +1,11 @@
 # composite-core
 
+## 0.2.2
+
+### Patch Changes
+
+- e4ae16d: Fine tune bounce power
+
 ## 0.2.1
 
 ### Patch Changes
