@@ -1,24 +1,26 @@
-# Composite - 2.5D coop platformer on the web
+# Composite
+
+In this 2.5D platformer game, two players will embody the essence of light and shadow, with one player representing light and the other embodying shadow.
+
+The game's mechanics are designed to leverage the interplay between these two elements, creating a cooperative and immersive experience where your skills will be challenged.
+
+Light and shadow are not just visual elements in this game; they are integral to the gameplay itself. Players will need to collaborate and use their unique abilities to overcome obstacles, puzzles, and progress through the game. Levels are designed to be finished together.
+
+At the moment, the project is still in the early stage of development. You can access the [staging here](http://staging.compositethegame.com/) where the latest updates are deployed to be tested by any body willing to experience the game. I encourage you to share on [discord](link to discord) or any other media any kind of feedback that could be valuable for the good evolution of the project.
+
+Are you ready to step into the light and embrace the shadows?
+
+So, gather your friends, sharpen your platforming skills, and get ready to dive into a world where light and shadow come alive!
+
+## Live Development
 
 The development of this project is streamed on this [Twitch channel](https://www.twitch.tv/elboursico). Take a look and support me if you like it 🙏
 
-Last released of the project => http://staging.compositethegame.com
+## Contributing
 
-## Development
+If you'd like to help build Composite, check out the [Contributor's Guide](https://github.com/benjaminbours/Composite/blob/master/CONTRIBUTING.md). For simple problems, feel free to open an issue or PR and tackle it yourself!
 
-### Requirements
-
-- Docker
-- docker-compose
-- Makefile
-
-### Configuration
-
-You need to setup a env variable `NPM_TOKEN` in order to install github packages
-
-Add this to your `.bashrc` / `.zshrc`:
-
-`export NPM_TOKEN=github_access_token`
+<!-- For more complex architecture decisions and experimental mad science, please open an RFC (Request For Comments) so we can brainstorm together effectively! -->
 
 ### How to run the application
 
