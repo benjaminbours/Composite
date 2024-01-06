@@ -15,6 +15,7 @@ services:
     # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
 
   api:
+    container_name: composite_api
     build:
       target: dev
     volumes:
