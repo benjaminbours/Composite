@@ -59,6 +59,12 @@ Run this command to build the docker containers locally, accordingly with your C
 
 ```make build_containers```
 
+### Build the database
+
+```make build_database```
+
+> ⚠️ Be careful about the output of this command. Ensure the migration are well applied, if you got an error such as: Error: P1001: Can't reach database server at `db`:`5432`, it just mean your database started after we tried to apply the migration. You might have to increase the sleep value define in the make command `build_database`, or to start the database in another process before.
+
 ### Start all the containers
 
 ```make start```
