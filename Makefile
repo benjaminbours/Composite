@@ -10,8 +10,11 @@ start:
 stop:
 	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) down
 
-build:
+build_containers:
 	docker-compose -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) build
+
+build_packages:
+	npm run build -w packages
 
 deploy:
 	docker --context staging stack deploy --compose-file docker-compose.yml --compose-file docker-compose-staging.yml composite
