@@ -28,9 +28,10 @@ export class ElementToBounce extends Mesh {
     };
 
     public update = (rotationY: number) => {
-        gsap.to(this.rotation, {
-            duration: 0.25,
-            y: degreesToRadians(rotationY),
-        });
+        this.rotation.y = degreesToRadians(rotationY);
+        // gsap.to(this.rotation, {
+        //     duration: 0.25,
+        //     y: degreesToRadians(rotationY),
+        // });
     };
 }

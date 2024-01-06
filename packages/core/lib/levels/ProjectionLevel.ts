@@ -80,7 +80,7 @@ export class ProjectionLevel extends Group {
             {
                 id: 0,
                 side: Side.SHADOW,
-                position: new Vector3(1, 1, 0),
+                position: new Vector3(1, 0.5, 0),
                 // initialRotation: 0, // success rotation
                 initialRotation: -25,
             },
