@@ -17,7 +17,7 @@ build_packages:
 	npm run build -w packages
 
 build_database:
-	docker exec composite_api cd /back && npx prisma migrate dev 
+	docker exec composite_api /bin/sh -c "cd ./back; npx prisma migrate dev" 
 
 deploy:
 	docker --context staging stack deploy --compose-file docker-compose.yml --compose-file docker-compose-staging.yml composite
