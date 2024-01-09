@@ -7,7 +7,6 @@ import {
     COLLISION_DETECTION_RANGE,
     COLLISION_DETECTION_RANGE_INSIDE,
 } from './collision.system';
-import { getCenterPoint } from '../levels';
 import { isLevelWithBounces } from './simulation.updaters';
 import { degreesToRadians } from '../helpers/math';
 
@@ -55,7 +54,7 @@ function handleEnterElementToBounce(
     bounceElement: ElementToBounce,
     player: PlayerGameState,
 ) {
-    const center = getCenterPoint(bounceElement);
+    const center = bounceElement.localToWorld(bounceElement.center.clone());
     player.state = MovableComponentState.inside;
     player.insideElementID = bounceElement.bounceID;
     player.position.x = center.x;
@@ -179,8 +178,6 @@ export function handleJump(
         } else {
             player.velocity.y = rotatedVector.y;
         }
-
-        console.log(player.velocity);
     }
 }
 
