@@ -1,4 +1,4 @@
-import { Vector3, Raycaster, Intersection, Object3D, Vec2 } from 'three';
+import { Vector3, Raycaster, Intersection, Object3D, Vec2, Box3 } from 'three';
 
 export interface INearestObjects {
     right?: Intersection;
@@ -31,6 +31,17 @@ export function getNearestObjects(
 ): INearestObjects {
     const nearestObjects: INearestObjects = {};
 
+    // TODO: Can be optimize by filtering at a higher level.
+    // like this, it is filtered once for each player
+    const obstaclesToConsider = obstacles.filter((obstacle) => {
+        const playerBBox = new Box3().setFromCenterAndSize(
+            new Vector3(position.x, position.y, 0),
+            new Vector3(100, 100, 0),
+        );
+        const obstacleBox = new Box3().setFromObject(obstacle);
+        return playerBBox.intersectsBox(obstacleBox);
+    });
+
     const directions = Object.keys(RAYS) as (keyof typeof RAYS)[];
     for (let i = 0; i < directions.length; i++) {
         const direction = directions[i];
@@ -38,8 +49,8 @@ export function getNearestObjects(
         const ray = RAYS[direction];
         RAYCASTER.set(new Vector3(position.x, position.y, 0), ray);
 
-        // TODO: Investigate if we need the recursive flag enabled
-        const intersectObjects = RAYCASTER.intersectObjects(obstacles);
+        const intersectObjects =
+            RAYCASTER.intersectObjects(obstaclesToConsider);
 
         if (!intersectObjects.length) {
             continue;
