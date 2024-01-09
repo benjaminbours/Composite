@@ -386,15 +386,8 @@ export function createBounce(
     wall.rotation.set(rotation.x, rotation.y, rotation.z);
     wall.updateMatrix();
     wall.geometry.center();
+    wall.geometry.computeBoundingBox();
+    wall.geometry.boundingBox?.getCenter(wall.center);
     wall.name = ElementName.BOUNCE(side);
     return wall;
-}
-
-export function getCenterPoint(mesh: Mesh) {
-    const geometry = mesh.geometry;
-    geometry.computeBoundingBox();
-    const center = new Vector3();
-    geometry.boundingBox?.getCenter(center);
-    mesh.localToWorld(center);
-    return center;
 }
