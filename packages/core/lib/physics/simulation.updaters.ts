@@ -159,8 +159,8 @@ function applyWorldUpdate(
             player.insideElementID !== undefined
         ) {
             const rotationY =
-                gameState.level.bounces[player.insideElementID].rotationY +
-                player.velocity.x / 2;
+                gameState.level.bounces[player.insideElementID].rotationY -
+                (player.velocity.x / 2) * -1;
             gameState.level.bounces[player.insideElementID].rotationY =
                 rotationY;
         }

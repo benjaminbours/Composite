@@ -94,7 +94,6 @@ Give it a try to nightbot, stop being a noob
 - At the beginning of each level, indicate the basic keys could be helpful
 - indicator of direction when going out of a platform => chevron rouge qui pointe
 - very light wave, pulsing at a frequency from where an element is being interacted with, to indicate other player the focus point
-- rotation direction is reverted
 - investigate [mix blend mode](https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode) for the menu animation, see website => https://buttermax.net/
 - Is it complicated to add controller support?
 - Double jump
