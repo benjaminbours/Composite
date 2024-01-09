@@ -1,5 +1,18 @@
 # composite-front
 
+## 0.3.0
+
+### Minor Changes
+
+- 198d227: Change state reconciliation strategy to avoid frustrating correction for player. Display a state behind the prediction state
+
+### Patch Changes
+
+- Updated dependencies [dfae287]
+- Updated dependencies [dfae287]
+- Updated dependencies [198d227]
+  - @benjaminbours/composite-core@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes

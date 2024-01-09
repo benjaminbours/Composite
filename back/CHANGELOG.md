@@ -1,5 +1,19 @@
 # composite-back
 
+## 0.3.0
+
+### Minor Changes
+
+- 198d227: Make the server send the last input knows for each client, so clients can improve predictions
+
+### Patch Changes
+
+- 198d227: Refactor socket gateway
+- Updated dependencies [dfae287]
+- Updated dependencies [dfae287]
+- Updated dependencies [198d227]
+  - @benjaminbours/composite-core@0.2.3
+
 ## 0.2.0
 
 ### Minor Changes

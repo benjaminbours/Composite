@@ -1,5 +1,13 @@
 # composite-core
 
+## 0.2.3
+
+### Patch Changes
+
+- dfae287: Pre compute center of bounce elements to avoid useless computation at run time
+- dfae287: Optimize performance of raycasting
+- 198d227: Fix reverted rotation direction for bounces
+
 ## 0.2.2
 
 ### Patch Changes
