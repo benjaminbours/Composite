@@ -19,7 +19,7 @@ export class SocketController {
     private timeSamples: { rtt: number; gameTimeDelta: number }[] = [];
     public getCurrentGameState?: () => GameState;
     public synchronizeGameTimeWithServer?: (time: number) => void;
-    public onGameStateUpdate?: (gameState: GameState) => void;
+    public onGameStateUpdate?: (data: GameStateUpdatePayload) => void;
     private isTimeSynced = false;
 
     constructor(
@@ -48,7 +48,7 @@ export class SocketController {
             SocketEventType.GAME_STATE_UPDATE,
             (data: GameStateUpdatePayload) => {
                 if (this.onGameStateUpdate && this.isTimeSynced) {
-                    this.onGameStateUpdate(data.gameState);
+                    this.onGameStateUpdate(data);
                 }
             },
         );

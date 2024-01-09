@@ -1,5 +1,4 @@
 import { Camera, Mesh, Vector3 } from 'three';
-import { gsap } from 'gsap';
 import { Side } from '../types';
 import { getCenterPoint } from '../levels';
 import { degreesToRadians } from '../helpers/math';
@@ -28,9 +27,6 @@ export class ElementToBounce extends Mesh {
     };
 
     public update = (rotationY: number) => {
-        gsap.to(this.rotation, {
-            duration: 0.25,
-            y: degreesToRadians(rotationY),
-        });
+        this.rotation.y = degreesToRadians(rotationY);
     };
 }

@@ -55,8 +55,6 @@
 - uchinara:
   - Player bounce against each other
   - onde / particles
-- rumpleplays:
-  - Open a dedicated discord, bitch
 
 ## Think about bounce mechanism
 
@@ -85,7 +83,6 @@ Give it a try to nightbot, stop being a noob
 ## What to remember from test with viewers
 
 - Sometimes, I can go through element of the same color than my entity, instead of entering into it, it's not suppose to happen
-- The second level is way to complicated for beginners, would be way better to understand the mechanic in a more friendly and less punishable way
 - Check of rotations and positions of players, I have seen some flacky correction from the server game state
 
 - Investigate why A stay displayed when Q is binded
@@ -97,3 +94,16 @@ Give it a try to nightbot, stop being a noob
 - At the beginning of each level, indicate the basic keys could be helpful
 - indicator of direction when going out of a platform => chevron rouge qui pointe
 - very light wave, pulsing at a frequency from where an element is being interacted with, to indicate other player the focus point
+- investigate [mix blend mode](https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode) for the menu animation, see website => https://buttermax.net/
+- Is it complicated to add controller support?
+- Double jump
+- twitch game support?
+
+## First streamer ever who played my game
+
+- s17n
+  - Because Legion sponsored me on his stream after a raid
+
+## Today
+
+- Use interpolation to apply player correction when difference at reconciliation

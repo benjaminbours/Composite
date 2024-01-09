@@ -89,6 +89,7 @@ function updateDoor(wallDoor: Object3D, open: boolean) {
     wallDoor.updateMatrixWorld();
 }
 
+// TODO: has to move somewhere else
 export const isLevelWithBounces = (
     value: LevelState,
 ): value is ProjectionLevelState =>
@@ -158,8 +159,8 @@ function applyWorldUpdate(
             player.insideElementID !== undefined
         ) {
             const rotationY =
-                gameState.level.bounces[player.insideElementID].rotationY +
-                player.velocity.x / 2;
+                gameState.level.bounces[player.insideElementID].rotationY -
+                (player.velocity.x / 2) * -1;
             gameState.level.bounces[player.insideElementID].rotationY =
                 rotationY;
         }
@@ -198,7 +199,7 @@ export function updateServerBounces(
 
 // responsible to take a single input and apply it to the game state
 // and the game state only, it should not trigger any 3D changes
-export function applySingleInput(
+export function applySingleInputToSimulation(
     delta: number,
     side: Side,
     inputs: Inputs,
@@ -252,7 +253,7 @@ export function applySingleInput(
 
 // responsible to take many inputs and apply them to the game state
 // and the game state only, it should not trigger any 3D changes
-export function applyInputList(
+export function applyInputListToSimulation(
     delta: number,
     lastPlayerInput: GamePlayerInputPayload | undefined,
     inputs: GamePlayerInputPayload[],
@@ -282,7 +283,7 @@ export function applyInputList(
                     gameState.players[input.player].velocity,
                 );
             }
-            applySingleInput(
+            applySingleInputToSimulation(
                 delta,
                 input.player,
                 input.inputs,
@@ -330,7 +331,7 @@ export function applyInputList(
                     gameState.players[lastInput.player].velocity,
                 );
             }
-            applySingleInput(
+            applySingleInputToSimulation(
                 delta,
                 lastInput.player,
                 lastInput.inputs,

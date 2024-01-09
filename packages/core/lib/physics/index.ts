@@ -1,2 +1,2 @@
-export * from './PhysicLoop';
-export * from './updaters';
+export * from './PhysicSimulation';
+export * from './simulation.updaters';
