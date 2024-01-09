@@ -8,6 +8,8 @@ Ok so you are interested in contributing to Composite, awesome! Feel free to pit
 - docker-compose
 - Makefile
 - [nvm](https://github.com/nvm-sh/nvm)
+- typescript `npm install -g typescript`
+- npx `npm install -g npx`
 
 ## About the repository structure
 
@@ -29,48 +31,72 @@ Run `nvm use`
 
 If the node version of the project is not install on your machine, you will have to run
 
-```nvm install```
+`nvm install`
 
-### Github access token
+### Github access token :
 
 Create a [personal access token (classic)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
 
 Then you need to setup an env variable `NPM_TOKEN` in order to install github packages
 
+### Add Github access token for MacOS or Linux :
+
 Add this to your `.bashrc` / `.zshrc`:
 
 `export NPM_TOKEN=github_access_token`
+
+### Add Github access token for Windows :
+
+Open powershell in administrator and type :
+
+`[Environment]::SetEnvironmentVariable("NPM_TOKEN", "YOUR_GITHUB_TOKEN", "User")`
 
 ### Install dependencies
 
 Then you should be able to run this command successfully
 
-```npm i```
+`npm i`
 
 ### Build packages
 
 Run this command to build on your machine the packages
 
-```make build_packages```
+`make build_packages`
 
 ### Build containers
 
 Run this command to build the docker containers locally, accordingly with your CPU architecture
 
-```make build_containers```
+`make build_containers`
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+### For Windows users :
+
+In the terminal, cd to ./composite/packages/core and run
+
+`./build.bat`
+>>>>>>> 66c466c (Update CONTRIBUTING.md for windows installation and add build.bat script for windows users)
+
+=======
+>>>>>>> ee480fb (Add instructions for installing TypeScript and NPX, Add instructions for Windows users and create file build.bat)
 ### Build the database
 
-```make build_database```
+`make build_database`
 
 > ⚠️ Be careful about the output of this command. Ensure the migration are well applied, if you got an error such as: Error: P1001: Can't reach database server at `db`:`5432`, it just mean your database started after we tried to apply the migration. You might have to increase the sleep value define in the make command `build_database`, or to start the database in another process before.
 
+### For Windows users only :
+
+In the terminal, cd to ./composite/packages/core and run: `./build.bat`
+
 ### Start all the containers
 
-```make start```
+`make start`
 
 > ⚠️ Important information to know about watches.
-If you dig deeper into the docker config, you can see in local development, there are a bunch of volumes mounting, to facilitate watch processes and hot reloading of front and back. Regarding the `Core` package, you have to start the watch locally, it's not made inside any docker container. And you actually have to start two different watch processes, one that will compile to `cjs`, and the other that will compile to `esm`. (Yes it sucks, but it is what it is for now, feel free to improve it)
+> If you dig deeper into the docker config, you can see in local development, there are a bunch of volumes mounting, to facilitate watch processes and hot reloading of front and back. Regarding the `Core` package, you have to start the watch locally, it's not made inside any docker container. And you actually have to start two different watch processes, one that will compile to `cjs`, and the other that will compile to `esm`. (Yes it sucks, but it is what it is for now, feel free to improve it)
 
 #### Actually, why do we need two different watches for the core package? WTF?
 
@@ -84,10 +110,10 @@ So basically, frontend consume `esm`, backend consume `cjs`.
 
 Go at the root of the core package `/packages/core` and run these two processes in two different terminal
 
-```npm run dev:cjs```
+`npm run dev:cjs`
 
-```npm run dev:esm```
+`npm run dev:esm`
 
 ### Stop all the containers
 
-```make stop```
+`make stop`
