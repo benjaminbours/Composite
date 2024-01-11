@@ -42,8 +42,8 @@
 
 - Manage disconnect event while in game
 - Fix crash when you are in game, your team mate leave and you click to find another teammate, HomeInterface is null
-- Fix the fact player can exit bounce element without pressing enter sometimes
 - Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
+- I have seen a very big graphic bug on google chrome related to bounces shadow
 
 ## Potential game play suggestion
 
@@ -83,7 +83,6 @@ Give it a try to nightbot, stop being a noob
 ## What to remember from test with viewers
 
 - Sometimes, I can go through element of the same color than my entity, instead of entering into it, it's not suppose to happen
-- Check of rotations and positions of players, I have seen some flacky correction from the server game state
 
 - Investigate why A stay displayed when Q is binded
 - Transition menu from player quit the room to home is not smooth
@@ -103,7 +102,3 @@ Give it a try to nightbot, stop being a noob
 
 - s17n
   - Because Legion sponsored me on his stream after a raid
-
-## Today
-
-- Use interpolation to apply player correction when difference at reconciliation

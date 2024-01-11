@@ -98,7 +98,7 @@ export class SocketController {
                     //     (found?.gameTimeDelta || 0) / 2,
                     // );
                     // const gameTimeDelta = 15;
-                    const gameTimeDelta = found.gameTimeDelta;
+                    const gameTimeDelta = Math.floor(found.gameTimeDelta / 2.5);
                     // const gameTimeDelta = (found?.rtt || 0) + 10;
                     console.log('set game time delta', gameTimeDelta);
 

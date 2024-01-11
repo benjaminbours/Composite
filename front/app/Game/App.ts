@@ -600,13 +600,24 @@ export default class App {
         // return;
 
         // const ratio = Math.floor(this.gameDelta / 2);
-        // const ratio = this.gameDelta - 2;
-        const ratio = 10 + Math.floor(this.gameDelta / 2);
+        // const offset = this.gameDelta - 15;
+        const minOffset = 5;
+        const maxOffset = 40;
+        const offset = (() => {
+            const idealOffset = this.gameDelta - 5;
+            if (idealOffset > maxOffset) {
+                return maxOffset;
+            } else if (idealOffset < minOffset) {
+                return minOffset;
+            }
+            return idealOffset;
+        })();
+        // const ratio = Math.floor(this.gameDelta - 5);
         // console.log('HERE ratio', ratio);
 
         // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
-        if (this.predictionHistory.length > ratio) {
-            const statesToInterpolate = this.predictionHistory.slice(-ratio);
+        if (this.predictionHistory.length > offset) {
+            const statesToInterpolate = this.predictionHistory.slice(-offset);
             // console.log('interpolate states', statesToInterpolate.length);
 
             const interpolatedState = this.interpolateGameState(
