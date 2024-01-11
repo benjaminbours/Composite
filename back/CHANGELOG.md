@@ -1,5 +1,11 @@
 # composite-back
 
+## 0.3.1
+
+### Patch Changes
+
+- 7b25f0a: Improve latency management
+
 ## 0.3.0
 
 ### Minor Changes
