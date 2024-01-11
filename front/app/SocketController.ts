@@ -18,7 +18,10 @@ export class SocketController {
     // Round-trip time or ping
     private timeSamples: { rtt: number; gameTimeDelta: number }[] = [];
     public getCurrentGameState?: () => GameState;
-    public synchronizeGameTimeWithServer?: (time: number) => void;
+    public synchronizeGameTimeWithServer?: (
+        time: number,
+        delta: number,
+    ) => void;
     public onGameStateUpdate?: (data: GameStateUpdatePayload) => void;
     private isTimeSynced = false;
 
@@ -90,15 +93,17 @@ export class SocketController {
                     .find(({ gameTimeDelta }) => gameTimeDelta !== 0);
                 console.log('finished gathering ping info', found);
 
-                if (this.synchronizeGameTimeWithServer) {
+                if (this.synchronizeGameTimeWithServer && found) {
                     // const gameTimeDelta = Math.ceil(
                     //     (found?.gameTimeDelta || 0) / 2,
                     // );
-                    const gameTimeDelta = (found?.rtt || 0) + 10;
-                    console.log('set game time delta', gameTimeDelta);
+                    // const gameTimeDelta = 30;
+                    // const gameTimeDelta = (found?.rtt || 0) + 10;
+                    console.log('set game time delta', found.gameTimeDelta);
 
                     this.synchronizeGameTimeWithServer(
-                        data.serverGameTime! + gameTimeDelta,
+                        data.serverGameTime! + found.gameTimeDelta,
+                        found.gameTimeDelta,
                     );
                     this.isTimeSynced = true;
 
