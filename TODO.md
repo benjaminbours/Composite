@@ -44,6 +44,7 @@
 - Fix crash when you are in game, your team mate leave and you click to find another teammate, HomeInterface is null
 - Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
 - I have seen a very big graphic bug on google chrome related to bounces shadow
+- Bug with the queue
 
 ## Potential game play suggestion
 
@@ -87,7 +88,6 @@ Give it a try to nightbot, stop being a noob
 - Investigate why A stay displayed when Q is binded
 - Transition menu from player quit the room to home is not smooth
 - Updating key bindings have some bugs, key disappearing for example
-- Doing a lot of back and forth from the queue is making the app crash at some point, see on [discord](https://discord.com/channels/1190784529162580009/1192058819161895014/1192059129167093840)
 - Could be a idea to optimize and improve the UI to have a timing indicator about the next fetch of the queue state. That way, the user can trigger by himself faster if he wants, otherwise, he knows when the update will happen, and this allow me to increase the polling rate
 
 - At the beginning of each level, indicate the basic keys could be helpful
