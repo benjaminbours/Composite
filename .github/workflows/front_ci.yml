@@ -17,6 +17,7 @@ jobs:
       NEXT_PUBLIC_BACKEND_URL: http://api.localhost
       NEXT_PUBLIC_URL: http://front.localhost
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
     - uses: actions/checkout@v4
