@@ -130,6 +130,7 @@ export function Menu({
                     levelInterface: levelRef,
                     factionInterface: sideRef,
                     queueInterface: queueRef,
+                    endLevelInterface: endLevelRef,
                 },
                 blackCanvas.current,
                 whiteCanvas.current,

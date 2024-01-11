@@ -208,7 +208,19 @@ function queueOut() {
     });
 }
 
+function endLevelOut() {
+    const endLevelInterface = Animation.components?.endLevelInterface
+        .current as HTMLElement;
+
+    return gsap.to(endLevelInterface, {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            endLevelInterface.style.display = 'none';
+        },
+    });
+}
+
 export function allMenuScenesOut() {
-    // TODO: end level out
-    return [...homeOut(), levelOut(), factionOut(), queueOut()];
+    return [...homeOut(), levelOut(), factionOut(), queueOut(), endLevelOut()];
 }
