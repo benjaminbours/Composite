@@ -571,6 +571,64 @@ export default class App {
         }
 
         this.predictionHistory = predictionHistory;
+        if (this.predictionHistory[this.predictionHistory.length - 1]) {
+            // const distanceAfterInputsApply = this.calculateDistance(
+            //     this.currentState.players[this.playersConfig[0]].position,
+            //     this.predictionHistory[this.predictionHistory.length - 1]
+            //         .players[this.playersConfig[0]].position,
+            // );
+            // console.log(
+            //     'distance after inputs apply',
+            //     distanceAfterInputsApply,
+            // );
+            this.currentState = {
+                ...this.predictionHistory[this.predictionHistory.length - 1],
+                // this line avoid memory issues when switching tabs
+                game_time: this.currentState.game_time,
+            };
+        }
+    };
+
+    private computeDisplayState = () => {
+        if (!this.gameTimeIsSynchronized) {
+            this.displayState = this.currentState;
+            return;
+        }
+
+        // console.log('HERE', this.predictionHistory.length);
+        // this.displayState = this.currentState;
+        // return;
+
+        // const ratio = Math.floor(this.gameDelta / 2);
+        // const ratio = this.gameDelta - 2;
+        const ratio = 10 + Math.floor(this.gameDelta / 2);
+        // console.log('HERE ratio', ratio);
+
+        // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
+        if (this.predictionHistory.length > ratio) {
+            const statesToInterpolate = this.predictionHistory.slice(-ratio);
+            // console.log('interpolate states', statesToInterpolate.length);
+
+            const interpolatedState = this.interpolateGameState(
+                statesToInterpolate,
+                this.interpolation.ratio,
+            );
+
+            // Update the ratio for the next frame
+            this.interpolation.ratio += this.interpolation.increment;
+
+            // If the ratio exceeds 1, we've reached the next state
+            if (this.interpolation.ratio >= 1) {
+                // // Remove the previous state from the buffer
+                this.predictionHistory.shift();
+
+                // Reset the ratio
+                this.interpolation.ratio = 0;
+            }
+
+            // Update the display state to the interpolated state
+            this.displayState = interpolatedState;
+        }
     };
 
     // private calculateDistance(origin: Vec2, target: Vec2) {
@@ -603,30 +661,8 @@ export default class App {
             );
             // END PREDICTION
             // START DISPLAY TIME
-            const ratio = this.gameDelta - 5;
-            // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
-            if (this.predictionHistory.length > ratio) {
-                // Interpolate between the previous and next game states
-                const interpolatedState = this.interpolateGameState(
-                    this.predictionHistory.slice(ratio),
-                    this.interpolation.ratio,
-                );
 
-                // Update the ratio for the next frame
-                this.interpolation.ratio += this.interpolation.increment;
-
-                // If the ratio exceeds 1, we've reached the next state
-                if (this.interpolation.ratio >= 1) {
-                    // Remove the previous state from the buffer
-                    this.predictionHistory.shift();
-
-                    // Reset the ratio
-                    this.interpolation.ratio = 0;
-                }
-
-                // Update the display state to the interpolated state
-                this.displayState = interpolatedState;
-            }
+            this.computeDisplayState();
 
             for (let i = 0; i < this.playersConfig.length; i++) {
                 const side = this.playersConfig[i];
@@ -643,8 +679,8 @@ export default class App {
                     new Vector3(40, 40),
                 );
             }
-            this.updatePlayerGraphics(this.displayState);
         });
+        this.updatePlayerGraphics(this.displayState);
         this.updateWorldGraphics();
     };
 

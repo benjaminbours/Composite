@@ -405,7 +405,7 @@ export class SocketGateway {
     FLOOR.updateMatrixWorld(true);
     level.updateMatrixWorld(true);
 
-    const TICK_RATE = 60;
+    const TICK_RATE = 20;
     // let tick = 0;
     // let previous = hrtimeMs();
     const tickLengthMs = 1000 / TICK_RATE;

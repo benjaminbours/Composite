@@ -34,7 +34,7 @@ export class LightPlayer extends Player {
     // TODO: Duplicate function with element to bounce
     public get2dLightPosition = (camera: Camera, velocity: Vec2) => {
         const p = this.position.clone();
-        // p.sub(new Vector3(velocity.x, velocity.y, 0));
+        p.sub(new Vector3(velocity.x / 2, velocity.y / 2, 0));
         const vector = p.project(camera);
         const x = (vector.x + 1) / 2;
         const y = (vector.y + 1) / 2;
