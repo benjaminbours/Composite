@@ -118,6 +118,11 @@ function MainApp() {
 
     const handleTeamMateDisconnect = useCallback(() => {
         setTeamMateDisconnected(true);
+        setState((prev) => ({
+            ...prev,
+            side: undefined,
+            selectedLevel: undefined,
+        }))
         handleDestroyConnection();
     }, []);
 
