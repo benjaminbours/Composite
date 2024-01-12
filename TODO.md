@@ -40,8 +40,6 @@
 
 ## To fix
 
-- Manage disconnect event while in game
-- Fix crash when you are in game, your team mate leave and you click to find another teammate, HomeInterface is null
 - Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
 - I have seen a very big graphic bug on google chrome related to bounces shadow
 - Bug with the queue
