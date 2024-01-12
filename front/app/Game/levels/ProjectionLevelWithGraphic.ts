@@ -10,6 +10,7 @@ import {
 import { SkinBounceShadow } from '../elements/SkinBounceShadow';
 import { EndLevel } from '../elements/EndLevel';
 import { Mesh } from 'three';
+import { SkinBounce } from '../elements/SkinBounce';
 
 export class ProjectionLevelWithGraphic extends ProjectionLevel {
     constructor() {
@@ -19,6 +20,7 @@ export class ProjectionLevelWithGraphic extends ProjectionLevel {
             if (child.name.includes('BOUNCE')) {
                 const side = Number(child.name.replace('_BOUNCE', '')) as Side;
 
+                this.add(new SkinBounce(child as ElementToBounce));
                 if (side === Side.LIGHT) {
                     // initialization of the skin is done with postprocessing, it is spread around the App class, at the root of the game rendering
                 }
