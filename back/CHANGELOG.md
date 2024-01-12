@@ -1,5 +1,14 @@
 # composite-back
 
+## 0.3.2
+
+### Patch Changes
+
+- 3604076: Decrease network tick rate
+- Updated dependencies [3604076]
+- Updated dependencies [3da0b17]
+  - @benjaminbours/composite-core@0.2.4
+
 ## 0.3.2-next.0
 
 ### Patch Changes

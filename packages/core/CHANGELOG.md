@@ -1,5 +1,12 @@
 # composite-core
 
+## 0.2.4
+
+### Patch Changes
+
+- 3604076: Increase physic loop tick rate
+- 3da0b17: Add indicator of direction when jumping out of bounce element
+
 ## 0.2.4-next.0
 
 ### Patch Changes

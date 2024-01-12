@@ -1,5 +1,20 @@
 # composite-front
 
+## 0.3.3
+
+### Patch Changes
+
+- 3da0b17: Add indicator of direction when jumping out of bounce element
+- 779c393: Fix bug where on disconnect, the lonely player is redirected in the queue directly
+- dd44ffe: Fix issue with menu transition that could mess up the match making queue and create fake match
+- 3604076: Improve client feeling of fluidity
+- d3c5218: Add sentry
+- c87b0ee: Manage disconnect event while in game
+- 893c364: Add missing out transition for menu end level scene
+- Updated dependencies [3604076]
+- Updated dependencies [3da0b17]
+  - @benjaminbours/composite-core@0.2.4
+
 ## 0.3.3-next.0
 
 ### Patch Changes
