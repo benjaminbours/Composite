@@ -43,6 +43,7 @@
 - Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
 - I have seen a very big graphic bug on google chrome related to bounces shadow
 - On learn to fly when high, we can see the end of the shader box, the end of the "world"
+- The player in light composer change slightly the whole brightness of the screen when going in and out
 
 ## Potential game play suggestion
 
@@ -89,7 +90,6 @@ Give it a try to nightbot, stop being a noob
 - Could be a idea to optimize and improve the UI to have a timing indicator about the next fetch of the queue state. That way, the user can trigger by himself faster if he wants, otherwise, he knows when the update will happen, and this allow me to increase the polling rate
 
 - At the beginning of each level, indicate the basic keys could be helpful
-- indicator of direction when going out of a platform => chevron rouge qui pointe
 - very light wave, pulsing at a frequency from where an element is being interacted with, to indicate other player the focus point
 - investigate [mix blend mode](https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode) for the menu animation, see website => https://buttermax.net/
 - Is it complicated to add controller support?

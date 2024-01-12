@@ -165,18 +165,18 @@ export function handleJump(
         );
 
         // Apply the rotation to the vector
-        const rotatedVector = vectorToRotate
+        const jumpOutDirectionVector = vectorToRotate
             .clone()
             .applyMatrix4(rotationMatrix)
             .multiplyScalar(LEAVE_BOUNCE_POWER);
 
         player.state = MovableComponentState.inAir;
-        player.velocity.x = -rotatedVector.z;
-        if (Math.abs(rotatedVector.y) > LEAVE_BOUNCE_POWER_MAX_Y) {
-            const sign = Math.sign(rotatedVector.y);
+        player.velocity.x = -jumpOutDirectionVector.z;
+        if (Math.abs(jumpOutDirectionVector.y) > LEAVE_BOUNCE_POWER_MAX_Y) {
+            const sign = Math.sign(jumpOutDirectionVector.y);
             player.velocity.y = LEAVE_BOUNCE_POWER_MAX_Y * sign;
         } else {
-            player.velocity.y = rotatedVector.y;
+            player.velocity.y = jumpOutDirectionVector.y;
         }
     }
 }
