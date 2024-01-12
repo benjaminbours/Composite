@@ -130,6 +130,7 @@ export function Menu({
                     levelInterface: levelRef,
                     factionInterface: sideRef,
                     queueInterface: queueRef,
+                    endLevelInterface: endLevelRef,
                 },
                 blackCanvas.current,
                 whiteCanvas.current,
@@ -187,7 +188,7 @@ export function Menu({
     }, []);
 
     const handleClickOnPlay = useCallback(() => {
-        if (!animation.current) {
+        if (!animation.current || onTransition.current) {
             return;
         }
         if (teamMateDisconnected) {
@@ -202,7 +203,7 @@ export function Menu({
     }, [teamMateDisconnected, setTeamMateDisconnected]);
 
     const handleClickOnQuitTeam = useCallback(() => {
-        if (!animation.current) {
+        if (!animation.current || onTransition.current) {
             return;
         }
         animation.current.goToStep(MenuScene.HOME, () => {
@@ -213,7 +214,7 @@ export function Menu({
     }, []);
 
     const handleClickOnBack = useCallback(() => {
-        if (!animation.current) {
+        if (!animation.current || onTransition.current) {
             return;
         }
         const backOptions = {
@@ -258,7 +259,7 @@ export function Menu({
 
     const handleClickOnLevel = useCallback(
         (levelId: Levels) => {
-            if (!animation.current) {
+            if (!animation.current || onTransition.current) {
                 return;
             }
             if (teamMateDisconnected) {
@@ -279,7 +280,7 @@ export function Menu({
 
     const handleClickOnFaction = useCallback(
         (side: Side) => {
-            if (!animation.current) {
+            if (!animation.current || onTransition.current) {
                 return;
             }
             if (teamMateDisconnected) {

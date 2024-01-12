@@ -28,6 +28,7 @@ interface IAnimationComps {
     levelInterface: RefObject<HTMLDivElement>;
     factionInterface: RefObject<HTMLDivElement>;
     queueInterface: RefObject<HTMLDivElement>;
+    endLevelInterface: RefObject<HTMLDivElement>;
 }
 
 interface AnimationCanvasComponents {

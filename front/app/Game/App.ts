@@ -245,7 +245,7 @@ export default class App {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
-    public gameDelta = 0;
+    public gameDelta = process.env.NEXT_PUBLIC_SKIP_MATCHMAKING ? 5 : 0;
     public gameTimeIsSynchronized = false;
     public synchronizeGameTimeWithServer = (
         gameTime: number,
@@ -653,6 +653,10 @@ export default class App {
         if (this.shouldReconciliateState) {
             this.shouldReconciliateState = false;
             this.reconciliateState();
+        } else if (this.predictionHistory.length > this.gameDelta) {
+            this.predictionHistory = this.predictionHistory.slice(
+                -this.gameDelta,
+            );
         }
         this.physicSimulation.run((delta) => {
             this.processInputs();

@@ -118,6 +118,11 @@ function MainApp() {
 
     const handleTeamMateDisconnect = useCallback(() => {
         setTeamMateDisconnected(true);
+        setState((prev) => ({
+            ...prev,
+            side: undefined,
+            selectedLevel: undefined,
+        }))
         handleDestroyConnection();
     }, []);
 
@@ -127,15 +132,21 @@ function MainApp() {
     }, []);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {
-        import('./Menu/Animation')
-            .then((mod) => mod.default)
-            .then((Animation) => {
-                Animation.goToStep(MenuScene.HOME, () => {
-                    setMenuScene(MenuScene.HOME);
-                    setTeamMateDisconnected(false);
+        if (gameIsPlaying) {
+            setGameIsPlaying(false);
+            setMenuScene(MenuScene.HOME);
+            setTeamMateDisconnected(false);
+        } else {
+            import('./Menu/Animation')
+                .then((mod) => mod.default)
+                .then((Animation) => {
+                    Animation.goToStep(MenuScene.HOME, () => {
+                        setMenuScene(MenuScene.HOME);
+                        setTeamMateDisconnected(false);
+                    });
                 });
-            });
-    }, []);
+        }
+    }, [gameIsPlaying]);
 
     const handleClickOnJoinTeamMate = useCallback(() => {
         if (!teamMateInfo) {
