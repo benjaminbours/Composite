@@ -1,6 +1,6 @@
 export class PhysicSimulation {
     public loops = 0;
-    private tick_rate = 60;
+    private tick_rate = 120;
     private skip_ticks = 1000 / this.tick_rate;
     public delta = this.skip_ticks / 1000;
     // private max_frame_skip = 10;

@@ -1,5 +1,14 @@
 # composite-front
 
+## 0.3.3-next.0
+
+### Patch Changes
+
+- 3604076: Improve client feeling of fluidity
+- d3c5218: Add sentry
+- Updated dependencies [3604076]
+  - @benjaminbours/composite-core@0.2.4-next.0
+
 ## 0.3.2
 
 ### Patch Changes

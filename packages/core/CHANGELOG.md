@@ -1,5 +1,11 @@
 # composite-core
 
+## 0.2.4-next.0
+
+### Patch Changes
+
+- 3604076: Increase physic loop tick rate
+
 ## 0.2.3
 
 ### Patch Changes

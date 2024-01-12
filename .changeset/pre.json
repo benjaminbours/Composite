@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "composite-back": "0.3.1",
+    "composite-front": "0.3.2",
+    "@benjaminbours/composite-core": "0.2.3"
+  },
+  "changesets": [
+    "forty-laws-perform",
+    "silly-goats-worry",
+    "thick-pets-camp",
+    "unlucky-kangaroos-promise"
+  ]
+}

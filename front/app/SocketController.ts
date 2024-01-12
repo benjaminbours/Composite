@@ -97,13 +97,14 @@ export class SocketController {
                     // const gameTimeDelta = Math.ceil(
                     //     (found?.gameTimeDelta || 0) / 2,
                     // );
-                    // const gameTimeDelta = 30;
+                    // const gameTimeDelta = 15;
+                    const gameTimeDelta = Math.floor(found.gameTimeDelta / 2.5);
                     // const gameTimeDelta = (found?.rtt || 0) + 10;
-                    console.log('set game time delta', found.gameTimeDelta);
+                    console.log('set game time delta', gameTimeDelta);
 
                     this.synchronizeGameTimeWithServer(
-                        data.serverGameTime! + found.gameTimeDelta,
-                        found.gameTimeDelta,
+                        data.serverGameTime! + gameTimeDelta,
+                        gameTimeDelta,
                     );
                     this.isTimeSynced = true;
 
