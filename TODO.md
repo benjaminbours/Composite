@@ -42,7 +42,7 @@
 
 - Improve the game state management with redis. So far, it's too hardcoded and doesn't scale as good as it could
 - I have seen a very big graphic bug on google chrome related to bounces shadow
-- Bug with the queue
+- On learn to fly when high, we can see the end of the shader box, the end of the "world"
 
 ## Potential game play suggestion
 
