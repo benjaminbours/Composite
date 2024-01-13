@@ -40,13 +40,25 @@ export class ProjectionLevel extends Group {
 
     constructor() {
         super();
-        const wallBlockingLeftPath = createWall(
-            new Vector3(4, 2, 0),
-            new Vector3(-3.5, 0, 2),
-            new Vector3(0, 90, 0),
-        );
-        this.add(wallBlockingLeftPath);
-        this.collidingElements.push(wallBlockingLeftPath);
+        const walls = [
+            // blocking left path
+            createWall(
+                new Vector3(4, 5, 0),
+                new Vector3(-3.5, 0, 2),
+                new Vector3(0, 90, 0),
+            ),
+            // blocking right path
+            createWall(
+                new Vector3(4, 8, 0),
+                new Vector3(14, 0, 2),
+                new Vector3(0, 90, 0),
+            ),
+        ];
+
+        walls.forEach((wall) => {
+            this.add(wall);
+            this.collidingElements.push(wall);
+        });
 
         const arches = [
             createArchGroup(3, new Vector3(0, 0, 0)),
@@ -54,10 +66,10 @@ export class ProjectionLevel extends Group {
             createArchGroup(3, new Vector3(2, 0, 0)),
             createArchGroup(4, new Vector3(5, 0, 0)),
             createArchGroup(3.25, new Vector3(6, 0, 0)),
-            createArchGroup(2.5, new Vector3(7, 0, 0), false),
+            createArchGroup(2.5, new Vector3(7, 0, 0)),
             createArchGroup(2.5, new Vector3(8, 0, 0), false),
-            createArchGroup(2.5, new Vector3(9, 0, 0)),
-            createArchGroup(2.5, new Vector3(10, 0, 0)),
+            createArchGroup(2.5, new Vector3(9, 0, 0), false),
+            createArchGroup(2.5, new Vector3(10, 0, 0), false),
             createArchGroup(2.5, new Vector3(11, 0, 0)),
             createArchGroup(4, new Vector3(10.5, 0, 0)),
             createArchGroup(4, new Vector3(11.5, 0, 0), false),
