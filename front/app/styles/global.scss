@@ -48,6 +48,11 @@ canvas,
         width: 30px;
     }
 
+    .inline-link {
+        text-decoration: none;
+        margin-top: 15px;
+    }
+
     &--black {
         .cogwheel {
             fill: black;
@@ -55,6 +60,14 @@ canvas,
 
         .version {
             color: black;
+        }
+
+        .inline-link {
+            color: black;
+
+            &::before {
+                border-color: black;
+            }
         }
     }
 
@@ -65,6 +78,14 @@ canvas,
 
         .version {
             color: white;
+        }
+
+        .inline-link {
+            color: white;
+
+            &::before {
+                border-color: white;
+            }
         }
     }
 }

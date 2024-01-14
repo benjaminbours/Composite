@@ -78,7 +78,7 @@
 
 ## Twitch
 
-Give it a try to nightbot, stop being a noob
+- nvidia broadcast
 
 ## What to remember from test with viewers
 
