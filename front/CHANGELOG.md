@@ -1,5 +1,13 @@
 # composite-front
 
+## 0.3.4
+
+### Patch Changes
+
+- 001225a: Add timeline page with roadmap and history
+- Updated dependencies [0a6cd95]
+  - @benjaminbours/composite-core@0.2.5
+
 ## 0.3.3
 
 ### Patch Changes

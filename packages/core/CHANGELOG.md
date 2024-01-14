@@ -1,5 +1,11 @@
 # composite-core
 
+## 0.2.5
+
+### Patch Changes
+
+- 0a6cd95: Add missing wall on projection level
+
 ## 0.2.4
 
 ### Patch Changes
