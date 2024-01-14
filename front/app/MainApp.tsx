@@ -28,6 +28,7 @@ import { MenuMode, MenuScene } from './Menu/types';
 import { CogWheel } from './Game/icons/CogWheel';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
+import Link from 'next/link';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -122,7 +123,7 @@ function MainApp() {
             ...prev,
             side: undefined,
             selectedLevel: undefined,
-        }))
+        }));
         handleDestroyConnection();
     }, []);
 
@@ -310,6 +311,9 @@ function MainApp() {
                 <button className="settings" onClick={handleClickOnSettings}>
                     <CogWheel />
                 </button>
+                <Link href="/timeline#roadmap" className="inline-link">
+                    Roadmap
+                </Link>
                 <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
             </div>
         );

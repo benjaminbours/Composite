@@ -1,0 +1,80 @@
+.roadmap-page {
+    background-color: black;
+    color: white;
+    padding: 30px 0;
+
+    #buttonPlay {
+        position: static;
+        background: white;
+        color: black;
+        text-decoration: none;
+        display: block;
+        transform: none;
+
+        &:hover {
+            background: black;
+            color: white;
+        }
+    }
+
+    .button-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.roadmap-page .main-container {
+    width: 60%;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        width: 90%;
+    }
+}
+
+.timeline {
+    position: relative;
+    margin: 0 auto;
+    padding: 20px 0;
+    list-style: none;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: white;
+    left: 0;
+    margin-left: -1px;
+}
+
+.timeline-event {
+    position: relative;
+    margin-bottom: 20px;
+    margin-left: 30px;
+}
+
+.timeline-event-date::before {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 2px;
+    background: white;
+    top: 50%;
+    left: -30px;
+    transform: translateY(-50%);
+}
+
+.timeline-event-date {
+    font-weight: bold;
+    position: relative;
+    line-height: 2;
+}
+
+.timeline-event:nth-child(even)::before {
+    left: auto;
+    right: -6px;
+}
