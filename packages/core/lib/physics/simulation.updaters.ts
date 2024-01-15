@@ -177,11 +177,7 @@ function applyWorldUpdate(
 }
 
 function updateBounce(bounce: ElementToBounce, rotationY: number) {
-    bounce.rotation.set(
-        bounce.rotation.x,
-        degreesToRadians(rotationY),
-        bounce.rotation.z,
-    );
+    bounce.update(rotationY);
     bounce.updateMatrixWorld();
 }
 
@@ -273,6 +269,7 @@ export function applyInputListToSimulation(
         for (let j = 0; j < inputs.length; j++) {
             const input = inputs[j];
             if (dev) {
+                console.log('applying input for player', input.player);
                 console.log('applying input', input.time, input.sequence);
                 console.log(
                     'applying input from position',
@@ -353,4 +350,26 @@ export function applyInputListToSimulation(
         }
     }
     return lastInput;
+}
+
+export function collectInputsForTick(
+    inputsQueue: GamePlayerInputPayload[],
+    gameTime: number,
+) {
+    // 2 buffers, one for each player
+    const inputsForTick: GamePlayerInputPayload[][] = [[], []];
+    for (let i = 0; i < inputsQueue.length; i++) {
+        const input = inputsQueue[i];
+        if (input.sequence !== gameTime) {
+            continue;
+        }
+        // filter by player
+        if (input.player === Side.SHADOW) {
+            inputsForTick[0].push(input);
+        }
+        if (input.player === Side.LIGHT) {
+            inputsForTick[1].push(input);
+        }
+    }
+    return inputsForTick;
 }
