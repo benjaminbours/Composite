@@ -85,6 +85,7 @@ function Game({
 
         return () => {
             gsap.ticker.remove(gameLoop);
+            appRef.current?.destroy();
         };
     }, []);
 

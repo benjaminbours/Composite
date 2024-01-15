@@ -200,6 +200,9 @@ export default class App {
         GamePlayerInputPayload | undefined,
     ] = [undefined, undefined];
 
+    private inputBuffer: GamePlayerInputPayload[] = [];
+    private sendInputIntervalId: number = 0;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
@@ -242,6 +245,11 @@ export default class App {
             this.synchronizeGameTimeWithServer;
     }
 
+    destroy = () => {
+        console.log('cleared interval');
+        clearInterval(this.sendInputIntervalId);
+    };
+
     public resize = () => {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
@@ -249,14 +257,34 @@ export default class App {
     };
 
     public gameDelta = process.env.NEXT_PUBLIC_SKIP_MATCHMAKING ? 5 : 0;
+    public bufferHistorySize = 10;
     public gameTimeIsSynchronized = false;
-    public synchronizeGameTimeWithServer = (
-        gameTime: number,
-        delta: number,
-    ) => {
-        this.currentState.game_time = gameTime;
-        this.gameDelta = delta;
+    public synchronizeGameTimeWithServer = (rtt: number) => {
+        this.gameDelta = Math.floor(rtt / 2);
+        // this.gameDelta = delta;
+        this.currentState.game_time += this.gameDelta;
         this.gameTimeIsSynchronized = true;
+        this.bufferHistorySize = this.gameDelta;
+
+        // one trip time
+
+        console.log('game time delta', this.gameDelta);
+
+        let sendInputsInterval;
+        if (rtt < 50) {
+            sendInputsInterval = 20;
+        } else if (rtt < 100) {
+            sendInputsInterval = 30;
+        } else {
+            sendInputsInterval = 40;
+        }
+        console.log('send inputs interval', sendInputsInterval);
+
+        // Call sendBufferedInputs at regular intervals
+        this.sendInputIntervalId = setInterval(
+            this.sendBufferedInputs,
+            sendInputsInterval,
+        ) as any;
     };
 
     setupScene = (playersConfig: Side[]) => {
@@ -481,6 +509,19 @@ export default class App {
         }
     };
 
+    // Method for collecting player inputs
+    public collectInput = (input: GamePlayerInputPayload) => {
+        this.inputBuffer.push(input);
+    };
+
+    // Method for sending buffered inputs to the server
+    public sendBufferedInputs = () => {
+        if (this.inputBuffer.length > 0) {
+            this.socketController.sendInputs(this.inputBuffer);
+            this.inputBuffer = [];
+        }
+    };
+
     private processInputs = () => {
         // TODO: Investigate to send pack of inputs, to reduce network usage
         const payload = {
@@ -504,11 +545,7 @@ export default class App {
             isInputRelease
         ) {
             this.inputsHistory.push(payload);
-            // emit input to server
-            this.socketController?.emit([
-                SocketEventType.GAME_PLAYER_INPUT,
-                payload,
-            ]);
+            this.collectInput(payload);
         }
         this.lastInput = payload;
     };

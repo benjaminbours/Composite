@@ -117,14 +117,18 @@ export class SocketGateway {
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
   async handleGamePlayerInput(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data: GamePlayerInputPayload,
+    @MessageBody() data: GamePlayerInputPayload[],
   ) {
     const player = await this.temporaryStorage.getPlayer(socket.id);
     if (!player) {
       return;
     }
 
-    await this.temporaryStorage.addToGameInputsQueue(player.gameId, data);
+    Promise.all(
+      data.map((input) =>
+        this.temporaryStorage.addToGameInputsQueue(player.gameId, input),
+      ),
+    );
   }
 
   // @SubscribeMessage(SocketEventType.GAME_ACTIVATE_ELEMENT)

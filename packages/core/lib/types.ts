@@ -69,7 +69,10 @@ export interface GamePlayerInputPayload {
 
 export interface GameStateUpdatePayload {
     gameState: GameState;
-    lastInputs: [GamePlayerInputPayload | undefined, GamePlayerInputPayload | undefined];
+    lastInputs: [
+        GamePlayerInputPayload | undefined,
+        GamePlayerInputPayload | undefined,
+    ];
 }
 
 export interface GameActivateElementPayload {
@@ -113,7 +116,7 @@ export type GameStateUpdateEvent = [
 
 export type GamePlayerInputEvent = [
     type: SocketEventType.GAME_PLAYER_INPUT,
-    payload: GamePlayerInputPayload,
+    payload: GamePlayerInputPayload[],
 ];
 
 export type GameActivateElementEvent = [
