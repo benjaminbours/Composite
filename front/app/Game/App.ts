@@ -43,6 +43,7 @@ import {
     GameStateUpdatePayload,
     isLevelWithBounces,
     BounceState,
+    collectInputsForTick,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -98,8 +99,6 @@ export default class App {
     private playerOcclusionComposer!: EffectComposer;
     private playerVolumetricLightPass!: ShaderPass;
 
-    private lastInputValidated: GamePlayerInputPayload | undefined;
-    // private gameStateHistory: GameState[] = [];
     private inputsHistory: GamePlayerInputPayload[] = [];
     // its a predicted state if we compare it to the last validated state
     private shouldReconciliateState = false;
@@ -196,6 +195,11 @@ export default class App {
 
     private playerHelper?: Box3;
 
+    public lastServerInputs: [
+        GamePlayerInputPayload | undefined,
+        GamePlayerInputPayload | undefined,
+    ] = [undefined, undefined];
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
@@ -229,11 +233,10 @@ export default class App {
         this.socketController.onGameStateUpdate = (
             data: GameStateUpdatePayload,
         ) => {
-            // console.log('received update', data.gameState);
+            // console.log('received update', data);
             this.shouldReconciliateState = true;
             this.serverGameState = data.gameState;
-            // TODO: If not used anymore, remove lastInputs from payload
-            // this.lastServerInputs = data.lastInputs;
+            this.lastServerInputs = data.lastInputs;
         };
         this.socketController.synchronizeGameTimeWithServer =
             this.synchronizeGameTimeWithServer;
@@ -479,6 +482,7 @@ export default class App {
     };
 
     private processInputs = () => {
+        // TODO: Investigate to send pack of inputs, to reduce network usage
         const payload = {
             player: this.playersConfig[0],
             inputs: { ...this.inputsManager.inputsActive },
@@ -510,18 +514,6 @@ export default class App {
     };
 
     private reconciliateState = () => {
-        // TODO: Can be optimized
-        this.lastInputValidated = (() => {
-            const input = this.inputsHistory.findLast(
-                (input) =>
-                    input.sequence <= this.serverGameState.lastValidatedInput,
-            );
-            if (input) {
-                return JSON.parse(JSON.stringify(input));
-            }
-            return this.lastInputValidated;
-        })();
-
         this.inputsHistory = this.inputsHistory.filter(
             ({ sequence }) =>
                 sequence >= this.serverGameState.lastValidatedInput,
@@ -536,57 +528,77 @@ export default class App {
             JSON.parse(JSON.stringify(this.serverGameState)),
         ];
 
-        let lastInputValidated = undefined;
-        if (this.lastInputValidated) {
-            lastInputValidated = JSON.parse(
-                JSON.stringify(this.lastInputValidated),
-            );
-        }
-        while (nextState.game_time < this.currentState.game_time - 1) {
-            nextState.game_time++;
-            const inputsForTick = inputs.filter(
-                ({ sequence }) => sequence == nextState.game_time,
-            );
-            lastInputValidated = applyInputListToSimulation(
-                this.physicSimulation.delta,
-                lastInputValidated,
-                inputsForTick,
-                [
-                    FLOOR,
-                    ...this.levelController.levels[
-                        this.levelController.currentLevel
-                    ]!.collidingElements,
-                ],
-                nextState,
-                Context.client,
-                false,
-                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
-            );
-            for (let i = 0; i < inputsForTick.length; i++) {
-                const input = inputsForTick[i];
-                inputs.splice(inputs.indexOf(input), 1);
+        const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
+            undefined,
+            undefined,
+        ];
+        this.lastServerInputs.forEach((input, index) => {
+            if (input) {
+                lastPlayersInput[index] = JSON.parse(JSON.stringify(input));
             }
+        });
+        while (nextState.game_time < this.currentState.game_time) {
+            nextState.game_time++;
+            const inputsForTick = collectInputsForTick(
+                inputs,
+                nextState.game_time,
+            );
+
+            for (let i = 0; i < inputsForTick.length; i++) {
+                const inputs = inputsForTick[i];
+                lastPlayersInput[i] = applyInputListToSimulation(
+                    this.physicSimulation.delta,
+                    lastPlayersInput[i],
+                    inputs,
+                    [
+                        FLOOR,
+                        ...this.levelController.levels[
+                            this.levelController.currentLevel
+                        ]!.collidingElements,
+                    ],
+                    nextState,
+                    Context.client,
+                    false,
+                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
+                );
+                for (let i = 0; i < inputs.length; i++) {
+                    const input = inputs[i];
+                    inputs.splice(inputs.indexOf(input), 1);
+                }
+            }
+
             const snapshot = JSON.parse(JSON.stringify(nextState));
             predictionHistory.push(snapshot);
+            if (predictionHistory.length > BUFFER_HISTORY_SIZE) {
+                predictionHistory.shift();
+            }
         }
 
+        // const distanceAfterInputsApply = this.calculateDistance(
+        //     JSON.parse(
+        //         JSON.stringify(
+        //             this.currentState.players[this.playersConfig[0]].position,
+        //         ),
+        //     ),
+        //     nextState.players[this.playersConfig[0]].position,
+        // );
+        // console.log(
+        //     'current position',
+        //     JSON.parse(
+        //         JSON.stringify(
+        //             this.currentState.players[this.playersConfig[0]].position,
+        //         ),
+        //     ),
+        // );
+        // console.log(
+        //     'next position',
+        //     nextState.players[this.playersConfig[0]].position,
+        // );
+        // console.log('distance after inputs apply', distanceAfterInputsApply);
+
         this.predictionHistory = predictionHistory;
-        if (this.predictionHistory[this.predictionHistory.length - 1]) {
-            // const distanceAfterInputsApply = this.calculateDistance(
-            //     this.currentState.players[this.playersConfig[0]].position,
-            //     this.predictionHistory[this.predictionHistory.length - 1]
-            //         .players[this.playersConfig[0]].position,
-            // );
-            // console.log(
-            //     'distance after inputs apply',
-            //     distanceAfterInputsApply,
-            // );
-            this.currentState = {
-                ...this.predictionHistory[this.predictionHistory.length - 1],
-                // this line avoid memory issues when switching tabs
-                game_time: this.currentState.game_time,
-            };
-        }
+        this.currentState.players = nextState.players;
+        this.currentState.level = nextState.level;
     };
 
     private computeDisplayState = () => {
@@ -653,27 +665,67 @@ export default class App {
         if (this.shouldReconciliateState) {
             this.shouldReconciliateState = false;
             this.reconciliateState();
-        } else if (this.predictionHistory.length > this.gameDelta) {
-            this.predictionHistory = this.predictionHistory.slice(
-                -this.gameDelta,
-            );
         }
         this.physicSimulation.run((delta) => {
-            this.processInputs();
-            // predict first player
-            applySingleInputToSimulation(
-                delta,
-                this.playersConfig[0],
-                this.inputsManager.inputsActive,
-                this.collidingElements,
-                this.currentState,
-                Context.client,
-                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
-            );
             this.currentState.game_time++;
-            this.predictionHistory.push(
-                JSON.parse(JSON.stringify(this.currentState)),
-            );
+            // first player input
+            this.processInputs();
+            // other player input
+            const otherPlayerInput = {
+                inputs: this.lastServerInputs[this.playersConfig[1]]
+                    ?.inputs || {
+                    left: false,
+                    right: false,
+                    jump: false,
+                    top: false,
+                    bottom: false,
+                },
+                sequence: this.currentState.game_time,
+                time: Date.now(),
+                player: this.playersConfig[1],
+            };
+            this.inputsHistory.push({
+                inputs: this.lastServerInputs[this.playersConfig[1]]
+                    ?.inputs || {
+                    left: false,
+                    right: false,
+                    jump: false,
+                    top: false,
+                    bottom: false,
+                },
+                sequence: this.currentState.game_time,
+                time: Date.now(),
+                player: this.playersConfig[1],
+            });
+
+            const inputsForTick: GamePlayerInputPayload[][] = [[], []];
+            if (this.lastInput) {
+                inputsForTick[this.playersConfig[0]] = [this.lastInput];
+            }
+            inputsForTick[this.playersConfig[1]] = [otherPlayerInput];
+
+            for (let i = 0; i < inputsForTick.length; i++) {
+                const inputs = inputsForTick[i];
+                applyInputListToSimulation(
+                    delta,
+                    undefined,
+                    inputs,
+                    this.collidingElements,
+                    this.currentState,
+                    Context.client,
+                    // true,
+                );
+            }
+            if (this.gameTimeIsSynchronized) {
+                this.predictionHistory.push(
+                    JSON.parse(JSON.stringify(this.currentState)),
+                );
+
+                if (this.predictionHistory.length > BUFFER_HISTORY_SIZE) {
+                    this.predictionHistory.shift();
+                }
+            }
+
             // END PREDICTION
             // START DISPLAY TIME
 
