@@ -3,7 +3,8 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Roadmap',
-    description: 'TODO: Add description',
+    description:
+        'Explore the timeline of events and milestones in the development of Composite - The game.',
 };
 
 type TimelineEvent = {
