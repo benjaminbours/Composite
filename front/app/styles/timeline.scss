@@ -4,12 +4,10 @@
     padding: 30px 0;
 
     #buttonPlay {
-        position: static;
         background: white;
         color: black;
         text-decoration: none;
         display: block;
-        transform: none;
 
         &:hover {
             background: black;
