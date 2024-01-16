@@ -42,9 +42,9 @@ const pastEvents: TimelineEvent[] = [
         date: 'From December 2018 to February 2019',
         description: (
             <p>
-                First tentative of refactor, using Typescript. Mostly a
+                First tentative of refactoring, using Typescript. Mostly a
                 refactoring of the menu part, not the 3D and game one. In my
-                free time, aborted because not time in life.
+                free time, aborted because no time in life.
             </p>
         ),
     },
@@ -135,6 +135,20 @@ const pastEvents: TimelineEvent[] = [
                             >
                                 multiple socket.io instances.
                             </a>
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Discover and use{' '}
+                            <a
+                                href="https://redis.io/https://redis.io"
+                                target="_blank"
+                                className="inline-link"
+                            >
+                                Redis
+                            </a>{' '}
+                            as a temporary storage system to own the game state,
+                            the inputs buffer etc on the server.
                         </p>
                     </li>
                     <li>
@@ -369,6 +383,9 @@ const futureEvents: TimelineEvent[] = [
                             match with random person, you can just send a link
                             to your friend, and play the game with him.
                         </p>
+                    </li>
+                    <li>
+                        <p>Add certificate for https support.</p>
                     </li>
                     <li>
                         <p>

@@ -44,6 +44,8 @@
 - I have seen a very big graphic bug on google chrome related to bounces shadow
 - On learn to fly when high, we can see the end of the shader box, the end of the "world"
 - The player in light composer change slightly the whole brightness of the screen when going in and out
+- Bug with end game animation
+- Display exit bounce helper only when inside the element
 
 ## Potential game play suggestion
 
@@ -100,3 +102,12 @@
 
 - s17n
   - Because Legion sponsored me on his stream after a raid
+
+## Bug report on discord
+
+Still need to address number 2 and 5
+
+## To be decided with the community
+
+- Double jump feature when jumping against walls? Would change a lot the game but could be funny no?
+
