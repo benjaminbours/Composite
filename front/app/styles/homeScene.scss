@@ -65,7 +65,7 @@
 
     .queue-count {
         position: fixed;
-        top: calc(75% - 25px);
+        top: calc(60% - 25px);
 
         &--light {
             left: 10%;
@@ -100,6 +100,8 @@
     @media (min-width: 2000px) {
         top: calc(75% - 60px);
     }
+
+    // BUTTONS
 
     .button-random {
         background: white;
@@ -148,6 +150,46 @@
             opacity: 1;
             transition: 0.5s;
             border: solid rgba(0, 0, 0, 0) 1px;
+        }
+    }
+
+    // INFORMATION
+
+    $size: 250px;
+    $sizeTable: 200px;
+    .information {
+        position: absolute;
+        width: 300px;
+        line-height: 1.5;
+        opacity: 0;
+        transition: 0.3s ease-out;
+        top: 50%;
+        margin: 0;
+
+        &.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 1000px) {
+            width: 200px;
+        }
+    }
+
+    .information-random {
+        color: white;
+        transform: translate(calc($size * -1 - 50%), -50%);
+
+        @media (max-width: 1000px) {
+            transform: translate(calc($sizeTable * -1 - 50%), -50%);
+        }
+    }
+
+    .information-friend {
+        transform: translate($size, -50%);
+        color: black;
+
+        @media (max-width: 1000px) {
+            transform: translate($sizeTable, -50%);
         }
     }
 }
