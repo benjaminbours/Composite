@@ -1,5 +1,13 @@
 # composite-front
 
+## 0.3.5
+
+### Patch Changes
+
+- 513dacd: Add client settings depending of the rtt. Add input buffering and adaptative sent rate. Improve client prediction and reconciliation.
+- Updated dependencies [513dacd]
+  - @benjaminbours/composite-core@0.2.6
+
 ## 0.3.4
 
 ### Patch Changes

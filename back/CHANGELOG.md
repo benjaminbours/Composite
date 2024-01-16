@@ -1,5 +1,13 @@
 # composite-back
 
+## 0.3.3
+
+### Patch Changes
+
+- 513dacd: Add client settings depending of the rtt. Add input buffering and adaptative sent rate. Improve client prediction and reconciliation.
+- Updated dependencies [513dacd]
+  - @benjaminbours/composite-core@0.2.6
+
 ## 0.3.2
 
 ### Patch Changes

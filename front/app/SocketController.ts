@@ -86,7 +86,6 @@ export class SocketController {
                     0,
                 );
                 let averageRtt = Math.floor(totalRtt / TIME_SAMPLE_COUNT);
-                averageRtt = 1000;
                 if (this.synchronizeGameTimeWithServer) {
                     this.synchronizeGameTimeWithServer(
                         data.serverGameTime!,

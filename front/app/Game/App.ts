@@ -237,11 +237,11 @@ export default class App {
             data: GameStateUpdatePayload,
         ) => {
             // console.log('received update', data.gameState.game_time);
-            console.log(this.currentState.game_time);
-            console.log(
-                'time diff',
-                this.currentState.game_time - data.gameState.game_time,
-            );
+            // console.log(this.currentState.game_time);
+            // console.log(
+            //     'time diff',
+            //     this.currentState.game_time - data.gameState.game_time,
+            // );
 
             this.shouldReconciliateState = true;
             this.serverGameState = data.gameState;
