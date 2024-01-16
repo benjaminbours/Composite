@@ -28,6 +28,7 @@ import {
   updateServerBounces,
   ProjectionLevelState,
   GameState,
+  collectInputsForTick,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -116,14 +117,18 @@ export class SocketGateway {
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
   async handleGamePlayerInput(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data: GamePlayerInputPayload,
+    @MessageBody() data: GamePlayerInputPayload[],
   ) {
     const player = await this.temporaryStorage.getPlayer(socket.id);
     if (!player) {
       return;
     }
 
-    await this.temporaryStorage.addToGameInputsQueue(player.gameId, data);
+    Promise.all(
+      data.map((input) =>
+        this.temporaryStorage.addToGameInputsQueue(player.gameId, input),
+      ),
+    );
   }
 
   // @SubscribeMessage(SocketEventType.GAME_ACTIVATE_ELEMENT)
@@ -366,28 +371,6 @@ export class SocketGateway {
     ]);
   };
 
-  collectInputsForTick(
-    inputsQueue: GamePlayerInputPayload[],
-    gameTime: number,
-  ) {
-    // 2 buffers, one for each player
-    const inputsForTick: GamePlayerInputPayload[][] = [[], []];
-    for (let i = 0; i < inputsQueue.length; i++) {
-      const input = inputsQueue[i];
-      if (input.sequence !== gameTime) {
-        continue;
-      }
-      // filter by player
-      if (input.player === Side.SHADOW) {
-        inputsForTick[0].push(input);
-      }
-      if (input.player === Side.LIGHT) {
-        inputsForTick[1].push(input);
-      }
-    }
-    return inputsForTick;
-  }
-
   registerGameLoop = (
     gameId: number,
     level: PositionLevel | ProjectionLevel,
@@ -415,11 +398,10 @@ export class SocketGateway {
       const timerId = setTimeout(networkUpdateLoop, tickLengthMs);
       this.gameLoopsRegistry[`game:${gameId}`] = timerId;
       this.fetchGameData(gameId).then(([inputsQueue, gameState]) => {
-        // console.log('inputs queue before', inputsQueue.length);
         physicSimulation.run((delta) => {
           gameState.game_time++;
           // 2 buffers, one for each player
-          const inputsForTick = this.collectInputsForTick(
+          const inputsForTick = collectInputsForTick(
             inputsQueue,
             gameState.game_time,
           );

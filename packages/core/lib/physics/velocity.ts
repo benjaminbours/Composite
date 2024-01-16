@@ -1,7 +1,7 @@
 import { Inputs, MovableComponentState } from '../types';
 
 const MAX_VELOCITY = 10;
-const MIN_VELOCITY = 0.001;
+const MIN_VELOCITY = 0.1;
 const SPEED = 20;
 const SPEED_INSIDE = 40;
 

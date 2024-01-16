@@ -8,9 +8,11 @@ import {
     GameState,
     TimeSyncPayload,
     TeammateInfoPayload,
+    GamePlayerInputPayload,
 } from '@benjaminbours/composite-core';
 
-const TIME_SAMPLE_COUNT = 10;
+const TIME_SAMPLE_COUNT = 20;
+const TIME_SAMPLE_INTERVAL = 150;
 
 export class SocketController {
     private socket: Socket;
@@ -19,8 +21,8 @@ export class SocketController {
     private timeSamples: { rtt: number; gameTimeDelta: number }[] = [];
     public getCurrentGameState?: () => GameState;
     public synchronizeGameTimeWithServer?: (
-        time: number,
-        delta: number,
+        serverTime: number,
+        rtt: number,
     ) => void;
     public onGameStateUpdate?: (data: GameStateUpdatePayload) => void;
     private isTimeSynced = false;
@@ -79,32 +81,16 @@ export class SocketController {
             });
             if (this.timeSamples.length === TIME_SAMPLE_COUNT) {
                 console.log('finished gathering ping info', this.timeSamples);
-                const found = this.timeSamples
-                    .sort((a, b) => {
-                        // Only sort on rtt if not identical
-                        if (a.rtt < b.rtt) return -1;
-                        if (a.rtt > b.rtt) return 1;
-                        // Sort on game time delta
-                        if (a.gameTimeDelta < b.gameTimeDelta) return 1;
-                        if (a.gameTimeDelta > b.gameTimeDelta) return -1;
-                        // Both identical, return 0
-                        return 0;
-                    })
-                    .find(({ gameTimeDelta }) => gameTimeDelta !== 0);
-                console.log('finished gathering ping info', found);
-
-                if (this.synchronizeGameTimeWithServer && found) {
-                    // const gameTimeDelta = Math.ceil(
-                    //     (found?.gameTimeDelta || 0) / 2,
-                    // );
-                    // const gameTimeDelta = 15;
-                    const gameTimeDelta = Math.floor(found.gameTimeDelta / 2.5);
-                    // const gameTimeDelta = (found?.rtt || 0) + 10;
-                    console.log('set game time delta', gameTimeDelta);
-
+                const totalRtt = this.timeSamples.reduce(
+                    (a, b) => a + b.rtt,
+                    0,
+                );
+                let averageRtt = Math.floor(totalRtt / TIME_SAMPLE_COUNT);
+                averageRtt = 1000;
+                if (this.synchronizeGameTimeWithServer) {
                     this.synchronizeGameTimeWithServer(
-                        data.serverGameTime! + gameTimeDelta,
-                        gameTimeDelta,
+                        data.serverGameTime!,
+                        averageRtt,
                     );
                     this.isTimeSynced = true;
 
@@ -135,9 +121,13 @@ export class SocketController {
                     };
                     this.timeSamplesSent.push(payload);
                     this.emit([SocketEventType.TIME_SYNC, payload]);
-                }, i * 300);
+                }, i * TIME_SAMPLE_INTERVAL);
             }
         });
+    };
+
+    sendInputs = (inputs: GamePlayerInputPayload[]) => {
+        this.emit([SocketEventType.GAME_PLAYER_INPUT, inputs]);
     };
 
     public emit = (event: SocketEvent) => {
