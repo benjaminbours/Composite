@@ -70,6 +70,8 @@ export function Menu({
     const endLevelRef = useRef<HTMLDivElement>(null);
     const buttonFriendRef = useRef<HTMLButtonElement>(null);
     const buttonRandomRef = useRef<HTMLButtonElement>(null);
+    const informationFriendRef = useRef<HTMLParagraphElement>(null);
+    const informationRandomRef = useRef<HTMLParagraphElement>(null);
     const menuStarted = useRef(false);
 
     const isMobileDevice = useMemo(() => {
@@ -194,9 +196,13 @@ export function Menu({
         if (buttonFriendRef.current?.classList.contains(visibleCssClass)) {
             buttonFriendRef.current?.classList.remove(visibleCssClass);
             buttonRandomRef.current?.classList.remove(visibleCssClass);
+            informationFriendRef.current?.classList.remove(visibleCssClass);
+            informationRandomRef.current?.classList.remove(visibleCssClass);
         } else {
             buttonFriendRef.current?.classList.add(visibleCssClass);
             buttonRandomRef.current?.classList.add(visibleCssClass);
+            informationFriendRef.current?.classList.add(visibleCssClass);
+            informationRandomRef.current?.classList.add(visibleCssClass);
         }
     }, []);
 
@@ -371,6 +377,12 @@ export function Menu({
                     </>
                 )}
                 <div className="home-container__play-container play-container">
+                    <p
+                        ref={informationRandomRef}
+                        className="information information-random"
+                    >
+                        Play a game with a random person
+                    </p>
                     <button
                         ref={buttonRandomRef}
                         onClick={handleClickOnRandom}
@@ -378,6 +390,12 @@ export function Menu({
                     >
                         Random
                     </button>
+                    <p
+                        ref={informationFriendRef}
+                        className="information information-friend"
+                    >
+                        Generate a link to invite a friend
+                    </p>
                     <button
                         ref={buttonFriendRef}
                         className="buttonCircle button-hidden button-friend"
