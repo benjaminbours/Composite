@@ -1,7 +1,7 @@
 {
   "name": "composite-front",
   "description": "",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,7 +15,7 @@
   "author": "Benjamin Bours",
   "license": "ISC",
   "dependencies": {
-    "@benjaminbours/composite-core": "^0.2.5",
+    "@benjaminbours/composite-core": "^0.2.6",
     "@next/bundle-analyzer": "^13.5.4",
     "@sentry/nextjs": "^7.93.0",
     "bufferutil": "^4.0.7",
