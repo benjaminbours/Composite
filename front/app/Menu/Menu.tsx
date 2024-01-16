@@ -68,6 +68,8 @@ export function Menu({
     const sideRef = useRef<HTMLDivElement>(null);
     const queueRef = useRef<HTMLDivElement>(null);
     const endLevelRef = useRef<HTMLDivElement>(null);
+    const buttonFriendRef = useRef<HTMLButtonElement>(null);
+    const buttonRandomRef = useRef<HTMLButtonElement>(null);
     const menuStarted = useRef(false);
 
     const isMobileDevice = useMemo(() => {
@@ -188,6 +190,17 @@ export function Menu({
     }, []);
 
     const handleClickOnPlay = useCallback(() => {
+        const visibleCssClass = 'visible';
+        if (buttonFriendRef.current?.classList.contains(visibleCssClass)) {
+            buttonFriendRef.current?.classList.remove(visibleCssClass);
+            buttonRandomRef.current?.classList.remove(visibleCssClass);
+        } else {
+            buttonFriendRef.current?.classList.add(visibleCssClass);
+            buttonRandomRef.current?.classList.add(visibleCssClass);
+        }
+    }, []);
+
+    const handleClickOnRandom = useCallback(() => {
         if (!animation.current || onTransition.current) {
             return;
         }
@@ -357,15 +370,30 @@ export function Menu({
                         />
                     </>
                 )}
-                <button
-                    className="buttonCircle"
-                    id="buttonPlay"
-                    onMouseEnter={handleMouseEnterPlay}
-                    onMouseLeave={handleMouseLeavePlay}
-                    onClick={handleClickOnPlay}
-                >
-                    Play
-                </button>
+                <div className="home-container__play-container play-container">
+                    <button
+                        ref={buttonRandomRef}
+                        onClick={handleClickOnRandom}
+                        className="buttonCircle button-hidden button-random"
+                    >
+                        Random
+                    </button>
+                    <button
+                        ref={buttonFriendRef}
+                        className="buttonCircle button-hidden button-friend"
+                    >
+                        Friend
+                    </button>
+                    <button
+                        className="buttonCircle"
+                        id="buttonPlay"
+                        onMouseEnter={handleMouseEnterPlay}
+                        onMouseLeave={handleMouseLeavePlay}
+                        onClick={handleClickOnPlay}
+                    >
+                        Play
+                    </button>
+                </div>
             </div>
             <div
                 ref={levelRef}

@@ -47,6 +47,9 @@ export interface MainState {
     gameState: GameState | undefined;
 }
 
+/**
+ * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
+ */
 // TODO: Ability to restart a game from the same session without reloading or changing team mate
 function MainApp() {
     const socketController = useRef<SocketController>();
