@@ -20,7 +20,10 @@ export class SocketController {
     // Round-trip time or ping
     private timeSamples: { rtt: number; gameTimeDelta: number }[] = [];
     public getCurrentGameState?: () => GameState;
-    public synchronizeGameTimeWithServer?: (rtt: number) => void;
+    public synchronizeGameTimeWithServer?: (
+        serverTime: number,
+        rtt: number,
+    ) => void;
     public onGameStateUpdate?: (data: GameStateUpdatePayload) => void;
     private isTimeSynced = false;
 
@@ -85,7 +88,10 @@ export class SocketController {
                 let averageRtt = Math.floor(totalRtt / TIME_SAMPLE_COUNT);
                 averageRtt = 1000;
                 if (this.synchronizeGameTimeWithServer) {
-                    this.synchronizeGameTimeWithServer(averageRtt);
+                    this.synchronizeGameTimeWithServer(
+                        data.serverGameTime!,
+                        averageRtt,
+                    );
                     this.isTimeSynced = true;
 
                     // unregister all listener for time sync

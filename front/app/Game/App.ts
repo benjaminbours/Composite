@@ -236,7 +236,13 @@ export default class App {
         this.socketController.onGameStateUpdate = (
             data: GameStateUpdatePayload,
         ) => {
-            // console.log('received update', data);
+            // console.log('received update', data.gameState.game_time);
+            console.log(this.currentState.game_time);
+            console.log(
+                'time diff',
+                this.currentState.game_time - data.gameState.game_time,
+            );
+
             this.shouldReconciliateState = true;
             this.serverGameState = data.gameState;
             this.lastServerInputs = data.lastInputs;
@@ -259,26 +265,44 @@ export default class App {
     public gameDelta = process.env.NEXT_PUBLIC_SKIP_MATCHMAKING ? 5 : 0;
     public bufferHistorySize = 10;
     public gameTimeIsSynchronized = false;
-    public synchronizeGameTimeWithServer = (rtt: number) => {
-        this.gameDelta = Math.floor(rtt / 2);
+    public synchronizeGameTimeWithServer = (
+        serverTime: number,
+        rtt: number,
+    ) => {
+        // this.gameDelta = Math.floor(rtt / 2);
         // this.gameDelta = delta;
-        this.currentState.game_time += this.gameDelta;
         this.gameTimeIsSynchronized = true;
-        this.bufferHistorySize = this.gameDelta;
+        // this.bufferHistorySize = this.gameDelta;
+        console.log('average RTT', rtt);
 
         // one trip time
 
-        console.log('game time delta', this.gameDelta);
-
         let sendInputsInterval;
-        if (rtt < 50) {
+        if (rtt <= 30) {
+            this.gameDelta = rtt;
+            this.bufferHistorySize = 15;
             sendInputsInterval = 20;
-        } else if (rtt < 100) {
+        } else if (rtt <= 50) {
+            this.gameDelta = Math.floor(rtt / 1.5);
+            this.bufferHistorySize = 25;
             sendInputsInterval = 30;
-        } else {
-            sendInputsInterval = 40;
+        } else if (rtt <= 100) {
+            this.gameDelta = Math.floor(rtt / 2);
+            this.bufferHistorySize = 25;
+            sendInputsInterval = 50;
+        } else if (rtt <= 200) {
+            this.gameDelta = Math.floor(rtt / 3);
+            this.bufferHistorySize = 50;
+            sendInputsInterval = 100;
+        } else if (rtt <= 1000) {
+            this.gameDelta = Math.floor(rtt / 10);
+            this.bufferHistorySize = 50;
+            sendInputsInterval = 100;
         }
+        console.log('game time delta', this.gameDelta);
         console.log('send inputs interval', sendInputsInterval);
+        console.log('buffer history size', this.bufferHistorySize);
+        this.currentState.game_time = serverTime + this.gameDelta;
 
         // Call sendBufferedInputs at regular intervals
         this.sendInputIntervalId = setInterval(
@@ -606,7 +630,7 @@ export default class App {
 
             const snapshot = JSON.parse(JSON.stringify(nextState));
             predictionHistory.push(snapshot);
-            if (predictionHistory.length > BUFFER_HISTORY_SIZE) {
+            if (predictionHistory.length > this.bufferHistorySize) {
                 predictionHistory.shift();
             }
         }
@@ -644,33 +668,33 @@ export default class App {
             return;
         }
 
-        // console.log('HERE', this.predictionHistory.length);
+        // // console.log('HERE', this.predictionHistory.length);
         // this.displayState = this.currentState;
         // return;
 
         // const ratio = Math.floor(this.gameDelta / 2);
         // const offset = this.gameDelta - 15;
-        const minOffset = 5;
-        const maxOffset = 40;
-        const offset = (() => {
-            const idealOffset = this.gameDelta - 5;
-            if (idealOffset > maxOffset) {
-                return maxOffset;
-            } else if (idealOffset < minOffset) {
-                return minOffset;
-            }
-            return idealOffset;
-        })();
+        // const minOffset = 5;
+        // const maxOffset = 40;
+        // const offset = (() => {
+        //     const idealOffset = this.gameDelta - 5;
+        //     if (idealOffset > maxOffset) {
+        //         return maxOffset;
+        //     } else if (idealOffset < minOffset) {
+        //         return minOffset;
+        //     }
+        //     return idealOffset;
+        // })();
+        // const offset = 15;
         // const ratio = Math.floor(this.gameDelta - 5);
-        // console.log('HERE ratio', ratio);
+        // console.log('HERE offset', offset);
 
         // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
-        if (this.predictionHistory.length > offset) {
-            const statesToInterpolate = this.predictionHistory.slice(-offset);
-            // console.log('interpolate states', statesToInterpolate.length);
-
+        if (this.predictionHistory.length >= this.bufferHistorySize) {
+            // const statesToInterpolate = this.predictionHistory.slice(-offset);
             const interpolatedState = this.interpolateGameState(
-                statesToInterpolate,
+                // statesToInterpolate,
+                this.predictionHistory,
                 this.interpolation.ratio,
             );
 
@@ -758,7 +782,7 @@ export default class App {
                     JSON.parse(JSON.stringify(this.currentState)),
                 );
 
-                if (this.predictionHistory.length > BUFFER_HISTORY_SIZE) {
+                if (this.predictionHistory.length > this.bufferHistorySize) {
                     this.predictionHistory.shift();
                 }
             }
