@@ -15,7 +15,6 @@ import {
     TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
 // local
-import type Animation from './Animation';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
@@ -29,6 +28,7 @@ import {
     HomeScene,
 } from './scenes';
 import { Actions } from './Actions';
+import { useTweens } from './useTweens';
 
 interface Props {
     mainState: MainState;
@@ -70,10 +70,7 @@ export function Menu({
     const sideRef = useRef<HTMLDivElement>(null);
     const queueRef = useRef<HTMLDivElement>(null);
     const endLevelRef = useRef<HTMLDivElement>(null);
-    const buttonFriendRef = useRef<HTMLButtonElement>(null);
-    const buttonRandomRef = useRef<HTMLButtonElement>(null);
-    const informationFriendRef = useRef<HTMLParagraphElement>(null);
-    const informationRandomRef = useRef<HTMLParagraphElement>(null);
+
     const menuStarted = useRef(false);
 
     const isMobileDevice = useMemo(() => {
@@ -82,6 +79,20 @@ export function Menu({
         }
         return window.innerWidth <= 768;
     }, []);
+
+    const refHapMap = useMemo(
+        () => ({
+            canvasBlack: blackCanvas,
+            canvasWhite: whiteCanvas,
+            homeRef,
+            levelRef,
+            sideRef,
+            queueRef,
+            endLevelRef,
+        }),
+        [],
+    );
+    const { goToStep } = useTweens(refHapMap);
 
     const resize = useCallback(() => {
         if (
@@ -102,9 +113,6 @@ export function Menu({
             currentScene: menuScene,
             side: mainState.side,
         });
-        animation.current.runMethodForAllBothSideComponents('resize', [
-            blackCanvas.current.ctx,
-        ]);
     }, [isMobileDevice, menuScene, mainState.side]);
 
     const canvasLoop = useCallback(() => {
@@ -116,38 +124,20 @@ export function Menu({
 
     // effect to start to render the menu animation
     useEffect(() => {
-        Promise.all([
-            import('./Animation').then((mod) => mod.default),
-            import('./crossBrowser'),
-        ]).then(([Animation]) => {
-            if (menuStarted.current) {
-                return;
-            }
-            animation.current = Animation;
-            blackCanvas.current = new CanvasBlack(
-                blackCanvasDomElement.current as HTMLCanvasElement,
-            );
-            whiteCanvas.current = new CanvasWhite(
-                whiteCanvasDomElement.current as HTMLCanvasElement,
-            );
-            Animation.initComponents(
-                {
-                    homeInterface: homeRef,
-                    levelInterface: levelRef,
-                    factionInterface: sideRef,
-                    queueInterface: queueRef,
-                    endLevelInterface: endLevelRef,
-                },
-                blackCanvas.current,
-                whiteCanvas.current,
-                menuScene,
-                isMobileDevice,
-            );
-            Mouse.init();
-            resize();
-            gsap.ticker.add(canvasLoop);
-            menuStarted.current = true;
-        });
+        if (menuStarted.current) {
+            return;
+        }
+        animation.current = Animation;
+        blackCanvas.current = new CanvasBlack(
+            blackCanvasDomElement.current as HTMLCanvasElement,
+        );
+        whiteCanvas.current = new CanvasWhite(
+            whiteCanvasDomElement.current as HTMLCanvasElement,
+        );
+        Mouse.init();
+        resize();
+        gsap.ticker.add(canvasLoop);
+        menuStarted.current = true;
 
         return () => {
             gsap.ticker.remove(canvasLoop);
@@ -177,106 +167,122 @@ export function Menu({
         };
     }, [resize]);
 
-    const handleMouseEnterPlay = useCallback(() => {
-        if (!animation.current) {
-            return;
-        }
-        animation.current.playMouseEnterButtonPlay();
-    }, []);
-
-    const handleMouseLeavePlay = useCallback(() => {
-        if (!animation.current) {
-            return;
-        }
-        if (!onTransition.current) {
-            animation.current.playMouseLeaveButtonPlay();
-        }
-    }, []);
-
-    const handleClickOnPlay = useCallback(() => {
-        const visibleCssClass = 'visible';
-        if (buttonFriendRef.current?.classList.contains(visibleCssClass)) {
-            buttonFriendRef.current?.classList.remove(visibleCssClass);
-            buttonRandomRef.current?.classList.remove(visibleCssClass);
-            informationFriendRef.current?.classList.remove(visibleCssClass);
-            informationRandomRef.current?.classList.remove(visibleCssClass);
-        } else {
-            buttonFriendRef.current?.classList.add(visibleCssClass);
-            buttonRandomRef.current?.classList.add(visibleCssClass);
-            informationFriendRef.current?.classList.add(visibleCssClass);
-            informationRandomRef.current?.classList.add(visibleCssClass);
-        }
-    }, []);
-
     const handleClickOnRandom = useCallback(() => {
-        if (!animation.current || onTransition.current) {
+        if (onTransition.current) {
             return;
         }
-        if (teamMateDisconnected) {
-            setTeamMateDisconnected(false);
-        }
+        // TODO: This should change, it make sens only on end level scene
+        // if (teamMateDisconnected) {
+        //     setTeamMateDisconnected(false);
+        // }
         onTransition.current = true;
-        animation.current.goToStep(MenuScene.LEVEL, () => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.LEVEL);
-            animation.current?.playMouseLeaveButtonPlay();
-        });
-    }, [teamMateDisconnected, setTeamMateDisconnected]);
+        goToStep(
+            { step: MenuScene.LEVEL, side: undefined, isMobileDevice },
+            () => {
+                onTransition.current = false;
+                setMenuScene(MenuScene.LEVEL);
+                // animation.current?.playMouseLeaveButtonPlay();
+            },
+        );
+    }, [
+        teamMateDisconnected,
+        setTeamMateDisconnected,
+        goToStep,
+        isMobileDevice,
+    ]);
 
     const handleClickOnQuitTeam = useCallback(() => {
         if (!animation.current || onTransition.current) {
             return;
         }
-        animation.current.goToStep(MenuScene.HOME, () => {
-            onTransition.current = false;
-            setMenuScene(MenuScene.HOME);
-            destroyConnection();
-        });
-    }, []);
+        goToStep(
+            { step: MenuScene.HOME, side: undefined, isMobileDevice },
+            () => {
+                onTransition.current = false;
+                setMenuScene(MenuScene.HOME);
+                destroyConnection();
+            },
+        );
+    }, [goToStep, isMobileDevice]);
 
     const handleClickOnBack = useCallback(() => {
-        if (!animation.current || onTransition.current) {
+        if (onTransition.current) {
             return;
         }
         const backOptions = {
+            invite_friend() {
+                goToStep(
+                    { step: MenuScene.HOME, side: undefined, isMobileDevice },
+                    () => {
+                        onTransition.current = false;
+                        setMenuScene(MenuScene.HOME);
+                    },
+                );
+            },
             level() {
-                animation.current!.goToStep(MenuScene.HOME, () => {
-                    onTransition.current = false;
-                    setMenuScene(MenuScene.HOME);
-                });
+                setMenuScene(MenuScene.HOME);
+                goToStep(
+                    { step: MenuScene.HOME, side: undefined, isMobileDevice },
+                    () => {
+                        onTransition.current = false;
+                    },
+                );
             },
             faction() {
-                animation.current!.goToStep(MenuScene.LEVEL, () => {
-                    onTransition.current = false;
-                    setMenuScene(MenuScene.LEVEL);
-                });
+                goToStep(
+                    { step: MenuScene.LEVEL, side: undefined, isMobileDevice },
+                    () => {
+                        onTransition.current = false;
+                        setMenuScene(MenuScene.LEVEL);
+                    },
+                );
             },
             queue() {
-                animation.current!.goToStep(MenuScene.FACTION, () => {
-                    onTransition.current = false;
-                    setMenuScene(MenuScene.FACTION);
-                });
+                goToStep(
+                    {
+                        step: MenuScene.FACTION,
+                        side: mainState.side,
+                        isMobileDevice,
+                    },
+                    () => {
+                        onTransition.current = false;
+                        setMenuScene(MenuScene.FACTION);
+                    },
+                );
             },
         };
         onTransition.current = true;
         if (menuScene === 'queue') {
-            animation.current!.goToStep(MenuScene.FACTION, () => {
-                onTransition.current = false;
-                setMenuScene(MenuScene.FACTION);
-                setMainState((prev) => ({
-                    ...prev,
-                    side: undefined,
-                }));
-                if (mode === MenuMode.DEFAULT) {
-                    destroyConnection();
-                }
-            });
+            goToStep(
+                {
+                    step: MenuScene.FACTION,
+                    side: mainState.side,
+                    isMobileDevice,
+                },
+                () => {
+                    onTransition.current = false;
+                    setMenuScene(MenuScene.FACTION);
+                    setMainState((prev) => ({
+                        ...prev,
+                        side: undefined,
+                    }));
+                    if (mode === MenuMode.DEFAULT) {
+                        destroyConnection();
+                    }
+                },
+            );
         }
         // there is no back button on home scene or on end level scene
         if (menuScene !== MenuScene.HOME && menuScene !== MenuScene.END_LEVEL) {
             backOptions[menuScene]();
         }
-    }, [menuScene, destroyConnection]);
+    }, [
+        menuScene,
+        mainState.side,
+        destroyConnection,
+        goToStep,
+        isMobileDevice,
+    ]);
 
     const handleClickOnLevel = useCallback(
         (levelId: Levels) => {
@@ -291,12 +297,24 @@ export function Menu({
                 selectedLevel: levelId,
             }));
             onTransition.current = true;
-            animation.current.goToStep(MenuScene.FACTION, () => {
-                onTransition.current = false;
-                setMenuScene(MenuScene.FACTION);
-            });
+            goToStep(
+                {
+                    step: MenuScene.FACTION,
+                    side: undefined,
+                    isMobileDevice,
+                },
+                () => {
+                    onTransition.current = false;
+                    setMenuScene(MenuScene.FACTION);
+                },
+            );
         },
-        [teamMateDisconnected, setTeamMateDisconnected],
+        [
+            teamMateDisconnected,
+            setTeamMateDisconnected,
+            goToStep,
+            isMobileDevice,
+        ],
     );
 
     const handleClickOnFaction = useCallback(
@@ -309,13 +327,24 @@ export function Menu({
             }
             setMainState((prev) => ({ ...prev, side }));
             setMenuScene(MenuScene.QUEUE);
-            animation.current.faction = side;
             onTransition.current = true;
-            animation.current.goToStep(MenuScene.QUEUE, () => {
-                onTransition.current = false;
-            });
+            goToStep(
+                {
+                    step: MenuScene.QUEUE,
+                    side,
+                    isMobileDevice,
+                },
+                () => {
+                    onTransition.current = false;
+                },
+            );
         },
-        [teamMateDisconnected, setTeamMateDisconnected],
+        [
+            teamMateDisconnected,
+            setTeamMateDisconnected,
+            goToStep,
+            isMobileDevice,
+        ],
     );
 
     const levels = useMemo(
