@@ -5,8 +5,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { MenuScene } from './types';
-import { CopyToClipBoardIcon } from './CopyToClipboardIcon';
+import { MenuScene } from '../types';
+import { CopyToClipBoardIcon } from '../CopyToClipboardIcon';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;

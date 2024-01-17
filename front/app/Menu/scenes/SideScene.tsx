@@ -4,8 +4,8 @@ import React from 'react';
 // our libs
 import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
 // local
-import { QueueInfoText } from './QueueInfo';
-import { MenuStateInfo } from './MenuStateInfo';
+import { QueueInfoText } from '../QueueInfo';
+import { MenuStateInfo } from '../MenuStateInfo';
 
 interface Props {
     sideRef: React.RefObject<HTMLDivElement>;

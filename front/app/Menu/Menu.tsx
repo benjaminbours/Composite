@@ -20,12 +20,14 @@ import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { MenuMode, MenuScene } from './types';
-import LevelItem from './LevelItem';
 import { MainState } from '../MainApp';
-import { QueueInfoText } from './QueueInfo';
-import { QueueScene } from './QueueScene';
-import { SideScene } from './SideScene';
-import { EndLevelScene } from './EndLevelScene';
+import {
+    QueueScene,
+    SideScene,
+    EndLevelScene,
+    LevelScene,
+    HomeScene,
+} from './scenes';
 import { Actions } from './Actions';
 
 interface Props {
@@ -363,6 +365,30 @@ export function Menu({
                 homeRef={homeRef}
                 allQueueInfo={allQueueInfo}
                 handleClickOnRandom={handleClickOnRandom}
+            />
+            <LevelScene
+                actions={
+                    <Actions
+                        color="white"
+                        onBack={handleClickOnBack}
+                        onQuitTeam={
+                            mode === MenuMode.IN_TEAM
+                                ? handleClickOnQuitTeam
+                                : undefined
+                        }
+                        teamMate={{
+                            ...teamMate,
+                            levelName: levels.find(
+                                (level) =>
+                                    level.id === teamMate.info?.selectedLevel,
+                            )?.name,
+                        }}
+                    />
+                }
+                handleClickOnLevel={handleClickOnLevel}
+                levels={levels}
+                currentScene={menuScene}
+                levelRef={levelRef}
             />
             <SideScene
                 sideRef={sideRef}
