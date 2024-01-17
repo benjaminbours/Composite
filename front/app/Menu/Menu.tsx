@@ -348,7 +348,7 @@ export function Menu({
         <>
             <canvas
                 id="white"
-                style={{ zIndex: -3 }}
+                style={{ zIndex: -3, background: 'white' }}
                 ref={whiteCanvasDomElement}
             />
             <canvas
@@ -356,95 +356,14 @@ export function Menu({
                 style={{ zIndex: -2 }}
                 ref={blackCanvasDomElement}
             />
-            <div
-                ref={homeRef}
-                className={`home-container ${
-                    menuScene !== 'home' ? 'unmount' : ''
-                }`}
-            >
-                <h1 className="title-h1">Composite</h1>
-                <h2 className="main-subtitle">Think both ways</h2>
-                {allQueueInfo && (
-                    <>
-                        <QueueInfoText
-                            side="light"
-                            value={allQueueInfo.light}
-                        />
-                        <QueueInfoText
-                            side="shadow"
-                            value={allQueueInfo.shadow}
-                        />
-                    </>
-                )}
-                <div className="home-container__play-container play-container">
-                    <p
-                        ref={informationRandomRef}
-                        className="information information-random"
-                    >
-                        Play a game with a random person
-                    </p>
-                    <button
-                        ref={buttonRandomRef}
-                        onClick={handleClickOnRandom}
-                        className="buttonCircle button-hidden button-random"
-                    >
-                        Random
-                    </button>
-                    <p
-                        ref={informationFriendRef}
-                        className="information information-friend"
-                    >
-                        Generate a link to invite a friend
-                    </p>
-                    <button
-                        ref={buttonFriendRef}
-                        className="buttonCircle button-hidden button-friend"
-                    >
-                        Friend
-                    </button>
-                    <button
-                        className="buttonCircle"
-                        id="buttonPlay"
-                        onMouseEnter={handleMouseEnterPlay}
-                        onMouseLeave={handleMouseLeavePlay}
-                        onClick={handleClickOnPlay}
-                    >
-                        Play
-                    </button>
-                </div>
-            </div>
-            <div
-                ref={levelRef}
-                className={`content-container level-container ${
-                    menuScene !== 'level' ? 'unmount' : ''
-                }`}
-            >
-                <Actions
-                    color="white"
-                    onBack={handleClickOnBack}
-                    onQuitTeam={
-                        mode === MenuMode.IN_TEAM
-                            ? handleClickOnQuitTeam
-                            : undefined
-                    }
-                    teamMate={{
-                        ...teamMate,
-                        levelName: levels.find(
-                            (level) =>
-                                level.id === teamMate.info?.selectedLevel,
-                        )?.name,
-                    }}
-                />
-                <h2 className="title-h2">Select a&nbsp;level</h2>
-                {levels.map((item) => (
-                    <LevelItem
-                        {...item}
-                        key={item.name}
-                        onClick={handleClickOnLevel}
-                        queueInfo={allQueueInfo?.levels[item.id]}
-                    />
-                ))}
-            </div>
+            <HomeScene
+                canvasBlack={blackCanvas}
+                canvasWhite={whiteCanvas}
+                currentScene={menuScene}
+                homeRef={homeRef}
+                allQueueInfo={allQueueInfo}
+                handleClickOnRandom={handleClickOnRandom}
+            />
             <SideScene
                 sideRef={sideRef}
                 actions={

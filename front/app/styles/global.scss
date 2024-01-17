@@ -95,24 +95,6 @@ canvas,
     width: 100%;
 }
 
-.title-h1 {
-    text-transform: uppercase;
-    font-weight: 900;
-    font-size: 50px;
-    letter-spacing: 20px;
-    text-align: center;
-    text-indent: 20px;
-
-    @media (max-width: 580px) {
-        font-size: 30px;
-        line-height: 1.5;
-    }
-
-    @media (max-width: 420px) {
-        font-size: 25px;
-    }
-}
-
 .title-h2 {
     color: white;
 
@@ -165,12 +147,15 @@ button {
     }
 }
 
+$buttonSize: 90px;
+$buttonSizeSmall: 80px;
+$buttonSizeLarge: 120px;
 .buttonCircle {
     text-align: center;
-    width: 90px;
-    height: 90px;
-    border-radius: 100px;
-    line-height: 90px;
+    width: $buttonSize;
+    height: $buttonSize;
+    border-radius: $buttonSize;
+    line-height: $buttonSize;
     text-transform: uppercase;
     letter-spacing: 5px;
     font-weight: 900;
@@ -183,18 +168,18 @@ button {
     }
 
     @media (max-height: 700px), (max-width: 768px) {
-        width: 80px;
-        height: 80px;
+        width: $buttonSizeSmall;
+        height: $buttonSizeSmall;
         font-size: 18px;
-        line-height: 80px;
+        line-height: $buttonSizeSmall;
         font-weight: 500;
     }
 
     @media (min-width: 2000px) {
-        width: 120px;
-        height: 120px;
+        width: $buttonSizeLarge;
+        height: $buttonSizeLarge;
         font-size: 30px;
-        line-height: 120px;
+        line-height: $buttonSizeLarge;
     }
 }
 
