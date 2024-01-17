@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { CopyToClipBoardIcon } from './CopyToClipboardIcon';
-import { MenuStateInfo } from './MenuStateInfo';
+import { CopyToClipBoardIcon } from '../CopyToClipboardIcon';
+import { MenuStateInfo } from '../MenuStateInfo';
 
 interface Props {
     queueRef: React.RefObject<HTMLDivElement>;
