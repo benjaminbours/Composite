@@ -93,7 +93,6 @@
 
 - At the beginning of each level, indicate the basic keys could be helpful
 - very light wave, pulsing at a frequency from where an element is being interacted with, to indicate other player the focus point
-- investigate [mix blend mode](https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode) for the menu animation, see website => https://buttermax.net/
 - Is it complicated to add controller support?
 - Double jump
 - twitch game support?
@@ -110,4 +109,9 @@ Still need to address number 2 and 5
 ## To be decided with the community
 
 - Double jump feature when jumping against walls? Would change a lot the game but could be funny no?
+
+## Police to test for home scene
+
+- https://www.1001fonts.com/nk57-monospace-font.html
+- https://www.ffonts.net/CPMono_v07Bold.font?text=COMPOSITE#
 
