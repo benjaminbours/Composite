@@ -28,7 +28,9 @@ import {
     HomeScene,
 } from './scenes';
 import { Actions } from './Actions';
-import { useTweens } from './useTweens';
+import { TeamMateDisconnectNotification } from '../TeamMateDisconnectNotification';
+import { goToStep } from './tweens';
+import Curve, { defaultWaveOptions } from './canvas/Curve';
 
 interface Props {
     mainState: MainState;
@@ -64,14 +66,11 @@ export function Menu({
     const blackCanvas = useRef<CanvasBlack>();
     const whiteCanvas = useRef<CanvasWhite>();
     const onTransition = useRef(false);
-    const animation = useRef<typeof Animation>();
     const homeRef = useRef<HTMLDivElement>(null);
     const levelRef = useRef<HTMLDivElement>(null);
     const sideRef = useRef<HTMLDivElement>(null);
     const queueRef = useRef<HTMLDivElement>(null);
     const endLevelRef = useRef<HTMLDivElement>(null);
-
-    const menuStarted = useRef(false);
 
     const isMobileDevice = useMemo(() => {
         if (!window) {
@@ -80,7 +79,7 @@ export function Menu({
         return window.innerWidth <= 768;
     }, []);
 
-    const refHapMap = useMemo(
+    const refHashMap = useMemo(
         () => ({
             canvasBlack: blackCanvas,
             canvasWhite: whiteCanvas,
@@ -92,14 +91,9 @@ export function Menu({
         }),
         [],
     );
-    const { goToStep } = useTweens(refHapMap);
 
     const resize = useCallback(() => {
-        if (
-            !animation.current ||
-            !blackCanvas.current ||
-            !whiteCanvas.current
-        ) {
+        if (!blackCanvas.current || !whiteCanvas.current) {
             return;
         }
         const isMobileDevice = window.innerWidth <= 768;
@@ -124,10 +118,6 @@ export function Menu({
 
     // effect to start to render the menu animation
     useEffect(() => {
-        if (menuStarted.current) {
-            return;
-        }
-        animation.current = Animation;
         blackCanvas.current = new CanvasBlack(
             blackCanvasDomElement.current as HTMLCanvasElement,
         );
@@ -137,8 +127,6 @@ export function Menu({
         Mouse.init();
         resize();
         gsap.ticker.add(canvasLoop);
-        menuStarted.current = true;
-
         return () => {
             gsap.ticker.remove(canvasLoop);
             Mouse.destroy();
@@ -177,11 +165,11 @@ export function Menu({
         // }
         onTransition.current = true;
         goToStep(
+            refHashMap,
             { step: MenuScene.LEVEL, side: undefined, isMobileDevice },
             () => {
                 onTransition.current = false;
                 setMenuScene(MenuScene.LEVEL);
-                // animation.current?.playMouseLeaveButtonPlay();
             },
         );
     }, [
@@ -192,10 +180,11 @@ export function Menu({
     ]);
 
     const handleClickOnQuitTeam = useCallback(() => {
-        if (!animation.current || onTransition.current) {
+        if (onTransition.current) {
             return;
         }
         goToStep(
+            refHashMap,
             { step: MenuScene.HOME, side: undefined, isMobileDevice },
             () => {
                 onTransition.current = false;
@@ -212,6 +201,7 @@ export function Menu({
         const backOptions = {
             invite_friend() {
                 goToStep(
+                    refHashMap,
                     { step: MenuScene.HOME, side: undefined, isMobileDevice },
                     () => {
                         onTransition.current = false;
@@ -222,6 +212,7 @@ export function Menu({
             level() {
                 setMenuScene(MenuScene.HOME);
                 goToStep(
+                    refHashMap,
                     { step: MenuScene.HOME, side: undefined, isMobileDevice },
                     () => {
                         onTransition.current = false;
@@ -230,6 +221,7 @@ export function Menu({
             },
             faction() {
                 goToStep(
+                    refHashMap,
                     { step: MenuScene.LEVEL, side: undefined, isMobileDevice },
                     () => {
                         onTransition.current = false;
@@ -239,6 +231,7 @@ export function Menu({
             },
             queue() {
                 goToStep(
+                    refHashMap,
                     {
                         step: MenuScene.FACTION,
                         side: mainState.side,
@@ -254,6 +247,7 @@ export function Menu({
         onTransition.current = true;
         if (menuScene === 'queue') {
             goToStep(
+                refHashMap,
                 {
                     step: MenuScene.FACTION,
                     side: mainState.side,
@@ -286,7 +280,7 @@ export function Menu({
 
     const handleClickOnLevel = useCallback(
         (levelId: Levels) => {
-            if (!animation.current || onTransition.current) {
+            if (onTransition.current) {
                 return;
             }
             if (teamMateDisconnected) {
@@ -298,6 +292,7 @@ export function Menu({
             }));
             onTransition.current = true;
             goToStep(
+                refHashMap,
                 {
                     step: MenuScene.FACTION,
                     side: undefined,
@@ -319,7 +314,7 @@ export function Menu({
 
     const handleClickOnFaction = useCallback(
         (side: Side) => {
-            if (!animation.current || onTransition.current) {
+            if (onTransition.current) {
                 return;
             }
             if (teamMateDisconnected) {
@@ -329,6 +324,7 @@ export function Menu({
             setMenuScene(MenuScene.QUEUE);
             onTransition.current = true;
             goToStep(
+                refHashMap,
                 {
                     step: MenuScene.QUEUE,
                     side,
@@ -375,8 +371,27 @@ export function Menu({
         (level) => level.id === mainState.selectedLevel,
     )?.name;
 
+    const handleClickFindAnotherTeamMate = useCallback(() => {
+        goToStep(
+            refHashMap,
+            {
+                step: MenuScene.HOME,
+                side: undefined,
+                isMobileDevice,
+            },
+            () => {
+                setMenuScene(MenuScene.HOME);
+                setTeamMateDisconnected(false);
+            },
+        );
+    }, []);
+
     return (
         <>
+            <TeamMateDisconnectNotification
+                teamMateDisconnected={teamMateDisconnected}
+                handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
+            />
             <canvas
                 id="white"
                 style={{ zIndex: -3, background: 'white' }}
@@ -414,6 +429,7 @@ export function Menu({
                         }}
                     />
                 }
+                allQueueInfo={allQueueInfo}
                 handleClickOnLevel={handleClickOnLevel}
                 levels={levels}
                 currentScene={menuScene}

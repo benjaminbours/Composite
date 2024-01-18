@@ -17,6 +17,7 @@ export const defaultWaveOptions: IWaveOptions = {
     speed: 0.02,
 };
 
+// TODO: Avoid static method, don't think it's needed in that case.
 export default class Curve {
     public static vTotalPoints = 15;
     public static hTotalPoints = 8;

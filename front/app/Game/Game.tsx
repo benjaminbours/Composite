@@ -8,6 +8,7 @@ import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
+import { TeamMateDisconnectNotification } from '../TeamMateDisconnectNotification';
 
 interface Props {
     side: Side;
@@ -16,6 +17,8 @@ interface Props {
     socketController?: SocketController;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
+    teamMateDisconnected: boolean;
+    handleClickFindAnotherTeamMate: () => void;
     stats: React.MutableRefObject<Stats | undefined>;
 }
 
@@ -25,6 +28,8 @@ function Game({
     initialGameState,
     tabIsHidden,
     stats,
+    teamMateDisconnected,
+    handleClickFindAnotherTeamMate,
     inputsManager,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -110,6 +115,10 @@ function Game({
 
     return (
         <>
+            <TeamMateDisconnectNotification
+                teamMateDisconnected={teamMateDisconnected}
+                handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
+            />
             {isSynchronizingTime && (
                 <div className="game-sync-overlay">is Synchronizing</div>
             )}

@@ -136,20 +136,9 @@ function MainApp() {
     }, []);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {
-        if (gameIsPlaying) {
-            setGameIsPlaying(false);
-            setMenuScene(MenuScene.HOME);
-            setTeamMateDisconnected(false);
-        } else {
-            import('./Menu/Animation')
-                .then((mod) => mod.default)
-                .then((Animation) => {
-                    Animation.goToStep(MenuScene.HOME, () => {
-                        setMenuScene(MenuScene.HOME);
-                        setTeamMateDisconnected(false);
-                    });
-                });
-        }
+        setGameIsPlaying(false);
+        setMenuScene(MenuScene.HOME);
+        setTeamMateDisconnected(false);
     }, [gameIsPlaying]);
 
     const handleClickOnJoinTeamMate = useCallback(() => {
@@ -275,24 +264,6 @@ function MainApp() {
         }
     }, [gameIsPlaying, shouldEstablishConnection, shouldSendMatchMakingInfo]);
 
-    const teamMateDisconnectNotification = useMemo(() => {
-        if (!teamMateDisconnected) {
-            return null;
-        }
-        return (
-            // TODO: Make appear disappear animation
-            <div className="team-mate-disconnect">
-                <p>Your team mate disconnected or has quit the room</p>
-                <button
-                    className="buttonRect white"
-                    onClick={handleClickFindAnotherTeamMate}
-                >
-                    Find another team mate
-                </button>
-            </div>
-        );
-    }, [teamMateDisconnected, handleClickFindAnotherTeamMate]);
-
     const bottomRightInfo = useMemo(() => {
         const cssClass = classNames({
             'bottom-right-info': true,
@@ -328,7 +299,6 @@ function MainApp() {
                 {/* {!state.isGameRunning && (
                     <Menu mainState={state} setMainState={setState} />
                 )} */}
-                {teamMateDisconnectNotification}
                 {state.gameState && (
                     <Game
                         initialGameState={state.gameState}
@@ -337,6 +307,10 @@ function MainApp() {
                         tabIsHidden={tabIsHidden}
                         stats={statsRef}
                         inputsManager={inputsManager.current}
+                        handleClickFindAnotherTeamMate={
+                            handleClickFindAnotherTeamMate
+                        }
+                        teamMateDisconnected={teamMateDisconnected}
                     />
                 )}
                 {/* TODO: Don't forget to add it when not in skip matchmaking mode */}
@@ -353,7 +327,6 @@ function MainApp() {
 
     return (
         <>
-            {teamMateDisconnectNotification}
             {!gameIsPlaying && (
                 <Menu
                     mainState={state}
@@ -379,6 +352,10 @@ function MainApp() {
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
                     inputsManager={inputsManager.current}
+                    handleClickFindAnotherTeamMate={
+                        handleClickFindAnotherTeamMate
+                    }
+                    teamMateDisconnected={teamMateDisconnected}
                 />
             )}
             {isSettingsOpen && (
