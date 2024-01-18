@@ -125,6 +125,7 @@ export const EndLevelScene: React.FC<Props> = ({
                 </div>
                 <div>
                     <CopyToClipBoardButton
+                        color="black"
                         text={
                             process.env.NEXT_PUBLIC_URL ||
                             'Missing env variable'

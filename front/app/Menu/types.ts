@@ -6,6 +6,7 @@ export enum MenuScene {
     FACTION = 'faction',
     QUEUE = 'queue',
     END_LEVEL = 'end_level',
+    INVITE_FRIEND = 'invite_friend',
 }
 
 export enum MenuMode {

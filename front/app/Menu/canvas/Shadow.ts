@@ -17,6 +17,18 @@ export default class Shadow {
                 y: height * 0.75,
             };
         },
+        invite_friend(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return {
+                    x: width * 0.15,
+                    y: height * 0.5,
+                };
+            }
+            return {
+                x: width * 0.15,
+                y: height * 0.5,
+            };
+        },
         level(width: number, height: number, isOnMobile: boolean) {
             if (isOnMobile) {
                 return {

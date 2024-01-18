@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { CopyToClipBoardIcon } from '../CopyToClipboardIcon';
 import { MenuStateInfo } from '../MenuStateInfo';
+import { CopyToClipBoardButton } from '../CopyToClipboardButton';
 
 interface Props {
     queueRef: React.RefObject<HTMLDivElement>;
@@ -83,17 +83,10 @@ export const QueueScene: React.FC<Props> = ({
             <div className="queue-container__share">
                 <p>{`Waiting time is too long?`}</p>
                 <p>{`Share this link with your friends`}</p>
-                <button
-                    className={`buttonRect ${color}`}
-                    onClick={handleClickCopyToClipBoard}
-                >
-                    <CopyToClipBoardIcon color={color} />
-                    <p>
-                        {shouldDisplayIsCopied
-                            ? 'Copied to clipboard'
-                            : process.env.NEXT_PUBLIC_URL}
-                    </p>
-                </button>
+                <CopyToClipBoardButton
+                    color="black"
+                    text={process.env.NEXT_PUBLIC_URL || 'Missing env variable'}
+                />
             </div>
         </div>
     );

@@ -26,6 +26,7 @@ import {
     EndLevelScene,
     LevelScene,
     HomeScene,
+    InviteFriendScene,
 } from './scenes';
 import { Actions } from './Actions';
 import { TeamMateDisconnectNotification } from '../TeamMateDisconnectNotification';
@@ -76,6 +77,7 @@ export function Menu({
     const sideRef = useRef<HTMLDivElement>(null);
     const queueRef = useRef<HTMLDivElement>(null);
     const endLevelRef = useRef<HTMLDivElement>(null);
+    const inviteFriendRef = useRef<HTMLDivElement>(null);
 
     const isMobileDevice = useMemo(() => {
         if (!window) {
@@ -93,6 +95,7 @@ export function Menu({
             sideRef,
             queueRef,
             endLevelRef,
+            inviteFriendRef,
         }),
         [],
     );
@@ -188,7 +191,25 @@ export function Menu({
         isMobileDevice,
         refHashMap,
         setMenuScene,
+        setNextMenuScene,
     ]);
+
+    const handleClickOnFriend = useCallback(() => {
+        if (onTransition.current) {
+            return;
+        }
+        onTransition.current = true;
+        setNextMenuScene(MenuScene.INVITE_FRIEND);
+        goToStep(
+            refHashMap,
+            { step: MenuScene.INVITE_FRIEND, side: undefined, isMobileDevice },
+            () => {
+                onTransition.current = false;
+                setMenuScene(MenuScene.INVITE_FRIEND);
+                setNextMenuScene(undefined);
+            },
+        );
+    }, [isMobileDevice, refHashMap, setMenuScene, setNextMenuScene]);
 
     const handleClickOnQuitTeam = useCallback(() => {
         if (onTransition.current) {
@@ -460,6 +481,7 @@ export function Menu({
                     menuScene === MenuScene.INVITE_FRIEND ||
                     nextMenuScene === MenuScene.INVITE_FRIEND
                 }
+                handleClickOnRandom={handleClickOnRandom}
                 inviteFriendRef={inviteFriendRef}
                 actions={
                     <Actions

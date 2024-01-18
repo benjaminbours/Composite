@@ -22,6 +22,7 @@ export interface RefHashMap {
     sideRef: React.RefObject<HTMLDivElement>;
     queueRef: React.RefObject<HTMLDivElement>;
     endLevelRef: React.RefObject<HTMLDivElement>;
+    inviteFriendRef: React.RefObject<HTMLDivElement>;
 }
 
 /**
@@ -118,31 +119,31 @@ export function homeIn(homeInterface: HTMLDivElement) {
  * Invite friend
  */
 
-// function inviteFriendOut() {
-//     const levelInterface = Animation.components?.levelInterface
-//         .current as HTMLElement;
+function inviteFriendOut(inviteFriendInterface: HTMLDivElement) {
+    return gsap.to(inviteFriendInterface, {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            inviteFriendInterface.style.display = 'none';
+        },
+    });
+}
 
-//     return gsap.to(levelInterface, {
-//         duration: 0.5,
-//         opacity: 0,
-//         onComplete: () => {
-//             levelInterface.style.display = 'none';
-//         },
-//     });
-// }
-
-// export function inviteLevelIn() {
-//     const levelInterface = Animation.components?.levelInterface
-//         .current as HTMLElement;
-
-//     return gsap.to(levelInterface, {
-//         duration: 0.5,
-//         opacity: 1,
-//         onStart: () => {
-//             levelInterface.style.display = 'block';
-//         },
-//     });
-// }
+export function inviteFriendIn(inviteFriendInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        inviteFriendInterface,
+        {
+            opacity: 0,
+        },
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                inviteFriendInterface.style.display = 'flex';
+            },
+        },
+    );
+}
 
 /**
  * Level
@@ -250,6 +251,7 @@ export function allMenuScenesOut(refHashMap: RefHashMap) {
         factionOut(refHashMap.sideRef.current!),
         queueOut(refHashMap.queueRef.current!),
         endLevelOut(refHashMap.endLevelRef.current!),
+        inviteFriendOut(refHashMap.inviteFriendRef.current!),
     ];
 }
 
@@ -275,6 +277,8 @@ export function goToStep(
                 return factionIn(refHashMap.sideRef.current!);
             case MenuScene.QUEUE:
                 return queueIn(refHashMap.queueRef.current!);
+            case MenuScene.INVITE_FRIEND:
+                return inviteFriendIn(refHashMap.inviteFriendRef.current!);
             default:
                 return homeIn(refHashMap.homeRef.current!);
         }
