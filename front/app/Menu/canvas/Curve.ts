@@ -44,6 +44,12 @@ export default class Curve {
             }
             return width * 0.5;
         },
+        invite_friend(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return height * 0.5;
+            }
+            return width * 0.15;
+        },
         level(width: number, height: number, isOnMobile: boolean) {
             if (isOnMobile) {
                 return height * 0.5;

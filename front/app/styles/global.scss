@@ -129,17 +129,37 @@ button {
 
     &.white {
         color: white;
-
+        border-color: white;
         &:hover {
             border-color: white;
+            background: white;
+            color: black;
         }
     }
 
     &.black {
         color: black;
-
+        border-color: black;
         &:hover {
             border-color: black;
+            background: black;
+            color: white;
+        }
+    }
+
+    // different border management for back button
+    &.back {
+        border-color: transparent;
+        &.white {
+            &:hover {
+                border-color: white;
+            }
+        }
+
+        &.black {
+            &:hover {
+                border-color: black;
+            }
         }
     }
 
@@ -318,5 +338,32 @@ $buttonSizeLarge: 120px;
     svg {
         width: 35px;
         margin-right: 10px;
+        transition: 0.7s;
+    }
+
+    &.black {
+        svg {
+            fill: black;
+        }
+    }
+
+    &.white {
+        svg {
+            fill: white;
+        }
+    }
+
+    &:hover {
+        &.black {
+            svg {
+                fill: white;
+            }
+        }
+
+        &.white {
+            svg {
+                fill: black;
+            }
+        }
     }
 }
