@@ -5,8 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { MenuScene } from '../types';
-import { CopyToClipBoardIcon } from '../CopyToClipboardIcon';
+import { CopyToClipBoardButton } from '../CopyToClipboardButton';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;
@@ -25,7 +24,6 @@ export const EndLevelScene: React.FC<Props> = ({
     handleClickOnPlay,
     actions,
 }) => {
-    const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
         'content-container': true,
@@ -33,14 +31,6 @@ export const EndLevelScene: React.FC<Props> = ({
         [`end-level-container--${color}`]: side !== undefined ? true : false,
         ...(currentScene !== MenuScene.END_LEVEL ? { unmount: true } : {}),
     });
-
-    const handleClickCopyToClipBoard = useCallback(() => {
-        navigator.clipboard.writeText(process.env.NEXT_PUBLIC_URL!);
-        setShouldDisplayIsCopied(true);
-        setTimeout(() => {
-            setShouldDisplayIsCopied(false);
-        }, 3000);
-    }, []);
 
     // effect to trigger script coming with buttons
     useEffect(() => {
@@ -134,17 +124,12 @@ export const EndLevelScene: React.FC<Props> = ({
     `}</Script>
                 </div>
                 <div>
-                    <button
-                        className={`buttonRect ${color}`}
-                        onClick={handleClickCopyToClipBoard}
-                    >
-                        <CopyToClipBoardIcon color={color} />
-                        <p>
-                            {shouldDisplayIsCopied
-                                ? 'Copied to clipboard'
-                                : process.env.NEXT_PUBLIC_URL}
-                        </p>
-                    </button>
+                    <CopyToClipBoardButton
+                        text={
+                            process.env.NEXT_PUBLIC_URL ||
+                            'Missing env variable'
+                        }
+                    />
                 </div>
                 <div className="patreon-container">
                     <a
