@@ -46,6 +46,7 @@
 - The player in light composer change slightly the whole brightness of the screen when going in and out
 - Bug with end game animation
 - Display exit bounce helper only when inside the element
+- Bug with the wave when the menu is remounted after entering the game, the wave is not reacting with the mouse anymore.
 
 ## Potential game play suggestion
 
