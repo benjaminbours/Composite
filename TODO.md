@@ -37,6 +37,7 @@
   - Rendering
   - Post processing
   - State reconciliation / management
+- Address lint warnings
 
 ## To fix
 

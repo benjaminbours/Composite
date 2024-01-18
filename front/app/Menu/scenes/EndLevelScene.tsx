@@ -114,7 +114,7 @@ export const EndLevelScene: React.FC<Props> = ({
                     >
                         Tweet
                     </a>
-                    <Script>{`
+                    <Script id="twitter-post-button-script">{`
     window.twttr = (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0],
           t = window.twttr || {};
