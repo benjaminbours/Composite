@@ -30,7 +30,6 @@ import {
 import { Actions } from './Actions';
 import { TeamMateDisconnectNotification } from '../TeamMateDisconnectNotification';
 import { goToStep } from './tweens';
-import Curve, { defaultWaveOptions } from './canvas/Curve';
 
 interface Props {
     mainState: MainState;
@@ -114,6 +113,8 @@ export function Menu({
         blackCanvas.current?.render();
         whiteCanvas.current?.render();
         stats.current?.end();
+        // disable on purpose, I want this not to change after mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // effect to start to render the menu animation
@@ -131,6 +132,8 @@ export function Menu({
             gsap.ticker.remove(canvasLoop);
             Mouse.destroy();
         };
+        // disable on purpose, I want this not to change after mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // effect to fetch queue info
@@ -173,10 +176,11 @@ export function Menu({
             },
         );
     }, [
-        teamMateDisconnected,
-        setTeamMateDisconnected,
-        goToStep,
+        // teamMateDisconnected,
+        // setTeamMateDisconnected,
         isMobileDevice,
+        refHashMap,
+        setMenuScene,
     ]);
 
     const handleClickOnQuitTeam = useCallback(() => {
@@ -192,7 +196,7 @@ export function Menu({
                 destroyConnection();
             },
         );
-    }, [goToStep, isMobileDevice]);
+    }, [isMobileDevice, refHashMap, setMenuScene, destroyConnection]);
 
     const handleClickOnBack = useCallback(() => {
         if (onTransition.current) {
@@ -274,8 +278,11 @@ export function Menu({
         menuScene,
         mainState.side,
         destroyConnection,
-        goToStep,
         isMobileDevice,
+        mode,
+        refHashMap,
+        setMenuScene,
+        setMainState,
     ]);
 
     const handleClickOnLevel = useCallback(
@@ -307,8 +314,10 @@ export function Menu({
         [
             teamMateDisconnected,
             setTeamMateDisconnected,
-            goToStep,
             isMobileDevice,
+            refHashMap,
+            setMainState,
+            setMenuScene,
         ],
     );
 
@@ -338,8 +347,10 @@ export function Menu({
         [
             teamMateDisconnected,
             setTeamMateDisconnected,
-            goToStep,
             isMobileDevice,
+            refHashMap,
+            setMainState,
+            setMenuScene,
         ],
     );
 
@@ -384,7 +395,7 @@ export function Menu({
                 setTeamMateDisconnected(false);
             },
         );
-    }, []);
+    }, [isMobileDevice, setMenuScene, setTeamMateDisconnected, refHashMap]);
 
     return (
         <>
@@ -409,6 +420,10 @@ export function Menu({
                 homeRef={homeRef}
                 allQueueInfo={allQueueInfo}
                 handleClickOnRandom={handleClickOnRandom}
+            />
+            <InviteFriendScene
+                currentScene={menuScene}
+                inviteFriendRef={inviteFriendRef}
             />
             <LevelScene
                 actions={
