@@ -9,27 +9,27 @@ import { CopyToClipBoardButton } from '../CopyToClipboardButton';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     side?: Side;
     levelName?: string;
     handleClickOnPlay: () => void;
     actions: React.ReactNode;
+    isMount: boolean;
 }
 
 export const EndLevelScene: React.FC<Props> = ({
     endLevelRef,
-    currentScene,
     side,
     levelName,
     handleClickOnPlay,
     actions,
+    isMount,
 }) => {
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
         'content-container': true,
         'end-level-container': true,
         [`end-level-container--${color}`]: side !== undefined ? true : false,
-        ...(currentScene !== MenuScene.END_LEVEL ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     // effect to trigger script coming with buttons

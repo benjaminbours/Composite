@@ -8,7 +8,6 @@ import LevelItem from './LevelItem';
 
 interface Props {
     levelRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     handleClickOnLevel: (levelId: Levels) => void;
     allQueueInfo?: AllQueueInfo;
     actions: React.ReactNode;
@@ -18,26 +17,27 @@ interface Props {
         img: string;
         disabled: boolean;
     }[];
+    isMount: boolean;
 }
 
 export const LevelScene: React.FC<Props> = ({
     levelRef,
-    currentScene,
     handleClickOnLevel,
     allQueueInfo,
     actions,
     levels,
+    isMount,
 }) => {
     const cssClass = classNames({
         'content-container': true,
         'level-container': true,
-        ...(currentScene !== 'level' ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     return (
         <div ref={levelRef} className={cssClass}>
             {actions}
-            <h2 className="title-h2">Select a&nbsp;level</h2>
+            <h2 className="title-h2 title-h2--white">Select a&nbsp;level</h2>
             {levels.map((item) => (
                 <LevelItem
                     {...item}

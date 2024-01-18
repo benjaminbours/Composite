@@ -35,8 +35,12 @@ interface Props {
     mainState: MainState;
     setMainState: React.Dispatch<React.SetStateAction<MainState>>;
     menuScene: MenuScene;
+    nextMenuScene: MenuScene | undefined;
     mode: MenuMode;
     setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>;
+    setNextMenuScene: React.Dispatch<
+        React.SetStateAction<MenuScene | undefined>
+    >;
     destroyConnection: () => void;
     teamMate: {
         info: TeammateInfoPayload | undefined;
@@ -58,6 +62,8 @@ export function Menu({
     teamMateDisconnected,
     setTeamMateDisconnected,
     stats,
+    setNextMenuScene,
+    nextMenuScene,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -95,7 +101,6 @@ export function Menu({
         if (!blackCanvas.current || !whiteCanvas.current) {
             return;
         }
-        const isMobileDevice = window.innerWidth <= 768;
         blackCanvas.current.resize({
             isMobileDevice,
             currentScene: menuScene,
@@ -167,12 +172,14 @@ export function Menu({
         //     setTeamMateDisconnected(false);
         // }
         onTransition.current = true;
+        setNextMenuScene(MenuScene.LEVEL);
         goToStep(
             refHashMap,
             { step: MenuScene.LEVEL, side: undefined, isMobileDevice },
             () => {
                 onTransition.current = false;
                 setMenuScene(MenuScene.LEVEL);
+                setNextMenuScene(undefined);
             },
         );
     }, [
@@ -187,16 +194,24 @@ export function Menu({
         if (onTransition.current) {
             return;
         }
+        setNextMenuScene(MenuScene.HOME);
         goToStep(
             refHashMap,
             { step: MenuScene.HOME, side: undefined, isMobileDevice },
             () => {
                 onTransition.current = false;
                 setMenuScene(MenuScene.HOME);
+                setNextMenuScene(undefined);
                 destroyConnection();
             },
         );
-    }, [isMobileDevice, refHashMap, setMenuScene, destroyConnection]);
+    }, [
+        isMobileDevice,
+        refHashMap,
+        setMenuScene,
+        destroyConnection,
+        setNextMenuScene,
+    ]);
 
     const handleClickOnBack = useCallback(() => {
         if (onTransition.current) {
@@ -204,36 +219,44 @@ export function Menu({
         }
         const backOptions = {
             invite_friend() {
+                setNextMenuScene(MenuScene.HOME);
                 goToStep(
                     refHashMap,
                     { step: MenuScene.HOME, side: undefined, isMobileDevice },
                     () => {
                         onTransition.current = false;
                         setMenuScene(MenuScene.HOME);
+                        setNextMenuScene(undefined);
                     },
                 );
             },
             level() {
-                setMenuScene(MenuScene.HOME);
+                setNextMenuScene(MenuScene.HOME);
                 goToStep(
                     refHashMap,
                     { step: MenuScene.HOME, side: undefined, isMobileDevice },
                     () => {
                         onTransition.current = false;
+                        setMenuScene(MenuScene.HOME);
+                        setNextMenuScene(undefined);
                     },
                 );
             },
             faction() {
+                setNextMenuScene(MenuScene.LEVEL);
                 goToStep(
                     refHashMap,
                     { step: MenuScene.LEVEL, side: undefined, isMobileDevice },
                     () => {
                         onTransition.current = false;
                         setMenuScene(MenuScene.LEVEL);
+                        setNextMenuScene(undefined);
                     },
                 );
             },
             queue() {
+                MenuScene.FACTION;
+                setMenuScene;
                 goToStep(
                     refHashMap,
                     {
@@ -242,14 +265,16 @@ export function Menu({
                         isMobileDevice,
                     },
                     () => {
-                        onTransition.current = false;
                         setMenuScene(MenuScene.FACTION);
+                        setNextMenuScene(undefined);
+                        onTransition.current = false;
                     },
                 );
             },
         };
         onTransition.current = true;
         if (menuScene === 'queue') {
+            setNextMenuScene(MenuScene.FACTION);
             goToStep(
                 refHashMap,
                 {
@@ -260,6 +285,7 @@ export function Menu({
                 () => {
                     onTransition.current = false;
                     setMenuScene(MenuScene.FACTION);
+                    setNextMenuScene(undefined);
                     setMainState((prev) => ({
                         ...prev,
                         side: undefined,
@@ -283,6 +309,7 @@ export function Menu({
         refHashMap,
         setMenuScene,
         setMainState,
+        setNextMenuScene,
     ]);
 
     const handleClickOnLevel = useCallback(
@@ -298,6 +325,7 @@ export function Menu({
                 selectedLevel: levelId,
             }));
             onTransition.current = true;
+            setNextMenuScene(MenuScene.FACTION);
             goToStep(
                 refHashMap,
                 {
@@ -308,6 +336,7 @@ export function Menu({
                 () => {
                     onTransition.current = false;
                     setMenuScene(MenuScene.FACTION);
+                    setNextMenuScene(undefined);
                 },
             );
         },
@@ -318,6 +347,7 @@ export function Menu({
             refHashMap,
             setMainState,
             setMenuScene,
+            setNextMenuScene,
         ],
     );
 
@@ -416,14 +446,39 @@ export function Menu({
             <HomeScene
                 canvasBlack={blackCanvas}
                 canvasWhite={whiteCanvas}
-                currentScene={menuScene}
                 homeRef={homeRef}
                 allQueueInfo={allQueueInfo}
                 handleClickOnRandom={handleClickOnRandom}
+                handleClickOnFriend={handleClickOnFriend}
+                isMount={
+                    menuScene === MenuScene.HOME ||
+                    nextMenuScene === MenuScene.HOME
+                }
             />
             <InviteFriendScene
-                currentScene={menuScene}
+                isMount={
+                    menuScene === MenuScene.INVITE_FRIEND ||
+                    nextMenuScene === MenuScene.INVITE_FRIEND
+                }
                 inviteFriendRef={inviteFriendRef}
+                actions={
+                    <Actions
+                        color="white"
+                        onBack={handleClickOnBack}
+                        onQuitTeam={
+                            mode === MenuMode.IN_TEAM
+                                ? handleClickOnQuitTeam
+                                : undefined
+                        }
+                        teamMate={{
+                            ...teamMate,
+                            levelName: levels.find(
+                                (level) =>
+                                    level.id === teamMate.info?.selectedLevel,
+                            )?.name,
+                        }}
+                    />
+                }
             />
             <LevelScene
                 actions={
@@ -447,8 +502,11 @@ export function Menu({
                 allQueueInfo={allQueueInfo}
                 handleClickOnLevel={handleClickOnLevel}
                 levels={levels}
-                currentScene={menuScene}
                 levelRef={levelRef}
+                isMount={
+                    menuScene === MenuScene.LEVEL ||
+                    nextMenuScene === MenuScene.LEVEL
+                }
             />
             <SideScene
                 sideRef={sideRef}
@@ -470,15 +528,17 @@ export function Menu({
                         }}
                     />
                 }
-                currentScene={menuScene}
                 selectedLevel={mainState.selectedLevel}
                 levelName={levelName}
                 handleClickOnFaction={handleClickOnFaction}
                 allQueueInfo={allQueueInfo}
+                isMount={
+                    menuScene === MenuScene.FACTION ||
+                    nextMenuScene === MenuScene.FACTION
+                }
             />
             <QueueScene
                 queueRef={queueRef}
-                currentScene={menuScene}
                 side={mainState.side}
                 levelName={levelName}
                 isInQueue={menuScene === MenuScene.QUEUE}
@@ -502,10 +562,17 @@ export function Menu({
                         }}
                     />
                 }
+                isMount={
+                    menuScene === MenuScene.QUEUE ||
+                    nextMenuScene === MenuScene.QUEUE
+                }
             />
             <EndLevelScene
+                isMount={
+                    menuScene === MenuScene.END_LEVEL ||
+                    nextMenuScene === MenuScene.END_LEVEL
+                }
                 endLevelRef={endLevelRef}
-                currentScene={menuScene}
                 side={mainState.side}
                 levelName={levelName}
                 handleClickOnPlay={handleClickOnPlay}

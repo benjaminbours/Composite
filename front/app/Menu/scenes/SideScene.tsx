@@ -9,34 +9,34 @@ import { MenuStateInfo } from '../MenuStateInfo';
 
 interface Props {
     sideRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     selectedLevel?: Levels;
     levelName?: string;
     handleClickOnFaction: (side: Side) => void;
     allQueueInfo?: AllQueueInfo;
     actions: React.ReactNode;
+    isMount: boolean;
 }
 
 export const SideScene: React.FC<Props> = ({
     sideRef,
-    currentScene,
     selectedLevel,
     levelName,
     handleClickOnFaction,
     allQueueInfo,
     actions,
+    isMount,
 }) => {
     const cssClass = classNames({
         'content-container': true,
         'faction-container': true,
-        ...(currentScene !== 'queue' ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     return (
         <div ref={sideRef} className={cssClass}>
             {actions}
             <MenuStateInfo levelName={levelName} />
-            <h2 className="title-h2">Select a&nbsp;side</h2>
+            <h2 className="title-h2 title-h2--white">Select a&nbsp;side</h2>
             {/* <p>{`Selected level: ${levelName}`}</p> */}
             <button
                 className="buttonCircle factionButton white"

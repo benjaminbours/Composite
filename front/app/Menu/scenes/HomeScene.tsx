@@ -14,18 +14,20 @@ interface Props {
     canvasBlack: React.MutableRefObject<CanvasBlack | undefined>;
     canvasWhite: React.MutableRefObject<CanvasWhite | undefined>;
     homeRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     handleClickOnRandom: () => void;
+    handleClickOnFriend: () => void;
     allQueueInfo?: AllQueueInfo;
+    isMount: boolean;
 }
 
 export const HomeScene: React.FC<Props> = ({
     homeRef,
     canvasBlack,
     canvasWhite,
-    currentScene,
     allQueueInfo,
     handleClickOnRandom,
+    handleClickOnFriend,
+    isMount,
 }) => {
     const buttonFriendRef = useRef<HTMLButtonElement>(null);
     const buttonRandomRef = useRef<HTMLButtonElement>(null);
@@ -33,9 +35,8 @@ export const HomeScene: React.FC<Props> = ({
     const informationRandomRef = useRef<HTMLParagraphElement>(null);
 
     const cssClass = classNames({
-        // 'content-container': true,
         'home-container': true,
-        ...(currentScene !== 'home' ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     const handleClickOnPlay = useCallback(() => {
@@ -53,23 +54,29 @@ export const HomeScene: React.FC<Props> = ({
         }
     }, []);
 
-    const setLightIsPulsingFast = useCallback((value: boolean) => {
-        if (!canvasBlack.current) {
-            return;
-        }
-        canvasBlack.current.light.isPulsingFast = value;
-    }, []);
+    const setLightIsPulsingFast = useCallback(
+        (value: boolean) => {
+            if (!canvasBlack.current) {
+                return;
+            }
+            canvasBlack.current.light.isPulsingFast = value;
+        },
+        [canvasBlack],
+    );
 
-    const setShadowRotationSpeed = useCallback((rotationSpeed: number) => {
-        if (!canvasWhite.current) {
-            return;
-        }
-        gsap.to(canvasWhite.current.shadow, {
-            duration: 1,
-            rotationSpeed,
-            ease: 'power3.easeOut',
-        });
-    }, []);
+    const setShadowRotationSpeed = useCallback(
+        (rotationSpeed: number) => {
+            if (!canvasWhite.current) {
+                return;
+            }
+            gsap.to(canvasWhite.current.shadow, {
+                duration: 1,
+                rotationSpeed,
+                ease: 'power3.easeOut',
+            });
+        },
+        [canvasWhite],
+    );
 
     const handleMouseLeavePlay = useCallback(() => {
         if (!canvasBlack.current || !canvasWhite.current) {
@@ -84,7 +91,12 @@ export const HomeScene: React.FC<Props> = ({
         setLightIsPulsingFast(false);
         // shadow
         setShadowRotationSpeed(0.005);
-    }, [setLightIsPulsingFast, setShadowRotationSpeed]);
+    }, [
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
+        canvasBlack,
+        canvasWhite,
+    ]);
 
     const handleMouseEnterPlay = useCallback(() => {
         if (!canvasBlack.current || !canvasWhite.current) {
@@ -102,7 +114,12 @@ export const HomeScene: React.FC<Props> = ({
         setLightIsPulsingFast(true);
         // shadow
         setShadowRotationSpeed(0.02);
-    }, [setLightIsPulsingFast, setShadowRotationSpeed]);
+    }, [
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
+        canvasBlack,
+        canvasWhite,
+    ]);
 
     return (
         <div ref={homeRef} className={cssClass}>
@@ -138,6 +155,7 @@ export const HomeScene: React.FC<Props> = ({
                 </p>
                 <button
                     ref={buttonFriendRef}
+                    onClick={handleClickOnFriend}
                     onMouseEnter={() => setShadowRotationSpeed(0.02)}
                     onMouseLeave={() => setShadowRotationSpeed(0.005)}
                     className="buttonCircle button-hidden button-friend"
