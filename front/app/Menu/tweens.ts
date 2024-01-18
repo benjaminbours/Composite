@@ -99,13 +99,19 @@ function homeOut(homeInterface: HTMLDivElement) {
 }
 
 export function homeIn(homeInterface: HTMLDivElement) {
-    return gsap.to('.home-container > *', {
-        duration: 0.5,
-        opacity: 1,
-        onStart: () => {
-            homeInterface.style.display = 'block';
+    return gsap.fromTo(
+        '.home-container > *',
+        {
+            opacity: 0,
         },
-    });
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                homeInterface.style.display = 'block';
+            },
+        },
+    );
 }
 
 /**
@@ -152,13 +158,19 @@ function levelOut(levelInterface: HTMLDivElement) {
 }
 
 export function levelIn(levelInterface: HTMLDivElement) {
-    return gsap.to(levelInterface, {
-        duration: 0.5,
-        opacity: 1,
-        onStart: () => {
-            levelInterface.style.display = 'block';
+    return gsap.fromTo(
+        levelInterface,
+        {
+            opacity: 0,
         },
-    });
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                levelInterface.style.display = 'block';
+            },
+        },
+    );
 }
 
 /**
@@ -176,13 +188,19 @@ function factionOut(factionInterface: HTMLDivElement) {
 
 export function factionIn(factionInterface: HTMLDivElement) {
     return [
-        gsap.to(factionInterface, {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                factionInterface.style.display = 'block';
+        gsap.fromTo(
+            factionInterface,
+            {
+                opacity: 0,
             },
-        }),
+            {
+                duration: 0.5,
+                opacity: 1,
+                onStart: () => {
+                    factionInterface.style.display = 'block';
+                },
+            },
+        ),
     ];
 }
 
@@ -190,13 +208,19 @@ export function factionIn(factionInterface: HTMLDivElement) {
  * Queue
  */
 export function queueIn(queueInterface: HTMLDivElement) {
-    return gsap.to(queueInterface, {
-        duration: 0.5,
-        opacity: 1,
-        onStart: () => {
-            queueInterface.style.display = 'block';
+    return gsap.fromTo(
+        queueInterface,
+        {
+            opacity: 0,
         },
-    });
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                queueInterface.style.display = 'block';
+            },
+        },
+    );
 }
 
 function queueOut(queueInterface: HTMLDivElement) {

@@ -9,20 +9,20 @@ import { MenuStateInfo } from '../MenuStateInfo';
 
 interface Props {
     queueRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     side?: Side;
     levelName?: string;
     isInQueue: boolean;
     actions: React.ReactNode;
+    isMount: boolean;
 }
 
 export const QueueScene: React.FC<Props> = ({
     queueRef,
-    currentScene,
     side,
     levelName,
     isInQueue,
     actions,
+    isMount,
 }) => {
     const [queueTime, setQueueTime] = useState(0);
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
@@ -31,7 +31,7 @@ export const QueueScene: React.FC<Props> = ({
         'content-container': true,
         'queue-container': true,
         [`queue-container--${color}`]: side ? true : false,
-        ...(currentScene !== 'queue' ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     const queueText = useMemo(
@@ -39,7 +39,7 @@ export const QueueScene: React.FC<Props> = ({
             0: `Waiting for a light`,
             1: `Waiting for a shadow`,
         }),
-        [levelName],
+        [],
     );
 
     const handleClickCopyToClipBoard = useCallback(() => {
@@ -60,7 +60,7 @@ export const QueueScene: React.FC<Props> = ({
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [side]);
+    }, [isInQueue]);
 
     return (
         <div ref={queueRef} className={cssClass}>
@@ -69,7 +69,9 @@ export const QueueScene: React.FC<Props> = ({
             {side !== undefined && (
                 <h2
                     className={`title-h2${
-                        side === Side.SHADOW ? ' title-h2--black' : ''
+                        side === Side.SHADOW
+                            ? ' title-h2--black'
+                            : 'title-h2--white'
                     }`}
                 >
                     {queueText[side]}

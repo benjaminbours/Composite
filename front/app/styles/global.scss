@@ -96,10 +96,12 @@ canvas,
 }
 
 .title-h2 {
-    color: white;
-
     &--black {
         color: black;
+    }
+
+    &--white {
+        color: white;
     }
 
     @media (max-width: 768px) {
@@ -185,7 +187,7 @@ $buttonSizeLarge: 120px;
 
 .unmount {
     opacity: 0;
-    display: none;
+    display: none !important;
 }
 
 .queue-count {
@@ -284,6 +286,7 @@ $buttonSizeLarge: 120px;
     font-size: 12px;
     display: flex;
     align-items: center;
+    mix-blend-mode: difference;
 
     * {
         margin-right: 10px;
@@ -302,5 +305,18 @@ $buttonSizeLarge: 120px;
 
     button {
         font-size: 10px;
+    }
+}
+
+.copy-to-clipboard {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+
+    svg {
+        width: 35px;
+        margin-right: 10px;
     }
 }

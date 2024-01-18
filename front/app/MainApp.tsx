@@ -55,6 +55,9 @@ function MainApp() {
     const socketController = useRef<SocketController>();
     const inputsManager = useRef<InputsManager>(new InputsManager());
     const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
+    const [nextMenuScene, setNextMenuScene] = useState<MenuScene | undefined>(
+        undefined,
+    );
     const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
     const [state, setState] = useState<MainState>(() => {
         if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
@@ -332,8 +335,10 @@ function MainApp() {
                     mainState={state}
                     setMainState={setState}
                     menuScene={menuScene}
+                    nextMenuScene={nextMenuScene}
                     mode={menuMode}
                     setMenuScene={setMenuScene}
+                    setNextMenuScene={setNextMenuScene}
                     destroyConnection={handleDestroyConnection}
                     teamMate={{
                         info: teamMateInfo,
