@@ -1,0 +1,106 @@
+.team-lobby-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    h3,
+    h2 {
+        width: 100%;
+    }
+
+    .menu-actions {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .splide__arrow {
+        mix-blend-mode: difference;
+        background: white;
+        opacity: 1;
+        z-index: 100;
+    }
+}
+
+.level-slider__item {
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    position: relative;
+
+    .level-portal-container {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        border-radius: 100%;
+        background: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: grab;
+        transition: 0.3s ease-out;
+
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            border: solid transparent 1px;
+            transform: scale(0.9);
+            border-radius: 100%;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        &::after {
+            transform: scale(0.8);
+        }
+    }
+
+    p {
+        position: relative;
+        z-index: 5;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        font-weight: 100;
+    }
+
+    .background {
+        background-position: center center;
+        background-size: cover;
+        position: relative;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.5;
+        width: 100%;
+        height: 100%;
+    }
+
+    &.is-active {
+        .level-portal-container {
+            transform: scale(1.2);
+        }
+    }
+
+    &.level-slider__item--selected-by-team-mate {
+        .level-portal-container {
+            &::before {
+                border-color: white;
+            }
+        }
+    }
+
+    &.level-slider__item--selected-by-team-mate.is-active {
+        .level-portal-container {
+            &::after {
+                border-color: white;
+            }
+        }
+    }
+}

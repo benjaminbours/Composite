@@ -7,6 +7,7 @@ export enum MenuScene {
     QUEUE = 'queue',
     END_LEVEL = 'end_level',
     INVITE_FRIEND = 'invite_friend',
+    TEAM_LOBBY = 'team_lobby',
 }
 
 export enum MenuMode {

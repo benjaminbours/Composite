@@ -66,6 +66,12 @@ export default class Light {
                 y: height * 0.75,
             };
         },
+        team_lobby(width: number, height: number) {
+            return {
+                x: width * 0.25,
+                y: height * 0.75,
+            };
+        },
         invite_friend(width: number, height: number) {
             return {
                 x: width * 0.15,
