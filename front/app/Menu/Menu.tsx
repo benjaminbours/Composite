@@ -27,6 +27,7 @@ import {
     LevelScene,
     HomeScene,
     InviteFriendScene,
+    TeamLobbyScene,
 } from './scenes';
 import { Actions } from './Actions';
 import { TeamMateDisconnectNotification } from '../TeamMateDisconnectNotification';
@@ -78,6 +79,7 @@ export function Menu({
     const queueRef = useRef<HTMLDivElement>(null);
     const endLevelRef = useRef<HTMLDivElement>(null);
     const inviteFriendRef = useRef<HTMLDivElement>(null);
+    const teamLobbyRef = useRef<HTMLDivElement>(null);
 
     const isMobileDevice = useMemo(() => {
         if (!window) {
@@ -96,6 +98,7 @@ export function Menu({
             queueRef,
             endLevelRef,
             inviteFriendRef,
+            teamLobbyRef,
         }),
         [],
     );
@@ -318,7 +321,11 @@ export function Menu({
             );
         }
         // there is no back button on home scene or on end level scene
-        if (menuScene !== MenuScene.HOME && menuScene !== MenuScene.END_LEVEL) {
+        if (
+            menuScene !== MenuScene.HOME &&
+            menuScene !== MenuScene.END_LEVEL &&
+            menuScene !== MenuScene.TEAM_LOBBY
+        ) {
             backOptions[menuScene]();
         }
     }, [
@@ -332,6 +339,16 @@ export function Menu({
         setMainState,
         setNextMenuScene,
     ]);
+
+    const handleSelectLevelOnLobby = useCallback(
+        (levelId: Levels) => {
+            setMainState((prev) => ({
+                ...prev,
+                selectedLevel: levelId,
+            }));
+        },
+        [setMainState],
+    );
 
     const handleClickOnLevel = useCallback(
         (levelId: Levels) => {
@@ -487,6 +504,32 @@ export function Menu({
                     <Actions
                         color="white"
                         onBack={handleClickOnBack}
+                        onQuitTeam={
+                            mode === MenuMode.IN_TEAM
+                                ? handleClickOnQuitTeam
+                                : undefined
+                        }
+                        teamMate={{
+                            ...teamMate,
+                            levelName: levels.find(
+                                (level) =>
+                                    level.id === teamMate.info?.selectedLevel,
+                            )?.name,
+                        }}
+                    />
+                }
+            />
+            <TeamLobbyScene
+                isMount={
+                    menuScene === MenuScene.TEAM_LOBBY ||
+                    nextMenuScene === MenuScene.TEAM_LOBBY
+                }
+                handleSelectLevel={handleSelectLevelOnLobby}
+                handleClickOnRandom={handleClickOnRandom}
+                teamLobbyRef={teamLobbyRef}
+                actions={
+                    <Actions
+                        color="white"
                         onQuitTeam={
                             mode === MenuMode.IN_TEAM
                                 ? handleClickOnQuitTeam

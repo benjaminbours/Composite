@@ -23,6 +23,7 @@ export interface RefHashMap {
     queueRef: React.RefObject<HTMLDivElement>;
     endLevelRef: React.RefObject<HTMLDivElement>;
     inviteFriendRef: React.RefObject<HTMLDivElement>;
+    teamLobbyRef: React.RefObject<HTMLDivElement>;
 }
 
 /**
