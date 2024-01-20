@@ -1,6 +1,7 @@
 'use client';
 // vendors
 import React, {
+    createContext,
     useCallback,
     useEffect,
     useMemo,
@@ -30,6 +31,10 @@ import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
 import Link from 'next/link';
 
+export const AppContext = createContext({
+    setMenuScene: (_scene: MenuScene) => {},
+});
+
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
     ssr: false,
@@ -47,11 +52,14 @@ export interface MainState {
     gameState: GameState | undefined;
 }
 
+interface Props {
+    children: React.ReactNode;
+}
+
 /**
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
-// TODO: Ability to restart a game from the same session without reloading or changing team mate
-function MainApp() {
+function MainApp({ children }: Props) {
     const socketController = useRef<SocketController>();
     const inputsManager = useRef<InputsManager>(new InputsManager());
     const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
@@ -163,6 +171,7 @@ function MainApp() {
         ]);
     }, [teamMateInfo]);
 
+    // effect dedicated to tab switching
     useEffect(() => {
         if (process.env.NEXT_PUBLIC_STAGE === 'development') {
             const stats = new STATS.default();
@@ -330,46 +339,49 @@ function MainApp() {
 
     return (
         <>
-            {!gameIsPlaying && (
-                <Menu
-                    mainState={state}
-                    setMainState={setState}
-                    menuScene={menuScene}
-                    nextMenuScene={nextMenuScene}
-                    mode={menuMode}
-                    setMenuScene={setMenuScene}
-                    setNextMenuScene={setNextMenuScene}
-                    destroyConnection={handleDestroyConnection}
-                    teamMate={{
-                        info: teamMateInfo,
-                        onJoin: handleClickOnJoinTeamMate,
-                    }}
-                    teamMateDisconnected={teamMateDisconnected}
-                    setTeamMateDisconnected={setTeamMateDisconnected}
-                    stats={statsRef}
-                />
-            )}
-            {state.gameState && gameIsPlaying && (
-                <Game
-                    side={state.side!}
-                    initialGameState={state.gameState}
-                    socketController={socketController.current}
-                    tabIsHidden={tabIsHidden}
-                    stats={statsRef}
-                    inputsManager={inputsManager.current}
-                    handleClickFindAnotherTeamMate={
-                        handleClickFindAnotherTeamMate
-                    }
-                    teamMateDisconnected={teamMateDisconnected}
-                />
-            )}
-            {isSettingsOpen && (
-                <SettingsMenu
-                    inputsManager={inputsManager.current}
-                    onClose={handleClickOnCloseSettings}
-                />
-            )}
-            {bottomRightInfo}
+            <AppContext.Provider value={{ setMenuScene }}>
+                {!gameIsPlaying && (
+                    <Menu
+                        mainState={state}
+                        setMainState={setState}
+                        menuScene={menuScene}
+                        nextMenuScene={nextMenuScene}
+                        mode={menuMode}
+                        setMenuScene={setMenuScene}
+                        setNextMenuScene={setNextMenuScene}
+                        destroyConnection={handleDestroyConnection}
+                        teamMate={{
+                            info: teamMateInfo,
+                            onJoin: handleClickOnJoinTeamMate,
+                        }}
+                        teamMateDisconnected={teamMateDisconnected}
+                        setTeamMateDisconnected={setTeamMateDisconnected}
+                        stats={statsRef}
+                    />
+                )}
+                {state.gameState && gameIsPlaying && (
+                    <Game
+                        side={state.side!}
+                        initialGameState={state.gameState}
+                        socketController={socketController.current}
+                        tabIsHidden={tabIsHidden}
+                        stats={statsRef}
+                        inputsManager={inputsManager.current}
+                        handleClickFindAnotherTeamMate={
+                            handleClickFindAnotherTeamMate
+                        }
+                        teamMateDisconnected={teamMateDisconnected}
+                    />
+                )}
+                {isSettingsOpen && (
+                    <SettingsMenu
+                        inputsManager={inputsManager.current}
+                        onClose={handleClickOnCloseSettings}
+                    />
+                )}
+                {bottomRightInfo}
+                {children}
+            </AppContext.Provider>
         </>
     );
 }
