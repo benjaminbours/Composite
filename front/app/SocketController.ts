@@ -34,6 +34,7 @@ export class SocketController {
         onTeamMateDisconnect: () => void,
         onTeamMateInfo: (data: TeammateInfoPayload) => void,
         onReceiveInviteFriendToken: (data: InviteFriendTokenPayload) => void,
+        onJoinLobby: () => void,
     ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
@@ -62,6 +63,7 @@ export class SocketController {
 
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
         this.socket.on(SocketEventType.TEAMMATE_INFO, onTeamMateInfo);
+        this.socket.on(SocketEventType.JOIN_LOBBY, onJoinLobby);
         this.socket.on(
             SocketEventType.INVITE_FRIEND_TOKEN,
             onReceiveInviteFriendToken,

@@ -28,6 +28,10 @@ export enum SocketEventType {
     REQUEST_INVITE_FRIEND_TOKEN = 'REQUEST_INVITE_FRIEND_TOKEN',
     // send only by the server after receiving request from client
     INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
+    // send by the client just after joining lobby and connecting
+    FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
+    // send by the server to the invite emitter after the friend joined the lobby
+    JOIN_LOBBY = 'JOIN_LOBBY',
     // send by the server when 2 players connects and a game start
     GAME_START = 'GAME_START',
     // send by the 2 clients to the server and to each others during the game is on going
@@ -109,6 +113,13 @@ export type RequestInviteFriendTokenEvent = [
     type: SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
 ];
 
+export type FriendJoinLobbyEvent = [
+    type: SocketEventType.FRIEND_JOIN_LOBBY,
+    payload: string,
+];
+
+export type JoinLobbyEvent = [type: SocketEventType.JOIN_LOBBY];
+
 export type InviteFriendTokenEvent = [
     type: SocketEventType.INVITE_FRIEND_TOKEN,
     payload: InviteFriendTokenPayload,
@@ -157,7 +168,9 @@ export type SocketEvent =
     | GameDeactivateElementEvent
     | PingEvent
     | RequestInviteFriendTokenEvent
-    | InviteFriendTokenEvent;
+    | InviteFriendTokenEvent
+    | FriendJoinLobbyEvent
+    | JoinLobbyEvent;
 
 export class QueueInfo {
     constructor(public all = 0, public light = 0, public shadow = 0) {}

@@ -4,7 +4,6 @@ import React, {
     createContext,
     useCallback,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -32,6 +31,7 @@ import { BottomRightInfo } from './BottomRightInfo';
 
 export const AppContext = createContext({
     setMenuScene: (_scene: MenuScene) => {},
+    onEnterTeamLobby: (_token: string) => {},
 });
 
 const Menu = dynamic(() => import('./Menu'), {
@@ -83,6 +83,7 @@ function MainApp({ children }: Props) {
     const [inviteFriendToken, setInviteFriendToken] = useState<
         string | undefined
     >(undefined);
+    const [friendIsInLobby, setFriendIsInLobby] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
@@ -138,7 +139,8 @@ function MainApp({ children }: Props) {
         socketController.current?.destroy();
         socketController.current = undefined;
         setMenuMode(MenuMode.DEFAULT);
-    }, [menuMode]);
+        setFriendIsInLobby(false);
+    }, []);
 
     const handleTeamMateDisconnect = useCallback(() => {
         setTeamMateDisconnected(true);
@@ -148,7 +150,7 @@ function MainApp({ children }: Props) {
             selectedLevel: undefined,
         }));
         handleDestroyConnection();
-    }, []);
+    }, [handleDestroyConnection]);
 
     const handleTeamMateInfo = useCallback((data: TeammateInfoPayload) => {
         console.log('HERE receive team mate info');
@@ -159,7 +161,7 @@ function MainApp({ children }: Props) {
         setGameIsPlaying(false);
         setMenuScene(MenuScene.HOME);
         setTeamMateDisconnected(false);
-    }, [gameIsPlaying]);
+    }, []);
 
     const handleClickOnJoinTeamMate = useCallback(() => {
         if (!teamMateInfo) {
@@ -207,6 +209,12 @@ function MainApp({ children }: Props) {
         };
     }, []);
 
+    const handleJoinLobby = useCallback(() => {
+        console.log('joined lobby');
+        setMenuMode(MenuMode.IN_TEAM);
+        setFriendIsInLobby(true);
+    }, []);
+
     const establishConnection = useCallback(async () => {
         return import('./SocketController')
             .then((mod) => mod.SocketController)
@@ -217,6 +225,7 @@ function MainApp({ children }: Props) {
                     handleTeamMateDisconnect,
                     handleTeamMateInfo,
                     handleReceiveInviteFriendToken,
+                    handleJoinLobby,
                 );
                 return;
             });
@@ -226,6 +235,7 @@ function MainApp({ children }: Props) {
         handleTeamMateDisconnect,
         handleTeamMateInfo,
         handleReceiveInviteFriendToken,
+        handleJoinLobby,
     ]);
 
     const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
@@ -242,15 +252,29 @@ function MainApp({ children }: Props) {
         [establishConnection, sendMatchMakingInfo],
     );
 
-    const requestInviteFriendToken = useCallback(() => {
-        socketController.current?.emit([
-            SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
-        ]);
-    }, []);
-
     const onEnterInviteFriend = useCallback(() => {
-        establishConnection().then(requestInviteFriendToken);
-    }, [establishConnection, requestInviteFriendToken]);
+        establishConnection().then(() => {
+            socketController.current?.emit([
+                SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
+            ]);
+        });
+    }, [establishConnection]);
+
+    const onEnterTeamLobby = useCallback(
+        (inviteFriendToken: string) => {
+            if (socketController.current) {
+                return;
+            }
+            setMenuMode(MenuMode.IN_TEAM);
+            establishConnection().then(() => {
+                socketController.current?.emit([
+                    SocketEventType.FRIEND_JOIN_LOBBY,
+                    inviteFriendToken,
+                ]);
+            });
+        },
+        [establishConnection],
+    );
 
     // event dedicated to socket connection
     useEffect(() => {
@@ -264,6 +288,7 @@ function MainApp({ children }: Props) {
                         handleTeamMateDisconnect,
                         handleTeamMateInfo,
                         handleReceiveInviteFriendToken,
+                        handleJoinLobby,
                     );
                     return;
                 })
@@ -324,7 +349,14 @@ function MainApp({ children }: Props) {
             //     sendMatchMakingInfo();
             // }
         }
-    }, []);
+    }, [
+        handleGameFinished,
+        handleGameStart,
+        handleReceiveInviteFriendToken,
+        handleTeamMateDisconnect,
+        handleTeamMateInfo,
+        handleJoinLobby,
+    ]);
 
     if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
         return (
@@ -360,7 +392,7 @@ function MainApp({ children }: Props) {
 
     return (
         <>
-            <AppContext.Provider value={{ setMenuScene }}>
+            <AppContext.Provider value={{ setMenuScene, onEnterTeamLobby }}>
                 {!gameIsPlaying && (
                     <Menu
                         mainState={state}
@@ -381,6 +413,7 @@ function MainApp({ children }: Props) {
                         enterRandomQueue={onEnterRandomQueue}
                         enterInviteFriend={onEnterInviteFriend}
                         inviteFriendToken={inviteFriendToken}
+                        friendIsInLobby={friendIsInLobby}
                     />
                 )}
                 {state.gameState && gameIsPlaying && (

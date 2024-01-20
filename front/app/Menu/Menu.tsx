@@ -57,6 +57,7 @@ interface Props {
     enterRandomQueue: (payload: MatchMakingPayload) => void;
     enterInviteFriend: () => void;
     inviteFriendToken: string | undefined;
+    friendIsInLobby: boolean;
 }
 
 export function Menu({
@@ -75,6 +76,7 @@ export function Menu({
     enterRandomQueue,
     enterInviteFriend,
     inviteFriendToken,
+    friendIsInLobby,
 }: Props) {
     const router = useRouter();
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
@@ -139,6 +141,29 @@ export function Menu({
         // disable on purpose, I want this not to change after mount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // effect to go to team lobby when friend join
+    useEffect(() => {
+        if (friendIsInLobby && menuScene === MenuScene.INVITE_FRIEND) {
+            setNextMenuScene(MenuScene.TEAM_LOBBY);
+            goToStep(
+                refHashMap,
+                { step: MenuScene.TEAM_LOBBY, side: undefined, isMobileDevice },
+                () => {
+                    onTransition.current = false;
+                    setMenuScene(MenuScene.TEAM_LOBBY);
+                    setNextMenuScene(undefined);
+                },
+            );
+        }
+    }, [
+        friendIsInLobby,
+        isMobileDevice,
+        menuScene,
+        refHashMap,
+        setMenuScene,
+        setNextMenuScene,
+    ]);
 
     // effect to start to render the menu animation
     useEffect(() => {

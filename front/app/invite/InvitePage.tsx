@@ -13,6 +13,7 @@ export const InvitePage: React.FC = ({}) => {
     const context = useContext(AppContext);
     const [isTokenValid, setIsTokenValid] = React.useState<boolean>(false);
     const [isChecking, setIsChecking] = React.useState<boolean>(true);
+    const [enteredLobby, setEnteredLobby] = React.useState<boolean>(false);
     const router = useRouter();
     const urlSearchParams = useSearchParams();
     const token = useMemo(
@@ -35,24 +36,23 @@ export const InvitePage: React.FC = ({}) => {
             });
     }, [token, router]);
 
-    const shouldRedirectNotFound = useMemo(() => {
-        return !token || (!isChecking && !isTokenValid);
-    }, [token, isChecking, isTokenValid]);
-
-    const shouldRedirectLobby = useMemo(() => {
-        return isTokenValid && !isChecking;
-    }, [isChecking, isTokenValid]);
-
     useEffect(() => {
-        if (shouldRedirectNotFound) {
+        if (enteredLobby) {
+            return;
+        }
+
+        if (!token || (!isChecking && !isTokenValid)) {
             context.setMenuScene(MenuScene.NOT_FOUND);
             notFound();
         }
 
-        if (shouldRedirectLobby) {
+        if (isTokenValid && !isChecking) {
+            router.push('/lobby');
             context.setMenuScene(MenuScene.TEAM_LOBBY);
+            setEnteredLobby(true);
+            context.onEnterTeamLobby(token);
         }
-    }, [shouldRedirectNotFound, shouldRedirectLobby, context]);
+    }, [context, enteredLobby, router, isChecking, isTokenValid, token]);
 
     return <></>;
 };
