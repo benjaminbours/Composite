@@ -22,11 +22,14 @@ const REDIS_KEYS = {
   // List
   MATCH_MAKING_QUEUE: 'MATCH_MAKING_QUEUE',
   // Hash map
+  INVITE_TOKEN_MAP: 'INVITE_TOKEN_MAP',
+  // Hash map
   QUEUE_INFO: 'QUEUE_INFO',
   // Hash map
   QUEUE_LEVEL_INFO: (level: Levels | string) => `QUEUE_LEVEL_${level}_INFO`,
   // Hash map
   PLAYER: (socketId: string) => socketId,
+  // Hash map
   GAME: (gameId: number | string) => `game_${gameId}`,
   // Sorted set
   GAME_INPUTS_QUEUE: (gameId: number | string) => `game_${gameId}:inputs`,
@@ -190,6 +193,15 @@ export class TemporaryStorageService {
     }
 
     return this.findMatchInQueue(data, index + increaseRangeFactor);
+  }
+
+  async storeInviteToken(token: string, socketId: string) {
+    // store in the invite token map, the token is the key and the value is the emitter of the invite request
+    return this.redisClient.HSET(REDIS_KEYS.INVITE_TOKEN_MAP, token, socketId);
+  }
+
+  async getInviteEmitter(token: string) {
+    return this.redisClient.HGET(REDIS_KEYS.INVITE_TOKEN_MAP, token);
   }
 
   // games

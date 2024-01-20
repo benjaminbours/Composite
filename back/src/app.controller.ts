@@ -1,5 +1,5 @@
 // vendors
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 // our libs
 import type { AllQueueInfo } from '@benjaminbours/composite-core';
 // local
@@ -21,5 +21,14 @@ export class AppController {
   @Get('/queue-info')
   getQueueInfo(): Promise<AllQueueInfo> {
     return this.temporaryStorage.getQueueInfo();
+  }
+
+  @Post('/check-invite/:inviteToken')
+  async checkInviteValidity(
+    @Param('inviteToken') inviteToken: string,
+  ): Promise<boolean> {
+    const inviteEmitter =
+      await this.temporaryStorage.getInviteEmitter(inviteToken);
+    return Boolean(inviteEmitter);
   }
 }
