@@ -10,7 +10,6 @@ import React, {
 } from 'react';
 import dynamic from 'next/dynamic';
 import * as STATS from 'stats.js';
-import classNames from 'classnames';
 // our libs
 import {
     GameState,
@@ -27,10 +26,9 @@ import {
 // local
 import type { SocketController } from './SocketController';
 import { MenuMode, MenuScene } from './Menu/types';
-import { CogWheel } from './Game/icons/CogWheel';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
-import Link from 'next/link';
+import { BottomRightInfo } from './BottomRightInfo';
 
 export const AppContext = createContext({
     setMenuScene: (_scene: MenuScene) => {},
@@ -328,35 +326,6 @@ function MainApp({ children }: Props) {
         }
     }, []);
 
-    const bottomRightInfo = useMemo(() => {
-        const cssClass = classNames({
-            'bottom-right-info': true,
-            'bottom-right-info--white':
-                (menuScene === MenuScene.QUEUE && state.side === Side.LIGHT) ||
-                (menuScene === MenuScene.END_LEVEL &&
-                    state.side === Side.LIGHT) ||
-                gameIsPlaying,
-            'bottom-right-info--black':
-                menuScene === MenuScene.HOME ||
-                menuScene === MenuScene.LEVEL ||
-                menuScene === MenuScene.FACTION ||
-                (menuScene === MenuScene.QUEUE && state.side === Side.SHADOW) ||
-                (menuScene === MenuScene.END_LEVEL &&
-                    state.side === Side.SHADOW),
-        });
-        return (
-            <div className={cssClass}>
-                <button className="settings" onClick={handleClickOnSettings}>
-                    <CogWheel />
-                </button>
-                <Link href="/timeline#roadmap" className="inline-link">
-                    Roadmap
-                </Link>
-                <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
-            </div>
-        );
-    }, [handleClickOnCloseSettings, menuScene, state, gameIsPlaying]);
-
     if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
         return (
             <>
@@ -384,7 +353,7 @@ function MainApp({ children }: Props) {
                         onClose={handleClickOnCloseSettings}
                     />
                 )}
-                {bottomRightInfo}
+                <BottomRightInfo onSettingsClick={handleClickOnSettings} />
             </>
         );
     }
@@ -434,7 +403,7 @@ function MainApp({ children }: Props) {
                         onClose={handleClickOnCloseSettings}
                     />
                 )}
-                {bottomRightInfo}
+                <BottomRightInfo onSettingsClick={handleClickOnSettings} />
                 {children}
             </AppContext.Provider>
         </>
