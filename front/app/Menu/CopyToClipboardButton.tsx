@@ -20,12 +20,13 @@ export const CopyToClipBoardButton: React.FC<Props> = ({ text, color }) => {
     const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
 
     const handleClickCopyToClipBoard = useCallback(() => {
-        navigator.clipboard.writeText(process.env.NEXT_PUBLIC_URL!);
+        navigator.clipboard.writeText(text);
         setShouldDisplayIsCopied(true);
         setTimeout(() => {
             setShouldDisplayIsCopied(false);
         }, 3000);
-    }, []);
+    }, [text]);
+
     const cssClass = classNames({
         'copy-to-clipboard': true,
         buttonRect: true,
