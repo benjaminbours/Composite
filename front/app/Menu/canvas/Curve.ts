@@ -38,6 +38,13 @@ export default class Curve {
     public axis: 'h' | 'v' = 'v';
 
     public resizeOptions = {
+        not_found(width: number, height: number, isOnMobile: boolean) {
+            const position = 1.2;
+            if (isOnMobile) {
+                return height * position;
+            }
+            return width * position;
+        },
         home(width: number, height: number, isOnMobile: boolean) {
             if (isOnMobile) {
                 return height * 0.75;

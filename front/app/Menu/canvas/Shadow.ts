@@ -11,6 +11,20 @@ export default class Shadow {
     public startX: number = 0;
 
     public resizeOptions = {
+        not_found(width: number, height: number, isOnMobile: boolean) {
+            const positionX = 1;
+            const positionY = 0.5;
+            if (isOnMobile) {
+                return {
+                    x: width * 0.5,
+                    y: height * 0.85,
+                };
+            }
+            return {
+                x: width * positionX,
+                y: height * positionY,
+            };
+        },
         home(width: number, height: number) {
             return {
                 x: width * 0.5,

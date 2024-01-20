@@ -8,6 +8,7 @@ export enum MenuScene {
     END_LEVEL = 'end_level',
     INVITE_FRIEND = 'invite_friend',
     TEAM_LOBBY = 'team_lobby',
+    NOT_FOUND = 'not_found',
 }
 
 export enum MenuMode {

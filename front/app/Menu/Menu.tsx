@@ -7,6 +7,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
+import { useRouter } from 'next/navigation';
 // our libs
 import {
     AllQueueInfo,
@@ -28,6 +29,7 @@ import {
     HomeScene,
     InviteFriendScene,
     TeamLobbyScene,
+    NotFoundScene,
 } from './scenes';
 import { Actions } from './Actions';
 import { TeamMateDisconnectNotification } from '../TeamMateDisconnectNotification';
@@ -67,6 +69,7 @@ export function Menu({
     setNextMenuScene,
     nextMenuScene,
 }: Props) {
+    const router = useRouter();
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -80,6 +83,7 @@ export function Menu({
     const endLevelRef = useRef<HTMLDivElement>(null);
     const inviteFriendRef = useRef<HTMLDivElement>(null);
     const teamLobbyRef = useRef<HTMLDivElement>(null);
+    const notFoundRef = useRef<HTMLDivElement>(null);
 
     const isMobileDevice = useMemo(() => {
         if (!window) {
@@ -99,6 +103,7 @@ export function Menu({
             endLevelRef,
             inviteFriendRef,
             teamLobbyRef,
+            notFoundRef,
         }),
         [],
     );
@@ -324,7 +329,8 @@ export function Menu({
         if (
             menuScene !== MenuScene.HOME &&
             menuScene !== MenuScene.END_LEVEL &&
-            menuScene !== MenuScene.TEAM_LOBBY
+            menuScene !== MenuScene.TEAM_LOBBY &&
+            menuScene !== MenuScene.NOT_FOUND
         ) {
             backOptions[menuScene]();
         }
@@ -388,6 +394,25 @@ export function Menu({
             setNextMenuScene,
         ],
     );
+
+    const handleClickHome = useCallback(() => {
+        onTransition.current = true;
+        setNextMenuScene(MenuScene.HOME);
+        router.push('/');
+        goToStep(
+            refHashMap,
+            {
+                step: MenuScene.HOME,
+                side: undefined,
+                isMobileDevice,
+            },
+            () => {
+                setMenuScene(MenuScene.HOME);
+                setNextMenuScene(undefined);
+                onTransition.current = false;
+            },
+        );
+    }, [setMenuScene, setNextMenuScene, isMobileDevice, refHashMap, router]);
 
     const handleClickOnFaction = useCallback(
         (side: Side) => {
@@ -480,6 +505,14 @@ export function Menu({
                 id="black"
                 style={{ zIndex: -2 }}
                 ref={blackCanvasDomElement}
+            />
+            <NotFoundScene
+                isMount={
+                    menuScene === MenuScene.NOT_FOUND ||
+                    nextMenuScene === MenuScene.NOT_FOUND
+                }
+                notFoundRef={notFoundRef}
+                onHomeClick={handleClickHome}
             />
             <HomeScene
                 canvasBlack={blackCanvas}

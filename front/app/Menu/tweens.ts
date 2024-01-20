@@ -24,6 +24,7 @@ export interface RefHashMap {
     endLevelRef: React.RefObject<HTMLDivElement>;
     inviteFriendRef: React.RefObject<HTMLDivElement>;
     teamLobbyRef: React.RefObject<HTMLDivElement>;
+    notFoundRef: React.RefObject<HTMLDivElement>;
 }
 
 /**
@@ -245,6 +246,16 @@ function endLevelOut(endLevelInterface: HTMLDivElement) {
     });
 }
 
+function notFoundOut(notFoundInterface: HTMLDivElement) {
+    return gsap.to(notFoundInterface, {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            notFoundInterface.style.display = 'none';
+        },
+    });
+}
+
 export function allMenuScenesOut(refHashMap: RefHashMap) {
     return [
         homeOut(refHashMap.homeRef.current!),
@@ -253,6 +264,7 @@ export function allMenuScenesOut(refHashMap: RefHashMap) {
         queueOut(refHashMap.queueRef.current!),
         endLevelOut(refHashMap.endLevelRef.current!),
         inviteFriendOut(refHashMap.inviteFriendRef.current!),
+        notFoundOut(refHashMap.notFoundRef.current!),
     ];
 }
 
