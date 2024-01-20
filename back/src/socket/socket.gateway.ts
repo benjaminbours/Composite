@@ -9,6 +9,7 @@ import {
 import type { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import * as uuid from 'uuid';
+import ShortUniqueId from 'short-unique-id';
 // our libs
 import {
   SocketEventType,
@@ -29,6 +30,7 @@ import {
   ProjectionLevelState,
   GameState,
   collectInputsForTick,
+  InviteFriendTokenPayload,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -112,6 +114,25 @@ export class SocketGateway {
       },
     ];
     this.handlePlayerMatch(players);
+  }
+
+  /**
+   * 1. Client request a invite token
+   * 2. Server generate a token and store it and the reference of the emitter in redis
+   * 3. Client receive the token and send it to the friend
+   * 4. Friend client hit the link
+   * 5. Server receive the token and check if it's valid
+   * 6. If it's not, return an error
+   * 7. If it is, use reference of the token emitter to send both players the event "go_to_lobby"
+   */
+
+  @SubscribeMessage(SocketEventType.REQUEST_INVITE_FRIEND_TOKEN)
+  async handleRequestInviteFriendToken(@ConnectedSocket() socket: Socket) {
+    const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
+    await this.temporaryStorage.storeInviteToken(inviteToken, socket.id);
+    this.server.to(socket.id).emit(SocketEventType.INVITE_FRIEND_TOKEN, {
+      token: inviteToken,
+    } as InviteFriendTokenPayload);
   }
 
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
