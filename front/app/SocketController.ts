@@ -9,6 +9,7 @@ import {
     TimeSyncPayload,
     TeammateInfoPayload,
     GamePlayerInputPayload,
+    InviteFriendTokenPayload,
 } from '@benjaminbours/composite-core';
 
 const TIME_SAMPLE_COUNT = 20;
@@ -32,6 +33,7 @@ export class SocketController {
         onGameFinish: () => void,
         onTeamMateDisconnect: () => void,
         onTeamMateInfo: (data: TeammateInfoPayload) => void,
+        onReceiveInviteFriendToken: (data: InviteFriendTokenPayload) => void,
     ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
@@ -60,6 +62,10 @@ export class SocketController {
 
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
         this.socket.on(SocketEventType.TEAMMATE_INFO, onTeamMateInfo);
+        this.socket.on(
+            SocketEventType.INVITE_FRIEND_TOKEN,
+            onReceiveInviteFriendToken,
+        );
         this.socket.on(
             SocketEventType.TEAMMATE_DISCONNECT,
             onTeamMateDisconnect,

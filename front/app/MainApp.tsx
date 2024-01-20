@@ -14,6 +14,7 @@ import classNames from 'classnames';
 // our libs
 import {
     GameState,
+    InviteFriendTokenPayload,
     Levels,
     MatchMakingPayload,
     MovableComponentState,
@@ -81,6 +82,9 @@ function MainApp({ children }: Props) {
             gameState: undefined,
         };
     });
+    const [inviteFriendToken, setInviteFriendToken] = useState<
+        string | undefined
+    >(undefined);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
@@ -88,22 +92,29 @@ function MainApp({ children }: Props) {
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const statsRef = useRef<Stats>();
 
-    const shouldEstablishConnection = useMemo(
-        () =>
-            menuMode === MenuMode.DEFAULT &&
-            menuScene === MenuScene.QUEUE &&
-            state.side !== undefined &&
-            state.selectedLevel !== undefined &&
-            !socketController.current,
-        [state, menuMode, menuScene],
-    );
-    const shouldSendMatchMakingInfo = useMemo(
-        () =>
-            !gameIsPlaying &&
-            menuScene === MenuScene.QUEUE &&
-            state.side !== undefined &&
-            state.selectedLevel !== undefined,
-        [state, menuMode, menuScene, gameIsPlaying],
+    // const shouldEstablishConnection = useMemo(
+    //     () =>
+    //         menuMode === MenuMode.DEFAULT &&
+    //         menuScene === MenuScene.QUEUE &&
+    //         state.side !== undefined &&
+    //         state.selectedLevel !== undefined &&
+    //         !socketController.current,
+    //     [state, menuMode, menuScene],
+    // );
+    // const shouldSendMatchMakingInfo = useMemo(
+    //     () =>
+    //         !gameIsPlaying &&
+    //         menuScene === MenuScene.QUEUE &&
+    //         state.side !== undefined &&
+    //         state.selectedLevel !== undefined,
+    //     [state, menuMode, menuScene, gameIsPlaying],
+    // );
+
+    const handleReceiveInviteFriendToken = useCallback(
+        (data: InviteFriendTokenPayload) => {
+            setInviteFriendToken(data.token);
+        },
+        [],
     );
 
     const handleClickOnSettings = useCallback(() => {
@@ -198,14 +209,53 @@ function MainApp({ children }: Props) {
         };
     }, []);
 
-    useEffect(() => {
-        const sendMatchMakingInfo = () => {
-            socketController.current?.emit([
-                SocketEventType.MATCHMAKING_INFO,
-                state as MatchMakingPayload,
-            ]);
-        };
+    const establishConnection = useCallback(async () => {
+        return import('./SocketController')
+            .then((mod) => mod.SocketController)
+            .then((SocketController) => {
+                socketController.current = new SocketController(
+                    handleGameStart,
+                    handleGameFinished,
+                    handleTeamMateDisconnect,
+                    handleTeamMateInfo,
+                    handleReceiveInviteFriendToken,
+                );
+                return;
+            });
+    }, [
+        handleGameFinished,
+        handleGameStart,
+        handleTeamMateDisconnect,
+        handleTeamMateInfo,
+        handleReceiveInviteFriendToken,
+    ]);
 
+    const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
+        socketController.current?.emit([
+            SocketEventType.MATCHMAKING_INFO,
+            payload,
+        ]);
+    }, []);
+
+    const onEnterRandomQueue = useCallback(
+        (payload: MatchMakingPayload) => {
+            establishConnection().then(() => sendMatchMakingInfo(payload));
+        },
+        [establishConnection, sendMatchMakingInfo],
+    );
+
+    const requestInviteFriendToken = useCallback(() => {
+        socketController.current?.emit([
+            SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
+        ]);
+    }, []);
+
+    const onEnterInviteFriend = useCallback(() => {
+        establishConnection().then(requestInviteFriendToken);
+    }, [establishConnection, requestInviteFriendToken]);
+
+    // event dedicated to socket connection
+    useEffect(() => {
         if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
             import('./SocketController')
                 .then((mod) => mod.SocketController)
@@ -215,6 +265,7 @@ function MainApp({ children }: Props) {
                         handleGameFinished,
                         handleTeamMateDisconnect,
                         handleTeamMateInfo,
+                        handleReceiveInviteFriendToken,
                     );
                     return;
                 })
@@ -256,25 +307,26 @@ function MainApp({ children }: Props) {
                     handleGameStart(initialGameState);
                 });
         } else {
-            if (shouldEstablishConnection) {
-                import('./SocketController')
-                    .then((mod) => mod.SocketController)
-                    .then((SocketController) => {
-                        socketController.current = new SocketController(
-                            handleGameStart,
-                            handleGameFinished,
-                            handleTeamMateDisconnect,
-                            handleTeamMateInfo,
-                        );
-                        return;
-                    })
-                    .then(sendMatchMakingInfo);
-            } else if (shouldSendMatchMakingInfo) {
-                console.log('HERE send match making info');
-                sendMatchMakingInfo();
-            }
+            // if (shouldEstablishConnection) {
+            //     import('./SocketController')
+            //         .then((mod) => mod.SocketController)
+            //         .then((SocketController) => {
+            //             socketController.current = new SocketController(
+            //                 handleGameStart,
+            //                 handleGameFinished,
+            //                 handleTeamMateDisconnect,
+            //                 handleTeamMateInfo,
+            //             );
+            //             return;
+            //         })
+            //         .then(sendMatchMakingInfo);
+            // } else
+            // if (shouldSendMatchMakingInfo) {
+            //     console.log('HERE send match making info');
+            //     sendMatchMakingInfo();
+            // }
         }
-    }, [gameIsPlaying, shouldEstablishConnection, shouldSendMatchMakingInfo]);
+    }, []);
 
     const bottomRightInfo = useMemo(() => {
         const cssClass = classNames({
@@ -357,6 +409,9 @@ function MainApp({ children }: Props) {
                         teamMateDisconnected={teamMateDisconnected}
                         setTeamMateDisconnected={setTeamMateDisconnected}
                         stats={statsRef}
+                        enterRandomQueue={onEnterRandomQueue}
+                        enterInviteFriend={onEnterInviteFriend}
+                        inviteFriendToken={inviteFriendToken}
                     />
                 )}
                 {state.gameState && gameIsPlaying && (

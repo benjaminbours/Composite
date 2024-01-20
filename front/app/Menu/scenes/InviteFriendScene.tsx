@@ -9,6 +9,7 @@ interface Props {
     actions: React.ReactNode;
     isMount: boolean;
     handleClickOnRandom: () => void;
+    inviteFriendToken: string | undefined;
 }
 
 export const InviteFriendScene: React.FC<Props> = ({
@@ -16,6 +17,7 @@ export const InviteFriendScene: React.FC<Props> = ({
     actions,
     isMount,
     handleClickOnRandom,
+    inviteFriendToken,
 }) => {
     const cssClass = classNames({
         'content-container': true,
@@ -30,7 +32,9 @@ export const InviteFriendScene: React.FC<Props> = ({
             <p>Send this link to your friend to automatically match with him</p>
             <CopyToClipBoardButton
                 color="white"
-                text={`${process.env.NEXT_PUBLIC_URL}/invite/uuid`}
+                text={`${process.env.NEXT_PUBLIC_URL}/invite?token=${
+                    inviteFriendToken || 'incoming'
+                }`}
             />
             <p>Waiting for your friend to hit the link...</p>
             <div className="loader" />
