@@ -246,6 +246,38 @@ function endLevelOut(endLevelInterface: HTMLDivElement) {
     });
 }
 
+function teamLobbyIn(teamLobbyInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        teamLobbyInterface,
+        {
+            opacity: 0,
+        },
+        {
+            duration: 0.5,
+            opacity: 1,
+            onComplete: () => {
+                teamLobbyInterface.style.display = 'flex';
+            },
+        },
+    );
+}
+
+function teamLobbyOut(teamLobbyInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        teamLobbyInterface,
+        {
+            opacity: 1,
+        },
+        {
+            duration: 0.5,
+            opacity: 0,
+            onComplete: () => {
+                teamLobbyInterface.style.display = 'none';
+            },
+        },
+    );
+}
+
 function notFoundOut(notFoundInterface: HTMLDivElement) {
     return gsap.to(notFoundInterface, {
         duration: 0.5,
@@ -265,6 +297,7 @@ export function allMenuScenesOut(refHashMap: RefHashMap) {
         endLevelOut(refHashMap.endLevelRef.current!),
         inviteFriendOut(refHashMap.inviteFriendRef.current!),
         notFoundOut(refHashMap.notFoundRef.current!),
+        teamLobbyOut(refHashMap.teamLobbyRef.current!),
     ];
 }
 
@@ -283,16 +316,25 @@ export function goToStep(
     const inAnimation = () => {
         switch (tweenOptions.step) {
             case MenuScene.HOME:
+                refHashMap.homeRef.current!.style.display = 'none';
                 return homeIn(refHashMap.homeRef.current!);
             case MenuScene.LEVEL:
+                refHashMap.levelRef.current!.style.display = 'none';
                 return levelIn(refHashMap.levelRef.current!);
             case MenuScene.FACTION:
+                refHashMap.sideRef.current!.style.display = 'none';
                 return factionIn(refHashMap.sideRef.current!);
             case MenuScene.QUEUE:
+                refHashMap.queueRef.current!.style.display = 'none';
                 return queueIn(refHashMap.queueRef.current!);
             case MenuScene.INVITE_FRIEND:
+                refHashMap.inviteFriendRef.current!.style.display = 'none';
                 return inviteFriendIn(refHashMap.inviteFriendRef.current!);
-            default:
+            case MenuScene.TEAM_LOBBY:
+                refHashMap.teamLobbyRef.current!.style.display = 'none';
+                return teamLobbyIn(refHashMap.teamLobbyRef.current!);
+                default:
+                refHashMap.homeRef.current!.style.display = 'none';
                 return homeIn(refHashMap.homeRef.current!);
         }
     };

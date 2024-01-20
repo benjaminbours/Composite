@@ -116,16 +116,6 @@ export class SocketGateway {
     this.handlePlayerMatch(players);
   }
 
-  /**
-   * 1. Client request a invite token
-   * 2. Server generate a token and store it and the reference of the emitter in redis
-   * 3. Client receive the token and send it to the friend
-   * 4. Friend client hit the link
-   * 5. Server receive the token and check if it's valid
-   * 6. If it's not, return an error
-   * 7. If it is, use reference of the token emitter to send both players the event "go_to_lobby"
-   */
-
   @SubscribeMessage(SocketEventType.REQUEST_INVITE_FRIEND_TOKEN)
   async handleRequestInviteFriendToken(@ConnectedSocket() socket: Socket) {
     const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
@@ -133,6 +123,21 @@ export class SocketGateway {
     this.server.to(socket.id).emit(SocketEventType.INVITE_FRIEND_TOKEN, {
       token: inviteToken,
     } as InviteFriendTokenPayload);
+  }
+
+  @SubscribeMessage(SocketEventType.FRIEND_JOIN_LOBBY)
+  async handleFriendJoinLobby(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() inviteToken: string,
+  ) {
+    // TODO: When emitter disconnect, clear token
+    const socketIdEmitter =
+      await this.temporaryStorage.getInviteEmitter(inviteToken);
+    const teamRoomName = uuid.v4();
+
+    this.addSocketToRoom(socket.id, teamRoomName);
+    this.addSocketToRoom(socketIdEmitter, teamRoomName);
+    this.emit(socketIdEmitter, [SocketEventType.JOIN_LOBBY]);
   }
 
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
