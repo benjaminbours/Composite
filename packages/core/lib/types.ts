@@ -22,8 +22,12 @@ export enum SocketEventType {
     CONNECTION = 'connection',
     // receive automatically by the server when losing connection with a client
     DISCONNECT = 'disconnect',
-    // send only by the client after connect
+    // send only by the client after connect in random queue
     MATCHMAKING_INFO = 'MATCHMAKING_INFO',
+    // send only by the client after arriving invite friend scene
+    REQUEST_INVITE_FRIEND_TOKEN = 'REQUEST_INVITE_FRIEND_TOKEN',
+    // send only by the server after receiving request from client
+    INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
     // send by the server when 2 players connects and a game start
     GAME_START = 'GAME_START',
     // send by the 2 clients to the server and to each others during the game is on going
@@ -52,6 +56,10 @@ export interface Inputs {
 export interface MatchMakingPayload {
     side: Side;
     selectedLevel: Levels;
+}
+
+export interface InviteFriendTokenPayload {
+    token: string;
 }
 
 export interface TeammateInfoPayload {
@@ -97,6 +105,15 @@ export type MatchMakingEvent = [
     payload: MatchMakingPayload,
 ];
 
+export type RequestInviteFriendTokenEvent = [
+    type: SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
+];
+
+export type InviteFriendTokenEvent = [
+    type: SocketEventType.INVITE_FRIEND_TOKEN,
+    payload: InviteFriendTokenPayload,
+];
+
 export type TeammateInfoEvent = [
     type: SocketEventType.TEAMMATE_INFO,
     payload: TeammateInfoPayload,
@@ -138,7 +155,9 @@ export type SocketEvent =
     | GamePlayerInputEvent
     | GameActivateElementEvent
     | GameDeactivateElementEvent
-    | PingEvent;
+    | PingEvent
+    | RequestInviteFriendTokenEvent
+    | InviteFriendTokenEvent;
 
 export class QueueInfo {
     constructor(public all = 0, public light = 0, public shadow = 0) {}

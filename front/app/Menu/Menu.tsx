@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import {
     AllQueueInfo,
     Levels,
+    MatchMakingPayload,
     Side,
     TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
@@ -53,6 +54,9 @@ interface Props {
     teamMateDisconnected: boolean;
     setTeamMateDisconnected: React.Dispatch<React.SetStateAction<boolean>>;
     stats: React.MutableRefObject<Stats | undefined>;
+    enterRandomQueue: (payload: MatchMakingPayload) => void;
+    enterInviteFriend: () => void;
+    inviteFriendToken: string | undefined;
 }
 
 export function Menu({
@@ -68,6 +72,9 @@ export function Menu({
     stats,
     setNextMenuScene,
     nextMenuScene,
+    enterRandomQueue,
+    enterInviteFriend,
+    inviteFriendToken,
 }: Props) {
     const router = useRouter();
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
@@ -208,6 +215,7 @@ export function Menu({
         }
         onTransition.current = true;
         setNextMenuScene(MenuScene.INVITE_FRIEND);
+        enterInviteFriend();
         goToStep(
             refHashMap,
             { step: MenuScene.INVITE_FRIEND, side: undefined, isMobileDevice },
@@ -217,7 +225,13 @@ export function Menu({
                 setNextMenuScene(undefined);
             },
         );
-    }, [isMobileDevice, refHashMap, setMenuScene, setNextMenuScene]);
+    }, [
+        isMobileDevice,
+        refHashMap,
+        setMenuScene,
+        setNextMenuScene,
+        enterInviteFriend,
+    ]);
 
     const handleClickOnQuitTeam = useCallback(() => {
         if (onTransition.current) {
@@ -416,15 +430,15 @@ export function Menu({
 
     const handleClickOnFaction = useCallback(
         (side: Side) => {
-            if (onTransition.current) {
+            if (onTransition.current || mainState.selectedLevel === undefined) {
                 return;
             }
             if (teamMateDisconnected) {
                 setTeamMateDisconnected(false);
             }
             setMainState((prev) => ({ ...prev, side }));
-            setMenuScene(MenuScene.QUEUE);
             onTransition.current = true;
+            setNextMenuScene(MenuScene.QUEUE);
             goToStep(
                 refHashMap,
                 {
@@ -433,17 +447,26 @@ export function Menu({
                     isMobileDevice,
                 },
                 () => {
+                    setMenuScene(MenuScene.QUEUE);
+                    setNextMenuScene(undefined);
+                    enterRandomQueue({
+                        selectedLevel: mainState.selectedLevel!,
+                        side,
+                    });
                     onTransition.current = false;
                 },
             );
         },
         [
+            mainState.selectedLevel,
             teamMateDisconnected,
             setTeamMateDisconnected,
             isMobileDevice,
             refHashMap,
             setMainState,
             setMenuScene,
+            setNextMenuScene,
+            enterRandomQueue,
         ],
     );
 
@@ -527,6 +550,7 @@ export function Menu({
                 }
             />
             <InviteFriendScene
+                inviteFriendToken={inviteFriendToken}
                 isMount={
                     menuScene === MenuScene.INVITE_FRIEND ||
                     nextMenuScene === MenuScene.INVITE_FRIEND
