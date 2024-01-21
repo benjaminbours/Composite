@@ -58,7 +58,12 @@ export class TemporaryStorageService {
     transaction?: any,
   ) {
     const client = transaction ? transaction : this.redisClient;
-    return client.HSET(socketId, Object.entries(data).flat());
+    return client.HSET(
+      REDIS_KEYS.PLAYER(socketId),
+      Object.entries(data)
+        .filter(([, value]) => value !== undefined)
+        .flat(),
+    );
   }
 
   async getPlayer(socketId: string): Promise<PlayerState | undefined> {
@@ -216,11 +221,10 @@ export class TemporaryStorageService {
         this.removeFromQueue(socketId, indexToClear, transaction);
         this.updateQueueInfo('subtract', player, transaction);
       }
-      transaction.HSET(
-        REDIS_KEYS.PLAYER(socketId),
-        Object.entries(RedisPlayerState.parsePlayerState(player))
-          .filter(([, value]) => value !== undefined)
-          .flat(),
+      this.setPlayer(
+        socketId,
+        RedisPlayerState.parsePlayerState(player),
+        transaction,
       );
     });
     // store initial game data
