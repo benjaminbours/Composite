@@ -47,10 +47,8 @@ export const InvitePage: React.FC = ({}) => {
         }
 
         if (isTokenValid && !isChecking) {
-            router.push('/lobby');
-            context.setMenuScene(MenuScene.TEAM_LOBBY);
             setEnteredLobby(true);
-            context.onEnterTeamLobby(token);
+            context.enterTeamLobby(token);
         }
     }, [context, enteredLobby, router, isChecking, isTokenValid, token]);
 

@@ -21,8 +21,8 @@ export const defaultWaveOptions: IWaveOptions = {
 export default class Curve {
     public static vTotalPoints = 15;
     public static hTotalPoints = 8;
-    public static vGap = window.innerHeight / (Curve.vTotalPoints - 1);
-    public static hGap = window.innerWidth / (Curve.hTotalPoints - 1);
+    public static vGap = 0;
+    public static hGap = 0;
 
     public static waveOptions = defaultWaveOptions;
 

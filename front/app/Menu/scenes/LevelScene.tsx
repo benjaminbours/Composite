@@ -8,7 +8,7 @@ import LevelItem from './LevelItem';
 
 interface Props {
     levelRef: React.RefObject<HTMLDivElement>;
-    handleClickOnLevel: (levelId: Levels) => void;
+    onClickOnLevel: (levelId: Levels) => void;
     allQueueInfo?: AllQueueInfo;
     actions: React.ReactNode;
     levels: {
@@ -22,7 +22,7 @@ interface Props {
 
 export const LevelScene: React.FC<Props> = ({
     levelRef,
-    handleClickOnLevel,
+    onClickOnLevel,
     allQueueInfo,
     actions,
     levels,
@@ -42,7 +42,7 @@ export const LevelScene: React.FC<Props> = ({
                 <LevelItem
                     {...item}
                     key={item.name}
-                    onClick={handleClickOnLevel}
+                    onClick={onClickOnLevel}
                     queueInfo={allQueueInfo?.levels[item.id]}
                 />
             ))}
