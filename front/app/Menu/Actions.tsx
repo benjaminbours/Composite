@@ -11,14 +11,15 @@ interface Props {
     teamMate: {
         info: TeammateInfoPayload | undefined;
         levelName: string | undefined;
-        onJoin: () => void;
     };
+    onClickJoinTeamMate: () => void;
 }
 
 export const Actions: React.FC<Props> = ({
     color,
     onBack,
     onQuitTeam,
+    onClickJoinTeamMate,
     teamMate,
 }) => {
     return (
@@ -30,7 +31,7 @@ export const Actions: React.FC<Props> = ({
             {teamMate.info && (
                 <ButtonJoinTeam
                     color={color}
-                    onClick={teamMate.onJoin}
+                    onClick={onClickJoinTeamMate}
                     teamChoice={{
                         levelName: teamMate.levelName || 'undefined',
                         side:

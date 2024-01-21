@@ -7,31 +7,22 @@ import { MenuScene } from './types';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Curve, { defaultWaveOptions } from './canvas/Curve';
+import { RefHashMap } from '../useMenuTransition';
 
 export interface TweenOptions {
     step: MenuScene;
-    isMobileDevice: boolean;
     side?: Side;
-}
-
-export interface RefHashMap {
-    canvasBlack: React.MutableRefObject<CanvasBlack | undefined>;
-    canvasWhite: React.MutableRefObject<CanvasWhite | undefined>;
-    homeRef: React.RefObject<HTMLDivElement>;
-    levelRef: React.RefObject<HTMLDivElement>;
-    sideRef: React.RefObject<HTMLDivElement>;
-    queueRef: React.RefObject<HTMLDivElement>;
-    endLevelRef: React.RefObject<HTMLDivElement>;
-    inviteFriendRef: React.RefObject<HTMLDivElement>;
-    teamLobbyRef: React.RefObject<HTMLDivElement>;
-    notFoundRef: React.RefObject<HTMLDivElement>;
 }
 
 /**
  * Curve
  */
-export function curveToStep(options: TweenOptions, canvasBlack: CanvasBlack) {
-    const { step, isMobileDevice, side } = options;
+export function curveToStep(
+    options: TweenOptions,
+    canvasBlack: CanvasBlack,
+    isMobileDevice: boolean,
+) {
+    const { step, side } = options;
     return gsap.to(canvasBlack.curve, {
         duration: 0.5,
         origin: canvasBlack.curve.resizeOptions[step](
@@ -51,8 +42,12 @@ export function curveToStep(options: TweenOptions, canvasBlack: CanvasBlack) {
 /**
  * Light
  */
-export function lightToStep(options: TweenOptions, canvasBlack: CanvasBlack) {
-    const { step, isMobileDevice, side } = options;
+export function lightToStep(
+    options: TweenOptions,
+    canvasBlack: CanvasBlack,
+    isMobileDevice: boolean,
+) {
+    const { step, side } = options;
     const coordinate = canvasBlack.light.resizeOptions[step](
         canvasBlack.ctx.canvas.width,
         canvasBlack.ctx.canvas.height,
@@ -71,8 +66,12 @@ export function lightToStep(options: TweenOptions, canvasBlack: CanvasBlack) {
 /**
  * Shadow
  */
-export function shadowToStep(options: TweenOptions, canvasWhite: CanvasWhite) {
-    const { step, isMobileDevice, side } = options;
+export function shadowToStep(
+    options: TweenOptions,
+    canvasWhite: CanvasWhite,
+    isMobileDevice: boolean,
+) {
+    const { step, side } = options;
     const coordinate = canvasWhite.shadow.resizeOptions[step](
         canvasWhite.ctx.canvas.width,
         canvasWhite.ctx.canvas.height,
@@ -246,7 +245,7 @@ function endLevelOut(endLevelInterface: HTMLDivElement) {
     });
 }
 
-function teamLobbyIn(teamLobbyInterface: HTMLDivElement) {
+export function teamLobbyIn(teamLobbyInterface: HTMLDivElement) {
     return gsap.fromTo(
         teamLobbyInterface,
         {
@@ -299,62 +298,4 @@ export function allMenuScenesOut(refHashMap: RefHashMap) {
         notFoundOut(refHashMap.notFoundRef.current!),
         teamLobbyOut(refHashMap.teamLobbyRef.current!),
     ];
-}
-
-export function goToStep(
-    refHashMap: RefHashMap,
-    tweenOptions: TweenOptions,
-    onComplete: () => void,
-) {
-    const allRefsExist = Object.values(refHashMap).every(
-        (ref) => ref && ref.current,
-    );
-
-    if (!allRefsExist) {
-        return;
-    }
-    const inAnimation = () => {
-        switch (tweenOptions.step) {
-            case MenuScene.HOME:
-                refHashMap.homeRef.current!.style.display = 'none';
-                return homeIn(refHashMap.homeRef.current!);
-            case MenuScene.LEVEL:
-                refHashMap.levelRef.current!.style.display = 'none';
-                return levelIn(refHashMap.levelRef.current!);
-            case MenuScene.FACTION:
-                refHashMap.sideRef.current!.style.display = 'none';
-                return factionIn(refHashMap.sideRef.current!);
-            case MenuScene.QUEUE:
-                refHashMap.queueRef.current!.style.display = 'none';
-                return queueIn(refHashMap.queueRef.current!);
-            case MenuScene.INVITE_FRIEND:
-                refHashMap.inviteFriendRef.current!.style.display = 'none';
-                return inviteFriendIn(refHashMap.inviteFriendRef.current!);
-            case MenuScene.TEAM_LOBBY:
-                refHashMap.teamLobbyRef.current!.style.display = 'none';
-                return teamLobbyIn(refHashMap.teamLobbyRef.current!);
-                default:
-                refHashMap.homeRef.current!.style.display = 'none';
-                return homeIn(refHashMap.homeRef.current!);
-        }
-    };
-    Curve.setWaveOptions({
-        viscosity: 40,
-        damping: 0.2,
-    });
-    gsap.timeline({
-        onComplete: () => {
-            onComplete();
-        },
-    })
-        .add(curveToStep(tweenOptions, refHashMap.canvasBlack.current!))
-        .add(
-            [
-                lightToStep(tweenOptions, refHashMap.canvasBlack.current!),
-                shadowToStep(tweenOptions, refHashMap.canvasWhite.current!),
-                ...allMenuScenesOut(refHashMap),
-            ],
-            '-=0.5',
-        )
-        .add(inAnimation());
 }
