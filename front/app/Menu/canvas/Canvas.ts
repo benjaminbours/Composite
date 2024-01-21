@@ -1,5 +1,5 @@
 // local
-import { ResizeOptions } from '../types';
+import { ResizeOptions } from '../../types';
 
 export default class Canvas {
     public ctx: CanvasRenderingContext2D;

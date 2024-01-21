@@ -1,9 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { gsap } from 'gsap';
-import CanvasBlack from './Menu/canvas/CanvasBlack';
-import { MenuScene } from './Menu/types';
-import { Side } from '@benjaminbours/composite-core';
+import React from 'react';
 
 interface Props {}
 

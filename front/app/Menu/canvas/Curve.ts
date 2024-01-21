@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { IWaveOptions, ResizeOptions } from '../types';
+import { IWaveOptions, ResizeOptions } from '../../types';
 import Point from './Point';
 
 export const defaultWaveOptions: IWaveOptions = {

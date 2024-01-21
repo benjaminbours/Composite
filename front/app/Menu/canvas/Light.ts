@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { ResizeOptions } from '../types';
+import { ResizeOptions } from '../../types';
 
 const light = new Image();
 light.src = '/light.png';

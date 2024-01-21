@@ -1,7 +1,7 @@
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { ResizeOptions } from '../types';
+import { ResizeOptions } from '../../types';
 
 const shadow = new Image();
 shadow.src = '/shadow.png';

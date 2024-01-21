@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, notFound } from 'next/navigation';
 import { AppContext } from '../MainApp';
-import { MenuScene } from '../Menu/types';
+import { MenuScene } from '../types';
 
 /**
  * This page is only here to "please" next router, it's in fact just a redirect.

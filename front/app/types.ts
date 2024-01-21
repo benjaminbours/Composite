@@ -41,3 +41,8 @@ export interface IWaveOptions {
     amplitudeTransition: number;
     speed: number;
 }
+
+export enum Route {
+    LOBBY = '/lobby',
+    INVITE = '/invite',
+}
