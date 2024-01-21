@@ -8,21 +8,21 @@ import {
     SocketEventType,
     TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
-import { useCallback, useRef, useState } from 'react';
-import { MenuMode, MenuScene } from './types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { MenuMode, MenuScene, Route } from './types';
 import { MainState } from './MainApp';
 import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function useMainController(
     menuScene: MenuScene,
     setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>,
-    setTeamMateDisconnected: React.Dispatch<React.SetStateAction<boolean>>,
     goToStep: (tweenOptions: TweenOptions, onComplete?: () => void) => void,
     onTransition: React.MutableRefObject<boolean>,
 ) {
     const router = useRouter();
+    const path = usePathname();
     const socketController = useRef<SocketController>();
 
     const [state, setState] = useState<MainState>(() => {
@@ -39,12 +39,20 @@ export function useMainController(
             gameState: undefined,
         };
     });
+    const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [teamMateInfo, setTeamMateInfo] = useState<TeammateInfoPayload>();
     const [inviteFriendToken, setInviteFriendToken] = useState<
         string | undefined
     >(undefined);
+
+    // redirect
+    useEffect(() => {
+        if (path === Route.LOBBY && !inviteFriendToken) {
+            router.push(Route.HOME);
+        }
+    }, [path, router, inviteFriendToken]);
 
     const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
         socketController.current?.emit([
@@ -70,9 +78,10 @@ export function useMainController(
             SocketEventType.MATCHMAKING_INFO,
             matchMakingInfo,
         ]);
-    }, [teamMateInfo, setTeamMateInfo, setState]);
+    }, [teamMateInfo]);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {
+        router.push(Route.HOME);
         if (gameIsPlaying) {
             setGameIsPlaying(false);
             setMenuScene(MenuScene.HOME);
@@ -89,13 +98,7 @@ export function useMainController(
                 },
             );
         }
-    }, [
-        gameIsPlaying,
-        goToStep,
-        setGameIsPlaying,
-        setMenuScene,
-        setTeamMateDisconnected,
-    ]);
+    }, [router, gameIsPlaying, goToStep, setMenuScene]);
 
     const handleReceiveInviteFriendToken = useCallback(
         (data: InviteFriendTokenPayload) => {
@@ -106,15 +109,16 @@ export function useMainController(
 
     const handleJoinLobby = useCallback(() => {
         console.log('joined lobby');
+        router.push(Route.LOBBY);
         setMenuMode(MenuMode.IN_TEAM);
         goToStep({ step: MenuScene.TEAM_LOBBY, side: undefined });
-    }, [setMenuMode, goToStep]);
+    }, [goToStep, router]);
 
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
         socketController.current = undefined;
         setMenuMode(MenuMode.DEFAULT);
-    }, [setMenuMode]);
+    }, []);
 
     const handleTeamMateDisconnect = useCallback(() => {
         setTeamMateDisconnected(true);
@@ -124,21 +128,18 @@ export function useMainController(
             selectedLevel: undefined,
         }));
         handleDestroyConnection();
-    }, [handleDestroyConnection, setTeamMateDisconnected, setState]);
+    }, [handleDestroyConnection]);
 
-    const handleGameStart = useCallback(
-        (initialGameState: GameState) => {
-            setState((prev) => ({ ...prev, gameState: initialGameState }));
-            setGameIsPlaying(true);
-            setMenuMode(MenuMode.IN_TEAM);
-        },
-        [setState, setGameIsPlaying, setMenuMode],
-    );
+    const handleGameStart = useCallback((initialGameState: GameState) => {
+        setState((prev) => ({ ...prev, gameState: initialGameState }));
+        setGameIsPlaying(true);
+        setMenuMode(MenuMode.IN_TEAM);
+    }, []);
 
     const handleGameFinished = useCallback(() => {
         setGameIsPlaying(false);
         setMenuScene(MenuScene.END_LEVEL);
-    }, [setGameIsPlaying, setMenuScene]);
+    }, [setMenuScene]);
 
     const handleTeamMateInfo = useCallback((data: TeammateInfoPayload) => {
         console.log('receive team mate info');
@@ -160,7 +161,6 @@ export function useMainController(
                 return;
             });
     }, [
-        socketController,
         handleGameFinished,
         handleGameStart,
         handleTeamMateDisconnect,
@@ -174,7 +174,8 @@ export function useMainController(
             if (socketController.current) {
                 return;
             }
-            router.push('/lobby');
+            setInviteFriendToken(inviteFriendToken);
+            router.push(Route.LOBBY);
             setMenuScene(MenuScene.TEAM_LOBBY);
             setMenuMode(MenuMode.IN_TEAM);
             establishConnection().then(() => {
@@ -184,7 +185,7 @@ export function useMainController(
                 ]);
             });
         },
-        [establishConnection, setMenuMode, setMenuScene, router],
+        [establishConnection, setMenuScene, router],
     );
 
     const handleClickPlayWithFriend = useCallback(() => {
@@ -242,33 +243,27 @@ export function useMainController(
         [goToStep, onTransition],
     );
 
-    const handleSelectLevelOnLobby = useCallback(
-        (levelId: Levels) => {
-            setState((prev) => ({
-                ...prev,
-                selectedLevel: levelId,
-            }));
-            socketController.current?.emit([
-                SocketEventTeamLobby.SELECT_LEVEL,
-                levelId,
-            ]);
-        },
-        [setState, socketController],
-    );
+    const handleSelectLevelOnLobby = useCallback((levelId: Levels) => {
+        setState((prev) => ({
+            ...prev,
+            selectedLevel: levelId,
+        }));
+        socketController.current?.emit([
+            SocketEventTeamLobby.SELECT_LEVEL,
+            levelId,
+        ]);
+    }, []);
 
-    const handleSelectSideOnLobby = useCallback(
-        (side: Side) => {
-            setState((prev) => ({
-                ...prev,
-                side,
-            }));
-            socketController.current?.emit([
-                SocketEventTeamLobby.SELECT_SIDE,
-                side,
-            ]);
-        },
-        [setState, socketController],
-    );
+    const handleSelectSideOnLobby = useCallback((side: Side) => {
+        setState((prev) => ({
+            ...prev,
+            side,
+        }));
+        socketController.current?.emit([
+            SocketEventTeamLobby.SELECT_SIDE,
+            side,
+        ]);
+    }, []);
 
     const handleClickOnBack = useCallback(() => {
         if (onTransition.current) {
@@ -324,17 +319,18 @@ export function useMainController(
         if (onTransition.current) {
             return;
         }
+        router.push(Route.HOME);
         goToStep({ step: MenuScene.HOME, side: undefined }, () => {
             handleDestroyConnection();
         });
-    }, [goToStep, handleDestroyConnection, onTransition]);
+    }, [goToStep, handleDestroyConnection, onTransition, router]);
 
     // use only on not found page so far
     const handleClickHome = useCallback(() => {
         if (onTransition.current) {
             return;
         }
-        router.push('/');
+        router.push(Route.HOME);
         goToStep({
             step: MenuScene.HOME,
             side: undefined,
@@ -355,6 +351,7 @@ export function useMainController(
         teamMateInfo,
         gameIsPlaying,
         menuMode,
+        teamMateDisconnected,
         handleGameStart,
         establishConnection,
         sendMatchMakingInfo,

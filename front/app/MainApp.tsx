@@ -59,7 +59,6 @@ function MainApp({ children }: Props) {
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const statsRef = useRef<Stats>();
 
@@ -79,6 +78,7 @@ function MainApp({ children }: Props) {
         teamMateInfo,
         gameIsPlaying,
         menuMode,
+        teamMateDisconnected,
         handleGameStart,
         establishConnection,
         sendMatchMakingInfo,
@@ -94,13 +94,7 @@ function MainApp({ children }: Props) {
         handleClickOnBack,
         handleClickOnQuitTeam,
         handleClickHome,
-    } = useMainController(
-        menuScene,
-        setMenuScene,
-        setTeamMateDisconnected,
-        goToStep,
-        onTransition,
-    );
+    } = useMainController(menuScene, setMenuScene, goToStep, onTransition);
 
     const handleClickOnSettings = useCallback(() => {
         setIsSettingsOpen(true);
@@ -206,7 +200,10 @@ function MainApp({ children }: Props) {
 
     return (
         <AppContext.Provider
-            value={{ setMenuScene, enterTeamLobby: handleEnterTeamLobby }}
+            value={{
+                setMenuScene,
+                enterTeamLobby: handleEnterTeamLobby,
+            }}
         >
             <TeamMateDisconnectNotification
                 teamMateDisconnected={teamMateDisconnected}

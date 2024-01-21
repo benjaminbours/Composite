@@ -43,6 +43,7 @@ export interface IWaveOptions {
 }
 
 export enum Route {
+    HOME = '/',
     LOBBY = '/lobby',
     INVITE = '/invite',
 }
