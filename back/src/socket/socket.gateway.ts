@@ -34,7 +34,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { PlayerState, PlayerStatus } from 'src/PlayerState';
+import { PlayerState, PlayerStatus, RedisPlayerState } from 'src/PlayerState';
 import { GameStatus, Level } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
@@ -135,6 +135,22 @@ export class SocketGateway {
       await this.temporaryStorage.getInviteEmitter(inviteToken);
     const teamRoomName = uuid.v4();
 
+    const players = [socket.id, socketIdEmitter];
+    for (let i = 0; i < players.length; i++) {
+      const player = new PlayerState(
+        PlayerStatus.IS_WAITING_TEAMMATE,
+        undefined,
+        undefined,
+        undefined,
+        teamRoomName,
+      );
+      // TODO: Should be a transaction
+      this.temporaryStorage.setPlayer(
+        players[i],
+        RedisPlayerState.parsePlayerState(player),
+      );
+    }
+
     this.addSocketToRoom(socket.id, teamRoomName);
     this.addSocketToRoom(socketIdEmitter, teamRoomName);
     this.emit(socketIdEmitter, [SocketEventType.JOIN_LOBBY]);
@@ -205,15 +221,17 @@ export class SocketGateway {
       return;
     }
 
+    // room name is equivalent to team name
+    // if the player disconnected were in a room, notify the room
+    if (player.roomName) {
+      this.server
+        .to(String(player.roomName))
+        .emit(SocketEventType.TEAMMATE_DISCONNECT);
+    }
+
+    // if the player were playing, stop the game loop on the server
     if (player.gameId) {
-      try {
-        clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
-        this.server
-          .to(String(player.roomName))
-          .emit(SocketEventType.TEAMMATE_DISCONNECT);
-      } catch (error) {
-        Logger.error(error);
-      }
+      clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
     }
 
     this.temporaryStorage.removePlayer(socket.id, player);

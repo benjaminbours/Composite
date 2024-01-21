@@ -39,8 +39,8 @@ export class PlayerState {
    */
   constructor(
     public status: PlayerStatus,
-    public side: Side,
-    public selectedLevel: Levels, // public gameId?: number,
+    public side?: Side,
+    public selectedLevel?: Levels, // public gameId?: number,
     public gameId?: number,
     public roomName?: string,
   ) {}
