@@ -16,7 +16,7 @@ import {
     teamLobbyIn,
 } from './Menu/tweens';
 import Curve from './Menu/canvas/Curve';
-import { MenuScene } from './Menu/types';
+import { MenuScene } from './types';
 
 export interface RefHashMap {
     canvasBlack: React.MutableRefObject<CanvasBlack | undefined>;

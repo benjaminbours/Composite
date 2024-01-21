@@ -18,7 +18,7 @@ import {
     Side,
 } from '@benjaminbours/composite-core';
 // local
-import { MenuScene } from './Menu/types';
+import { MenuScene } from './types';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
 import { BottomRightInfo } from './BottomRightInfo';

@@ -9,7 +9,7 @@ import {
     TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
 import { useCallback, useRef, useState } from 'react';
-import { MenuMode, MenuScene } from './Menu/types';
+import { MenuMode, MenuScene } from './types';
 import { MainState } from './MainApp';
 import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';

@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // project
-import { MenuScene } from './types';
+import { MenuScene } from '../types';
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Curve, { defaultWaveOptions } from './canvas/Curve';

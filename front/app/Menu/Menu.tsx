@@ -18,7 +18,7 @@ import {
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
-import { MenuMode, MenuScene } from './types';
+import { MenuMode, MenuScene } from '../types';
 import { MainState } from '../MainApp';
 import {
     QueueScene,
