@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as uuid from 'uuid';
 import ShortUniqueId from 'short-unique-id';
 // our libs
@@ -37,6 +37,8 @@ import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus, RedisPlayerState } from 'src/PlayerState';
 import { GameStatus, Level } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { UtilsService } from './utils.service';
+import { SocketService } from './socket.service';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -51,6 +53,7 @@ import { PrismaService } from 'src/prisma.service';
   //   origin: [ENVIRONMENT.CLIENT_URL],
   // },
 })
+@Injectable()
 export class SocketGateway {
   private gameLoopsRegistry: Record<string, NodeJS.Timeout> = {};
   @WebSocketServer() server: Server;
@@ -58,7 +61,13 @@ export class SocketGateway {
   constructor(
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
+    private socketService: SocketService,
+    private utils: UtilsService,
   ) {}
+
+  afterInit(server: Server) {
+    this.socketService.socket = server;
+  }
 
   emit = (roomName: string, event: SocketEvent) => {
     this.server.to(roomName).emit(event[0], event[1]);
@@ -286,31 +295,12 @@ export class SocketGateway {
       status: String(PlayerStatus.IS_WAITING_TEAMMATE),
     });
 
-    // find team mate socket id
-    const teamMateSocketId = await this.server
-      .in(String(player.roomName))
-      .fetchSockets()
-      .then((sockets) => sockets.find(({ id }) => id !== socket.id).id);
+    const players = await this.utils.detectIfGameCanStart(socket, player);
 
-    // find team mate player state
-    const teamMatePlayer =
-      await this.temporaryStorage.getPlayer(teamMateSocketId);
-
-    const isTeamReady =
-      teamMatePlayer.status === PlayerStatus.IS_WAITING_TEAMMATE &&
-      teamMatePlayer.side !== player.side &&
-      teamMatePlayer.selectedLevel === player.selectedLevel;
-
-    if (!isTeamReady) {
-      Logger.log('no match, teammate info');
-      socket.to(player.roomName).emit(SocketEventType.TEAMMATE_INFO, data);
+    if (!players) {
       return;
     }
 
-    const players = [
-      { player, socketId: socket.id },
-      { player: teamMatePlayer, socketId: teamMateSocketId },
-    ];
     this.handlePlayerMatch(players);
   };
 
