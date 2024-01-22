@@ -19,7 +19,6 @@ import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { MenuMode, MenuScene } from '../types';
-import { MainState } from '../MainApp';
 import {
     QueueScene,
     SideScene,
@@ -32,6 +31,7 @@ import {
 } from './scenes';
 import { Actions } from './Actions';
 import { RefHashMap } from '../useMenuTransition';
+import { MainState } from '../useMainController';
 
 interface Props {
     mainState: MainState;
@@ -156,29 +156,84 @@ export function Menu({
                 name: 'Crack the door',
                 img: '/crack_the_door.png',
                 disabled: false,
-                selectedByTeamMate: false,
+                selectedByTeamMate:
+                    mainState.levelSelectedByTeamMate === Levels.CRACK_THE_DOOR,
             },
             {
                 id: Levels.LEARN_TO_FLY,
                 name: 'Learn to fly',
                 img: '/learn_to_fly.png',
                 disabled: false,
-                selectedByTeamMate: true,
+                selectedByTeamMate:
+                    mainState.levelSelectedByTeamMate === Levels.LEARN_TO_FLY,
             },
             {
                 id: Levels.THE_HIGH_SPHERES,
                 name: 'The high spheres',
                 img: '/the_high_spheres.png',
                 disabled: true,
-                selectedByTeamMate: false,
+                selectedByTeamMate:
+                    mainState.levelSelectedByTeamMate ===
+                    Levels.THE_HIGH_SPHERES,
             },
         ],
-        [],
+        [mainState.levelSelectedByTeamMate],
     );
 
     const levelName = levels.find(
         (level) => level.id === mainState.selectedLevel,
     )?.name;
+
+    const actions = useMemo(() => {
+        return (
+            <Actions
+                onBack={handleClickOnBack}
+                onQuitTeam={
+                    mode === MenuMode.IN_TEAM
+                        ? handleClickOnQuitTeam
+                        : undefined
+                }
+                onClickJoinTeamMate={handleClickOnJoinTeamMate}
+                teamMate={{
+                    info: teamMateInfo,
+                    levelName: levels.find(
+                        (level) => level.id === teamMateInfo?.selectedLevel,
+                    )?.name,
+                }}
+            />
+        );
+    }, [
+        handleClickOnBack,
+        handleClickOnJoinTeamMate,
+        handleClickOnQuitTeam,
+        levels,
+        mode,
+        teamMateInfo,
+    ]);
+
+    const setLightIsPulsingFast = useCallback(
+        (value: boolean) => {
+            if (!refHashMap.canvasBlack.current) {
+                return;
+            }
+            refHashMap.canvasBlack.current.light.isPulsingFast = value;
+        },
+        [refHashMap.canvasBlack],
+    );
+
+    const setShadowRotationSpeed = useCallback(
+        (rotationSpeed: number) => {
+            if (!refHashMap.canvasWhite.current) {
+                return;
+            }
+            gsap.to(refHashMap.canvasWhite.current.shadow, {
+                duration: 1,
+                rotationSpeed,
+                ease: 'power3.easeOut',
+            });
+        },
+        [refHashMap.canvasWhite],
+    );
 
     return (
         <>
@@ -211,6 +266,8 @@ export function Menu({
                     menuScene === MenuScene.HOME ||
                     nextMenuScene === MenuScene.HOME
                 }
+                setLightIsPulsingFast={setLightIsPulsingFast}
+                setShadowRotationSpeed={setShadowRotationSpeed}
             />
             <InviteFriendScene
                 inviteFriendToken={inviteFriendToken}
@@ -220,25 +277,7 @@ export function Menu({
                 }
                 handleClickOnRandom={handleClickPlayWithRandom}
                 inviteFriendRef={refHashMap.inviteFriendRef}
-                actions={
-                    <Actions
-                        color="white"
-                        onBack={handleClickOnBack}
-                        onQuitTeam={
-                            mode === MenuMode.IN_TEAM
-                                ? handleClickOnQuitTeam
-                                : undefined
-                        }
-                        onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                        teamMate={{
-                            info: teamMateInfo,
-                            levelName: levels.find(
-                                (level) =>
-                                    level.id === teamMateInfo?.selectedLevel,
-                            )?.name,
-                        }}
-                    />
-                }
+                actions={actions}
             />
             <TeamLobbyScene
                 isMount={
@@ -247,47 +286,16 @@ export function Menu({
                 }
                 handleSelectLevel={handleSelectLevelOnLobby}
                 handleSelectSide={handleSelectSideOnLobby}
+                selectedSide={mainState.side}
+                sideSelectedByTeamMate={mainState.sideSelectedByTeamMate}
                 teamLobbyRef={refHashMap.teamLobbyRef}
                 levels={levels}
-                actions={
-                    <Actions
-                        color="white"
-                        onQuitTeam={
-                            mode === MenuMode.IN_TEAM
-                                ? handleClickOnQuitTeam
-                                : undefined
-                        }
-                        onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                        teamMate={{
-                            info: teamMateInfo,
-                            levelName: levels.find(
-                                (level) =>
-                                    level.id === teamMateInfo?.selectedLevel,
-                            )?.name,
-                        }}
-                    />
-                }
+                actions={actions}
+                setLightIsPulsingFast={setLightIsPulsingFast}
+                setShadowRotationSpeed={setShadowRotationSpeed}
             />
             <LevelScene
-                actions={
-                    <Actions
-                        color="white"
-                        onBack={handleClickOnBack}
-                        onQuitTeam={
-                            mode === MenuMode.IN_TEAM
-                                ? handleClickOnQuitTeam
-                                : undefined
-                        }
-                        onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                        teamMate={{
-                            info: teamMateInfo,
-                            levelName: levels.find(
-                                (level) =>
-                                    level.id === teamMateInfo?.selectedLevel,
-                            )?.name,
-                        }}
-                    />
-                }
+                actions={actions}
                 allQueueInfo={allQueueInfo}
                 onClickOnLevel={handleSelectLevel}
                 levels={levels}
@@ -299,25 +307,7 @@ export function Menu({
             />
             <SideScene
                 sideRef={refHashMap.sideRef}
-                actions={
-                    <Actions
-                        color="white"
-                        onBack={handleClickOnBack}
-                        onQuitTeam={
-                            mode === MenuMode.IN_TEAM
-                                ? handleClickOnQuitTeam
-                                : undefined
-                        }
-                        onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                        teamMate={{
-                            info: teamMateInfo,
-                            levelName: levels.find(
-                                (level) =>
-                                    level.id === teamMateInfo?.selectedLevel,
-                            )?.name,
-                        }}
-                    />
-                }
+                actions={actions}
                 selectedLevel={mainState.selectedLevel}
                 levelName={levelName}
                 onClickOnFaction={handleEnterRandomQueue}
@@ -332,27 +322,7 @@ export function Menu({
                 side={mainState.side}
                 levelName={levelName}
                 isInQueue={menuScene === MenuScene.QUEUE}
-                actions={
-                    <Actions
-                        color={
-                            mainState.side === Side.SHADOW ? 'black' : 'white'
-                        }
-                        onBack={handleClickOnBack}
-                        onQuitTeam={
-                            mode === MenuMode.IN_TEAM
-                                ? handleClickOnQuitTeam
-                                : undefined
-                        }
-                        onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                        teamMate={{
-                            info: teamMateInfo,
-                            levelName: levels.find(
-                                (level) =>
-                                    level.id === teamMateInfo?.selectedLevel,
-                            )?.name,
-                        }}
-                    />
-                }
+                actions={actions}
                 isMount={
                     menuScene === MenuScene.QUEUE ||
                     nextMenuScene === MenuScene.QUEUE
@@ -368,26 +338,7 @@ export function Menu({
                 levelName={levelName}
                 // TODO: This has to change
                 handleClickOnPlay={handleClickPlayWithRandom}
-                actions={
-                    <Actions
-                        color={
-                            mainState.side === Side.SHADOW ? 'black' : 'white'
-                        }
-                        onQuitTeam={
-                            mode === MenuMode.IN_TEAM
-                                ? handleClickOnQuitTeam
-                                : undefined
-                        }
-                        onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                        teamMate={{
-                            info: teamMateInfo,
-                            levelName: levels.find(
-                                (level) =>
-                                    level.id === teamMateInfo?.selectedLevel,
-                            )?.name,
-                        }}
-                    />
-                }
+                actions={actions}
             />
         </>
     );

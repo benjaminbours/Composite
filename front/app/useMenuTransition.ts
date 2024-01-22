@@ -10,9 +10,7 @@ import {
     homeIn,
     inviteFriendIn,
     levelIn,
-    lightToStep,
     queueIn,
-    shadowToStep,
     teamLobbyIn,
 } from './Menu/tweens';
 import Curve from './Menu/canvas/Curve';
@@ -63,6 +61,48 @@ export function useMenuTransition() {
             notFoundRef,
         }),
         [],
+    );
+
+    const lightToStep = useCallback(
+        (options: TweenOptions, isMobileDevice: boolean) => {
+            const { step, side } = options;
+            const coordinate =
+                refHashMap.canvasBlack.current!.light.resizeOptions[step](
+                    refHashMap.canvasBlack.current!.ctx.canvas.width,
+                    refHashMap.canvasBlack.current!.ctx.canvas.height,
+                    isMobileDevice,
+                    side,
+                );
+
+            return gsap.to(refHashMap.canvasBlack.current!.light, {
+                duration: 0.5,
+                delay: 0.1,
+                startX: coordinate.x,
+                startY: coordinate.y,
+            });
+        },
+        [refHashMap],
+    );
+
+    const shadowToStep = useCallback(
+        (options: TweenOptions, isMobileDevice: boolean) => {
+            const { step, side } = options;
+            const coordinate =
+                refHashMap.canvasWhite.current!.shadow.resizeOptions[step](
+                    refHashMap.canvasWhite.current!.ctx.canvas.width,
+                    refHashMap.canvasWhite.current!.ctx.canvas.height,
+                    isMobileDevice,
+                    side,
+                );
+
+            return gsap.to(refHashMap.canvasWhite.current!.shadow, {
+                duration: 0.5,
+                delay: 0.1,
+                startX: coordinate.x,
+                startY: coordinate.y,
+            });
+        },
+        [refHashMap],
     );
 
     const goToStep = useCallback(
@@ -129,27 +169,21 @@ export function useMenuTransition() {
                 )
                 .add(
                     [
-                        lightToStep(
-                            tweenOptions,
-                            refHashMap.canvasBlack.current!,
-                            isMobileDevice,
-                        ),
-                        shadowToStep(
-                            tweenOptions,
-                            refHashMap.canvasWhite.current!,
-                            isMobileDevice,
-                        ),
+                        lightToStep(tweenOptions, isMobileDevice),
+                        shadowToStep(tweenOptions, isMobileDevice),
                         ...allMenuScenesOut(refHashMap),
                     ],
                     '-=0.5',
                 )
                 .add(inAnimation());
         },
-        [refHashMap],
+        [refHashMap, lightToStep, shadowToStep],
     );
 
     return {
         goToStep,
+        lightToStep,
+        shadowToStep,
         refHashMap,
         onTransition,
         menuScene,

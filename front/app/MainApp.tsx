@@ -12,10 +12,8 @@ import * as STATS from 'stats.js';
 // our libs
 import {
     GameState,
-    Levels,
     MovableComponentState,
     ProjectionLevel,
-    Side,
 } from '@benjaminbours/composite-core';
 // local
 import { MenuScene } from './types';
@@ -42,11 +40,6 @@ const Game = dynamic(() => import('./Game'), {
 });
 
 // almost the same state in Menu
-export interface MainState {
-    side: Side | undefined;
-    selectedLevel: Levels | undefined;
-    gameState: GameState | undefined;
-}
 
 interface Props {
     children: React.ReactNode;
@@ -69,6 +62,8 @@ function MainApp({ children }: Props) {
         goToStep,
         onTransition,
         setMenuScene,
+        lightToStep,
+        shadowToStep,
     } = useMenuTransition();
 
     const {
@@ -94,7 +89,14 @@ function MainApp({ children }: Props) {
         handleClickOnBack,
         handleClickOnQuitTeam,
         handleClickHome,
-    } = useMainController(menuScene, setMenuScene, goToStep, onTransition);
+    } = useMainController(
+        menuScene,
+        setMenuScene,
+        goToStep,
+        lightToStep,
+        shadowToStep,
+        onTransition,
+    );
 
     const handleClickOnSettings = useCallback(() => {
         setIsSettingsOpen(true);

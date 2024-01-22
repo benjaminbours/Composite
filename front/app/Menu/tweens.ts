@@ -40,54 +40,6 @@ export function curveToStep(
 }
 
 /**
- * Light
- */
-export function lightToStep(
-    options: TweenOptions,
-    canvasBlack: CanvasBlack,
-    isMobileDevice: boolean,
-) {
-    const { step, side } = options;
-    const coordinate = canvasBlack.light.resizeOptions[step](
-        canvasBlack.ctx.canvas.width,
-        canvasBlack.ctx.canvas.height,
-        isMobileDevice,
-        side,
-    );
-
-    return gsap.to(canvasBlack.light, {
-        duration: 0.5,
-        delay: 0.1,
-        startX: coordinate.x,
-        startY: coordinate.y,
-    });
-}
-
-/**
- * Shadow
- */
-export function shadowToStep(
-    options: TweenOptions,
-    canvasWhite: CanvasWhite,
-    isMobileDevice: boolean,
-) {
-    const { step, side } = options;
-    const coordinate = canvasWhite.shadow.resizeOptions[step](
-        canvasWhite.ctx.canvas.width,
-        canvasWhite.ctx.canvas.height,
-        isMobileDevice,
-        side,
-    );
-
-    return gsap.to(canvasWhite.shadow, {
-        duration: 0.5,
-        delay: 0.1,
-        startX: coordinate.x,
-        startY: coordinate.y,
-    });
-}
-
-/**
  * Home
  */
 function homeOut(homeInterface: HTMLDivElement) {
