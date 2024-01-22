@@ -10,15 +10,25 @@ import {
 } from '@benjaminbours/composite-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuMode, MenuScene, Route } from './types';
-import { MainState } from './MainApp';
 import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
 import { useRouter, usePathname } from 'next/navigation';
+import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
+
+export interface MainState {
+    side: Side | undefined;
+    selectedLevel: Levels | undefined;
+    gameState: GameState | undefined;
+    levelSelectedByTeamMate: Levels | undefined;
+    sideSelectedByTeamMate: Side | undefined;
+}
 
 export function useMainController(
     menuScene: MenuScene,
     setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>,
     goToStep: (tweenOptions: TweenOptions, onComplete?: () => void) => void,
+    lightToStep: (options: TweenOptions, isMobileDevice: boolean) => void,
+    shadowToStep: (options: TweenOptions, isMobileDevice: boolean) => void,
     onTransition: React.MutableRefObject<boolean>,
 ) {
     const router = useRouter();
@@ -31,14 +41,19 @@ export function useMainController(
                 side: Side.LIGHT,
                 selectedLevel: Levels.LEARN_TO_FLY,
                 gameState: undefined,
+                levelSelectedByTeamMate: undefined,
+                sideSelectedByTeamMate: undefined,
             };
         }
         return {
             side: undefined,
             selectedLevel: undefined,
             gameState: undefined,
+            levelSelectedByTeamMate: undefined,
+            sideSelectedByTeamMate: undefined,
         };
     });
+
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
@@ -53,6 +68,41 @@ export function useMainController(
             router.push(Route.HOME);
         }
     }, [path, router, inviteFriendToken]);
+
+    // lobby animation effect
+    useEffect(() => {
+        if (menuScene !== MenuScene.TEAM_LOBBY) {
+            return;
+        }
+
+        const isMobile = window.innerWidth < 768;
+        // curve
+        if (state.selectedLevel === state.levelSelectedByTeamMate) {
+            Curve.setWaveOptions({
+                speed: 0.4,
+            });
+        } else {
+            Curve.setWaveOptions({
+                ...defaultWaveOptions,
+            });
+        }
+
+        // light
+        if (
+            state.side === Side.LIGHT ||
+            state.sideSelectedByTeamMate === Side.LIGHT
+        ) {
+            lightToStep({ step: MenuScene.HOME }, isMobile);
+        }
+
+        // shadow
+        if (
+            state.side === Side.SHADOW ||
+            state.sideSelectedByTeamMate === Side.SHADOW
+        ) {
+            shadowToStep({ step: MenuScene.HOME }, isMobile);
+        }
+    }, [state, menuScene, lightToStep, shadowToStep]);
 
     const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
         socketController.current?.emit([
@@ -107,12 +157,35 @@ export function useMainController(
         [],
     );
 
+    const handleSelectLevelOnLobby = useCallback((levelId: Levels) => {
+        setState((prev) => ({
+            ...prev,
+            selectedLevel: levelId,
+        }));
+        socketController.current?.emit([
+            SocketEventTeamLobby.SELECT_LEVEL,
+            levelId,
+        ]);
+    }, []);
+
+    const handleSelectSideOnLobby = useCallback((side: Side) => {
+        setState((prev) => ({
+            ...prev,
+            side,
+        }));
+        socketController.current?.emit([
+            SocketEventTeamLobby.SELECT_SIDE,
+            side,
+        ]);
+    }, []);
+
     const handleJoinLobby = useCallback(() => {
         console.log('joined lobby');
         router.push(Route.LOBBY);
         setMenuMode(MenuMode.IN_TEAM);
+        handleSelectLevelOnLobby(0);
         goToStep({ step: MenuScene.TEAM_LOBBY, side: undefined });
-    }, [goToStep, router]);
+    }, [goToStep, router, handleSelectLevelOnLobby]);
 
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
@@ -146,6 +219,20 @@ export function useMainController(
         setTeamMateInfo(data);
     }, []);
 
+    const handleReceiveLevelOnLobby = useCallback((levelId: Levels) => {
+        setState((prev) => ({
+            ...prev,
+            levelSelectedByTeamMate: levelId,
+        }));
+    }, []);
+
+    const handleReceiveSideOnLobby = useCallback((side: Side) => {
+        setState((prev) => ({
+            ...prev,
+            sideSelectedByTeamMate: side,
+        }));
+    }, []);
+
     const establishConnection = useCallback(async () => {
         return import('./SocketController')
             .then((mod) => mod.SocketController)
@@ -157,6 +244,8 @@ export function useMainController(
                     handleTeamMateInfo,
                     handleReceiveInviteFriendToken,
                     handleJoinLobby,
+                    handleReceiveLevelOnLobby,
+                    handleReceiveSideOnLobby,
                 );
                 return;
             });
@@ -167,6 +256,8 @@ export function useMainController(
         handleTeamMateInfo,
         handleReceiveInviteFriendToken,
         handleJoinLobby,
+        handleReceiveLevelOnLobby,
+        handleReceiveSideOnLobby,
     ]);
 
     const handleEnterTeamLobby = useCallback(
@@ -242,28 +333,6 @@ export function useMainController(
         },
         [goToStep, onTransition],
     );
-
-    const handleSelectLevelOnLobby = useCallback((levelId: Levels) => {
-        setState((prev) => ({
-            ...prev,
-            selectedLevel: levelId,
-        }));
-        socketController.current?.emit([
-            SocketEventTeamLobby.SELECT_LEVEL,
-            levelId,
-        ]);
-    }, []);
-
-    const handleSelectSideOnLobby = useCallback((side: Side) => {
-        setState((prev) => ({
-            ...prev,
-            side,
-        }));
-        socketController.current?.emit([
-            SocketEventTeamLobby.SELECT_SIDE,
-            side,
-        ]);
-    }, []);
 
     const handleClickOnBack = useCallback(() => {
         if (onTransition.current) {

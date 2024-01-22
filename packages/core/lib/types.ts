@@ -48,6 +48,11 @@ export enum SocketEventType {
     TEAMMATE_DISCONNECT = 'TEAMMATE_DISCONNECT',
 }
 
+export enum SocketEventTeamLobby {
+    SELECT_LEVEL = 'SELECT_LEVEL',
+    SELECT_SIDE = 'SELECT_SIDE',
+}
+
 export interface Inputs {
     left: boolean;
     right: boolean;
@@ -157,6 +162,16 @@ export type GameDeactivateElementEvent = [
     payload: GameActivateElementPayload,
 ];
 
+export type TeamSelectLevel = [
+    type: SocketEventTeamLobby.SELECT_LEVEL,
+    payload: Levels,
+];
+
+export type TeamSelectSide = [
+    type: SocketEventTeamLobby.SELECT_SIDE,
+    payload: Side,
+];
+
 export type SocketEvent =
     | MatchMakingEvent
     | TeammateInfoEvent
@@ -170,7 +185,9 @@ export type SocketEvent =
     | RequestInviteFriendTokenEvent
     | InviteFriendTokenEvent
     | FriendJoinLobbyEvent
-    | JoinLobbyEvent;
+    | JoinLobbyEvent
+    | TeamSelectLevel
+    | TeamSelectSide;
 
 export class QueueInfo {
     constructor(public all = 0, public light = 0, public shadow = 0) {}

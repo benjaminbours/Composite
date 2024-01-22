@@ -5,7 +5,6 @@ import ButtonJoinTeam from './ButtonJoinTeam';
 import { Side, TeammateInfoPayload } from '@benjaminbours/composite-core';
 
 interface Props {
-    color: string;
     onBack?: () => void;
     onQuitTeam?: () => void;
     teamMate: {
@@ -16,7 +15,6 @@ interface Props {
 }
 
 export const Actions: React.FC<Props> = ({
-    color,
     onBack,
     onQuitTeam,
     onClickJoinTeamMate,
@@ -24,13 +22,10 @@ export const Actions: React.FC<Props> = ({
 }) => {
     return (
         <div className="menu-actions">
-            {onBack && <ButtonBack color={color} onClick={onBack} />}
-            {onQuitTeam && (
-                <ButtonQuitTeam color={color} onClick={onQuitTeam} />
-            )}
+            {onBack && <ButtonBack onClick={onBack} />}
+            {onQuitTeam && <ButtonQuitTeam onClick={onQuitTeam} />}
             {teamMate.info && (
                 <ButtonJoinTeam
-                    color={color}
                     onClick={onClickJoinTeamMate}
                     teamChoice={{
                         levelName: teamMate.levelName || 'undefined',

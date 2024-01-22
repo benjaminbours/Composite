@@ -10,6 +10,9 @@ import {
     TeammateInfoPayload,
     GamePlayerInputPayload,
     InviteFriendTokenPayload,
+    SocketEventTeamLobby,
+    Levels,
+    Side,
 } from '@benjaminbours/composite-core';
 
 const TIME_SAMPLE_COUNT = 20;
@@ -35,6 +38,8 @@ export class SocketController {
         onTeamMateInfo: (data: TeammateInfoPayload) => void,
         onReceiveInviteFriendToken: (data: InviteFriendTokenPayload) => void,
         onJoinLobby: () => void,
+        handleReceiveLevelOnLobby: (levelId: Levels) => void,
+        handleReceiveSideOnLobby: (side: Side) => void,
     ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
@@ -72,6 +77,16 @@ export class SocketController {
             SocketEventType.TEAMMATE_DISCONNECT,
             onTeamMateDisconnect,
         );
+
+        // team lobby event
+        this.socket.on(
+            SocketEventTeamLobby.SELECT_LEVEL,
+            handleReceiveLevelOnLobby,
+        );
+        this.socket.on(
+            SocketEventTeamLobby.SELECT_SIDE,
+            handleReceiveSideOnLobby,
+        );
     }
 
     public onTimeSyncReceived =
@@ -102,6 +117,7 @@ export class SocketController {
                     this.isTimeSynced = true;
 
                     // unregister all listener for time sync
+                    // TODO: investigate to use remove listeners for other events as well
                     this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
                     resolve(true);
                 }

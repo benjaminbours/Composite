@@ -91,7 +91,7 @@ button {
 .buttonRect {
     width: auto;
     text-align: center;
-    border: solid transparent 1px;
+    border: solid white 1px;
     padding: 20px;
     letter-spacing: 5px;
     text-transform: uppercase;
@@ -121,16 +121,9 @@ button {
     // different border management for back button
     &.back {
         border-color: transparent;
-        &.white {
-            &:hover {
-                border-color: white;
-            }
-        }
 
-        &.black {
-            &:hover {
-                border-color: black;
-            }
+        &:hover {
+            border-color: white;
         }
     }
 
@@ -278,6 +271,7 @@ $buttonSizeLarge: 120px;
     display: flex;
     align-items: center;
     mix-blend-mode: difference;
+    color: white;
 
     * {
         margin-right: 10px;

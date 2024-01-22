@@ -18,6 +18,8 @@ interface Props {
     handleClickOnFriend: () => void;
     allQueueInfo?: AllQueueInfo;
     isMount: boolean;
+    setLightIsPulsingFast: (isPulsingFast: boolean) => void;
+    setShadowRotationSpeed: (speed: number) => void;
 }
 
 export const HomeScene: React.FC<Props> = ({
@@ -28,6 +30,8 @@ export const HomeScene: React.FC<Props> = ({
     handleClickOnRandom,
     handleClickOnFriend,
     isMount,
+    setLightIsPulsingFast,
+    setShadowRotationSpeed,
 }) => {
     const buttonFriendRef = useRef<HTMLButtonElement>(null);
     const buttonRandomRef = useRef<HTMLButtonElement>(null);
@@ -53,30 +57,6 @@ export const HomeScene: React.FC<Props> = ({
             informationRandomRef.current?.classList.add(visibleCssClass);
         }
     }, []);
-
-    const setLightIsPulsingFast = useCallback(
-        (value: boolean) => {
-            if (!canvasBlack.current) {
-                return;
-            }
-            canvasBlack.current.light.isPulsingFast = value;
-        },
-        [canvasBlack],
-    );
-
-    const setShadowRotationSpeed = useCallback(
-        (rotationSpeed: number) => {
-            if (!canvasWhite.current) {
-                return;
-            }
-            gsap.to(canvasWhite.current.shadow, {
-                duration: 1,
-                rotationSpeed,
-                ease: 'power3.easeOut',
-            });
-        },
-        [canvasWhite],
-    );
 
     const handleMouseLeavePlay = useCallback(() => {
         if (!canvasBlack.current || !canvasWhite.current) {

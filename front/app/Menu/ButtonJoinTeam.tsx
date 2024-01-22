@@ -3,7 +3,6 @@ import classNames from 'classnames';
 import React from 'react';
 
 interface IProps {
-    color: string;
     onClick: () => void;
     teamChoice: {
         side: string;
@@ -11,10 +10,9 @@ interface IProps {
     };
 }
 
-export default function ButtonJoinTeam({ color, onClick, teamChoice }: IProps) {
+export default function ButtonJoinTeam({ onClick, teamChoice }: IProps) {
     const cssClass = classNames({
         buttonRect: true,
-        ...(color ? { [color]: true } : {}),
     });
     return (
         <button
