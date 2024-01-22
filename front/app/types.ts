@@ -46,4 +46,6 @@ export enum Route {
     HOME = '/',
     LOBBY = '/lobby',
     INVITE = '/invite',
+    TIMELINE = '/timeline',
+    ROADMAP = '/timeline#roadmap',
 }
