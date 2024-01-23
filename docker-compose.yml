@@ -69,9 +69,9 @@ services:
       - traefik.http.services.api.loadbalancer.server.port=3002
       - traefik.http.services.api.loadBalancer.sticky.cookie.name=server_id
       - traefik.http.services.api.loadBalancer.sticky.cookie.httpOnly=true
-      - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://front.localhost
-      - traefik.http.middlewares.testheader.headers.accessControlAllowCredentials=true
-      - traefik.http.routers.api.middlewares=testheader
+      - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost
+      - traefik.http.middlewares.api_middleware.headers.accessControlAllowCredentials=true
+      - traefik.http.routers.api.middlewares=api_middleware
 
   front:
     restart: always

@@ -6,4 +6,5 @@ data-backup
 data
 cache
 
+.env.dev
 .env.staging

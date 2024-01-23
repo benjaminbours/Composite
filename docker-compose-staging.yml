@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -25,7 +25,7 @@ services:
       - "80:80"
 
   api:
-    image: boursbenjamin/composite-back:latest
+    image: boursbenjamin/composite-back:0.3.3
     env_file:
       - ./back/.env.staging
     labels:
@@ -33,8 +33,39 @@ services:
       - traefik.http.middlewares.testheader.headers.accesscontrolalloworiginlist=http://staging.compositethegame.com
 
   front:
-    image: boursbenjamin/composite-front:latest
+    image: boursbenjamin/composite-front:0.3.5
+    depends_on:
+      - db
     env_file:
       - ./front/.env.staging
     labels:
       - "traefik.http.routers.front.rule=Host(`staging.compositethegame.com`)"
+
+  api_dev:
+    image: boursbenjamin/composite-back:latest
+    networks:
+      - main
+      - database
+    env_file:
+      - ./back/.env.staging
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.api_dev.rule=Host(`dev.api.compositethegame.com`)"
+      - traefik.docker.network=main
+      - traefik.http.services.api_dev.loadbalancer.server.port=3002
+      - traefik.http.services.api_dev.loadBalancer.sticky.cookie.name=server_id
+      - traefik.http.services.api_dev.loadBalancer.sticky.cookie.httpOnly=true
+      - traefik.http.middlewares.api_dev_middleware.headers.accesscontrolalloworiginlist=http://dev.compositethegame.com
+      - traefik.http.middlewares.api_dev_middleware.headers.accessControlAllowCredentials=true
+      - traefik.http.routers.api_dev.middlewares=api_dev_middleware
+
+  front_dev:
+    image: boursbenjamin/composite-front:latest
+    networks:
+      - main
+    env_file:
+      - ./front/.env.dev
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front_dev.rule=Host(`dev.compositethegame.com`)"
+      - traefik.http.services.front_dev.loadbalancer.server.port=3000
