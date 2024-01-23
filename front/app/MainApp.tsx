@@ -89,6 +89,7 @@ function MainApp({ children }: Props) {
         handleClickOnBack,
         handleClickOnQuitTeam,
         handleClickHome,
+        handleClickPlayAgain,
     } = useMainController(
         menuScene,
         setMenuScene,
@@ -231,6 +232,7 @@ function MainApp({ children }: Props) {
                     handleClickOnQuitTeam={handleClickOnQuitTeam}
                     handleClickHome={handleClickHome}
                     handleClickOnJoinTeamMate={handleClickOnJoinTeamMate}
+                    handleClickPlayAgain={handleClickPlayAgain}
                 />
             )}
             {state.gameState && gameIsPlaying && (

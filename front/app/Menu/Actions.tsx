@@ -22,7 +22,7 @@ export const Actions: React.FC<Props> = ({
 }) => {
     return (
         <div className="menu-actions">
-            {onBack && <ButtonBack onClick={onBack} />}
+            {onBack && !onQuitTeam && <ButtonBack onClick={onBack} />}
             {onQuitTeam && <ButtonQuitTeam onClick={onQuitTeam} />}
             {teamMate.info && (
                 <ButtonJoinTeam

@@ -210,6 +210,13 @@ export function useMainController(
     }, []);
 
     const handleGameFinished = useCallback(() => {
+        setState((prev) => ({
+            side: prev.side,
+            selectedLevel: undefined,
+            sideSelectedByTeamMate: undefined,
+            levelSelectedByTeamMate: undefined,
+            gameState: undefined,
+        }));
         setGameIsPlaying(false);
         setMenuScene(MenuScene.END_LEVEL);
     }, [setMenuScene]);
@@ -413,6 +420,18 @@ export function useMainController(
         goToStep({ step: MenuScene.LEVEL, side: undefined });
     }, [goToStep, onTransition]);
 
+    const handleClickPlayAgain = useCallback(() => {
+        if (onTransition.current) {
+            return;
+        }
+        goToStep({ step: MenuScene.TEAM_LOBBY, side: undefined }, () => {
+            setState((prev) => ({
+                ...prev,
+                side: undefined,
+            }));
+        });
+    }, [goToStep, onTransition, setState]);
+
     return {
         state,
         socketController,
@@ -436,5 +455,6 @@ export function useMainController(
         handleClickOnBack,
         handleClickOnQuitTeam,
         handleClickHome,
+        handleClickPlayAgain,
     };
 }
