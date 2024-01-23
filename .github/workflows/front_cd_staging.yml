@@ -15,8 +15,8 @@ jobs:
 
     env:
       NEXT_PUBLIC_STAGE: staging
-      NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
-      NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
+      NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+      NEXT_PUBLIC_URL: ${{ vars.NEXT_PUBLIC_URL }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
@@ -50,5 +50,5 @@ jobs:
           build-args: |
             NPM_TOKEN=${{ secrets.NPM_TOKEN }}
             NEXT_PUBLIC_STAGE=staging
-            NEXT_PUBLIC_BACKEND_URL=${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
-            NEXT_PUBLIC_URL=${{ secrets.NEXT_PUBLIC_URL}}
+            NEXT_PUBLIC_BACKEND_URL=${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+            NEXT_PUBLIC_URL=${{ vars.NEXT_PUBLIC_URL}}
