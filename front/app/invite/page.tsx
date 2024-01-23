@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { InvitePage } from './InvitePage';
 
 export const metadata: Metadata = {
@@ -8,5 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function Invite() {
-    return <InvitePage />;
+    return (
+        <>
+            <Suspense>
+                <InvitePage />
+            </Suspense>
+        </>
+    );
 }
