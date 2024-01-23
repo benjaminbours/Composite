@@ -2,11 +2,16 @@ name: Push backend image
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        default: "staging"
 
 jobs:
   push_image:
     runs-on: ubuntu-latest
-    environment: staging
+    environment: ${{ github.event.inputs.environment }}
 
     env:
       PORT: 3002
