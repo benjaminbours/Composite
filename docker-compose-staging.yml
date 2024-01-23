@@ -30,7 +30,7 @@ services:
       - ./back/.env.staging
     labels:
       - "traefik.http.routers.api.rule=Host(`staging.api.compositethegame.com`)"
-      - traefik.http.middlewares.pi_middleware.headers.accesscontrolalloworiginlist=http://staging.compositethegame.com
+      - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=http://staging.compositethegame.com
 
   front:
     image: boursbenjamin/composite-front:0.3.5
