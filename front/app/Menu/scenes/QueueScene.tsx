@@ -1,6 +1,6 @@
 // vendors
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
@@ -25,7 +25,6 @@ export const QueueScene: React.FC<Props> = ({
     isMount,
 }) => {
     const [queueTime, setQueueTime] = useState(0);
-    const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
         'content-container': true,
@@ -41,14 +40,6 @@ export const QueueScene: React.FC<Props> = ({
         }),
         [],
     );
-
-    const handleClickCopyToClipBoard = useCallback(() => {
-        navigator.clipboard.writeText(process.env.NEXT_PUBLIC_URL!);
-        setShouldDisplayIsCopied(true);
-        setTimeout(() => {
-            setShouldDisplayIsCopied(false);
-        }, 3000);
-    }, []);
 
     useEffect(() => {
         if (!isInQueue) {
