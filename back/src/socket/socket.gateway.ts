@@ -517,7 +517,9 @@ export class SocketGateway {
       .then((sockets) => {
         sockets.forEach(({ id }) => {
           this.temporaryStorage.setPlayer(id, {
-            status: String(PlayerStatus.IS_PENDING),
+            status: String(PlayerStatus.IS_WAITING_TEAMMATE),
+            side: '',
+            selectedLevel: '',
           });
         });
       });

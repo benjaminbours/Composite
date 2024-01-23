@@ -1,7 +1,7 @@
 // vendors
 import Script from 'next/script';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
@@ -15,6 +15,8 @@ interface Props {
     handleClickOnPlay: () => void;
     actions: React.ReactNode;
     isMount: boolean;
+    setLightIsPulsingFast: (isPulsingFast: boolean) => void;
+    setShadowRotationSpeed: (speed: number) => void;
 }
 
 export const EndLevelScene: React.FC<Props> = ({
@@ -24,6 +26,8 @@ export const EndLevelScene: React.FC<Props> = ({
     handleClickOnPlay,
     actions,
     isMount,
+    setLightIsPulsingFast,
+    setShadowRotationSpeed,
 }) => {
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
@@ -69,10 +73,28 @@ export const EndLevelScene: React.FC<Props> = ({
             </h3>
             <button
                 className={`buttonCircle ${color} end-level-container__play-button`}
-                // TODO: had same interaction as on home page
-                // onMouseEnter={handleMouseEnterPlay}
-                // onMouseLeave={handleMouseLeavePlay}
-                onClick={handleClickOnPlay}
+                onMouseEnter={() => {
+                    if (side === Side.LIGHT) {
+                        setLightIsPulsingFast(true);
+                    } else {
+                        setShadowRotationSpeed(0.02);
+                    }
+                }}
+                onMouseLeave={() => {
+                    if (side === Side.LIGHT) {
+                        setLightIsPulsingFast(false);
+                    } else {
+                        setShadowRotationSpeed(0.005);
+                    }
+                }}
+                onClick={() => {
+                    if (side === Side.LIGHT) {
+                        setLightIsPulsingFast(false);
+                    } else {
+                        setShadowRotationSpeed(0.005);
+                    }
+                    handleClickOnPlay();
+                }}
             >
                 Play
             </button>

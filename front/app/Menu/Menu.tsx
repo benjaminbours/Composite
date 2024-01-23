@@ -53,6 +53,7 @@ interface Props {
     handleClickOnQuitTeam: () => void;
     handleClickHome: () => void;
     handleClickOnJoinTeamMate: () => void;
+    handleClickPlayAgain: () => void;
 }
 
 export function Menu({
@@ -74,6 +75,7 @@ export function Menu({
     handleClickOnQuitTeam,
     handleClickHome,
     handleClickOnJoinTeamMate,
+    handleClickPlayAgain,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
@@ -336,9 +338,10 @@ export function Menu({
                 endLevelRef={refHashMap.endLevelRef}
                 side={mainState.side}
                 levelName={levelName}
-                // TODO: This has to change
-                handleClickOnPlay={handleClickPlayWithRandom}
+                handleClickOnPlay={handleClickPlayAgain}
                 actions={actions}
+                setLightIsPulsingFast={setLightIsPulsingFast}
+                setShadowRotationSpeed={setShadowRotationSpeed}
             />
         </>
     );
