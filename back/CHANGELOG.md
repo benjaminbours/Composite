@@ -1,5 +1,16 @@
 # composite-back
 
+## 0.4.0-next.0
+
+### Minor Changes
+
+- 0fee674: Add team lobby scene, connect it to invite a friend feature and to end level scene
+
+### Patch Changes
+
+- Updated dependencies [0fee674]
+  - @benjaminbours/composite-core@0.3.0-next.0
+
 ## 0.3.3
 
 ### Patch Changes
