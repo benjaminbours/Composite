@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "composite-back": "0.3.3",
+    "composite-front": "0.3.5",
+    "@benjaminbours/composite-core": "0.2.6"
+  },
+  "changesets": []
+}
