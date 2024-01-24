@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 import { Side } from '@benjaminbours/composite-core';
 // local
 import { CopyToClipBoardButton } from '../CopyToClipboardButton';
-import { Route } from '../../types';
+import { RouteStatic } from '../../types';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;
@@ -105,7 +105,7 @@ export const EndLevelScene: React.FC<Props> = ({
                         If you liked the experience and you want it to reach its{' '}
                         <a
                             className="inline-link"
-                            href={Route.ROADMAP}
+                            href={RouteStatic.ROADMAP}
                             target="_blank"
                         >
                             full potential

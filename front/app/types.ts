@@ -46,6 +46,10 @@ export enum Route {
     HOME = '/',
     LOBBY = '/lobby',
     INVITE = '/invite',
+}
+
+// route not game related, that should benefit from SSR
+export enum RouteStatic {
     TIMELINE = '/timeline',
     ROADMAP = '/timeline#roadmap',
 }

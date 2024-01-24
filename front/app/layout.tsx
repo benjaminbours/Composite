@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
 import './styles/main.scss';
-import MainApp from './MainApp';
+import { WithMainApp } from './WithMainApp';
 
 export const metadata: Metadata = {
     title: 'Next.js',
@@ -36,7 +36,7 @@ export default function RootLayout({
                 </>
             )}
             <body data-app-version={process.env.APP_VERSION}>
-                <MainApp>{children}</MainApp>
+                <WithMainApp>{children}</WithMainApp>
             </body>
         </html>
     );
