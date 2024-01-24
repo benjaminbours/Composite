@@ -1,6 +1,6 @@
 // vendors
 import classNames from 'classnames';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import Slider, { Settings } from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -58,6 +58,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         setLightIsPulsingFast,
         setShadowRotationSpeed,
     }) => {
+        const sliderRef = useRef<any>(null);
         const cssClass = classNames({
             'content-container': true,
             'team-lobby-container': true,
@@ -66,21 +67,37 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
 
         const levelDuplicates = useMemo(() => [...levels, ...levels], [levels]);
 
-        const settings: Settings = useMemo(
-            () => ({
-                className: 'center level-slider',
-                centerMode: true,
-                infinite: true,
-                centerPadding: '10px',
-                slidesToShow: 3,
-                speed: 500,
-                beforeChange: (_currentSlide: number, nextSlide: number) => {
-                    handleSelectLevel(levelDuplicates[nextSlide].id);
-                },
-            }),
-            [levelDuplicates, handleSelectLevel],
-        );
+        const settings: Settings = {
+            className: 'center level-slider',
+            centerMode: true,
+            infinite: true,
+            centerPadding: '10px',
+            slidesToShow: 3,
+            speed: 500,
+            waitForAnimate: false,
+            beforeChange: function (currentSlide: number, nextSlide: number) {
+                const level = levelDuplicates[nextSlide];
+                const direction = nextSlide > currentSlide ? 'next' : 'prev';
 
+                if (level.disabled) {
+                    if (direction === 'next') {
+                        sliderRef.current!.innerSlider.slickGoTo(
+                            nextSlide + 1,
+                            true,
+                        );
+                    } else {
+                        sliderRef.current!.innerSlider.slickGoTo(
+                            nextSlide - 1,
+                            true,
+                        );
+                    }
+                } else {
+                    handleSelectLevel(level.id);
+                }
+            },
+        };
+
+        // initial loading
         useEffect(() => {
             handleSelectLevel(levels[0].id);
             // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,7 +107,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
             <div ref={teamLobbyRef} className={cssClass}>
                 {actions}
                 <h3 className="title-h2 title-h2--white">Select a level</h3>
-                <Slider {...settings}>
+                <Slider ref={sliderRef} {...settings}>
                     {levelDuplicates.map(
                         ({ id, img, name, selectedByTeamMate, disabled }) => {
                             const slideCssClass = classNames({
@@ -110,7 +127,11 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                                         />
                                         <YingYang />
                                         <p>{name}</p>
-                                        {disabled && <span className='coming-soon'>Coming soong</span>}
+                                        {disabled && (
+                                            <span className="coming-soon">
+                                                Coming soong
+                                            </span>
+                                        )}
                                     </button>
                                 </div>
                             );
