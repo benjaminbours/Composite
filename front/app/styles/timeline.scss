@@ -1,4 +1,4 @@
-.roadmap-page {
+.timeline-page {
     background-color: black;
     color: white;
     padding: 30px 0;
@@ -8,6 +8,7 @@
         color: black;
         text-decoration: none;
         display: block;
+        position: static;
 
         &:hover {
             background: black;
@@ -22,7 +23,7 @@
     }
 }
 
-.roadmap-page .main-container {
+.timeline-page .main-container {
     width: 60%;
     margin: 0 auto;
 

@@ -631,9 +631,9 @@ const futureEvents: TimelineEvent[] = [
     },
 ];
 
-export default async function Roadmap() {
+export default async function Timeline() {
     return (
-        <main className="roadmap-page">
+        <main className="timeline-page">
             <div className="main-container">
                 <h1>Composite - Timeline</h1>
                 <ul className="timeline">
