@@ -516,11 +516,11 @@ export class SocketGateway {
       .fetchSockets()
       .then((sockets) => {
         sockets.forEach(({ id }) => {
-          this.temporaryStorage.setPlayer(id, {
-            status: String(PlayerStatus.IS_WAITING_TEAMMATE),
-            side: '',
-            selectedLevel: '',
-          });
+          const state = RedisPlayerState.parsePlayerState(
+            new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
+          );
+          // console.log('parsed state', parsedState);
+          this.temporaryStorage.setPlayer(id, state);
         });
       });
   };
