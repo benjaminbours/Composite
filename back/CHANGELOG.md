@@ -1,5 +1,11 @@
 # composite-back
 
+## 0.4.0-next.1
+
+### Minor Changes
+
+- Fix various bugs detected on the last dev deployment
+
 ## 0.4.0-next.0
 
 ### Minor Changes
