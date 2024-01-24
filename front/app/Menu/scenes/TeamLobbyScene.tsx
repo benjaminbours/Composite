@@ -92,9 +92,10 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                 <h3 className="title-h2 title-h2--white">Select a level</h3>
                 <Slider {...settings}>
                     {levelDuplicates.map(
-                        ({ id, img, name, selectedByTeamMate }) => {
+                        ({ id, img, name, selectedByTeamMate, disabled }) => {
                             const slideCssClass = classNames({
                                 'level-slider__item': true,
+                                'level-slider__item--disabled': disabled,
                                 'level-slider__item--selected-by-team-mate':
                                     selectedByTeamMate,
                             });
@@ -109,6 +110,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                                         />
                                         <YingYang />
                                         <p>{name}</p>
+                                        {disabled && <span className='coming-soon'>Coming soong</span>}
                                     </button>
                                 </div>
                             );

@@ -79,7 +79,7 @@
         }
     }
 
-    p {
+    p, span {
         position: relative;
         z-index: 5;
         color: white;
@@ -116,6 +116,17 @@
             transition: 0.3s ease-out;
         }
     }
+
+    .coming-soon {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 10px;
+        width: 100%;
+        text-align: center;
+    }
 }
 
 .slick-center {
@@ -132,6 +143,10 @@
     .ying-yang .black {
         opacity: 0.8;
     }
+}
+
+.level-slider__item--disabled .level-portal-container {
+    cursor: not-allowed;
 }
 
 @keyframes rotate {
