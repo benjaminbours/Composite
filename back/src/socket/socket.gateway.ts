@@ -336,6 +336,12 @@ export class SocketGateway {
       }
     })();
 
+    if (!level) {
+      throw new Error(
+        `Level doesn't exist or is not ready yet: ${players[0].player.selectedLevel}`,
+      );
+    }
+
     // create initial game data
     const initialGameState = new GameState(
       [

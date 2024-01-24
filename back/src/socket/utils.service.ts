@@ -5,6 +5,9 @@ import { Injectable } from '@nestjs/common';
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus } from 'src/PlayerState';
 import { SocketService } from './socket.service';
+import { Levels } from '@benjaminbours/composite-core';
+
+const COMING_SOON_LEVELS = [Levels.THE_HIGH_SPHERES];
 
 @Injectable()
 export class UtilsService {
@@ -29,7 +32,8 @@ export class UtilsService {
       !Number.isNaN(player.side) &&
       !Number.isNaN(teamMatePlayer.side) &&
       teamMatePlayer.side !== player.side &&
-      teamMatePlayer.selectedLevel === player.selectedLevel;
+      teamMatePlayer.selectedLevel === player.selectedLevel &&
+      !COMING_SOON_LEVELS.includes(player.selectedLevel);
 
     if (!isTeamReady) {
       return false;
