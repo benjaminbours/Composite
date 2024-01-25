@@ -1,5 +1,11 @@
 # composite-front
 
+## 0.3.6
+
+### Patch Changes
+
+- Update roadmap for january week 3-4
+
 ## 0.3.5
 
 ### Patch Changes
