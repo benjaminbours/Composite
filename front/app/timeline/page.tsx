@@ -366,6 +366,117 @@ const pastEvents: TimelineEvent[] = [
                         </p>
                     </li>
                 </ul>
+                <h4 id="january-week-3">
+                    <a
+                        href="https://github.com/benjaminbours/Composite/pull/64"
+                        target="_blank"
+                        className="inline-link"
+                    >
+                        Week 3
+                    </a>
+                </h4>
+                <ul>
+                    <li>
+                        <p>
+                            Update menu home scene accordingly with the feature
+                            invite a friend.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Remove a lot of code dedicated to the drawing of
+                            text with the{' '}
+                            <a
+                                href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API"
+                                target="_blank"
+                                className="inline-link"
+                            >
+                                canvas API
+                            </a>{' '}
+                            to benefit for the{' '}
+                            <a
+                                href="https://caniuse.com/?search=mix-blend-mode"
+                                target="_blank"
+                                className="inline-link"
+                            >
+                                now supported enough
+                            </a>{' '}
+                            CSS property{' '}
+                            <a
+                                href="https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode"
+                                target="_blank"
+                                className="inline-link"
+                            >
+                                mix-blend-mode
+                            </a>
+                            . Thank you to{' '}
+                            <a
+                                href="https://buttermax.net/"
+                                target="_blank"
+                                className="inline-link"
+                            >
+                                this website
+                            </a>{' '}
+                            for the inspiration.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Tremendous refactor of the "MainApp" orchestration
+                            in order to welcome more easily the invite a friend
+                            flow, but also to improve the separation of concerns
+                            of the menu.
+                        </p>
+                    </li>
+                    <li>
+                        <p>Add menu scene invite a friend and team lobby.</p>
+                    </li>
+                    <li>
+                        <p>Add missing router management.</p>
+                    </li>
+                    <li>
+                        <p>Add page 404.</p>
+                    </li>
+                </ul>
+                <h4 id="january-week-4">
+                    <a
+                        href="https://github.com/benjaminbours/Composite/pull/64"
+                        target="_blank"
+                        className="inline-link"
+                    >
+                        Week 4
+                    </a>
+                </h4>
+                <ul>
+                    <li>
+                        <p>
+                            Use team lobby at the end of any game, even ones
+                            from the matchmaking queue.
+                        </p>
+                    </li>
+                    <li>
+                        <p>Add https support.</p>
+                    </li>
+                    <li>
+                        <p>
+                            Add{' '}
+                            <a
+                                href="https://dev.compositethegame.com"
+                                target="_blank"
+                                className="inline-link"
+                            >
+                                dev environment
+                            </a>{' '}
+                            in order to deploy and test safely updates while
+                            keeping a stable version to demonstrate any time.
+                            Update deployments procedure accordingly.
+                        </p>
+                    </li>
+                    <li>
+                        Deploy all changes from week 3 and 4 on dev environment
+                        for testing.
+                    </li>
+                </ul>
             </>
         ),
     },
