@@ -1,5 +1,21 @@
 # composite-front
 
+## 0.4.0
+
+### Minor Changes
+
+- c3ce64b: Refactor menu animation
+- b8d9a78: Add 404 page
+- b8d9a78: Add team lobby scene, connect it to invite a friend feature and to end level scene
+- 4e0c720: Fix various bugs detected on the last dev deployment
+- 3baa2d0: Move from canvas rendered main h1 and h2 to html with mix blend mode strategy
+- 3baa2d0: Add random and friend button to menu home scene + additional information
+
+### Patch Changes
+
+- Updated dependencies [b8d9a78]
+  - @benjaminbours/composite-core@0.3.0
+
 ## 0.4.0-next.1
 
 ### Minor Changes
