@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Composite - The game - Roadmap',
+    title: 'Composite - The game - Timeline',
     description:
         'Explore the timeline of events and milestones in the development of Composite - The game.',
 };
@@ -422,10 +422,10 @@ const pastEvents: TimelineEvent[] = [
                     </li>
                     <li>
                         <p>
-                            Tremendous refactor of the "MainApp" orchestration
+                            {`Tremendous refactor of the "MainApp" orchestration
                             in order to welcome more easily the invite a friend
                             flow, but also to improve the separation of concerns
-                            of the menu.
+                            of the menu.`}
                         </p>
                     </li>
                     <li>
@@ -566,6 +566,10 @@ const futureEvents: TimelineEvent[] = [
             <>
                 <h3>Objectives</h3>
                 <ul>
+                    <li>
+                        Electron app installable on desktop, with auto update,
+                        and register it on steam.
+                    </li>
                     <li>
                         <p>Many more levels</p>
                     </li>

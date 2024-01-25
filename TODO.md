@@ -38,6 +38,7 @@
   - Post processing
   - State reconciliation / management
 - Address lint warnings
+- S4oul => https://roadmap.sh/cpp first, the connections and styles are interesting, then it can be nice to link roadmap points with github ticket. The goal is to reduce friction and ease a maximum the eventual collaboration experience.
 
 ## To fix
 
@@ -48,6 +49,7 @@
 - Bug with end game animation
 - Display exit bounce helper only when inside the element
 - Bug with the wave when the menu is remounted after entering the game, the wave is not reacting with the mouse anymore.
+- On loading of any page of the website, there is blank screen with loading written for a moment before disappearing. Fix it.
 
 ## Potential game play suggestion
 
@@ -71,7 +73,10 @@
 
 - thank you for the mental support and follow up, they sent me so much strength:
   - L3Gl0N__
-  - uchinara
+  - uchinara => The guy disapeared, hope he is well :(
+  - S4oul
+  - Smoke
+  - strailder
 
 - thank you for making me discover this lib => https://github.com/gkjohnson/three-mesh-bvh, was a game changer in terms of performance + youtube video about designing puzzle game
   - uchinara
@@ -98,6 +103,7 @@
 - Is it complicated to add controller support?
 - Double jump
 - twitch game support?
+- Avoir des petites plateforme qui bouge, ou des éléments de décor qui change en fonction de si light ou shadow est dans la zone ou sur un interrupteur, dinguerie en devenir
 
 ## First streamer ever who played my game
 
@@ -117,3 +123,7 @@ Still need to address number 2 and 5
 - https://www.1001fonts.com/nk57-monospace-font.html
 - https://www.ffonts.net/CPMono_v07Bold.font?text=COMPOSITE#
 
+## TODAY
+
+- Add recurrent message such as kofibot, to print available commands for users in the chat. Or put it in the title of the stream.
+- Enable github sponsor?

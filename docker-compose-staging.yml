@@ -42,7 +42,7 @@ services:
       - traefik.http.routers.api.tls.certresolver=myresolver
 
   front:
-    image: boursbenjamin/composite-front:0.3.5
+    image: boursbenjamin/composite-front:0.3.6
     depends_on:
       - db
     env_file:
@@ -53,7 +53,7 @@ services:
       - traefik.http.routers.front.tls.certresolver=myresolver
 
   api_dev:
-    image: boursbenjamin/composite-back:latest
+    image: boursbenjamin/composite-back:0.4.0-next.1
     networks:
       - main
       - database
@@ -73,7 +73,7 @@ services:
       - traefik.http.routers.api_dev.tls.certresolver=myresolver
 
   front_dev:
-    image: boursbenjamin/composite-front:latest
+    image: boursbenjamin/composite-front:0.4.0-next.1
     networks:
       - main
     env_file:
