@@ -6,6 +6,9 @@ export enum MenuScene {
     FACTION = 'faction',
     QUEUE = 'queue',
     END_LEVEL = 'end_level',
+    INVITE_FRIEND = 'invite_friend',
+    TEAM_LOBBY = 'team_lobby',
+    NOT_FOUND = 'not_found',
 }
 
 export enum MenuMode {
@@ -37,4 +40,16 @@ export interface IWaveOptions {
     randomTransition: number;
     amplitudeTransition: number;
     speed: number;
+}
+
+export enum Route {
+    HOME = '/',
+    LOBBY = '/lobby',
+    INVITE = '/invite',
+}
+
+// route not game related, that should benefit from SSR
+export enum RouteStatic {
+    TIMELINE = '/timeline',
+    ROADMAP = '/timeline#roadmap',
 }

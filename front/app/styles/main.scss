@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@900&display=swap');
 @import 'mixins';
 @import 'global';
 @import 'homeScene';
@@ -5,5 +6,8 @@
 @import 'factionScene';
 @import 'queueScene';
 @import 'endLevelScene';
+@import 'inviteFriendScene';
+@import 'teamLobbyScene';
 @import 'SettingsMenu';
 @import 'timeline';
+@import 'notFound';

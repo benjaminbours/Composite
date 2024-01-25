@@ -1,46 +1,41 @@
 // vendors
 import Script from 'next/script';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { MenuScene } from './types';
-import { CopyToClipBoardIcon } from './CopyToClipboardIcon';
+import { CopyToClipBoardButton } from '../CopyToClipboardButton';
+import { RouteStatic } from '../../types';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     side?: Side;
     levelName?: string;
     handleClickOnPlay: () => void;
     actions: React.ReactNode;
+    isMount: boolean;
+    setLightIsPulsingFast: (isPulsingFast: boolean) => void;
+    setShadowRotationSpeed: (speed: number) => void;
 }
 
 export const EndLevelScene: React.FC<Props> = ({
     endLevelRef,
-    currentScene,
     side,
     levelName,
     handleClickOnPlay,
     actions,
+    isMount,
+    setLightIsPulsingFast,
+    setShadowRotationSpeed,
 }) => {
-    const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
         'content-container': true,
         'end-level-container': true,
         [`end-level-container--${color}`]: side !== undefined ? true : false,
-        ...(currentScene !== MenuScene.END_LEVEL ? { unmount: true } : {}),
+        unmount: !isMount,
     });
-
-    const handleClickCopyToClipBoard = useCallback(() => {
-        navigator.clipboard.writeText(process.env.NEXT_PUBLIC_URL!);
-        setShouldDisplayIsCopied(true);
-        setTimeout(() => {
-            setShouldDisplayIsCopied(false);
-        }, 3000);
-    }, []);
 
     // effect to trigger script coming with buttons
     useEffect(() => {
@@ -78,10 +73,28 @@ export const EndLevelScene: React.FC<Props> = ({
             </h3>
             <button
                 className={`buttonCircle ${color} end-level-container__play-button`}
-                // TODO: had same interaction as on home page
-                // onMouseEnter={handleMouseEnterPlay}
-                // onMouseLeave={handleMouseLeavePlay}
-                onClick={handleClickOnPlay}
+                onMouseEnter={() => {
+                    if (side === Side.LIGHT) {
+                        setLightIsPulsingFast(true);
+                    } else {
+                        setShadowRotationSpeed(0.02);
+                    }
+                }}
+                onMouseLeave={() => {
+                    if (side === Side.LIGHT) {
+                        setLightIsPulsingFast(false);
+                    } else {
+                        setShadowRotationSpeed(0.005);
+                    }
+                }}
+                onClick={() => {
+                    if (side === Side.LIGHT) {
+                        setLightIsPulsingFast(false);
+                    } else {
+                        setShadowRotationSpeed(0.005);
+                    }
+                    handleClickOnPlay();
+                }}
             >
                 Play
             </button>
@@ -92,7 +105,7 @@ export const EndLevelScene: React.FC<Props> = ({
                         If you liked the experience and you want it to reach its{' '}
                         <a
                             className="inline-link"
-                            href="/about"
+                            href={RouteStatic.ROADMAP}
                             target="_blank"
                         >
                             full potential
@@ -114,7 +127,7 @@ export const EndLevelScene: React.FC<Props> = ({
                     >
                         Tweet
                     </a>
-                    <Script>{`
+                    <Script id="twitter-post-button-script">{`
     window.twttr = (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0],
           t = window.twttr || {};
@@ -134,17 +147,13 @@ export const EndLevelScene: React.FC<Props> = ({
     `}</Script>
                 </div>
                 <div>
-                    <button
-                        className={`buttonRect ${color}`}
-                        onClick={handleClickCopyToClipBoard}
-                    >
-                        <CopyToClipBoardIcon color={color} />
-                        <p>
-                            {shouldDisplayIsCopied
-                                ? 'Copied to clipboard'
-                                : process.env.NEXT_PUBLIC_URL}
-                        </p>
-                    </button>
+                    <CopyToClipBoardButton
+                        color="black"
+                        text={
+                            process.env.NEXT_PUBLIC_URL ||
+                            'Missing env variable'
+                        }
+                    />
                 </div>
                 <div className="patreon-container">
                     <a

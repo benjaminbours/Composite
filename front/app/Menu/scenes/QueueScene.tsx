@@ -1,37 +1,36 @@
 // vendors
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { CopyToClipBoardIcon } from './CopyToClipboardIcon';
-import { MenuStateInfo } from './MenuStateInfo';
+import { MenuStateInfo } from '../MenuStateInfo';
+import { CopyToClipBoardButton } from '../CopyToClipboardButton';
 
 interface Props {
     queueRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     side?: Side;
     levelName?: string;
     isInQueue: boolean;
     actions: React.ReactNode;
+    isMount: boolean;
 }
 
 export const QueueScene: React.FC<Props> = ({
     queueRef,
-    currentScene,
     side,
     levelName,
     isInQueue,
     actions,
+    isMount,
 }) => {
     const [queueTime, setQueueTime] = useState(0);
-    const [shouldDisplayIsCopied, setShouldDisplayIsCopied] = useState(false);
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
         'content-container': true,
         'queue-container': true,
         [`queue-container--${color}`]: side ? true : false,
-        ...(currentScene !== 'queue' ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     const queueText = useMemo(
@@ -39,16 +38,8 @@ export const QueueScene: React.FC<Props> = ({
             0: `Waiting for a light`,
             1: `Waiting for a shadow`,
         }),
-        [levelName],
+        [],
     );
-
-    const handleClickCopyToClipBoard = useCallback(() => {
-        navigator.clipboard.writeText(process.env.NEXT_PUBLIC_URL!);
-        setShouldDisplayIsCopied(true);
-        setTimeout(() => {
-            setShouldDisplayIsCopied(false);
-        }, 3000);
-    }, []);
 
     useEffect(() => {
         if (!isInQueue) {
@@ -60,7 +51,7 @@ export const QueueScene: React.FC<Props> = ({
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [side]);
+    }, [isInQueue]);
 
     return (
         <div ref={queueRef} className={cssClass}>
@@ -69,7 +60,9 @@ export const QueueScene: React.FC<Props> = ({
             {side !== undefined && (
                 <h2
                     className={`title-h2${
-                        side === Side.SHADOW ? ' title-h2--black' : ''
+                        side === Side.SHADOW
+                            ? ' title-h2--black'
+                            : 'title-h2--white'
                     }`}
                 >
                     {queueText[side]}
@@ -81,17 +74,10 @@ export const QueueScene: React.FC<Props> = ({
             <div className="queue-container__share">
                 <p>{`Waiting time is too long?`}</p>
                 <p>{`Share this link with your friends`}</p>
-                <button
-                    className={`buttonRect ${color}`}
-                    onClick={handleClickCopyToClipBoard}
-                >
-                    <CopyToClipBoardIcon color={color} />
-                    <p>
-                        {shouldDisplayIsCopied
-                            ? 'Copied to clipboard'
-                            : process.env.NEXT_PUBLIC_URL}
-                    </p>
-                </button>
+                <CopyToClipBoardButton
+                    color="black"
+                    text={process.env.NEXT_PUBLIC_URL || 'Missing env variable'}
+                />
             </div>
         </div>
     );

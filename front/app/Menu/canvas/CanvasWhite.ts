@@ -1,7 +1,5 @@
-// our libs
-import { Side } from '@benjaminbours/composite-core';
 // local
-import { ResizeOptions } from '../types';
+import { ResizeOptions } from '../../types';
 import Shadow from './Shadow';
 import Canvas from './Canvas';
 
@@ -15,7 +13,6 @@ export default class CanvasWhite extends Canvas {
 
     public render = () => {
         super.clear();
-        super.renderBothComponents(Side.SHADOW);
         this.shadow.render();
     };
 

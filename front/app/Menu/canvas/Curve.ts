@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { IWaveOptions, ResizeOptions } from '../types';
+import { IWaveOptions, ResizeOptions } from '../../types';
 import Point from './Point';
 
 export const defaultWaveOptions: IWaveOptions = {
@@ -17,11 +17,12 @@ export const defaultWaveOptions: IWaveOptions = {
     speed: 0.02,
 };
 
+// TODO: Avoid static method, don't think it's needed in that case.
 export default class Curve {
     public static vTotalPoints = 15;
     public static hTotalPoints = 8;
-    public static vGap = window.innerHeight / (Curve.vTotalPoints - 1);
-    public static hGap = window.innerWidth / (Curve.hTotalPoints - 1);
+    public static vGap = 0;
+    public static hGap = 0;
 
     public static waveOptions = defaultWaveOptions;
 
@@ -37,11 +38,30 @@ export default class Curve {
     public axis: 'h' | 'v' = 'v';
 
     public resizeOptions = {
+        not_found(width: number, height: number, isOnMobile: boolean) {
+            const position = 1.2;
+            if (isOnMobile) {
+                return height * position;
+            }
+            return width * position;
+        },
         home(width: number, height: number, isOnMobile: boolean) {
             if (isOnMobile) {
                 return height * 0.75;
             }
             return width * 0.5;
+        },
+        team_lobby(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return height * 0.75;
+            }
+            return width * 0.5;
+        },
+        invite_friend(width: number, height: number, isOnMobile: boolean) {
+            if (isOnMobile) {
+                return height * 0.5;
+            }
+            return width * 0.15;
         },
         level(width: number, height: number, isOnMobile: boolean) {
             if (isOnMobile) {

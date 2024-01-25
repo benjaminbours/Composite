@@ -4,46 +4,46 @@ import React from 'react';
 // our libs
 import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
 // local
-import { QueueInfoText } from './QueueInfo';
-import { MenuStateInfo } from './MenuStateInfo';
+import { QueueInfoText } from '../QueueInfo';
+import { MenuStateInfo } from '../MenuStateInfo';
 
 interface Props {
     sideRef: React.RefObject<HTMLDivElement>;
-    currentScene: string;
     selectedLevel?: Levels;
     levelName?: string;
-    handleClickOnFaction: (side: Side) => void;
+    onClickOnFaction: (side: Side) => void;
     allQueueInfo?: AllQueueInfo;
     actions: React.ReactNode;
+    isMount: boolean;
 }
 
 export const SideScene: React.FC<Props> = ({
     sideRef,
-    currentScene,
     selectedLevel,
     levelName,
-    handleClickOnFaction,
+    onClickOnFaction,
     allQueueInfo,
     actions,
+    isMount,
 }) => {
     const cssClass = classNames({
         'content-container': true,
         'faction-container': true,
-        ...(currentScene !== 'queue' ? { unmount: true } : {}),
+        unmount: !isMount,
     });
 
     return (
         <div ref={sideRef} className={cssClass}>
             {actions}
             <MenuStateInfo levelName={levelName} />
-            <h2 className="title-h2">Select a&nbsp;side</h2>
+            <h2 className="title-h2 title-h2--white">Select a&nbsp;side</h2>
             {/* <p>{`Selected level: ${levelName}`}</p> */}
             <button
                 className="buttonCircle factionButton white"
                 // TODO: had same interaction as on home page
                 // onMouseEnter={handleMouseEnterPlay}
                 // onMouseLeave={handleMouseLeavePlay}
-                onClick={() => handleClickOnFaction(Side.LIGHT)}
+                onClick={() => onClickOnFaction(Side.LIGHT)}
             >
                 light
             </button>
@@ -52,7 +52,7 @@ export const SideScene: React.FC<Props> = ({
                 // TODO: had same interaction as on home page
                 // onMouseEnter={handleMouseEnterPlay}
                 // onMouseLeave={handleMouseLeavePlay}
-                onClick={() => handleClickOnFaction(Side.SHADOW)}
+                onClick={() => onClickOnFaction(Side.SHADOW)}
             >
                 shadow
             </button>

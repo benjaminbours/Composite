@@ -1,28 +1,67 @@
 .home-container {
     .title-h1 {
-        display: none;
         color: white;
         margin-top: 100px;
+        margin-bottom: 0px;
+        mix-blend-mode: difference;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 40px;
+        text-indent: 40px;
+        transform: scaleY(0.8);
+        text-transform: uppercase;
+        text-align: center;
+
+        @media (min-width: 1600px) {
+            font-size: 160px;
+        }
+
+        @media (max-width: 1600px) {
+            font-size: 140px;
+        }
+
+        @media (max-width: 1200px) {
+            font-size: 100px;
+        }
+
+        @media (max-width: 1000px) {
+            font-size: 70px;
+            letter-spacing: 30px;
+            text-indent: 30px;
+        }
 
         @media (max-width: 768px) {
-            display: block;
+            font-size: 70px;
+            letter-spacing: 20px;
+            text-indent: 20px;
+        }
+
+        @media (max-width: 580px) {
+            font-size: 50px;
+            letter-spacing: 10px;
+            text-indent: 10px;
+        }
+
+        @media (max-width: 420px) {
+            font-size: 40px;
+            letter-spacing: 10px;
+            text-indent: 10px;
         }
     }
 
     .main-subtitle {
+        font-family: 'Source Code Pro', monospace;
         text-transform: uppercase;
-        font-weight: 400;
+        font-weight: 600;
         font-size: 30px;
         letter-spacing: 20px;
         text-indent: 20px;
         text-align: center;
-        width: 90%;
         color: white;
-        display: none;
-        text-align: center;
+        mix-blend-mode: difference;
 
-        @media (min-width: 2000px) {
-            font-size: 40px;
+        @media (max-width: 1000px) {
+            font-size: 25px;
         }
 
         @media (max-width: 768px) {
@@ -43,29 +82,12 @@
 
         @media (max-width: 580px) {
             font-size: 16px;
-            line-height: 1.5;
         }
-
-        // @media (max-width: 400px) and (min-height: 800px) {
-        //     top: 30%;
-        // }
-
-        // @media (max-height: 800px) {
-        //     top: 30%;
-        // }
-
-        // @media (max-height: 600px) {
-        //     top: 25%;
-        // }
-
-        // @media (min-height: 1000px) {
-        //     top: 30%;
-        // }
     }
 
     .queue-count {
         position: fixed;
-        top: calc(75% - 25px);
+        top: calc(60% - 25px);
 
         &--light {
             left: 10%;
@@ -87,31 +109,143 @@
     }
 }
 
-#buttonPlay {
+.home-container__play-container {
     position: fixed;
     left: 50%;
     transform: translate(-50%, 0%);
     top: calc(75% - 45px);
-    background: black;
-    color: white;
+    width: 90px;
+    height: 90px;
+
+    @media (max-width: 768px) {
+        width: 80px;
+        height: 80px;
+        top: calc(75% - 40px);
+    }
+
+    // BUTTONS
+
+    .button-random {
+        background: white;
+        opacity: 0;
+
+        &:hover {
+            &::before {
+                border: solid rgba(255, 255, 255, 1) 1px;
+            }
+        }
+
+        &.visible {
+            transform: translateX(-100%);
+            opacity: 1;
+        }
+    }
+
+    .button-friend {
+        background: black;
+        color: white;
+        opacity: 0;
+
+        &:hover {
+            &::before {
+                border: solid rgba(0, 0, 0, 1) 1px;
+            }
+        }
+
+        &.visible {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+    }
+
+    .button-hidden {
+        position: absolute;
+        z-index: -1;
+        font-size: 11px;
+        transition: 0.3s ease-out;
+
+        &::before {
+            content: '';
+            width: 100%;
+            top: 50%;
+            left: 50%;
+            height: 100%;
+            transform: translateX(-50%) translateY(-50%) scale(1.3);
+            position: absolute;
+            border-radius: 100px;
+            opacity: 1;
+            transition: 0.5s;
+            border: solid rgba(0, 0, 0, 0) 1px;
+        }
+    }
+
+    // INFORMATION
+
+    $size: 250px;
+    $sizeTable: 200px;
+    .information {
+        position: absolute;
+        width: 300px;
+        line-height: 1.5;
+        opacity: 0;
+        transition: 0.3s ease-out;
+        top: 50%;
+        margin: 0;
+
+        &.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 1000px) {
+            width: 200px;
+        }
+    }
+
+    .information-random {
+        color: white;
+        transform: translate(calc($size * -1 - 50%), -50%);
+
+        @media (max-width: 1000px) {
+            transform: translate(calc($sizeTable * -1 - 50%), -50%);
+        }
+    }
+
+    .information-friend {
+        transform: translate($size, -50%);
+        color: black;
+
+        @media (max-width: 1000px) {
+            transform: translate($sizeTable, -50%);
+        }
+    }
+}
+
+#buttonPlay {
+    background: white;
+    color: black;
+    border: solid black 7px;
     font-weight: 100;
     font-size: 20px;
     transition: 0.3s ease-out;
     overflow: hidden;
+    mix-blend-mode: difference;
+    border-color: black;
+    color: black;
+    mix-blend-mode: difference;
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    top: calc(75% - 52px);
 
-    @media (min-width: 769px) {
+    @media (min-width: 768px) {
         &:hover {
-            background: white;
+            border-color: white;
             color: black;
             transition: 0.3s ease-out;
         }
     }
 
     @media (max-height: 700px), (max-width: 768px) {
-        top: calc(75% - 40px);
-    }
-
-    @media (min-width: 2000px) {
-        top: calc(75% - 60px);
+        top: calc(75% - 47px);
     }
 }

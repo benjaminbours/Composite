@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { ResizeOptions } from '../types';
+import { ResizeOptions } from '../../types';
 
 const light = new Image();
 light.src = '/light.png';
@@ -60,10 +60,36 @@ export default class Light {
     ];
 
     public resizeOptions = {
+        not_found(width: number, height: number, isOnMobile: boolean) {
+            const positionX = 0.5;
+            const positionY = 0.5;
+            if (isOnMobile) {
+                return {
+                    x: width * 0.5,
+                    y: height * 0.85,
+                };
+            }
+            return {
+                x: width * positionX,
+                y: height * positionY,
+            };
+        },
         home(width: number, height: number) {
             return {
                 x: width * 0.5,
                 y: height * 0.75,
+            };
+        },
+        team_lobby(width: number, height: number) {
+            return {
+                x: width * 0.25,
+                y: height * 0.75,
+            };
+        },
+        invite_friend(width: number, height: number) {
+            return {
+                x: width * 0.15,
+                y: height * 0.5,
             };
         },
         level(width: number, height: number) {

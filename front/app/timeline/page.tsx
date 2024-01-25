@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Composite - The game - Roadmap',
+    title: 'Composite - The game - Timeline',
     description:
         'Explore the timeline of events and milestones in the development of Composite - The game.',
 };
@@ -53,10 +53,10 @@ const pastEvents: TimelineEvent[] = [
         date: '2023 - July',
         description: (
             <p>
-                Too bored by corporate jobs, too thirsty about creating
+                {`Too bored by corporate jobs, too thirsty about creating
                 something on my own and working for my dreams and not for
                 somebody else's dream. Start to work on the game again, in my
-                free time.
+                free time.`}
             </p>
         ),
     },
@@ -182,8 +182,8 @@ const pastEvents: TimelineEvent[] = [
                         </p>
                     </li>
                     <li>
-                        Fist level "Crack the door" restored and playable. Door
-                        opening mechanic restored.
+                        {`Fist level "Crack the door" restored and playable. Door
+                        opening mechanic restored.`}
                     </li>
                 </ul>
             </>
@@ -219,12 +219,12 @@ const pastEvents: TimelineEvent[] = [
         description: (
             <>
                 <p>
-                    Realize it's not gonna work, realize I have to force myself
+                    {`Realize it's not gonna work, realize I have to force myself
                     so much to work for that job I have no interest into,
                     realize I'm not gonna be able to work on the game in my free
                     time with a full time job load, realize I was much more
                     productive working one month on Composite than 2 months on
-                    the freelance mission.
+                    the freelance mission.`}
                 </p>
                 <p>
                     Realize I am not in the rush to find another mission in the
@@ -264,19 +264,19 @@ const pastEvents: TimelineEvent[] = [
                     </li>
                     <li>
                         <p>
-                            Realizing that doing real time collision between
+                            {` Realizing that doing real time collision between
                             players in multiplayer game is more challenging and
                             the current experience is poor in the second level
                             based on this mechanic. Start reading a lot of
                             content about Rocket League's physic system,
-                            fighting / FPS games's net code, etc.
+                            fighting / FPS games's net code, etc.`}
                         </p>
                     </li>
                     <li>
                         <p>
-                            Second level "Learn to fly" remake, playable but not
+                            {`Second level "Learn to fly" remake, playable but not
                             incredible. Bounce mechanic enabled but hard to deal
-                            with network inconsistencies.
+                            with network inconsistencies.`}
                         </p>
                     </li>
                     <li>
@@ -422,10 +422,10 @@ const pastEvents: TimelineEvent[] = [
                     </li>
                     <li>
                         <p>
-                            Tremendous refactor of the "MainApp" orchestration
+                            {`Tremendous refactor of the "MainApp" orchestration
                             in order to welcome more easily the invite a friend
                             flow, but also to improve the separation of concerns
-                            of the menu.
+                            of the menu.`}
                         </p>
                     </li>
                     <li>
@@ -491,9 +491,9 @@ const futureEvents: TimelineEvent[] = [
                 <ul>
                     <li>
                         <p>
-                            Add menu mode, invite a friend, so you don't have to
+                            {`Add menu mode, invite a friend, so you don't have to
                             match with random person, you can just send a link
-                            to your friend, and play the game with him.
+                            to your friend, and play the game with him.`}
                         </p>
                     </li>
                     <li>
@@ -515,8 +515,8 @@ const futureEvents: TimelineEvent[] = [
                     </li>
                     <li>
                         <p>
-                            Level 3, "The High Spheres", combining the mechanics
-                            of the two first levels, in a more complex way.
+                            {` Level 3, "The High Spheres", combining the mechanics
+                            of the two first levels, in a more complex way.`}
                         </p>
                     </li>
                     <li>
@@ -567,18 +567,25 @@ const futureEvents: TimelineEvent[] = [
                 <h3>Objectives</h3>
                 <ul>
                     <li>
+                        Electron app installable on desktop, with auto update,
+                        and register it on steam.
+                    </li>
+                    <li>
                         <p>Many more levels</p>
+                    </li>
+                    <li>
+                        <p>Many more languages / translations</p>
                     </li>
                     <li>
                         <p>Rethink the look and feels of levels</p>
                     </li>
                     <li>
                         <p>
-                            Make the game "speed run" friendly, display an
+                            {` Make the game "speed run" friendly, display an
                             accurate timer for each game session. Should the
                             leader board be stored in blockchain? Seems like a
                             good fits to me, in order to be as transparent as
-                            possible.
+                            possible.`}
                         </p>
                     </li>
                     <li>
@@ -604,22 +611,22 @@ const futureEvents: TimelineEvent[] = [
                             would be awesome for me.
                         </p>
                         <p>
-                            We could also imagine events, where NFTs would be
+                            {` We could also imagine events, where NFTs would be
                             hidden in some levels of the game, and the first
                             player to find it wins it. I have no idea yet about
                             any kind of valorization in terms of tokens or NFTs,
                             it's just the incentive and reward ideas that I love
-                            very much, and blockchain seems a good fit for it.
+                            very much, and blockchain seems a good fit for it.`}
                         </p>
                     </li>
                     <li>
                         <p>
-                            We could also imagine events, where NFTs would be
+                            {`We could also imagine events, where NFTs would be
                             hidden in some levels of the game, and the first
                             player to find it wins it. I have no idea yet about
                             any kind of valorization in terms of tokens or NFTs,
                             it's just the incentive and reward ideas that I love
-                            very much, and blockchain seems a good fit for it.
+                            very much, and blockchain seems a good fit for it.`}
                         </p>
                     </li>
                 </ul>
@@ -628,9 +635,9 @@ const futureEvents: TimelineEvent[] = [
     },
 ];
 
-export default async function Roadmap() {
+export default async function Timeline() {
     return (
-        <main className="roadmap-page">
+        <main className="timeline-page">
             <div className="main-container">
                 <h1>Composite - Timeline</h1>
                 <ul className="timeline">

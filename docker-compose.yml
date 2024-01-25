@@ -85,8 +85,8 @@ services:
     networks:
       - main
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.front.rule=Host(`front.localhost`)"
+      - traefik.enable=true
+      - traefik.http.routers.front.rule=Host(`front.localhost`)
       - traefik.http.services.front.loadbalancer.server.port=3000
 
 networks:

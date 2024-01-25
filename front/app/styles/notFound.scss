@@ -1,0 +1,32 @@
+.not-found {
+    background: black;
+    width: 100%;
+    color: white;
+
+    .content-container {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        margin-top: 100px;
+    }
+
+    .buttonCircle.white {
+        text-decoration: none;
+        transition: 0.3s ease-in-out;
+        display: block;
+        background: white;
+        color: black;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+
+        @media (min-width: 769px) {
+            &:hover {
+                background: black;
+                color: white;
+            }
+        }
+    }
+}

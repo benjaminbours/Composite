@@ -1,7 +1,5 @@
-// our libs
-import { Side } from '@benjaminbours/composite-core';
 // local
-import { ResizeOptions } from '../types';
+import { ResizeOptions } from '../../types';
 import Curve from './Curve';
 import Light from './Light';
 import Canvas from './Canvas';
@@ -20,7 +18,6 @@ export default class CanvasBlack extends Canvas {
         super.clear();
         this.ctx.save();
         this.curve.render();
-        super.renderBothComponents(Side.LIGHT);
         this.light.render();
         this.ctx.restore();
     };

@@ -1,7 +1,7 @@
 import { Levels, QueueInfo } from '@benjaminbours/composite-core';
 import React from 'react';
-import { QueueInfoText } from './QueueInfo';
 import classNames from 'classnames';
+import { QueueInfoText } from '../QueueInfo';
 
 interface IProps {
     id: Levels;

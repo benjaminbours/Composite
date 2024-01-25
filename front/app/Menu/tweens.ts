@@ -1,131 +1,107 @@
+// vendors
 import { gsap } from 'gsap';
-import Animation from './Animation';
-import { MenuScene } from './types';
+// our libs
+import { Side } from '@benjaminbours/composite-core';
+// project
+import { MenuScene } from '../types';
+import CanvasBlack from './canvas/CanvasBlack';
+import CanvasWhite from './canvas/CanvasWhite';
+import Curve, { defaultWaveOptions } from './canvas/Curve';
+import { RefHashMap } from '../useMenuTransition';
+
+export interface TweenOptions {
+    step: MenuScene;
+    side?: Side;
+}
 
 /**
  * Curve
  */
-export function curveToStep(step: MenuScene) {
-    const { canvas, curve } = Animation.canvasComponents;
-
-    return gsap.to(curve, {
+export function curveToStep(
+    options: TweenOptions,
+    canvasBlack: CanvasBlack,
+    isMobileDevice: boolean,
+) {
+    const { step, side } = options;
+    return gsap.to(canvasBlack.curve, {
         duration: 0.5,
-        origin: curve.resizeOptions[step](
-            canvas.width,
-            canvas.height,
-            Animation.isMobileDevice,
-            Animation.faction,
+        origin: canvasBlack.curve.resizeOptions[step](
+            canvasBlack.ctx.canvas.width,
+            canvasBlack.ctx.canvas.height,
+            isMobileDevice,
+            side,
         ),
-        onComplete: Animation.setWaveInDefaultMode,
-    });
-}
-
-/**
- * Light
- */
-export function lightToStep(step: MenuScene) {
-    const { canvas, light } = Animation.canvasComponents;
-    const coordinate = light.resizeOptions[step](
-        canvas.width,
-        canvas.height,
-        Animation.isMobileDevice,
-        Animation.faction,
-    );
-
-    return gsap.to(light, {
-        duration: 0.5,
-        delay: 0.1,
-        startX: coordinate.x,
-        startY: coordinate.y,
-    });
-}
-
-/**
- * Shadow
- */
-export function shadowToStep(step: MenuScene) {
-    const { canvas, shadow } = Animation.canvasComponents;
-    const coordinate = shadow.resizeOptions[step](
-        canvas.width,
-        canvas.height,
-        Animation.isMobileDevice,
-        Animation.faction,
-    );
-
-    return gsap.to(shadow, {
-        duration: 0.5,
-        delay: 0.1,
-        startX: coordinate.x,
-        startY: coordinate.y,
+        onComplete: () => {
+            Curve.setWaveOptions({
+                ...defaultWaveOptions,
+            });
+        },
     });
 }
 
 /**
  * Home
  */
-function homeOut() {
-    const { mainTitle, subtitleHome } = Animation.canvasComponents;
-    const homeInterface = Animation.components?.homeInterface
-        .current as HTMLDivElement;
-
-    return [
-        gsap.to(homeInterface, {
-            duration: 0.5,
-            opacity: 0,
-            onComplete: () => {
-                homeInterface.style.display = 'none';
-            },
-        }),
-        gsap.to([mainTitle, subtitleHome], {
-            duration: 0.5,
-            opacity: 0,
-            onComplete: () => {
-                mainTitle.onTransition = false;
-                mainTitle.isMount = false;
-                subtitleHome.onTransition = false;
-                subtitleHome.isMount = false;
-            },
-        }),
-    ];
+function homeOut(homeInterface: HTMLDivElement) {
+    return gsap.to('.home-container > *', {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            homeInterface.style.display = 'none';
+        },
+    });
 }
 
-export function homeIn() {
-    const { mainTitle, subtitleHome } = Animation.canvasComponents;
-    const homeInterface = Animation.components?.homeInterface
-        .current as HTMLDivElement;
-
-    return [
-        gsap.to([mainTitle, subtitleHome], {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                mainTitle.onTransition = true;
-                subtitleHome.onTransition = true;
-            },
-            onComplete: () => {
-                mainTitle.onTransition = false;
-                mainTitle.isMount = true;
-                subtitleHome.onTransition = false;
-                subtitleHome.isMount = true;
-            },
-        }),
-        gsap.to(homeInterface, {
+export function homeIn(homeInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        '.home-container > *',
+        {
+            opacity: 0,
+        },
+        {
             duration: 0.5,
             opacity: 1,
             onStart: () => {
                 homeInterface.style.display = 'block';
             },
-        }),
-    ];
+        },
+    );
+}
+
+/**
+ * Invite friend
+ */
+
+function inviteFriendOut(inviteFriendInterface: HTMLDivElement) {
+    return gsap.to(inviteFriendInterface, {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            inviteFriendInterface.style.display = 'none';
+        },
+    });
+}
+
+export function inviteFriendIn(inviteFriendInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        inviteFriendInterface,
+        {
+            opacity: 0,
+        },
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                inviteFriendInterface.style.display = 'flex';
+            },
+        },
+    );
 }
 
 /**
  * Level
  */
-function levelOut() {
-    const levelInterface = Animation.components?.levelInterface
-        .current as HTMLElement;
-
+function levelOut(levelInterface: HTMLDivElement) {
     return gsap.to(levelInterface, {
         duration: 0.5,
         opacity: 0,
@@ -135,26 +111,26 @@ function levelOut() {
     });
 }
 
-export function levelIn() {
-    const levelInterface = Animation.components?.levelInterface
-        .current as HTMLElement;
-
-    return gsap.to(levelInterface, {
-        duration: 0.5,
-        opacity: 1,
-        onStart: () => {
-            levelInterface.style.display = 'block';
+export function levelIn(levelInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        levelInterface,
+        {
+            opacity: 0,
         },
-    });
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                levelInterface.style.display = 'block';
+            },
+        },
+    );
 }
 
 /**
  * Faction
  */
-function factionOut() {
-    const factionInterface = Animation.components?.factionInterface
-        .current as HTMLElement;
-
+function factionOut(factionInterface: HTMLDivElement) {
     return gsap.to(factionInterface, {
         duration: 0.5,
         opacity: 0,
@@ -164,41 +140,44 @@ function factionOut() {
     });
 }
 
-export function factionIn() {
-    const factionInterface = Animation.components?.factionInterface
-        .current as HTMLElement;
-
+export function factionIn(factionInterface: HTMLDivElement) {
     return [
-        gsap.to(factionInterface, {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                factionInterface.style.display = 'block';
+        gsap.fromTo(
+            factionInterface,
+            {
+                opacity: 0,
             },
-        }),
+            {
+                duration: 0.5,
+                opacity: 1,
+                onStart: () => {
+                    factionInterface.style.display = 'block';
+                },
+            },
+        ),
     ];
 }
 
 /**
  * Queue
  */
-export function queueIn() {
-    const queueInterface = Animation.components?.queueInterface
-        .current as HTMLElement;
-
-    return gsap.to(queueInterface, {
-        duration: 0.5,
-        opacity: 1,
-        onStart: () => {
-            queueInterface.style.display = 'block';
+export function queueIn(queueInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        queueInterface,
+        {
+            opacity: 0,
         },
-    });
+        {
+            duration: 0.5,
+            opacity: 1,
+            onStart: () => {
+                queueInterface.style.display = 'block';
+            },
+        },
+    );
 }
 
-function queueOut() {
-    const queueInterface = Animation.components?.queueInterface
-        .current as HTMLElement;
-
+function queueOut(queueInterface: HTMLDivElement) {
     return gsap.to(queueInterface, {
         duration: 0.5,
         opacity: 0,
@@ -208,10 +187,7 @@ function queueOut() {
     });
 }
 
-function endLevelOut() {
-    const endLevelInterface = Animation.components?.endLevelInterface
-        .current as HTMLElement;
-
+function endLevelOut(endLevelInterface: HTMLDivElement) {
     return gsap.to(endLevelInterface, {
         duration: 0.5,
         opacity: 0,
@@ -221,6 +197,57 @@ function endLevelOut() {
     });
 }
 
-export function allMenuScenesOut() {
-    return [...homeOut(), levelOut(), factionOut(), queueOut(), endLevelOut()];
+export function teamLobbyIn(teamLobbyInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        teamLobbyInterface,
+        {
+            opacity: 0,
+        },
+        {
+            duration: 0.5,
+            opacity: 1,
+            onComplete: () => {
+                teamLobbyInterface.style.display = 'flex';
+            },
+        },
+    );
+}
+
+function teamLobbyOut(teamLobbyInterface: HTMLDivElement) {
+    return gsap.fromTo(
+        teamLobbyInterface,
+        {
+            opacity: 1,
+        },
+        {
+            duration: 0.5,
+            opacity: 0,
+            onComplete: () => {
+                teamLobbyInterface.style.display = 'none';
+            },
+        },
+    );
+}
+
+function notFoundOut(notFoundInterface: HTMLDivElement) {
+    return gsap.to(notFoundInterface, {
+        duration: 0.5,
+        opacity: 0,
+        onComplete: () => {
+            notFoundInterface.style.display = 'none';
+        },
+    });
+}
+
+export function allMenuScenesOut(refHashMap: RefHashMap) {
+    return [
+        homeOut(refHashMap.homeRef.current!),
+        levelOut(refHashMap.levelRef.current!),
+        factionOut(refHashMap.sideRef.current!),
+        queueOut(refHashMap.queueRef.current!),
+        endLevelOut(refHashMap.endLevelRef.current!),
+        inviteFriendOut(refHashMap.inviteFriendRef.current!),
+        notFoundOut(refHashMap.notFoundRef.current!),
+        teamLobbyOut(refHashMap.teamLobbyRef.current!),
+    ];
 }

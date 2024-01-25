@@ -30,6 +30,7 @@ canvas,
     flex-direction: column;
     align-items: flex-end;
     justify-content: space-between;
+    mix-blend-mode: difference;
 
     .settings {
         transition: 0.3s ease-in;
@@ -46,47 +47,17 @@ canvas,
 
     .cogwheel {
         width: 30px;
+        fill: white;
     }
 
     .inline-link {
         text-decoration: none;
         margin-top: 15px;
+        color: white;
     }
 
-    &--black {
-        .cogwheel {
-            fill: black;
-        }
-
-        .version {
-            color: black;
-        }
-
-        .inline-link {
-            color: black;
-
-            &::before {
-                border-color: black;
-            }
-        }
-    }
-
-    &--white {
-        .cogwheel {
-            fill: white;
-        }
-
-        .version {
-            color: white;
-        }
-
-        .inline-link {
-            color: white;
-
-            &::before {
-                border-color: white;
-            }
-        }
+    .version {
+        color: white;
     }
 }
 
@@ -95,29 +66,13 @@ canvas,
     width: 100%;
 }
 
-.title-h1 {
-    text-transform: uppercase;
-    font-weight: 900;
-    font-size: 50px;
-    letter-spacing: 20px;
-    text-align: center;
-    text-indent: 20px;
-
-    @media (max-width: 580px) {
-        font-size: 30px;
-        line-height: 1.5;
-    }
-
-    @media (max-width: 420px) {
-        font-size: 25px;
-    }
-}
-
 .title-h2 {
-    color: white;
-
     &--black {
         color: black;
+    }
+
+    &--white {
+        color: white;
     }
 
     @media (max-width: 768px) {
@@ -136,7 +91,7 @@ button {
 .buttonRect {
     width: auto;
     text-align: center;
-    border: solid transparent 1px;
+    border: solid white 1px;
     padding: 20px;
     letter-spacing: 5px;
     text-transform: uppercase;
@@ -145,17 +100,30 @@ button {
 
     &.white {
         color: white;
-
+        border-color: white;
         &:hover {
             border-color: white;
+            background: white;
+            color: black;
         }
     }
 
     &.black {
         color: black;
-
+        border-color: black;
         &:hover {
             border-color: black;
+            background: black;
+            color: white;
+        }
+    }
+
+    // different border management for back button
+    &.back {
+        border-color: transparent;
+
+        &:hover {
+            border-color: white;
         }
     }
 
@@ -165,12 +133,15 @@ button {
     }
 }
 
+$buttonSize: 90px;
+$buttonSizeSmall: 80px;
+$buttonSizeLarge: 120px;
 .buttonCircle {
     text-align: center;
-    width: 90px;
-    height: 90px;
-    border-radius: 100px;
-    line-height: 90px;
+    width: $buttonSize;
+    height: $buttonSize;
+    border-radius: $buttonSize;
+    line-height: $buttonSize;
     text-transform: uppercase;
     letter-spacing: 5px;
     font-weight: 900;
@@ -183,24 +154,24 @@ button {
     }
 
     @media (max-height: 700px), (max-width: 768px) {
-        width: 80px;
-        height: 80px;
+        width: $buttonSizeSmall;
+        height: $buttonSizeSmall;
         font-size: 18px;
-        line-height: 80px;
+        line-height: $buttonSizeSmall;
         font-weight: 500;
     }
 
     @media (min-width: 2000px) {
-        width: 120px;
-        height: 120px;
+        width: $buttonSizeLarge;
+        height: $buttonSizeLarge;
         font-size: 30px;
-        line-height: 120px;
+        line-height: $buttonSizeLarge;
     }
 }
 
 .unmount {
     opacity: 0;
-    display: none;
+    display: none !important;
 }
 
 .queue-count {
@@ -299,6 +270,8 @@ button {
     font-size: 12px;
     display: flex;
     align-items: center;
+    mix-blend-mode: difference;
+    color: white;
 
     * {
         margin-right: 10px;
@@ -310,11 +283,52 @@ button {
     border: solid white 1px;
     color: white;
     position: fixed;
+    z-index: 100;
     top: 2.5%;
     right: 2.5%;
     padding: 20px;
 
     button {
         font-size: 10px;
+    }
+}
+
+.copy-to-clipboard {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+
+    svg {
+        width: 35px;
+        margin-right: 10px;
+        transition: 0.7s;
+    }
+
+    &.black {
+        svg {
+            fill: black;
+        }
+    }
+
+    &.white {
+        svg {
+            fill: white;
+        }
+    }
+
+    &:hover {
+        &.black {
+            svg {
+                fill: white;
+            }
+        }
+
+        &.white {
+            svg {
+                fill: black;
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ The game's mechanics are designed to leverage the interplay between these two el
 
 Light and shadow are not just visual elements in this game; they are integral to the gameplay itself. Players will need to collaborate and use their unique abilities to overcome obstacles, puzzles, and progress through the game. Levels are designed to be finished together.
 
-At the moment, the project is still in the early stage of development. You can access the [staging here](http://staging.compositethegame.com/) where the latest updates are deployed to be tested by any body willing to experience the game. I encourage you to share on [discord](https://discord.gg/735Nvhh7) or any other media any kind of feedback that could be valuable for the good evolution of the project.
+At the moment, the project is still in the early stage of development. You can access the [staging here](https://staging.compositethegame.com/) where the latest updates are deployed to be tested by any body willing to experience the game. I encourage you to share on [discord](https://discord.gg/735Nvhh7) or any other media any kind of feedback that could be valuable for the good evolution of the project.
 
 Are you ready to step into the light and embrace the shadows?
 

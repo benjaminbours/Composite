@@ -7,8 +7,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as uuid from 'uuid';
+import ShortUniqueId from 'short-unique-id';
 // our libs
 import {
   SocketEventType,
@@ -29,12 +30,15 @@ import {
   ProjectionLevelState,
   GameState,
   collectInputsForTick,
+  InviteFriendTokenPayload,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { PlayerState, PlayerStatus } from 'src/PlayerState';
+import { PlayerState, PlayerStatus, RedisPlayerState } from 'src/PlayerState';
 import { GameStatus, Level } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { UtilsService } from './utils.service';
+import { SocketService } from './socket.service';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -49,6 +53,7 @@ import { PrismaService } from 'src/prisma.service';
   //   origin: [ENVIRONMENT.CLIENT_URL],
   // },
 })
+@Injectable()
 export class SocketGateway {
   private gameLoopsRegistry: Record<string, NodeJS.Timeout> = {};
   @WebSocketServer() server: Server;
@@ -56,7 +61,13 @@ export class SocketGateway {
   constructor(
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
+    private socketService: SocketService,
+    private utils: UtilsService,
   ) {}
+
+  afterInit(server: Server) {
+    this.socketService.socket = server;
+  }
 
   emit = (roomName: string, event: SocketEvent) => {
     this.server.to(roomName).emit(event[0], event[1]);
@@ -112,6 +123,46 @@ export class SocketGateway {
       },
     ];
     this.handlePlayerMatch(players);
+  }
+
+  @SubscribeMessage(SocketEventType.REQUEST_INVITE_FRIEND_TOKEN)
+  async handleRequestInviteFriendToken(@ConnectedSocket() socket: Socket) {
+    const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
+    await this.temporaryStorage.storeInviteToken(inviteToken, socket.id);
+    this.server.to(socket.id).emit(SocketEventType.INVITE_FRIEND_TOKEN, {
+      token: inviteToken,
+    } as InviteFriendTokenPayload);
+  }
+
+  @SubscribeMessage(SocketEventType.FRIEND_JOIN_LOBBY)
+  async handleFriendJoinLobby(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() inviteToken: string,
+  ) {
+    // TODO: When emitter disconnect, clear token
+    const socketIdEmitter =
+      await this.temporaryStorage.getInviteEmitter(inviteToken);
+    const teamRoomName = uuid.v4();
+
+    const players = [socket.id, socketIdEmitter];
+    for (let i = 0; i < players.length; i++) {
+      const player = new PlayerState(
+        PlayerStatus.IS_WAITING_TEAMMATE,
+        undefined,
+        undefined,
+        undefined,
+        teamRoomName,
+      );
+      // TODO: Should be a transaction
+      this.temporaryStorage.setPlayer(
+        players[i],
+        RedisPlayerState.parsePlayerState(player),
+      );
+    }
+
+    this.addSocketToRoom(socket.id, teamRoomName);
+    this.addSocketToRoom(socketIdEmitter, teamRoomName);
+    this.emit(socketIdEmitter, [SocketEventType.JOIN_LOBBY]);
   }
 
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
@@ -179,15 +230,17 @@ export class SocketGateway {
       return;
     }
 
+    // room name is equivalent to team name
+    // if the player disconnected were in a room, notify the room
+    if (player.roomName) {
+      this.server
+        .to(String(player.roomName))
+        .emit(SocketEventType.TEAMMATE_DISCONNECT);
+    }
+
+    // if the player were playing, stop the game loop on the server
     if (player.gameId) {
-      try {
-        clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
-        this.server
-          .to(String(player.roomName))
-          .emit(SocketEventType.TEAMMATE_DISCONNECT);
-      } catch (error) {
-        Logger.error(error);
-      }
+      clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
     }
 
     this.temporaryStorage.removePlayer(socket.id, player);
@@ -242,31 +295,12 @@ export class SocketGateway {
       status: String(PlayerStatus.IS_WAITING_TEAMMATE),
     });
 
-    // find team mate socket id
-    const teamMateSocketId = await this.server
-      .in(String(player.roomName))
-      .fetchSockets()
-      .then((sockets) => sockets.find(({ id }) => id !== socket.id).id);
+    const players = await this.utils.detectIfGameCanStart(socket, player);
 
-    // find team mate player state
-    const teamMatePlayer =
-      await this.temporaryStorage.getPlayer(teamMateSocketId);
-
-    const isTeamReady =
-      teamMatePlayer.status === PlayerStatus.IS_WAITING_TEAMMATE &&
-      teamMatePlayer.side !== player.side &&
-      teamMatePlayer.selectedLevel === player.selectedLevel;
-
-    if (!isTeamReady) {
-      Logger.log('no match, teammate info');
-      socket.to(player.roomName).emit(SocketEventType.TEAMMATE_INFO, data);
+    if (!players) {
       return;
     }
 
-    const players = [
-      { player, socketId: socket.id },
-      { player: teamMatePlayer, socketId: teamMateSocketId },
-    ];
     this.handlePlayerMatch(players);
   };
 
@@ -301,6 +335,12 @@ export class SocketGateway {
           return new ProjectionLevel();
       }
     })();
+
+    if (!level) {
+      throw new Error(
+        `Level doesn't exist or is not ready yet: ${players[0].player.selectedLevel}`,
+      );
+    }
 
     // create initial game data
     const initialGameState = new GameState(
@@ -482,9 +522,11 @@ export class SocketGateway {
       .fetchSockets()
       .then((sockets) => {
         sockets.forEach(({ id }) => {
-          this.temporaryStorage.setPlayer(id, {
-            status: String(PlayerStatus.IS_PENDING),
-          });
+          const state = RedisPlayerState.parsePlayerState(
+            new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
+          );
+          // console.log('parsed state', parsedState);
+          this.temporaryStorage.setPlayer(id, state);
         });
       });
   };

@@ -3,14 +3,12 @@ import classNames from 'classnames';
 import React from 'react';
 
 interface IProps {
-    color: string;
     onClick: () => void;
 }
 
-export default function ButtonQuitTeam({ color, onClick }: IProps) {
+export default function ButtonQuitTeam({ onClick }: IProps) {
     const cssClass = classNames({
         buttonRect: true,
-        ...(color ? { [color]: true } : {}),
     });
     return (
         <button
