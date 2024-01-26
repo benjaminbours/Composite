@@ -32,7 +32,7 @@ services:
       - "443:443"
 
   api:
-    image: boursbenjamin/composite-back:0.3.3
+    image: boursbenjamin/composite-back:0.4.0
     env_file:
       - ./back/.env.staging
     labels:
@@ -42,7 +42,7 @@ services:
       - traefik.http.routers.api.tls.certresolver=myresolver
 
   front:
-    image: boursbenjamin/composite-front:0.3.6
+    image: boursbenjamin/composite-front:0.4.0
     depends_on:
       - db
     env_file:
