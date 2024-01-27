@@ -1,0 +1,15 @@
+# This is a sample funding configuration file. Replace the URLs below with your own
+# to direct users to your own sponsorship opportunities.
+
+github: # Replace with up to 4 GitHub Sponsors-enabled usernames e.g., [user1, user2]
+  - benjaminbours
+patreon: benjaminbours
+# open_collective: your-open-collective-username
+ko_fi: benjaminbours
+# tidelift: your-tidelift-username
+# community_bridge: your-community-bridge-username
+# liberapay: your-liberapay-username
+# issuehunt: your-issuehunt-username
+# otechie: your-otechie-username
+# custom: # Replace with up to 4 custom sponsorship URLs e.g., ['link1', 'link2']
+#   - your-custom-url
