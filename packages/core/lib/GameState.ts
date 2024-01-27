@@ -7,15 +7,13 @@ export enum Levels {
     THE_HIGH_SPHERES,
 }
 
-interface Level {
-    end_level: number[];
-}
-
-export interface PositionLevelState extends Level {
+export interface LevelState {
+    id: Levels;
     doors: {
         [key: string]: number[];
     };
-    id: Levels.CRACK_THE_DOOR;
+    bounces: BounceState;
+    end_level: number[];
 }
 
 export interface BounceState {
@@ -24,118 +22,42 @@ export interface BounceState {
     };
 }
 
-export interface ProjectionLevelState extends Level {
-    bounces: BounceState;
-    id: Levels.LEARN_TO_FLY;
-}
-
-interface OtherLevelState extends Level {
-    id: Levels.LEARN_TO_FLY;
-}
-
-export type LevelState =
-    | PositionLevelState
-    | ProjectionLevelState
-    | OtherLevelState;
-
 export interface PlayerGameState {
     position: Vec2;
     velocity: Vec2;
     state: MovableComponentState;
     insideElementID: number | undefined;
 }
-// orders of properties are very important here
-export class RedisGameState {
-    constructor(
-        public level: string,
-        public light_x: string,
-        public light_y: string,
-        public light_velocity_x: string,
-        public light_velocity_y: string,
-        public light_state: string,
-        public light_inside_element_id: string | undefined,
-        public shadow_x: string,
-        public shadow_y: string,
-        public shadow_velocity_x: string,
-        public shadow_velocity_y: string,
-        public shadow_state: string,
-        public shadow_inside_element_id: string | undefined,
-        public lastValidatedInput: string,
-        public game_time: string,
-        public end_level: string,
-        public level_0_door_ground: string | undefined,
-        public level_0_door_roof: string | undefined,
-        public level_1_bounce_0: string | undefined,
-        public level_1_bounce_1: string | undefined,
-        public level_1_bounce_2: string | undefined,
-        public level_1_bounce_3: string | undefined,
-    ) {}
 
-    static parseGameState(state: GameState) {
-        // TODO: Remove code duplication, function is copy pasted from apply world update
-        const isPositionLevel = (
-            value: LevelState,
-        ): value is PositionLevelState =>
-            Boolean((value as PositionLevelState).doors);
-
-        const isProjectionLevel = (
-            value: LevelState,
-        ): value is ProjectionLevelState =>
-            Boolean((value as ProjectionLevelState).bounces);
-
-        const doors: [string | undefined, string | undefined] = (() => {
-            if (isPositionLevel(state.level)) {
-                return [
-                    state.level.doors.ground.join(),
-                    state.level.doors.roof.join(),
-                ];
-            }
-            return [undefined, undefined];
-        })();
-
-        const bounces: [
-            string | undefined,
-            string | undefined,
-            string | undefined,
-            string | undefined,
-        ] = (() => {
-            if (isProjectionLevel(state.level)) {
-                return [
-                    String(state.level.bounces[0].rotationY),
-                    String(state.level.bounces[1].rotationY),
-                    String(state.level.bounces[2].rotationY),
-                    String(state.level.bounces[3].rotationY),
-                ];
-            }
-            return [undefined, undefined, undefined, undefined];
-        })();
-
-        return new RedisGameState(
-            String(state.level.id),
-            String(state.players[1].position.x),
-            String(state.players[1].position.y),
-            String(state.players[1].velocity.x),
-            String(state.players[1].velocity.y),
-            String(state.players[1].state),
-            state.players[1].insideElementID !== undefined
-                ? String(state.players[1].insideElementID)
-                : undefined,
-            String(state.players[0].position.x),
-            String(state.players[0].position.y),
-            String(state.players[0].velocity.x),
-            String(state.players[0].velocity.y),
-            String(state.players[0].state),
-            state.players[0].insideElementID !== undefined
-                ? String(state.players[0].insideElementID)
-                : undefined,
-            String(state.lastValidatedInput),
-            String(state.game_time),
-            state.level.end_level.join(),
-            ...doors,
-            ...bounces,
-        );
-    }
+interface RedisStaticGameState {
+    level: string;
+    light_x: string;
+    light_y: string;
+    light_velocity_x: string;
+    light_velocity_y: string;
+    light_state: string;
+    light_inside_element_id: string | undefined;
+    shadow_x: string;
+    shadow_y: string;
+    shadow_velocity_x: string;
+    shadow_velocity_y: string;
+    shadow_state: string;
+    shadow_inside_element_id: string | undefined;
+    lastValidatedInput: string;
+    game_time: string;
+    end_level: string;
 }
+
+interface RedisDynamicGameState {
+    [key: string]: string | undefined;
+}
+
+export type RedisGameState = RedisStaticGameState & RedisDynamicGameState;
+
+const REDIS_DYNAMIC_FIELDS = {
+    DOOR: (doorId: string) => `door_${doorId}`,
+    BOUNCE: (bounceId: string) => `bounce_${bounceId}`,
+};
 
 function parseActivators(str: string) {
     if (str === '') {
@@ -156,44 +78,25 @@ export class GameState {
     ) {}
 
     // parse from the one level object allowed by redis
-    static parseRedisGameState(state: RedisGameState) {
+    static parseFromRedisGameState(state: RedisGameState) {
         const level: Levels = Number(state.level);
-        let levelState = (() => {
-            switch (level) {
-                case Levels.CRACK_THE_DOOR:
-                    return {
-                        id: level,
-                        doors: {
-                            ground: parseActivators(
-                                state.level_0_door_ground as string,
-                            ),
-                            roof: parseActivators(
-                                state.level_0_door_roof as string,
-                            ),
-                        },
-                        end_level: parseActivators(state.end_level),
-                    };
-                case Levels.LEARN_TO_FLY:
-                    return {
-                        bounces: {
-                            0: {
-                                rotationY: Number(state.level_1_bounce_0),
-                            },
-                            1: {
-                                rotationY: Number(state.level_1_bounce_1),
-                            },
-                            2: {
-                                rotationY: Number(state.level_1_bounce_2),
-                            },
-                            3: {
-                                rotationY: Number(state.level_1_bounce_3),
-                            },
-                        },
-                        id: level,
-                        end_level: parseActivators(state.end_level),
-                    };
+        const levelState: LevelState = {
+            id: level,
+            end_level: parseActivators(state.end_level),
+            doors: {},
+            bounces: {},
+        };
+        Object.entries(state).forEach(([key, value]) => {
+            if (key.includes('door') && value !== undefined) {
+                levelState.doors[key.replace('door_', '')] =
+                    parseActivators(value);
             }
-        })() as LevelState;
+            if (key.includes('bounce') && value) {
+                levelState.bounces[Number(key.replace('bounce_', ''))] = {
+                    rotationY: Number(value),
+                };
+            }
+        });
         return new GameState(
             [
                 {
@@ -231,5 +134,41 @@ export class GameState {
             Number(state.lastValidatedInput),
             Number(state.game_time),
         );
+    }
+
+    static parseToRedisGameState(state: GameState) {
+        const redisGameState: RedisGameState = {
+            level: String(state.level.id),
+            light_x: String(state.players[1].position.x),
+            light_y: String(state.players[1].position.y),
+            light_velocity_x: String(state.players[1].velocity.x),
+            light_velocity_y: String(state.players[1].velocity.y),
+            light_state: String(state.players[1].state),
+            light_inside_element_id:
+                state.players[1].insideElementID !== undefined
+                    ? String(state.players[1].insideElementID)
+                    : undefined,
+            shadow_x: String(state.players[0].position.x),
+            shadow_y: String(state.players[0].position.y),
+            shadow_velocity_x: String(state.players[0].velocity.x),
+            shadow_velocity_y: String(state.players[0].velocity.y),
+            shadow_state: String(state.players[0].state),
+            shadow_inside_element_id:
+                state.players[0].insideElementID !== undefined
+                    ? String(state.players[0].insideElementID)
+                    : undefined,
+            lastValidatedInput: String(state.lastValidatedInput),
+            game_time: String(state.game_time),
+            end_level: state.level.end_level.join(),
+        };
+        Object.entries(state.level.doors).forEach(([key, value]) => {
+            redisGameState[REDIS_DYNAMIC_FIELDS.DOOR(key)] = value.join();
+        });
+        Object.entries(state.level.bounces).forEach(([key, value]) => {
+            redisGameState[REDIS_DYNAMIC_FIELDS.BOUNCE(key)] = String(
+                value.rotationY,
+            );
+        });
+        return redisGameState;
     }
 }
