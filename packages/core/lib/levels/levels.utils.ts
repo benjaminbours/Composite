@@ -17,6 +17,7 @@ import {
 import { degreesToRadians } from '../helpers/math';
 import { Layer, Side } from '../types';
 import { ElementToBounce } from '../elements';
+import { LevelState } from '../GameState';
 
 // Add the extension functions
 BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -390,4 +391,17 @@ export function createBounce(
     wall.geometry.boundingBox?.getCenter(wall.center);
     wall.name = ElementName.BOUNCE(side);
     return wall;
+}
+
+export interface AbstractLevel {
+    collidingElements: Object3D[];
+    name: string;
+    startPosition: {
+        light: Vector3;
+        shadow: Vector3;
+    };
+    state: LevelState;
+    bounces: ElementToBounce[];
+    lightBounces: ElementToBounce[];
+    updateMatrixWorld(force?: boolean): void;
 }

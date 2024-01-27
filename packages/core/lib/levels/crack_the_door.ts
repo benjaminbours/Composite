@@ -3,18 +3,22 @@ import { Group, Object3D, Vector3, Mesh } from 'three';
 // local
 import {
     ElementName,
+    AbstractLevel,
     createArchGroup,
     createWall,
     createWallDoor,
     positionOnGrid,
 } from './levels.utils';
 import { InteractiveArea } from '../elements/InteractiveArea';
-import { Levels, PositionLevelState } from '../GameState';
+import { Levels, LevelState } from '../GameState';
+import { ElementToBounce } from '../elements';
 
-export class PositionLevel extends Group {
+export class CrackTheDoorLevel extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
     public interactiveElements: any[] = [];
-    public name = 'position-level';
+    public name = 'crack-the-door';
+    public bounces: ElementToBounce[] = [];
+    public lightBounces: ElementToBounce[] = [];
 
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
@@ -24,12 +28,10 @@ export class PositionLevel extends Group {
         // shadow: new Vector3(2400, 20, 0), // end level
     };
 
-    public state: PositionLevelState = {
+    public state: LevelState = {
         id: Levels.CRACK_THE_DOOR,
-        doors: {
-            ground: [],
-            roof: [],
-        },
+        doors: {},
+        bounces: {},
         end_level: [],
     };
 
@@ -74,43 +76,43 @@ export class PositionLevel extends Group {
         );
         this.add(wallInsideTemple);
 
-        // ground door
-        const wallDoorGroundFloor = createWallDoor(
-            new Vector3(0, 3, 0),
-            new Vector3(9, 0, 0),
-            new Vector3(0, 0, 0),
-            'vertical',
-        );
-        wallDoorGroundFloor.name = ElementName.WALL_DOOR('ground');
-        this.add(wallDoorGroundFloor);
-        this.collidingElements.push(wallDoorGroundFloor);
+        const doorList = [
+            {
+                id: 'ground',
+                wall: createWallDoor(
+                    new Vector3(0, 3, 0),
+                    new Vector3(9, 0, 0),
+                    new Vector3(0, 0, 0),
+                    'vertical',
+                ),
+                openerPosition: new Vector3(10, 1.02, 0),
+            },
+            {
+                id: 'roof',
+                wall: createWallDoor(
+                    new Vector3(2, 6, 0),
+                    new Vector3(8, 3, 0),
+                    new Vector3(0, 3, 0),
+                    'horizontal',
+                ),
+                openerPosition: new Vector3(10, 3, 0),
+            },
+        ];
 
-        const groundFloorDoorOpener = new InteractiveArea(
-            ElementName.AREA_DOOR_OPENER('ground'),
-        );
-        this.collidingElements.push(groundFloorDoorOpener);
-        this.interactiveElements.push(groundFloorDoorOpener);
-        positionOnGrid(groundFloorDoorOpener, new Vector3(10, 1.02, 0));
-        this.add(groundFloorDoorOpener);
+        doorList.forEach(({ id, wall, openerPosition }) => {
+            this.state.doors[id] = [];
+            wall.name = ElementName.WALL_DOOR(id);
+            this.add(wall);
+            this.collidingElements.push(wall);
 
-        // roof door
-        const wallDoorRoof = createWallDoor(
-            new Vector3(2, 6, 0),
-            new Vector3(8, 3, 0),
-            new Vector3(0, 3, 0),
-            'horizontal',
-        );
-        wallDoorRoof.name = ElementName.WALL_DOOR('roof');
-        this.add(wallDoorRoof);
-        this.collidingElements.push(wallDoorRoof);
-
-        const roofDoorOpener = new InteractiveArea(
-            ElementName.AREA_DOOR_OPENER('roof'),
-        );
-        this.collidingElements.push(roofDoorOpener);
-        this.interactiveElements.push(roofDoorOpener);
-        positionOnGrid(roofDoorOpener, new Vector3(10, 3, 0));
-        this.add(roofDoorOpener);
+            const doorOpener = new InteractiveArea(
+                ElementName.AREA_DOOR_OPENER(id),
+            );
+            this.collidingElements.push(doorOpener);
+            this.interactiveElements.push(doorOpener);
+            positionOnGrid(doorOpener, openerPosition);
+            this.add(doorOpener);
+        });
 
         const insideArches = [
             createArchGroup(1, new Vector3(10, 0, 0)),

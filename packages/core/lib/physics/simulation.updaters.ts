@@ -11,8 +11,6 @@ import {
     GameState,
     LevelState,
     PlayerGameState,
-    PositionLevelState,
-    ProjectionLevelState,
 } from '../GameState';
 import { computeVelocity } from './velocity';
 import { INearestObjects } from './raycaster';
@@ -89,12 +87,6 @@ function updateDoor(wallDoor: Object3D, open: boolean) {
     wallDoor.updateMatrixWorld();
 }
 
-// TODO: has to move somewhere else
-export const isLevelWithBounces = (
-    value: LevelState,
-): value is ProjectionLevelState =>
-    Boolean((value as ProjectionLevelState).bounces);
-
 // we could easily detect the activation area using position precalculated eventually.
 // but if we update the level, we have to update it as well.
 function applyWorldUpdate(
@@ -105,65 +97,56 @@ function applyWorldUpdate(
     player: PlayerGameState,
     context: Context,
 ) {
-    const isPositionLevel = (value: LevelState): value is PositionLevelState =>
-        Boolean((value as PositionLevelState).doors);
+    // doors
+    let doorNameActivating: string | undefined = undefined;
+    if (
+        collisionResult.bottom &&
+        isTouchingDoorOpener(collisionResult.bottom)
+    ) {
+        const elem = collisionResult.bottom.object.parent as InteractiveArea;
+        doorNameActivating = `${elem.name.replace(
+            `_${AREA_DOOR_OPENER_SUFFIX}`,
+            '',
+        )}`;
+        if (gameState.level.doors[doorNameActivating].indexOf(side) === -1) {
+            gameState.level.doors[doorNameActivating].push(side);
+        }
+    }
 
-    if (isPositionLevel(gameState.level)) {
-        let doorNameActivating: string | undefined = undefined;
-        if (
-            collisionResult.bottom &&
-            isTouchingDoorOpener(collisionResult.bottom)
-        ) {
-            const elem = collisionResult.bottom.object
-                .parent as InteractiveArea;
-            doorNameActivating = `${elem.name.replace(
-                `_${AREA_DOOR_OPENER_SUFFIX}`,
-                '',
-            )}`;
-            if (
-                gameState.level.doors[doorNameActivating].indexOf(side) === -1
-            ) {
-                gameState.level.doors[doorNameActivating].push(side);
+    for (const key in gameState.level.doors) {
+        const activators = gameState.level.doors[key];
+
+        // if this door opener is not the one we are currently activating
+        // remove us from the list of activators
+        if (key !== doorNameActivating) {
+            const index = activators.indexOf(side);
+            if (index !== -1) {
+                activators.splice(index, 1);
             }
         }
 
-        for (const key in gameState.level.doors) {
-            const activators = gameState.level.doors[key];
-
-            // if this door opener is not the one we are currently activating
-            // remove us from the list of activators
-            if (key !== doorNameActivating) {
-                const index = activators.indexOf(side);
-                if (index !== -1) {
-                    activators.splice(index, 1);
-                }
-            }
-
-            // TODO: Check if at some point, this kind of update should not be directly inside the component,
-            // not here where we are suppose to manage game state
-            // and have a condition there about updating for server or client
-            if (context === Context.server) {
-                const wallDoor = obstacles.find(
-                    (e) => e.name === ElementName.WALL_DOOR(key),
-                );
-                if (wallDoor) {
-                    updateDoor(wallDoor, activators.length > 0);
-                }
+        // TODO: Check if at some point, this kind of update should not be directly inside the component,
+        // not here where we are suppose to manage game state
+        // and have a condition there about updating for server or client
+        if (context === Context.server) {
+            const wallDoor = obstacles.find(
+                (e) => e.name === ElementName.WALL_DOOR(key),
+            );
+            if (wallDoor) {
+                updateDoor(wallDoor, activators.length > 0);
             }
         }
     }
 
-    if (isLevelWithBounces(gameState.level)) {
-        if (
-            player.state === MovableComponentState.inside &&
-            player.insideElementID !== undefined
-        ) {
-            const rotationY =
-                gameState.level.bounces[player.insideElementID].rotationY -
-                (player.velocity.x / 2) * -1;
-            gameState.level.bounces[player.insideElementID].rotationY =
-                rotationY;
-        }
+    // bounces
+    if (
+        player.state === MovableComponentState.inside &&
+        player.insideElementID !== undefined
+    ) {
+        const rotationY =
+            gameState.level.bounces[player.insideElementID].rotationY -
+            (player.velocity.x / 2) * -1;
+        gameState.level.bounces[player.insideElementID].rotationY = rotationY;
     }
 
     const endLevelIndex = gameState.level.end_level.indexOf(side);

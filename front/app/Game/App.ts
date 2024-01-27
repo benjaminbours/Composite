@@ -28,20 +28,15 @@ import {
     GameState,
     FLOOR,
     Side,
-    SocketEventType,
-    applySingleInputToSimulation,
     applyInputListToSimulation,
     PhysicSimulation,
     ElementName,
     Layer,
-    PositionLevelState,
     LevelState,
     Context,
     MovableComponentState,
     ElementToBounce,
-    ProjectionLevelState,
     GameStateUpdatePayload,
-    isLevelWithBounces,
     BounceState,
     collectInputsForTick,
 } from '@benjaminbours/composite-core';
@@ -60,7 +55,6 @@ import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
 import { EndLevel } from './elements/EndLevel';
-import { ProjectionLevelWithGraphic } from './levels/ProjectionLevelWithGraphic';
 
 interface InterpolationConfig {
     ratio: number;
@@ -808,6 +802,7 @@ export default class App {
                 );
             }
         });
+        // TODO: fix player graphic at 60 fps whatever the main render fps is
         this.updatePlayerGraphics(this.displayState);
         this.updateWorldGraphics();
     };
@@ -831,56 +826,46 @@ export default class App {
     };
 
     private updateWorldPhysic = (state: GameState) => {
-        // TODO: Remove code duplication, function is copy pasted from apply world update
-        const isPositionLevel = (
-            value: LevelState,
-        ): value is PositionLevelState =>
-            Boolean((value as PositionLevelState).doors);
-
         // doors
-        if (isPositionLevel(state.level)) {
-            for (const key in state.level.doors) {
-                const activators = state.level.doors[key];
+        for (const key in state.level.doors) {
+            const activators = state.level.doors[key];
 
-                const doorOpener = this.collidingElements
-                    .find(
-                        (object) =>
-                            object.name === ElementName.AREA_DOOR_OPENER(key),
-                    )
-                    ?.children.find(
-                        (object) =>
-                            object.name === ElementName.DOOR_OPENER(key),
-                    ) as DoorOpener | undefined;
+            const doorOpener = this.collidingElements
+                .find(
+                    (object) =>
+                        object.name === ElementName.AREA_DOOR_OPENER(key),
+                )
+                ?.children.find(
+                    (object) => object.name === ElementName.DOOR_OPENER(key),
+                ) as DoorOpener | undefined;
 
-                if (doorOpener) {
-                    if (activators.length > 0 && !doorOpener.shouldActivate) {
-                        doorOpener.shouldActivate = true;
-                    } else if (
-                        activators.length === 0 &&
-                        doorOpener.shouldActivate
-                    ) {
-                        doorOpener.shouldActivate = false;
-                    }
+            if (doorOpener) {
+                if (activators.length > 0 && !doorOpener.shouldActivate) {
+                    doorOpener.shouldActivate = true;
+                } else if (
+                    activators.length === 0 &&
+                    doorOpener.shouldActivate
+                ) {
+                    doorOpener.shouldActivate = false;
                 }
-
-                const withFocusCamera = activators.includes(
-                    this.playersConfig[0],
-                );
-                doorOpener?.update(this.delta, this.camera, withFocusCamera);
             }
+
+            const withFocusCamera = activators.includes(this.playersConfig[0]);
+            doorOpener?.update(this.delta, this.camera, withFocusCamera);
         }
 
-        if (isLevelWithBounces(state.level)) {
-            (
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ] as ProjectionLevelWithGraphic
-            ).bounces.forEach((bounce) => {
-                const rotationY = (state.level as ProjectionLevelState).bounces[
-                    bounce.bounceID
-                ].rotationY;
-                bounce.update(rotationY);
-            });
+        for (
+            let i = 0;
+            i <
+            this.levelController.levels[this.levelController.currentLevel]
+                .bounces.length;
+            i++
+        ) {
+            const bounce =
+                this.levelController.levels[this.levelController.currentLevel]
+                    .bounces[i];
+            const rotationY = state.level.bounces[bounce.bounceID].rotationY;
+            bounce.update(rotationY);
         }
 
         // end level

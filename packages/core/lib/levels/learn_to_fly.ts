@@ -3,19 +3,20 @@ import { Group, Mesh, Object3D, Vector3 } from 'three';
 // local
 import {
     ElementName,
+    AbstractLevel,
     createArchGroup,
     createBounce,
     createWall,
     positionOnGrid,
 } from './levels.utils';
-import { Levels, ProjectionLevelState } from '../GameState';
+import { Levels, LevelState } from '../GameState';
 import { Side } from '../types';
 import { ElementToBounce, InteractiveArea } from '../elements';
 
-export class ProjectionLevel extends Group {
+export class LearnToFlyLevel extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
     public interactiveElements: any[] = [];
-    public name = 'projection-level';
+    public name = 'learn-to-fly';
     public lightBounces: ElementToBounce[] = [];
     public bounces: ElementToBounce[] = [];
 
@@ -32,7 +33,8 @@ export class ProjectionLevel extends Group {
         // shadow: new Vector3(2700, 1100, 0), // third platform
     };
 
-    public state: ProjectionLevelState = {
+    public state: LevelState = {
+        doors: {},
         bounces: {},
         id: Levels.LEARN_TO_FLY,
         end_level: [],
@@ -123,7 +125,7 @@ export class ProjectionLevel extends Group {
             const bounce = createBounce(position, initialRotation, side, id);
             this.add(bounce);
             this.collidingElements.push(bounce);
-            this.state.bounces[id] = { rotationY: initialRotation };
+            this.state.bounces![id] = { rotationY: initialRotation };
 
             if (side === Side.LIGHT) {
                 this.lightBounces.push(bounce);
