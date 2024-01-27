@@ -393,6 +393,13 @@ export function createBounce(
     return wall;
 }
 
+export function createMountain() {
+    const mountain = createMeshForGrid(geometries.mountain, materials.phong);
+    mountain.name = "mountain";
+    positionOnGrid(mountain, new Vector3(0, 0, -30));
+    return mountain;
+}
+
 export interface AbstractLevel {
     collidingElements: Object3D[];
     name: string;

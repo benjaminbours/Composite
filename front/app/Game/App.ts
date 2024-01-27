@@ -39,6 +39,7 @@ import {
     GameStateUpdatePayload,
     BounceState,
     collectInputsForTick,
+    createMountain,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -369,6 +370,7 @@ export default class App {
             ...this.levelController.levels[this.levelController.currentLevel]!
                 .collidingElements,
         );
+        this.scene.add(createMountain());
         if (process.env.NEXT_PUBLIC_PLAYER_BBOX_HELPER) {
             this.playerHelper = new Box3();
             this.scene.add(new Box3Helper(this.playerHelper, 0xffff00));
