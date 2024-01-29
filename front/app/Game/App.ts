@@ -56,6 +56,7 @@ import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
 import { EndLevel } from './elements/EndLevel';
+import { SkinBounce } from './elements/SkinBounce';
 
 interface InterpolationConfig {
     ratio: number;
@@ -197,6 +198,9 @@ export default class App {
 
     private inputBuffer: GamePlayerInputPayload[] = [];
     private sendInputIntervalId: number = 0;
+
+    // bounce helper
+    private currentBounceName?: string;
 
     constructor(
         canvasDom: HTMLCanvasElement,
@@ -806,7 +810,7 @@ export default class App {
         });
         // TODO: fix player graphic at 60 fps whatever the main render fps is
         this.updatePlayerGraphics(this.displayState);
-        this.updateWorldGraphics();
+        this.updateWorldGraphics(this.displayState);
     };
 
     public updatePlayerGraphics = (state: GameState) => {
@@ -910,7 +914,7 @@ export default class App {
         }
     };
 
-    public updateWorldGraphics = () => {
+    public updateWorldGraphics = (state: GameState) => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
         // this.floor.position.set(this.players[0].position.x, 0, 0);
@@ -929,6 +933,39 @@ export default class App {
         this.dirLight.intensity = lightInfo.intensity;
         this.dirLight.color.copy(lightInfo.color);
         this.dirLight.target.position.set(this.camera.position.x, 0, 0);
+
+        // player inside
+        if (
+            state.players[this.playersConfig[0]].state ===
+                MovableComponentState.inside &&
+            state.players[this.playersConfig[0]].insideElementID
+        ) {
+            const skinBounce = this.levelController.levels[
+                this.levelController.currentLevel
+            ].children.find(
+                (child) =>
+                    child.name ===
+                    `skin-bounce-${
+                        state.players[this.playersConfig[0]].insideElementID
+                    }`,
+            ) as SkinBounce | undefined;
+            if (skinBounce && !this.currentBounceName) {
+                skinBounce.add(skinBounce.directionHelper);
+                this.currentBounceName = skinBounce.name;
+            }
+        } else {
+            const skinBounce = this.levelController.levels[
+                this.levelController.currentLevel
+            ].children.find(
+                (child) => child.name === this.currentBounceName,
+            ) as SkinBounce | undefined;
+
+            // if there is a currentBounceName, clean it
+            if (skinBounce) {
+                skinBounce.remove(skinBounce.directionHelper);
+                this.currentBounceName = undefined;
+            }
+        }
 
         // update camera
         this.camera.update();
