@@ -3,7 +3,7 @@
 import {
     ElementName,
     ElementToBounce,
-    ProjectionLevel,
+    LearnToFlyLevel,
     Side,
 } from '@benjaminbours/composite-core';
 // local
@@ -12,7 +12,7 @@ import { EndLevel } from '../elements/EndLevel';
 import { Mesh } from 'three';
 import { SkinBounce } from '../elements/SkinBounce';
 
-export class ProjectionLevelWithGraphic extends ProjectionLevel {
+export class LearnToFlyLevelWithGraphic extends LearnToFlyLevel {
     constructor() {
         super();
 

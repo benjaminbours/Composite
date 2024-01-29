@@ -1,12 +1,12 @@
 // vendors
 import { Vector3 } from 'three';
 // our libs
-import { ElementName, PositionLevel } from '@benjaminbours/composite-core';
+import { ElementName, CrackTheDoorLevel } from '@benjaminbours/composite-core';
 // local
 import { DoorOpener } from '../elements/DoorOpener';
 import { EndLevel } from '../elements/EndLevel';
 
-export class PositionLevelWithGraphic extends PositionLevel {
+export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
     constructor() {
         super();
 

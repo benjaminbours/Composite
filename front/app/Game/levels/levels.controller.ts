@@ -4,21 +4,22 @@ import { Scene, Vector3 } from 'three';
 import { Levels } from '@benjaminbours/composite-core';
 // local
 import { LightPlayer, ShadowPlayer, Player } from '../Player';
-import { PositionLevelWithGraphic } from './PositionLevelWithGraphic';
-import { ProjectionLevelWithGraphic } from './ProjectionLevelWithGraphic';
+import { CrackTheDoorLevelWithGraphic } from './CrackTheDoorLevelWithGraphic';
+import { LearnToFlyLevelWithGraphic } from './LearnToFlyLevelWithGraphic';
 
 export default class LevelController {
     public levels: {
-        [Levels.CRACK_THE_DOOR]: PositionLevelWithGraphic;
-        [Levels.LEARN_TO_FLY]: ProjectionLevelWithGraphic;
-        [Levels.THE_HIGH_SPHERES]?: PositionLevelWithGraphic;
+        [Levels.CRACK_THE_DOOR]: CrackTheDoorLevelWithGraphic;
+        [Levels.LEARN_TO_FLY]: LearnToFlyLevelWithGraphic;
+        [Levels.THE_HIGH_SPHERES]: CrackTheDoorLevelWithGraphic;
     };
 
     constructor(public currentLevel: Levels) {
         // TODO: Could use dynamic import to load level code only when needed
         this.levels = {
-            [Levels.CRACK_THE_DOOR]: new PositionLevelWithGraphic(),
-            [Levels.LEARN_TO_FLY]: new ProjectionLevelWithGraphic(),
+            [Levels.CRACK_THE_DOOR]: new CrackTheDoorLevelWithGraphic(),
+            [Levels.LEARN_TO_FLY]: new LearnToFlyLevelWithGraphic(),
+            [Levels.THE_HIGH_SPHERES]: new LearnToFlyLevelWithGraphic(),
         };
     }
 

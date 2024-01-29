@@ -230,7 +230,7 @@ export class TemporaryStorageService {
     // store initial game data
     transaction.HSET(
       REDIS_KEYS.GAME(gameId),
-      Object.entries(RedisGameState.parseGameState(gameState))
+      Object.entries(GameState.parseToRedisGameState(gameState))
         .filter(([, value]) => value !== undefined)
         .flat(),
     );
@@ -241,7 +241,7 @@ export class TemporaryStorageService {
     return this.redisClient
       .HGETALL(REDIS_KEYS.GAME(gameId))
       .then((state) =>
-        GameState.parseRedisGameState(state as unknown as RedisGameState),
+        GameState.parseFromRedisGameState(state as unknown as RedisGameState),
       );
   }
 
@@ -249,7 +249,7 @@ export class TemporaryStorageService {
     const transaction = this.redisClient.MULTI();
     transaction.HSET(
       REDIS_KEYS.GAME(gameId),
-      Object.entries(RedisGameState.parseGameState(state))
+      Object.entries(GameState.parseToRedisGameState(state))
         .filter(([, value]) => value !== undefined)
         .flat(),
     );

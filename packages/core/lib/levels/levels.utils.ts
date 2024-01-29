@@ -17,6 +17,7 @@ import {
 import { degreesToRadians } from '../helpers/math';
 import { Layer, Side } from '../types';
 import { ElementToBounce } from '../elements';
+import { LevelState } from '../GameState';
 
 // Add the extension functions
 BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -390,4 +391,24 @@ export function createBounce(
     wall.geometry.boundingBox?.getCenter(wall.center);
     wall.name = ElementName.BOUNCE(side);
     return wall;
+}
+
+export function createMountain() {
+    const mountain = createMeshForGrid(geometries.mountain, materials.phong);
+    mountain.name = "mountain";
+    positionOnGrid(mountain, new Vector3(0, 0, -30));
+    return mountain;
+}
+
+export interface AbstractLevel {
+    collidingElements: Object3D[];
+    name: string;
+    startPosition: {
+        light: Vector3;
+        shadow: Vector3;
+    };
+    state: LevelState;
+    bounces: ElementToBounce[];
+    lightBounces: ElementToBounce[];
+    updateMatrixWorld(force?: boolean): void;
 }

@@ -19,18 +19,18 @@ import {
   Side,
   SocketEvent,
   MovableComponentState,
-  PositionLevel,
-  ProjectionLevel,
+  CrackTheDoorLevel,
+  LearnToFlyLevel,
   FLOOR,
   TimeSyncPayload,
   PhysicSimulation,
   applyInputListToSimulation,
   Context,
   updateServerBounces,
-  ProjectionLevelState,
   GameState,
   collectInputsForTick,
   InviteFriendTokenPayload,
+  AbstractLevel,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -330,9 +330,9 @@ export class SocketGateway {
     const level = (() => {
       switch (players[0].player.selectedLevel) {
         case Levels.CRACK_THE_DOOR:
-          return new PositionLevel();
+          return new CrackTheDoorLevel();
         case Levels.LEARN_TO_FLY:
-          return new ProjectionLevel();
+          return new LearnToFlyLevel();
       }
     })();
 
@@ -411,10 +411,7 @@ export class SocketGateway {
     ]);
   };
 
-  registerGameLoop = (
-    gameId: number,
-    level: PositionLevel | ProjectionLevel,
-  ) => {
+  registerGameLoop = (gameId: number, level: AbstractLevel) => {
     // TODO: The following variable declared here and accessible in the process
     // input queue closure are potential memory leaks.
     // Let's try to declare them only once somewhere else, or to update
@@ -457,12 +454,7 @@ export class SocketGateway {
               gameState,
               Context.server,
             );
-            if (gameState.level.id === Levels.LEARN_TO_FLY) {
-              updateServerBounces(
-                (level as ProjectionLevel).bounces,
-                (gameState.level as ProjectionLevelState).bounces,
-              );
-            }
+            updateServerBounces(level.bounces, gameState.level.bounces);
             // then we remove it from the list
             for (let i = 0; i < inputs.length; i++) {
               const input = inputs[i];

@@ -7,7 +7,6 @@ import {
     COLLISION_DETECTION_RANGE,
     COLLISION_DETECTION_RANGE_INSIDE,
 } from './collision.system';
-import { isLevelWithBounces } from './simulation.updaters';
 import { degreesToRadians } from '../helpers/math';
 
 export const MAX_FALL_SPEED = 20;
@@ -151,8 +150,7 @@ export function handleJump(
         player.velocity.y = JUMP_POWER;
     } else if (
         player.state === MovableComponentState.inside &&
-        player.insideElementID !== undefined &&
-        isLevelWithBounces(levelState)
+        player.insideElementID !== undefined
     ) {
         const rotationY = levelState.bounces[player.insideElementID].rotationY;
         const vectorToRotate = new Vector3(0, 1, 0);

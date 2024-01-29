@@ -12,8 +12,8 @@ import * as STATS from 'stats.js';
 // our libs
 import {
     GameState,
+    LearnToFlyLevel,
     MovableComponentState,
-    ProjectionLevel,
 } from '@benjaminbours/composite-core';
 // local
 import { MenuScene } from './types';
@@ -138,7 +138,7 @@ function MainApp({ children }: Props) {
     useEffect(() => {
         if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
             establishConnection().then(() => {
-                const level = new ProjectionLevel();
+                const level = new LearnToFlyLevel();
                 const initialGameState = new GameState(
                     [
                         {
