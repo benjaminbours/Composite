@@ -277,7 +277,11 @@ export default class App {
         // one trip time
 
         let sendInputsInterval;
-        if (rtt <= 30) {
+        if (rtt <= 15) {
+            this.gameDelta = 15;
+            this.bufferHistorySize = 15;
+            sendInputsInterval = 20;
+        } else if (rtt <= 30) {
             this.gameDelta = rtt;
             this.bufferHistorySize = 15;
             sendInputsInterval = 20;
