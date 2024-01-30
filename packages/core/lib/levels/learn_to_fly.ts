@@ -63,21 +63,72 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
         });
 
         const arches = [
-            createArchGroup(3, new Vector3(0, 0, 0)),
-            createArchGroup(3, new Vector3(1, 0, 0), false),
-            createArchGroup(3, new Vector3(2, 0, 0)),
-            createArchGroup(4, new Vector3(5, 0, 0)),
-            createArchGroup(3.25, new Vector3(6, 0, 0)),
-            createArchGroup(2.5, new Vector3(7, 0, 0)),
-            createArchGroup(2.5, new Vector3(8, 0, 0), false),
-            createArchGroup(2.5, new Vector3(9, 0, 0), false),
-            createArchGroup(2.5, new Vector3(10, 0, 0), false),
-            createArchGroup(2.5, new Vector3(11, 0, 0)),
-            createArchGroup(4, new Vector3(10.5, 0, 0)),
-            createArchGroup(4, new Vector3(11.5, 0, 0), false),
-            createArchGroup(4, new Vector3(12.5, 0, 0), false),
-            createArchGroup(4, new Vector3(13.5, 0, 0)),
-            createArchGroup(6.5, new Vector3(10.5, 0, 0)),
+            createArchGroup({
+                height: 3,
+                position: new Vector3(0, 0, 0),
+            }),
+            createArchGroup({
+                height: 3,
+                position: new Vector3(1, 0, 0),
+                withoutColumns: true,
+            }),
+            createArchGroup({
+                height: 3,
+                position: new Vector3(2, 0, 0),
+            }),
+            createArchGroup({
+                height: 4,
+                position: new Vector3(5, 0, 0),
+            }),
+            createArchGroup({
+                height: 3.25,
+                position: new Vector3(6, 0, 0),
+            }),
+            createArchGroup({
+                height: 2.5,
+                position: new Vector3(7, 0, 0),
+            }),
+            createArchGroup({
+                height: 2.5,
+                position: new Vector3(8, 0, 0),
+                withoutColumns: true,
+            }),
+            createArchGroup({
+                height: 2.5,
+                position: new Vector3(9, 0, 0),
+                withoutColumns: true,
+            }),
+            createArchGroup({
+                height: 2.5,
+                position: new Vector3(10, 0, 0),
+                withoutColumns: true,
+            }),
+            createArchGroup({
+                height: 2.5,
+                position: new Vector3(11, 0, 0),
+            }),
+            createArchGroup({
+                height: 4,
+                position: new Vector3(10.5, 0, 0),
+            }),
+            createArchGroup({
+                height: 4,
+                position: new Vector3(11.5, 0, 0),
+                withoutColumns: true,
+            }),
+            createArchGroup({
+                height: 4,
+                position: new Vector3(12.5, 0, 0),
+                withoutColumns: true,
+            }),
+            createArchGroup({
+                height: 4,
+                position: new Vector3(13.5, 0, 0),
+            }),
+            createArchGroup({
+                height: 6.5,
+                position: new Vector3(10.5, 0, 0),
+            }),
         ];
 
         arches.forEach((arch) => {

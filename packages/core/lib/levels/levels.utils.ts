@@ -251,14 +251,20 @@ export function createWallDoor(
     return group;
 }
 
-export function createArchGroup(
-    height: number,
-    position: Vector3,
-    withColumns = true,
-) {
+interface ArchGroupOptions {
+    height: number;
+    position: Vector3;
+    withoutColumns?: true;
+}
+
+export function createArchGroup({
+    height,
+    position,
+    withoutColumns,
+}: ArchGroupOptions) {
     const group = new Object3D();
 
-    if (withColumns) {
+    if (!withoutColumns) {
         const columnLeft1 = createColumnGroup(height, 'normal');
         const columnLeft2 = createColumnGroup(height, 'normal');
         const columnRight1 = createColumnGroup(height, 'normal', true);

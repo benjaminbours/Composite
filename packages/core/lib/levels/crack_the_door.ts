@@ -46,9 +46,18 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
         this.collidingElements.push(wallBlockingLeftPath);
 
         const outsideArches = [
-            createArchGroup(1, new Vector3(2, 0, 0)),
-            createArchGroup(2, new Vector3(4, 0, 0)),
-            createArchGroup(3, new Vector3(6, 0, 0)),
+            createArchGroup({
+                height: 1,
+                position: new Vector3(2, 0, 0),
+            }),
+            createArchGroup({
+                height: 2,
+                position: new Vector3(4, 0, 0),
+            }),
+            createArchGroup({
+                height: 3,
+                position: new Vector3(6, 0, 0),
+            }),
         ];
 
         outsideArches.forEach((arch) => {
@@ -115,8 +124,14 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
         });
 
         const insideArches = [
-            createArchGroup(1, new Vector3(10, 0, 0)),
-            createArchGroup(2, new Vector3(12, 0, 0)),
+            createArchGroup({
+                height: 1,
+                position: new Vector3(10, 0, 0),
+            }),
+            createArchGroup({
+                height: 2,
+                position: new Vector3(12, 0, 0),
+            }),
         ];
 
         insideArches.forEach((arch) => {
