@@ -67,7 +67,9 @@ export class SkinBounceShadow extends Object3D {
 
     update(delta: number) {
         const particlesMat = this.particles.material as ShaderMaterial;
-        particlesMat.uniforms.time.value += delta;
+        if (this.bounce.interactive) {
+            particlesMat.uniforms.time.value -= delta;
+        }
         this.rotation.copy(this.bounce.rotation);
     }
 }
