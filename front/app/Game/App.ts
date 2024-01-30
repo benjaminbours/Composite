@@ -439,6 +439,7 @@ export default class App {
                 density: { value: 0.8 },
                 weight: { value: 0.5 },
                 samples: { value: 100 },
+                time: { value: 0 },
             },
             vertexShader: basicPostProdVS,
             fragmentShader: volumetricLightPlayerFS,
@@ -825,6 +826,8 @@ export default class App {
                         this.camera,
                         state.players[this.playersConfig[0]].velocity,
                     );
+                this.playerVolumetricLightPass.material.uniforms.time.value +=
+                    this.delta;
             }
 
             if (player instanceof ShadowPlayer) {
