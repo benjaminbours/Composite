@@ -477,8 +477,8 @@ export default class App {
                     density: { value: 0.5 },
                     weight: { value: 0.5 },
                     samples: { value: 100 },
-                    // isInteractive: { value: lightBounces[i].interactive },
-                    // time: { value: 0 },
+                    isInteractive: { value: lightBounces[i].interactive },
+                    time: { value: 0 },
                 },
                 vertexShader: basicPostProdVS,
                 fragmentShader: volumetricLightBounceFS,
@@ -1004,8 +1004,8 @@ export default class App {
             ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
                 this.camera,
             );
-            // this.volumetricLightPasses[i].material.uniforms.time.value +=
-            //     this.delta;
+            this.volumetricLightPasses[i].material.uniforms.time.value +=
+                this.delta;
             const occlusionComposer = this.occlusionComposers[i];
             occlusionComposer.render();
             if (i === this.occlusionComposers.length - 1) {
