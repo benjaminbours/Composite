@@ -355,7 +355,7 @@ export default class App {
         this.dirLight.shadow.camera.far = 8000;
         this.dirLight.shadow.mapSize.width = 1024 * 2;
         this.dirLight.shadow.mapSize.height = 1024 * 2;
-        this.dirLight.shadow.bias = -0.01;
+        // this.dirLight.shadow.bias = -0.01;
         // this.dirLight.position.set(-2, 1, 2);
         // this.dirLight.position.copy(this.camera.position);
         this.dirLight.target = new Object3D();
@@ -934,8 +934,8 @@ export default class App {
         skyShaderMat.setSunAngle(200);
         skyShaderMat.render();
         (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
-        skyShaderMat.setTimeOfDay(0.6, [255, 255], 0, [195, 230], 0);
-        // skyShaderMat.setTimeOfDay(1,[20,55], 0, [195,230], 0);
+        // sun Hue and atm Hue are not applied with a saturation of 0
+        skyShaderMat.setTimeOfDay(0.6, undefined, 0, undefined, 0);
         const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
 
         this.dirLight.position.copy(lightInfo.position);
