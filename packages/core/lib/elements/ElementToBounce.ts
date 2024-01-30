@@ -11,6 +11,7 @@ export class ElementToBounce extends Mesh {
         material: any,
         public side: Side,
         public bounceID: number,
+        public interactive: boolean,
     ) {
         super(geometry, material);
     }

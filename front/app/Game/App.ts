@@ -472,6 +472,8 @@ export default class App {
                     density: { value: 0.5 },
                     weight: { value: 0.5 },
                     samples: { value: 100 },
+                    // isInteractive: { value: lightBounces[i].interactive },
+                    // time: { value: 0 },
                 },
                 vertexShader: basicPostProdVS,
                 fragmentShader: volumetricLightBounceFS,
@@ -980,24 +982,23 @@ export default class App {
         this.camera.layers.set(Layer.OCCLUSION);
         for (let i = 0; i < this.occlusionComposers.length; i++) {
             if (i > 0) {
-                const previousLightBounce = (
+                const previousLightBounce =
                     this.levelController.levels[
                         this.levelController.currentLevel
-                    ] as any
-                ).lightBounces[i - 1];
+                    ].lightBounces[i - 1];
                 previousLightBounce.layers.disable(Layer.OCCLUSION);
             }
-            const lightBounce = (
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ] as any
-            ).lightBounces[i];
+            const lightBounce =
+                this.levelController.levels[this.levelController.currentLevel]
+                    .lightBounces[i];
             lightBounce.layers.enable(Layer.OCCLUSION);
             this.volumetricLightPasses[
                 i
             ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
                 this.camera,
             );
+            // this.volumetricLightPasses[i].material.uniforms.time.value +=
+            //     this.delta;
             const occlusionComposer = this.occlusionComposers[i];
             occlusionComposer.render();
             if (i === this.occlusionComposers.length - 1) {

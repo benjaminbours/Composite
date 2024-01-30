@@ -106,7 +106,9 @@ export function handleCollision(
         const collidingObject = collision.object as ElementToBounce;
 
         const shouldEnterElementToBounce =
-            collidingObject.bounce && side === collidingObject.side;
+            collidingObject.bounce &&
+            side === collidingObject.side &&
+            collidingObject.interactive;
 
         const shouldExitElementToBounce =
             collidingObject.bounce &&

@@ -115,6 +115,7 @@ export function createMeshForGrid(
     withBounce?: {
         side: Side;
         id: number;
+        interactive: boolean;
     },
 ): Mesh {
     // geo.translate(
@@ -129,6 +130,7 @@ export function createMeshForGrid(
                 mat,
                 withBounce.side,
                 withBounce.id,
+                withBounce.interactive,
             );
         }
         return new Mesh(geo, mat);
@@ -148,6 +150,7 @@ export function createWall(
     withBounce?: {
         side: Side;
         id: number;
+        interactive: boolean;
     },
 ) {
     const sizeForGrid = size.multiplyScalar(gridSize);
@@ -347,6 +350,7 @@ export function createBounce(
     rotationY: number,
     side: Side,
     id: number,
+    interactive: boolean,
 ) {
     const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize / 1.5);
     const positionForGrid = position.multiplyScalar(gridSize);
@@ -377,6 +381,7 @@ export function createBounce(
     const wall = createMeshForGrid(geometry, material, {
         side,
         id,
+        interactive,
     }) as ElementToBounce;
 
     wall.position.set(
@@ -395,7 +400,7 @@ export function createBounce(
 
 export function createMountain() {
     const mountain = createMeshForGrid(geometries.mountain, materials.phong);
-    mountain.name = "mountain";
+    mountain.name = 'mountain';
     positionOnGrid(mountain, new Vector3(0, 0, -30));
     return mountain;
 }
