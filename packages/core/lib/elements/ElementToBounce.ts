@@ -5,6 +5,7 @@ import { degreesToRadians } from '../helpers/math';
 export class ElementToBounce extends Mesh {
     public bounce = true;
     public center = new Vector3();
+    public entryNormal = new Vector3();
 
     constructor(
         geometry: any,

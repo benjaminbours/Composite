@@ -40,6 +40,7 @@
 - Address lint warnings
 - S4oul => https://roadmap.sh/cpp first, the connections and styles are interesting, then it can be nice to link roadmap points with github ticket. The goal is to reduce friction and ease a maximum the eventual collaboration experience.
 - L3Gl0N__: Moi ce que je kifferai avoir à la place du synchronize .... Ce serais une grande vue comme ça et cela zoom sur le perso et seulement après tu peux jouer, le delai d'animation sert de synchro
+- Use the already stored "entryNormal" inside the element to bounce to make coherent the entry and exit normal of the player.
 
 ## To fix
 
