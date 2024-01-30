@@ -11,6 +11,7 @@ import { SkinBounceShadow } from '../elements/SkinBounceShadow';
 import { EndLevel } from '../elements/EndLevel';
 import { SkinBounce } from '../elements/SkinBounce';
 import { Pulse } from '../elements/Pulse';
+// import { BlackHole } from '../elements/BlackHole';
 
 export class LearnToFlyLevelWithGraphic extends LearnToFlyLevel {
     constructor() {
@@ -34,6 +35,14 @@ export class LearnToFlyLevelWithGraphic extends LearnToFlyLevel {
                 }
             }
         });
+
+        // const blackHole = new BlackHole(Side.LIGHT);
+        // blackHole.position.set(-200, 200, 0);
+        // this.add(blackHole);
+
+        // const blackHole2 = new BlackHole(Side.SHADOW);
+        // blackHole2.position.set(-600, 200, 0);
+        // this.add(blackHole2);
 
         const endLevel = new EndLevel();
         const endArea = this.children.find(
