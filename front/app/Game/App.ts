@@ -781,7 +781,8 @@ export default class App {
                     this.collidingElements,
                     this.currentState,
                     Context.client,
-                    // true,
+                    false,
+                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );
             }
             if (this.gameTimeIsSynchronized) {
