@@ -34,13 +34,13 @@ export class RedisPlayerState {
 }
 
 export class PlayerState {
-  /**
-   * key use with redis to store game state (the name of the room with socket io)
-   */
   constructor(
     public status: PlayerStatus,
     public side?: Side,
-    public selectedLevel?: Levels, // public gameId?: number,
+    public selectedLevel?: Levels,
+    /**
+     * key use with redis to store game state (the name of the room with socket io)
+     */
     public gameId?: number,
     public roomName?: string,
   ) {}
