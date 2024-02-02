@@ -21,7 +21,14 @@ export class UtilsService {
     const teamMateSocketId = await this.socketService.socket
       .in(String(player.roomName))
       .fetchSockets()
-      .then((sockets) => sockets.find(({ id }) => id !== socket.id).id);
+      .then((sockets) => {
+        const teamMate = sockets.find(({ id }) => id !== socket.id);
+        return teamMate?.id || undefined;
+      });
+
+    if (!teamMateSocketId) {
+      return false;
+    }
 
     // find team mate player state
     const teamMatePlayer =
