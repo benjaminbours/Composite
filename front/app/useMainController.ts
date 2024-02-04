@@ -3,16 +3,18 @@ import {
     InviteFriendTokenPayload,
     Levels,
     MatchMakingPayload,
+    MovableComponentState,
     Side,
     SocketEventTeamLobby,
     SocketEventType,
     TeammateInfoPayload,
+    TheHighSpheresLevel,
 } from '@benjaminbours/composite-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuMode, MenuScene, Route } from './types';
 import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
 
 export interface MainState {
@@ -31,14 +33,23 @@ export function useMainController(
     shadowToStep: (options: TweenOptions, isMobileDevice: boolean) => void,
     onTransition: React.MutableRefObject<boolean>,
 ) {
+    const queryParams = useSearchParams();
     const router = useRouter();
     const path = usePathname();
     const socketController = useRef<SocketController>();
 
     const [state, setState] = useState<MainState>(() => {
-        if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
+        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+            const devModePlayer = (() => {
+                const param = queryParams.get('dev_player');
+                if (param) {
+                    return Number(param) as Side;
+                }
+
+                return undefined;
+            })();
             return {
-                side: Side.LIGHT,
+                side: devModePlayer,
                 selectedLevel: Levels.LEARN_TO_FLY,
                 gameState: undefined,
                 levelSelectedByTeamMate: undefined,
@@ -431,6 +442,54 @@ export function useMainController(
             }));
         });
     }, [goToStep, onTransition, setState]);
+
+    // development effect
+    useEffect(() => {
+        console.log(process.env.NEXT_PUBLIC_SOLO_MODE);
+
+        if (process.env.NEXT_PUBLIC_SOLO_MODE) {
+            establishConnection().then(() => {
+                const level = new TheHighSpheresLevel();
+                const initialGameState = new GameState(
+                    [
+                        {
+                            position: {
+                                x: level.startPosition.shadow.x,
+                                y: level.startPosition.shadow.y,
+                            },
+                            velocity: {
+                                x: 0,
+                                y: 0,
+                            },
+                            state: MovableComponentState.onFloor,
+                            insideElementID: undefined,
+                        },
+                        {
+                            position: {
+                                x: level.startPosition.light.x,
+                                y: level.startPosition.light.y,
+                            },
+                            velocity: {
+                                x: 0,
+                                y: 0,
+                            },
+                            state: MovableComponentState.onFloor,
+                            insideElementID: undefined,
+                        },
+                    ],
+                    {
+                        ...level.state,
+                    },
+                    Date.now(),
+                    0,
+                );
+                handleGameStart(initialGameState);
+            });
+            return () => {
+                handleDestroyConnection();
+            };
+        }
+    }, []);
 
     return {
         state,
