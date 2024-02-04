@@ -314,13 +314,13 @@ export function useMainController(
             if (onTransition.current || state.selectedLevel === undefined) {
                 return;
             }
-            setState((prev) => ({ ...prev, side }));
-            establishConnection().then(() =>
+            establishConnection().then(() => {
+                setState((prev) => ({ ...prev, side }));
                 sendMatchMakingInfo({
                     selectedLevel: state.selectedLevel!,
                     side,
-                }),
-            );
+                });
+            });
             goToStep({
                 step: MenuScene.QUEUE,
                 side,
@@ -489,6 +489,18 @@ export function useMainController(
                 handleDestroyConnection();
             };
         }
+        if (
+            process.env.NEXT_PUBLIC_STAGE === 'development' &&
+            state.side !== undefined &&
+            socketController.current === undefined
+        ) {
+            console.log('enter random queue');
+            handleEnterRandomQueue(state.side);
+        }
+
+        return () => {
+            handleDestroyConnection();
+        };
     }, []);
 
     return {
