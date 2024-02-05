@@ -37,11 +37,11 @@ export class TheHighSpheresLevel extends Group implements AbstractLevel {
 
     constructor() {
         super();
-        const wallBlockingLeftPath = createWall(
-            new Vector3(4, 2, 0),
-            new Vector3(-2, 0, 2),
-            new Vector3(0, 90, 0),
-        );
+        const wallBlockingLeftPath = createWall({
+            size: new Vector3(4, 2, 0),
+            position: new Vector3(-4, 0, 2),
+            rotation: new Vector3(0, 90, 0),
+        });
         this.add(wallBlockingLeftPath);
         this.collidingElements.push(wallBlockingLeftPath);
 

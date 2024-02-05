@@ -90,24 +90,35 @@ export class SocketGateway {
     @MessageBody() data: MatchMakingPayload,
   ) {
     Logger.log('matchmaking info', socket.id, data);
-    const player = await this.temporaryStorage.getPlayer(socket.id);
-    Logger.log('player', player);
+    // const player = await this.temporaryStorage.getPlayer(socket.id);
+    // Logger.log('player', player);
+
+    // if (!player) {
+    //   return;
+    // }
     // if the player is already in a team room
-    if (player && player.roomName) {
-      Logger.log('player already in a team room');
-      this.handleTeamMatchMakingInfo(player, data, socket);
-      return;
-    }
+    // if (player && player.roomName) {
+    //   Logger.log('player already in a team room');
+    //   this.handleTeamMatchMakingInfo(player, data, socket);
+    //   return;
+    // }
 
     const playerFound = await this.temporaryStorage.findMatchInQueue(data, 0);
     if (!playerFound) {
-      Logger.log('no match, add to queue');
-      const player = new PlayerState(
-        PlayerStatus.IS_IN_QUEUE,
-        data.side,
-        data.selectedLevel,
-      );
-      this.temporaryStorage.addToQueue(socket.id, player);
+      Logger.log('no match');
+      const isPlayerAlreadyInQueue =
+        await this.temporaryStorage.checkIfExistInQueue(socket.id);
+      if (!isPlayerAlreadyInQueue) {
+        Logger.log('add to queue');
+        const player = new PlayerState(
+          PlayerStatus.IS_IN_QUEUE,
+          data.side,
+          data.selectedLevel,
+        );
+        this.temporaryStorage.addToQueue(socket.id, player);
+      } else {
+        Logger.log('already in queue');
+      }
       return;
     }
 
@@ -280,29 +291,29 @@ export class SocketGateway {
     ]);
   };
 
-  handleTeamMatchMakingInfo = async (
-    player: PlayerState,
-    data: MatchMakingPayload,
-    socket: Socket,
-  ) => {
-    // update local instance of fetched player with new data
-    player.selectedLevel = data.selectedLevel;
-    player.side = data.side;
-    // update player store in storage
-    await this.temporaryStorage.setPlayer(socket.id, {
-      selectedLevel: String(data.selectedLevel),
-      side: String(data.side),
-      status: String(PlayerStatus.IS_WAITING_TEAMMATE),
-    });
+  // handleTeamMatchMakingInfo = async (
+  //   player: PlayerState,
+  //   data: MatchMakingPayload,
+  //   socket: Socket,
+  // ) => {
+  //   // update local instance of fetched player with new data
+  //   player.selectedLevel = data.selectedLevel;
+  //   player.side = data.side;
+  //   // update player store in storage
+  //   await this.temporaryStorage.setPlayer(socket.id, {
+  //     selectedLevel: String(data.selectedLevel),
+  //     side: String(data.side),
+  //     status: String(PlayerStatus.IS_WAITING_TEAMMATE),
+  //   });
 
-    const players = await this.utils.detectIfGameCanStart(socket, player);
+  //   const players = await this.utils.detectIfGameCanStart(socket, player);
 
-    if (!players) {
-      return;
-    }
+  //   if (!players) {
+  //     return;
+  //   }
 
-    this.handlePlayerMatch(players);
-  };
+  //   this.handlePlayerMatch(players);
+  // };
 
   async createPersistentGameData(level: Levels) {
     const dbLevel = (() => {

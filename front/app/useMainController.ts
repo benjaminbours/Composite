@@ -3,17 +3,21 @@ import {
     InviteFriendTokenPayload,
     Levels,
     MatchMakingPayload,
+    MovableComponentState,
     Side,
     SocketEventTeamLobby,
     SocketEventType,
     TeammateInfoPayload,
+    TheHighSpheresLevel,
 } from '@benjaminbours/composite-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuMode, MenuScene, Route } from './types';
 import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
+import { CrackTheDoorLevelWithGraphic } from './Game/levels/CrackTheDoorLevelWithGraphic';
+import { LearnToFlyLevelWithGraphic } from './Game/levels/LearnToFlyLevelWithGraphic';
 
 export interface MainState {
     side: Side | undefined;
@@ -31,20 +35,40 @@ export function useMainController(
     shadowToStep: (options: TweenOptions, isMobileDevice: boolean) => void,
     onTransition: React.MutableRefObject<boolean>,
 ) {
+    const queryParams = useSearchParams();
     const router = useRouter();
     const path = usePathname();
     const socketController = useRef<SocketController>();
 
     const [state, setState] = useState<MainState>(() => {
-        if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
+        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+            let side = undefined;
+            let selectedLevel = undefined;
+
+            const param = queryParams.get('dev_state');
+            if (param) {
+                const parts = param.split(',').map((str) => Number(str));
+                side = parts[0] as Side;
+                selectedLevel = parts[1] as Levels;
+            }
+
+            if (process.env.NEXT_PUBLIC_SOLO_MODE) {
+                const parts = process.env.NEXT_PUBLIC_SOLO_MODE.split(',').map(
+                    (str) => Number(str),
+                );
+                side = parts[0] as Side;
+                selectedLevel = parts[1] as Levels;
+            }
+
             return {
-                side: Side.LIGHT,
-                selectedLevel: Levels.LEARN_TO_FLY,
+                side,
+                selectedLevel,
                 gameState: undefined,
                 levelSelectedByTeamMate: undefined,
                 sideSelectedByTeamMate: undefined,
             };
         }
+
         return {
             side: undefined,
             selectedLevel: undefined,
@@ -303,13 +327,13 @@ export function useMainController(
             if (onTransition.current || state.selectedLevel === undefined) {
                 return;
             }
-            setState((prev) => ({ ...prev, side }));
-            establishConnection().then(() =>
+            establishConnection().then(() => {
+                setState((prev) => ({ ...prev, side }));
                 sendMatchMakingInfo({
                     selectedLevel: state.selectedLevel!,
                     side,
-                }),
-            );
+                });
+            });
             goToStep({
                 step: MenuScene.QUEUE,
                 side,
@@ -431,6 +455,77 @@ export function useMainController(
             }));
         });
     }, [goToStep, onTransition, setState]);
+
+    // development effect
+    useEffect(() => {
+        console.log(process.env.NEXT_PUBLIC_SOLO_MODE);
+
+        if (process.env.NEXT_PUBLIC_SOLO_MODE) {
+            establishConnection().then(() => {
+                const level = (() => {
+                    switch (state.selectedLevel) {
+                        case Levels.CRACK_THE_DOOR:
+                            return new CrackTheDoorLevelWithGraphic();
+                        case Levels.LEARN_TO_FLY:
+                            return new LearnToFlyLevelWithGraphic();
+                        case Levels.THE_HIGH_SPHERES:
+                            return new TheHighSpheresLevel();
+                        default:
+                            return new CrackTheDoorLevelWithGraphic();
+                    }
+                })();
+                const initialGameState = new GameState(
+                    [
+                        {
+                            position: {
+                                x: level.startPosition.shadow.x,
+                                y: level.startPosition.shadow.y,
+                            },
+                            velocity: {
+                                x: 0,
+                                y: 0,
+                            },
+                            state: MovableComponentState.onFloor,
+                            insideElementID: undefined,
+                        },
+                        {
+                            position: {
+                                x: level.startPosition.light.x,
+                                y: level.startPosition.light.y,
+                            },
+                            velocity: {
+                                x: 0,
+                                y: 0,
+                            },
+                            state: MovableComponentState.onFloor,
+                            insideElementID: undefined,
+                        },
+                    ],
+                    {
+                        ...level.state,
+                    },
+                    Date.now(),
+                    0,
+                );
+                handleGameStart(initialGameState);
+            });
+            return () => {
+                handleDestroyConnection();
+            };
+        }
+        if (
+            process.env.NEXT_PUBLIC_STAGE === 'development' &&
+            state.side !== undefined &&
+            socketController.current === undefined
+        ) {
+            console.log('enter random queue');
+            handleEnterRandomQueue(state.side);
+        }
+
+        return () => {
+            handleDestroyConnection();
+        };
+    }, []);
 
     return {
         state,

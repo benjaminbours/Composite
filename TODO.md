@@ -19,6 +19,7 @@
 - Indicate where you team mate is in a game, and add possibility to call your friend in a direction somehow
 - Restore level loading
 - Display a message if your team mate disconnect => manage the behavior if its happening during the game
+- Different moment of the day depending of the level
 
 ## Nice to have
 

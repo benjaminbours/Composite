@@ -86,17 +86,23 @@ export class TemporaryStorageService {
     transaction.exec();
   }
 
+  async checkIfExistInQueue(socketId: string) {
+    const res = await this.redisClient.LPOS(
+      REDIS_KEYS.MATCH_MAKING_QUEUE,
+      socketId,
+    );
+    return res === null ? false : true;
+  }
+
   // match making queue
   async addToQueue(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     // TODO: Probably a bad idea to use the socketId. I should better use a session id => https://socket.io/docs/v4/client-socket-instance/
     console.log(socketId, player);
-
-    transaction.HSET(
+    this.setPlayer(
       socketId,
-      Object.entries(RedisPlayerState.parsePlayerState(player))
-        .filter(([, value]) => value !== undefined)
-        .flat(),
+      RedisPlayerState.parsePlayerState(player),
+      transaction,
     );
     transaction.RPUSH(REDIS_KEYS.MATCH_MAKING_QUEUE, socketId);
     this.updateQueueInfo('add', player, transaction);

@@ -37,11 +37,11 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
     constructor() {
         super();
-        const wallBlockingLeftPath = createWall(
-            new Vector3(4, 2, 0),
-            new Vector3(-2, 0, 2),
-            new Vector3(0, 90, 0),
-        );
+        const wallBlockingLeftPath = createWall({
+            size: new Vector3(4, 2, 0),
+            position: new Vector3(-2, 0, 2),
+            rotation: new Vector3(0, 90, 0),
+        });
         this.add(wallBlockingLeftPath);
         this.collidingElements.push(wallBlockingLeftPath);
 
@@ -70,19 +70,19 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
             }
         });
 
-        const templeEndWall = createWall(
-            new Vector3(4, 5, 0),
-            new Vector3(13, 0, 2),
-            new Vector3(0, 90, 0),
-        );
+        const templeEndWall = createWall({
+            size: new Vector3(4, 5, 0),
+            position: new Vector3(13, 0, 2),
+            rotation: new Vector3(0, 90, 0),
+        });
         this.add(templeEndWall);
         this.collidingElements.push(templeEndWall);
 
-        const wallInsideTemple = createWall(
-            new Vector3(6, 3, 0),
-            new Vector3(9, 0, -2),
-            new Vector3(0, 0, 0),
-        );
+        const wallInsideTemple = createWall({
+            size: new Vector3(6, 3, 0),
+            position: new Vector3(9, 0, -2),
+            rotation: new Vector3(0, 0, 0),
+        });
         this.add(wallInsideTemple);
 
         const doorList = [

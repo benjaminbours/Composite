@@ -261,7 +261,7 @@ export default class App {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
-    public gameDelta = process.env.NEXT_PUBLIC_SKIP_MATCHMAKING ? 5 : 0;
+    public gameDelta = 0;
     public bufferHistorySize = 10;
     public gameTimeIsSynchronized = false;
     public synchronizeGameTimeWithServer = (

@@ -9,12 +9,6 @@ import React, {
 } from 'react';
 import dynamic from 'next/dynamic';
 import * as STATS from 'stats.js';
-// our libs
-import {
-    GameState,
-    LearnToFlyLevel,
-    MovableComponentState,
-} from '@benjaminbours/composite-core';
 // local
 import { MenuScene } from './types';
 import { SettingsMenu } from './SettingsMenu';
@@ -133,73 +127,6 @@ function MainApp({ children }: Props) {
             );
         };
     }, []);
-
-    // effect use in development mode only
-    useEffect(() => {
-        if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
-            establishConnection().then(() => {
-                const level = new LearnToFlyLevel();
-                const initialGameState = new GameState(
-                    [
-                        {
-                            position: {
-                                x: level.startPosition.shadow.x,
-                                y: level.startPosition.shadow.y,
-                            },
-                            velocity: {
-                                x: 0,
-                                y: 0,
-                            },
-                            state: MovableComponentState.onFloor,
-                            insideElementID: undefined,
-                        },
-                        {
-                            position: {
-                                x: level.startPosition.light.x,
-                                y: level.startPosition.light.y,
-                            },
-                            velocity: {
-                                x: 0,
-                                y: 0,
-                            },
-                            state: MovableComponentState.onFloor,
-                            insideElementID: undefined,
-                        },
-                    ],
-                    {
-                        ...level.state,
-                    },
-                    Date.now(),
-                    0,
-                );
-                handleGameStart(initialGameState);
-            });
-        }
-    }, [establishConnection, sendMatchMakingInfo, handleGameStart]);
-
-    if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
-        return (
-            <>
-                {state.gameState && (
-                    <Game
-                        initialGameState={state.gameState}
-                        side={state.side!}
-                        socketController={socketController.current}
-                        tabIsHidden={tabIsHidden}
-                        stats={statsRef}
-                        inputsManager={inputsManager.current}
-                    />
-                )}
-                {isSettingsOpen && (
-                    <SettingsMenu
-                        inputsManager={inputsManager.current}
-                        onClose={handleClickOnCloseSettings}
-                    />
-                )}
-                <BottomRightInfo onSettingsClick={handleClickOnSettings} />
-            </>
-        );
-    }
 
     return (
         <AppContext.Provider

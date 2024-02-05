@@ -142,39 +142,30 @@ export function createMeshForGrid(
     return mesh;
 }
 
-export function createWall(
-    size: Vector3,
-    position: Vector3,
-    rotation: Vector3,
-    withOcclusion?: boolean,
-    withBounce?: {
-        side: Side;
-        id: number;
-        interactive: boolean;
-    },
-) {
-    const sizeForGrid = size.multiplyScalar(gridSize);
-    const material = (() => {
-        if (withBounce) {
-            if (withBounce.side === Side.SHADOW) {
-                return materials.skinBounceShadow;
-            }
-            if (withBounce.side === Side.LIGHT) {
-                return materials.skinBounceLight;
-            }
-        }
-        return materials.phong;
-    })();
+interface WallOptions {
+    size: Vector3;
+    position: Vector3;
+    rotation: Vector3;
+    withOcclusion?: boolean;
+    isGeometryCentered?: boolean;
+}
 
-    const wall = createMeshForGrid(
-        new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth).translate(
-            sizeForGrid.x / 2,
-            sizeForGrid.y / 2,
-            wallDepth / 2,
-        ),
-        material,
-        withBounce,
-    );
+export function createWall({
+    size,
+    position,
+    rotation,
+    withOcclusion,
+    isGeometryCentered,
+}: WallOptions) {
+    const sizeForGrid = size.multiplyScalar(gridSize);
+    const geometry = new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth);
+
+    if (isGeometryCentered) {
+        geometry.center();
+    } else {
+        geometry.translate(sizeForGrid.x / 2, sizeForGrid.y / 2, wallDepth / 2);
+    }
+    const wall = new Mesh(geometry, materials.phong);
     // position the whole group
     positionOnGrid(wall, position, rotation);
     if (withOcclusion) {
@@ -192,17 +183,17 @@ export function createWallDoor(
 ) {
     const group = new Object3D();
     // wall left to the door
-    const wallLeft = createWall(
-        new Vector3(1.5, size.y, 0),
-        new Vector3(0.5, 0, 0),
-        new Vector3(),
-    );
-    const wallRight = createWall(
-        new Vector3(0.5, size.y, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(),
-        true,
-    );
+    const wallLeft = createWall({
+        size: new Vector3(1.5, size.y, 0),
+        position: new Vector3(0.5, 0, 0),
+        rotation: new Vector3(),
+    });
+    const wallRight = createWall({
+        size: new Vector3(0.5, size.y, 0),
+        position: new Vector3(-1, 0, 0),
+        rotation: new Vector3(),
+        withOcclusion: true,
+    });
     group.add(wallLeft, wallRight);
 
     for (let i = 0; i < size.y; i++) {
@@ -230,11 +221,11 @@ export function createWallDoor(
 
             group.add(wallDoor, doorLeft, doorRight);
         } else {
-            const wall = createWall(
-                new Vector3(1, 1, 0),
-                new Vector3(-0.5, i, 0),
-                new Vector3(),
-            );
+            const wall = createWall({
+                size: new Vector3(1, 1, 0),
+                position: new Vector3(-0.5, i, 0),
+                rotation: new Vector3(),
+            });
             group.add(wall);
         }
     }
@@ -351,6 +342,14 @@ export function createColumnGroup(
     return group;
 }
 
+export interface BounceDefinition {
+    position: Vector3;
+    rotationY: number;
+    side: Side;
+    id: number;
+    interactive?: boolean;
+}
+
 export function createBounce(
     position: Vector3,
     rotationY: number,
@@ -365,6 +364,7 @@ export function createBounce(
         degreesToRadians(90 + rotationY),
         degreesToRadians(0),
     );
+
     const material = (() => {
         if (side === Side.SHADOW) {
             return materials.skinBounceShadow;
@@ -390,11 +390,7 @@ export function createBounce(
         interactive,
     }) as ElementToBounce;
 
-    wall.position.set(
-        positionForGrid.x + sizeForGrid.x / 2,
-        positionForGrid.y + sizeForGrid.y / 2,
-        positionForGrid.z,
-    );
+    wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
     wall.rotation.set(rotation.x, rotation.y, rotation.z);
     wall.updateMatrix();
     wall.geometry.center();
