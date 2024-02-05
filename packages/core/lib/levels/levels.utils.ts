@@ -37,8 +37,7 @@ export const ElementName = {
     DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
     AREA_DOOR_OPENER: (doorName: string) =>
         `${doorName}_${AREA_DOOR_OPENER_SUFFIX}`,
-    WALL_DOOR: (doorName: string) => `${doorName}_WALL_DOOR`,
-    BOUNCE: (side: Side) => `${side}_BOUNCE`,
+    WALL_DOOR: (doorIndex: string) => `${doorIndex}_WALL_DOOR`,
 };
 
 // TODO: Its not clear the fact is instantiated here then populate with more
@@ -175,12 +174,19 @@ export function createWall({
     return wall;
 }
 
-export function createWallDoor(
-    size: Vector3,
-    position: Vector3,
-    doorPosition: Vector3,
-    orientation: 'horizontal' | 'vertical',
-) {
+interface WallDoorOptions {
+    size: Vector3;
+    position: Vector3;
+    doorPosition: Vector3;
+    orientation: 'horizontal' | 'vertical';
+}
+
+export function createWallDoor({
+    size,
+    position,
+    doorPosition,
+    orientation,
+}: WallDoorOptions) {
     const group = new Object3D();
     // wall left to the door
     const wallLeft = createWall({
@@ -196,40 +202,52 @@ export function createWallDoor(
     });
     group.add(wallLeft, wallRight);
 
-    for (let i = 0; i < size.y; i++) {
-        if (i === doorPosition.y) {
-            const wallDoor = createMeshForGrid(
-                geometries.wallDoor as any,
-                materials.phong,
-            );
-            wallDoor.translateY(i * gridSize);
-            wallDoor.translateZ(wallDepth / 2);
-            const doorLeft = createMeshForGrid(
-                geometries.doorLeft as any,
-                materials.phong,
-            );
-            doorLeft.translateY(i * gridSize);
-            doorLeft.translateZ(wallDepth / 2);
-            doorLeft.name = 'doorLeft';
-            const doorRight = createMeshForGrid(
-                geometries.doorRight as any,
-                materials.phong,
-            );
-            doorRight.translateY(i * gridSize);
-            doorRight.translateZ(wallDepth / 2);
-            doorRight.name = 'doorRight';
+    const createDoor = () => {
+        const wallDoor = createMeshForGrid(
+            geometries.wallDoor as any,
+            materials.phong,
+        );
+        wallDoor.translateY(doorPosition.y * gridSize);
+        wallDoor.translateZ(wallDepth / 2);
+        const doorLeft = createMeshForGrid(
+            geometries.doorLeft as any,
+            materials.phong,
+        );
+        doorLeft.translateY(doorPosition.y * gridSize);
+        doorLeft.translateZ(wallDepth / 2);
+        doorLeft.name = 'doorLeft';
+        const doorRight = createMeshForGrid(
+            geometries.doorRight as any,
+            materials.phong,
+        );
+        doorRight.translateY(doorPosition.y * gridSize);
+        doorRight.translateZ(wallDepth / 2);
+        doorRight.name = 'doorRight';
 
-            group.add(wallDoor, doorLeft, doorRight);
-        } else {
-            const wall = createWall({
-                size: new Vector3(1, 1, 0),
-                position: new Vector3(-0.5, i, 0),
-                rotation: new Vector3(),
-            });
-            group.add(wall);
-        }
+        group.add(wallDoor, doorLeft, doorRight);
+    };
+    // wall (column) center
+    // door
+    createDoor();
+    // below
+    if (doorPosition.y > 0) {
+        const wall = createWall({
+            size: new Vector3(1, doorPosition.y, 0),
+            position: new Vector3(-0.5, 0, 0),
+            rotation: new Vector3(),
+        });
+        group.add(wall);
     }
-
+    // top
+    const sizeBetweenDoorAndTop = size.y - doorPosition.y;
+    if (sizeBetweenDoorAndTop > 0) {
+        const wall = createWall({
+            size: new Vector3(1, sizeBetweenDoorAndTop - 1, 0),
+            position: new Vector3(-0.5, doorPosition.y + 1, 0),
+            rotation: new Vector3(),
+        });
+        group.add(wall);
+    }
     switch (orientation) {
         case 'horizontal':
             positionOnGrid(group, position, new Vector3(90, 0, -90));
@@ -346,7 +364,6 @@ export interface BounceDefinition {
     position: Vector3;
     rotationY: number;
     side: Side;
-    id: number;
     interactive?: boolean;
 }
 
@@ -396,7 +413,6 @@ export function createBounce(
     wall.geometry.center();
     wall.geometry.computeBoundingBox();
     wall.geometry.boundingBox?.getCenter(wall.center);
-    wall.name = ElementName.BOUNCE(side);
     return wall;
 }
 

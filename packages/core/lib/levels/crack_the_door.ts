@@ -87,35 +87,33 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
         const doorList = [
             {
-                id: 'ground',
-                wall: createWallDoor(
-                    new Vector3(0, 3, 0),
-                    new Vector3(9, 0, 0),
-                    new Vector3(0, 0, 0),
-                    'vertical',
-                ),
+                wall: createWallDoor({
+                    size: new Vector3(0, 3, 0),
+                    position: new Vector3(9, 0, 0),
+                    doorPosition: new Vector3(0, 0, 0),
+                    orientation: 'vertical',
+                }),
                 openerPosition: new Vector3(10, 1.02, 0),
             },
             {
-                id: 'roof',
-                wall: createWallDoor(
-                    new Vector3(2, 6, 0),
-                    new Vector3(8, 3, 0),
-                    new Vector3(0, 3, 0),
-                    'horizontal',
-                ),
+                wall: createWallDoor({
+                    size: new Vector3(2, 6, 0),
+                    position: new Vector3(8, 3, 0),
+                    doorPosition: new Vector3(0, 3, 0),
+                    orientation: 'horizontal',
+                }),
                 openerPosition: new Vector3(10, 3, 0),
             },
         ];
 
-        doorList.forEach(({ id, wall, openerPosition }) => {
-            this.state.doors[id] = [];
-            wall.name = ElementName.WALL_DOOR(id);
+        doorList.forEach(({ wall, openerPosition }, index) => {
+            this.state.doors[index] = [];
+            wall.name = ElementName.WALL_DOOR(String(index));
             this.add(wall);
             this.collidingElements.push(wall);
 
             const doorOpener = new InteractiveArea(
-                ElementName.AREA_DOOR_OPENER(id),
+                ElementName.AREA_DOOR_OPENER(String(index)),
             );
             this.collidingElements.push(doorOpener);
             this.interactiveElements.push(doorOpener);

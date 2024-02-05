@@ -8,6 +8,7 @@ import {
     createBounce,
     createWall,
     positionOnGrid,
+    BounceDefinition,
 } from './levels.utils';
 import { Levels, LevelState } from '../GameState';
 import { Side } from '../types';
@@ -141,66 +142,60 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
             }
         });
 
-        const bounceList = [
+        const bounceList: BounceDefinition[] = [
             {
-                id: 0,
                 side: Side.SHADOW,
                 position: new Vector3(1, 0.5, 0),
                 // initialRotation: 0, // success rotation
-                initialRotation: -25,
+                rotationY: -25,
             },
             {
-                id: 12,
                 side: Side.SHADOW,
                 position: new Vector3(0, 0.5, 0),
-                // initialRotation: 0, // success rotation
-                initialRotation: -25,
+                // rotationY: 0, // success rotation
+                rotationY: -25,
                 interactive: true,
             },
             {
-                id: 1,
                 side: Side.LIGHT,
                 position: new Vector3(3, 0.5, 0),
-                initialRotation: -45,
+                rotationY: -45,
                 interactive: false,
-                // initialRotation: -25, // success rotation
+                // rotationY: -25, // success rotation
             },
             {
-                id: 4,
                 side: Side.LIGHT,
                 position: new Vector3(4, 0.5, 0),
-                initialRotation: -45,
+                rotationY: -45,
                 interactive: true,
-                // initialRotation: -25, // success rotation
+                // rotationY: -25, // success rotation
             },
             {
-                id: 2,
                 side: Side.SHADOW,
                 position: new Vector3(7, 5, 0),
-                initialRotation: -45,
-                // initialRotation: 0, // success rotation
+                rotationY: -45,
+                // rotationY: 0, // success rotation
             },
             {
-                id: 3,
                 side: Side.LIGHT,
                 position: new Vector3(12, 5, 0),
-                initialRotation: -45,
-                // initialRotation: 25, // success rotation
+                rotationY: -45,
+                // rotationY: 25, // success rotation
             },
         ];
 
         bounceList.forEach(
-            ({ position, initialRotation, side, id, interactive }) => {
+            ({ position, rotationY, side, interactive }, index) => {
                 const bounce = createBounce(
                     position,
-                    initialRotation,
+                    rotationY,
                     side,
-                    id,
+                    index,
                     interactive || false,
                 );
                 this.add(bounce);
                 this.collidingElements.push(bounce);
-                this.state.bounces![id] = { rotationY: initialRotation };
+                this.state.bounces![index] = { rotationY };
 
                 if (side === Side.LIGHT) {
                     this.lightBounces.push(bounce);

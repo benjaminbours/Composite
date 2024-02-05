@@ -12,18 +12,16 @@ export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
 
         const doors = [
             {
-                id: 'ground',
                 cameraPosition: new Vector3(50, 200),
             },
             {
-                id: 'roof',
                 cameraPosition: new Vector3(0, 100),
             },
         ];
 
-        doors.forEach(({ id, cameraPosition }) => {
+        doors.forEach(({ cameraPosition }, index) => {
             const wallDoor = this.children.find(
-                (child) => child.name === ElementName.WALL_DOOR(id),
+                (child) => child.name === ElementName.WALL_DOOR(String(index)),
             )!;
             const groundFloorDoorLeft = wallDoor.children.find(
                 (child) => child.name === 'doorLeft',
@@ -34,7 +32,7 @@ export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
             const groundFloorDoorWorldPosition =
                 groundFloorDoorLeft!.getWorldPosition(new Vector3());
             const groundFloorDoorOpener = new DoorOpener(
-                ElementName.DOOR_OPENER(id),
+                ElementName.DOOR_OPENER(String(index)),
                 {
                     cameraPosition:
                         groundFloorDoorWorldPosition.add(cameraPosition),
@@ -43,7 +41,7 @@ export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
                 },
             );
             const area = this.children.find(
-                (child) => child.name === ElementName.AREA_DOOR_OPENER(id),
+                (child) => child.name === ElementName.AREA_DOOR_OPENER(String(index)),
             )!;
             area.add(groundFloorDoorOpener);
         });
