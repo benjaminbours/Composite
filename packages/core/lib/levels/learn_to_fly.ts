@@ -44,17 +44,17 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
         super();
         const walls = [
             // blocking left path
-            createWall(
-                new Vector3(4, 5, 0),
-                new Vector3(-3.5, 0, 2),
-                new Vector3(0, 90, 0),
-            ),
+            createWall({
+                size: new Vector3(4, 5, 0),
+                position: new Vector3(-3.5, 0, 2),
+                rotation: new Vector3(0, 90, 0),
+            }),
             // blocking right path
-            createWall(
-                new Vector3(4, 8, 0),
-                new Vector3(14, 0, 2),
-                new Vector3(0, 90, 0),
-            ),
+            createWall({
+                size: new Vector3(4, 8, 0),
+                position: new Vector3(14, 0, 2),
+                rotation: new Vector3(0, 90, 0),
+            }),
         ];
 
         walls.forEach((wall) => {
@@ -150,10 +150,27 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
                 initialRotation: -25,
             },
             {
+                id: 12,
+                side: Side.SHADOW,
+                position: new Vector3(0, 0.5, 0),
+                // initialRotation: 0, // success rotation
+                initialRotation: -25,
+                interactive: true,
+            },
+            {
                 id: 1,
                 side: Side.LIGHT,
-                position: new Vector3(3, 1.75, 0),
+                position: new Vector3(3, 0.5, 0),
                 initialRotation: -45,
+                interactive: false,
+                // initialRotation: -25, // success rotation
+            },
+            {
+                id: 4,
+                side: Side.LIGHT,
+                position: new Vector3(4, 0.5, 0),
+                initialRotation: -45,
+                interactive: true,
                 // initialRotation: -25, // success rotation
             },
             {
@@ -172,17 +189,25 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
             },
         ];
 
-        bounceList.forEach(({ position, initialRotation, side, id }) => {
-            const bounce = createBounce(position, initialRotation, side, id);
-            this.add(bounce);
-            this.collidingElements.push(bounce);
-            this.state.bounces![id] = { rotationY: initialRotation };
+        bounceList.forEach(
+            ({ position, initialRotation, side, id, interactive }) => {
+                const bounce = createBounce(
+                    position,
+                    initialRotation,
+                    side,
+                    id,
+                    interactive || false,
+                );
+                this.add(bounce);
+                this.collidingElements.push(bounce);
+                this.state.bounces![id] = { rotationY: initialRotation };
 
-            if (side === Side.LIGHT) {
-                this.lightBounces.push(bounce);
-            }
-            this.bounces.push(bounce);
-        });
+                if (side === Side.LIGHT) {
+                    this.lightBounces.push(bounce);
+                }
+                this.bounces.push(bounce);
+            },
+        );
 
         const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
         this.add(endLevel);
