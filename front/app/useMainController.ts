@@ -16,6 +16,8 @@ import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
+import { CrackTheDoorLevelWithGraphic } from './Game/levels/CrackTheDoorLevelWithGraphic';
+import { LearnToFlyLevelWithGraphic } from './Game/levels/LearnToFlyLevelWithGraphic';
 
 export interface MainState {
     side: Side | undefined;
@@ -40,22 +42,33 @@ export function useMainController(
 
     const [state, setState] = useState<MainState>(() => {
         if (process.env.NEXT_PUBLIC_STAGE === 'development') {
-            const devModePlayer = (() => {
-                const param = queryParams.get('dev_player');
-                if (param) {
-                    return Number(param) as Side;
-                }
+            let side = undefined;
+            let selectedLevel = undefined;
 
-                return undefined;
-            })();
+            const param = queryParams.get('dev_state');
+            if (param) {
+                const parts = param.split(',').map((str) => Number(str));
+                side = parts[0] as Side;
+                selectedLevel = parts[1] as Levels;
+            }
+
+            if (process.env.NEXT_PUBLIC_SOLO_MODE) {
+                const parts = process.env.NEXT_PUBLIC_SOLO_MODE.split(',').map(
+                    (str) => Number(str),
+                );
+                side = parts[0] as Side;
+                selectedLevel = parts[1] as Levels;
+            }
+
             return {
-                side: devModePlayer,
-                selectedLevel: Levels.LEARN_TO_FLY,
+                side,
+                selectedLevel,
                 gameState: undefined,
                 levelSelectedByTeamMate: undefined,
                 sideSelectedByTeamMate: undefined,
             };
         }
+
         return {
             side: undefined,
             selectedLevel: undefined,
@@ -449,7 +462,18 @@ export function useMainController(
 
         if (process.env.NEXT_PUBLIC_SOLO_MODE) {
             establishConnection().then(() => {
-                const level = new TheHighSpheresLevel();
+                const level = (() => {
+                    switch (state.selectedLevel) {
+                        case Levels.CRACK_THE_DOOR:
+                            return new CrackTheDoorLevelWithGraphic();
+                        case Levels.LEARN_TO_FLY:
+                            return new LearnToFlyLevelWithGraphic();
+                        case Levels.THE_HIGH_SPHERES:
+                            return new TheHighSpheresLevel();
+                        default:
+                            return new CrackTheDoorLevelWithGraphic();
+                    }
+                })();
                 const initialGameState = new GameState(
                     [
                         {
