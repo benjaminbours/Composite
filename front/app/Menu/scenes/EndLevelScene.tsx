@@ -45,8 +45,6 @@ export const EndLevelScene: React.FC<Props> = ({
         let scriptElement: HTMLElement | undefined;
         fetch('https://c6.patreon.com/becomePatronButton.bundle.js').then(
             async (res) => {
-                console.log(res);
-                console.log('loaded');
                 const b = await res.blob();
                 let ou = URL.createObjectURL(b),
                     scriptElement = document.createElement('script');

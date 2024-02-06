@@ -1,4 +1,4 @@
-import { Matrix4, Vector3 } from 'three';
+import { Intersection, Matrix4, Vector3 } from 'three';
 import { Inputs, MovableComponentState, Side } from '../types';
 import { LevelState, PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
@@ -50,10 +50,14 @@ function handleDefaultCollision(
 }
 
 function handleEnterElementToBounce(
-    bounceElement: ElementToBounce,
+    intersection: Intersection,
     player: PlayerGameState,
 ) {
+    const bounceElement = intersection.object as ElementToBounce;
     const center = bounceElement.localToWorld(bounceElement.center.clone());
+    if (intersection.normal) {
+        bounceElement.entryNormal = intersection.normal;
+    }
     player.state = MovableComponentState.inside;
     player.insideElementID = bounceElement.bounceID;
     player.position.x = center.x;
@@ -106,7 +110,9 @@ export function handleCollision(
         const collidingObject = collision.object as ElementToBounce;
 
         const shouldEnterElementToBounce =
-            collidingObject.bounce && side === collidingObject.side;
+            collidingObject.bounce &&
+            side === collidingObject.side &&
+            collidingObject.interactive;
 
         const shouldExitElementToBounce =
             collidingObject.bounce &&
@@ -120,7 +126,7 @@ export function handleCollision(
         }
 
         if (shouldEnterElementToBounce) {
-            handleEnterElementToBounce(collidingObject, player);
+            handleEnterElementToBounce(collision, player);
         } else if (shouldBounceAgainst) {
             if (collision.normal === undefined) {
                 return;

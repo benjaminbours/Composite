@@ -19,6 +19,7 @@
 - Indicate where you team mate is in a game, and add possibility to call your friend in a direction somehow
 - Restore level loading
 - Display a message if your team mate disconnect => manage the behavior if its happening during the game
+- Different moment of the day depending of the level
 
 ## Nice to have
 
@@ -39,6 +40,8 @@
   - State reconciliation / management
 - Address lint warnings
 - S4oul => https://roadmap.sh/cpp first, the connections and styles are interesting, then it can be nice to link roadmap points with github ticket. The goal is to reduce friction and ease a maximum the eventual collaboration experience.
+- L3Gl0N__: Moi ce que je kifferai avoir à la place du synchronize .... Ce serais une grande vue comme ça et cela zoom sur le perso et seulement après tu peux jouer, le delai d'animation sert de synchro
+- Use the already stored "entryNormal" inside the element to bounce to make coherent the entry and exit normal of the player.
 
 ## To fix
 
@@ -75,14 +78,22 @@
   - uchinara => The guy disapeared, hope he is well :(
   - S4oul
   - Smoke
-  - strailder
+  - strailder => discord but he disapeard so far
 
 - thank you for making me discover this lib => https://github.com/gkjohnson/three-mesh-bvh, was a game changer in terms of performance + youtube video about designing puzzle game
   - uchinara
+- This shader toy shader => https://www.shadertoy.com/view/Xsl3zX recomended by Legion
+- Andrew Berg for this => https://medium.com/@andrew_b_berg/volumetric-light-scattering-in-three-js-6e1850680a41
+
+
+## Stupid things to do
+
+- Record welcome to millenium from => https://open.spotify.com/track/2GHnPQ8mAukedPzVZWRyTj?si=059aff8634a84bee and use it as a jingle when people subscribe
 
 ## If I ever receive one penny for this game
 
 - Support this lib => https://github.com/gkjohnson/three-mesh-bvh
+- Donate to shadertoy
 
 ## Twitch
 
@@ -125,4 +136,5 @@ Still need to address number 2 and 5
 ## TODAY
 
 - Add recurrent message such as kofibot, to print available commands for users in the chat. Or put it in the title of the stream.
+- Lobby not always detecting choice of team mate on loading
 - Enable github sponsor?

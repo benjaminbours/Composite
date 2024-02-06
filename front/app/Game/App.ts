@@ -261,7 +261,7 @@ export default class App {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
-    public gameDelta = process.env.NEXT_PUBLIC_SKIP_MATCHMAKING ? 5 : 0;
+    public gameDelta = 0;
     public bufferHistorySize = 10;
     public gameTimeIsSynchronized = false;
     public synchronizeGameTimeWithServer = (
@@ -277,7 +277,11 @@ export default class App {
         // one trip time
 
         let sendInputsInterval;
-        if (rtt <= 30) {
+        if (rtt <= 15) {
+            this.gameDelta = 15;
+            this.bufferHistorySize = 15;
+            sendInputsInterval = 20;
+        } else if (rtt <= 30) {
             this.gameDelta = rtt;
             this.bufferHistorySize = 15;
             sendInputsInterval = 20;
@@ -351,7 +355,7 @@ export default class App {
         this.dirLight.shadow.camera.far = 8000;
         this.dirLight.shadow.mapSize.width = 1024 * 2;
         this.dirLight.shadow.mapSize.height = 1024 * 2;
-        this.dirLight.shadow.bias = -0.01;
+        // this.dirLight.shadow.bias = -0.01;
         // this.dirLight.position.set(-2, 1, 2);
         // this.dirLight.position.copy(this.camera.position);
         this.dirLight.target = new Object3D();
@@ -439,6 +443,7 @@ export default class App {
                 density: { value: 0.8 },
                 weight: { value: 0.5 },
                 samples: { value: 100 },
+                time: { value: 0 },
             },
             vertexShader: basicPostProdVS,
             fragmentShader: volumetricLightPlayerFS,
@@ -472,6 +477,8 @@ export default class App {
                     density: { value: 0.5 },
                     weight: { value: 0.5 },
                     samples: { value: 100 },
+                    isInteractive: { value: lightBounces[i].interactive },
+                    time: { value: 0 },
                 },
                 vertexShader: basicPostProdVS,
                 fragmentShader: volumetricLightBounceFS,
@@ -774,7 +781,8 @@ export default class App {
                     this.collidingElements,
                     this.currentState,
                     Context.client,
-                    // true,
+                    false,
+                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );
             }
             if (this.gameTimeIsSynchronized) {
@@ -823,6 +831,8 @@ export default class App {
                         this.camera,
                         state.players[this.playersConfig[0]].velocity,
                     );
+                this.playerVolumetricLightPass.material.uniforms.time.value +=
+                    this.delta;
             }
 
             if (player instanceof ShadowPlayer) {
@@ -925,8 +935,8 @@ export default class App {
         skyShaderMat.setSunAngle(200);
         skyShaderMat.render();
         (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
-        skyShaderMat.setTimeOfDay(0.6, [255, 255], 0, [195, 230], 0);
-        // skyShaderMat.setTimeOfDay(1,[20,55], 0, [195,230], 0);
+        // sun Hue and atm Hue are not applied with a saturation of 0
+        skyShaderMat.setTimeOfDay(0.6, undefined, 0, undefined, 0);
         const lightInfo = skyShaderMat.getLightInfo(this.camera.position);
 
         this.dirLight.position.copy(lightInfo.position);
@@ -980,24 +990,23 @@ export default class App {
         this.camera.layers.set(Layer.OCCLUSION);
         for (let i = 0; i < this.occlusionComposers.length; i++) {
             if (i > 0) {
-                const previousLightBounce = (
+                const previousLightBounce =
                     this.levelController.levels[
                         this.levelController.currentLevel
-                    ] as any
-                ).lightBounces[i - 1];
+                    ].lightBounces[i - 1];
                 previousLightBounce.layers.disable(Layer.OCCLUSION);
             }
-            const lightBounce = (
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ] as any
-            ).lightBounces[i];
+            const lightBounce =
+                this.levelController.levels[this.levelController.currentLevel]
+                    .lightBounces[i];
             lightBounce.layers.enable(Layer.OCCLUSION);
             this.volumetricLightPasses[
                 i
             ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
                 this.camera,
             );
+            this.volumetricLightPasses[i].material.uniforms.time.value +=
+                this.delta;
             const occlusionComposer = this.occlusionComposers[i];
             occlusionComposer.render();
             if (i === this.occlusionComposers.length - 1) {

@@ -6,12 +6,14 @@ uniform float decay;
 uniform float density;
 uniform float weight;
 uniform int samples;
+uniform float time;
 const int MAX_SAMPLES = 100;
 
 void main() {
     vec2 texCoord = vUv;
     vec2 deltaTextCoord = texCoord - lightPosition;
-    deltaTextCoord *= 1. / float(samples) * density;
+    float timeMod = 1.1 + cos(time * 1.) / 10.;
+    deltaTextCoord *= 1. / float(samples) * density * timeMod;
 
     vec4 color = texture2D(tDiffuse, texCoord);
     float illuminationDecay = 1.0;
@@ -22,7 +24,7 @@ void main() {
         }
         texCoord -= deltaTextCoord;
         vec4 sampleFixed = texture2D(tDiffuse, texCoord);
-        sampleFixed *= illuminationDecay * weight;
+        sampleFixed *= illuminationDecay * weight * timeMod;
         color += sampleFixed;
         illuminationDecay *= decay;
     }

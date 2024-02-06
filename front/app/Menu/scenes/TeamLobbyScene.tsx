@@ -99,9 +99,12 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
 
         // initial loading
         useEffect(() => {
-            handleSelectLevel(levels[0].id);
+            // TODO: ISSUE IS HERE, it should only send this when we are in friend mode somehow
+            if (isMount) {
+                handleSelectLevel(levels[0].id);
+            }
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
+        }, [isMount]);
 
         return (
             <div ref={teamLobbyRef} className={cssClass}>

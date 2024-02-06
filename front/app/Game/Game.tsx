@@ -96,7 +96,7 @@ function Game({
                 setIsSynchronizingTime(false);
             };
 
-            if (process.env.NEXT_PUBLIC_SKIP_MATCHMAKING) {
+            if (process.env.NEXT_PUBLIC_SOLO_MODE) {
                 onTimeSynchronized();
             } else {
                 socketController.synchronizeTime().then(onTimeSynchronized);
