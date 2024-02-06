@@ -204,6 +204,28 @@ export function createWallDoor({
         doorRight.translateZ(wallDepth / 2);
         doorRight.name = 'doorRight';
 
+        // occlusion
+        const doorLeftOcclusion = doorLeft.clone();
+        doorLeftOcclusion.name = '';
+        doorLeftOcclusion.material = materials.occlusion;
+        doorLeftOcclusion.layers.set(Layer.OCCLUSION);
+        doorLeftOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+        group.add(doorLeftOcclusion);
+
+        const doorRightOcclusion = doorRight.clone();
+        doorRightOcclusion.name = '';
+        doorRightOcclusion.material = materials.occlusion;
+        doorRightOcclusion.layers.set(Layer.OCCLUSION);
+        doorRightOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+        group.add(doorRightOcclusion);
+
+        const wallDoorOcclusion = wallDoor.clone();
+        wallDoorOcclusion.name = '';
+        wallDoorOcclusion.material = materials.occlusion;
+        wallDoorOcclusion.layers.set(Layer.OCCLUSION);
+        wallDoorOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+        group.add(wallDoorOcclusion);
+
         group.add(wallDoor, doorLeft, doorRight);
     };
     // wall (column) center
