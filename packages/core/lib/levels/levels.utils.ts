@@ -108,45 +108,13 @@ export function positionInsideGridBox(
     element.position.add(coordinate);
 }
 
-export function createMeshForGrid(
-    geo: BoxGeometry,
-    mat: Material,
-    withBounce?: {
-        side: Side;
-        id: number;
-        interactive: boolean;
-    },
-): Mesh {
-    // geo.translate(
-    //     geo.parameters.width / 2,
-    //     geo.parameters.height / 2,
-    //     geo.parameters.depth / 2,
-    // );
-    const mesh = (() => {
-        if (withBounce) {
-            return new ElementToBounce(
-                geo,
-                mat,
-                withBounce.side,
-                withBounce.id,
-                withBounce.interactive,
-            );
-        }
-        return new Mesh(geo, mat);
-    })();
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    // putting all mesh into occlusion effect creates an interesting effect
-    // mesh.layers.enable(Layer.OCCLUSION);
-    return mesh;
-}
-
 interface WallOptions {
     size: Vector3;
     position: Vector3;
     rotation: Vector3;
     withOcclusion?: boolean;
     isGeometryCentered?: boolean;
+    receiveShadow?: boolean;
 }
 
 export function createWall({
@@ -155,6 +123,7 @@ export function createWall({
     rotation,
     withOcclusion,
     isGeometryCentered,
+    receiveShadow,
 }: WallOptions) {
     const sizeForGrid = size.multiplyScalar(gridSize);
     const geometry = new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth);
@@ -165,6 +134,10 @@ export function createWall({
         geometry.translate(sizeForGrid.x / 2, sizeForGrid.y / 2, wallDepth / 2);
     }
     const wall = new Mesh(geometry, materials.phong);
+    wall.castShadow = true;
+    if (receiveShadow) {
+        wall.receiveShadow = true;
+    }
     // position the whole group
     positionOnGrid(wall, position, rotation);
     if (withOcclusion) {
@@ -198,28 +171,25 @@ export function createWallDoor({
         size: new Vector3(0.5, size.y, 0),
         position: new Vector3(-1, 0, 0),
         rotation: new Vector3(),
-        withOcclusion: true,
+        // withOcclusion: true,
     });
     group.add(wallLeft, wallRight);
 
     const createDoor = () => {
-        const wallDoor = createMeshForGrid(
-            geometries.wallDoor as any,
-            materials.phong,
-        );
+        const wallDoor = new Mesh(geometries.wallDoor as any, materials.phong);
+        wallDoor.castShadow = true;
         wallDoor.translateY(doorPosition.y * gridSize);
         wallDoor.translateZ(wallDepth / 2);
-        const doorLeft = createMeshForGrid(
-            geometries.doorLeft as any,
-            materials.phong,
-        );
+        const doorLeft = new Mesh(geometries.doorLeft as any, materials.phong);
+        doorLeft.castShadow = true;
         doorLeft.translateY(doorPosition.y * gridSize);
         doorLeft.translateZ(wallDepth / 2);
         doorLeft.name = 'doorLeft';
-        const doorRight = createMeshForGrid(
+        const doorRight = new Mesh(
             geometries.doorRight as any,
             materials.phong,
         );
+        doorRight.castShadow = true;
         doorRight.translateY(doorPosition.y * gridSize);
         doorRight.translateZ(wallDepth / 2);
         doorRight.name = 'doorRight';
@@ -245,6 +215,7 @@ export function createWallDoor({
             size: new Vector3(1, sizeBetweenDoorAndTop - 1, 0),
             position: new Vector3(-0.5, doorPosition.y + 1, 0),
             rotation: new Vector3(),
+            // withOcclusion: true,
         });
         group.add(wall);
     }
@@ -303,9 +274,11 @@ export function createArchGroup({
         10,
         gridSize * 2.5,
     );
-    const platformMesh = createMeshForGrid(geometryPlatform, materials.phong);
+    const platformMesh = new Mesh(geometryPlatform, materials.phong);
+    platformMesh.castShadow = true;
+    // platformMesh.receiveShadow = true;
     platformMesh.name = 'platform';
-    const platformMeshOcclusion = createMeshForGrid(
+    const platformMeshOcclusion = new Mesh(
         geometryPlatform,
         materials.occlusion,
     );
@@ -336,7 +309,9 @@ export function createColumnGroup(
     const partGeometry = geometries[`column_${columnGeometry}`] as BoxGeometry;
     const group = new Object3D();
 
-    const columnStart = createMeshForGrid(pedestalGeometry, materials.phong);
+    const columnStart = new Mesh(pedestalGeometry, materials.phong);
+    columnStart.castShadow = true;
+    columnStart.receiveShadow = true;
     group.add(columnStart);
     if (withOcclusion) {
         columnStart.layers.enable(Layer.OCCLUSION);
@@ -344,7 +319,9 @@ export function createColumnGroup(
     }
 
     if (partGeometry) {
-        const part = createMeshForGrid(partGeometry, materials.phong);
+        const part = new Mesh(partGeometry, materials.phong);
+        part.castShadow = true;
+        part.receiveShadow = true;
         part.scale.set(1, size - 0.02, 1);
         group.add(part);
         if (withOcclusion) {
@@ -401,11 +378,7 @@ export function createBounce(
         30,
     );
 
-    const wall = createMeshForGrid(geometry, material, {
-        side,
-        id,
-        interactive,
-    }) as ElementToBounce;
+    const wall = new ElementToBounce(geometry, material, side, id, interactive);
 
     wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
     wall.rotation.set(rotation.x, rotation.y, rotation.z);
@@ -417,7 +390,7 @@ export function createBounce(
 }
 
 export function createMountain() {
-    const mountain = createMeshForGrid(geometries.mountain, materials.phong);
+    const mountain = new Mesh(geometries.mountain, materials.phong);
     mountain.name = 'mountain';
     positionOnGrid(mountain, new Vector3(0, 0, -30));
     return mountain;
