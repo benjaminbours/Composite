@@ -19,9 +19,6 @@ import {
     Object3DEventMap,
     Vec2,
 } from 'three';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 // our libs
 import {
     GamePlayerInputPayload,
@@ -45,11 +42,6 @@ import {
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 import CustomCamera from './CustomCamera';
-import basicPostProdVS from './glsl/basic_postprod_vs.glsl';
-import playerInsideFS from './glsl/playerInside_fs.glsl';
-import mixPassFS from './glsl/mixPass_fs.glsl';
-import volumetricLightBounceFS from './glsl/volumetricLightBounce_fs.glsl';
-import volumetricLightPlayerFS from './glsl/volumetricLightPlayer_fs.glsl';
 import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
@@ -57,6 +49,7 @@ import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
 import { EndLevel } from './elements/EndLevel';
 import { SkinBounce } from './elements/SkinBounce';
+import { PostProcessingManager } from './PostProcessingManager';
 
 interface InterpolationConfig {
     ratio: number;
@@ -85,15 +78,6 @@ export default class App {
     private dirLight = new DirectionalLight(0xffffee, 1);
 
     private levelController: LevelController;
-
-    private mainComposer!: EffectComposer;
-    private playerInsideComposer!: EffectComposer;
-
-    private occlusionComposers: EffectComposer[] = [];
-    private volumetricLightPasses: ShaderPass[] = [];
-
-    private playerOcclusionComposer!: EffectComposer;
-    private playerVolumetricLightPass!: ShaderPass;
 
     private inputsHistory: GamePlayerInputPayload[] = [];
     // its a predicted state if we compare it to the last validated state
@@ -204,6 +188,8 @@ export default class App {
 
     private floor = FLOOR;
 
+    private postProcessingManager: PostProcessingManager;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
@@ -231,7 +217,16 @@ export default class App {
 
         this.setupScene(playersConfig);
         this.scene.updateMatrixWorld();
-        this.setupPostProcessing();
+        this.postProcessingManager = new PostProcessingManager(
+            this.renderer,
+            this.scene,
+            this.camera,
+            (
+                this.levelController.levels[
+                    this.levelController.currentLevel
+                ] as any
+            ).lightBounces || [],
+        );
 
         this.socketController.getCurrentGameState = this.getCurrentGameState;
         this.socketController.onGameStateUpdate = (
@@ -385,140 +380,6 @@ export default class App {
             this.playerHelper = new Box3();
             this.scene.add(new Box3Helper(this.playerHelper, 0xffff00));
         }
-    };
-
-    createRenderTarget = (renderScale: number) => {
-        return new WebGLRenderTarget(
-            this.width * renderScale,
-            this.height * renderScale,
-        );
-    };
-
-    createOcclusionComposer = (
-        renderPass: RenderPass,
-        lightPass: ShaderPass,
-        occlusionRenderTarget: WebGLRenderTarget,
-    ) => {
-        const occlusionComposer = new EffectComposer(
-            this.renderer,
-            occlusionRenderTarget,
-        );
-        occlusionComposer.renderToScreen = false;
-        occlusionComposer.addPass(renderPass);
-        occlusionComposer.addPass(lightPass);
-
-        return occlusionComposer;
-    };
-
-    createMixPass = (addTexture: WebGLRenderTarget) => {
-        const mixPass = new ShaderPass(
-            {
-                uniforms: {
-                    baseTexture: { value: null },
-                    addTexture: { value: null },
-                },
-                vertexShader: basicPostProdVS,
-                fragmentShader: mixPassFS,
-            },
-            'baseTexture',
-        );
-        mixPass.uniforms.addTexture.value = addTexture.texture;
-
-        return mixPass;
-    };
-
-    setupPostProcessing = () => {
-        const renderScale = 1;
-        this.mainComposer = new EffectComposer(this.renderer);
-
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.mainComposer.addPass(renderPass);
-
-        // create occlusion render for player light
-        const occlusionRenderTarget = this.createRenderTarget(renderScale);
-        this.playerVolumetricLightPass = new ShaderPass({
-            uniforms: {
-                tDiffuse: { value: null },
-                lightPosition: { value: new Vector2(0.5, 0.5) },
-                exposure: { value: 0.18 },
-                decay: { value: 0.97 },
-                density: { value: 0.8 },
-                weight: { value: 0.5 },
-                samples: { value: 100 },
-                time: { value: 0 },
-            },
-            vertexShader: basicPostProdVS,
-            fragmentShader: volumetricLightPlayerFS,
-        });
-        this.playerVolumetricLightPass.needsSwap = false;
-        this.playerOcclusionComposer = this.createOcclusionComposer(
-            renderPass,
-            this.playerVolumetricLightPass,
-            occlusionRenderTarget,
-        );
-        const mixPass = this.createMixPass(occlusionRenderTarget);
-
-        this.mainComposer.addPass(mixPass);
-
-        // create occlusion render for each light bounce element
-        const lightBounces =
-            (
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ] as any
-            ).lightBounces || [];
-
-        for (let i = 0; i < lightBounces.length; i++) {
-            const occlusionRenderTarget = this.createRenderTarget(renderScale);
-            const volumetricLightPass = new ShaderPass({
-                uniforms: {
-                    tDiffuse: { value: null },
-                    lightPosition: { value: new Vector2(0.5, 0.5) },
-                    exposure: { value: 0.18 },
-                    decay: { value: 0.9 },
-                    density: { value: 0.5 },
-                    weight: { value: 0.5 },
-                    samples: { value: 100 },
-                    isInteractive: { value: lightBounces[i].interactive },
-                    time: { value: 0 },
-                },
-                vertexShader: basicPostProdVS,
-                fragmentShader: volumetricLightBounceFS,
-            });
-            volumetricLightPass.needsSwap = false;
-            const occlusionComposer = this.createOcclusionComposer(
-                renderPass,
-                volumetricLightPass,
-                occlusionRenderTarget,
-            );
-            const mixPass = this.createMixPass(occlusionRenderTarget);
-
-            this.mainComposer.addPass(mixPass);
-            this.occlusionComposers.push(occlusionComposer);
-            this.volumetricLightPasses.push(volumetricLightPass);
-        }
-
-        // create a renderer for when a player is inside an element
-        const playerInsideRenderTarget = this.createRenderTarget(renderScale);
-        const playerInsidePass = new ShaderPass({
-            uniforms: {
-                tDiffuse: { value: null },
-            },
-            vertexShader: basicPostProdVS,
-            fragmentShader: playerInsideFS,
-        });
-        playerInsidePass.needsSwap = false;
-        this.playerInsideComposer = new EffectComposer(
-            this.renderer,
-            playerInsideRenderTarget,
-        );
-        this.playerInsideComposer.renderToScreen = false;
-        this.playerInsideComposer.addPass(renderPass);
-        this.playerInsideComposer.addPass(playerInsidePass);
-        const playerInsideMixPass = this.createMixPass(
-            playerInsideRenderTarget,
-        );
-        this.mainComposer.addPass(playerInsideMixPass);
     };
 
     public updateChildren = (object: Object3D) => {
@@ -677,27 +538,6 @@ export default class App {
             return;
         }
 
-        // // console.log('HERE', this.predictionHistory.length);
-        // this.displayState = this.currentState;
-        // return;
-
-        // const ratio = Math.floor(this.gameDelta / 2);
-        // const offset = this.gameDelta - 15;
-        // const minOffset = 5;
-        // const maxOffset = 40;
-        // const offset = (() => {
-        //     const idealOffset = this.gameDelta - 5;
-        //     if (idealOffset > maxOffset) {
-        //         return maxOffset;
-        //     } else if (idealOffset < minOffset) {
-        //         return minOffset;
-        //     }
-        //     return idealOffset;
-        // })();
-        // const offset = 15;
-        // const ratio = Math.floor(this.gameDelta - 5);
-        // console.log('HERE offset', offset);
-
         // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
         if (this.predictionHistory.length >= this.bufferHistorySize) {
             // const statesToInterpolate = this.predictionHistory.slice(-offset);
@@ -828,12 +668,12 @@ export default class App {
             const player = this.players[i];
 
             if (player instanceof LightPlayer) {
-                this.playerVolumetricLightPass.material.uniforms.lightPosition.value =
+                this.postProcessingManager.playerVolumetricLightPass.material.uniforms.lightPosition.value =
                     player.get2dLightPosition(
                         this.camera,
                         state.players[this.playersConfig[0]].velocity,
                     );
-                this.playerVolumetricLightPass.material.uniforms.time.value +=
+                this.postProcessingManager.playerVolumetricLightPass.material.uniforms.time.value +=
                     this.delta;
             }
 
@@ -991,10 +831,14 @@ export default class App {
         const state = this.displayState;
         this.camera.layers.set(Layer.OCCLUSION_PLAYER);
         this.renderer.setClearColor(0x000000);
-        this.playerOcclusionComposer.render();
+        this.postProcessingManager.playerOcclusionComposer.render();
         // one occlusion composer by bounce
         this.camera.layers.set(Layer.OCCLUSION);
-        for (let i = 0; i < this.occlusionComposers.length; i++) {
+        for (
+            let i = 0;
+            i < this.postProcessingManager.occlusionComposers.length;
+            i++
+        ) {
             if (i > 0) {
                 const previousLightBounce =
                     this.levelController.levels[
@@ -1006,16 +850,21 @@ export default class App {
                 this.levelController.levels[this.levelController.currentLevel]
                     .lightBounces[i];
             lightBounce.layers.enable(Layer.OCCLUSION);
-            this.volumetricLightPasses[
+            this.postProcessingManager.volumetricLightPasses[
                 i
             ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
                 this.camera,
             );
-            this.volumetricLightPasses[i].material.uniforms.time.value +=
-                this.delta;
-            const occlusionComposer = this.occlusionComposers[i];
+            this.postProcessingManager.volumetricLightPasses[
+                i
+            ].material.uniforms.time.value += this.delta;
+            const occlusionComposer =
+                this.postProcessingManager.occlusionComposers[i];
             occlusionComposer.render();
-            if (i === this.occlusionComposers.length - 1) {
+            if (
+                i ===
+                this.postProcessingManager.occlusionComposers.length - 1
+            ) {
                 lightBounce.layers.disable(Layer.OCCLUSION);
             }
         }
@@ -1054,15 +903,15 @@ export default class App {
             }
             this.camera.layers.set(Layer.PLAYER_INSIDE);
             this.renderer.setClearColor(0x444444);
-            this.playerInsideComposer.render();
+            this.postProcessingManager.playerInsideComposer.render();
         } else {
             this.renderer.setRenderTarget(
-                this.playerInsideComposer.renderTarget1,
+                this.postProcessingManager.playerInsideComposer.renderTarget1,
             );
             this.renderer.clear();
         }
         this.camera.layers.set(Layer.DEFAULT);
         this.renderer.setClearColor(0x000000);
-        this.mainComposer.render();
+        this.postProcessingManager.mainComposer.render();
     };
 }
