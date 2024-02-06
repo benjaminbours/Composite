@@ -8,6 +8,7 @@ import {
     Object3D,
     Vector3,
     BufferGeometry,
+    Group,
 } from 'three';
 import {
     computeBoundsTree,
@@ -138,13 +139,19 @@ export function createWall({
     if (receiveShadow) {
         wall.receiveShadow = true;
     }
+    const wallGroup = new Group();
+    wallGroup.add(wall);
     // position the whole group
-    positionOnGrid(wall, position, rotation);
     if (withOcclusion) {
-        wall.layers.enable(Layer.OCCLUSION);
-        // wall.layers.enable(Layer.OCCLUSION_PLAYER);
+        const wallOcclusion = wall.clone();
+        wallOcclusion.material = materials.occlusion;
+        wallOcclusion.layers.set(Layer.OCCLUSION);
+        wallOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+        wallGroup.add(wallOcclusion);
     }
-    return wall;
+
+    positionOnGrid(wallGroup, position, rotation);
+    return wallGroup;
 }
 
 interface WallDoorOptions {
@@ -166,12 +173,13 @@ export function createWallDoor({
         size: new Vector3(1.5, size.y, 0),
         position: new Vector3(0.5, 0, 0),
         rotation: new Vector3(),
+        withOcclusion: true,
     });
     const wallRight = createWall({
         size: new Vector3(0.5, size.y, 0),
         position: new Vector3(-1, 0, 0),
         rotation: new Vector3(),
-        // withOcclusion: true,
+        withOcclusion: true,
     });
     group.add(wallLeft, wallRight);
 
@@ -205,6 +213,7 @@ export function createWallDoor({
             size: new Vector3(1, doorPosition.y, 0),
             position: new Vector3(-0.5, 0, 0),
             rotation: new Vector3(),
+            withOcclusion: true,
         });
         group.add(wall);
     }
@@ -215,7 +224,7 @@ export function createWallDoor({
             size: new Vector3(1, sizeBetweenDoorAndTop - 1, 0),
             position: new Vector3(-0.5, doorPosition.y + 1, 0),
             rotation: new Vector3(),
-            // withOcclusion: true,
+            withOcclusion: true,
         });
         group.add(wall);
     }
@@ -278,14 +287,15 @@ export function createArchGroup({
     platformMesh.castShadow = true;
     // platformMesh.receiveShadow = true;
     platformMesh.name = 'platform';
+    // position the height of the platform only
+    positionOnGrid(platformMesh, new Vector3(0, height, 0));
+    group.add(platformMesh);
+
+    // occlusion management
     const platformMeshOcclusion = new Mesh(
         geometryPlatform,
         materials.occlusion,
     );
-
-    positionOnGrid(platformMesh, new Vector3(0, height, 0));
-    group.add(platformMesh);
-
     platformMeshOcclusion.position.copy(platformMesh.position);
     group.add(platformMeshOcclusion);
     platformMeshOcclusion.layers.set(Layer.OCCLUSION);
@@ -313,10 +323,6 @@ export function createColumnGroup(
     columnStart.castShadow = true;
     columnStart.receiveShadow = true;
     group.add(columnStart);
-    if (withOcclusion) {
-        columnStart.layers.enable(Layer.OCCLUSION);
-        columnStart.layers.enable(Layer.OCCLUSION_PLAYER);
-    }
 
     if (partGeometry) {
         const part = new Mesh(partGeometry, materials.phong);
@@ -324,15 +330,32 @@ export function createColumnGroup(
         part.receiveShadow = true;
         part.scale.set(1, size - 0.02, 1);
         group.add(part);
-        if (withOcclusion) {
-            part.layers.enable(Layer.OCCLUSION);
-            part.layers.enable(Layer.OCCLUSION_PLAYER);
-        }
     }
 
     const columnEnd = columnStart.clone();
     positionOnGrid(columnEnd, new Vector3(0, size, 0), new Vector3(180, 0, 0));
     group.add(columnEnd);
+
+    if (withOcclusion) {
+        const columnStartOcclusion = columnStart.clone();
+        columnStartOcclusion.material = materials.occlusion;
+        columnStartOcclusion.layers.set(Layer.OCCLUSION);
+        columnStartOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+        group.add(columnStartOcclusion);
+
+        const columnEndOcclusion = columnEnd.clone();
+        columnEndOcclusion.material = materials.occlusion;
+        columnEndOcclusion.layers.set(Layer.OCCLUSION);
+        columnEndOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+        group.add(columnEndOcclusion);
+
+        if (partGeometry) {
+            const partOcclusion = new Mesh(partGeometry, materials.occlusion);
+            partOcclusion.layers.set(Layer.OCCLUSION);
+            partOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
+            group.add(partOcclusion);
+        }
+    }
 
     return group;
 }
