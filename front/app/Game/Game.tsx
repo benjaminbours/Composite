@@ -39,7 +39,10 @@ function Game({
         if (appRef.current?.clock.running) {
             appRef.current?.run();
         }
-        appRef.current?.render();
+        appRef.current?.rendererManager.render(
+            appRef.current?.displayState,
+            appRef.current?.delta,
+        );
         stats.current?.end();
     }, []);
 
@@ -48,7 +51,7 @@ function Game({
             if (!appRef.current) {
                 return;
             }
-            appRef.current.resize();
+            appRef.current.rendererManager.resize();
         };
         window.addEventListener('resize', onResize);
         return () => {

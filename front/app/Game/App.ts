@@ -3,21 +3,16 @@ import {
     Mesh,
     DirectionalLight,
     Scene,
-    WebGLRenderer,
     HemisphereLight,
-    WebGLRenderTarget,
     Object3D,
     Clock,
     FogExp2,
-    PCFSoftShadowMap,
     IcosahedronGeometry,
     Fog,
-    Vector2,
     Box3,
     Vector3,
     Box3Helper,
     Object3DEventMap,
-    Vec2,
 } from 'three';
 // our libs
 import {
@@ -41,7 +36,7 @@ import {
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
-import CustomCamera from './CustomCamera';
+// import CustomCamera from './CustomCamera';
 import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
@@ -49,7 +44,8 @@ import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
 import { EndLevel } from './elements/EndLevel';
 import { SkinBounce } from './elements/SkinBounce';
-import { PostProcessingManager } from './PostProcessingManager';
+import { RendererManager } from './RendererManager';
+import CustomCamera from './CustomCamera';
 
 interface InterpolationConfig {
     ratio: number;
@@ -58,23 +54,19 @@ interface InterpolationConfig {
 }
 
 export default class App {
-    private width = window.innerWidth;
-    private height = window.innerHeight;
-
-    private scene = new Scene();
-    private camera = new CustomCamera(
+    public camera = new CustomCamera(
         75,
         window.innerWidth / window.innerHeight,
         0.1,
         12000,
     );
-    private renderer: WebGLRenderer;
+    private scene = new Scene();
 
     private players: Player[] = [];
     private skyMesh!: Mesh;
 
     public clock = new Clock();
-    private delta = this.clock.getDelta();
+    public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
 
     private levelController: LevelController;
@@ -162,7 +154,7 @@ export default class App {
      * It's in fact the prediction state
      */
     private currentState: GameState; // simulation present
-    private displayState: GameState; // simulation present
+    public displayState: GameState; // simulation present
     public serverGameState: GameState; // simulation validated by the server, present - RTT
     private predictionHistory: GameState[] = [];
 
@@ -188,15 +180,20 @@ export default class App {
 
     private floor = FLOOR;
 
-    private postProcessingManager: PostProcessingManager;
+    public rendererManager: RendererManager;
+
+    private mainPlayerSide: Side;
+    private secondPlayerSide: Side;
 
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
-        private playersConfig: Side[],
+        playersConfig: Side[],
         public socketController: SocketController,
         public inputsManager: InputsManager,
     ) {
+        this.mainPlayerSide = playersConfig[0];
+        this.secondPlayerSide = playersConfig[1];
         this.currentState = JSON.parse(JSON.stringify(initialGameState));
         this.displayState = JSON.parse(JSON.stringify(initialGameState));
         this.serverGameState = JSON.parse(JSON.stringify(initialGameState));
@@ -204,23 +201,17 @@ export default class App {
 
         // levels
         this.levelController = new LevelController(initialGameState.level.id);
-        // render
-        this.renderer = new WebGLRenderer({
-            canvas: canvasDom,
-            // powerPreference: "high-performance",
-            // precision: "highp",
-            // antialias: true,
-        });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = PCFSoftShadowMap;
 
-        this.setupScene(playersConfig);
+        this.setupPlayers();
+        this.setupScene();
         this.scene.updateMatrixWorld();
-        this.postProcessingManager = new PostProcessingManager(
-            this.renderer,
-            this.scene,
+
+        // setup renderer manager
+        this.rendererManager = new RendererManager(
+            this.players,
             this.camera,
+            canvasDom,
+            this.scene,
             (
                 this.levelController.levels[
                     this.levelController.currentLevel
@@ -250,12 +241,6 @@ export default class App {
     destroy = () => {
         console.log('cleared interval');
         clearInterval(this.sendInputIntervalId);
-    };
-
-    public resize = () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
     public gameDelta = 0;
@@ -311,31 +296,35 @@ export default class App {
         ) as any;
     };
 
-    setupScene = (playersConfig: Side[]) => {
-        this.scene.add(this.floor);
-        this.collidingElements.push(this.floor);
-
-        // player
-        playersConfig.forEach((side, index) => {
+    setupPlayers = () => {
+        for (let i = 0; i < 2; i++) {
             const player = (() => {
-                switch (side) {
+                switch (i) {
                     case Side.LIGHT:
-                        const lightPlayer = new LightPlayer(index === 0);
+                        const lightPlayer = new LightPlayer();
                         lightPlayer.mesh.layers.set(Layer.OCCLUSION_PLAYER);
                         return lightPlayer;
                     case Side.SHADOW:
-                        const shadowPlayer = new ShadowPlayer(index === 0);
+                        const shadowPlayer = new ShadowPlayer();
                         shadowPlayer.mesh.layers.set(Layer.PLAYER_INSIDE);
                         return shadowPlayer;
+                    default:
+                        return new LightPlayer();
                 }
             })();
             this.players.push(player);
             this.scene.add(player);
-        });
+        }
+    };
 
-        this.camera.setDefaultTarget(this.players[0].position);
+    setupScene = () => {
+        this.scene.add(this.floor);
+        this.collidingElements.push(this.floor);
 
         // camera
+        this.camera.setDefaultTarget(
+            this.players[this.mainPlayerSide].position,
+        );
         this.camera.position.z = 500;
         this.camera.position.y = 10;
 
@@ -419,7 +408,7 @@ export default class App {
     private processInputs = () => {
         // TODO: Investigate to send pack of inputs, to reduce network usage
         const payload = {
-            player: this.playersConfig[0],
+            player: this.mainPlayerSide,
             inputs: { ...this.inputsManager.inputsActive },
             time: Date.now(),
             sequence: this.currentState.game_time,
@@ -582,7 +571,7 @@ export default class App {
             this.processInputs();
             // other player input
             const otherPlayerInput = {
-                inputs: this.lastServerInputs[this.playersConfig[1]]
+                inputs: this.lastServerInputs[this.secondPlayerSide]
                     ?.inputs || {
                     left: false,
                     right: false,
@@ -592,10 +581,10 @@ export default class App {
                 },
                 sequence: this.currentState.game_time,
                 time: Date.now(),
-                player: this.playersConfig[1],
+                player: this.secondPlayerSide,
             };
             this.inputsHistory.push({
-                inputs: this.lastServerInputs[this.playersConfig[1]]
+                inputs: this.lastServerInputs[this.secondPlayerSide]
                     ?.inputs || {
                     left: false,
                     right: false,
@@ -605,14 +594,14 @@ export default class App {
                 },
                 sequence: this.currentState.game_time,
                 time: Date.now(),
-                player: this.playersConfig[1],
+                player: this.secondPlayerSide,
             });
 
             const inputsForTick: GamePlayerInputPayload[][] = [[], []];
             if (this.lastInput) {
-                inputsForTick[this.playersConfig[0]] = [this.lastInput];
+                inputsForTick[this.mainPlayerSide] = [this.lastInput];
             }
-            inputsForTick[this.playersConfig[1]] = [otherPlayerInput];
+            inputsForTick[this.secondPlayerSide] = [otherPlayerInput];
 
             for (let i = 0; i < inputsForTick.length; i++) {
                 const inputs = inputsForTick[i];
@@ -642,11 +631,10 @@ export default class App {
 
             this.computeDisplayState();
 
-            for (let i = 0; i < this.playersConfig.length; i++) {
-                const side = this.playersConfig[i];
+            for (let i = 0; i < this.players.length; i++) {
                 this.players[i].position.set(
-                    this.displayState.players[side].position.x,
-                    this.displayState.players[side].position.y,
+                    this.displayState.players[i].position.x,
+                    this.displayState.players[i].position.y,
                     0,
                 );
             }
@@ -661,6 +649,9 @@ export default class App {
         // TODO: fix player graphic at 60 fps whatever the main render fps is
         this.updatePlayerGraphics(this.displayState);
         this.updateWorldGraphics(this.displayState);
+
+        // update camera
+        this.camera.update();
     };
 
     public updatePlayerGraphics = (state: GameState) => {
@@ -668,12 +659,12 @@ export default class App {
             const player = this.players[i];
 
             if (player instanceof LightPlayer) {
-                this.postProcessingManager.playerVolumetricLightPass.material.uniforms.lightPosition.value =
+                this.rendererManager.playerVolumetricLightPass.material.uniforms.lightPosition.value =
                     player.get2dLightPosition(
                         this.camera,
-                        state.players[this.playersConfig[0]].velocity,
+                        state.players[this.mainPlayerSide].velocity,
                     );
-                this.postProcessingManager.playerVolumetricLightPass.material.uniforms.time.value +=
+                this.rendererManager.playerVolumetricLightPass.material.uniforms.time.value +=
                     this.delta;
             }
 
@@ -708,7 +699,7 @@ export default class App {
                 }
             }
 
-            const withFocusCamera = activators.includes(this.playersConfig[0]);
+            const withFocusCamera = activators.includes(this.mainPlayerSide);
             doorOpener?.update(this.delta, this.camera, withFocusCamera);
         }
 
@@ -792,9 +783,9 @@ export default class App {
 
         // player inside
         if (
-            state.players[this.playersConfig[0]].state ===
+            state.players[this.mainPlayerSide].state ===
                 MovableComponentState.inside &&
-            state.players[this.playersConfig[0]].insideElementID
+            state.players[this.mainPlayerSide].insideElementID
         ) {
             const skinBounce = this.levelController.levels[
                 this.levelController.currentLevel
@@ -802,7 +793,7 @@ export default class App {
                 (child) =>
                     child.name ===
                     `skin-bounce-${
-                        state.players[this.playersConfig[0]].insideElementID
+                        state.players[this.mainPlayerSide].insideElementID
                     }`,
             ) as SkinBounce | undefined;
             if (skinBounce && !this.currentBounceName) {
@@ -822,96 +813,5 @@ export default class App {
                 this.currentBounceName = undefined;
             }
         }
-
-        // update camera
-        this.camera.update();
-    };
-
-    public render = () => {
-        const state = this.displayState;
-        this.camera.layers.set(Layer.OCCLUSION_PLAYER);
-        this.renderer.setClearColor(0x000000);
-        this.postProcessingManager.playerOcclusionComposer.render();
-        // one occlusion composer by bounce
-        this.camera.layers.set(Layer.OCCLUSION);
-        for (
-            let i = 0;
-            i < this.postProcessingManager.occlusionComposers.length;
-            i++
-        ) {
-            if (i > 0) {
-                const previousLightBounce =
-                    this.levelController.levels[
-                        this.levelController.currentLevel
-                    ].lightBounces[i - 1];
-                previousLightBounce.layers.disable(Layer.OCCLUSION);
-            }
-            const lightBounce =
-                this.levelController.levels[this.levelController.currentLevel]
-                    .lightBounces[i];
-            lightBounce.layers.enable(Layer.OCCLUSION);
-            this.postProcessingManager.volumetricLightPasses[
-                i
-            ].material.uniforms.lightPosition.value = lightBounce.get2dPosition(
-                this.camera,
-            );
-            this.postProcessingManager.volumetricLightPasses[
-                i
-            ].material.uniforms.time.value += this.delta;
-            const occlusionComposer =
-                this.postProcessingManager.occlusionComposers[i];
-            occlusionComposer.render();
-            if (
-                i ===
-                this.postProcessingManager.occlusionComposers.length - 1
-            ) {
-                lightBounce.layers.disable(Layer.OCCLUSION);
-            }
-        }
-
-        // player inside
-        if (
-            state.players[this.playersConfig[0]].state ===
-                MovableComponentState.inside ||
-            state.players[this.playersConfig[1]].state ===
-                MovableComponentState.inside
-        ) {
-            if (
-                state.players[this.playersConfig[0]].state ===
-                MovableComponentState.inside
-            ) {
-                (this.players[0] as any).mesh.layers.enable(
-                    Layer.PLAYER_INSIDE,
-                );
-            } else {
-                (this.players[0] as any).mesh.layers.disable(
-                    Layer.PLAYER_INSIDE,
-                );
-            }
-
-            if (
-                state.players[this.playersConfig[1]].state ===
-                MovableComponentState.inside
-            ) {
-                (this.players[1] as any).mesh.layers.enable(
-                    Layer.PLAYER_INSIDE,
-                );
-            } else {
-                (this.players[1] as any).mesh.layers.disable(
-                    Layer.PLAYER_INSIDE,
-                );
-            }
-            this.camera.layers.set(Layer.PLAYER_INSIDE);
-            this.renderer.setClearColor(0x444444);
-            this.postProcessingManager.playerInsideComposer.render();
-        } else {
-            this.renderer.setRenderTarget(
-                this.postProcessingManager.playerInsideComposer.renderTarget1,
-            );
-            this.renderer.clear();
-        }
-        this.camera.layers.set(Layer.DEFAULT);
-        this.renderer.setClearColor(0x000000);
-        this.postProcessingManager.mainComposer.render();
     };
 }
