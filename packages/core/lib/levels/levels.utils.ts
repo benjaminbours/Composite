@@ -9,6 +9,7 @@ import {
     Vector3,
     BufferGeometry,
     Group,
+    Object3DEventMap,
 } from 'three';
 import {
     computeBoundsTree,
@@ -38,6 +39,7 @@ export const ElementName = {
     DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
     AREA_DOOR_OPENER: (doorName: string) =>
         `${doorName}_${AREA_DOOR_OPENER_SUFFIX}`,
+    BOUNCE: (side: Side) => `${side}_BOUNCE`,
     WALL_DOOR: (doorIndex: string) => `${doorIndex}_WALL_DOOR`,
 };
 
@@ -409,6 +411,7 @@ export function createBounce(
     wall.geometry.center();
     wall.geometry.computeBoundingBox();
     wall.geometry.boundingBox?.getCenter(wall.center);
+    wall.name = ElementName.BOUNCE(side);
     return wall;
 }
 
@@ -427,6 +430,10 @@ export interface AbstractLevel {
         shadow: Vector3;
     };
     state: LevelState;
+    doors: {
+        wall: Object3D<Object3DEventMap>;
+        openerPosition: Vector3;
+    }[];
     bounces: ElementToBounce[];
     lightBounces: ElementToBounce[];
     updateMatrixWorld(force?: boolean): void;

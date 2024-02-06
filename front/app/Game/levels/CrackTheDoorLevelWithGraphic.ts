@@ -10,40 +10,37 @@ export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
     constructor() {
         super();
 
-        const doors = [
-            {
-                cameraPosition: new Vector3(50, 200),
-            },
-            {
-                cameraPosition: new Vector3(0, 100),
-            },
-        ];
-
-        doors.forEach(({ cameraPosition }, index) => {
+        this.doors.forEach((_, index) => {
             const wallDoor = this.children.find(
                 (child) => child.name === ElementName.WALL_DOOR(String(index)),
             )!;
-            const groundFloorDoorLeft = wallDoor.children.find(
+            const doorLeft = wallDoor.children.find(
                 (child) => child.name === 'doorLeft',
             );
-            const groundFloorDoorRight = wallDoor.children.find(
+            const doorRight = wallDoor.children.find(
                 (child) => child.name === 'doorRight',
             );
-            const groundFloorDoorWorldPosition =
-                groundFloorDoorLeft!.getWorldPosition(new Vector3());
-            const groundFloorDoorOpener = new DoorOpener(
+            const doorWorldPosition = doorLeft!.getWorldPosition(new Vector3());
+            const area = this.children.find(
+                (child) =>
+                    child.name === ElementName.AREA_DOOR_OPENER(String(index)),
+            )!;
+
+            const sign =
+                doorWorldPosition.x - area.getWorldPosition(new Vector3()).x > 0
+                    ? -1
+                    : 1;
+
+            const cameraPosition = new Vector3(100 * sign, 200);
+            const doorOpener = new DoorOpener(
                 ElementName.DOOR_OPENER(String(index)),
                 {
-                    cameraPosition:
-                        groundFloorDoorWorldPosition.add(cameraPosition),
-                    doorLeft: groundFloorDoorLeft!,
-                    doorRight: groundFloorDoorRight!,
+                    cameraPosition: doorWorldPosition.add(cameraPosition),
+                    doorLeft: doorLeft!,
+                    doorRight: doorRight!,
                 },
             );
-            const area = this.children.find(
-                (child) => child.name === ElementName.AREA_DOOR_OPENER(String(index)),
-            )!;
-            area.add(groundFloorDoorOpener);
+            area.add(doorOpener);
         });
         const endLevel = new EndLevel();
         const endArea = this.children.find(
