@@ -24,13 +24,10 @@ import {
     PhysicSimulation,
     ElementName,
     Layer,
-    LevelState,
     Context,
     MovableComponentState,
     ElementToBounce,
     GameStateUpdatePayload,
-    BounceState,
-    collectInputsForTick,
     createMountain,
 } from '@benjaminbours/composite-core';
 // local
@@ -46,12 +43,7 @@ import { EndLevel } from './elements/EndLevel';
 import { SkinBounce } from './elements/SkinBounce';
 import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
-
-interface InterpolationConfig {
-    ratio: number;
-    increment: number;
-    shouldUpdate: boolean;
-}
+import { GameStateManager } from './GameStateManager';
 
 export default class App {
     public camera = new CustomCamera(
@@ -71,106 +63,15 @@ export default class App {
 
     private levelController: LevelController;
 
-    private inputsHistory: GamePlayerInputPayload[] = [];
-    // its a predicted state if we compare it to the last validated state
     private shouldReconciliateState = false;
-
-    public getCurrentGameState = () => this.currentState;
-    private interpolateGameState = (
-        states: GameState[],
-        t: number,
-    ): GameState => {
-        const interpolatedState: GameState = JSON.parse(
-            JSON.stringify(states[0]),
-        );
-
-        // Interpolate each player's position and velocity
-        for (let i = 0; i < interpolatedState.players.length; i++) {
-            interpolatedState.players[i].position = { x: 0, y: 0 };
-            interpolatedState.players[i].velocity = { x: 0, y: 0 };
-
-            for (let j = 0; j < states.length; j++) {
-                let basis = 1;
-                for (let m = 0; m < states.length; m++) {
-                    if (m != j) {
-                        basis *=
-                            (t - m / (states.length - 1)) /
-                            (j / (states.length - 1) - m / (states.length - 1));
-                    }
-                }
-
-                interpolatedState.players[i].position.x +=
-                    basis * states[j].players[i].position.x;
-                interpolatedState.players[i].position.y +=
-                    basis * states[j].players[i].position.y;
-                interpolatedState.players[i].velocity.x +=
-                    basis * states[j].players[i].velocity.x;
-                interpolatedState.players[i].velocity.y +=
-                    basis * states[j].players[i].velocity.y;
-            }
-        }
-
-        // Interpolate level state and bounces
-        if ('level' in states[0] && 'bounces' in states[0].level) {
-            const interpolatedBounces: BounceState = {};
-
-            for (const key in states[0].level.bounces) {
-                interpolatedBounces[key] = { rotationY: 0 };
-
-                for (let j = 0; j < states.length; j++) {
-                    if (key in (states[j].level as any).bounces) {
-                        let basis = 1;
-                        for (let m = 0; m < states.length; m++) {
-                            if (m != j) {
-                                basis *=
-                                    (t - m / (states.length - 1)) /
-                                    (j / (states.length - 1) -
-                                        m / (states.length - 1));
-                            }
-                        }
-
-                        interpolatedBounces[key].rotationY +=
-                            basis *
-                            (states[j].level as any).bounces[key].rotationY;
-                    }
-                }
-            }
-
-            interpolatedState.level = {
-                ...interpolatedState.level,
-                bounces: interpolatedBounces,
-                // Add other level properties here
-            } as any;
-        }
-
-        return interpolatedState;
-    };
 
     private lastInput: GamePlayerInputPayload | undefined;
 
     private physicSimulation = new PhysicSimulation();
 
-    /**
-     * It's in fact the prediction state
-     */
-    private currentState: GameState; // simulation present
-    public displayState: GameState; // simulation present
-    public serverGameState: GameState; // simulation validated by the server, present - RTT
-    private predictionHistory: GameState[] = [];
-
     private collidingElements: Object3D<Object3DEventMap>[] = [];
-    private interpolation: InterpolationConfig = {
-        ratio: 0,
-        increment: 5,
-        shouldUpdate: false,
-    };
 
     private playerHelper?: Box3;
-
-    public lastServerInputs: [
-        GamePlayerInputPayload | undefined,
-        GamePlayerInputPayload | undefined,
-    ] = [undefined, undefined];
 
     private inputBuffer: GamePlayerInputPayload[] = [];
     private sendInputIntervalId: number = 0;
@@ -181,6 +82,7 @@ export default class App {
     private floor = FLOOR;
 
     public rendererManager: RendererManager;
+    public gameStateManager: GameStateManager;
 
     private mainPlayerSide: Side;
     private secondPlayerSide: Side;
@@ -194,9 +96,7 @@ export default class App {
     ) {
         this.mainPlayerSide = playersConfig[0];
         this.secondPlayerSide = playersConfig[1];
-        this.currentState = JSON.parse(JSON.stringify(initialGameState));
-        this.displayState = JSON.parse(JSON.stringify(initialGameState));
-        this.serverGameState = JSON.parse(JSON.stringify(initialGameState));
+        this.gameStateManager = new GameStateManager(initialGameState);
         // inputs
 
         // levels
@@ -219,20 +119,13 @@ export default class App {
             ).lightBounces || [],
         );
 
-        this.socketController.getCurrentGameState = this.getCurrentGameState;
         this.socketController.onGameStateUpdate = (
             data: GameStateUpdatePayload,
         ) => {
             // console.log('received update', data.gameState.game_time);
-            // console.log(this.currentState.game_time);
-            // console.log(
-            //     'time diff',
-            //     this.currentState.game_time - data.gameState.game_time,
-            // );
-
             this.shouldReconciliateState = true;
-            this.serverGameState = data.gameState;
-            this.lastServerInputs = data.lastInputs;
+            this.gameStateManager.serverGameState = data.gameState;
+            this.gameStateManager.lastServerInputs = data.lastInputs;
         };
         this.socketController.synchronizeGameTimeWithServer =
             this.synchronizeGameTimeWithServer;
@@ -243,16 +136,13 @@ export default class App {
         clearInterval(this.sendInputIntervalId);
     };
 
-    public gameDelta = 0;
-    public bufferHistorySize = 10;
-    public gameTimeIsSynchronized = false;
     public synchronizeGameTimeWithServer = (
         serverTime: number,
         rtt: number,
     ) => {
         // this.gameDelta = Math.floor(rtt / 2);
         // this.gameDelta = delta;
-        this.gameTimeIsSynchronized = true;
+        this.gameStateManager.gameTimeIsSynchronized = true;
         // this.bufferHistorySize = this.gameDelta;
         console.log('average RTT', rtt);
 
@@ -260,34 +150,38 @@ export default class App {
 
         let sendInputsInterval;
         if (rtt <= 15) {
-            this.gameDelta = 15;
-            this.bufferHistorySize = 15;
+            this.gameStateManager.gameTimeDelta = 15;
+            this.gameStateManager.bufferHistorySize = 15;
             sendInputsInterval = 20;
         } else if (rtt <= 30) {
-            this.gameDelta = rtt;
-            this.bufferHistorySize = 15;
+            this.gameStateManager.gameTimeDelta = rtt;
+            this.gameStateManager.bufferHistorySize = 15;
             sendInputsInterval = 20;
         } else if (rtt <= 50) {
-            this.gameDelta = Math.floor(rtt / 1.5);
-            this.bufferHistorySize = 25;
+            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 1.5);
+            this.gameStateManager.bufferHistorySize = 25;
             sendInputsInterval = 30;
         } else if (rtt <= 100) {
-            this.gameDelta = Math.floor(rtt / 2);
-            this.bufferHistorySize = 25;
+            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 2);
+            this.gameStateManager.bufferHistorySize = 25;
             sendInputsInterval = 50;
         } else if (rtt <= 200) {
-            this.gameDelta = Math.floor(rtt / 3);
-            this.bufferHistorySize = 50;
+            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 3);
+            this.gameStateManager.bufferHistorySize = 50;
             sendInputsInterval = 100;
         } else if (rtt <= 1000) {
-            this.gameDelta = Math.floor(rtt / 10);
-            this.bufferHistorySize = 50;
+            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 10);
+            this.gameStateManager.bufferHistorySize = 50;
             sendInputsInterval = 100;
         }
-        console.log('game time delta', this.gameDelta);
+        console.log('game time delta', this.gameStateManager.gameTimeDelta);
         console.log('send inputs interval', sendInputsInterval);
-        console.log('buffer history size', this.bufferHistorySize);
-        this.currentState.game_time = serverTime + this.gameDelta;
+        console.log(
+            'buffer history size',
+            this.gameStateManager.bufferHistorySize,
+        );
+        this.gameStateManager.currentState.game_time =
+            serverTime + this.gameStateManager.gameTimeDelta;
 
         // Call sendBufferedInputs at regular intervals
         this.sendInputIntervalId = setInterval(
@@ -296,7 +190,7 @@ export default class App {
         ) as any;
     };
 
-    setupPlayers = () => {
+    private setupPlayers = () => {
         for (let i = 0; i < 2; i++) {
             const player = (() => {
                 switch (i) {
@@ -317,7 +211,7 @@ export default class App {
         }
     };
 
-    setupScene = () => {
+    private setupScene = () => {
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
 
@@ -411,7 +305,7 @@ export default class App {
             player: this.mainPlayerSide,
             inputs: { ...this.inputsManager.inputsActive },
             time: Date.now(),
-            sequence: this.currentState.game_time,
+            sequence: this.gameStateManager.currentState.game_time,
         };
         const isInputRelease =
             this.lastInput &&
@@ -427,175 +321,41 @@ export default class App {
             this.inputsManager.inputsActive.jump ||
             isInputRelease
         ) {
-            this.inputsHistory.push(payload);
+            this.gameStateManager.inputsHistory.push(payload);
             this.collectInput(payload);
         }
         this.lastInput = payload;
     };
 
-    private reconciliateState = () => {
-        this.inputsHistory = this.inputsHistory.filter(
-            ({ sequence }) =>
-                sequence >= this.serverGameState.lastValidatedInput,
-        );
-        const nextState: GameState = JSON.parse(
-            JSON.stringify(this.serverGameState),
-        );
-        const inputs: GamePlayerInputPayload[] = JSON.parse(
-            JSON.stringify(this.inputsHistory),
-        );
-        const predictionHistory: GameState[] = [
-            JSON.parse(JSON.stringify(this.serverGameState)),
-        ];
-
-        const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
-            undefined,
-            undefined,
-        ];
-        this.lastServerInputs.forEach((input, index) => {
-            if (input) {
-                lastPlayersInput[index] = JSON.parse(JSON.stringify(input));
-            }
-        });
-        while (nextState.game_time < this.currentState.game_time) {
-            nextState.game_time++;
-            const inputsForTick = collectInputsForTick(
-                inputs,
-                nextState.game_time,
-            );
-
-            for (let i = 0; i < inputsForTick.length; i++) {
-                const inputs = inputsForTick[i];
-                lastPlayersInput[i] = applyInputListToSimulation(
-                    this.physicSimulation.delta,
-                    lastPlayersInput[i],
-                    inputs,
-                    [
-                        FLOOR,
-                        ...this.levelController.levels[
-                            this.levelController.currentLevel
-                        ]!.collidingElements,
-                    ],
-                    nextState,
-                    Context.client,
-                    false,
-                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
-                );
-                for (let i = 0; i < inputs.length; i++) {
-                    const input = inputs[i];
-                    inputs.splice(inputs.indexOf(input), 1);
-                }
-            }
-
-            const snapshot = JSON.parse(JSON.stringify(nextState));
-            predictionHistory.push(snapshot);
-            if (predictionHistory.length > this.bufferHistorySize) {
-                predictionHistory.shift();
-            }
-        }
-
-        // const distanceAfterInputsApply = this.calculateDistance(
-        //     JSON.parse(
-        //         JSON.stringify(
-        //             this.currentState.players[this.playersConfig[0]].position,
-        //         ),
-        //     ),
-        //     nextState.players[this.playersConfig[0]].position,
-        // );
-        // console.log(
-        //     'current position',
-        //     JSON.parse(
-        //         JSON.stringify(
-        //             this.currentState.players[this.playersConfig[0]].position,
-        //         ),
-        //     ),
-        // );
-        // console.log(
-        //     'next position',
-        //     nextState.players[this.playersConfig[0]].position,
-        // );
-        // console.log('distance after inputs apply', distanceAfterInputsApply);
-
-        this.predictionHistory = predictionHistory;
-        this.currentState.players = nextState.players;
-        this.currentState.level = nextState.level;
-    };
-
-    private computeDisplayState = () => {
-        if (!this.gameTimeIsSynchronized) {
-            this.displayState = this.currentState;
-            return;
-        }
-
-        // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
-        if (this.predictionHistory.length >= this.bufferHistorySize) {
-            // const statesToInterpolate = this.predictionHistory.slice(-offset);
-            const interpolatedState = this.interpolateGameState(
-                // statesToInterpolate,
-                this.predictionHistory,
-                this.interpolation.ratio,
-            );
-
-            // Update the ratio for the next frame
-            this.interpolation.ratio += this.interpolation.increment;
-
-            // If the ratio exceeds 1, we've reached the next state
-            if (this.interpolation.ratio >= 1) {
-                // // Remove the previous state from the buffer
-                this.predictionHistory.shift();
-
-                // Reset the ratio
-                this.interpolation.ratio = 0;
-            }
-
-            // Update the display state to the interpolated state
-            this.displayState = interpolatedState;
-        }
-    };
-
-    // private calculateDistance(origin: Vec2, target: Vec2) {
-    //     const vector = new Vector2(origin.x, origin.y);
-    //     const vectorTarget = new Vector2(target.x, target.y);
-    //     return vector.distanceTo(vectorTarget);
-    // }
-
     public run = () => {
         this.delta = this.clock.getDelta();
         if (this.shouldReconciliateState) {
             this.shouldReconciliateState = false;
-            this.reconciliateState();
+            this.gameStateManager.reconciliateState(
+                this.collidingElements,
+                this.physicSimulation.delta,
+            );
         }
         this.physicSimulation.run((delta) => {
-            this.currentState.game_time++;
+            this.gameStateManager.currentState.game_time++;
             // first player input
             this.processInputs();
             // other player input
             const otherPlayerInput = {
-                inputs: this.lastServerInputs[this.secondPlayerSide]
-                    ?.inputs || {
+                inputs: this.gameStateManager.lastServerInputs[
+                    this.secondPlayerSide
+                ]?.inputs || {
                     left: false,
                     right: false,
                     jump: false,
                     top: false,
                     bottom: false,
                 },
-                sequence: this.currentState.game_time,
+                sequence: this.gameStateManager.currentState.game_time,
                 time: Date.now(),
                 player: this.secondPlayerSide,
             };
-            this.inputsHistory.push({
-                inputs: this.lastServerInputs[this.secondPlayerSide]
-                    ?.inputs || {
-                    left: false,
-                    right: false,
-                    jump: false,
-                    top: false,
-                    bottom: false,
-                },
-                sequence: this.currentState.game_time,
-                time: Date.now(),
-                player: this.secondPlayerSide,
-            });
+            this.gameStateManager.inputsHistory.push(otherPlayerInput);
 
             const inputsForTick: GamePlayerInputPayload[][] = [[], []];
             if (this.lastInput) {
@@ -610,35 +370,40 @@ export default class App {
                     undefined,
                     inputs,
                     this.collidingElements,
-                    this.currentState,
+                    this.gameStateManager.currentState,
                     Context.client,
                     false,
                     Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );
             }
-            if (this.gameTimeIsSynchronized) {
-                this.predictionHistory.push(
-                    JSON.parse(JSON.stringify(this.currentState)),
+            if (this.gameStateManager.gameTimeIsSynchronized) {
+                this.gameStateManager.predictionHistory.push(
+                    JSON.parse(
+                        JSON.stringify(this.gameStateManager.currentState),
+                    ),
                 );
 
-                if (this.predictionHistory.length > this.bufferHistorySize) {
-                    this.predictionHistory.shift();
+                if (
+                    this.gameStateManager.predictionHistory.length >
+                    this.gameStateManager.bufferHistorySize
+                ) {
+                    this.gameStateManager.predictionHistory.shift();
                 }
             }
 
             // END PREDICTION
             // START DISPLAY TIME
 
-            this.computeDisplayState();
+            this.gameStateManager.computeDisplayState();
 
             for (let i = 0; i < this.players.length; i++) {
                 this.players[i].position.set(
-                    this.displayState.players[i].position.x,
-                    this.displayState.players[i].position.y,
+                    this.gameStateManager.displayState.players[i].position.x,
+                    this.gameStateManager.displayState.players[i].position.y,
                     0,
                 );
             }
-            this.updateWorldPhysic(this.displayState);
+            this.updateWorldPhysic(this.gameStateManager.displayState);
             if (this.playerHelper) {
                 this.playerHelper.setFromCenterAndSize(
                     this.players[0].position,
@@ -647,8 +412,8 @@ export default class App {
             }
         });
         // TODO: fix player graphic at 60 fps whatever the main render fps is
-        this.updatePlayerGraphics(this.displayState);
-        this.updateWorldGraphics(this.displayState);
+        this.updatePlayerGraphics(this.gameStateManager.displayState);
+        this.updateWorldGraphics(this.gameStateManager.displayState);
 
         // update camera
         this.camera.update();

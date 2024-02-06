@@ -40,7 +40,7 @@ function Game({
             appRef.current?.run();
         }
         appRef.current?.rendererManager.render(
-            appRef.current?.displayState,
+            appRef.current?.gameStateManager.displayState,
             appRef.current?.delta,
         );
         stats.current?.end();

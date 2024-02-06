@@ -22,8 +22,7 @@ export class SocketController {
     private socket: Socket;
     private timeSamplesSent: TimeSyncPayload[] = [];
     // Round-trip time or ping
-    private timeSamples: { rtt: number; gameTimeDelta: number }[] = [];
-    public getCurrentGameState?: () => GameState;
+    private timeSamples: { rtt: number }[] = [];
     public synchronizeGameTimeWithServer?: (
         serverTime: number,
         rtt: number,
@@ -95,12 +94,8 @@ export class SocketController {
             const sample = this.timeSamplesSent.find(
                 ({ id }) => data.id === id,
             )!;
-            const currentGameTime = this.getCurrentGameState
-                ? this.getCurrentGameState().game_time
-                : 0;
             this.timeSamples.push({
                 rtt: Date.now() - sample.clientLocalTime,
-                gameTimeDelta: data.serverGameTime! - currentGameTime,
             });
             if (this.timeSamples.length === TIME_SAMPLE_COUNT) {
                 console.log('finished gathering ping info', this.timeSamples);
