@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3, Mesh } from 'three';
+import { Group, Object3D, Vector3, Mesh, Object3DEventMap } from 'three';
 // local
 import {
     ElementName,
@@ -35,6 +35,11 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
         end_level: [],
     };
 
+    public doors: {
+        wall: Object3D<Object3DEventMap>;
+        openerPosition: Vector3;
+    }[];
+
     constructor() {
         super();
 
@@ -45,7 +50,7 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
                 position: new Vector3(-2, 0, 2),
                 rotation: new Vector3(0, 90, 0),
             }),
-            // template end wall
+            // temple end wall
             createWall({
                 size: new Vector3(4, 5, 0),
                 position: new Vector3(13, 0, 2),
@@ -89,7 +94,7 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
             }
         });
 
-        const doorList = [
+        this.doors = [
             {
                 wall: createWallDoor({
                     size: new Vector3(0, 3, 0),
@@ -110,7 +115,7 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
             },
         ];
 
-        doorList.forEach(({ wall, openerPosition }, index) => {
+        this.doors.forEach(({ wall, openerPosition }, index) => {
             this.state.doors[index] = [];
             wall.name = ElementName.WALL_DOOR(String(index));
             this.add(wall);

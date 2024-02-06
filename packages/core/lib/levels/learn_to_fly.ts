@@ -1,5 +1,5 @@
 // vendors
-import { Group, Mesh, Object3D, Vector3 } from 'three';
+import { Group, Mesh, Object3D, Object3DEventMap, Vector3 } from 'three';
 // local
 import {
     ElementName,
@@ -40,6 +40,11 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
         id: Levels.LEARN_TO_FLY,
         end_level: [],
     };
+
+    public doors: {
+        wall: Object3D<Object3DEventMap>;
+        openerPosition: Vector3;
+    }[] = [];
 
     constructor() {
         super();
