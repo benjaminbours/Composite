@@ -37,13 +37,32 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
     constructor() {
         super();
-        const wallBlockingLeftPath = createWall({
-            size: new Vector3(4, 2, 0),
-            position: new Vector3(-2, 0, 2),
-            rotation: new Vector3(0, 90, 0),
+
+        const walls = [
+            // blocking left path
+            createWall({
+                size: new Vector3(4, 2, 0),
+                position: new Vector3(-2, 0, 2),
+                rotation: new Vector3(0, 90, 0),
+            }),
+            // template end wall
+            createWall({
+                size: new Vector3(4, 5, 0),
+                position: new Vector3(13, 0, 2),
+                rotation: new Vector3(0, 90, 0),
+            }),
+            // inside temple
+            createWall({
+                size: new Vector3(6, 3, 0),
+                position: new Vector3(9, 0, -2),
+                rotation: new Vector3(0, 0, 0),
+            }),
+        ];
+
+        walls.forEach((wall) => {
+            this.add(wall);
+            this.collidingElements.push(wall);
         });
-        this.add(wallBlockingLeftPath);
-        this.collidingElements.push(wallBlockingLeftPath);
 
         const outsideArches = [
             createArchGroup({
@@ -69,21 +88,6 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
                 this.collidingElements.push(platform);
             }
         });
-
-        const templeEndWall = createWall({
-            size: new Vector3(4, 5, 0),
-            position: new Vector3(13, 0, 2),
-            rotation: new Vector3(0, 90, 0),
-        });
-        this.add(templeEndWall);
-        this.collidingElements.push(templeEndWall);
-
-        const wallInsideTemple = createWall({
-            size: new Vector3(6, 3, 0),
-            position: new Vector3(9, 0, -2),
-            rotation: new Vector3(0, 0, 0),
-        });
-        this.add(wallInsideTemple);
 
         const doorList = [
             {
