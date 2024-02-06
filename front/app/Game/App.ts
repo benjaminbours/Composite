@@ -202,6 +202,8 @@ export default class App {
     // bounce helper
     private currentBounceName?: string;
 
+    private floor = FLOOR;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
@@ -315,8 +317,8 @@ export default class App {
     };
 
     setupScene = (playersConfig: Side[]) => {
-        this.scene.add(FLOOR);
-        this.collidingElements.push(FLOOR);
+        this.scene.add(this.floor);
+        this.collidingElements.push(this.floor);
 
         // player
         playersConfig.forEach((side, index) => {
@@ -927,11 +929,15 @@ export default class App {
     public updateWorldGraphics = (state: GameState) => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
-        // this.floor.position.set(this.players[0].position.x, 0, 0);
+        this.floor.position.set(this.camera.position.x, 0, 0);
 
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
-        this.skyMesh.position.set(this.camera.position.x, 0, 0);
+        this.skyMesh.position.set(
+            this.camera.position.x,
+            this.camera.position.y - 2500,
+            0,
+        );
         skyShaderMat.setSunAngle(200);
         skyShaderMat.render();
         (this.scene.fog as Fog).color.copy(skyShaderMat.getFogColor());
