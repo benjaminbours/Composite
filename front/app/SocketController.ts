@@ -23,11 +23,6 @@ export class SocketController {
     private timeSamplesSent: TimeSyncPayload[] = [];
     // Round-trip time or ping
     private timeSamples: { rtt: number }[] = [];
-    public synchronizeGameTimeWithServer?: (
-        serverTime: number,
-        rtt: number,
-    ) => void;
-    public onGameStateUpdate?: (data: GameStateUpdatePayload) => void;
     private isTimeSynced = false;
 
     constructor(
@@ -44,10 +39,10 @@ export class SocketController {
             withCredentials: true,
         });
 
+        // menu listeners
         this.socket.on(SocketEventType.CONNECT, () => {
             console.log('connected', this.socket.id);
         });
-
         this.socket.on(
             SocketEventType.GAME_START,
             (data: GameStateUpdatePayload) => {
@@ -55,16 +50,6 @@ export class SocketController {
                 onGameStart(data.gameState);
             },
         );
-
-        this.socket.on(
-            SocketEventType.GAME_STATE_UPDATE,
-            (data: GameStateUpdatePayload) => {
-                if (this.onGameStateUpdate && this.isTimeSynced) {
-                    this.onGameStateUpdate(data);
-                }
-            },
-        );
-
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
         this.socket.on(SocketEventType.TEAMMATE_INFO, onTeamMateInfo);
         this.socket.on(SocketEventType.JOIN_LOBBY, onJoinLobby);
@@ -88,8 +73,23 @@ export class SocketController {
         );
     }
 
+    public registerGameStateUpdateListener = (
+        onGameStateUpdate: (data: GameStateUpdatePayload) => void,
+    ) => {
+        // TODO: Unregister event on destroy
+        this.socket.on(
+            SocketEventType.GAME_STATE_UPDATE,
+            (data: GameStateUpdatePayload) => {
+                if (this.isTimeSynced) {
+                    onGameStateUpdate(data);
+                }
+            },
+        );
+    };
+
     public onTimeSyncReceived =
-        (resolve: (value: unknown) => void) => (data: TimeSyncPayload) => {
+        (resolve: (value: [serverTime: number, rtt: number]) => void) =>
+        (data: TimeSyncPayload) => {
             console.log('received time sync event', data);
             const sample = this.timeSamplesSent.find(
                 ({ id }) => data.id === id,
@@ -104,22 +104,16 @@ export class SocketController {
                     0,
                 );
                 let averageRtt = Math.floor(totalRtt / TIME_SAMPLE_COUNT);
-                if (this.synchronizeGameTimeWithServer) {
-                    this.synchronizeGameTimeWithServer(
-                        data.serverGameTime!,
-                        averageRtt,
-                    );
-                    this.isTimeSynced = true;
+                this.isTimeSynced = true;
 
-                    // unregister all listener for time sync
-                    // TODO: investigate to use remove listeners for other events as well
-                    this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
-                    resolve(true);
-                }
+                // unregister all listener for time sync
+                // TODO: investigate to use remove listeners for other events as well
+                this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
+                resolve([data.serverGameTime!, averageRtt]);
             }
         };
 
-    public synchronizeTime = () => {
+    public synchronizeTime = (): Promise<[serverTime: number, rtt: number]> => {
         return new Promise((resolve) => {
             this.isTimeSynced = false;
             // remove previous time samples in case of resynchronization
@@ -144,7 +138,7 @@ export class SocketController {
         });
     };
 
-    sendInputs = (inputs: GamePlayerInputPayload[]) => {
+    public sendInputs = (inputs: GamePlayerInputPayload[]) => {
         this.emit([SocketEventType.GAME_PLAYER_INPUT, inputs]);
     };
 

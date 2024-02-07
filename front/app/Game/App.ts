@@ -27,8 +27,8 @@ import {
     Context,
     MovableComponentState,
     ElementToBounce,
-    GameStateUpdatePayload,
     createMountain,
+    Inputs,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -63,18 +63,15 @@ export default class App {
 
     private levelController: LevelController;
 
-    private shouldReconciliateState = false;
-
     private lastInput: GamePlayerInputPayload | undefined;
+    // TODO: disgusting, find alternative
+    private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
 
     private physicSimulation = new PhysicSimulation();
 
     private collidingElements: Object3D<Object3DEventMap>[] = [];
 
     private playerHelper?: Box3;
-
-    private inputBuffer: GamePlayerInputPayload[] = [];
-    private sendInputIntervalId: number = 0;
 
     // bounce helper
     private currentBounceName?: string;
@@ -91,12 +88,15 @@ export default class App {
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
         playersConfig: Side[],
-        public socketController: SocketController,
         public inputsManager: InputsManager,
+        public socketController?: SocketController,
     ) {
         this.mainPlayerSide = playersConfig[0];
         this.secondPlayerSide = playersConfig[1];
-        this.gameStateManager = new GameStateManager(initialGameState);
+        this.gameStateManager = new GameStateManager(
+            initialGameState,
+            this.socketController?.sendInputs,
+        );
         // inputs
 
         // levels
@@ -119,75 +119,15 @@ export default class App {
             ).lightBounces || [],
         );
 
-        this.socketController.onGameStateUpdate = (
-            data: GameStateUpdatePayload,
-        ) => {
-            // console.log('received update', data.gameState.game_time);
-            this.shouldReconciliateState = true;
-            this.gameStateManager.serverGameState = data.gameState;
-            this.gameStateManager.lastServerInputs = data.lastInputs;
-        };
-        this.socketController.synchronizeGameTimeWithServer =
-            this.synchronizeGameTimeWithServer;
+        if (this.socketController) {
+            this.socketController.registerGameStateUpdateListener(
+                this.gameStateManager.onGameGameStateUpdate,
+            );
+        }
     }
 
-    destroy = () => {
-        console.log('cleared interval');
-        clearInterval(this.sendInputIntervalId);
-    };
-
-    public synchronizeGameTimeWithServer = (
-        serverTime: number,
-        rtt: number,
-    ) => {
-        // this.gameDelta = Math.floor(rtt / 2);
-        // this.gameDelta = delta;
-        this.gameStateManager.gameTimeIsSynchronized = true;
-        // this.bufferHistorySize = this.gameDelta;
-        console.log('average RTT', rtt);
-
-        // one trip time
-
-        let sendInputsInterval;
-        if (rtt <= 15) {
-            this.gameStateManager.gameTimeDelta = 15;
-            this.gameStateManager.bufferHistorySize = 15;
-            sendInputsInterval = 20;
-        } else if (rtt <= 30) {
-            this.gameStateManager.gameTimeDelta = rtt;
-            this.gameStateManager.bufferHistorySize = 15;
-            sendInputsInterval = 20;
-        } else if (rtt <= 50) {
-            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 1.5);
-            this.gameStateManager.bufferHistorySize = 25;
-            sendInputsInterval = 30;
-        } else if (rtt <= 100) {
-            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 2);
-            this.gameStateManager.bufferHistorySize = 25;
-            sendInputsInterval = 50;
-        } else if (rtt <= 200) {
-            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 3);
-            this.gameStateManager.bufferHistorySize = 50;
-            sendInputsInterval = 100;
-        } else if (rtt <= 1000) {
-            this.gameStateManager.gameTimeDelta = Math.floor(rtt / 10);
-            this.gameStateManager.bufferHistorySize = 50;
-            sendInputsInterval = 100;
-        }
-        console.log('game time delta', this.gameStateManager.gameTimeDelta);
-        console.log('send inputs interval', sendInputsInterval);
-        console.log(
-            'buffer history size',
-            this.gameStateManager.bufferHistorySize,
-        );
-        this.gameStateManager.currentState.game_time =
-            serverTime + this.gameStateManager.gameTimeDelta;
-
-        // Call sendBufferedInputs at regular intervals
-        this.sendInputIntervalId = setInterval(
-            this.sendBufferedInputs,
-            sendInputsInterval,
-        ) as any;
+    public destroy = () => {
+        this.gameStateManager.destroy();
     };
 
     private setupPlayers = () => {
@@ -286,27 +226,33 @@ export default class App {
         }
     };
 
-    // Method for collecting player inputs
-    public collectInput = (input: GamePlayerInputPayload) => {
-        this.inputBuffer.push(input);
-    };
-
-    // Method for sending buffered inputs to the server
-    public sendBufferedInputs = () => {
-        if (this.inputBuffer.length > 0) {
-            this.socketController.sendInputs(this.inputBuffer);
-            this.inputBuffer = [];
+    private processInputs = (player: Side) => {
+        let inputs: Inputs;
+        if (player === this.mainPlayerSide) {
+            inputs = { ...this.inputsManager.inputsActive };
+        } else {
+            inputs = this.gameStateManager.lastServerInputs[
+                this.secondPlayerSide
+            ]?.inputs || {
+                left: false,
+                right: false,
+                jump: false,
+                top: false,
+                bottom: false,
+            };
         }
-    };
-
-    private processInputs = () => {
-        // TODO: Investigate to send pack of inputs, to reduce network usage
         const payload = {
-            player: this.mainPlayerSide,
-            inputs: { ...this.inputsManager.inputsActive },
+            player,
+            inputs,
             time: Date.now(),
             sequence: this.gameStateManager.currentState.game_time,
         };
+        if (player !== this.mainPlayerSide) {
+            this.gameStateManager.inputsHistory.push(payload);
+            this.lastOtherPlayerInput = payload;
+            return;
+        }
+
         const isInputRelease =
             this.lastInput &&
             ((this.lastInput.inputs.left &&
@@ -322,46 +268,31 @@ export default class App {
             isInputRelease
         ) {
             this.gameStateManager.inputsHistory.push(payload);
-            this.collectInput(payload);
+            this.gameStateManager.collectInput(payload);
         }
         this.lastInput = payload;
     };
 
     public run = () => {
         this.delta = this.clock.getDelta();
-        if (this.shouldReconciliateState) {
-            this.shouldReconciliateState = false;
-            this.gameStateManager.reconciliateState(
-                this.collidingElements,
-                this.physicSimulation.delta,
-            );
-        }
+        this.gameStateManager.reconciliateState(
+            this.collidingElements,
+            this.physicSimulation.delta,
+        );
         this.physicSimulation.run((delta) => {
             this.gameStateManager.currentState.game_time++;
-            // first player input
-            this.processInputs();
-            // other player input
-            const otherPlayerInput = {
-                inputs: this.gameStateManager.lastServerInputs[
-                    this.secondPlayerSide
-                ]?.inputs || {
-                    left: false,
-                    right: false,
-                    jump: false,
-                    top: false,
-                    bottom: false,
-                },
-                sequence: this.gameStateManager.currentState.game_time,
-                time: Date.now(),
-                player: this.secondPlayerSide,
-            };
-            this.gameStateManager.inputsHistory.push(otherPlayerInput);
+            this.processInputs(this.mainPlayerSide);
+            this.processInputs(this.secondPlayerSide);
 
             const inputsForTick: GamePlayerInputPayload[][] = [[], []];
             if (this.lastInput) {
                 inputsForTick[this.mainPlayerSide] = [this.lastInput];
             }
-            inputsForTick[this.secondPlayerSide] = [otherPlayerInput];
+            if (this.lastOtherPlayerInput) {
+                inputsForTick[this.secondPlayerSide] = [
+                    this.lastOtherPlayerInput,
+                ];
+            }
 
             for (let i = 0; i < inputsForTick.length; i++) {
                 const inputs = inputsForTick[i];
@@ -376,20 +307,9 @@ export default class App {
                     Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );
             }
-            if (this.gameStateManager.gameTimeIsSynchronized) {
-                this.gameStateManager.predictionHistory.push(
-                    JSON.parse(
-                        JSON.stringify(this.gameStateManager.currentState),
-                    ),
-                );
-
-                if (
-                    this.gameStateManager.predictionHistory.length >
-                    this.gameStateManager.bufferHistorySize
-                ) {
-                    this.gameStateManager.predictionHistory.shift();
-                }
-            }
+            this.gameStateManager.addToPredictionHistory(
+                this.gameStateManager.currentState,
+            );
 
             // END PREDICTION
             // START DISPLAY TIME

@@ -75,8 +75,8 @@ function Game({
                     canvasRef.current,
                     initialGameState,
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                    socketController,
                     inputsManager,
+                    socketController,
                 );
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);
@@ -94,13 +94,21 @@ function Game({
 
     useEffect(() => {
         if (!tabIsHidden && isSynchronizingTime && socketController) {
-            const onTimeSynchronized = () => {
+            const onTimeSynchronized = ([serverTime, rtt]: [
+                serverTime: number,
+                rtt: number,
+            ]) => {
+                appRef.current?.gameStateManager.onAverageRttReceived(
+                    serverTime,
+                    rtt,
+                );
                 appRef.current?.inputsManager.registerEventListeners();
                 setIsSynchronizingTime(false);
             };
 
             if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-                onTimeSynchronized();
+                // TODO: Fix solo mode
+                // onTimeSynchronized();
             } else {
                 socketController.synchronizeTime().then(onTimeSynchronized);
             }
