@@ -31,13 +31,13 @@ export class RendererManager {
     private playerInsideComposer: EffectComposer;
     private occlusionComposers: EffectComposer[] = [];
     private playerOcclusionComposer: EffectComposer;
-    private renderer: WebGLRenderer;
     private width = window.innerWidth;
     private height = window.innerHeight;
     private players: Player[];
     private camera: CustomCamera;
     private lightBounces: ElementToBounce[];
-
+    
+    public renderer: WebGLRenderer;
     public playerVolumetricLightPass: ShaderPass;
 
     private createRenderTarget = (renderScale: number) => {

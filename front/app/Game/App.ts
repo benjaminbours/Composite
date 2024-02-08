@@ -15,6 +15,7 @@ import {
     Object3DEventMap,
     Group,
 } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 // our libs
 import {
     GamePlayerInputPayload,
@@ -58,7 +59,7 @@ export default class App {
         0.1,
         12000,
     );
-    private scene = new Scene();
+    public scene = new Scene();
 
     private players: Player[] = [];
     private skyMesh!: Mesh;
@@ -73,7 +74,7 @@ export default class App {
 
     private physicSimulation = new PhysicSimulation();
 
-    private collidingElements: Object3D<Object3DEventMap>[] = [];
+    public collidingElements: Object3D<Object3DEventMap>[] = [];
 
     private playerHelper?: Box3;
 
@@ -90,11 +91,15 @@ export default class App {
 
     private level: AbstractLevel;
 
+    private controls?: OrbitControls;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
+        // TODO: This flag will not be enough, we need to handle the fact we might be in level builder but testing for example
+        private isLevelBuilder: boolean,
         public socketController?: SocketController,
     ) {
         this.mainPlayerSide = playersConfig[0];
@@ -135,12 +140,27 @@ export default class App {
             this.level.lightBounces,
         );
 
+        if (this.isLevelBuilder) {
+            this.controls = new OrbitControls(
+                this.camera,
+                this.rendererManager.renderer.domElement,
+            );
+            this.controls.enableRotate = false;
+            this.controls.maxDistance = 2000;
+            this.controls.maxPolarAngle = Math.PI / 2;
+            this.controls.minPolarAngle = Math.PI / 2;
+        }
+
         if (this.socketController) {
             this.socketController.registerGameStateUpdateListener(
                 this.gameStateManager.onGameGameStateUpdate,
             );
         }
     }
+
+    public addToScene = (object: Object3D) => {
+        this.scene.add(object);
+    };
 
     public destroy = () => {
         this.gameStateManager.destroy();
@@ -179,6 +199,7 @@ export default class App {
         this.camera.position.y = 10;
 
         this.scene.fog = new FogExp2(0xffffff, 0.001);
+        // this.scene.fog = new FogExp2(0xffffff, 0.0002);
         const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
 
         // dirlight
@@ -344,7 +365,15 @@ export default class App {
         this.updateWorldGraphics(this.gameStateManager.displayState);
 
         // update camera
-        this.camera.update();
+
+        if (this.controls) {
+            this.controls.update(this.delta);
+            if (this.controls.object.position.y < 20) {
+                this.controls.object.position.y = 20;
+            }
+        } else {
+            this.camera.update();
+        }
     };
 
     public updatePlayerGraphics = (state: GameState) => {

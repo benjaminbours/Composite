@@ -1,20 +1,14 @@
-.elements-panel {
-    position: fixed;
-    top: 1%;
-    right: 1%;
-    padding: 25px;
+.panel {
+    padding: 15px;
     background: black;
     border: solid white 1px;
     color: white;
+    display: flex;
+    flex-direction: column;
+    min-width: 250px;
 
-    $imgSize: 50px;
-    .img-placeholder {
-        width: $imgSize;
-        height: $imgSize;
-        background: white;
-    }
-
-    h2 {
+    h2,
+    h3 {
         margin-top: 0;
     }
 
@@ -22,6 +16,15 @@
         list-style: none;
         margin: 0;
         padding: 0;
+        overflow-y: auto;
+    }
+
+    $imgSize: 50px;
+    .img-placeholder {
+        width: $imgSize;
+        min-width: $imgSize;
+        height: $imgSize;
+        background: white;
     }
 
     button {
@@ -32,13 +35,43 @@
         padding: 10px;
         box-sizing: border-box;
         width: 100%;
+        min-width: 200px;
 
         &:hover {
             border-color: white;
         }
     }
 
-    .elements-panel__item-name {
+    .item-name {
+        margin: 0;
         margin-left: 10px;
+        white-space: nowrap;
     }
+}
+
+.elements-panel {
+    position: fixed;
+    top: 1%;
+    right: 1%;
+    height: 40%;
+}
+
+.level-builder__bottom-right-container {
+    position: fixed;
+    bottom: 1%;
+    right: 1%;
+    height: 40%;
+    display: flex;
+}
+
+.properties-panel {
+    order: 1;
+}
+
+.scene-content-panel {
+    order: 2;
+}
+
+.scene-content-panel__item--active button {
+    border-color: white;
 }

@@ -86,7 +86,6 @@
 - This shader toy shader => https://www.shadertoy.com/view/Xsl3zX recomended by Legion
 - Andrew Berg for this => https://medium.com/@andrew_b_berg/volumetric-light-scattering-in-three-js-6e1850680a41
 
-
 ## Stupid things to do
 
 - Record welcome to millenium from => https://open.spotify.com/track/2GHnPQ8mAukedPzVZWRyTj?si=059aff8634a84bee and use it as a jingle when people subscribe
@@ -146,6 +145,19 @@ Still need to address number 2 and 5
 - It should give the ability to select and position on the map any of the components that compose level
 - It should have the same render appearance than when playing the game
 - It should allow CRUD operation for level configuration save as JSON
+- Nice to have a button to toggle the fog
+- Le fog est actuellement trop fort et brule toute une partie des contrastes de la scene. Ca enleve un potentiel aspect du jeu qui serait de jouer sur ces contrastes pour eclairer / assombrir des zones pour son partenaire, ou impacter la luminosite de maniere generale.
+
+### soon
+
+- Visual indication of the current editing element
+- List tab with all the elements to avoid having to select them by 3D view.
+- Camera movement not attached to player if not in "test" mode
+- Careful about backend crash due to new addition in the level enum "EMPTY_LEVEL"
+- I can get lost with orbit control camera super easily and not finding players anymore. I need a reset button.
+- Diminish overall size of panels, everything is fat, take inspiration from Blender please
+
+- Add appropriate license for the project, VERY IMPORTANT
 
 ### ideas
 

@@ -2,6 +2,7 @@ import type { Vec2 } from 'three';
 import { MovableComponentState } from './types';
 
 export enum Levels {
+    EMPTY,
     CRACK_THE_DOOR,
     LEARN_TO_FLY,
     THE_HIGH_SPHERES,

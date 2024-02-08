@@ -1,13 +1,5 @@
 import React, { useMemo } from 'react';
-
-enum ElementType {
-    WALL = 'wall',
-    WALL_DOOR = 'wall_door',
-    ARCH = 'arch',
-    BOUNCE = 'bounce',
-    END_LEVEL = 'end_level',
-    FAT_COLUMN = 'fat_column',
-}
+import { ElementType, LevelElement } from './types';
 
 interface ElementListItem {
     type: ElementType;
@@ -18,9 +10,11 @@ interface ElementListItem {
     name: string;
 }
 
-interface Props {}
+interface Props {
+    onElementClick: (type: ElementType) => (clickEvent: any) => void;
+}
 
-export const ElementsPanel: React.FC<Props> = ({}) => {
+export const LibraryPanel: React.FC<Props> = ({ onElementClick }) => {
     const elements: ElementListItem[] = useMemo(() => {
         return [
             {
@@ -57,20 +51,16 @@ export const ElementsPanel: React.FC<Props> = ({}) => {
     }, []);
 
     return (
-        <div className="elements-panel">
-            <h2>Elements</h2>
+        <div className="panel elements-panel">
+            <h3>Library</h3>
             <div className="separator" />
             <ul>
                 {elements.map(({ img, type, name }) => (
                     <li className="elements-panel__item" key={type}>
-                        <button
-                            onClick={() => {
-                                console.log('just added element of type', type);
-                            }}
-                        >
+                        <button onClick={onElementClick(type)}>
                             <div className="img-placeholder" />
                             {/* <img src={img} alt="coming soon" /> */}
-                            <p className="elements-panel__item-name">{name}</p>
+                            <p className="item-name">{name}</p>
                         </button>
                     </li>
                 ))}

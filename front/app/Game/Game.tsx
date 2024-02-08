@@ -16,6 +16,7 @@ interface Props {
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
+    levelBuilderAppRef?: React.MutableRefObject<App | undefined>;
 }
 
 function Game({
@@ -25,6 +26,7 @@ function Game({
     tabIsHidden,
     stats,
     inputsManager,
+    levelBuilderAppRef,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
@@ -72,8 +74,12 @@ function Game({
                     initialGameState,
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                     inputsManager,
+                    Boolean(levelBuilderAppRef),
                     socketController,
                 );
+                if (levelBuilderAppRef) {
+                    levelBuilderAppRef.current = appRef.current;
+                }
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);
                 gsap.ticker.add(gameLoop);
