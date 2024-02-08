@@ -12,7 +12,6 @@ import InputsManager from './Player/InputsManager';
 interface Props {
     side: Side;
     initialGameState: GameState;
-    // can be undefined for dev purpose
     socketController?: SocketController;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
@@ -68,9 +67,6 @@ function Game({
                 if (!canvasRef.current) {
                     return;
                 }
-                if (!socketController) {
-                    return;
-                }
                 appRef.current = new App(
                     canvasRef.current,
                     initialGameState,
@@ -82,7 +78,11 @@ function Game({
                 gsap.ticker.fps(60);
                 gsap.ticker.add(gameLoop);
                 gameStarted.current = true;
-                setIsSynchronizingTime(true);
+                if (socketController) {
+                    setIsSynchronizingTime(true);
+                } else {
+                    appRef.current?.inputsManager.registerEventListeners();
+                }
             });
         }
 
@@ -110,6 +110,7 @@ function Game({
                 // TODO: Fix solo mode
                 // onTimeSynchronized();
             } else {
+                setIsSynchronizingTime(true);
                 socketController.synchronizeTime().then(onTimeSynchronized);
             }
         }
@@ -117,7 +118,7 @@ function Game({
         return () => {
             appRef.current?.inputsManager.destroyEventListeners();
         };
-    }, [isSynchronizingTime, tabIsHidden]);
+    }, [tabIsHidden, socketController, isSynchronizingTime]);
 
     return (
         <>
