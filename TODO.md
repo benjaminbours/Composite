@@ -139,3 +139,30 @@ Still need to address number 2 and 5
 - Add recurrent message such as kofibot, to print available commands for users in the chat. Or put it in the title of the stream.
 - Lobby not always detecting choice of team mate on loading
 - Enable github sponsor?
+
+## Level builder
+
+- It should give the ability to switch from light to shadow easily in the same level instance
+- It should give the ability to select and position on the map any of the components that compose level
+- It should have the same render appearance than when playing the game
+- It should allow CRUD operation for level configuration save as JSON
+
+### ideas
+
+- Timeline management while testing the level, to easily come back at any moment in the level. Multiple timeline, test different things in the same time, or timeline respective for shadow and light.
+
+### Thinking
+
+- Comment juge la difficulte ?
+  - Par utilisateurs / duo qui l'on fini par example
+- Creation de niveau doit avoir un save draft et un save publish. Qu'est ce qu'il se passe quand on publish?
+- Vue niveau creer par la communaute
+  - call to action pour creer tes propres niveaux
+  - Obviously, good UX / tuto / tips pour creer tes niveaux
+  - Showcase avec les 5 derniers niveau creer
+  - Les 5 niveaux les plus jouer
+  - Un system de like par niveau, et donc niveau le plus like, etc
+  - Niveau le plus partage
+  - Le mec qui a fait les meilleurs niveaux, est ce que tu peux le follow ?
+  - news about les prochains update du game, example, soon, element trou noir disponible dans le level builder
+

@@ -10,7 +10,7 @@ interface Props {
 export const WithMainApp: React.FC<Props> = ({ children }) => {
     const path = usePathname();
 
-    if (path.includes('/timeline')) {
+    if (path.includes('/timeline') || path.includes('/level-builder')) {
         return children;
     }
 
