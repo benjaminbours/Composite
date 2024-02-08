@@ -12,7 +12,6 @@ import InputsManager from './Player/InputsManager';
 interface Props {
     side: Side;
     initialGameState: GameState;
-    // can be undefined for dev purpose
     socketController?: SocketController;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
@@ -39,7 +38,10 @@ function Game({
         if (appRef.current?.clock.running) {
             appRef.current?.run();
         }
-        appRef.current?.render();
+        appRef.current?.rendererManager.render(
+            appRef.current?.gameStateManager.displayState,
+            appRef.current?.delta,
+        );
         stats.current?.end();
     }, []);
 
@@ -48,7 +50,7 @@ function Game({
             if (!appRef.current) {
                 return;
             }
-            appRef.current.resize();
+            appRef.current.rendererManager.resize();
         };
         window.addEventListener('resize', onResize);
         return () => {
@@ -65,21 +67,22 @@ function Game({
                 if (!canvasRef.current) {
                     return;
                 }
-                if (!socketController) {
-                    return;
-                }
                 appRef.current = new App(
                     canvasRef.current,
                     initialGameState,
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                    socketController,
                     inputsManager,
+                    socketController,
                 );
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);
                 gsap.ticker.add(gameLoop);
                 gameStarted.current = true;
-                setIsSynchronizingTime(true);
+                if (socketController) {
+                    setIsSynchronizingTime(true);
+                } else {
+                    appRef.current?.inputsManager.registerEventListeners();
+                }
             });
         }
 
@@ -91,14 +94,23 @@ function Game({
 
     useEffect(() => {
         if (!tabIsHidden && isSynchronizingTime && socketController) {
-            const onTimeSynchronized = () => {
+            const onTimeSynchronized = ([serverTime, rtt]: [
+                serverTime: number,
+                rtt: number,
+            ]) => {
+                appRef.current?.gameStateManager.onAverageRttReceived(
+                    serverTime,
+                    rtt,
+                );
                 appRef.current?.inputsManager.registerEventListeners();
                 setIsSynchronizingTime(false);
             };
 
             if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-                onTimeSynchronized();
+                // TODO: Fix solo mode
+                // onTimeSynchronized();
             } else {
+                setIsSynchronizingTime(true);
                 socketController.synchronizeTime().then(onTimeSynchronized);
             }
         }
@@ -106,7 +118,7 @@ function Game({
         return () => {
             appRef.current?.inputsManager.destroyEventListeners();
         };
-    }, [isSynchronizingTime, tabIsHidden]);
+    }, [tabIsHidden, socketController, isSynchronizingTime]);
 
     return (
         <>

@@ -13,8 +13,8 @@ export class LightPlayer extends Player {
     public mesh: Mesh;
     public name = 'light-player';
 
-    constructor(public isMainPlayer: boolean) {
-        super(isMainPlayer);
+    constructor() {
+        super();
 
         const geometry = new SphereGeometry(5, 32, 32);
         const material = new MeshBasicMaterial({ color: 0xffffff, fog: false });

@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3, Mesh } from 'three';
+import { Group, Object3D, Vector3, Mesh, Object3DEventMap } from 'three';
 // local
 import {
     ElementName,
@@ -34,6 +34,11 @@ export class TheHighSpheresLevel extends Group implements AbstractLevel {
         bounces: {},
         end_level: [],
     };
+
+    public doors: {
+        wall: Object3D<Object3DEventMap>;
+        openerPosition: Vector3;
+    }[];
 
     constructor() {
         super();

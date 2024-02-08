@@ -45,17 +45,17 @@ export function useMainController(
             let side = undefined;
             let selectedLevel = undefined;
 
-            const param = queryParams.get('dev_state');
-            if (param) {
-                const parts = param.split(',').map((str) => Number(str));
-                side = parts[0] as Side;
-                selectedLevel = parts[1] as Levels;
-            }
-
             if (process.env.NEXT_PUBLIC_SOLO_MODE) {
                 const parts = process.env.NEXT_PUBLIC_SOLO_MODE.split(',').map(
                     (str) => Number(str),
                 );
+                side = parts[0] as Side;
+                selectedLevel = parts[1] as Levels;
+            }
+
+            const param = queryParams.get('dev_state');
+            if (param) {
+                const parts = param.split(',').map((str) => Number(str));
                 side = parts[0] as Side;
                 selectedLevel = parts[1] as Levels;
             }
@@ -458,8 +458,6 @@ export function useMainController(
 
     // development effect
     useEffect(() => {
-        console.log(process.env.NEXT_PUBLIC_SOLO_MODE);
-
         if (process.env.NEXT_PUBLIC_SOLO_MODE) {
             establishConnection().then(() => {
                 const level = (() => {

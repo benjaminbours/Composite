@@ -18,8 +18,8 @@ void main() {
     vec4 color = texture2D(tDiffuse, texCoord);
     float illuminationDecay = 1.0;
 
-    for(int i=0; i < MAX_SAMPLES; i++) {
-        if(i == samples){
+    for(int i = 0; i < MAX_SAMPLES; i++) {
+        if(i == samples) {
             break;
         }
         texCoord -= deltaTextCoord;

@@ -22,8 +22,8 @@ export class ShadowPlayer extends Player {
     protected particles: Points;
     private lastPosition = new Vector3();
 
-    constructor(public isMainPlayer: boolean) {
-        super(isMainPlayer);
+    constructor() {
+        super();
 
         const geometry = new SphereGeometry(5, 50, 50);
         const particlesNumber = geometry.attributes.position.array.length / 3;

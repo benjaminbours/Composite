@@ -52,6 +52,7 @@
 - Bug with end game animation
 - Bug with the wave when the menu is remounted after entering the game, the wave is not reacting with the mouse anymore.
 - On loading of any page of the website, there is blank screen with loading written for a moment before disappearing. Fix it.
+- Fix the "patchwork" effect we see in wall with door around the door
 
 ## Potential game play suggestion
 
