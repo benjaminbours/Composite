@@ -13,6 +13,7 @@ import {
     Vector3,
     Box3Helper,
     Object3DEventMap,
+    Group,
 } from 'three';
 // our libs
 import {
@@ -29,12 +30,13 @@ import {
     ElementToBounce,
     createMountain,
     Inputs,
+    Levels,
+    AbstractLevel,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 // import CustomCamera from './CustomCamera';
-import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
@@ -44,6 +46,10 @@ import { SkinBounce } from './elements/SkinBounce';
 import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
 import { GameStateManager } from './GameStateManager';
+import { EmptyLevel } from './levels/EmptyLevel';
+import { CrackTheDoorLevelWithGraphic } from './levels/CrackTheDoorLevelWithGraphic';
+import { LearnToFlyLevelWithGraphic } from './levels/LearnToFlyLevelWithGraphic';
+import { TheHighSpheresLevelWithGraphic } from './levels/TheHighSpheresWithGraphic';
 
 export default class App {
     public camera = new CustomCamera(
@@ -60,8 +66,6 @@ export default class App {
     public clock = new Clock();
     public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
-
-    private levelController: LevelController;
 
     private lastInput: GamePlayerInputPayload | undefined;
     // TODO: disgusting, find alternative
@@ -84,6 +88,8 @@ export default class App {
     private mainPlayerSide: Side;
     private secondPlayerSide: Side;
 
+    private level: AbstractLevel;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
@@ -100,7 +106,21 @@ export default class App {
         // inputs
 
         // levels
-        this.levelController = new LevelController(initialGameState.level.id);
+        this.level = (() => {
+            switch (initialGameState.level.id) {
+                case Levels.EMPTY:
+                    return new EmptyLevel();
+                case Levels.CRACK_THE_DOOR:
+                    return new CrackTheDoorLevelWithGraphic();
+                case Levels.LEARN_TO_FLY:
+                    return new LearnToFlyLevelWithGraphic();
+                case Levels.THE_HIGH_SPHERES:
+                    return new TheHighSpheresLevelWithGraphic();
+                default:
+                    return new EmptyLevel();
+            }
+        })();
+        this.scene.add(this.level as unknown as Group);
 
         this.setupPlayers();
         this.setupScene();
@@ -112,11 +132,7 @@ export default class App {
             this.camera,
             canvasDom,
             this.scene,
-            (
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ] as any
-            ).lightBounces || [],
+            this.level.lightBounces,
         );
 
         if (this.socketController) {
@@ -189,15 +205,7 @@ export default class App {
         this.skyMesh.rotation.set(0, 1, 0);
         this.scene.add(this.skyMesh);
 
-        this.levelController.loadLevel(
-            this.levelController.currentLevel,
-            this.scene,
-            this.players,
-        );
-        this.collidingElements.push(
-            ...this.levelController.levels[this.levelController.currentLevel]!
-                .collidingElements,
-        );
+        this.collidingElements.push(...this.level.collidingElements);
         this.scene.add(createMountain());
         if (process.env.NEXT_PUBLIC_PLAYER_BBOX_HELPER) {
             this.playerHelper = new Box3();
@@ -388,16 +396,8 @@ export default class App {
             doorOpener?.update(this.delta, this.camera, withFocusCamera);
         }
 
-        for (
-            let i = 0;
-            i <
-            this.levelController.levels[this.levelController.currentLevel]
-                .bounces.length;
-            i++
-        ) {
-            const bounce =
-                this.levelController.levels[this.levelController.currentLevel]
-                    .bounces[i];
+        for (let i = 0; i < this.level.bounces.length; i++) {
+            const bounce = this.level.bounces[i];
             const rotationY = state.level.bounces[bounce.bounceID].rotationY;
             bounce.update(rotationY);
         }
@@ -472,9 +472,7 @@ export default class App {
                 MovableComponentState.inside &&
             state.players[this.mainPlayerSide].insideElementID
         ) {
-            const skinBounce = this.levelController.levels[
-                this.levelController.currentLevel
-            ].children.find(
+            const skinBounce = (this.level as unknown as Group).children.find(
                 (child) =>
                     child.name ===
                     `skin-bounce-${
@@ -486,9 +484,7 @@ export default class App {
                 this.currentBounceName = skinBounce.name;
             }
         } else {
-            const skinBounce = this.levelController.levels[
-                this.levelController.currentLevel
-            ].children.find(
+            const skinBounce = (this.level as unknown as Group).children.find(
                 (child) => child.name === this.currentBounceName,
             ) as SkinBounce | undefined;
 
