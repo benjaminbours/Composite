@@ -31,6 +31,7 @@ import {
   collectInputsForTick,
   InviteFriendTokenPayload,
   AbstractLevel,
+  TheHighSpheresLevel,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -324,6 +325,8 @@ export class SocketGateway {
           return Level.LEARN_TO_FLY;
         case Levels.THE_HIGH_SPHERES:
           return Level.THE_HIGH_SPHERES;
+        default:
+          return Level.EMPTY_LEVEL;
       }
     })();
     return this.prismaService.game.create({
@@ -344,6 +347,10 @@ export class SocketGateway {
           return new CrackTheDoorLevel();
         case Levels.LEARN_TO_FLY:
           return new LearnToFlyLevel();
+        case Levels.THE_HIGH_SPHERES:
+          return new TheHighSpheresLevel();
+        default:
+          return new CrackTheDoorLevel();
       }
     })();
 

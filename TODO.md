@@ -178,3 +178,6 @@ Still need to address number 2 and 5
   - Le mec qui a fait les meilleurs niveaux, est ce que tu peux le follow ?
   - news about les prochains update du game, example, soon, element trou noir disponible dans le level builder
 
+## NOTE TO MYSELF
+
+- You added a migration dude, remember it when you will deploy the next release, you might have to do an extra operation.

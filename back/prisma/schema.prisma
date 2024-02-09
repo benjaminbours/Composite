@@ -20,6 +20,7 @@ model User {
 }
 
 enum Level {
+  EMPTY_LEVEL
   CRACK_THE_DOOR
   LEARN_TO_FLY
   THE_HIGH_SPHERES
