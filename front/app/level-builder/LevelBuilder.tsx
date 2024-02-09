@@ -1,21 +1,25 @@
 'use client';
+// vendors
 import React, { useCallback, useMemo, useState } from 'react';
 import { useRef } from 'react';
-import InputsManager from '../Game/Player/InputsManager';
+import { Vector3 } from 'three';
 import dynamic from 'next/dynamic';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+// our libs
 import {
     GameState,
     MovableComponentState,
     Side,
     createWall,
 } from '@benjaminbours/composite-core';
-import { LibraryPanel } from './LibraryPanel';
+// project
+import InputsManager from '../Game/Player/InputsManager';
 import { ElementType, LevelElement, WallProperties } from './types';
 import { EmptyLevel } from '../Game/levels/EmptyLevel';
-import { Scene, Vector3 } from 'three';
 import App from '../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
 import { PropertiesPanel } from './PropertiesPanel';
+import { TopBar } from './TopBar';
 
 const Game = dynamic(() => import('../Game'), {
     loading: () => <p>Loading...</p>,
@@ -57,6 +61,29 @@ const initialGameState = new GameState(
     0,
 );
 
+// const theme = createTheme({
+//     palette: {
+//         primary: {
+//             main: '#000000',
+//             light: '#b8b8b8',
+//             dark: '#3c3c3c',
+//             contrastText: '#fff',
+//         },
+//         secondary: {
+//             main: '#ffffff',
+//             // light: '#b8b8b8',
+//             // dark: '#777777',
+//             contrastText: '#000',
+//         },
+//     },
+// });
+
+const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+});
+
 export const LevelBuilder: React.FC = ({}) => {
     const [currentEditingIndex, setCurrentEditingIndex] = useState<
         number | undefined
@@ -67,7 +94,7 @@ export const LevelBuilder: React.FC = ({}) => {
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const addElementToLevel = useCallback(
-        (type: ElementType) => (clickEvent: any) => {
+        (type: ElementType) => {
             const [mesh, properties] = (() => {
                 let properties;
                 switch (type) {
@@ -92,7 +119,6 @@ export const LevelBuilder: React.FC = ({}) => {
             ]);
             // last index + 1 = state.length
             setCurrentEditingIndex(state.length);
-            clickEvent.target.blur();
 
             if (appRef.current) {
                 appRef.current.scene.add(mesh);
@@ -111,6 +137,13 @@ export const LevelBuilder: React.FC = ({}) => {
         });
     }, []);
 
+    const resetCamera = useCallback(() => {
+        if (appRef.current) {
+            appRef.current.camera.position.set(0, 100, 500);
+            appRef.current.controls?.target.set(0, 100, 0);
+        }
+    }, []);
+
     const currentEditingElement = useMemo(() => {
         if (currentEditingIndex === undefined) {
             return null;
@@ -120,17 +153,22 @@ export const LevelBuilder: React.FC = ({}) => {
 
     return (
         <main className="level-builder">
-            <LibraryPanel onElementClick={addElementToLevel} />
-            <div className="level-builder__bottom-right-container">
-                <SceneContentPanel
-                    elements={state}
-                    currentEditingIndex={currentEditingIndex}
-                    onElementClick={selectElement}
+            <ThemeProvider theme={darkTheme}>
+                <TopBar
+                    onResetCamera={resetCamera}
+                    onLibraryElementClick={addElementToLevel}
                 />
-                {currentEditingElement && (
-                    <PropertiesPanel element={currentEditingElement} />
-                )}
-            </div>
+                <div className="level-builder__bottom-right-container">
+                    <SceneContentPanel
+                        elements={state}
+                        currentEditingIndex={currentEditingIndex}
+                        onElementClick={selectElement}
+                    />
+                    {currentEditingElement && (
+                        <PropertiesPanel element={currentEditingElement} />
+                    )}
+                </div>
+            </ThemeProvider>
             <Game
                 side={Side.SHADOW}
                 initialGameState={initialGameState}

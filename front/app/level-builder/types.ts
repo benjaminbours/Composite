@@ -19,3 +19,12 @@ export interface LevelElement {
     type: ElementType;
     properties: Record<string, any>;
 }
+
+export interface ElementLibraryItem {
+    type: ElementType;
+    /**
+     * src of the image
+     */
+    img: string;
+    name: string;
+}

@@ -91,7 +91,7 @@ export default class App {
 
     private level: AbstractLevel;
 
-    private controls?: OrbitControls;
+    public controls?: OrbitControls;
 
     constructor(
         canvasDom: HTMLCanvasElement,
@@ -140,15 +140,48 @@ export default class App {
             this.level.lightBounces,
         );
 
+        // camera
         if (this.isLevelBuilder) {
+            this.camera.position.set(0, 100, 500);
             this.controls = new OrbitControls(
                 this.camera,
                 this.rendererManager.renderer.domElement,
             );
+            this.controls.target.set(0, 100, 0);
+            this.controls.enableDamping = false;
             this.controls.enableRotate = false;
+            this.controls.autoRotate = false;
             this.controls.maxDistance = 2000;
             this.controls.maxPolarAngle = Math.PI / 2;
             this.controls.minPolarAngle = Math.PI / 2;
+            this.controls.update();
+            this.controls.addEventListener('change', () => {
+                if (!this.controls) {
+                    return;
+                }
+
+                if (this.controls.object.position.y < 10) {
+                    this.camera.position.y = 10;
+                    this.controls.target.y = 10;
+                }
+
+                const limitX = 8000;
+                if (this.controls.object.position.x > limitX) {
+                    this.camera.position.x = limitX;
+                    this.controls.target.x = limitX;
+                }
+
+                if (this.controls.object.position.x < -limitX) {
+                    this.camera.position.x = -limitX;
+                    this.controls.target.x = -limitX;
+                }
+            });
+        } else {
+            this.camera.setDefaultTarget(
+                this.players[this.mainPlayerSide].position,
+            );
+            this.camera.position.z = 500;
+            this.camera.position.y = 10;
         }
 
         if (this.socketController) {
@@ -190,13 +223,6 @@ export default class App {
     private setupScene = () => {
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
-
-        // camera
-        this.camera.setDefaultTarget(
-            this.players[this.mainPlayerSide].position,
-        );
-        this.camera.position.z = 500;
-        this.camera.position.y = 10;
 
         this.scene.fog = new FogExp2(0xffffff, 0.001);
         // this.scene.fog = new FogExp2(0xffffff, 0.0002);
@@ -366,12 +392,7 @@ export default class App {
 
         // update camera
 
-        if (this.controls) {
-            this.controls.update(this.delta);
-            if (this.controls.object.position.y < 20) {
-                this.controls.object.position.y = 20;
-            }
-        } else {
+        if (!this.controls) {
             this.camera.update();
         }
     };
@@ -474,7 +495,11 @@ export default class App {
     public updateWorldGraphics = (state: GameState) => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
-        this.floor.position.set(this.camera.position.x, 0, 0);
+        this.floor.position.set(
+            this.players[this.mainPlayerSide].position.x,
+            0,
+            0,
+        );
 
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
