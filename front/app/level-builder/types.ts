@@ -1,4 +1,4 @@
-import { Vector3 } from 'three';
+import { Object3D, Vector3 } from 'three';
 
 export class WallProperties {
     public size: Vector3 = new Vector3(1, 1, 1);
@@ -18,6 +18,7 @@ export interface LevelElement {
     name: string;
     type: ElementType;
     properties: Record<string, any>;
+    mesh: Object3D;
 }
 
 export interface ElementLibraryItem {

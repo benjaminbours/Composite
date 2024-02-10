@@ -115,6 +115,7 @@ export const LevelBuilder: React.FC = ({}) => {
                     name: `${type}_${state.length}`,
                     type,
                     properties,
+                    mesh,
                 },
             ]);
             // last index + 1 = state.length
@@ -128,14 +129,54 @@ export const LevelBuilder: React.FC = ({}) => {
         [state],
     );
 
-    const selectElement = useCallback((index: number) => {
-        setCurrentEditingIndex((prev) => {
-            if (prev === index) {
-                return undefined;
-            }
-            return index;
-        });
-    }, []);
+    const selectElement = useCallback(
+        (index: number) => () => {
+            setCurrentEditingIndex((prev) => {
+                if (prev === index) {
+                    return undefined;
+                }
+                return index;
+            });
+        },
+        [],
+    );
+
+    const deleteElement = useCallback(
+        (index: number) => () => {
+            setState((state) => {
+                // remove mesh from scene first
+                const mesh = state[index].mesh;
+                if (appRef.current) {
+                    appRef.current.scene.remove(mesh);
+                    const collidingIndex =
+                        appRef.current.collidingElements.indexOf(mesh);
+                    if (collidingIndex !== -1) {
+                        appRef.current.collidingElements.splice(
+                            collidingIndex,
+                            1,
+                        );
+                    }
+                }
+
+                // update state
+                const newState = [...state];
+                newState.splice(index, 1);
+                return newState;
+            });
+        },
+        [],
+    );
+
+    const changeElementName = useCallback(
+        (index: number) => (e: any) => {
+            setState((state) => {
+                const newState = [...state];
+                newState[index].name = e.target.value;
+                return newState;
+            });
+        },
+        [],
+    );
 
     const resetCamera = useCallback(() => {
         if (appRef.current) {
@@ -163,6 +204,8 @@ export const LevelBuilder: React.FC = ({}) => {
                         elements={state}
                         currentEditingIndex={currentEditingIndex}
                         onElementClick={selectElement}
+                        onChangeName={changeElementName}
+                        onElementDelete={deleteElement}
                     />
                     {currentEditingElement && (
                         <PropertiesPanel element={currentEditingElement} />

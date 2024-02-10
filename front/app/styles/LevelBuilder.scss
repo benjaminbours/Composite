@@ -1,15 +1,11 @@
 .panel {
     padding: 15px;
-    background: black;
-    border: solid white 1px;
-    color: white;
     display: flex;
     flex-direction: column;
-    min-width: 250px;
 
     h2,
     h3 {
-        margin-top: 0;
+        margin: 0;
     }
 
     ul {
@@ -27,21 +23,6 @@
         background: white;
     }
 
-    button {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        border: solid transparent 1px;
-        padding: 10px;
-        box-sizing: border-box;
-        width: 100%;
-        min-width: 200px;
-
-        &:hover {
-            border-color: white;
-        }
-    }
-
     .item-name {
         margin: 0;
         margin-left: 10px;
@@ -56,9 +37,9 @@
     height: 40%;
 }
 
-.level-builder__bottom-right-container {
+.level-builder__top-right-container {
     position: fixed;
-    bottom: 1%;
+    top: 6%;
     right: 1%;
     height: 40%;
     display: flex;
@@ -70,10 +51,15 @@
 
 .scene-content-panel {
     order: 2;
+    width: 250px;
 }
 
-.scene-content-panel__item--active button {
-    border-color: white;
+.scene-content-panel__item {
+    padding: 0;
+}
+
+.scene-content-panel__item {
+    margin: 10px 0;
 }
 
 .top-bar__tool-bar {

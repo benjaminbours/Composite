@@ -1,40 +1,47 @@
-import React, { useMemo } from 'react';
-import { ElementType, LevelElement } from './types';
-import classNames from 'classnames';
+// vendors
+import React from 'react';
+import Paper from '@mui/material/Paper';
+import List from '@mui/material/List';
+// project
+import { LevelElement } from './types';
+import { Divider } from '@mui/material';
+import { SceneItem } from './SceneItem';
 
 interface Props {
     elements: LevelElement[];
     currentEditingIndex: number | undefined;
-    onElementClick: (index: number) => void;
+    onElementClick: (index: number) => () => void;
+    onElementDelete: (index: number) => () => void;
+    onChangeName: (index: number) => (e: any) => void;
 }
 
-export const SceneContentPanel: React.FC<Props> = ({
-    elements,
-    currentEditingIndex,
-    onElementClick,
-}) => {
-    return (
-        <div className="panel scene-content-panel">
-            <h3>Scene</h3>
-            <div className="separator" />
-            <ul>
-                {elements.map(({ name }, index) => {
-                    const cssClass = classNames({
-                        'scene-content-panel__item': true,
-                        'scene-content-panel__item--active':
-                            index === currentEditingIndex,
-                    });
-                    return (
-                        <li className={cssClass} key={name}>
-                            <button onClick={() => onElementClick(index)}>
-                                <div className="img-placeholder" />
-                                {/* <img src={img} alt="coming soon" /> */}
-                                <p className="item-name">{name}</p>
-                            </button>
-                        </li>
-                    );
-                })}
-            </ul>
-        </div>
-    );
-};
+export const SceneContentPanel: React.FC<Props> = React.memo(
+    ({
+        elements,
+        currentEditingIndex,
+        onElementClick,
+        onChangeName,
+        onElementDelete,
+    }) => {
+        return (
+            <Paper className="panel scene-content-panel">
+                <h3>Scene</h3>
+                <Divider className="scene-content-panel__divider" />
+                <List>
+                    {elements.map((element, index) => (
+                        <SceneItem
+                            key={index}
+                            {...element}
+                            index={index}
+                            isSelected={index === currentEditingIndex}
+                            onDelete={onElementDelete}
+                            onChangeName={onChangeName}
+                            onClick={onElementClick}
+                        />
+                    ))}
+                </List>
+            </Paper>
+        );
+    },
+);
+SceneContentPanel.displayName = 'SceneContentPanel';

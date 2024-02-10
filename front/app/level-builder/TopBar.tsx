@@ -2,14 +2,10 @@
 import React, { useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import MenuIcon from '@mui/icons-material/Menu';
 import SquareIcon from '@mui/icons-material/Square';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -74,21 +70,22 @@ export const TopBar: React.FC<Props> = ({
     return (
         <AppBar className="level-builder__app-bar top-bar" position="static">
             <Toolbar className="top-bar__tool-bar">
-                <Button startIcon={<KeyboardArrowLeftIcon />}>Back</Button>
+                <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
+                    Back
+                </Button>
                 <Divider orientation="vertical" flexItem />
                 <Button
-                    id="basic-button"
                     aria-controls={open ? 'basic-menu' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                     onClick={handleClick}
                     variant="outlined"
                     endIcon={<KeyboardArrowDownIcon />}
+                    size="small"
                 >
                     Library
                 </Button>
                 <Menu
-                    id="basic-menu"
                     anchorEl={anchorEl}
                     open={open}
                     onClose={handleClose}
@@ -122,6 +119,7 @@ export const TopBar: React.FC<Props> = ({
                     onClick={onResetCamera}
                     variant="outlined"
                     endIcon={<CameraIcon />}
+                    size="small"
                 >
                     Reset camera
                 </Button>
