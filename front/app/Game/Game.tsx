@@ -86,7 +86,7 @@ function Game({
                 gameStarted.current = true;
                 if (socketController) {
                     setIsSynchronizingTime(true);
-                } else {
+                } else if (!levelBuilderAppRef) {
                     appRef.current?.inputsManager.registerEventListeners();
                 }
             });
