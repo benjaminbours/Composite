@@ -2,6 +2,8 @@
     padding: 15px;
     display: flex;
     flex-direction: column;
+    max-height: 300px;
+    width: 250px;
 
     h2,
     h3 {
@@ -34,24 +36,23 @@
     position: fixed;
     top: 1%;
     right: 1%;
-    height: 40%;
 }
 
 .level-builder__top-right-container {
     position: fixed;
     top: 6%;
     right: 1%;
-    height: 40%;
     display: flex;
+    align-items: flex-start;
 }
 
 .properties-panel {
     order: 1;
+    margin-right: 10px;
 }
 
 .scene-content-panel {
     order: 2;
-    width: 250px;
 }
 
 .scene-content-panel__item {
@@ -89,4 +90,32 @@
 
 #camera-button {
     margin-left: auto;
+}
+
+.properties-panel__inputs-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+
+    input {
+        width: 100%;
+        font-size: 12px;
+        padding: 5px;
+        padding-right: 14px;
+    }
+
+    > * {
+        margin: 10px 0;
+    }
+}
+
+.my-num-input {
+    border-color: rgb(67, 77, 91) !important;
+    box-shadow: none !important;
+
+    &.focused {
+        border-color: #3399ff !important;
+        box-shadow: 0 0 0 3px #0059b2 !important;
+    }
 }

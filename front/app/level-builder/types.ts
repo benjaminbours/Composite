@@ -17,7 +17,7 @@ export enum ElementType {
 export interface LevelElement {
     name: string;
     type: ElementType;
-    properties: Record<string, any>;
+    properties: WallProperties;
     mesh: Object3D;
 }
 
