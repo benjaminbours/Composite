@@ -22,10 +22,10 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
-        shadow: new Vector3(200, 20, 0),
+        // shadow: new Vector3(200, 20, 0),
         // shadow: new Vector3(2200, 775, 0), // roof door
         // light: new Vector3(2500, 20, 0), // end level
-        // shadow: new Vector3(2400, 20, 0), // end level
+        shadow: new Vector3(2400, 20, 0), // end level
     };
 
     public state: LevelState = {
@@ -71,15 +71,15 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
         const outsideArches = [
             createArchGroup({
-                height: 1,
+                size: new Vector3(1, 1, 1),
                 position: new Vector3(2, 0, 0),
             }),
             createArchGroup({
-                height: 2,
+                size: new Vector3(1, 2, 1),
                 position: new Vector3(4, 0, 0),
             }),
             createArchGroup({
-                height: 3,
+                size: new Vector3(1, 3, 1),
                 position: new Vector3(6, 0, 0),
             }),
         ];
@@ -132,11 +132,11 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
         const insideArches = [
             createArchGroup({
-                height: 1,
+                size: new Vector3(1, 1, 1),
                 position: new Vector3(10, 0, 0),
             }),
             createArchGroup({
-                height: 2,
+                size: new Vector3(1, 2, 1),
                 position: new Vector3(12, 0, 0),
             }),
         ];

@@ -1,7 +1,6 @@
 import {
     BoxGeometry,
     DoubleSide,
-    Material,
     Mesh,
     MeshPhongMaterial,
     MeshBasicMaterial,
@@ -104,14 +103,7 @@ export function positionOnGrid(
     }
 }
 
-export function positionInsideGridBox(
-    element: Mesh | Object3D,
-    position: Vector3,
-) {
-    const coordinate = position.multiplyScalar(gridSizeSmall);
-    element.position.add(coordinate);
-}
-
+// TODO: Check to remove / merge it with WallProperties
 interface WallOptions {
     size: Vector3;
     position: Vector3;
@@ -267,46 +259,73 @@ export function createWallDoor({
     return group;
 }
 
+// TODO: Check to remove / merge it with ArchGroupProperties
 interface ArchGroupOptions {
-    height: number;
+    size: Vector3;
     position: Vector3;
     withoutColumns?: true;
 }
 
 export function createArchGroup({
-    height,
+    size,
     position,
     withoutColumns,
 }: ArchGroupOptions) {
     const group = new Object3D();
 
     if (!withoutColumns) {
-        const columnLeft1 = createColumnGroup(height, 'normal');
-        const columnLeft2 = createColumnGroup(height, 'normal');
-        const columnRight1 = createColumnGroup(height, 'normal', true);
-        const columnRight2 = createColumnGroup(height, 'normal', true);
+        const columnGroup = new Object3D();
+        group.add(columnGroup);
 
-        positionOnGrid(columnLeft1, new Vector3(0, 0, -1));
-        group.add(columnLeft1);
+        const columnBackRight = createColumnGroup(size.y, 'normal');
+        const columnBackLeft = createColumnGroup(size.y, 'normal');
+        const columnFrontRight = createColumnGroup(size.y, 'normal', true);
+        const columnFrontLeft = createColumnGroup(size.y, 'normal', true);
+        // back pair
+        columnGroup.add(columnBackRight);
+        columnGroup.add(columnBackLeft);
+        // front pair
+        columnGroup.add(columnFrontRight);
+        columnGroup.add(columnFrontLeft);
 
-        positionOnGrid(columnRight1, new Vector3(0, 0, 1));
-        group.add(columnRight1);
-
-        positionInsideGridBox(columnLeft1, new Vector3(-1, 0, 0));
-
-        positionOnGrid(columnLeft2, new Vector3(0, 0, -1));
-        positionInsideGridBox(columnLeft2, new Vector3(1, 0, 0));
-        group.add(columnLeft2);
-
-        positionInsideGridBox(columnRight1, new Vector3(-1, 0, 0));
-
-        positionOnGrid(columnRight2, new Vector3(0, 0, 1));
-        positionInsideGridBox(columnRight2, new Vector3(1, 0, 0));
-        group.add(columnRight2);
+        const internalColumnPosition = 0.25;
+        positionOnGrid(
+            columnBackRight,
+            new Vector3(-internalColumnPosition, 0, -1),
+        );
+        positionOnGrid(
+            columnBackLeft,
+            new Vector3(internalColumnPosition, 0, -1),
+        );
+        positionOnGrid(
+            columnFrontRight,
+            new Vector3(-internalColumnPosition, 0, 1),
+        );
+        positionOnGrid(
+            columnFrontLeft,
+            new Vector3(internalColumnPosition, 0, 1),
+        );
+        if (size.x >= 2) {
+            // position left group
+            columnGroup.position.set(
+                (-size.x / 2) * gridSize + 0.5 * gridSize,
+                0,
+                0,
+            );
+            // position right group
+            const rightGroup = columnGroup.clone();
+            rightGroup.position.set(
+                (size.x / 2) * gridSize - 0.5 * gridSize,
+                0,
+                0,
+            );
+            group.add(rightGroup);
+        }
     }
 
     const geometryPlatform = new BoxGeometry(
-        gridSize * 1.25,
+        // gridSize * 1.25 * size.x,
+        gridSize * size.x,
         10,
         gridSize * 2.5,
     );
@@ -315,7 +334,7 @@ export function createArchGroup({
     // platformMesh.receiveShadow = true;
     platformMesh.name = 'platform';
     // position the height of the platform only
-    positionOnGrid(platformMesh, new Vector3(0, height, 0));
+    positionOnGrid(platformMesh, new Vector3(0, size.y, 0));
     group.add(platformMesh);
 
     // occlusion management

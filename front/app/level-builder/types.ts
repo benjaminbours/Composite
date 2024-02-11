@@ -6,6 +6,11 @@ export class WallProperties {
     public rotation = new Euler(0, 0, 0);
 }
 
+export class ArchProperties {
+    public size = new Vector3(1, 1, 1);
+    public position = new Vector3(0, 0, 0);
+}
+
 export enum ElementType {
     WALL = 'wall',
     WALL_DOOR = 'wall_door',
@@ -18,7 +23,7 @@ export enum ElementType {
 export interface LevelElement {
     name: string;
     type: ElementType;
-    properties: WallProperties;
+    properties: WallProperties | ArchProperties;
     mesh: Object3D;
 }
 

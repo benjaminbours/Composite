@@ -10,13 +10,19 @@ import {
     GameState,
     MovableComponentState,
     Side,
+    createArchGroup,
     createWall,
     degreesToRadians,
     gridSize,
 } from '@benjaminbours/composite-core';
 // project
 import InputsManager from '../Game/Player/InputsManager';
-import { ElementType, LevelElement, WallProperties } from './types';
+import {
+    ArchProperties,
+    ElementType,
+    LevelElement,
+    WallProperties,
+} from './types';
 import { EmptyLevel } from '../Game/levels/EmptyLevel';
 import App from '../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
@@ -63,23 +69,6 @@ const initialGameState = new GameState(
     0,
 );
 
-// const theme = createTheme({
-//     palette: {
-//         primary: {
-//             main: '#000000',
-//             light: '#b8b8b8',
-//             dark: '#3c3c3c',
-//             contrastText: '#fff',
-//         },
-//         secondary: {
-//             main: '#ffffff',
-//             // light: '#b8b8b8',
-//             // dark: '#777777',
-//             contrastText: '#000',
-//         },
-//     },
-// });
-
 const darkTheme = createTheme({
     palette: {
         mode: 'dark',
@@ -121,11 +110,19 @@ export const LevelBuilder: React.FC = ({}) => {
         (type: ElementType) => {
             const [mesh, properties] = (() => {
                 let properties;
+                let mesh;
                 switch (type) {
+                    case ElementType.ARCH:
+                        properties = new ArchProperties();
+                        mesh = createArchGroup({
+                            size: properties.size.clone(),
+                            position: properties.position.clone(),
+                        });
+                        return [mesh, properties];
                     case ElementType.WALL:
                     default:
                         properties = new WallProperties();
-                        const mesh = createWall({
+                        mesh = createWall({
                             size: properties.size.clone(),
                             position: properties.position.clone(),
                             rotation: properties.rotation.clone(),
@@ -188,7 +185,8 @@ export const LevelBuilder: React.FC = ({}) => {
 
                 // update mesh
                 if (appRef.current) {
-                    let mesh = nextState[currentEditingIndex].mesh;
+                    let { properties, mesh, type } =
+                        nextState[currentEditingIndex];
                     switch (propertyKey) {
                         case 'position':
                             mesh.position.copy(
@@ -206,20 +204,30 @@ export const LevelBuilder: React.FC = ({}) => {
                         case 'size':
                             // remove element
                             removeMeshFromScene(nextState, currentEditingIndex);
+
                             // create a new one
-                            nextState[currentEditingIndex].mesh = createWall({
-                                size: nextState[
-                                    currentEditingIndex
-                                ].properties.size.clone(),
-                                position:
-                                    nextState[
-                                        currentEditingIndex
-                                    ].properties.position.clone(),
-                                rotation:
-                                    nextState[
-                                        currentEditingIndex
-                                    ].properties.rotation.clone(),
-                            });
+                            switch (type) {
+                                case ElementType.WALL:
+                                    nextState[currentEditingIndex].mesh =
+                                        createWall({
+                                            size: properties.size.clone(),
+                                            position:
+                                                properties.position.clone(),
+                                            rotation: (
+                                                properties as WallProperties
+                                            ).rotation.clone(),
+                                        });
+                                    break;
+                                case ElementType.ARCH:
+                                    nextState[currentEditingIndex].mesh =
+                                        createArchGroup({
+                                            size: properties.size.clone(),
+                                            position:
+                                                properties.position.clone(),
+                                        });
+                                default:
+                                    break;
+                            }
                             addMeshToScene(nextState[currentEditingIndex].mesh);
                             break;
                     }
