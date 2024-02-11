@@ -45,7 +45,6 @@ export const NumberInput = React.forwardRef(function CustomNumberInput(
 ) {
     return (
         <BaseNumberInput
-            step={0.1}
             slots={{
                 root: InputRoot,
                 input: InputElement,

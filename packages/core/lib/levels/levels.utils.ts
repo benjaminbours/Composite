@@ -10,6 +10,7 @@ import {
     BufferGeometry,
     Group,
     Object3DEventMap,
+    Euler,
 } from 'three';
 import {
     computeBoundsTree,
@@ -90,7 +91,7 @@ export function positionOnGrid(
     /**
      * A vector of degrees, example, x: 180, y: 90, z:0
      */
-    rotation?: Vector3,
+    rotation?: Euler,
 ): void {
     const coordinate = position.multiplyScalar(gridSize);
     // console.log(coordinate);
@@ -114,12 +115,14 @@ export function positionInsideGridBox(
 interface WallOptions {
     size: Vector3;
     position: Vector3;
-    rotation: Vector3;
+    rotation: Euler;
     withOcclusion?: boolean;
     isGeometryCentered?: boolean;
     receiveShadow?: boolean;
 }
 
+// TODO: detect if some walls are occluding the player
+// TODO: detect if some walls could potentially collide with the player
 export function createWall({
     size,
     position,
@@ -174,13 +177,13 @@ export function createWallDoor({
     const wallLeft = createWall({
         size: new Vector3(1.5, size.y, 0),
         position: new Vector3(0.5, 0, 0),
-        rotation: new Vector3(),
+        rotation: new Euler(),
         withOcclusion: true,
     });
     const wallRight = createWall({
         size: new Vector3(0.5, size.y, 0),
         position: new Vector3(-1, 0, 0),
-        rotation: new Vector3(),
+        rotation: new Euler(),
         withOcclusion: true,
     });
     group.add(wallLeft, wallRight);
@@ -236,7 +239,7 @@ export function createWallDoor({
         const wall = createWall({
             size: new Vector3(1, doorPosition.y, 0),
             position: new Vector3(-0.5, 0, 0),
-            rotation: new Vector3(),
+            rotation: new Euler(),
             withOcclusion: true,
         });
         group.add(wall);
@@ -247,17 +250,17 @@ export function createWallDoor({
         const wall = createWall({
             size: new Vector3(1, sizeBetweenDoorAndTop - 1, 0),
             position: new Vector3(-0.5, doorPosition.y + 1, 0),
-            rotation: new Vector3(),
+            rotation: new Euler(),
             withOcclusion: true,
         });
         group.add(wall);
     }
     switch (orientation) {
         case 'horizontal':
-            positionOnGrid(group, position, new Vector3(90, 0, -90));
+            positionOnGrid(group, position, new Euler(90, 0, -90));
             break;
         case 'vertical':
-            positionOnGrid(group, position, new Vector3(0, 90, 0));
+            positionOnGrid(group, position, new Euler(0, 90, 0));
             break;
     }
 
@@ -357,7 +360,7 @@ export function createColumnGroup(
     }
 
     const columnEnd = columnStart.clone();
-    positionOnGrid(columnEnd, new Vector3(0, size, 0), new Vector3(180, 0, 0));
+    positionOnGrid(columnEnd, new Vector3(0, size, 0), new Euler(180, 0, 0));
     group.add(columnEnd);
 
     if (withOcclusion) {

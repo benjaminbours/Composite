@@ -2,7 +2,7 @@
 // vendors
 import React, { useCallback, useMemo, useState } from 'react';
 import { useRef } from 'react';
-import { Vector3 } from 'three';
+import { Euler, Object3D, Vector3 } from 'three';
 import dynamic from 'next/dynamic';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // our libs
@@ -11,6 +11,8 @@ import {
     MovableComponentState,
     Side,
     createWall,
+    degreesToRadians,
+    gridSize,
 } from '@benjaminbours/composite-core';
 // project
 import InputsManager from '../Game/Player/InputsManager';
@@ -93,6 +95,28 @@ export const LevelBuilder: React.FC = ({}) => {
     const statsRef = useRef<Stats>();
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
+    const addMeshToScene = useCallback((mesh: Object3D) => {
+        if (appRef.current) {
+            appRef.current.scene.add(mesh);
+            appRef.current.collidingElements.push(mesh);
+        }
+    }, []);
+
+    const removeMeshFromScene = useCallback(
+        (state: LevelElement[], index: number) => {
+            if (appRef.current) {
+                const mesh = state[index].mesh;
+                appRef.current.scene.remove(mesh);
+                const collidingIndex =
+                    appRef.current.collidingElements.indexOf(mesh);
+                if (collidingIndex !== -1) {
+                    appRef.current.collidingElements.splice(collidingIndex, 1);
+                }
+            }
+        },
+        [],
+    );
+
     const addElementToLevel = useCallback(
         (type: ElementType) => {
             const [mesh, properties] = (() => {
@@ -102,9 +126,9 @@ export const LevelBuilder: React.FC = ({}) => {
                     default:
                         properties = new WallProperties();
                         const mesh = createWall({
-                            size: properties.size,
-                            position: properties.position,
-                            rotation: new Vector3(),
+                            size: properties.size.clone(),
+                            position: properties.position.clone(),
+                            rotation: properties.rotation.clone(),
                         });
                         return [mesh, properties];
                 }
@@ -120,13 +144,9 @@ export const LevelBuilder: React.FC = ({}) => {
             ]);
             // last index + 1 = state.length
             setCurrentEditingIndex(state.length);
-
-            if (appRef.current) {
-                appRef.current.scene.add(mesh);
-                appRef.current.collidingElements.push(mesh);
-            }
+            addMeshToScene(mesh);
         },
-        [state],
+        [state, addMeshToScene],
     );
 
     const selectElement = useCallback(
@@ -145,26 +165,69 @@ export const LevelBuilder: React.FC = ({}) => {
         (index: number) => () => {
             setState((state) => {
                 // remove mesh from scene first
-                const mesh = state[index].mesh;
-                if (appRef.current) {
-                    appRef.current.scene.remove(mesh);
-                    const collidingIndex =
-                        appRef.current.collidingElements.indexOf(mesh);
-                    if (collidingIndex !== -1) {
-                        appRef.current.collidingElements.splice(
-                            collidingIndex,
-                            1,
-                        );
-                    }
-                }
-
+                removeMeshFromScene(state, index);
                 // update state
                 const newState = [...state];
                 newState.splice(index, 1);
                 return newState;
             });
         },
-        [],
+        [removeMeshFromScene],
+    );
+
+    const updateElementProperty = useCallback(
+        (propertyKey: string, value: Vector3 | Euler) => {
+            if (currentEditingIndex === undefined) {
+                return;
+            }
+            setState((state) => {
+                const nextState = [...state];
+                (nextState[currentEditingIndex].properties as any)[
+                    propertyKey
+                ] = value;
+
+                // update mesh
+                if (appRef.current) {
+                    let mesh = nextState[currentEditingIndex].mesh;
+                    switch (propertyKey) {
+                        case 'position':
+                            mesh.position.copy(
+                                (value as Vector3)
+                                    .clone()
+                                    .multiplyScalar(gridSize),
+                            );
+                            break;
+                        case 'rotation':
+                            const rotationX = degreesToRadians(value.x);
+                            const rotationY = degreesToRadians(value.y);
+                            const rotationZ = degreesToRadians(value.z);
+                            mesh.rotation.set(rotationX, rotationY, rotationZ);
+                            break;
+                        case 'size':
+                            // remove element
+                            removeMeshFromScene(nextState, currentEditingIndex);
+                            // create a new one
+                            nextState[currentEditingIndex].mesh = createWall({
+                                size: nextState[
+                                    currentEditingIndex
+                                ].properties.size.clone(),
+                                position:
+                                    nextState[
+                                        currentEditingIndex
+                                    ].properties.position.clone(),
+                                rotation:
+                                    nextState[
+                                        currentEditingIndex
+                                    ].properties.rotation.clone(),
+                            });
+                            addMeshToScene(nextState[currentEditingIndex].mesh);
+                            break;
+                    }
+                }
+                return nextState;
+            });
+        },
+        [currentEditingIndex, removeMeshFromScene, addMeshToScene],
     );
 
     const changeElementName = useCallback(
@@ -199,7 +262,7 @@ export const LevelBuilder: React.FC = ({}) => {
                     onResetCamera={resetCamera}
                     onLibraryElementClick={addElementToLevel}
                 />
-                <div className="level-builder__bottom-right-container">
+                <div className="level-builder__top-right-container">
                     <SceneContentPanel
                         elements={state}
                         currentEditingIndex={currentEditingIndex}
@@ -208,14 +271,16 @@ export const LevelBuilder: React.FC = ({}) => {
                         onElementDelete={deleteElement}
                     />
                     {currentEditingElement && (
-                        <PropertiesPanel element={currentEditingElement} />
+                        <PropertiesPanel
+                            onUpdateProperty={updateElementProperty}
+                            element={currentEditingElement}
+                        />
                     )}
                 </div>
             </ThemeProvider>
             <Game
                 side={Side.SHADOW}
                 initialGameState={initialGameState}
-                // socketController={socketController.current}
                 tabIsHidden={false}
                 stats={statsRef}
                 inputsManager={inputsManager.current}

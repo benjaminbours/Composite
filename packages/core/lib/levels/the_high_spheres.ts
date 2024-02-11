@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3, Mesh, Object3DEventMap } from 'three';
+import { Group, Object3D, Vector3, Mesh, Object3DEventMap, Euler } from 'three';
 // local
 import {
     ElementName,

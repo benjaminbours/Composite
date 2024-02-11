@@ -1,5 +1,5 @@
 // vendors
-import { Group, Mesh, Object3D, Object3DEventMap, Vector3 } from 'three';
+import { Euler, Group, Mesh, Object3D, Object3DEventMap, Vector3 } from 'three';
 // local
 import {
     ElementName,
@@ -53,13 +53,13 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
             createWall({
                 size: new Vector3(4, 5, 0),
                 position: new Vector3(-3.5, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
             // blocking right path
             createWall({
                 size: new Vector3(4, 8, 0),
                 position: new Vector3(14, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
         ];
 

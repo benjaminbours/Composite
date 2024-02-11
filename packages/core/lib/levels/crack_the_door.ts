@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3, Mesh, Object3DEventMap } from 'three';
+import { Group, Object3D, Vector3, Mesh, Object3DEventMap, Euler } from 'three';
 // local
 import {
     ElementName,
@@ -48,19 +48,19 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
             createWall({
                 size: new Vector3(4, 2, 0),
                 position: new Vector3(-2, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
             // temple end wall
             createWall({
                 size: new Vector3(4, 5, 0),
                 position: new Vector3(13, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
             // inside temple
             createWall({
                 size: new Vector3(6, 3, 0),
                 position: new Vector3(9, 0, -2),
-                rotation: new Vector3(0, 0, 0),
+                rotation: new Euler(0, 0, 0),
             }),
         ];
 

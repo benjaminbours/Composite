@@ -1,8 +1,9 @@
-import { Object3D, Vector3 } from 'three';
+import { Euler, Object3D, Vector3 } from 'three';
 
 export class WallProperties {
-    public size: Vector3 = new Vector3(1, 1, 1);
-    public position: Vector3 = new Vector3(0, 0, 0);
+    public size = new Vector3(1, 1, 1);
+    public position = new Vector3(0, 0, 0);
+    public rotation = new Euler(0, 0, 0);
 }
 
 export enum ElementType {
