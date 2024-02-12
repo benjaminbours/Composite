@@ -1,3 +1,4 @@
+import { Side } from '@benjaminbours/composite-core';
 import { Euler, Object3D, Vector3 } from 'three';
 
 export class WallProperties {
@@ -11,6 +12,15 @@ export class ArchProperties {
     public position = new Vector3(0, 0, 0);
 }
 
+export class BounceProperties {
+    public size = new Vector3(1, 1, 1);
+    public position = new Vector3(0, 0, 0);
+    // degrees
+    public rotation = new Euler(90, 0, 0);
+    public side = Side.SHADOW;
+    public interactive = false;
+}
+
 export enum ElementType {
     WALL = 'wall',
     WALL_DOOR = 'wall_door',
@@ -20,10 +30,15 @@ export enum ElementType {
     FAT_COLUMN = 'fat_column',
 }
 
+export type ElementProperties =
+    | WallProperties
+    | ArchProperties
+    | BounceProperties;
+
 export interface LevelElement {
     name: string;
     type: ElementType;
-    properties: WallProperties | ArchProperties;
+    properties: ElementProperties;
     mesh: Object3D;
 }
 

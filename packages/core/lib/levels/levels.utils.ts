@@ -406,27 +406,25 @@ export function createColumnGroup(
     return group;
 }
 
-export interface BounceDefinition {
+export interface BounceOptions {
+    size: Vector3;
     position: Vector3;
-    rotationY: number;
+    rotation: Euler;
     side: Side;
-    interactive?: boolean;
+    id: number;
+    interactive: boolean;
 }
 
-export function createBounce(
-    position: Vector3,
-    rotationY: number,
-    side: Side,
-    id: number,
-    interactive: boolean,
-) {
+export function createBounce({
+    size,
+    position,
+    rotation,
+    side,
+    id,
+    interactive,
+}: BounceOptions) {
     const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize / 1.5);
     const positionForGrid = position.multiplyScalar(gridSize);
-    const rotation = new Vector3(
-        degreesToRadians(90),
-        degreesToRadians(90 + rotationY),
-        degreesToRadians(0),
-    );
 
     const material = (() => {
         if (side === Side.SHADOW) {
@@ -450,7 +448,11 @@ export function createBounce(
     const wall = new ElementToBounce(geometry, material, side, id, interactive);
 
     wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
-    wall.rotation.set(rotation.x, rotation.y, rotation.z);
+    wall.rotation.set(
+        degreesToRadians(rotation.x),
+        degreesToRadians(rotation.y),
+        degreesToRadians(rotation.z),
+    );
     wall.updateMatrix();
     wall.geometry.center();
     wall.geometry.computeBoundingBox();
