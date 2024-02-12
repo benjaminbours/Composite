@@ -23,6 +23,10 @@ export class BounceProperties {
     constructor(public id: number) {}
 }
 
+export class EndLevelProperties {
+    public position = new Vector3(0, 0, 0);
+}
+
 export enum ElementType {
     WALL = 'wall',
     WALL_DOOR = 'wall_door',
@@ -35,7 +39,8 @@ export enum ElementType {
 export type ElementProperties =
     | WallProperties
     | ArchProperties
-    | BounceProperties;
+    | BounceProperties
+    | EndLevelProperties;
 
 export interface LevelElement {
     name: string;

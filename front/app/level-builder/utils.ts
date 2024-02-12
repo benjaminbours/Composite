@@ -1,10 +1,13 @@
 import { Object3D } from 'three';
 import {
+    ElementName,
     ElementToBounce,
+    InteractiveArea,
     Side,
     createArchGroup,
     createBounce,
     createWall,
+    positionOnGrid,
 } from '@benjaminbours/composite-core';
 import {
     BounceProperties,
@@ -12,11 +15,13 @@ import {
     ElementType,
     WallProperties,
     ArchProperties,
+    EndLevelProperties,
 } from './types';
 import { SkinBounce } from '../Game/elements/SkinBounce';
 import { Pulse } from '../Game/elements/Pulse';
 import { SkinBounceShadow } from '../Game/elements/SkinBounceShadow';
 import App from '../Game/App';
+import { EndLevel } from '../Game/elements/EndLevel';
 
 export function createElement(
     app: App,
@@ -25,6 +30,16 @@ export function createElement(
 ): [Object3D, ElementProperties] {
     let props;
     switch (type) {
+        case ElementType.END_LEVEL:
+            props =
+                (properties as EndLevelProperties) || new EndLevelProperties();
+            const endLevelGroup = new InteractiveArea(
+                ElementName.AREA_END_LEVEL,
+            );
+            const endLevelGraphic = new EndLevel();
+            endLevelGroup.add(endLevelGraphic);
+            positionOnGrid(endLevelGroup, props.position);
+            return [endLevelGroup, props];
         case ElementType.ARCH:
             props = (properties as ArchProperties) || new ArchProperties();
             return [
