@@ -13,12 +13,14 @@ export class ArchProperties {
 }
 
 export class BounceProperties {
-    public size = new Vector3(1, 1, 1);
+    // public size = new Vector3(1, 1, 1);
     public position = new Vector3(0, 0, 0);
     // degrees
     public rotation = new Euler(90, 0, 0);
     public side = Side.SHADOW;
     public interactive = false;
+
+    constructor(public id: number) {}
 }
 
 export enum ElementType {

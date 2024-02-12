@@ -26,6 +26,7 @@ import CustomCamera from './CustomCamera';
 import { Player } from './Player';
 
 export class RendererManager {
+    private lightBounceMixPasses: ShaderPass[] = [];
     private volumetricLightPasses: ShaderPass[] = [];
     private mainComposer: EffectComposer;
     private playerInsideComposer: EffectComposer;
@@ -35,8 +36,9 @@ export class RendererManager {
     private height = window.innerHeight;
     private players: Player[];
     private camera: CustomCamera;
-    private lightBounces: ElementToBounce[];
-    
+    private lightBounces: ElementToBounce[] = [];
+    private renderPass: RenderPass;
+
     public renderer: WebGLRenderer;
     public playerVolumetricLightPass: ShaderPass;
 
@@ -90,14 +92,14 @@ export class RendererManager {
     ) {
         this.players = players;
         this.camera = camera;
-        this.lightBounces = lightBounces;
         // init renderer
         this.renderer = new WebGLRenderer({
             canvas: canvasDom,
-            // powerPreference: "high-performance",
-            // precision: "highp",
-            // antialias: true,
+            powerPreference: 'high-performance',
+            precision: 'highp',
+            antialias: true,
         });
+        // this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = PCFSoftShadowMap;
@@ -106,8 +108,8 @@ export class RendererManager {
         const renderScale = 1;
         this.mainComposer = new EffectComposer(this.renderer);
 
-        const renderPass = new RenderPass(scene, this.camera);
-        this.mainComposer.addPass(renderPass);
+        this.renderPass = new RenderPass(scene, this.camera);
+        this.mainComposer.addPass(this.renderPass);
 
         // create occlusion render for player light
         const occlusionRenderTarget = this.createRenderTarget(renderScale);
@@ -128,7 +130,7 @@ export class RendererManager {
         this.playerVolumetricLightPass.needsSwap = false;
         this.playerOcclusionComposer = this.createOcclusionComposer(
             this.renderer,
-            renderPass,
+            this.renderPass,
             this.playerVolumetricLightPass,
             occlusionRenderTarget,
         );
@@ -138,34 +140,7 @@ export class RendererManager {
 
         // create occlusion render for each light bounce element
         for (let i = 0; i < lightBounces.length; i++) {
-            const occlusionRenderTarget = this.createRenderTarget(renderScale);
-            const volumetricLightPass = new ShaderPass({
-                uniforms: {
-                    tDiffuse: { value: null },
-                    lightPosition: { value: new Vector2(0.5, 0.5) },
-                    exposure: { value: 0.18 },
-                    decay: { value: 0.9 },
-                    density: { value: 0.5 },
-                    weight: { value: 0.5 },
-                    samples: { value: 100 },
-                    isInteractive: { value: lightBounces[i].interactive },
-                    time: { value: 0 },
-                },
-                vertexShader: basicPostProdVS,
-                fragmentShader: volumetricLightBounceFS,
-            });
-            volumetricLightPass.needsSwap = false;
-            const occlusionComposer = this.createOcclusionComposer(
-                this.renderer,
-                renderPass,
-                volumetricLightPass,
-                occlusionRenderTarget,
-            );
-            const mixPass = this.createMixPass(occlusionRenderTarget);
-
-            this.mainComposer.addPass(mixPass);
-            this.occlusionComposers.push(occlusionComposer);
-            this.volumetricLightPasses.push(volumetricLightPass);
+            this.addLightBounceComposer(lightBounces[i]);
         }
 
         // create a renderer for when a player is inside an element
@@ -183,13 +158,56 @@ export class RendererManager {
             playerInsideRenderTarget,
         );
         this.playerInsideComposer.renderToScreen = false;
-        this.playerInsideComposer.addPass(renderPass);
+        this.playerInsideComposer.addPass(this.renderPass);
         this.playerInsideComposer.addPass(playerInsidePass);
         const playerInsideMixPass = this.createMixPass(
             playerInsideRenderTarget,
         );
         this.mainComposer.addPass(playerInsideMixPass);
     }
+
+    public addLightBounceComposer = (bounce: ElementToBounce) => {
+        const renderScale = 1;
+        const occlusionRenderTarget = this.createRenderTarget(renderScale);
+        const volumetricLightPass = new ShaderPass({
+            uniforms: {
+                tDiffuse: { value: null },
+                lightPosition: { value: new Vector2(0.5, 0.5) },
+                exposure: { value: 0.18 },
+                decay: { value: 0.9 },
+                density: { value: 0.5 },
+                weight: { value: 0.5 },
+                samples: { value: 100 },
+                isInteractive: { value: bounce.interactive },
+                time: { value: 0 },
+            },
+            vertexShader: basicPostProdVS,
+            fragmentShader: volumetricLightBounceFS,
+        });
+        volumetricLightPass.needsSwap = false;
+        const occlusionComposer = this.createOcclusionComposer(
+            this.renderer,
+            this.renderPass,
+            volumetricLightPass,
+            occlusionRenderTarget,
+        );
+        const mixPass = this.createMixPass(occlusionRenderTarget);
+
+        this.mainComposer.addPass(mixPass);
+        this.lightBounces.push(bounce);
+        this.occlusionComposers.push(occlusionComposer);
+        this.volumetricLightPasses.push(volumetricLightPass);
+        this.lightBounceMixPasses.push(mixPass);
+    };
+
+    public removeLightBounceComposer = (index: number) => {
+        const mixPass = this.lightBounceMixPasses[index];
+        this.mainComposer.removePass(mixPass);
+        this.occlusionComposers.splice(index, 1);
+        this.volumetricLightPasses.splice(index, 1);
+        this.lightBounceMixPasses.splice(index, 1);
+        this.lightBounces.splice(index, 1);
+    };
 
     private renderPlayerInsideComposer = (state: GameState) => {
         if (

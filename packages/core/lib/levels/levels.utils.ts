@@ -407,7 +407,7 @@ export function createColumnGroup(
 }
 
 export interface BounceOptions {
-    size: Vector3;
+    // size: Vector3;
     position: Vector3;
     rotation: Euler;
     side: Side;
@@ -416,7 +416,7 @@ export interface BounceOptions {
 }
 
 export function createBounce({
-    size,
+    // size,
     position,
     rotation,
     side,
@@ -425,6 +425,15 @@ export function createBounce({
 }: BounceOptions) {
     const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize / 1.5);
     const positionForGrid = position.multiplyScalar(gridSize);
+
+    const group = new Object3D();
+    group.name = ElementName.BOUNCE(side);
+    group.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
+    group.rotation.set(
+        degreesToRadians(rotation.x),
+        degreesToRadians(rotation.y),
+        degreesToRadians(rotation.z),
+    );
 
     const material = (() => {
         if (side === Side.SHADOW) {
@@ -435,7 +444,6 @@ export function createBounce({
         }
         return materials.phong;
     })();
-
     const geometry = new BoxGeometry(
         sizeForGrid.x,
         sizeForGrid.y,
@@ -444,21 +452,16 @@ export function createBounce({
         30,
         30,
     );
-
     const wall = new ElementToBounce(geometry, material, side, id, interactive);
+    group.add(wall);
 
-    wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
-    wall.rotation.set(
-        degreesToRadians(rotation.x),
-        degreesToRadians(rotation.y),
-        degreesToRadians(rotation.z),
-    );
-    wall.updateMatrix();
     wall.geometry.center();
+    wall.updateMatrix();
     wall.geometry.computeBoundingBox();
     wall.geometry.boundingBox?.getCenter(wall.center);
-    wall.name = ElementName.BOUNCE(side);
-    return wall;
+    wall.name = 'wall';
+
+    return group;
 }
 
 export function createMountain() {

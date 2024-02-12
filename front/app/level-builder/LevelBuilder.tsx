@@ -2,7 +2,7 @@
 // vendors
 import React, { useCallback, useMemo, useState } from 'react';
 import { useRef } from 'react';
-import { Euler, Object3D, Vector3 } from 'three';
+import { Object3D, Vector3 } from 'three';
 import dynamic from 'next/dynamic';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // our libs
@@ -34,6 +34,7 @@ const initialGameState = new GameState(
         {
             position: {
                 x: 200,
+                // TODO: Try better solution than putting the player position below the ground
                 y: 20,
             },
             velocity: {
@@ -81,6 +82,7 @@ export const LevelBuilder: React.FC = ({}) => {
     const addMeshToScene = useCallback((mesh: Object3D) => {
         if (appRef.current) {
             appRef.current.scene.add(mesh);
+            // TODO: Do not add all as colliding elements, it depends of the type and position
             appRef.current.collidingElements.push(mesh);
         }
     }, []);
@@ -102,7 +104,10 @@ export const LevelBuilder: React.FC = ({}) => {
 
     const addElementToLevel = useCallback(
         (type: ElementType) => {
-            const [mesh, properties] = createElement(type);
+            if (!appRef.current) {
+                return;
+            }
+            const [mesh, properties] = createElement(appRef.current, type);
             setState((state) => [
                 ...state,
                 {
@@ -154,62 +159,65 @@ export const LevelBuilder: React.FC = ({}) => {
                 const nextState = [...state];
 
                 // update mesh
-                if (appRef.current) {
-                    let { properties, mesh, type } =
-                        nextState[currentEditingIndex];
-                    switch (propertyKey) {
-                        case 'side':
-                            (
-                                nextState[currentEditingIndex]
-                                    .properties as BounceProperties
-                            )[propertyKey] =
-                                value === true ? Side.LIGHT : Side.SHADOW;
-                            // remove element
-                            removeMeshFromScene(nextState, currentEditingIndex);
-                            const [newMeshBounce] = createElement(
-                                type,
-                                nextState[currentEditingIndex].properties,
-                            );
-                            nextState[currentEditingIndex].mesh = newMeshBounce;
-                            addMeshToScene(nextState[currentEditingIndex].mesh);
-                            break;
-                        case 'interactive':
-                            // TODO: TO implement after managing graphics side of bounces
-                            break;
-                        case 'position':
-                            (nextState[currentEditingIndex].properties as any)[
-                                propertyKey
-                            ] = value;
-                            mesh.position.copy(
-                                (value as Vector3)
-                                    .clone()
-                                    .multiplyScalar(gridSize),
-                            );
-                            break;
-                        case 'rotation':
-                            (nextState[currentEditingIndex].properties as any)[
-                                propertyKey
-                            ] = value;
-                            const rotationX = degreesToRadians(value.x);
-                            const rotationY = degreesToRadians(value.y);
-                            const rotationZ = degreesToRadians(value.z);
-                            mesh.rotation.set(rotationX, rotationY, rotationZ);
-                            break;
-                        case 'size':
-                            (nextState[currentEditingIndex].properties as any)[
-                                propertyKey
-                            ] = value;
-                            // remove element
-                            removeMeshFromScene(nextState, currentEditingIndex);
-                            // create a new one
-                            const [newMesh] = createElement(
-                                type,
-                                nextState[currentEditingIndex].properties,
-                            );
-                            nextState[currentEditingIndex].mesh = newMesh;
-                            addMeshToScene(nextState[currentEditingIndex].mesh);
-                            break;
-                    }
+                if (!appRef.current) {
+                    return nextState;
+                }
+                let { properties, mesh, type } = nextState[currentEditingIndex];
+                switch (propertyKey) {
+                    case 'side':
+                        (properties as BounceProperties)[propertyKey] =
+                            value === true ? Side.LIGHT : Side.SHADOW;
+                        // remove element
+                        removeMeshFromScene(nextState, currentEditingIndex);
+                        const [newMeshBounce] = createElement(
+                            appRef.current,
+                            type,
+                            nextState[currentEditingIndex].properties,
+                        );
+                        nextState[currentEditingIndex].mesh = newMeshBounce;
+                        addMeshToScene(nextState[currentEditingIndex].mesh);
+                        break;
+                    case 'interactive':
+                        // TODO: TO implement after managing graphics side of bounces
+                        const props = properties as BounceProperties;
+                        props[propertyKey] = value;
+
+                        // remove element
+                        removeMeshFromScene(nextState, currentEditingIndex);
+                        const [bounceGroup] = createElement(
+                            appRef.current,
+                            type,
+                            nextState[currentEditingIndex].properties,
+                        );
+                        nextState[currentEditingIndex].mesh = bounceGroup;
+                        addMeshToScene(nextState[currentEditingIndex].mesh);
+                        break;
+                    case 'position':
+                        properties[propertyKey] = value;
+                        mesh.position.copy(
+                            (value as Vector3).clone().multiplyScalar(gridSize),
+                        );
+                        break;
+                    case 'rotation':
+                        (properties as any)[propertyKey] = value;
+                        const rotationX = degreesToRadians(value.x);
+                        const rotationY = degreesToRadians(value.y);
+                        const rotationZ = degreesToRadians(value.z);
+                        mesh.rotation.set(rotationX, rotationY, rotationZ);
+                        break;
+                    case 'size':
+                        (properties as any)[propertyKey] = value;
+                        // remove element
+                        removeMeshFromScene(nextState, currentEditingIndex);
+                        // create a new one
+                        const [newMesh] = createElement(
+                            appRef.current,
+                            type,
+                            nextState[currentEditingIndex].properties,
+                        );
+                        nextState[currentEditingIndex].mesh = newMesh;
+                        addMeshToScene(nextState[currentEditingIndex].mesh);
+                        break;
                 }
                 return nextState;
             });

@@ -61,8 +61,6 @@ export class SkinBounceShadow extends Object3D {
 
         this.particles = new Points(bufferGeometry, material);
         this.add(this.particles);
-        this.position.copy(bounce.position);
-        this.rotation.copy(bounce.rotation);
     }
 
     update(delta: number) {
@@ -70,6 +68,5 @@ export class SkinBounceShadow extends Object3D {
         if (this.bounce.interactive) {
             particlesMat.uniforms.time.value -= delta;
         }
-        this.rotation.copy(this.bounce.rotation);
     }
 }

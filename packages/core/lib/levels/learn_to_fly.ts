@@ -182,26 +182,26 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
             },
         ];
 
-        bounceList.forEach(
-            ({ position, rotation, side, interactive }, index) => {
-                const bounce = createBounce({
-                    size: new Vector3(1, 1, 1),
-                    position,
-                    rotation,
-                    side,
-                    id: index,
-                    interactive: interactive || false,
-                });
-                this.add(bounce);
-                this.collidingElements.push(bounce);
-                this.state.bounces![index] = { rotationY: rotation };
+        // bounceList.forEach(
+        //     ({ position, rotation, side, interactive }, index) => {
+        //         const bounce = createBounce({
+        //             size: new Vector3(1, 1, 1),
+        //             position,
+        //             rotation,
+        //             side,
+        //             id: index,
+        //             interactive: interactive || false,
+        //         });
+        //         this.add(bounce);
+        //         this.collidingElements.push(bounce);
+        //         this.state.bounces![index] = { rotationY: rotation };
 
-                if (side === Side.LIGHT) {
-                    this.lightBounces.push(bounce);
-                }
-                this.bounces.push(bounce);
-            },
-        );
+        //         if (side === Side.LIGHT) {
+        //             this.lightBounces.push(bounce);
+        //         }
+        //         this.bounces.push(bounce);
+        //     },
+        // );
 
         const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
         this.add(endLevel);

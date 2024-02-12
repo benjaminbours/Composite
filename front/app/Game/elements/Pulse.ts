@@ -1,3 +1,4 @@
+// vendors
 import {
     Object3D,
     Vector3,
@@ -8,9 +9,14 @@ import {
     Camera,
     DoubleSide,
 } from 'three';
+// our libs
+import {
+    ElementToBounce,
+    degreesToRadians,
+} from '@benjaminbours/composite-core';
+// project
 import basicVS from '../glsl/basic_postprod_vs.glsl';
 import pulseFS from '../glsl/pulse_fs.glsl';
-import { ElementToBounce } from '@benjaminbours/composite-core';
 
 export class Pulse extends Object3D {
     time = 0;
@@ -33,9 +39,7 @@ export class Pulse extends Object3D {
 
         const mesh = new Mesh(geometry, this.material);
         this.add(mesh);
-        console.log(this.bounce.center);
-
-        this.position.copy(this.bounce.position);
+        this.rotation.set(degreesToRadians(-90), 0, 0);
     }
 
     update(delta: number) {

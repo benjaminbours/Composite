@@ -127,7 +127,9 @@ export default class App {
         })();
         this.scene.add(this.level as unknown as Group);
 
-        this.setupPlayers();
+        if (!this.isLevelBuilder) {
+            this.setupPlayers();
+        }
         this.setupScene();
         this.scene.updateMatrixWorld();
 
@@ -448,7 +450,7 @@ export default class App {
 
         for (let i = 0; i < this.level.bounces.length; i++) {
             const bounce = this.level.bounces[i];
-            const rotationY = state.level.bounces[bounce.bounceID].rotationY;
+            const rotationY = state.level.bounces[i].rotationY;
             bounce.update(rotationY);
         }
 
@@ -495,11 +497,13 @@ export default class App {
     public updateWorldGraphics = (state: GameState) => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
-        this.floor.position.set(
-            this.players[this.mainPlayerSide].position.x,
-            0,
-            0,
-        );
+        if (this.players[this.mainPlayerSide]) {
+            this.floor.position.set(
+                this.players[this.mainPlayerSide].position.x,
+                0,
+                0,
+            );
+        }
 
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
