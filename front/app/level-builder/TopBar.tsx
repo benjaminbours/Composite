@@ -4,73 +4,78 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import SquareIcon from '@mui/icons-material/Square';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import CameraIcon from '@mui/icons-material/Camera';
-import { ElementLibraryItem, ElementType } from './types';
+import { ElementType } from './types';
 import { Divider } from '@mui/material';
+import { DropDownMenu } from './DropDownMenu';
 
 interface Props {
     onLibraryElementClick: (type: ElementType) => void;
     onResetCamera: () => void;
+    onToggleCollisionArea: () => void;
 }
 
 export const TopBar: React.FC<Props> = ({
     onLibraryElementClick,
     onResetCamera,
+    onToggleCollisionArea,
 }) => {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const elementsLibrary: ElementLibraryItem[] = useMemo(() => {
+    const libraryItems = useMemo(() => {
         return [
             {
-                type: ElementType.WALL,
-                img: '/images/elements/wall.png',
-                name: 'Wall',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'Wall',
+                onClick: () => onLibraryElementClick(ElementType.WALL),
             },
             {
-                type: ElementType.WALL_DOOR,
-                img: '/images/elements/wall_door.png',
-                name: 'Door',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'Door',
+                onClick: () => onLibraryElementClick(ElementType.WALL_DOOR),
             },
             {
-                type: ElementType.DOOR_OPENER,
-                img: '/images/elements/wall_door.png',
-                name: 'Door opener',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'Door opener',
+                onClick: () => onLibraryElementClick(ElementType.DOOR_OPENER),
             },
             {
-                type: ElementType.ARCH,
-                img: '/images/elements/arch.png',
-                name: 'Arch',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'Arch',
+                onClick: () => onLibraryElementClick(ElementType.ARCH),
             },
             {
-                type: ElementType.BOUNCE,
-                img: '/images/elements/bounce.png',
-                name: 'Bounce',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'Bounce',
+                onClick: () => onLibraryElementClick(ElementType.BOUNCE),
             },
             {
-                type: ElementType.END_LEVEL,
-                img: '/images/elements/end_level.png',
-                name: 'End level',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'End level',
+                onClick: () => onLibraryElementClick(ElementType.END_LEVEL),
             },
             {
-                type: ElementType.FAT_COLUMN,
-                img: '/images/elements/fat_column.png',
-                name: 'Fat column',
+                icon: <SquareIcon fontSize="small" />,
+                text: 'Fat column',
+                onClick: () => onLibraryElementClick(ElementType.FAT_COLUMN),
             },
         ];
-    }, []);
+    }, [onLibraryElementClick]);
+
+    const actionItems = useMemo(() => {
+        return [
+            {
+                icon: <VisibilityIcon fontSize="small" />,
+                text: 'Display collision area',
+                onClick: onToggleCollisionArea,
+            },
+            {
+                icon: <CameraIcon fontSize="small" />,
+                text: 'Reset camera',
+                onClick: onResetCamera,
+            },
+        ];
+    }, [onResetCamera, onToggleCollisionArea]);
 
     return (
         <AppBar className="level-builder__app-bar top-bar" position="static">
@@ -79,55 +84,8 @@ export const TopBar: React.FC<Props> = ({
                     Back
                 </Button>
                 <Divider orientation="vertical" flexItem />
-                <Button
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                    variant="outlined"
-                    endIcon={<KeyboardArrowDownIcon />}
-                    size="small"
-                >
-                    Library
-                </Button>
-                <Menu
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                        'aria-labelledby': 'basic-button',
-                    }}
-                >
-                    {elementsLibrary.map(({ img, type, name }) => (
-                        <MenuItem
-                            key={type}
-                            onClick={() => {
-                                handleClose();
-                                onLibraryElementClick(type);
-                            }}
-                        >
-                            <ListItemIcon>
-                                <SquareIcon fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText>{name}</ListItemText>
-                            {/* <Typography variant="body2" color="text.secondary">
-                            ⌘X
-                        </Typography> */}
-                        </MenuItem>
-                    ))}
-                </Menu>
-                <Button
-                    id="camera-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={onResetCamera}
-                    variant="outlined"
-                    endIcon={<CameraIcon />}
-                    size="small"
-                >
-                    Reset camera
-                </Button>
+                <DropDownMenu buttonText="Library" items={libraryItems} />
+                <DropDownMenu buttonText="Actions" items={actionItems} />
             </Toolbar>
         </AppBar>
     );

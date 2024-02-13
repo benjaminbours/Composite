@@ -14,6 +14,8 @@ import {
     Box3Helper,
     Object3DEventMap,
     Group,
+    PlaneGeometry,
+    MeshBasicMaterial,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 // our libs
@@ -178,6 +180,16 @@ export default class App {
                     this.controls.target.x = -limitX;
                 }
             });
+
+            // draw collision plane / axis
+            const geometry = new PlaneGeometry(10000, 10000);
+            const material = new MeshBasicMaterial({
+                color: 0xff0000, // red color
+                transparent: true,
+                opacity: 0.1,
+            });
+            this.collisionAreaMesh = new Mesh(geometry, material);
+            this.collisionAreaMesh.position.y = 10000 / 2;
         } else {
             this.camera.setDefaultTarget(
                 this.players[this.mainPlayerSide].position,
@@ -192,6 +204,21 @@ export default class App {
             );
         }
     }
+
+    private collisionAreaMesh?: Mesh;
+    private isCollisionAreaVisible = false;
+    public toggleCollisionArea = () => {
+        if (!this.collisionAreaMesh) {
+            return;
+        }
+        if (this.isCollisionAreaVisible) {
+            this.isCollisionAreaVisible = false;
+            this.scene.remove(this.collisionAreaMesh);
+        } else {
+            this.isCollisionAreaVisible = true;
+            this.scene.add(this.collisionAreaMesh);
+        }
+    };
 
     public addToScene = (object: Object3D) => {
         this.scene.add(object);

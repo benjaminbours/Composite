@@ -71,12 +71,3 @@ export interface LevelElement {
     properties: ElementProperties;
     mesh: Object3D;
 }
-
-export interface ElementLibraryItem {
-    type: ElementType;
-    /**
-     * src of the image
-     */
-    img: string;
-    name: string;
-}

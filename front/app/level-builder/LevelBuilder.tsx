@@ -264,6 +264,12 @@ export const LevelBuilder: React.FC = ({}) => {
         }
     }, []);
 
+    const toggleCollisionArea = useCallback(() => {
+        if (appRef.current) {
+            appRef.current.toggleCollisionArea();
+        }
+    }, []);
+
     const currentEditingElement = useMemo(() => {
         if (currentEditingIndex === undefined) {
             return null;
@@ -277,6 +283,7 @@ export const LevelBuilder: React.FC = ({}) => {
                 <TopBar
                     onResetCamera={resetCamera}
                     onLibraryElementClick={addElementToLevel}
+                    onToggleCollisionArea={toggleCollisionArea}
                 />
                 <div className="level-builder__top-right-container">
                     <SceneContentPanel
