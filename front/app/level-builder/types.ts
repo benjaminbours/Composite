@@ -32,9 +32,24 @@ export class ColumnFatProperties {
     public position = new Vector3(0, 0, 0);
 }
 
+export class WallDoorProperties {
+    public size = new Vector3(1, 1, 1);
+    public position = new Vector3(0, 0, 0);
+    public doorPosition = new Vector3(0, 0, 0);
+    public rotation = new Euler(0, 0, 0);
+
+    constructor(public id: number) {}
+}
+
+export class DoorOpenerProperties {
+    public position = new Vector3(0, 0, 0);
+    public door_id: number = 0;
+}
+
 export enum ElementType {
     WALL = 'wall',
     WALL_DOOR = 'wall_door',
+    DOOR_OPENER = 'door_opener',
     ARCH = 'arch',
     BOUNCE = 'bounce',
     END_LEVEL = 'end_level',
@@ -46,7 +61,9 @@ export type ElementProperties =
     | ArchProperties
     | BounceProperties
     | EndLevelProperties
-    | ColumnFatProperties;
+    | ColumnFatProperties
+    | WallDoorProperties
+    | DoorOpenerProperties;
 
 export interface LevelElement {
     name: string;

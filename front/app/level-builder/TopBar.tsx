@@ -45,6 +45,11 @@ export const TopBar: React.FC<Props> = ({
                 name: 'Door',
             },
             {
+                type: ElementType.DOOR_OPENER,
+                img: '/images/elements/wall_door.png',
+                name: 'Door opener',
+            },
+            {
                 type: ElementType.ARCH,
                 img: '/images/elements/arch.png',
                 name: 'Arch',

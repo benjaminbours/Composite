@@ -38,11 +38,9 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     protected organicRatio = DEFAULT_ORGANIC_RATIO;
 
     protected particles: Points;
+    public doorInfo?: DoorInfo;
 
-    constructor(
-        public name: string,
-        public doorInfo: DoorInfo,
-    ) {
+    constructor(public name: string) {
         super();
         const particlesNumber = 700;
         // When particlesNumber is multiply by 3, it's because it's an array of vector3 instead of simple floats
@@ -179,6 +177,10 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     };
 
     activate = (camera: CustomCamera, withFocusCamera: boolean) => () => {
+        if (!this.doorInfo) {
+            console.log('no door info');
+            return;
+        }
         console.log('activate door', this.name);
         if (withFocusCamera) {
             camera.focusTarget(
@@ -199,6 +201,10 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     };
 
     openTheDoor = () => {
+        if (!this.doorInfo) {
+            console.log('no door info');
+            return;
+        }
         gsap.to(this.doorInfo.doorLeft.position, {
             duration: 2,
             x: -100,
@@ -212,6 +218,10 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
     };
 
     closeTheDoor = () => {
+        if (!this.doorInfo) {
+            console.log('no door info');
+            return;
+        }
         gsap.to(
             [this.doorInfo.doorLeft.position, this.doorInfo.doorRight.position],
             {

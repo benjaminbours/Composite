@@ -8,6 +8,7 @@ import {
     createBounce,
     createColumnGroup,
     createWall,
+    createWallDoor,
     positionOnGrid,
 } from '@benjaminbours/composite-core';
 import {
@@ -18,27 +19,70 @@ import {
     ArchProperties,
     EndLevelProperties,
     ColumnFatProperties,
+    WallDoorProperties,
+    DoorOpenerProperties,
 } from './types';
 import { SkinBounce } from '../Game/elements/SkinBounce';
 import { Pulse } from '../Game/elements/Pulse';
 import { SkinBounceShadow } from '../Game/elements/SkinBounceShadow';
 import App from '../Game/App';
 import { EndLevel } from '../Game/elements/EndLevel';
+import { DoorOpener } from '../Game/elements/DoorOpener';
 
 export function createElement(
     app: App,
     type: ElementType,
     properties?: ElementProperties,
-): [Object3D, ElementProperties] {
+): {
+    mesh: Object3D;
+    properties: ElementProperties;
+} {
     let props;
     switch (type) {
+        case ElementType.DOOR_OPENER:
+            props =
+                (properties as DoorOpenerProperties) ||
+                new DoorOpenerProperties();
+            const doorOpenerGroup = new InteractiveArea(
+                ElementName.AREA_DOOR_OPENER(String(props.door_id)),
+            );
+            const doorOpener = new DoorOpener(
+                ElementName.DOOR_OPENER(String(props.door_id)),
+            );
+            doorOpenerGroup.add(doorOpener);
+            return {
+                mesh: doorOpenerGroup,
+                properties: props,
+            };
+        case ElementType.WALL_DOOR:
+            props =
+                (properties as WallDoorProperties) ||
+                new WallDoorProperties(
+                    Object.keys(
+                        app.gameStateManager.currentState.level.doors,
+                    ).length,
+                );
+            const wallDoorGroup = createWallDoor({
+                size: props.size.clone(),
+                position: props.position.clone(),
+                doorPosition: props.doorPosition.clone(),
+                rotation: props.rotation.clone(),
+            });
+            app.gameStateManager.currentState.level.doors[props.id] = [];
+            return {
+                mesh: wallDoorGroup,
+                properties: props,
+            };
         case ElementType.FAT_COLUMN:
             props =
                 (properties as ColumnFatProperties) ||
                 new ColumnFatProperties();
             const column = createColumnGroup(props.size.y, 'big');
             positionOnGrid(column, props.position.clone());
-            return [column, props];
+            return {
+                mesh: column,
+                properties: props,
+            };
         case ElementType.END_LEVEL:
             props =
                 (properties as EndLevelProperties) || new EndLevelProperties();
@@ -48,16 +92,19 @@ export function createElement(
             const endLevelGraphic = new EndLevel();
             endLevelGroup.add(endLevelGraphic);
             positionOnGrid(endLevelGroup, props.position);
-            return [endLevelGroup, props];
+            return {
+                mesh: endLevelGroup,
+                properties: props,
+            };
         case ElementType.ARCH:
             props = (properties as ArchProperties) || new ArchProperties();
-            return [
-                createArchGroup({
+            return {
+                mesh: createArchGroup({
                     size: props.size.clone(),
                     position: props.position.clone(),
                 }),
-                props,
-            ];
+                properties: props,
+            };
         case ElementType.BOUNCE:
             props =
                 (properties as BounceProperties) ||
@@ -101,17 +148,21 @@ export function createElement(
                 rotationY: (bounceGroup.children[0] as ElementToBounce).rotation
                     .y,
             };
-            return [bounceGroup, props];
+
+            return {
+                mesh: bounceGroup,
+                properties: props,
+            };
         case ElementType.WALL:
         default:
             props = (properties as WallProperties) || new WallProperties();
-            return [
-                createWall({
+            return {
+                mesh: createWall({
                     size: props.size.clone(),
                     position: props.position.clone(),
                     rotation: props.rotation.clone(),
                 }),
-                props,
-            ];
+                properties: props,
+            };
     }
 }

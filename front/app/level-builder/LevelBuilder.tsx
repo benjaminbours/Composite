@@ -15,7 +15,13 @@ import {
 } from '@benjaminbours/composite-core';
 // project
 import InputsManager from '../Game/Player/InputsManager';
-import { BounceProperties, ElementType, LevelElement } from './types';
+import {
+    BounceProperties,
+    DoorOpenerProperties,
+    ElementType,
+    LevelElement,
+    WallDoorProperties,
+} from './types';
 import { EmptyLevel } from '../Game/levels/EmptyLevel';
 import App from '../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
@@ -107,7 +113,7 @@ export const LevelBuilder: React.FC = ({}) => {
             if (!appRef.current) {
                 return;
             }
-            const [mesh, properties] = createElement(appRef.current, type);
+            const { mesh, properties } = createElement(appRef.current, type);
             setState((state) => [
                 ...state,
                 {
@@ -164,12 +170,16 @@ export const LevelBuilder: React.FC = ({}) => {
                 }
                 let { properties, mesh, type } = nextState[currentEditingIndex];
                 switch (propertyKey) {
+                    case 'door_id':
+                        (properties as DoorOpenerProperties)[propertyKey] =
+                            value;
+                        break;
                     case 'side':
                         (properties as BounceProperties)[propertyKey] =
                             value === true ? Side.LIGHT : Side.SHADOW;
                         // remove element
                         removeMeshFromScene(nextState, currentEditingIndex);
-                        const [newMeshBounce] = createElement(
+                        const { mesh: newMeshBounce } = createElement(
                             appRef.current,
                             type,
                             nextState[currentEditingIndex].properties,
@@ -184,12 +194,23 @@ export const LevelBuilder: React.FC = ({}) => {
 
                         // remove element
                         removeMeshFromScene(nextState, currentEditingIndex);
-                        const [bounceGroup] = createElement(
+                        const { mesh: bounceGroup } = createElement(
                             appRef.current,
                             type,
                             nextState[currentEditingIndex].properties,
                         );
                         nextState[currentEditingIndex].mesh = bounceGroup;
+                        addMeshToScene(nextState[currentEditingIndex].mesh);
+                        break;
+                    case 'doorPosition':
+                        (properties as WallDoorProperties)[propertyKey] = value;
+                        removeMeshFromScene(nextState, currentEditingIndex);
+                        const { mesh: newDoor } = createElement(
+                            appRef.current,
+                            type,
+                            nextState[currentEditingIndex].properties,
+                        );
+                        nextState[currentEditingIndex].mesh = newDoor;
                         addMeshToScene(nextState[currentEditingIndex].mesh);
                         break;
                     case 'position':
@@ -210,7 +231,7 @@ export const LevelBuilder: React.FC = ({}) => {
                         // remove element
                         removeMeshFromScene(nextState, currentEditingIndex);
                         // create a new one
-                        const [newMesh] = createElement(
+                        const { mesh: newMesh } = createElement(
                             appRef.current,
                             type,
                             nextState[currentEditingIndex].properties,
@@ -267,6 +288,7 @@ export const LevelBuilder: React.FC = ({}) => {
                     />
                     {currentEditingElement && (
                         <PropertiesPanel
+                            state={state}
                             onUpdateProperty={updateElementProperty}
                             element={currentEditingElement}
                         />

@@ -151,30 +151,31 @@ export function createWall({
     return wallGroup;
 }
 
+// TODO: Check to remove / merge it with WallDoorProperties
 interface WallDoorOptions {
     size: Vector3;
     position: Vector3;
     doorPosition: Vector3;
-    orientation: 'horizontal' | 'vertical';
+    rotation: Euler;
 }
 
 export function createWallDoor({
     size,
     position,
     doorPosition,
-    orientation,
+    rotation,
 }: WallDoorOptions) {
     const group = new Object3D();
     // wall left to the door
     const wallLeft = createWall({
-        size: new Vector3(1.5, size.y, 0),
+        size: new Vector3(size.x, size.y, 0),
         position: new Vector3(0.5, 0, 0),
         rotation: new Euler(),
         withOcclusion: true,
     });
     const wallRight = createWall({
-        size: new Vector3(0.5, size.y, 0),
-        position: new Vector3(-1, 0, 0),
+        size: new Vector3(size.x, size.y, 0),
+        position: new Vector3(-0.5 - size.x, 0, 0),
         rotation: new Euler(),
         withOcclusion: true,
     });
@@ -247,14 +248,7 @@ export function createWallDoor({
         });
         group.add(wall);
     }
-    switch (orientation) {
-        case 'horizontal':
-            positionOnGrid(group, position, new Euler(90, 0, -90));
-            break;
-        case 'vertical':
-            positionOnGrid(group, position, new Euler(0, 90, 0));
-            break;
-    }
+    positionOnGrid(group, position, rotation);
 
     return group;
 }
