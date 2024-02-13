@@ -354,15 +354,14 @@ export function createArchGroup({
 
 export function createColumnGroup(
     size: number,
-    columnGeometry: 'normal' | 'big',
+    geometryType: 'normal' | 'big',
     withOcclusion?: boolean,
 ) {
-    // TODO: Fix this any
     const pedestalGeometry = geometries[
-        `column_${columnGeometry}_pedestal`
+        `column_${geometryType}_pedestal`
     ] as BoxGeometry;
     // pedestalGeometry
-    const partGeometry = geometries[`column_${columnGeometry}`] as BoxGeometry;
+    const partGeometry = geometries[`column_${geometryType}`] as BoxGeometry;
     const group = new Object3D();
 
     const columnStart = new Mesh(pedestalGeometry, materials.phong);

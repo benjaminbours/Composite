@@ -6,6 +6,7 @@ import {
     Side,
     createArchGroup,
     createBounce,
+    createColumnGroup,
     createWall,
     positionOnGrid,
 } from '@benjaminbours/composite-core';
@@ -16,6 +17,7 @@ import {
     WallProperties,
     ArchProperties,
     EndLevelProperties,
+    ColumnFatProperties,
 } from './types';
 import { SkinBounce } from '../Game/elements/SkinBounce';
 import { Pulse } from '../Game/elements/Pulse';
@@ -30,6 +32,13 @@ export function createElement(
 ): [Object3D, ElementProperties] {
     let props;
     switch (type) {
+        case ElementType.FAT_COLUMN:
+            props =
+                (properties as ColumnFatProperties) ||
+                new ColumnFatProperties();
+            const column = createColumnGroup(props.size.y, 'big');
+            positionOnGrid(column, props.position.clone());
+            return [column, props];
         case ElementType.END_LEVEL:
             props =
                 (properties as EndLevelProperties) || new EndLevelProperties();

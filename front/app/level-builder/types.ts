@@ -27,6 +27,11 @@ export class EndLevelProperties {
     public position = new Vector3(0, 0, 0);
 }
 
+export class ColumnFatProperties {
+    public size = new Vector3(1, 1, 1);
+    public position = new Vector3(0, 0, 0);
+}
+
 export enum ElementType {
     WALL = 'wall',
     WALL_DOOR = 'wall_door',
@@ -40,7 +45,8 @@ export type ElementProperties =
     | WallProperties
     | ArchProperties
     | BounceProperties
-    | EndLevelProperties;
+    | EndLevelProperties
+    | ColumnFatProperties;
 
 export interface LevelElement {
     name: string;

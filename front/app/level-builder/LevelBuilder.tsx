@@ -83,7 +83,7 @@ export const LevelBuilder: React.FC = ({}) => {
         if (appRef.current) {
             appRef.current.scene.add(mesh);
             // TODO: Do not add all as colliding elements, it depends of the type and position
-            appRef.current.collidingElements.push(mesh);
+            // appRef.current.collidingElements.push(mesh);
         }
     }, []);
 
