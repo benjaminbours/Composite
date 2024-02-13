@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import SquareIcon from '@mui/icons-material/Square';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import CameraIcon from '@mui/icons-material/Camera';
 import { ElementType } from './types';
 import { Divider } from '@mui/material';
@@ -15,12 +16,14 @@ interface Props {
     onLibraryElementClick: (type: ElementType) => void;
     onResetCamera: () => void;
     onToggleCollisionArea: () => void;
+    onStartTestMode: () => void;
 }
 
 export const TopBar: React.FC<Props> = ({
     onLibraryElementClick,
     onResetCamera,
     onToggleCollisionArea,
+    onStartTestMode,
 }) => {
     const libraryItems = useMemo(() => {
         return [
@@ -74,8 +77,13 @@ export const TopBar: React.FC<Props> = ({
                 text: 'Reset camera',
                 onClick: onResetCamera,
             },
+            {
+                icon: <SportsEsportsIcon fontSize="small" />,
+                text: 'Test / Play',
+                onClick: onStartTestMode,
+            },
         ];
-    }, [onResetCamera, onToggleCollisionArea]);
+    }, [onResetCamera, onToggleCollisionArea, onStartTestMode]);
 
     return (
         <AppBar className="level-builder__app-bar top-bar" position="static">

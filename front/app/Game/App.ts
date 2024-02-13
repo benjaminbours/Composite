@@ -54,6 +54,11 @@ import { CrackTheDoorLevelWithGraphic } from './levels/CrackTheDoorLevelWithGrap
 import { LearnToFlyLevelWithGraphic } from './levels/LearnToFlyLevelWithGraphic';
 import { TheHighSpheresLevelWithGraphic } from './levels/TheHighSpheresWithGraphic';
 
+export enum AppMode {
+    EDITOR = 'EDITOR',
+    GAME = 'GAME',
+}
+
 export default class App {
     public camera = new CustomCamera(
         75,
@@ -95,15 +100,17 @@ export default class App {
 
     public controls?: OrbitControls;
 
+    public mode: AppMode;
+
     constructor(
         canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
-        // TODO: This flag will not be enough, we need to handle the fact we might be in level builder but testing for example
-        private isLevelBuilder: boolean,
+        initialMode: AppMode,
         public socketController?: SocketController,
     ) {
+        this.mode = initialMode;
         this.mainPlayerSide = playersConfig[0];
         this.secondPlayerSide = playersConfig[1];
         this.gameStateManager = new GameStateManager(
@@ -111,6 +118,9 @@ export default class App {
             this.socketController?.sendInputs,
         );
         // inputs
+        if (!socketController && initialMode === AppMode.GAME) {
+            this.inputsManager.registerEventListeners();
+        }
 
         // levels
         this.level = (() => {
@@ -129,7 +139,7 @@ export default class App {
         })();
         this.scene.add(this.level as unknown as Group);
 
-        if (!this.isLevelBuilder) {
+        if (this.mode === AppMode.GAME) {
             this.setupPlayers();
         }
         this.setupScene();
@@ -145,42 +155,8 @@ export default class App {
         );
 
         // camera
-        if (this.isLevelBuilder) {
-            this.camera.position.set(0, 100, 500);
-            this.controls = new OrbitControls(
-                this.camera,
-                this.rendererManager.renderer.domElement,
-            );
-            this.controls.target.set(0, 100, 0);
-            this.controls.enableDamping = false;
-            this.controls.enableRotate = false;
-            this.controls.autoRotate = false;
-            this.controls.maxDistance = 2000;
-            this.controls.maxPolarAngle = Math.PI / 2;
-            this.controls.minPolarAngle = Math.PI / 2;
-            this.controls.update();
-            this.controls.addEventListener('change', () => {
-                if (!this.controls) {
-                    return;
-                }
-
-                if (this.controls.object.position.y < 10) {
-                    this.camera.position.y = 10;
-                    this.controls.target.y = 10;
-                }
-
-                const limitX = 8000;
-                if (this.controls.object.position.x > limitX) {
-                    this.camera.position.x = limitX;
-                    this.controls.target.x = limitX;
-                }
-
-                if (this.controls.object.position.x < -limitX) {
-                    this.camera.position.x = -limitX;
-                    this.controls.target.x = -limitX;
-                }
-            });
-
+        if (this.mode === AppMode.EDITOR) {
+            this.createEditorCamera();
             // draw collision plane / axis
             const geometry = new PlaneGeometry(10000, 10000);
             const material = new MeshBasicMaterial({
@@ -191,11 +167,7 @@ export default class App {
             this.collisionAreaMesh = new Mesh(geometry, material);
             this.collisionAreaMesh.position.y = 10000 / 2;
         } else {
-            this.camera.setDefaultTarget(
-                this.players[this.mainPlayerSide].position,
-            );
-            this.camera.position.z = 500;
-            this.camera.position.y = 10;
+            this.setGameCamera();
         }
 
         if (this.socketController) {
@@ -204,6 +176,79 @@ export default class App {
             );
         }
     }
+
+    public resetEditorCamera = () => {
+        this.camera.position.set(0, 100, 500);
+        this.controls?.target.set(0, 100, 0);
+        this.controls?.update();
+    };
+
+    private createEditorCamera = () => {
+        this.camera.position.set(0, 100, 500);
+        this.controls = new OrbitControls(
+            this.camera,
+            this.rendererManager.renderer.domElement,
+        );
+        this.controls.enabled = true;
+        this.controls.target.set(0, 100, 0);
+        this.controls.enableDamping = false;
+        this.controls.enableRotate = false;
+        this.controls.autoRotate = false;
+        this.controls.maxDistance = 2000;
+        this.controls.maxPolarAngle = Math.PI / 2;
+        this.controls.minPolarAngle = Math.PI / 2;
+        this.controls.minAzimuthAngle = Math.PI * 2;
+        this.controls.maxAzimuthAngle = Math.PI * 2;
+        this.controls.update();
+        this.controls.addEventListener('change', () => {
+            if (!this.controls) {
+                return;
+            }
+
+            if (this.controls.object.position.y < 10) {
+                this.camera.position.y = 10;
+                this.controls.target.y = 10;
+            }
+
+            const limitX = 8000;
+            if (this.controls.object.position.x > limitX) {
+                this.camera.position.x = limitX;
+                this.controls.target.x = limitX;
+            }
+
+            if (this.controls.object.position.x < -limitX) {
+                this.camera.position.x = -limitX;
+                this.controls.target.x = -limitX;
+            }
+        });
+    };
+
+    private setGameCamera = () => {
+        this.camera.setDefaultTarget(
+            this.players[this.mainPlayerSide].position,
+        );
+        this.camera.position.z = 500;
+        this.camera.position.y = 10;
+    };
+
+    public setAppMode = (mode: AppMode) => {
+        this.mode = mode;
+        if (this.mode === AppMode.GAME) {
+            this.setupPlayers();
+            this.inputsManager.registerEventListeners();
+            if (this.controls) {
+                this.controls.enabled = false;
+                this.setGameCamera();
+            }
+        } else {
+            this.removePlayers();
+            this.inputsManager.destroyEventListeners();
+            if (this.controls) {
+                this.controls.enabled = true;
+                this.resetEditorCamera();
+            }
+        }
+    };
 
     private collisionAreaMesh?: Mesh;
     private isCollisionAreaVisible = false;
@@ -247,6 +292,11 @@ export default class App {
             this.players.push(player);
             this.scene.add(player);
         }
+    };
+
+    private removePlayers = () => {
+        this.scene.remove(...this.players);
+        this.players = [];
     };
 
     private setupScene = () => {
@@ -420,8 +470,7 @@ export default class App {
         this.updateWorldGraphics(this.gameStateManager.displayState);
 
         // update camera
-
-        if (!this.controls) {
+        if (this.mode === AppMode.GAME) {
             this.camera.update();
         }
     };

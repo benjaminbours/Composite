@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 // our libs
 import { GameState, Side } from '@benjaminbours/composite-core';
-import App from './App';
+import App, { AppMode } from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
@@ -69,12 +69,13 @@ function Game({
                 if (!canvasRef.current) {
                     return;
                 }
+                const mode = levelBuilderAppRef ? AppMode.EDITOR : AppMode.GAME;
                 appRef.current = new App(
                     canvasRef.current,
                     initialGameState,
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                     inputsManager,
-                    Boolean(levelBuilderAppRef),
+                    mode,
                     socketController,
                 );
                 if (levelBuilderAppRef) {
@@ -86,8 +87,6 @@ function Game({
                 gameStarted.current = true;
                 if (socketController) {
                     setIsSynchronizingTime(true);
-                } else if (!levelBuilderAppRef) {
-                    appRef.current?.inputsManager.registerEventListeners();
                 }
             });
         }

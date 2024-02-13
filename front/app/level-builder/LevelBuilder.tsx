@@ -23,7 +23,7 @@ import {
     WallDoorProperties,
 } from './types';
 import { EmptyLevel } from '../Game/levels/EmptyLevel';
-import App from '../Game/App';
+import App, { AppMode } from '../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
 import { PropertiesPanel } from './PropertiesPanel';
 import { TopBar } from './TopBar';
@@ -259,14 +259,23 @@ export const LevelBuilder: React.FC = ({}) => {
 
     const resetCamera = useCallback(() => {
         if (appRef.current) {
-            appRef.current.camera.position.set(0, 100, 500);
-            appRef.current.controls?.target.set(0, 100, 0);
+            appRef.current.resetEditorCamera();
         }
     }, []);
 
     const toggleCollisionArea = useCallback(() => {
         if (appRef.current) {
             appRef.current.toggleCollisionArea();
+        }
+    }, []);
+
+    const toggleTestMode = useCallback(() => {
+        if (appRef.current) {
+            appRef.current.setAppMode(
+                appRef.current.mode === AppMode.GAME
+                    ? AppMode.EDITOR
+                    : AppMode.GAME,
+            );
         }
     }, []);
 
@@ -284,6 +293,7 @@ export const LevelBuilder: React.FC = ({}) => {
                     onResetCamera={resetCamera}
                     onLibraryElementClick={addElementToLevel}
                     onToggleCollisionArea={toggleCollisionArea}
+                    onStartTestMode={toggleTestMode}
                 />
                 <div className="level-builder__top-right-container">
                     <SceneContentPanel
