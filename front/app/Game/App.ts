@@ -104,7 +104,7 @@ export default class App {
 
     constructor(
         canvasDom: HTMLCanvasElement,
-        initialGameState: GameState,
+        private initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
         initialMode: AppMode,
@@ -176,6 +176,15 @@ export default class App {
             );
         }
     }
+
+    public resetPlayersPosition = () => {
+        this.gameStateManager.currentState.players.forEach((player, index) => {
+            player.position = {
+                ...this.initialGameState.players[index].position,
+            };
+        });
+    };
+
 
     public resetEditorCamera = () => {
         this.camera.position.set(0, 100, 500);

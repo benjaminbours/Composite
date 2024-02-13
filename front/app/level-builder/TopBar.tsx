@@ -17,6 +17,7 @@ interface Props {
     onResetCamera: () => void;
     onToggleCollisionArea: () => void;
     onStartTestMode: () => void;
+    onResetPlayersPosition: () => void;
 }
 
 export const TopBar: React.FC<Props> = ({
@@ -24,6 +25,7 @@ export const TopBar: React.FC<Props> = ({
     onResetCamera,
     onToggleCollisionArea,
     onStartTestMode,
+    onResetPlayersPosition,
 }) => {
     const libraryItems = useMemo(() => {
         return [
@@ -82,8 +84,18 @@ export const TopBar: React.FC<Props> = ({
                 text: 'Test / Play',
                 onClick: onStartTestMode,
             },
+            {
+                icon: <SportsEsportsIcon fontSize="small" />,
+                text: 'Reset players position',
+                onClick: onResetPlayersPosition,
+            },
         ];
-    }, [onResetCamera, onToggleCollisionArea, onStartTestMode]);
+    }, [
+        onResetCamera,
+        onToggleCollisionArea,
+        onStartTestMode,
+        onResetPlayersPosition,
+    ]);
 
     return (
         <AppBar className="level-builder__app-bar top-bar" position="static">

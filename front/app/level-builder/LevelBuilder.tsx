@@ -279,6 +279,12 @@ export const LevelBuilder: React.FC = ({}) => {
         }
     }, []);
 
+    const resetPlayersPosition = useCallback(() => {
+        if (appRef.current) {
+            appRef.current.resetPlayersPosition();
+        }
+    }, []);
+
     const currentEditingElement = useMemo(() => {
         if (currentEditingIndex === undefined) {
             return null;
@@ -294,6 +300,7 @@ export const LevelBuilder: React.FC = ({}) => {
                     onLibraryElementClick={addElementToLevel}
                     onToggleCollisionArea={toggleCollisionArea}
                     onStartTestMode={toggleTestMode}
+                    onResetPlayersPosition={resetPlayersPosition}
                 />
                 <div className="level-builder__top-right-container">
                     <SceneContentPanel
