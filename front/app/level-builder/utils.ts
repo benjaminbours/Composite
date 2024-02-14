@@ -1,4 +1,4 @@
-import { Object3D } from 'three';
+import { Object3D, Vector3 } from 'three';
 import {
     ElementName,
     ElementToBounce,
@@ -27,7 +27,31 @@ import { Pulse } from '../Game/elements/Pulse';
 import { SkinBounceShadow } from '../Game/elements/SkinBounceShadow';
 import App from '../Game/App';
 import { EndLevel } from '../Game/elements/EndLevel';
-import { DoorOpener } from '../Game/elements/DoorOpener';
+import { DoorInfo, DoorOpener } from '../Game/elements/DoorOpener';
+
+export function computeDoorInfo(
+    wallDoor: Object3D,
+    area: DoorOpener,
+): DoorInfo {
+    const doorLeft = wallDoor.children.find(
+        (child) => child.name === 'doorLeft',
+    );
+    const doorRight = wallDoor.children.find(
+        (child) => child.name === 'doorRight',
+    );
+    const doorWorldPosition = doorLeft!.getWorldPosition(new Vector3());
+    const sign =
+        doorWorldPosition.x - area.getWorldPosition(new Vector3()).x > 0
+            ? -1
+            : 1;
+
+    const cameraPosition = new Vector3(100 * sign, 200);
+    return {
+        cameraPosition: doorWorldPosition.add(cameraPosition),
+        doorLeft: doorLeft!,
+        doorRight: doorRight!,
+    };
+}
 
 export function createElement(
     app: App,

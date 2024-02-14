@@ -43,7 +43,7 @@ export class WallDoorProperties {
 
 export class DoorOpenerProperties {
     public position = new Vector3(0, 0, 0);
-    public door_id: number = 0;
+    public door_id: number | undefined = undefined;
 }
 
 export enum ElementType {

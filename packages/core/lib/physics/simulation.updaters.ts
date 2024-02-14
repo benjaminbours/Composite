@@ -108,7 +108,10 @@ function applyWorldUpdate(
             `_${AREA_DOOR_OPENER_SUFFIX}`,
             '',
         )}`;
-        if (gameState.level.doors[doorNameActivating].indexOf(side) === -1) {
+        if (
+            gameState.level.doors[doorNameActivating] &&
+            gameState.level.doors[doorNameActivating].indexOf(side) === -1
+        ) {
             gameState.level.doors[doorNameActivating].push(side);
         }
     }

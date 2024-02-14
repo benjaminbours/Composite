@@ -19,7 +19,7 @@ import CustomCamera from '../CustomCamera';
 import VS from '../glsl/doorOpener_vs.glsl';
 import FS from '../glsl/doorOpener_fs.glsl';
 
-interface DoorInfo {
+export interface DoorInfo {
     cameraPosition: Vector3;
     doorLeft: Object3D;
     doorRight: Object3D;

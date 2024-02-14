@@ -19,6 +19,7 @@ export const DropDownMenu: React.FC<Props> = ({ items, buttonText }) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.currentTarget.blur();
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {

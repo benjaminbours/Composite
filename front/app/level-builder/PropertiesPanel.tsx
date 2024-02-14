@@ -51,14 +51,27 @@ export const PropertiesPanel: React.FC<Props> = ({
                                     </MenuItem>
                                 );
                             });
+                        const hasDoorInTheScene = doors.length > 0;
+                        doors.unshift(
+                            <MenuItem
+                                key="no_door_selected"
+                                value="no_door_selected"
+                            >
+                                No door selected
+                            </MenuItem>,
+                        );
                         return (
                             <li key={key} className="property">
                                 <label style={{ display: 'block' }}>
                                     {(propertyTextMap as any)[key]}
                                 </label>
-                                {doors.length > 0 ? (
+                                {hasDoorInTheScene ? (
                                     <Select
-                                        value={value}
+                                        value={
+                                            value !== undefined
+                                                ? value
+                                                : 'no_door_selected'
+                                        }
                                         label="Door id"
                                         onChange={(event: any) => {
                                             onUpdateProperty(

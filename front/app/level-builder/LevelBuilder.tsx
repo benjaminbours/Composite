@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // our libs
 import {
+    ElementName,
     GameState,
     MovableComponentState,
     Side,
@@ -27,7 +28,8 @@ import App, { AppMode } from '../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
 import { PropertiesPanel } from './PropertiesPanel';
 import { TopBar } from './TopBar';
-import { createElement } from './utils';
+import { computeDoorInfo, createElement } from './utils';
+import { DoorOpener } from '../Game/elements/DoorOpener';
 
 const Game = dynamic(() => import('../Game'), {
     loading: () => <p>Loading...</p>,
@@ -173,6 +175,28 @@ export const LevelBuilder: React.FC = ({}) => {
                     case 'door_id':
                         (properties as DoorOpenerProperties)[propertyKey] =
                             value;
+
+                        // mesh is a door opener group here
+                        const doorOpener = mesh.children[1] as DoorOpener;
+                        const wallDoor = state.find(
+                            (el) =>
+                                (el.properties as WallDoorProperties).id ===
+                                value,
+                        );
+                        mesh.name = ElementName.AREA_DOOR_OPENER(String(value));
+                        doorOpener.name = ElementName.DOOR_OPENER(
+                            String(value),
+                        );
+                        if (wallDoor && value !== undefined) {
+                            const doorInfo = computeDoorInfo(
+                                wallDoor.mesh,
+                                doorOpener,
+                            );
+                            doorOpener.doorInfo = doorInfo;
+                        } else {
+                            doorOpener.doorInfo = undefined;
+                        }
+
                         break;
                     case 'side':
                         (properties as BounceProperties)[propertyKey] =
