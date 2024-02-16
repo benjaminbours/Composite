@@ -27,8 +27,6 @@ BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 Mesh.prototype.raycast = acceleratedRaycast;
 
 export const gridSize = 250;
-const gridSizeMedium = gridSize / 2;
-const gridSizeSmall = gridSizeMedium / 2;
 const wallDepth = 34;
 
 export const AREA_DOOR_OPENER_SUFFIX = 'AREA_DOOR_OPENER';
@@ -48,7 +46,6 @@ export const ElementName = {
 // loading registry
 export const geometries: { [key: string]: any } = {
     border: new BoxGeometry(100, 10, 100),
-    platform: new BoxGeometry(gridSize * 0.65, 10, gridSize * 2.5),
 };
 
 export function addToGeometries(mesh: Mesh) {
@@ -114,7 +111,6 @@ interface WallOptions {
 }
 
 // TODO: detect if some walls are occluding the player
-// TODO: detect if some walls could potentially collide with the player
 export function createWall({
     size,
     position,
@@ -141,6 +137,7 @@ export function createWall({
     // position the whole group
     if (withOcclusion) {
         const wallOcclusion = wall.clone();
+        wallOcclusion.name = 'wallOcclusion';
         wallOcclusion.material = materials.occlusion;
         wallOcclusion.layers.set(Layer.OCCLUSION);
         wallOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
@@ -173,16 +170,20 @@ export function createWallDoor({
         rotation: new Euler(),
         withOcclusion: true,
     });
+    wallLeft.name = 'wallLeft';
     const wallRight = createWall({
         size: new Vector3(size.x, size.y, 0),
         position: new Vector3(-0.5 - size.x, 0, 0),
         rotation: new Euler(),
         withOcclusion: true,
     });
+    wallRight.name = 'wallRight';
     group.add(wallLeft, wallRight);
 
     const createDoor = () => {
+        // wall with door recess
         const wallDoor = new Mesh(geometries.wallDoor as any, materials.phong);
+        wallDoor.name = 'wallDoor';
         wallDoor.castShadow = true;
         wallDoor.translateY(doorPosition.y * gridSize);
         wallDoor.translateZ(wallDepth / 2);
@@ -202,21 +203,21 @@ export function createWallDoor({
 
         // occlusion
         const doorLeftOcclusion = doorLeft.clone();
-        doorLeftOcclusion.name = '';
+        doorLeftOcclusion.name = 'doorLeftOcclusion';
         doorLeftOcclusion.material = materials.occlusion;
         doorLeftOcclusion.layers.set(Layer.OCCLUSION);
         doorLeftOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
         group.add(doorLeftOcclusion);
 
         const doorRightOcclusion = doorRight.clone();
-        doorRightOcclusion.name = '';
+        doorRightOcclusion.name = 'doorRightOcclusion';
         doorRightOcclusion.material = materials.occlusion;
         doorRightOcclusion.layers.set(Layer.OCCLUSION);
         doorRightOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
         group.add(doorRightOcclusion);
 
         const wallDoorOcclusion = wallDoor.clone();
-        wallDoorOcclusion.name = '';
+        wallDoorOcclusion.name = 'wallDoorOcclusion';
         wallDoorOcclusion.material = materials.occlusion;
         wallDoorOcclusion.layers.set(Layer.OCCLUSION);
         wallDoorOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
@@ -235,6 +236,7 @@ export function createWallDoor({
             rotation: new Euler(),
             withOcclusion: true,
         });
+        wall.name = 'wallBelow';
         group.add(wall);
     }
     // top
@@ -246,6 +248,7 @@ export function createWallDoor({
             rotation: new Euler(),
             withOcclusion: true,
         });
+        wall.name = 'wallTop';
         group.add(wall);
     }
     positionOnGrid(group, position, rotation);
@@ -333,9 +336,10 @@ export function createArchGroup({
 
     // occlusion management
     const platformMeshOcclusion = new Mesh(
-        geometryPlatform,
+        geometryPlatform.clone(),
         materials.occlusion,
     );
+    platformMeshOcclusion.name = 'platformOcclusion';
     platformMeshOcclusion.position.copy(platformMesh.position);
     group.add(platformMeshOcclusion);
     platformMeshOcclusion.layers.set(Layer.OCCLUSION);
@@ -359,30 +363,46 @@ export function createColumnGroup(
     const group = new Object3D();
 
     const columnStart = new Mesh(pedestalGeometry, materials.phong);
+    columnStart.name = 'columnStart';
     columnStart.castShadow = true;
     columnStart.receiveShadow = true;
     group.add(columnStart);
 
     if (partGeometry) {
         const part = new Mesh(partGeometry, materials.phong);
+        part.name = 'columnPart';
         part.castShadow = true;
         part.receiveShadow = true;
         part.scale.set(1, size - 0.02, 1);
         group.add(part);
     }
 
-    const columnEnd = columnStart.clone();
-    positionOnGrid(columnEnd, new Vector3(0, size, 0), new Euler(180, 0, 0));
+    const columnEnd = new Mesh(
+        pedestalGeometry
+            .clone()
+            .rotateX(degreesToRadians(180))
+            .translate(0, size * gridSize, 0),
+        materials.phong,
+    );
+    columnEnd.name = 'columnEnd';
+    columnEnd.updateMatrixWorld(true);
+    columnEnd.matrix.decompose(
+        columnEnd.position,
+        columnEnd.quaternion,
+        columnEnd.scale,
+    );
     group.add(columnEnd);
 
     if (withOcclusion) {
         const columnStartOcclusion = columnStart.clone();
+        columnStartOcclusion.name = 'columnStartOcclusion';
         columnStartOcclusion.material = materials.occlusion;
         columnStartOcclusion.layers.set(Layer.OCCLUSION);
         columnStartOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
         group.add(columnStartOcclusion);
 
         const columnEndOcclusion = columnEnd.clone();
+        columnEndOcclusion.name = 'columnEndOcclusion';
         columnEndOcclusion.material = materials.occlusion;
         columnEndOcclusion.layers.set(Layer.OCCLUSION);
         columnEndOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
@@ -390,6 +410,7 @@ export function createColumnGroup(
 
         if (partGeometry) {
             const partOcclusion = new Mesh(partGeometry, materials.occlusion);
+            partOcclusion.name = 'partOcclusion';
             partOcclusion.layers.set(Layer.OCCLUSION);
             partOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
             group.add(partOcclusion);

@@ -185,6 +185,59 @@ export default class App {
         });
     };
 
+    public removeFromCollidingElements = (mesh: Object3D) => {
+        const checkChildren = (elements: Object3D[]) => {
+            for (let i = 0; i < elements.length; i++) {
+                const child = elements[i];
+                if (child.name.includes('Occlusion')) {
+                    continue;
+                }
+
+                if (child.children.length > 0) {
+                    checkChildren(child.children);
+                } else {
+                    const collidingIndex =
+                        this.collidingElements.indexOf(child);
+                    if (collidingIndex !== -1) {
+                        this.collidingElements.splice(collidingIndex, 1);
+                    }
+                }
+            }
+        };
+
+        if (mesh.children.length > 0) {
+            checkChildren(mesh.children);
+        } else {
+            const collidingIndex = this.collidingElements.indexOf(mesh);
+            if (collidingIndex !== -1) {
+                this.collidingElements.splice(collidingIndex, 1);
+            }
+        }
+    };
+
+    public detectIfMeshIsCollidable = (mesh: Mesh) => {
+        if (!this.collisionAreaMesh) {
+            return false;
+        }
+        this.scene.updateMatrixWorld(true);
+
+        const geometry = mesh.geometry.clone();
+        geometry.applyMatrix4(mesh.matrixWorld);
+
+        const transformedVertices = [];
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            const vertex = new Vector3(
+                geometry.attributes.position.getX(i),
+                geometry.attributes.position.getY(i),
+                geometry.attributes.position.getZ(i),
+            );
+            transformedVertices.push(vertex);
+        }
+
+        const meshBBox = new Box3().setFromPoints(transformedVertices);
+        const collisionBBox = new Box3().setFromObject(this.collisionAreaMesh);
+        return meshBBox.intersectsBox(collisionBBox);
+    };
 
     public resetEditorCamera = () => {
         this.camera.position.set(0, 100, 500);

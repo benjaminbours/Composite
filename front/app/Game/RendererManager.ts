@@ -245,6 +245,9 @@ export class RendererManager {
         this.playerOcclusionComposer.render();
         // one occlusion composer by bounce
         this.camera.layers.set(Layer.OCCLUSION);
+        // TODO: Fix big performance issue about bounce, both light and shadow and rotation and position update. Avoid re-creation
+        console.log(this.occlusionComposers.length);
+
         for (let i = 0; i < this.occlusionComposers.length; i++) {
             if (i > 0) {
                 const previousLightBounce = this.lightBounces[i - 1];

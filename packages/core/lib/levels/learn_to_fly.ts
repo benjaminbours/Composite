@@ -15,7 +15,6 @@ import { ElementToBounce, InteractiveArea } from '../elements';
 
 export class LearnToFlyLevel extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
-    public interactiveElements: any[] = [];
     public name = 'learn-to-fly';
     public lightBounces: ElementToBounce[] = [];
     public bounces: ElementToBounce[] = [];
@@ -206,7 +205,6 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
         const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
         this.add(endLevel);
         this.collidingElements.push(endLevel);
-        this.interactiveElements.push(endLevel);
         positionOnGrid(endLevel, new Vector3(10.5, 6.525, 0));
 
         this.collidingElements.forEach((element) => {
