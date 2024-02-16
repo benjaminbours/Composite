@@ -135,6 +135,14 @@ export const LevelBuilder: React.FC = ({}) => {
                 const mesh = state[index].mesh;
                 appRef.current.scene.remove(mesh);
                 appRef.current.removeFromCollidingElements(mesh);
+                if (mesh.name.includes('BOUNCE')) {
+                    const bounce = mesh.children[0] as ElementToBounce;
+                    if (bounce.side === Side.LIGHT) {
+                        appRef.current.rendererManager.removeLightBounceComposer(
+                            bounce,
+                        );
+                    }
+                }
             }
         },
         [],

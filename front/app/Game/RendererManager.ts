@@ -200,7 +200,8 @@ export class RendererManager {
         this.lightBounceMixPasses.push(mixPass);
     };
 
-    public removeLightBounceComposer = (index: number) => {
+    public removeLightBounceComposer = (bounce: ElementToBounce) => {
+        const index = this.lightBounces.indexOf(bounce);
         const mixPass = this.lightBounceMixPasses[index];
         this.mainComposer.removePass(mixPass);
         this.occlusionComposers.splice(index, 1);
@@ -245,9 +246,6 @@ export class RendererManager {
         this.playerOcclusionComposer.render();
         // one occlusion composer by bounce
         this.camera.layers.set(Layer.OCCLUSION);
-        // TODO: Fix big performance issue about bounce, both light and shadow and rotation and position update. Avoid re-creation
-        console.log(this.occlusionComposers.length);
-
         for (let i = 0; i < this.occlusionComposers.length; i++) {
             if (i > 0) {
                 const previousLightBounce = this.lightBounces[i - 1];
