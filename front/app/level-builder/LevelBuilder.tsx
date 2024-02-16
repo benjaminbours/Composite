@@ -1,16 +1,19 @@
 'use client';
 // vendors
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRef } from 'react';
-import { Mesh, Object3D } from 'three';
+import { Mesh, Object3D, Vector3 } from 'three';
 import dynamic from 'next/dynamic';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // our libs
 import {
     ElementName,
+    ElementToBounce,
     GameState,
     MovableComponentState,
     Side,
+    degreesToRadians,
+    gridSize,
 } from '@benjaminbours/composite-core';
 // project
 import InputsManager from '../Game/Player/InputsManager';
@@ -86,9 +89,9 @@ export const LevelBuilder: React.FC = ({}) => {
     const statsRef = useRef<Stats>();
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
-    const addMeshToScene = useCallback((type: ElementType, group: Object3D) => {
+
+    const addToCollidingElements = useCallback((group: Object3D) => {
         if (appRef.current) {
-            appRef.current.scene.add(group);
             const addToCollidingElements = (mesh: Mesh) => {
                 if (appRef.current!.detectIfMeshIsCollidable(mesh)) {
                     (mesh.geometry as any).computeBoundsTree();
@@ -115,6 +118,16 @@ export const LevelBuilder: React.FC = ({}) => {
             checkChildren(group.children);
         }
     }, []);
+
+    const addMeshToScene = useCallback(
+        (type: ElementType, group: Object3D) => {
+            if (appRef.current) {
+                appRef.current.scene.add(group);
+                addToCollidingElements(group);
+            }
+        },
+        [addToCollidingElements],
+    );
 
     const removeMeshFromScene = useCallback(
         (state: LevelElement[], index: number) => {
@@ -263,53 +276,23 @@ export const LevelBuilder: React.FC = ({}) => {
                             nextState[currentEditingIndex].mesh,
                         );
                         break;
-                    case 'position':
                     case 'rotation':
                         (properties as any)[propertyKey] = value;
-                        removeMeshFromScene(nextState, currentEditingIndex);
-                        const res = createElement(
-                            appRef.current,
-                            type,
-                            nextState[currentEditingIndex].properties,
-                        );
-                        nextState[currentEditingIndex].mesh = res.mesh;
-                        addMeshToScene(
-                            type,
-                            nextState[currentEditingIndex].mesh,
-                        );
-                        // mesh.position.copy(
-                        //     (value as Vector3).clone().multiplyScalar(gridSize),
-                        // );
-                        // if (appRef.current.detectIfMeshIsCollidable(mesh)) {
-                        //     if (
-                        //         appRef.current.collidingElements.indexOf(
-                        //             mesh,
-                        //         ) === -1
-                        //     ) {
-                        //         appRef.current.collidingElements.push(mesh);
-                        //     }
-                        // } else {
-                        //     appRef.current.removeFromCollidingElements(mesh);
-                        // }
+                        appRef.current.removeFromCollidingElements(mesh);
+                        const rotationX = degreesToRadians(value.x);
+                        const rotationY = degreesToRadians(value.y);
+                        const rotationZ = degreesToRadians(value.z);
+                        mesh.rotation.set(rotationX, rotationY, rotationZ);
+                        addToCollidingElements(mesh);
                         break;
-                    // case 'rotation':
-                    // (properties as any)[propertyKey] = value;
-                    // const rotationX = degreesToRadians(value.x);
-                    // const rotationY = degreesToRadians(value.y);
-                    // const rotationZ = degreesToRadians(value.z);
-                    // mesh.rotation.set(rotationX, rotationY, rotationZ);
-                    // if (appRef.current.detectIfMeshIsCollidable(mesh)) {
-                    //     if (
-                    //         appRef.current.collidingElements.indexOf(
-                    //             mesh,
-                    //         ) === -1
-                    //     ) {
-                    //         appRef.current.collidingElements.push(mesh);
-                    //     }
-                    // } else {
-                    //     appRef.current.removeFromCollidingElements(mesh);
-                    // }
-                    // break;
+                    case 'position':
+                        (properties as any)[propertyKey] = value;
+                        appRef.current.removeFromCollidingElements(mesh);
+                        mesh.position.copy(
+                            (value as Vector3).clone().multiplyScalar(gridSize),
+                        );
+                        addToCollidingElements(mesh);
+                        break;
                     case 'size':
                         (properties as any)[propertyKey] = value;
                         // remove element
@@ -330,7 +313,12 @@ export const LevelBuilder: React.FC = ({}) => {
                 return nextState;
             });
         },
-        [currentEditingIndex, removeMeshFromScene, addMeshToScene],
+        [
+            currentEditingIndex,
+            removeMeshFromScene,
+            addMeshToScene,
+            addToCollidingElements,
+        ],
     );
 
     const changeElementName = useCallback(
