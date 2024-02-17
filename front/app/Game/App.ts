@@ -16,8 +16,11 @@ import {
     Group,
     PlaneGeometry,
     MeshBasicMaterial,
+    Vector2,
+    Raycaster,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 // our libs
 import {
     GamePlayerInputPayload,
@@ -99,16 +102,21 @@ export default class App {
     private level: AbstractLevel;
 
     public controls?: OrbitControls;
+    public transformControls?: TransformControls;
 
     public mode: AppMode;
+    public mousePosition = new Vector2();
+    private mouseRaycaster = new Raycaster();
+    public mouseSelectedObject?: Object3D;
 
     constructor(
-        canvasDom: HTMLCanvasElement,
+        public canvasDom: HTMLCanvasElement,
         private initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
         initialMode: AppMode,
         public socketController?: SocketController,
+        onTransformControlsObjectChange?: (e: any) => void,
     ) {
         this.mode = initialMode;
         this.mainPlayerSide = playersConfig[0];
@@ -156,6 +164,24 @@ export default class App {
 
         // camera
         if (this.mode === AppMode.EDITOR) {
+            this.transformControls = new TransformControls(
+                this.camera,
+                canvasDom,
+            );
+            this.transformControls.addEventListener(
+                'objectChange',
+                (e: any) => {
+                    console.log(e);
+                    console.log(this.controlledMesh);
+                    if (
+                        this.controlledMesh &&
+                        onTransformControlsObjectChange
+                    ) {
+                        onTransformControlsObjectChange(this.controlledMesh);
+                    }
+                },
+            );
+            this.scene.add(this.transformControls);
             this.createEditorCamera();
             // draw collision plane / axis
             const geometry = new PlaneGeometry(10000, 10000);
@@ -176,6 +202,17 @@ export default class App {
             );
         }
     }
+
+    private controlledMesh: Object3D | undefined;
+    public attachTransformControls = (mesh: Object3D) => {
+        this.controlledMesh = mesh;
+        this.transformControls?.attach(mesh);
+    };
+
+    public detachTransformControls = () => {
+        this.controlledMesh = undefined;
+        this.transformControls?.detach();
+    };
 
     public resetPlayersPosition = () => {
         this.gameStateManager.currentState.players.forEach((player, index) => {
@@ -390,6 +427,7 @@ export default class App {
         const skyShaderMat = new SkyShader(this.camera);
         const skyBox = new IcosahedronGeometry(10000, 1);
         this.skyMesh = new Mesh(skyBox, skyShaderMat);
+        this.skyMesh.name = 'sky-box';
         this.skyMesh.rotation.set(0, 1, 0);
         this.scene.add(this.skyMesh);
 
@@ -469,7 +507,31 @@ export default class App {
         this.lastInput = payload;
     };
 
+    private updateMouseIntersection = () => {
+        // Update the picking ray with the camera and mouse position
+        this.mouseRaycaster.setFromCamera(this.mousePosition, this.camera);
+
+        // Calculate objects intersecting the picking ray
+        const intersects = this.mouseRaycaster.intersectObjects(
+            this.scene.children,
+        );
+
+        // If there's an intersection
+        if (intersects.length > 0) {
+            // console.log('Selected object', intersects[0].object);
+            const notEditable = ['floor', 'sky-box', 'mountain'];
+            if (notEditable.includes(intersects[0].object.name)) {
+                this.mouseSelectedObject = undefined;
+            } else {
+                this.mouseSelectedObject = intersects[0].object;
+            }
+        }
+    };
+
     public run = () => {
+        if (this.mode === AppMode.EDITOR) {
+            this.updateMouseIntersection();
+        }
         this.delta = this.clock.getDelta();
         this.gameStateManager.reconciliateState(
             this.collidingElements,

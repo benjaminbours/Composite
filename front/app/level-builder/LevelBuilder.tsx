@@ -2,7 +2,7 @@
 // vendors
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRef } from 'react';
-import { Mesh, Object3D, Vector3 } from 'three';
+import { Euler, Mesh, Object3D, Vector3 } from 'three';
 import dynamic from 'next/dynamic';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // our libs
@@ -14,6 +14,7 @@ import {
     Side,
     degreesToRadians,
     gridSize,
+    radiansToDegrees,
 } from '@benjaminbours/composite-core';
 // project
 import InputsManager from '../Game/Player/InputsManager';
@@ -89,6 +90,125 @@ export const LevelBuilder: React.FC = ({}) => {
     const statsRef = useRef<Stats>();
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
+    const currentEditingElement = useMemo(() => {
+        if (currentEditingIndex === undefined) {
+            return null;
+        }
+        return state[currentEditingIndex];
+    }, [currentEditingIndex, state]);
+
+    // effect responsible to update the current attach transform control element in three.js accordingly with the react state
+    useEffect(() => {
+        if (!appRef.current) {
+            return;
+        }
+        if (currentEditingElement) {
+            appRef.current?.attachTransformControls(currentEditingElement.mesh);
+        } else {
+            appRef.current?.detachTransformControls();
+        }
+    }, [currentEditingElement]);
+
+    // responsible to register and clear event listeners for the level builder
+    useEffect(() => {
+        if (!appRef.current) {
+            return;
+        }
+        function isMouseLeftButton(event: any) {
+            if (
+                event.metaKey ||
+                event.ctrlKey ||
+                event.altKey ||
+                event.shiftKey
+            ) {
+                return false;
+            } else if ('buttons' in event) {
+                return event.buttons === 1;
+            } else if ('which' in event) {
+                return event.which === 1;
+            } else {
+                return event.button == 1 || event.type == 'click';
+            }
+        }
+        const app = appRef.current;
+        const onMouseMove = (e: MouseEvent) => {
+            app.mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+            app.mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        };
+        const onMouseDown = (e: MouseEvent) => {
+            if (!app.mouseSelectedObject) {
+                return;
+            }
+
+            if (!isMouseLeftButton(e)) {
+                return;
+            }
+
+            function findItemInParents(object: any, item: any) {
+                // If the current object is the item, return it
+                if (object === item) {
+                    return object;
+                }
+
+                // If the current object has a parent, search in the parent
+                if (object.parent) {
+                    return findItemInParents(object.parent, item);
+                }
+
+                // If the item was not found, return null
+                return null;
+            }
+
+            const index = state.findIndex((el) => {
+                return Boolean(
+                    findItemInParents(app.mouseSelectedObject, el.mesh),
+                );
+            });
+
+            if (index !== -1) {
+                setCurrentEditingIndex(index);
+            }
+        };
+        const onKeyDown = (e: KeyboardEvent) => {
+            switch (e.code) {
+                case 'KeyT': // T
+                    app.transformControls?.setMode('translate');
+                    break;
+                case 'KeyR': // R
+                    app.transformControls?.setMode('rotate');
+                    break;
+                default:
+                    break;
+            }
+        };
+        app.canvasDom.addEventListener('mousemove', onMouseMove);
+        app.canvasDom.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('keydown', onKeyDown);
+        return () => {
+            app.canvasDom.removeEventListener('mousemove', onMouseMove);
+            app.canvasDom.removeEventListener('mousedown', onMouseDown);
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, [state]);
+
+    const handleControlObjectChange = useCallback((object: Object3D) => {
+        setState((prevState) => {
+            const nextState = [...prevState];
+            const index = nextState.findIndex((el) => el.mesh === object);
+            nextState[index].properties.position = object.position
+                .clone()
+                .divideScalar(gridSize);
+            const rotationX = radiansToDegrees(object.rotation.x);
+            const rotationY = radiansToDegrees(object.rotation.y);
+            const rotationZ = radiansToDegrees(object.rotation.z);
+            (nextState[index].properties as any).rotation = new Euler(
+                rotationX,
+                rotationY,
+                rotationZ,
+            );
+            return nextState;
+        });
+    }, []);
 
     const addToCollidingElements = useCallback((group: Object3D) => {
         if (appRef.current) {
@@ -329,6 +449,8 @@ export const LevelBuilder: React.FC = ({}) => {
         ],
     );
 
+    // console.log(appRef.current?.collidingElements);
+
     const changeElementName = useCallback(
         (index: number) => (e: any) => {
             setState((prevState) => {
@@ -368,13 +490,6 @@ export const LevelBuilder: React.FC = ({}) => {
         }
     }, []);
 
-    const currentEditingElement = useMemo(() => {
-        if (currentEditingIndex === undefined) {
-            return null;
-        }
-        return state[currentEditingIndex];
-    }, [currentEditingIndex, state]);
-
     return (
         <main className="level-builder">
             <ThemeProvider theme={darkTheme}>
@@ -409,6 +524,7 @@ export const LevelBuilder: React.FC = ({}) => {
                 stats={statsRef}
                 inputsManager={inputsManager.current}
                 levelBuilderAppRef={appRef}
+                onTransformControlsObjectChange={handleControlObjectChange}
             />
         </main>
     );

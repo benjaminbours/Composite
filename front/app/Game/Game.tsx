@@ -17,6 +17,8 @@ interface Props {
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
     levelBuilderAppRef?: React.MutableRefObject<App | undefined>;
+    // TODO: Don't like so much the management of this callback
+    onTransformControlsObjectChange?: (object: THREE.Object3D) => void;
 }
 
 function Game({
@@ -27,6 +29,7 @@ function Game({
     stats,
     inputsManager,
     levelBuilderAppRef,
+    onTransformControlsObjectChange,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
@@ -77,6 +80,7 @@ function Game({
                     inputsManager,
                     mode,
                     socketController,
+                    onTransformControlsObjectChange,
                 );
                 if (levelBuilderAppRef) {
                     levelBuilderAppRef.current = appRef.current;
