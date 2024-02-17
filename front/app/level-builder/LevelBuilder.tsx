@@ -480,7 +480,6 @@ export const LevelBuilder: React.FC = ({}) => {
             <ThemeProvider theme={darkTheme}>
                 <TopBar
                     onResetCamera={resetCamera}
-                    onLibraryElementClick={addElementToLevel}
                     onToggleCollisionArea={toggleCollisionArea}
                     onStartTestMode={toggleTestMode}
                     onResetPlayersPosition={resetPlayersPosition}
@@ -492,6 +491,7 @@ export const LevelBuilder: React.FC = ({}) => {
                         onElementClick={selectElement}
                         onChangeName={changeElementName}
                         onElementDelete={deleteElement}
+                        onAddElement={addElementToLevel}
                     />
                     {currentEditingElement && (
                         <PropertiesPanel

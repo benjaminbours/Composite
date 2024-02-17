@@ -55,6 +55,11 @@
     order: 2;
 }
 
+.scene-content-panel__header {
+    display: flex;
+    justify-content: space-between;
+}
+
 .scene-content-panel__item {
     padding: 0;
 }

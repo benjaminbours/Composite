@@ -1,7 +1,6 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -13,9 +12,10 @@ interface Props {
         icon: React.ReactNode;
         text: string;
     }[];
+    icon: React.ReactNode;
 }
 
-export const DropDownMenu: React.FC<Props> = ({ items, buttonText }) => {
+export const DropDownMenu: React.FC<Props> = ({ items, buttonText, icon }) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -34,7 +34,7 @@ export const DropDownMenu: React.FC<Props> = ({ items, buttonText }) => {
                 aria-expanded={open ? 'true' : undefined}
                 onClick={handleClick}
                 variant="outlined"
-                endIcon={<KeyboardArrowDownIcon />}
+                endIcon={icon}
                 size="small"
             >
                 {buttonText}
