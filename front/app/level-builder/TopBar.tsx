@@ -7,19 +7,25 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import SaveIcon from '@mui/icons-material/Save';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CameraIcon from '@mui/icons-material/Camera';
-import { Divider } from '@mui/material';
+import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
+import Divider from '@mui/material/Divider';
 
 interface Props {
     onResetCamera: () => void;
     onToggleCollisionArea: () => void;
     onStartTestMode: () => void;
     onResetPlayersPosition: () => void;
+    levelName: string;
+    onLevelNameChange: (e: any) => void;
 }
 
 export const TopBar: React.FC<Props> = ({
+    levelName,
+    onLevelNameChange,
     onResetCamera,
     onToggleCollisionArea,
     onStartTestMode,
@@ -62,11 +68,21 @@ export const TopBar: React.FC<Props> = ({
                     Back
                 </Button>
                 <Divider orientation="vertical" flexItem />
+                <TextField
+                    variant="standard"
+                    placeholder="Level name"
+                    value={levelName}
+                    onChange={onLevelNameChange}
+                />
+                <Divider orientation="vertical" flexItem />
                 <DropDownMenu
                     buttonText="Actions"
                     items={actionItems}
                     icon={<KeyboardArrowDownIcon />}
                 />
+                <Button size="small" variant="contained" endIcon={<SaveIcon />}>
+                    Save
+                </Button>
             </Toolbar>
         </AppBar>
     );

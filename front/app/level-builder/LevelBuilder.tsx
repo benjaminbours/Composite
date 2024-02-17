@@ -86,6 +86,7 @@ export const LevelBuilder: React.FC = ({}) => {
     const [currentEditingIndex, setCurrentEditingIndex] = useState<
         number | undefined
     >(undefined);
+    const [levelName, setLevelName] = useState('New level');
     const [state, setState] = useState<LevelElement[]>([]);
     const appRef = useRef<App>();
     const statsRef = useRef<Stats>();
@@ -191,6 +192,10 @@ export const LevelBuilder: React.FC = ({}) => {
             window.removeEventListener('keydown', onKeyDown);
         };
     }, [state]);
+
+    const handleLevelNameChange = useCallback((e: any) => {
+        setLevelName(e.target.value);
+    }, []);
 
     const handleControlObjectChange = useCallback((object: Object3D) => {
         setState((prevState) => {
@@ -483,6 +488,8 @@ export const LevelBuilder: React.FC = ({}) => {
                     onToggleCollisionArea={toggleCollisionArea}
                     onStartTestMode={toggleTestMode}
                     onResetPlayersPosition={resetPlayersPosition}
+                    levelName={levelName}
+                    onLevelNameChange={handleLevelNameChange}
                 />
                 <div className="level-builder__top-right-container">
                     <SceneContentPanel
