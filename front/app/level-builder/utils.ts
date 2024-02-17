@@ -67,15 +67,18 @@ export function createElement(
             props =
                 (properties as DoorOpenerProperties) ||
                 new DoorOpenerProperties();
-            const doorOpenerGroup = new InteractiveArea(
-                ElementName.AREA_DOOR_OPENER(String(props.door_id)),
+            const group = new Object3D();
+            group.name = `door-opener-group-${props.door_id}`;
+            group.add(
+                new InteractiveArea(
+                    ElementName.AREA_DOOR_OPENER(String(props.door_id)),
+                ),
             );
-            const doorOpener = new DoorOpener(
-                ElementName.DOOR_OPENER(String(props.door_id)),
+            group.add(
+                new DoorOpener(ElementName.DOOR_OPENER(String(props.door_id))),
             );
-            doorOpenerGroup.add(doorOpener);
             return {
-                mesh: doorOpenerGroup,
+                mesh: group,
                 properties: props,
             };
         case ElementType.WALL_DOOR:
@@ -92,6 +95,7 @@ export function createElement(
                 doorPosition: props.doorPosition.clone(),
                 rotation: props.rotation.clone(),
             });
+            wallDoorGroup.name = ElementName.WALL_DOOR(String(props.id));
             app.gameStateManager.currentState.level.doors[props.id] = [];
             return {
                 mesh: wallDoorGroup,
@@ -110,11 +114,10 @@ export function createElement(
         case ElementType.END_LEVEL:
             props =
                 (properties as EndLevelProperties) || new EndLevelProperties();
-            const endLevelGroup = new InteractiveArea(
-                ElementName.AREA_END_LEVEL,
-            );
-            const endLevelGraphic = new EndLevel();
-            endLevelGroup.add(endLevelGraphic);
+            const endLevelGroup = new Object3D();
+            endLevelGroup.add(new InteractiveArea(ElementName.AREA_END_LEVEL));
+            // graphic
+            endLevelGroup.add(new EndLevel());
             positionOnGrid(endLevelGroup, props.position);
             return {
                 mesh: endLevelGroup,
@@ -172,6 +175,7 @@ export function createElement(
                 rotationY: (bounceGroup.children[0] as ElementToBounce).rotation
                     .y,
             };
+            app.level.bounces.push(bounceGroup);
 
             return {
                 mesh: bounceGroup,

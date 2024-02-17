@@ -497,7 +497,7 @@ export interface AbstractLevel {
         wall: Object3D<Object3DEventMap>;
         openerPosition: Vector3;
     }[];
-    bounces: ElementToBounce[];
+    bounces: Object3D[];
     lightBounces: ElementToBounce[];
     updateMatrixWorld(force?: boolean): void;
 }

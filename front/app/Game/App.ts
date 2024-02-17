@@ -38,6 +38,7 @@ import {
     Inputs,
     Levels,
     AbstractLevel,
+    degreesToRadians,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -99,7 +100,7 @@ export default class App {
     private mainPlayerSide: Side;
     private secondPlayerSide: Side;
 
-    private level: AbstractLevel;
+    public level: AbstractLevel;
 
     public controls?: OrbitControls;
     public transformControls?: TransformControls;
@@ -168,19 +169,11 @@ export default class App {
                 this.camera,
                 canvasDom,
             );
-            this.transformControls.addEventListener(
-                'objectChange',
-                (e: any) => {
-                    console.log(e);
-                    console.log(this.controlledMesh);
-                    if (
-                        this.controlledMesh &&
-                        onTransformControlsObjectChange
-                    ) {
-                        onTransformControlsObjectChange(this.controlledMesh);
-                    }
-                },
-            );
+            this.transformControls.addEventListener('objectChange', () => {
+                if (this.controlledMesh && onTransformControlsObjectChange) {
+                    onTransformControlsObjectChange(this.controlledMesh);
+                }
+            });
             this.scene.add(this.transformControls);
             this.createEditorCamera();
             // draw collision plane / axis
@@ -191,6 +184,7 @@ export default class App {
                 opacity: 0.1,
             });
             this.collisionAreaMesh = new Mesh(geometry, material);
+            this.collisionAreaMesh.name = 'collision-area';
             this.collisionAreaMesh.position.y = 10000 / 2;
         } else {
             this.setGameCamera();
@@ -203,7 +197,7 @@ export default class App {
         }
     }
 
-    private controlledMesh: Object3D | undefined;
+    public controlledMesh: Object3D | undefined;
     public attachTransformControls = (mesh: Object3D) => {
         this.controlledMesh = mesh;
         this.transformControls?.attach(mesh);
@@ -443,12 +437,7 @@ export default class App {
         for (let i = 0; i < object.children.length; i++) {
             const item = object.children[i] as any;
             if (item.update) {
-                if (
-                    item instanceof DoorOpener ||
-                    item instanceof EndLevel ||
-                    item instanceof Player ||
-                    item instanceof ElementToBounce
-                ) {
+                if (item instanceof Player || item instanceof ElementToBounce) {
                     // do nothing
                 } else {
                     item.update(this.delta);
@@ -519,7 +508,12 @@ export default class App {
         // If there's an intersection
         if (intersects.length > 0) {
             // console.log('Selected object', intersects[0].object);
-            const notEditable = ['floor', 'sky-box', 'mountain'];
+            const notEditable = [
+                'floor',
+                'sky-box',
+                'mountain',
+                'collision-area',
+            ];
             if (notEditable.includes(intersects[0].object.name)) {
                 this.mouseSelectedObject = undefined;
             } else {
@@ -624,14 +618,9 @@ export default class App {
         for (const key in state.level.doors) {
             const activators = state.level.doors[key];
 
-            const doorOpener = this.collidingElements
-                .find(
-                    (object) =>
-                        object.name === ElementName.AREA_DOOR_OPENER(key),
-                )
-                ?.children.find(
-                    (object) => object.name === ElementName.DOOR_OPENER(key),
-                ) as DoorOpener | undefined;
+            const doorOpener = this.collidingElements.find(
+                (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
+            )?.parent?.children[1] as DoorOpener | undefined;
 
             if (doorOpener) {
                 if (activators.length > 0 && !doorOpener.shouldActivate) {
@@ -653,15 +642,13 @@ export default class App {
         for (let i = 0; i < this.level.bounces.length; i++) {
             const bounce = this.level.bounces[i];
             const rotationY = state.level.bounces[i].rotationY;
-            bounce.update(rotationY);
+            bounce.rotation.y = degreesToRadians(rotationY);
         }
 
         // end level
-        const endLevelElement = this.collidingElements
-            .find((object) => object.name === ElementName.AREA_END_LEVEL)
-            ?.children.find(
-                (object) => object.name === ElementName.END_LEVEL,
-            ) as EndLevel | undefined;
+        const endLevelElement = this.collidingElements.find(
+            (object) => object.name === ElementName.AREA_END_LEVEL,
+        )?.parent?.children[1] as EndLevel | undefined;
 
         if (endLevelElement) {
             if (

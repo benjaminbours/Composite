@@ -65,13 +65,11 @@ function applyPlayerUpdate(
 // World relate functions
 
 const isTouchingDoorOpener = (objectDown: Intersection) => {
-    const { parent } = objectDown.object;
-    return parent?.name.includes(AREA_DOOR_OPENER_SUFFIX) || false;
+    return objectDown.object.name.includes(AREA_DOOR_OPENER_SUFFIX) || false;
 };
 
 const isTouchingEndLevel = (objectDown: Intersection) => {
-    const { parent } = objectDown.object;
-    return parent?.name.includes(ElementName.END_LEVEL) || false;
+    return objectDown.object.name.includes(ElementName.END_LEVEL) || false;
 };
 
 function updateDoor(wallDoor: Object3D, open: boolean) {
@@ -103,7 +101,7 @@ function applyWorldUpdate(
         collisionResult.bottom &&
         isTouchingDoorOpener(collisionResult.bottom)
     ) {
-        const elem = collisionResult.bottom.object.parent as InteractiveArea;
+        const elem = collisionResult.bottom.object as InteractiveArea;
         doorNameActivating = `${elem.name.replace(
             `_${AREA_DOOR_OPENER_SUFFIX}`,
             '',
@@ -162,19 +160,21 @@ function applyWorldUpdate(
     }
 }
 
-function updateBounce(bounce: ElementToBounce, rotationY: number) {
-    bounce.update(rotationY);
+function updateBounce(bounce: Object3D, rotationY: number) {
+    bounce.rotation.y = degreesToRadians(rotationY);
     bounce.updateMatrixWorld();
 }
 
 export function updateServerBounces(
-    bounces: ElementToBounce[],
+    bounces: Object3D[],
     bounceState: BounceState,
 ) {
     for (let i = 0; i < bounces.length; i++) {
         const bounce = bounces[i];
-        if (bounce.bounceID in bounceState) {
-            updateBounce(bounce, bounceState[bounce.bounceID].rotationY);
+        // TODO: this can be improved, not a fan, think about it, id could be in the parent as well I don't know
+        const bounceID = (bounce.children[0] as ElementToBounce).bounceID;
+        if (bounceID in bounceState) {
+            updateBounce(bounce, bounceState[bounceID].rotationY);
         }
     }
 }

@@ -1,17 +1,10 @@
 // vendors
-import {
-    BoxGeometry,
-    DoubleSide,
-    Mesh,
-    MeshPhongMaterial,
-    Object3D,
-} from 'three';
+import { BoxGeometry, DoubleSide, Mesh, MeshPhongMaterial } from 'three';
 // our libs
 import { gridSize } from '../levels/levels.utils';
 
-export class InteractiveArea extends Object3D {
+export class InteractiveArea extends Mesh {
     constructor(public name: string) {
-        super();
         const geometry = new BoxGeometry(gridSize / 2, 10, gridSize / 2);
         const material = new MeshPhongMaterial({
             color: 0xffffff,
@@ -20,8 +13,6 @@ export class InteractiveArea extends Object3D {
             shininess: 50,
             transparent: true,
         });
-
-        const whiteBlock = new Mesh(geometry, material);
-        this.add(whiteBlock);
+        super(geometry, material);
     }
 }

@@ -109,6 +109,7 @@ export class DoorOpener extends Object3D implements InteractiveComponent {
         });
 
         this.particles = new Points(particlesGeo, particlesMat);
+        this.particles.name = 'particles';
         this.add(this.particles);
         this.particles.frustumCulled = false;
     }

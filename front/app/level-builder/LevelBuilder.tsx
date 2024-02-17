@@ -10,6 +10,7 @@ import {
     ElementName,
     ElementToBounce,
     GameState,
+    InteractiveArea,
     MovableComponentState,
     Side,
     degreesToRadians,
@@ -221,8 +222,10 @@ export const LevelBuilder: React.FC = ({}) => {
             const checkChildren = (elements: Object3D[]) => {
                 for (let i = 0; i < elements.length; i++) {
                     const child = elements[i];
+                    const notCollidable = ['particles'];
                     if (
                         child.name.includes('Occlusion') ||
+                        notCollidable.includes(child.name) ||
                         child instanceof SkinBounce === true
                     ) {
                         continue;
@@ -243,6 +246,7 @@ export const LevelBuilder: React.FC = ({}) => {
         (type: ElementType, group: Object3D) => {
             if (appRef.current) {
                 appRef.current.scene.add(group);
+                appRef.current.attachTransformControls(group);
                 addToCollidingElements(group);
             }
         },
@@ -254,9 +258,23 @@ export const LevelBuilder: React.FC = ({}) => {
             if (appRef.current) {
                 const mesh = state[index].mesh;
                 appRef.current.scene.remove(mesh);
+                if (mesh.id === appRef.current.controlledMesh?.id) {
+                    appRef.current.detachTransformControls();
+                }
                 appRef.current.removeFromCollidingElements(mesh);
+                if (mesh.name.includes('WALL_DOOR')) {
+                    const id = mesh.name.split('_')[0];
+                    delete appRef.current.gameStateManager.currentState.level
+                        .doors[id];
+                }
                 if (mesh.name.includes('BOUNCE')) {
                     const bounce = mesh.children[0] as ElementToBounce;
+                    const index = appRef.current.level.bounces.findIndex(
+                        (el) => el === mesh,
+                    );
+                    appRef.current.level.bounces.splice(index, 1);
+                    delete appRef.current.gameStateManager.currentState.level
+                        .bounces[bounce.bounceID];
                     if (bounce.side === Side.LIGHT) {
                         appRef.current.rendererManager.removeLightBounceComposer(
                             bounce,
@@ -333,15 +351,20 @@ export const LevelBuilder: React.FC = ({}) => {
                     case 'door_id':
                         (properties as DoorOpenerProperties)[propertyKey] =
                             value;
-
                         // mesh is a door opener group here
+                        const areaDoorOpener = mesh
+                            .children[0] as InteractiveArea;
                         const doorOpener = mesh.children[1] as DoorOpener;
                         const wallDoor = prevState.find(
                             (el) =>
+                                el.type === ElementType.WALL_DOOR &&
                                 (el.properties as WallDoorProperties).id ===
-                                value,
+                                    value,
                         );
-                        mesh.name = ElementName.AREA_DOOR_OPENER(String(value));
+                        mesh.name = `door-opener-group-${value}`;
+                        areaDoorOpener.name = ElementName.AREA_DOOR_OPENER(
+                            String(value),
+                        );
                         doorOpener.name = ElementName.DOOR_OPENER(
                             String(value),
                         );
@@ -354,56 +377,34 @@ export const LevelBuilder: React.FC = ({}) => {
                         } else {
                             doorOpener.doorInfo = undefined;
                         }
-
                         break;
                     case 'side':
-                        (properties as BounceProperties)[propertyKey] =
-                            value === true ? Side.LIGHT : Side.SHADOW;
-                        // remove element
-                        removeMeshFromScene(nextState, currentEditingIndex);
-                        const { mesh: newMeshBounce } = createElement(
-                            appRef.current,
-                            type,
-                            nextState[currentEditingIndex].properties,
-                        );
-                        nextState[currentEditingIndex].mesh = newMeshBounce;
-                        addMeshToScene(
-                            type,
-                            nextState[currentEditingIndex].mesh,
-                        );
-                        break;
                     case 'interactive':
-                        // TODO: TO implement after managing graphics side of bounces
-                        const props = properties as BounceProperties;
-                        props[propertyKey] = value;
-
+                    case 'doorPosition':
+                    case 'size':
+                        (properties as any)[propertyKey] = (() => {
+                            if (propertyKey === 'side') {
+                                return value === true
+                                    ? Side.LIGHT
+                                    : Side.SHADOW;
+                            }
+                            return value;
+                        })();
                         // remove element
                         removeMeshFromScene(nextState, currentEditingIndex);
-                        const { mesh: bounceGroup } = createElement(
+                        // create a new one
+                        const { mesh: newMesh } = createElement(
                             appRef.current,
                             type,
                             nextState[currentEditingIndex].properties,
                         );
-                        nextState[currentEditingIndex].mesh = bounceGroup;
+                        nextState[currentEditingIndex].mesh = newMesh;
                         addMeshToScene(
                             type,
                             nextState[currentEditingIndex].mesh,
                         );
                         break;
-                    case 'doorPosition':
-                        (properties as WallDoorProperties)[propertyKey] = value;
-                        removeMeshFromScene(nextState, currentEditingIndex);
-                        const { mesh: newDoor } = createElement(
-                            appRef.current,
-                            type,
-                            nextState[currentEditingIndex].properties,
-                        );
-                        nextState[currentEditingIndex].mesh = newDoor;
-                        addMeshToScene(
-                            type,
-                            nextState[currentEditingIndex].mesh,
-                        );
-                        break;
+                    // Transformations
                     case 'rotation':
                         (properties as any)[propertyKey] = value;
                         appRef.current.removeFromCollidingElements(mesh);
@@ -420,22 +421,6 @@ export const LevelBuilder: React.FC = ({}) => {
                             (value as Vector3).clone().multiplyScalar(gridSize),
                         );
                         addToCollidingElements(mesh);
-                        break;
-                    case 'size':
-                        (properties as any)[propertyKey] = value;
-                        // remove element
-                        removeMeshFromScene(nextState, currentEditingIndex);
-                        // create a new one
-                        const { mesh: newMesh } = createElement(
-                            appRef.current,
-                            type,
-                            nextState[currentEditingIndex].properties,
-                        );
-                        nextState[currentEditingIndex].mesh = newMesh;
-                        addMeshToScene(
-                            type,
-                            nextState[currentEditingIndex].mesh,
-                        );
                         break;
                 }
                 return nextState;
