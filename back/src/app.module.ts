@@ -3,13 +3,13 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ENVIRONMENT } from './environment';
 import { SocketModule } from './socket/socket.module';
+import { AuthModule } from './auth/auth.module';
 import { TemporaryStorageService } from './temporary-storage.service';
+import { ENVIRONMENT } from '@project-common/environment';
 
 @Module({
   imports: [
-    SocketModule,
     CacheModule.registerAsync<any>({
       isGlobal: true,
       useFactory: async () => {
@@ -21,6 +21,8 @@ import { TemporaryStorageService } from './temporary-storage.service';
         };
       },
     }),
+    SocketModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, TemporaryStorageService],

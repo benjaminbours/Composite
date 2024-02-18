@@ -3,9 +3,16 @@ import { Logger } from '@nestjs/common';
 const REQUIRED_ENV_VARS = [
   // API variables
   'PORT',
+  'DATABASE_URL',
   'REDIS_URL',
-  // disable while cors is managed in load balancer
-  // 'CLIENT_URL',
+  'JWT_SECRET',
+  'JWT_REFRESH_SECRET',
+  'STAGE',
+  'CLIENT_URL',
+  // // MAILGUN
+  'MAILGUN_USER',
+  'MAILGUN_API_KEY',
+  'MAILGUN_DOMAIN',
 ] as const;
 
 const OPTIONAL_ENV_VARS = [''] as const;

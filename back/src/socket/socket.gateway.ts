@@ -36,10 +36,10 @@ import {
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus, RedisPlayerState } from 'src/PlayerState';
-import { GameStatus, Level } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
+// import { GameStatus } from '@prisma/client';
 import { UtilsService } from './utils.service';
 import { SocketService } from './socket.service';
+// import { PrismaService } from '@project-common/services';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -60,7 +60,7 @@ export class SocketGateway {
   @WebSocketServer() server: Server;
 
   constructor(
-    private prismaService: PrismaService,
+    // private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
     private socketService: SocketService,
     private utils: UtilsService,
@@ -316,25 +316,29 @@ export class SocketGateway {
   //   this.handlePlayerMatch(players);
   // };
 
-  async createPersistentGameData(level: Levels) {
-    const dbLevel = (() => {
-      switch (level) {
-        case Levels.CRACK_THE_DOOR:
-          return Level.CRACK_THE_DOOR;
-        case Levels.LEARN_TO_FLY:
-          return Level.LEARN_TO_FLY;
-        case Levels.THE_HIGH_SPHERES:
-          return Level.THE_HIGH_SPHERES;
-        default:
-          return Level.EMPTY_LEVEL;
-      }
-    })();
-    return this.prismaService.game.create({
-      data: {
-        level: dbLevel,
-        status: GameStatus.STARTED,
-      },
-    });
+  async createPersistentGameData(level: any) {
+    console.log(level);
+    // const dbLevel = (() => {
+    //   switch (level) {
+    //     case Levels.CRACK_THE_DOOR:
+    //       return Level.CRACK_THE_DOOR;
+    //     case Levels.LEARN_TO_FLY:
+    //       return Level.LEARN_TO_FLY;
+    //     case Levels.THE_HIGH_SPHERES:
+    //       return Level.THE_HIGH_SPHERES;
+    //     default:
+    //       return Level.EMPTY_LEVEL;
+    //   }
+    // })();
+    // return this.prismaService.game.create({
+    //   data: {
+    //     level: 0 as any,
+    //     status: GameStatus.STARTED,
+    //   },
+    // });
+    return {
+      id: 0,
+    };
   }
 
   async createGame(
