@@ -17,6 +17,9 @@ void main() {
     float s = sin(a - time * 1.5 + b) * c;
 
     color *= abs(0.5 / (s * 5.8)) + 0.01;
+    if(color.r < 1.) {
+        discard;
+    }
     float alpha = 0.5 - smoothstep(0., 5., r);
     if(alpha < 0.) {
         alpha = 0.;

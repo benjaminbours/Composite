@@ -1,5 +1,5 @@
 // vendors
-import { Group, Mesh, Object3D, Object3DEventMap, Vector3 } from 'three';
+import { Euler, Group, Mesh, Object3D, Object3DEventMap, Vector3 } from 'three';
 // local
 import {
     ElementName,
@@ -8,7 +8,6 @@ import {
     createBounce,
     createWall,
     positionOnGrid,
-    BounceDefinition,
 } from './levels.utils';
 import { Levels, LevelState } from '../GameState';
 import { Side } from '../types';
@@ -16,7 +15,6 @@ import { ElementToBounce, InteractiveArea } from '../elements';
 
 export class LearnToFlyLevel extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
-    public interactiveElements: any[] = [];
     public name = 'learn-to-fly';
     public lightBounces: ElementToBounce[] = [];
     public bounces: ElementToBounce[] = [];
@@ -53,13 +51,13 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
             createWall({
                 size: new Vector3(4, 5, 0),
                 position: new Vector3(-3.5, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
             // blocking right path
             createWall({
                 size: new Vector3(4, 8, 0),
                 position: new Vector3(14, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
         ];
 
@@ -70,69 +68,69 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
 
         const arches = [
             createArchGroup({
-                height: 3,
+                size: new Vector3(1, 3, 1),
                 position: new Vector3(0, 0, 0),
             }),
             createArchGroup({
-                height: 3,
+                size: new Vector3(1, 3, 1),
                 position: new Vector3(1, 0, 0),
                 withoutColumns: true,
             }),
             createArchGroup({
-                height: 3,
+                size: new Vector3(1, 3, 1),
                 position: new Vector3(2, 0, 0),
             }),
             createArchGroup({
-                height: 4,
+                size: new Vector3(1, 4, 1),
                 position: new Vector3(5, 0, 0),
             }),
             createArchGroup({
-                height: 3.25,
+                size: new Vector3(1, 3.25, 1),
                 position: new Vector3(6, 0, 0),
             }),
             createArchGroup({
-                height: 2.5,
+                size: new Vector3(1, 2.5, 1),
                 position: new Vector3(7, 0, 0),
             }),
             createArchGroup({
-                height: 2.5,
+                size: new Vector3(1, 2.5, 1),
                 position: new Vector3(8, 0, 0),
                 withoutColumns: true,
             }),
             createArchGroup({
-                height: 2.5,
+                size: new Vector3(1, 2.5, 1),
                 position: new Vector3(9, 0, 0),
                 withoutColumns: true,
             }),
             createArchGroup({
-                height: 2.5,
+                size: new Vector3(1, 2.5, 1),
                 position: new Vector3(10, 0, 0),
                 withoutColumns: true,
             }),
             createArchGroup({
-                height: 2.5,
+                size: new Vector3(1, 2.5, 1),
                 position: new Vector3(11, 0, 0),
             }),
             createArchGroup({
-                height: 4,
+                size: new Vector3(1, 4, 1),
                 position: new Vector3(10.5, 0, 0),
             }),
             createArchGroup({
-                height: 4,
+                size: new Vector3(1, 4, 1),
                 position: new Vector3(11.5, 0, 0),
                 withoutColumns: true,
             }),
             createArchGroup({
-                height: 4,
+                size: new Vector3(1, 4, 1),
                 position: new Vector3(12.5, 0, 0),
                 withoutColumns: true,
             }),
             createArchGroup({
-                height: 4,
+                size: new Vector3(1, 4, 1),
                 position: new Vector3(13.5, 0, 0),
             }),
             createArchGroup({
-                height: 6.5,
+                size: new Vector3(1, 6.5, 1),
                 position: new Vector3(10.5, 0, 0),
             }),
         ];
@@ -147,72 +145,66 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
             }
         });
 
-        const bounceList: BounceDefinition[] = [
+        const bounceList: any[] = [
             {
                 side: Side.SHADOW,
                 position: new Vector3(1, 0.5, 0),
-                // initialRotation: 0, // success rotation
-                rotationY: -25,
+                rotation: new Euler(0, -25, 0),
             },
             {
                 side: Side.SHADOW,
                 position: new Vector3(0, 0.5, 0),
-                // rotationY: 0, // success rotation
-                rotationY: -25,
+                rotation: new Euler(0, -25, 0),
                 interactive: true,
             },
             {
                 side: Side.LIGHT,
                 position: new Vector3(3, 0.5, 0),
-                rotationY: -45,
+                rotation: new Euler(0, -45, 0),
                 interactive: false,
-                // rotationY: -25, // success rotation
             },
             {
                 side: Side.LIGHT,
                 position: new Vector3(4, 0.5, 0),
-                rotationY: -45,
+                rotation: new Euler(0, -45, 0),
                 interactive: true,
-                // rotationY: -25, // success rotation
             },
             {
                 side: Side.SHADOW,
                 position: new Vector3(7, 5, 0),
-                rotationY: -45,
-                // rotationY: 0, // success rotation
+                rotation: new Euler(0, -45, 0),
             },
             {
                 side: Side.LIGHT,
                 position: new Vector3(12, 5, 0),
-                rotationY: -45,
-                // rotationY: 25, // success rotation
+                rotation: new Euler(0, -45, 0),
             },
         ];
 
-        bounceList.forEach(
-            ({ position, rotationY, side, interactive }, index) => {
-                const bounce = createBounce(
-                    position,
-                    rotationY,
-                    side,
-                    index,
-                    interactive || false,
-                );
-                this.add(bounce);
-                this.collidingElements.push(bounce);
-                this.state.bounces![index] = { rotationY };
+        // bounceList.forEach(
+        //     ({ position, rotation, side, interactive }, index) => {
+        //         const bounce = createBounce({
+        //             size: new Vector3(1, 1, 1),
+        //             position,
+        //             rotation,
+        //             side,
+        //             id: index,
+        //             interactive: interactive || false,
+        //         });
+        //         this.add(bounce);
+        //         this.collidingElements.push(bounce);
+        //         this.state.bounces![index] = { rotationY: rotation };
 
-                if (side === Side.LIGHT) {
-                    this.lightBounces.push(bounce);
-                }
-                this.bounces.push(bounce);
-            },
-        );
+        //         if (side === Side.LIGHT) {
+        //             this.lightBounces.push(bounce);
+        //         }
+        //         this.bounces.push(bounce);
+        //     },
+        // );
 
         const endLevel = new InteractiveArea(ElementName.AREA_END_LEVEL);
         this.add(endLevel);
         this.collidingElements.push(endLevel);
-        this.interactiveElements.push(endLevel);
         positionOnGrid(endLevel, new Vector3(10.5, 6.525, 0));
 
         this.collidingElements.forEach((element) => {

@@ -42,6 +42,7 @@
 - S4oul => https://roadmap.sh/cpp first, the connections and styles are interesting, then it can be nice to link roadmap points with github ticket. The goal is to reduce friction and ease a maximum the eventual collaboration experience.
 - L3Gl0N__: Moi ce que je kifferai avoir à la place du synchronize .... Ce serais une grande vue comme ça et cela zoom sur le perso et seulement après tu peux jouer, le delai d'animation sert de synchro
 - Use the already stored "entryNormal" inside the element to bounce to make coherent the entry and exit normal of the player.
+- charger la rotation du bounce pour propulser plus loin son team mate, type gros coup de bate de baseball
 
 ## To fix
 
@@ -85,7 +86,6 @@
   - uchinara
 - This shader toy shader => https://www.shadertoy.com/view/Xsl3zX recomended by Legion
 - Andrew Berg for this => https://medium.com/@andrew_b_berg/volumetric-light-scattering-in-three-js-6e1850680a41
-
 
 ## Stupid things to do
 
@@ -139,3 +139,46 @@ Still need to address number 2 and 5
 - Add recurrent message such as kofibot, to print available commands for users in the chat. Or put it in the title of the stream.
 - Lobby not always detecting choice of team mate on loading
 - Enable github sponsor?
+
+## Level builder
+
+- It should give the ability to switch from light to shadow easily in the same level instance
+- It should give the ability to select and position on the map any of the components that compose level
+- It should have the same render appearance than when playing the game
+- It should allow CRUD operation for level configuration save as JSON
+- Nice to have a button to toggle the fog
+- Le fog est actuellement trop fort et brule toute une partie des contrastes de la scene. Ca enleve un potentiel aspect du jeu qui serait de jouer sur ces contrastes pour eclairer / assombrir des zones pour son partenaire, ou impacter la luminosite de maniere generale.
+
+### soon
+
+- Visual indication of the current editing element
+- List tab with all the elements to avoid having to select them by 3D view.
+- Camera movement not attached to player if not in "test" mode
+- Careful about backend crash due to new addition in the level enum "EMPTY_LEVEL"
+- I can get lost with orbit control camera super easily and not finding players anymore. I need a reset button.
+- Diminish overall size of panels, everything is fat, take inspiration from Blender please
+
+- Add appropriate license for the project, VERY IMPORTANT
+
+### ideas
+
+- Timeline management while testing the level, to easily come back at any moment in the level. Multiple timeline, test different things in the same time, or timeline respective for shadow and light.
+
+### Thinking
+
+- Comment juge la difficulte ?
+  - Par utilisateurs / duo qui l'on fini par example
+- Creation de niveau doit avoir un save draft et un save publish. Qu'est ce qu'il se passe quand on publish?
+- Vue niveau creer par la communaute
+  - call to action pour creer tes propres niveaux
+  - Obviously, good UX / tuto / tips pour creer tes niveaux
+  - Showcase avec les 5 derniers niveau creer
+  - Les 5 niveaux les plus jouer
+  - Un system de like par niveau, et donc niveau le plus like, etc
+  - Niveau le plus partage
+  - Le mec qui a fait les meilleurs niveaux, est ce que tu peux le follow ?
+  - news about les prochains update du game, example, soon, element trou noir disponible dans le level builder
+
+## NOTE TO MYSELF
+
+- You added a migration dude, remember it when you will deploy the next release, you might have to do an extra operation.

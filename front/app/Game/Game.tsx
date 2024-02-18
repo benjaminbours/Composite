@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 // our libs
 import { GameState, Side } from '@benjaminbours/composite-core';
-import App from './App';
+import App, { AppMode } from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
@@ -16,6 +16,9 @@ interface Props {
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
+    levelBuilderAppRef?: React.MutableRefObject<App | undefined>;
+    // TODO: Don't like so much the management of this callback
+    onTransformControlsObjectChange?: (object: THREE.Object3D) => void;
 }
 
 function Game({
@@ -25,6 +28,8 @@ function Game({
     tabIsHidden,
     stats,
     inputsManager,
+    levelBuilderAppRef,
+    onTransformControlsObjectChange,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
@@ -67,21 +72,25 @@ function Game({
                 if (!canvasRef.current) {
                     return;
                 }
+                const mode = levelBuilderAppRef ? AppMode.EDITOR : AppMode.GAME;
                 appRef.current = new App(
                     canvasRef.current,
                     initialGameState,
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                     inputsManager,
+                    mode,
                     socketController,
+                    onTransformControlsObjectChange,
                 );
+                if (levelBuilderAppRef) {
+                    levelBuilderAppRef.current = appRef.current;
+                }
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);
                 gsap.ticker.add(gameLoop);
                 gameStarted.current = true;
                 if (socketController) {
                     setIsSynchronizingTime(true);
-                } else {
-                    appRef.current?.inputsManager.registerEventListeners();
                 }
             });
         }

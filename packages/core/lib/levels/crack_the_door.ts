@@ -1,5 +1,5 @@
 // vendors
-import { Group, Object3D, Vector3, Mesh, Object3DEventMap } from 'three';
+import { Group, Object3D, Vector3, Mesh, Object3DEventMap, Euler } from 'three';
 // local
 import {
     ElementName,
@@ -22,10 +22,10 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
     public startPosition = {
         light: new Vector3(10, 20, 0), // start level
-        shadow: new Vector3(200, 20, 0),
+        // shadow: new Vector3(200, 20, 0),
         // shadow: new Vector3(2200, 775, 0), // roof door
         // light: new Vector3(2500, 20, 0), // end level
-        // shadow: new Vector3(2400, 20, 0), // end level
+        shadow: new Vector3(2400, 20, 0), // end level
     };
 
     public state: LevelState = {
@@ -48,19 +48,19 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
             createWall({
                 size: new Vector3(4, 2, 0),
                 position: new Vector3(-2, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
             // temple end wall
             createWall({
                 size: new Vector3(4, 5, 0),
                 position: new Vector3(13, 0, 2),
-                rotation: new Vector3(0, 90, 0),
+                rotation: new Euler(0, 90, 0),
             }),
             // inside temple
             createWall({
                 size: new Vector3(6, 3, 0),
                 position: new Vector3(9, 0, -2),
-                rotation: new Vector3(0, 0, 0),
+                rotation: new Euler(0, 0, 0),
             }),
         ];
 
@@ -71,15 +71,15 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
         const outsideArches = [
             createArchGroup({
-                height: 1,
+                size: new Vector3(1, 1, 1),
                 position: new Vector3(2, 0, 0),
             }),
             createArchGroup({
-                height: 2,
+                size: new Vector3(1, 2, 1),
                 position: new Vector3(4, 0, 0),
             }),
             createArchGroup({
-                height: 3,
+                size: new Vector3(1, 3, 1),
                 position: new Vector3(6, 0, 0),
             }),
         ];
@@ -100,7 +100,8 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
                     size: new Vector3(0, 3, 0),
                     position: new Vector3(9, 0, 0),
                     doorPosition: new Vector3(0, 0, 0),
-                    orientation: 'vertical',
+                    rotation: new Euler(0, 0, 0),
+                    // orientation: 'vertical',
                 }),
                 openerPosition: new Vector3(10, 1.02, 0),
             },
@@ -109,7 +110,8 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
                     size: new Vector3(2, 6, 0),
                     position: new Vector3(8, 3, 0),
                     doorPosition: new Vector3(0, 3, 0),
-                    orientation: 'horizontal',
+                    rotation: new Euler(0, 0, 0),
+                    // orientation: 'horizontal',
                 }),
                 openerPosition: new Vector3(10, 3, 0),
             },
@@ -132,11 +134,11 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
 
         const insideArches = [
             createArchGroup({
-                height: 1,
+                size: new Vector3(1, 1, 1),
                 position: new Vector3(10, 0, 0),
             }),
             createArchGroup({
-                height: 2,
+                size: new Vector3(1, 2, 1),
                 position: new Vector3(12, 0, 0),
             }),
         ];

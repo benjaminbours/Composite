@@ -1,0 +1,126 @@
+.panel {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    max-height: 300px;
+    width: 250px;
+
+    h2,
+    h3 {
+        margin: 0;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+    }
+
+    $imgSize: 50px;
+    .img-placeholder {
+        width: $imgSize;
+        min-width: $imgSize;
+        height: $imgSize;
+        background: white;
+    }
+
+    .item-name {
+        margin: 0;
+        margin-left: 10px;
+        white-space: nowrap;
+    }
+}
+
+.elements-panel {
+    position: fixed;
+    top: 1%;
+    right: 1%;
+}
+
+.level-builder__top-right-container {
+    position: fixed;
+    top: 6%;
+    right: 1%;
+    display: flex;
+    align-items: flex-start;
+}
+
+.properties-panel {
+    order: 1;
+    margin-right: 10px;
+}
+
+.scene-content-panel {
+    order: 2;
+}
+
+.scene-content-panel__header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.scene-content-panel__item {
+    padding: 0;
+}
+
+.scene-content-panel__item {
+    margin: 10px 0;
+}
+
+.top-bar__tool-bar {
+    min-height: initial;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    > * {
+        margin: 0 10px;
+    }
+}
+
+.MuiButtonBase-root {
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        'Open Sans',
+        'Helvetica Neue',
+        sans-serif;
+}
+
+#camera-button {
+    margin-left: auto;
+}
+
+.properties-panel__inputs-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+
+    input {
+        width: 100%;
+        font-size: 12px;
+        padding: 5px;
+        padding-right: 14px;
+    }
+
+    > * {
+        margin: 10px 0;
+    }
+}
+
+.my-num-input {
+    border-color: rgb(67, 77, 91) !important;
+    box-shadow: none !important;
+
+    &.focused {
+        border-color: #3399ff !important;
+        box-shadow: 0 0 0 3px #0059b2 !important;
+    }
+}

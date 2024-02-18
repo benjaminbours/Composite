@@ -34,11 +34,11 @@ export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
             const cameraPosition = new Vector3(100 * sign, 200);
             const doorOpener = new DoorOpener(
                 ElementName.DOOR_OPENER(String(index)),
-                {
-                    cameraPosition: doorWorldPosition.add(cameraPosition),
-                    doorLeft: doorLeft!,
-                    doorRight: doorRight!,
-                },
+                // {
+                //     cameraPosition: doorWorldPosition.add(cameraPosition),
+                //     doorLeft: doorLeft!,
+                //     doorRight: doorRight!,
+                // },
             );
             area.add(doorOpener);
         });

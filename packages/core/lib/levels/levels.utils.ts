@@ -1,7 +1,6 @@
 import {
     BoxGeometry,
     DoubleSide,
-    Material,
     Mesh,
     MeshPhongMaterial,
     MeshBasicMaterial,
@@ -10,6 +9,7 @@ import {
     BufferGeometry,
     Group,
     Object3DEventMap,
+    Euler,
 } from 'three';
 import {
     computeBoundsTree,
@@ -27,8 +27,6 @@ BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 Mesh.prototype.raycast = acceleratedRaycast;
 
 export const gridSize = 250;
-const gridSizeMedium = gridSize / 2;
-const gridSizeSmall = gridSizeMedium / 2;
 const wallDepth = 34;
 
 export const AREA_DOOR_OPENER_SUFFIX = 'AREA_DOOR_OPENER';
@@ -48,7 +46,6 @@ export const ElementName = {
 // loading registry
 export const geometries: { [key: string]: any } = {
     border: new BoxGeometry(100, 10, 100),
-    platform: new BoxGeometry(gridSize * 0.65, 10, gridSize * 2.5),
 };
 
 export function addToGeometries(mesh: Mesh) {
@@ -90,7 +87,7 @@ export function positionOnGrid(
     /**
      * A vector of degrees, example, x: 180, y: 90, z:0
      */
-    rotation?: Vector3,
+    rotation?: Euler,
 ): void {
     const coordinate = position.multiplyScalar(gridSize);
     // console.log(coordinate);
@@ -103,23 +100,17 @@ export function positionOnGrid(
     }
 }
 
-export function positionInsideGridBox(
-    element: Mesh | Object3D,
-    position: Vector3,
-) {
-    const coordinate = position.multiplyScalar(gridSizeSmall);
-    element.position.add(coordinate);
-}
-
+// TODO: Check to remove / merge it with WallProperties
 interface WallOptions {
     size: Vector3;
     position: Vector3;
-    rotation: Vector3;
+    rotation: Euler;
     withOcclusion?: boolean;
     isGeometryCentered?: boolean;
     receiveShadow?: boolean;
 }
 
+// TODO: detect if some walls are occluding the player
 export function createWall({
     size,
     position,
@@ -146,6 +137,7 @@ export function createWall({
     // position the whole group
     if (withOcclusion) {
         const wallOcclusion = wall.clone();
+        wallOcclusion.name = 'wallOcclusion';
         wallOcclusion.material = materials.occlusion;
         wallOcclusion.layers.set(Layer.OCCLUSION);
         wallOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
@@ -156,37 +148,42 @@ export function createWall({
     return wallGroup;
 }
 
+// TODO: Check to remove / merge it with WallDoorProperties
 interface WallDoorOptions {
     size: Vector3;
     position: Vector3;
     doorPosition: Vector3;
-    orientation: 'horizontal' | 'vertical';
+    rotation: Euler;
 }
 
 export function createWallDoor({
     size,
     position,
     doorPosition,
-    orientation,
+    rotation,
 }: WallDoorOptions) {
     const group = new Object3D();
     // wall left to the door
     const wallLeft = createWall({
-        size: new Vector3(1.5, size.y, 0),
+        size: new Vector3(size.x, size.y, 0),
         position: new Vector3(0.5, 0, 0),
-        rotation: new Vector3(),
+        rotation: new Euler(),
         withOcclusion: true,
     });
+    wallLeft.name = 'wallLeft';
     const wallRight = createWall({
-        size: new Vector3(0.5, size.y, 0),
-        position: new Vector3(-1, 0, 0),
-        rotation: new Vector3(),
+        size: new Vector3(size.x, size.y, 0),
+        position: new Vector3(-0.5 - size.x, 0, 0),
+        rotation: new Euler(),
         withOcclusion: true,
     });
+    wallRight.name = 'wallRight';
     group.add(wallLeft, wallRight);
 
     const createDoor = () => {
+        // wall with door recess
         const wallDoor = new Mesh(geometries.wallDoor as any, materials.phong);
+        wallDoor.name = 'wallDoor';
         wallDoor.castShadow = true;
         wallDoor.translateY(doorPosition.y * gridSize);
         wallDoor.translateZ(wallDepth / 2);
@@ -206,21 +203,21 @@ export function createWallDoor({
 
         // occlusion
         const doorLeftOcclusion = doorLeft.clone();
-        doorLeftOcclusion.name = '';
+        doorLeftOcclusion.name = 'doorLeftOcclusion';
         doorLeftOcclusion.material = materials.occlusion;
         doorLeftOcclusion.layers.set(Layer.OCCLUSION);
         doorLeftOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
         group.add(doorLeftOcclusion);
 
         const doorRightOcclusion = doorRight.clone();
-        doorRightOcclusion.name = '';
+        doorRightOcclusion.name = 'doorRightOcclusion';
         doorRightOcclusion.material = materials.occlusion;
         doorRightOcclusion.layers.set(Layer.OCCLUSION);
         doorRightOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
         group.add(doorRightOcclusion);
 
         const wallDoorOcclusion = wallDoor.clone();
-        wallDoorOcclusion.name = '';
+        wallDoorOcclusion.name = 'wallDoorOcclusion';
         wallDoorOcclusion.material = materials.occlusion;
         wallDoorOcclusion.layers.set(Layer.OCCLUSION);
         wallDoorOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
@@ -236,9 +233,10 @@ export function createWallDoor({
         const wall = createWall({
             size: new Vector3(1, doorPosition.y, 0),
             position: new Vector3(-0.5, 0, 0),
-            rotation: new Vector3(),
+            rotation: new Euler(),
             withOcclusion: true,
         });
+        wall.name = 'wallBelow';
         group.add(wall);
     }
     // top
@@ -247,63 +245,84 @@ export function createWallDoor({
         const wall = createWall({
             size: new Vector3(1, sizeBetweenDoorAndTop - 1, 0),
             position: new Vector3(-0.5, doorPosition.y + 1, 0),
-            rotation: new Vector3(),
+            rotation: new Euler(),
             withOcclusion: true,
         });
+        wall.name = 'wallTop';
         group.add(wall);
     }
-    switch (orientation) {
-        case 'horizontal':
-            positionOnGrid(group, position, new Vector3(90, 0, -90));
-            break;
-        case 'vertical':
-            positionOnGrid(group, position, new Vector3(0, 90, 0));
-            break;
-    }
+    positionOnGrid(group, position, rotation);
 
     return group;
 }
 
+// TODO: Check to remove / merge it with ArchGroupProperties
 interface ArchGroupOptions {
-    height: number;
+    size: Vector3;
     position: Vector3;
     withoutColumns?: true;
 }
 
 export function createArchGroup({
-    height,
+    size,
     position,
     withoutColumns,
 }: ArchGroupOptions) {
     const group = new Object3D();
 
     if (!withoutColumns) {
-        const columnLeft1 = createColumnGroup(height, 'normal');
-        const columnLeft2 = createColumnGroup(height, 'normal');
-        const columnRight1 = createColumnGroup(height, 'normal', true);
-        const columnRight2 = createColumnGroup(height, 'normal', true);
+        const columnGroup = new Object3D();
+        group.add(columnGroup);
 
-        positionOnGrid(columnLeft1, new Vector3(0, 0, -1));
-        group.add(columnLeft1);
+        const columnBackRight = createColumnGroup(size.y, 'normal');
+        const columnBackLeft = createColumnGroup(size.y, 'normal');
+        const columnFrontRight = createColumnGroup(size.y, 'normal', true);
+        const columnFrontLeft = createColumnGroup(size.y, 'normal', true);
+        // back pair
+        columnGroup.add(columnBackRight);
+        columnGroup.add(columnBackLeft);
+        // front pair
+        columnGroup.add(columnFrontRight);
+        columnGroup.add(columnFrontLeft);
 
-        positionOnGrid(columnRight1, new Vector3(0, 0, 1));
-        group.add(columnRight1);
-
-        positionInsideGridBox(columnLeft1, new Vector3(-1, 0, 0));
-
-        positionOnGrid(columnLeft2, new Vector3(0, 0, -1));
-        positionInsideGridBox(columnLeft2, new Vector3(1, 0, 0));
-        group.add(columnLeft2);
-
-        positionInsideGridBox(columnRight1, new Vector3(-1, 0, 0));
-
-        positionOnGrid(columnRight2, new Vector3(0, 0, 1));
-        positionInsideGridBox(columnRight2, new Vector3(1, 0, 0));
-        group.add(columnRight2);
+        const internalColumnPosition = 0.25;
+        positionOnGrid(
+            columnBackRight,
+            new Vector3(-internalColumnPosition, 0, -1),
+        );
+        positionOnGrid(
+            columnBackLeft,
+            new Vector3(internalColumnPosition, 0, -1),
+        );
+        positionOnGrid(
+            columnFrontRight,
+            new Vector3(-internalColumnPosition, 0, 1),
+        );
+        positionOnGrid(
+            columnFrontLeft,
+            new Vector3(internalColumnPosition, 0, 1),
+        );
+        if (size.x >= 2) {
+            // position left group
+            columnGroup.position.set(
+                (-size.x / 2) * gridSize + 0.5 * gridSize,
+                0,
+                0,
+            );
+            // position right group
+            const rightGroup = columnGroup.clone();
+            rightGroup.position.set(
+                (size.x / 2) * gridSize - 0.5 * gridSize,
+                0,
+                0,
+            );
+            group.add(rightGroup);
+        }
     }
 
     const geometryPlatform = new BoxGeometry(
-        gridSize * 1.25,
+        // gridSize * 1.25 * size.x,
+        gridSize * size.x,
         10,
         gridSize * 2.5,
     );
@@ -312,14 +331,15 @@ export function createArchGroup({
     // platformMesh.receiveShadow = true;
     platformMesh.name = 'platform';
     // position the height of the platform only
-    positionOnGrid(platformMesh, new Vector3(0, height, 0));
+    positionOnGrid(platformMesh, new Vector3(0, size.y, 0));
     group.add(platformMesh);
 
     // occlusion management
     const platformMeshOcclusion = new Mesh(
-        geometryPlatform,
+        geometryPlatform.clone(),
         materials.occlusion,
     );
+    platformMeshOcclusion.name = 'platformOcclusion';
     platformMeshOcclusion.position.copy(platformMesh.position);
     group.add(platformMeshOcclusion);
     platformMeshOcclusion.layers.set(Layer.OCCLUSION);
@@ -332,42 +352,57 @@ export function createArchGroup({
 
 export function createColumnGroup(
     size: number,
-    columnGeometry: 'normal' | 'big',
+    geometryType: 'normal' | 'big',
     withOcclusion?: boolean,
 ) {
-    // TODO: Fix this any
     const pedestalGeometry = geometries[
-        `column_${columnGeometry}_pedestal`
+        `column_${geometryType}_pedestal`
     ] as BoxGeometry;
     // pedestalGeometry
-    const partGeometry = geometries[`column_${columnGeometry}`] as BoxGeometry;
+    const partGeometry = geometries[`column_${geometryType}`] as BoxGeometry;
     const group = new Object3D();
 
     const columnStart = new Mesh(pedestalGeometry, materials.phong);
+    columnStart.name = 'columnStart';
     columnStart.castShadow = true;
     columnStart.receiveShadow = true;
     group.add(columnStart);
 
     if (partGeometry) {
         const part = new Mesh(partGeometry, materials.phong);
+        part.name = 'columnPart';
         part.castShadow = true;
         part.receiveShadow = true;
         part.scale.set(1, size - 0.02, 1);
         group.add(part);
     }
 
-    const columnEnd = columnStart.clone();
-    positionOnGrid(columnEnd, new Vector3(0, size, 0), new Vector3(180, 0, 0));
+    const columnEnd = new Mesh(
+        pedestalGeometry
+            .clone()
+            .rotateX(degreesToRadians(180))
+            .translate(0, size * gridSize, 0),
+        materials.phong,
+    );
+    columnEnd.name = 'columnEnd';
+    columnEnd.updateMatrixWorld(true);
+    columnEnd.matrix.decompose(
+        columnEnd.position,
+        columnEnd.quaternion,
+        columnEnd.scale,
+    );
     group.add(columnEnd);
 
     if (withOcclusion) {
         const columnStartOcclusion = columnStart.clone();
+        columnStartOcclusion.name = 'columnStartOcclusion';
         columnStartOcclusion.material = materials.occlusion;
         columnStartOcclusion.layers.set(Layer.OCCLUSION);
         columnStartOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
         group.add(columnStartOcclusion);
 
         const columnEndOcclusion = columnEnd.clone();
+        columnEndOcclusion.name = 'columnEndOcclusion';
         columnEndOcclusion.material = materials.occlusion;
         columnEndOcclusion.layers.set(Layer.OCCLUSION);
         columnEndOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
@@ -375,6 +410,7 @@ export function createColumnGroup(
 
         if (partGeometry) {
             const partOcclusion = new Mesh(partGeometry, materials.occlusion);
+            partOcclusion.name = 'partOcclusion';
             partOcclusion.layers.set(Layer.OCCLUSION);
             partOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
             group.add(partOcclusion);
@@ -384,26 +420,33 @@ export function createColumnGroup(
     return group;
 }
 
-export interface BounceDefinition {
+export interface BounceOptions {
+    // size: Vector3;
     position: Vector3;
-    rotationY: number;
+    rotation: Euler;
     side: Side;
-    interactive?: boolean;
+    id: number;
+    interactive: boolean;
 }
 
-export function createBounce(
-    position: Vector3,
-    rotationY: number,
-    side: Side,
-    id: number,
-    interactive: boolean,
-) {
+export function createBounce({
+    // size,
+    position,
+    rotation,
+    side,
+    id,
+    interactive,
+}: BounceOptions) {
     const sizeForGrid = new Vector3(1, 1, 1).multiplyScalar(gridSize / 1.5);
     const positionForGrid = position.multiplyScalar(gridSize);
-    const rotation = new Vector3(
-        degreesToRadians(90),
-        degreesToRadians(90 + rotationY),
-        degreesToRadians(0),
+
+    const group = new Object3D();
+    group.name = ElementName.BOUNCE(side);
+    group.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
+    group.rotation.set(
+        degreesToRadians(rotation.x),
+        degreesToRadians(rotation.y),
+        degreesToRadians(rotation.z),
     );
 
     const material = (() => {
@@ -415,7 +458,6 @@ export function createBounce(
         }
         return materials.phong;
     })();
-
     const geometry = new BoxGeometry(
         sizeForGrid.x,
         sizeForGrid.y,
@@ -424,17 +466,16 @@ export function createBounce(
         30,
         30,
     );
-
     const wall = new ElementToBounce(geometry, material, side, id, interactive);
+    group.add(wall);
 
-    wall.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
-    wall.rotation.set(rotation.x, rotation.y, rotation.z);
-    wall.updateMatrix();
     wall.geometry.center();
+    wall.updateMatrix();
     wall.geometry.computeBoundingBox();
     wall.geometry.boundingBox?.getCenter(wall.center);
-    wall.name = ElementName.BOUNCE(side);
-    return wall;
+    wall.name = 'wall';
+
+    return group;
 }
 
 export function createMountain() {
@@ -456,7 +497,7 @@ export interface AbstractLevel {
         wall: Object3D<Object3DEventMap>;
         openerPosition: Vector3;
     }[];
-    bounces: ElementToBounce[];
+    bounces: Object3D[];
     lightBounces: ElementToBounce[];
     updateMatrixWorld(force?: boolean): void;
 }

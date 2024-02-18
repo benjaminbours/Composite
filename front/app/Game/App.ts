@@ -13,7 +13,14 @@ import {
     Vector3,
     Box3Helper,
     Object3DEventMap,
+    Group,
+    PlaneGeometry,
+    MeshBasicMaterial,
+    Vector2,
+    Raycaster,
 } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 // our libs
 import {
     GamePlayerInputPayload,
@@ -29,12 +36,14 @@ import {
     ElementToBounce,
     createMountain,
     Inputs,
+    Levels,
+    AbstractLevel,
+    degreesToRadians,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 // import CustomCamera from './CustomCamera';
-import LevelController from './levels/levels.controller';
 import { DoorOpener } from './elements/DoorOpener';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
@@ -44,6 +53,15 @@ import { SkinBounce } from './elements/SkinBounce';
 import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
 import { GameStateManager } from './GameStateManager';
+import { EmptyLevel } from './levels/EmptyLevel';
+import { CrackTheDoorLevelWithGraphic } from './levels/CrackTheDoorLevelWithGraphic';
+import { LearnToFlyLevelWithGraphic } from './levels/LearnToFlyLevelWithGraphic';
+import { TheHighSpheresLevelWithGraphic } from './levels/TheHighSpheresWithGraphic';
+
+export enum AppMode {
+    EDITOR = 'EDITOR',
+    GAME = 'GAME',
+}
 
 export default class App {
     public camera = new CustomCamera(
@@ -52,7 +70,7 @@ export default class App {
         0.1,
         12000,
     );
-    private scene = new Scene();
+    public scene = new Scene();
 
     private players: Player[] = [];
     private skyMesh!: Mesh;
@@ -61,15 +79,13 @@ export default class App {
     public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
 
-    private levelController: LevelController;
-
     private lastInput: GamePlayerInputPayload | undefined;
     // TODO: disgusting, find alternative
     private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
 
     private physicSimulation = new PhysicSimulation();
 
-    private collidingElements: Object3D<Object3DEventMap>[] = [];
+    public collidingElements: Object3D<Object3DEventMap>[] = [];
 
     private playerHelper?: Box3;
 
@@ -84,13 +100,26 @@ export default class App {
     private mainPlayerSide: Side;
     private secondPlayerSide: Side;
 
+    public level: AbstractLevel;
+
+    public controls?: OrbitControls;
+    public transformControls?: TransformControls;
+
+    public mode: AppMode;
+    public mousePosition = new Vector2();
+    private mouseRaycaster = new Raycaster();
+    public mouseSelectedObject?: Object3D;
+
     constructor(
-        canvasDom: HTMLCanvasElement,
-        initialGameState: GameState,
+        public canvasDom: HTMLCanvasElement,
+        private initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
+        initialMode: AppMode,
         public socketController?: SocketController,
+        onTransformControlsObjectChange?: (e: any) => void,
     ) {
+        this.mode = initialMode;
         this.mainPlayerSide = playersConfig[0];
         this.secondPlayerSide = playersConfig[1];
         this.gameStateManager = new GameStateManager(
@@ -98,11 +127,30 @@ export default class App {
             this.socketController?.sendInputs,
         );
         // inputs
+        if (!socketController && initialMode === AppMode.GAME) {
+            this.inputsManager.registerEventListeners();
+        }
 
         // levels
-        this.levelController = new LevelController(initialGameState.level.id);
+        this.level = (() => {
+            switch (initialGameState.level.id) {
+                case Levels.EMPTY:
+                    return new EmptyLevel();
+                case Levels.CRACK_THE_DOOR:
+                    return new CrackTheDoorLevelWithGraphic();
+                case Levels.LEARN_TO_FLY:
+                    return new LearnToFlyLevelWithGraphic();
+                case Levels.THE_HIGH_SPHERES:
+                    return new TheHighSpheresLevelWithGraphic();
+                default:
+                    return new EmptyLevel();
+            }
+        })();
+        this.scene.add(this.level as unknown as Group);
 
-        this.setupPlayers();
+        if (this.mode === AppMode.GAME) {
+            this.setupPlayers();
+        }
         this.setupScene();
         this.scene.updateMatrixWorld();
 
@@ -112,12 +160,35 @@ export default class App {
             this.camera,
             canvasDom,
             this.scene,
-            (
-                this.levelController.levels[
-                    this.levelController.currentLevel
-                ] as any
-            ).lightBounces || [],
+            this.level.lightBounces,
         );
+
+        // camera
+        if (this.mode === AppMode.EDITOR) {
+            this.transformControls = new TransformControls(
+                this.camera,
+                canvasDom,
+            );
+            this.transformControls.addEventListener('objectChange', () => {
+                if (this.controlledMesh && onTransformControlsObjectChange) {
+                    onTransformControlsObjectChange(this.controlledMesh);
+                }
+            });
+            this.scene.add(this.transformControls);
+            this.createEditorCamera();
+            // draw collision plane / axis
+            const geometry = new PlaneGeometry(10000, 10000);
+            const material = new MeshBasicMaterial({
+                color: 0xff0000, // red color
+                transparent: true,
+                opacity: 0.1,
+            });
+            this.collisionAreaMesh = new Mesh(geometry, material);
+            this.collisionAreaMesh.name = 'collision-area';
+            this.collisionAreaMesh.position.y = 10000 / 2;
+        } else {
+            this.setGameCamera();
+        }
 
         if (this.socketController) {
             this.socketController.registerGameStateUpdateListener(
@@ -125,6 +196,171 @@ export default class App {
             );
         }
     }
+
+    public controlledMesh: Object3D | undefined;
+    public attachTransformControls = (mesh: Object3D) => {
+        this.controlledMesh = mesh;
+        this.transformControls?.attach(mesh);
+    };
+
+    public detachTransformControls = () => {
+        this.controlledMesh = undefined;
+        this.transformControls?.detach();
+    };
+
+    public resetPlayersPosition = () => {
+        this.gameStateManager.currentState.players.forEach((player, index) => {
+            player.position = {
+                ...this.initialGameState.players[index].position,
+            };
+        });
+    };
+
+    public removeFromCollidingElements = (mesh: Object3D) => {
+        const checkChildren = (elements: Object3D[]) => {
+            for (let i = 0; i < elements.length; i++) {
+                const child = elements[i];
+                if (child.name.includes('Occlusion')) {
+                    continue;
+                }
+
+                if (child.children.length > 0) {
+                    checkChildren(child.children);
+                } else {
+                    const collidingIndex =
+                        this.collidingElements.indexOf(child);
+                    if (collidingIndex !== -1) {
+                        this.collidingElements.splice(collidingIndex, 1);
+                    }
+                }
+            }
+        };
+
+        if (mesh.children.length > 0) {
+            checkChildren(mesh.children);
+        } else {
+            const collidingIndex = this.collidingElements.indexOf(mesh);
+            if (collidingIndex !== -1) {
+                this.collidingElements.splice(collidingIndex, 1);
+            }
+        }
+    };
+
+    public detectIfMeshIsCollidable = (mesh: Mesh) => {
+        if (!this.collisionAreaMesh) {
+            return false;
+        }
+        this.scene.updateMatrixWorld(true);
+
+        const geometry = mesh.geometry.clone();
+        geometry.applyMatrix4(mesh.matrixWorld);
+
+        const transformedVertices = [];
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            const vertex = new Vector3(
+                geometry.attributes.position.getX(i),
+                geometry.attributes.position.getY(i),
+                geometry.attributes.position.getZ(i),
+            );
+            transformedVertices.push(vertex);
+        }
+
+        const meshBBox = new Box3().setFromPoints(transformedVertices);
+        const collisionBBox = new Box3().setFromObject(this.collisionAreaMesh);
+        return meshBBox.intersectsBox(collisionBBox);
+    };
+
+    public resetEditorCamera = () => {
+        this.camera.position.set(0, 100, 500);
+        this.controls?.target.set(0, 100, 0);
+        this.controls?.update();
+    };
+
+    private createEditorCamera = () => {
+        this.camera.position.set(0, 100, 500);
+        this.controls = new OrbitControls(
+            this.camera,
+            this.rendererManager.renderer.domElement,
+        );
+        this.controls.enabled = true;
+        this.controls.target.set(0, 100, 0);
+        this.controls.enableDamping = false;
+        this.controls.enableRotate = false;
+        this.controls.autoRotate = false;
+        this.controls.maxDistance = 2000;
+        this.controls.maxPolarAngle = Math.PI / 2;
+        this.controls.minPolarAngle = Math.PI / 2;
+        this.controls.minAzimuthAngle = Math.PI * 2;
+        this.controls.maxAzimuthAngle = Math.PI * 2;
+        this.controls.update();
+        this.controls.addEventListener('change', () => {
+            if (!this.controls) {
+                return;
+            }
+
+            if (this.controls.object.position.y < 10) {
+                this.camera.position.y = 10;
+                this.controls.target.y = 10;
+            }
+
+            const limitX = 8000;
+            if (this.controls.object.position.x > limitX) {
+                this.camera.position.x = limitX;
+                this.controls.target.x = limitX;
+            }
+
+            if (this.controls.object.position.x < -limitX) {
+                this.camera.position.x = -limitX;
+                this.controls.target.x = -limitX;
+            }
+        });
+    };
+
+    private setGameCamera = () => {
+        this.camera.setDefaultTarget(
+            this.players[this.mainPlayerSide].position,
+        );
+        this.camera.position.z = 500;
+        this.camera.position.y = 10;
+    };
+
+    public setAppMode = (mode: AppMode) => {
+        this.mode = mode;
+        if (this.mode === AppMode.GAME) {
+            this.setupPlayers();
+            this.inputsManager.registerEventListeners();
+            if (this.controls) {
+                this.controls.enabled = false;
+                this.setGameCamera();
+            }
+        } else {
+            this.removePlayers();
+            this.inputsManager.destroyEventListeners();
+            if (this.controls) {
+                this.controls.enabled = true;
+                this.resetEditorCamera();
+            }
+        }
+    };
+
+    private collisionAreaMesh?: Mesh;
+    private isCollisionAreaVisible = false;
+    public toggleCollisionArea = () => {
+        if (!this.collisionAreaMesh) {
+            return;
+        }
+        if (this.isCollisionAreaVisible) {
+            this.isCollisionAreaVisible = false;
+            this.scene.remove(this.collisionAreaMesh);
+        } else {
+            this.isCollisionAreaVisible = true;
+            this.scene.add(this.collisionAreaMesh);
+        }
+    };
+
+    public addToScene = (object: Object3D) => {
+        this.scene.add(object);
+    };
 
     public destroy = () => {
         this.gameStateManager.destroy();
@@ -151,18 +387,17 @@ export default class App {
         }
     };
 
+    private removePlayers = () => {
+        this.scene.remove(...this.players);
+        this.players = [];
+    };
+
     private setupScene = () => {
         this.scene.add(this.floor);
         this.collidingElements.push(this.floor);
 
-        // camera
-        this.camera.setDefaultTarget(
-            this.players[this.mainPlayerSide].position,
-        );
-        this.camera.position.z = 500;
-        this.camera.position.y = 10;
-
         this.scene.fog = new FogExp2(0xffffff, 0.001);
+        // this.scene.fog = new FogExp2(0xffffff, 0.0002);
         const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
 
         // dirlight
@@ -186,18 +421,11 @@ export default class App {
         const skyShaderMat = new SkyShader(this.camera);
         const skyBox = new IcosahedronGeometry(10000, 1);
         this.skyMesh = new Mesh(skyBox, skyShaderMat);
+        this.skyMesh.name = 'sky-box';
         this.skyMesh.rotation.set(0, 1, 0);
         this.scene.add(this.skyMesh);
 
-        this.levelController.loadLevel(
-            this.levelController.currentLevel,
-            this.scene,
-            this.players,
-        );
-        this.collidingElements.push(
-            ...this.levelController.levels[this.levelController.currentLevel]!
-                .collidingElements,
-        );
+        this.collidingElements.push(...this.level.collidingElements);
         this.scene.add(createMountain());
         if (process.env.NEXT_PUBLIC_PLAYER_BBOX_HELPER) {
             this.playerHelper = new Box3();
@@ -209,12 +437,7 @@ export default class App {
         for (let i = 0; i < object.children.length; i++) {
             const item = object.children[i] as any;
             if (item.update) {
-                if (
-                    item instanceof DoorOpener ||
-                    item instanceof EndLevel ||
-                    item instanceof Player ||
-                    item instanceof ElementToBounce
-                ) {
+                if (item instanceof Player || item instanceof ElementToBounce) {
                     // do nothing
                 } else {
                     item.update(this.delta);
@@ -273,7 +496,36 @@ export default class App {
         this.lastInput = payload;
     };
 
+    private updateMouseIntersection = () => {
+        // Update the picking ray with the camera and mouse position
+        this.mouseRaycaster.setFromCamera(this.mousePosition, this.camera);
+
+        // Calculate objects intersecting the picking ray
+        const intersects = this.mouseRaycaster.intersectObjects(
+            this.scene.children,
+        );
+
+        // If there's an intersection
+        if (intersects.length > 0) {
+            // console.log('Selected object', intersects[0].object);
+            const notEditable = [
+                'floor',
+                'sky-box',
+                'mountain',
+                'collision-area',
+            ];
+            if (notEditable.includes(intersects[0].object.name)) {
+                this.mouseSelectedObject = undefined;
+            } else {
+                this.mouseSelectedObject = intersects[0].object;
+            }
+        }
+    };
+
     public run = () => {
+        if (this.mode === AppMode.EDITOR) {
+            this.updateMouseIntersection();
+        }
         this.delta = this.clock.getDelta();
         this.gameStateManager.reconciliateState(
             this.collidingElements,
@@ -336,7 +588,9 @@ export default class App {
         this.updateWorldGraphics(this.gameStateManager.displayState);
 
         // update camera
-        this.camera.update();
+        if (this.mode === AppMode.GAME) {
+            this.camera.update();
+        }
     };
 
     public updatePlayerGraphics = (state: GameState) => {
@@ -364,14 +618,9 @@ export default class App {
         for (const key in state.level.doors) {
             const activators = state.level.doors[key];
 
-            const doorOpener = this.collidingElements
-                .find(
-                    (object) =>
-                        object.name === ElementName.AREA_DOOR_OPENER(key),
-                )
-                ?.children.find(
-                    (object) => object.name === ElementName.DOOR_OPENER(key),
-                ) as DoorOpener | undefined;
+            const doorOpener = this.collidingElements.find(
+                (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
+            )?.parent?.children[1] as DoorOpener | undefined;
 
             if (doorOpener) {
                 if (activators.length > 0 && !doorOpener.shouldActivate) {
@@ -384,30 +633,22 @@ export default class App {
                 }
             }
 
-            const withFocusCamera = activators.includes(this.mainPlayerSide);
+            const withFocusCamera =
+                activators.includes(this.mainPlayerSide) &&
+                this.mode === AppMode.GAME;
             doorOpener?.update(this.delta, this.camera, withFocusCamera);
         }
 
-        for (
-            let i = 0;
-            i <
-            this.levelController.levels[this.levelController.currentLevel]
-                .bounces.length;
-            i++
-        ) {
-            const bounce =
-                this.levelController.levels[this.levelController.currentLevel]
-                    .bounces[i];
-            const rotationY = state.level.bounces[bounce.bounceID].rotationY;
-            bounce.update(rotationY);
+        for (let i = 0; i < this.level.bounces.length; i++) {
+            const bounce = this.level.bounces[i];
+            const rotationY = state.level.bounces[i].rotationY;
+            bounce.rotation.y = degreesToRadians(rotationY);
         }
 
         // end level
-        const endLevelElement = this.collidingElements
-            .find((object) => object.name === ElementName.AREA_END_LEVEL)
-            ?.children.find(
-                (object) => object.name === ElementName.END_LEVEL,
-            ) as EndLevel | undefined;
+        const endLevelElement = this.collidingElements.find(
+            (object) => object.name === ElementName.AREA_END_LEVEL,
+        )?.parent?.children[1] as EndLevel | undefined;
 
         if (endLevelElement) {
             if (
@@ -445,7 +686,13 @@ export default class App {
     public updateWorldGraphics = (state: GameState) => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
-        this.floor.position.set(this.camera.position.x, 0, 0);
+        if (this.players[this.mainPlayerSide]) {
+            this.floor.position.set(
+                this.players[this.mainPlayerSide].position.x,
+                0,
+                0,
+            );
+        }
 
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;
@@ -472,9 +719,7 @@ export default class App {
                 MovableComponentState.inside &&
             state.players[this.mainPlayerSide].insideElementID
         ) {
-            const skinBounce = this.levelController.levels[
-                this.levelController.currentLevel
-            ].children.find(
+            const skinBounce = (this.level as unknown as Group).children.find(
                 (child) =>
                     child.name ===
                     `skin-bounce-${
@@ -486,9 +731,7 @@ export default class App {
                 this.currentBounceName = skinBounce.name;
             }
         } else {
-            const skinBounce = this.levelController.levels[
-                this.levelController.currentLevel
-            ].children.find(
+            const skinBounce = (this.level as unknown as Group).children.find(
                 (child) => child.name === this.currentBounceName,
             ) as SkinBounce | undefined;
 

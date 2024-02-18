@@ -5,9 +5,9 @@ import { Injectable } from '@nestjs/common';
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus } from 'src/PlayerState';
 import { SocketService } from './socket.service';
-import { Levels } from '@benjaminbours/composite-core';
+// import { Levels } from '@benjaminbours/composite-core';
 
-const COMING_SOON_LEVELS = [Levels.THE_HIGH_SPHERES];
+const COMING_SOON_LEVELS = [];
 
 @Injectable()
 export class UtilsService {
