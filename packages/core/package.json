@@ -29,6 +29,6 @@
   "peerDependencies": {
     "gsap": "^3.12.2",
     "three": "^0.161.0",
-    "three-mesh-bvh": "^0.7.2"
+    "three-mesh-bvh": "^0.6.8"
   }
 }
