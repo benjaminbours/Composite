@@ -332,3 +332,64 @@ $buttonSizeLarge: 120px;
         }
     }
 }
+
+.buttons-container {
+    display: grid;
+    gap: 10px;
+    text-align: center;
+}
+
+.central-content-template {
+    width: 100%;
+    height: calc(100vh - 56px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    border-radius: 0;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+.small-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-padding {
+    padding: 30px;
+}
+
+.top-bar__tool-bar {
+    min-height: initial;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    > * {
+        margin: 0 10px;
+    }
+}
+
+.top-bar__account-container {
+    margin-left: auto;
+}
+
+.top-bar__logo {
+    text-decoration: none;
+
+    h2 {
+        color: white;
+        margin: 0;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 10px;
+        text-transform: uppercase;
+    }
+}
+
+// .sign-up-email-activated-page {
+//     background: black;
+//     color: white;
+// }

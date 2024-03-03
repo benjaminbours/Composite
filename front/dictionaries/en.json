@@ -1,0 +1,64 @@
+{
+    "common": {
+        "form": {
+            "label": {
+                "email": "Email",
+                "password": "Password",
+                "confirm-password": "Confirm password",
+                "name": "Username"
+            },
+            "description": {
+                "name": "Will be visible to other users"
+            },
+            "validation": {
+                "required": "This field is required",
+                "email": "Invalid email address",
+                "password-min-length": "Password must be at least 8 characters",
+                "password-miss-match": "Passwords don't match"
+            },
+            "button": {
+                "login": "Login",
+                "create-account": "Create Account",
+                "sign-in": "Already an account? Sign in",
+                "forgot-password": "Forgot your password?",
+                "no-received-email": "Didn't receive the validation email?",
+                "resend-confirmation-email": "Re send confirmation email",
+                "reset-password": "Reset my password"
+            }
+        },
+        "notification": {
+            "success-login": "Successfully login!",
+            "error-login": "Invalid email or password!",
+            "success-sign-up": "I just sent an email to {{email}}. Please click on the link in the mail to confirm your account.",
+            "success-resend-validation-email": "A new email has been send to {{address}}",
+            "success-reset-password-sent-email": "An email as successfully been sent to reset your password"
+        }
+    },
+    "register": {
+        "title": "Create an account",
+        "form": {
+            "label": {
+                "confirm-password": "Confirm password"
+            }
+        }
+    },
+    "forgot-password": {
+        "title": "Password forgotten",
+        "description": "Give me your email address and I will send you a link to reset your password.",
+        "notification": {}
+    },
+    "new-password": {
+        "title": "New password",
+        "description": "Please enter your new password."
+    },
+    "sign-up-email-validation": {
+        "title": "Account validation required!",
+        "description": "I need you to validate your email address. Please click on the link in the mail I just sent you.",
+        "no-received-email": "Didn't receive the email we previously sent you?",
+        "notification": {}
+    },
+    "sign-up-email-activated": {
+        "title": "Email activated!",
+        "description": "Congratulations, your email has been activated. You can now login."
+    }
+}
