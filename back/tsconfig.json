@@ -21,5 +21,6 @@
     "paths": {
       "@project-common/*": ["src/common/*"]
     }
-  }
+  },
+  "exclude": ["**/*e2e-spec.ts", "dist"],
 }
