@@ -7,6 +7,7 @@ import { SocketModule } from './socket/socket.module';
 import { AuthModule } from './auth/auth.module';
 import { TemporaryStorageService } from './temporary-storage.service';
 import { ENVIRONMENT } from '@project-common/environment';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ENVIRONMENT } from '@project-common/environment';
     }),
     SocketModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService, TemporaryStorageService],

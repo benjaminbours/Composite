@@ -71,6 +71,7 @@ services:
       - traefik.http.services.api.loadBalancer.sticky.cookie.httpOnly=true
       - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost
       - traefik.http.middlewares.api_middleware.headers.accessControlAllowCredentials=true
+      - traefik.http.middlewares.api_middleware.headers.accessControlAllowHeaders=Content-Type
       - traefik.http.routers.api.middlewares=api_middleware
 
   front:

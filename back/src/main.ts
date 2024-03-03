@@ -31,7 +31,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   // disable while cors is managed in load balancer
-  // app.enableCors({ origin: [ENVIRONMENT.CLIENT_URL] });
+  // app.enableCors({ allowedHeaders: ['content-type'] });
 
   if (ENVIRONMENT.STAGE === 'development') {
     const document = generateSwaggerDocument(app);

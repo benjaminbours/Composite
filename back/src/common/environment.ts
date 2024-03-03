@@ -9,10 +9,9 @@ const REQUIRED_ENV_VARS = [
   'JWT_REFRESH_SECRET',
   'STAGE',
   'CLIENT_URL',
-  // // MAILGUN
-  'MAILGUN_USER',
-  'MAILGUN_API_KEY',
-  'MAILGUN_DOMAIN',
+  // MAIL
+  'SENDER_EMAIL',
+  'SENDER_EMAIL_KEY',
 ] as const;
 
 const OPTIONAL_ENV_VARS = [''] as const;

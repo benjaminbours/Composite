@@ -1,41 +1,63 @@
 // vendor
 import { Injectable, Logger } from '@nestjs/common';
-import { MailgunService, MailgunMessageData } from 'nestjs-mailgun';
 import mjml2html = require('mjml');
 // project
 import i18n from '@project-common/i18n';
+import * as nodemailer from 'nodemailer';
 import {
   createNewTextParagraphSection,
-  // createNewRowSection,
-  // createNewDividerSection,
-  // createNewSubtitleSection,
   EmailComposer,
   createButtonSection,
   createSpacerSection,
 } from '@project-common/utils/mail';
 import { ENVIRONMENT } from '@project-common/environment';
+import * as smtpTransport from 'nodemailer-smtp-transport';
+
+interface MailgunMessageData {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+}
 
 @Injectable()
 export class MailService {
-  constructor(private mailgunService: MailgunService) {}
+  constructor() {}
 
   async sendMail(messageData: MailgunMessageData) {
-    try {
-      const { from, to, subject } = messageData;
-      Logger.log('Sending mail', {
-        from,
-        to,
-        subject,
-      });
+    const { from, to, subject } = messageData;
+    Logger.log('Sending mail', {
+      from,
+      to,
+      subject,
+    });
 
-      await this.mailgunService.createEmail(
-        process.env.MAILGUN_DOMAIN,
-        messageData,
-      );
-      Logger.log('Successfully sent');
-    } catch (error) {
+    const transporter = nodemailer.createTransport(
+      smtpTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: ENVIRONMENT.SENDER_EMAIL,
+          pass: ENVIRONMENT.SENDER_EMAIL_KEY,
+        },
+      }),
+    );
+
+    return new Promise((resolve, reject) => {
+      transporter.sendMail(messageData, function (error, info) {
+        console.log('cb', error, info);
+        if (error) {
+          reject();
+        } else {
+          Logger.log('Successfully sent', info.response);
+          resolve(true);
+        }
+      });
+    }).catch((error) => {
       Logger.error(error);
-    }
+    });
   }
 
   /**
@@ -69,7 +91,7 @@ export class MailService {
     const content = mjml2html(emailTemplate);
 
     const messageData: MailgunMessageData = {
-      from: 'noreply@compositethegame.com',
+      from: ENVIRONMENT.SENDER_EMAIL,
       to: recipient,
       subject: t('account-verification-mail.subject') || '',
       html: content.html,
@@ -107,7 +129,7 @@ export class MailService {
     const content = mjml2html(emailTemplate);
 
     const messageData: MailgunMessageData = {
-      from: 'noreply@compositethegame.com',
+      from: ENVIRONMENT.SENDER_EMAIL,
       to: recipient,
       subject: t('reset-password-mail.subject') || '',
       html: content.html,
@@ -141,7 +163,7 @@ export class MailService {
     const content = mjml2html(emailTemplate);
 
     const messageData: MailgunMessageData = {
-      from: 'noreply@compositethegame.com',
+      from: ENVIRONMENT.SENDER_EMAIL,
       to: recipient,
       subject: t('sign-up-mail.subject') || '',
       html: content.html,
