@@ -69,7 +69,7 @@ export class MailService {
     locale: string = 'en',
   ) {
     const t = i18n(locale);
-    const email = new EmailComposer(t('visit-store-button'));
+    const email = new EmailComposer(t('play-button'));
     email
       .addContentSection(createSpacerSection())
       .addContentSection(
@@ -108,7 +108,7 @@ export class MailService {
     locale: string = 'en',
   ) {
     const t = i18n(locale);
-    const email = new EmailComposer(t('visit-store-button'));
+    const email = new EmailComposer(t('play-button'));
     email
       .addContentSection(createSpacerSection())
       .addContentSection(
@@ -142,7 +142,7 @@ export class MailService {
    */
   async sendSignUpEmail(recipient: string, locale = 'en') {
     const t = i18n(locale);
-    const email = new EmailComposer(t('visit-store-button'));
+    const email = new EmailComposer(t('play-button'));
     email
       .addContentSection(createSpacerSection())
       .addContentSection(

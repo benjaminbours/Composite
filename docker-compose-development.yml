@@ -14,12 +14,17 @@ services:
       - "8081:8080"
     # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
 
+  cache:
+    ports:
+      - 6379:6379
+
   api:
     container_name: composite_api
     build:
       target: dev
     volumes:
       - ./back/.env:/app/back/.env
+      - ./back/locales:/app/back/locales
       - ./back/src:/app/back/src
       - ./back/test:/app/back/test
       - ./back/prisma:/app/back/prisma
