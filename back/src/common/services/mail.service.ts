@@ -82,7 +82,7 @@ export class MailService {
       .addContentSection(
         createButtonSection({
           label: t('account-verification-mail.buttonText'),
-          href: `${process.env.DOMAIN_NAME}/auth/confirm/${confirmationToken}`,
+          href: `${ENVIRONMENT.SERVER_URL}/auth/confirm/${confirmationToken}`,
         }),
       )
       .addContentSection(createSpacerSection());

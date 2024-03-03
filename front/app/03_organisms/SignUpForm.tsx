@@ -19,6 +19,7 @@ import { MAIL_REGEXP } from '../constants';
 import { generateErrorForm } from '../utils/errors';
 import { getDictionary } from '../../getDictionary';
 import { Route } from '../types';
+import { generateErrorNotification } from '../utils/errors/generateErrorNotification';
 // import {
 //     generateErrorNotification,
 //     generateErrorForm,
@@ -128,22 +129,15 @@ export const SignUpForm: React.FC<Props> = ({
                     //     );
                     // }
                 })
-                .catch((error: any) => {
+                .catch(async (error: any) => {
                     console.error(error);
-                    // enqueueSnackbar(generateErrorNotification(error, t), {
-                    //     variant: 'error',
-                    // });
-
-                    const data = error.response?.data;
-                    // TODO: copy pasted from generateErrorNotification. Can do better here
-                    const errors = {} as any;
-                    // if (data.statusCode === 409) {
-                    //     errors.email = {};
-                    //     errors.email.__errors = [
-                    //         t('notification.unique-constraint-violation-email'),
-                    //     ];
-                    // }
-                    setExtraErrors(errors);
+                    const errorData = await error.response.json();
+                    enqueueSnackbar(
+                        generateErrorNotification(errorData, dictionary),
+                        {
+                            variant: 'error',
+                        },
+                    );
                 })
                 .finally(() => {
                     setIsLoading(false);

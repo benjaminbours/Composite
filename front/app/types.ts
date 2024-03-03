@@ -55,5 +55,5 @@ export enum Route {
     SIGN_UP_EMAIL_VALIDATION = '/sign-up-email-validation',
     SIGN_UP_EMAIL_ACTIVATED = '/sign-up-email-activated',
     FORGOT_PASSWORD = '/forgot-password',
-    NEW_PASSWORD_ = '/new-password',
+    NEW_PASSWORD = '/new-password',
 }

@@ -50,12 +50,17 @@ export function middleware(request: NextRequest) {
 
         // e.g. incoming request is /products
         // The new URL is now /en-US/products
-        return NextResponse.redirect(
-            new URL(
-                `/${locale}${pathname.startsWith('/') ? '' : '/'}${pathname}`,
-                request.url,
-            ),
+        const incomingURL = new URL(request.url);
+
+        const nextURL = new URL(
+            `/${locale}${pathname.startsWith('/') ? '' : '/'}${pathname}`,
+            request.url,
         );
+        const queryString = incomingURL.searchParams.toString();
+        if (queryString) {
+            nextURL.search = queryString;
+        }
+        return NextResponse.redirect(nextURL);
     }
 }
 

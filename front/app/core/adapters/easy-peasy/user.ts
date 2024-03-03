@@ -6,6 +6,7 @@ import type {
     TokensDto,
     User,
     RegisterDto,
+    AuthControllerUpdatePasswordRequest,
 } from '@benjaminbours/composite-api-client';
 import { servicesContainer } from '../../frameworks';
 import { ApiClient } from '../../services';
@@ -35,7 +36,21 @@ export interface UserModel {
     retrieveSession: Thunk<UserModel, void, any, StoreModel, Promise<boolean>>; // return if a session has been retrieved or not
     signIn: Thunk<UserModel, LoginDto, any, StoreModel, Promise<User>>;
     signOut: Thunk<UserModel, void, any, StoreModel, Promise<boolean>>;
+    updatePassword: Thunk<
+        UserModel,
+        AuthControllerUpdatePasswordRequest,
+        any,
+        StoreModel,
+        Promise<boolean>
+    >;
     resetPassword: Thunk<UserModel, string, any, StoreModel, Promise<boolean>>;
+    resendEmailValidation: Thunk<
+        UserModel,
+        string,
+        any,
+        StoreModel,
+        Promise<boolean>
+    >;
     signUp: Thunk<UserModel, RegisterDto, any, StoreModel, Promise<void>>;
     getProfile: Thunk<UserModel, void, any, StoreModel, Promise<User>>;
 }
@@ -193,6 +208,36 @@ export const userModel: UserModel = {
         const apiClient = servicesContainer.get(ApiClient);
 
         const response = await apiClient.defaultApi.authControllerResetPassword(
+            {
+                resetPasswordDto: {
+                    email: userEmail,
+                },
+            },
+        );
+
+        return response;
+    }),
+
+    updatePassword: thunk(
+        async (_actions, { resetPasswordToken, updatePasswordDto }) => {
+            // inject services
+            const apiClient = servicesContainer.get(ApiClient);
+
+            const response =
+                await apiClient.defaultApi.authControllerUpdatePassword({
+                    resetPasswordToken,
+                    updatePasswordDto,
+                });
+
+            return response;
+        },
+    ),
+
+    resendEmailValidation: thunk(async (_actions, userEmail) => {
+        // inject services
+        const apiClient = servicesContainer.get(ApiClient);
+
+        const response = await apiClient.defaultApi.authControllerConfirmResend(
             {
                 resetPasswordDto: {
                     email: userEmail,
