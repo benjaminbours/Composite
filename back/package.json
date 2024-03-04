@@ -19,7 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "generate-swagger:local": "env-cmd -f .env.local ts-node -r tsconfig-paths/register ./src/scripts/generateSwaggerSpec.ts"
+    "generate-swagger:local": "env-cmd -f .env.local ts-node -r tsconfig-paths/register ./src/scripts/generateSwaggerSpec.ts",
+    "prisma:migrate:reset:local": "env-cmd -f .env.local prisma migrate reset"
   },
   "dependencies": {
     "@benjaminbours/composite-core": "^0.3.0",
@@ -115,5 +116,8 @@
     "moduleNameMapper": {
       "^@project-common/(.*)$": "<rootDir>/../src/common/$1"
     }
+  },
+  "prisma": {
+    "seed": "npx ts-node -r tsconfig-paths/register prisma/seed.ts"
   }
 }

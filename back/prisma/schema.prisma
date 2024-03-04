@@ -10,20 +10,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// model Role {
+//   id          Int    @id @default(autoincrement())
+//   name        String @unique @db.VarChar(255)
+//   permissions Json
+//   // relations
+//   // All the users having this role
+//   user        User[]
+// }
+
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email String  @unique
-  name  String?
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(255)
+  name     String @db.VarChar(50)
+
+  confirmationToken  String? @db.VarChar(255)
+  hashedRefreshToken String? @db.VarChar(255)
+  resetPasswordToken String? @db.VarChar(255)
+  role               Role
+
+  // relations
+  levels Level[]
+  Player Player[]
 }
 
-enum Level {
-  EMPTY_LEVEL
-  CRACK_THE_DOOR
-  LEARN_TO_FLY
-  THE_HIGH_SPHERES
+enum Role {
+  ADMIN
+  USER
+}
+
+enum LevelStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Level {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name   String      @unique @db.VarChar(50)
+  likes  Int         @default(0)
+  status LevelStatus
+  data   Json
+
+  // relations
+  games  Game[]
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 enum GameStatus {
@@ -37,33 +75,31 @@ model Game {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  level   Level
-  status  GameStatus
-  endTime DateTime?
+  status    GameStatus
+  startTime DateTime
+  endTime   DateTime?
+
+  players Player[]
+
+  // relations
+  levelId Int
+  level   Level @relation(fields: [levelId], references: [id])
 }
 
-// enum PlayerSide {
-//   SHADOW
-//   LIGHT
-// }
+enum PlayerSide {
+  SHADOW
+  LIGHT
+}
 
-// enum PlayerState {
-//   IS_PLAYING
-//   IS_PENDING
-// }
+model Player {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-// model Player {
-//   id        Int      @id @default(autoincrement())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
+  side PlayerSide
 
-//   side PlayerSide
-//   state PlayerState
-//   currentLevel Level
-//   // title       String   @unique
-//   // description String
-//   // releaseDate DateTime
-
-//   // // relations
-//   // genre Genre[]
-// }
+  // relations
+  games  Game[]
+  user   User?  @relation(fields: [userId], references: [id])
+  userId Int?
+}

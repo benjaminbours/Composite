@@ -1,2 +1,0 @@
--- AlterEnum
-ALTER TYPE "Level" ADD VALUE 'EMPTY_LEVEL';

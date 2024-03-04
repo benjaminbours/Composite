@@ -9,7 +9,7 @@
     "reset-password-mail": {
         "subject": "Reset your password",
         "title": "Forgot your password? No problem, let's create a new one!",
-        "paragraph": "If you need to reset your password, just click the button below to choose a new one!<br><br>For security reasons, this link is only valid for one hour. <br /><br />If you didn’t request to change your password, you don’t have to do anything, your account stay secure, and your password remains unchanged.",
+        "paragraph": "If you need to reset your password, just click the button below to choose a new one!<br><br>For security reasons, this link is only valid for one hour. <br><br>If you didn’t request to change your password, you don’t have to do anything, your account stay secure, and your password remains unchanged.",
         "buttonText": "Reset my password"
     },
     "sign-up-mail": {
