@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
+import { Role } from '@prisma/client';
 // import fetch from 'cross-fetch';
 // import * as uuid from 'uuid';
 // project
@@ -53,7 +54,7 @@ export class AuthService {
       throw new ForbiddenException('Access denied');
     }
 
-    const tokens = this.getTokens(user.id, user.email);
+    const tokens = this.getTokens(user.id, user.email, user.role);
     await this.updateRefreshTokenHash(user.id, (await tokens).refresh_token);
     return tokens;
   }
@@ -116,6 +117,7 @@ export class AuthService {
         data: {
           ...restDto,
           password: hash,
+          role: Role.USER,
         },
       })
       .catch((err) => {
@@ -392,7 +394,7 @@ export class AuthService {
       throw new ForbiddenException('Access denied');
     }
 
-    const tokens = this.getTokens(user.id, user.email);
+    const tokens = this.getTokens(user.id, user.email, user.role);
     await this.updateRefreshTokenHash(user.id, (await tokens).refresh_token);
     return tokens;
   }
@@ -403,16 +405,14 @@ export class AuthService {
   async getTokens(
     userId: number,
     email: string,
-    // roleId: number,
-    // clientId?: number,
+    role: Role,
   ): Promise<TokensDto> {
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(
         {
           username: email,
           sub: userId,
-          // role: roleId,
-          // clientId,
+          role: role,
         },
         {
           secret: jwtConstants.secret,
@@ -423,8 +423,7 @@ export class AuthService {
         {
           username: email,
           sub: userId,
-          // role: roleId,
-          // clientId,
+          role: role,
         },
         {
           secret: jwtConstants.refresh_secret,

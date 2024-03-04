@@ -1,9 +1,10 @@
 // vendor
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 // project
 import { SerializeService } from '@project-common/services/serialize.service';
-import { Roles, Role, GetUser } from '@project-common/decorators';
+import { Roles, GetUser } from '@project-common/decorators';
 import { JWTUserPayload } from '@project-common/types';
 // local
 import { UsersService } from './users.service';
@@ -21,7 +22,7 @@ export class UsersController {
     description: 'Receive user profile',
     type: User,
   })
-  @Roles(Role.Admin, Role.ContentCreator, Role.Client)
+  @Roles(Role.ADMIN, Role.USER)
   @Get('profile')
   async getProfile(@GetUser() user: JWTUserPayload): Promise<User> {
     return this.usersService
@@ -44,7 +45,7 @@ export class UsersController {
     description: 'Receive user list',
     type: [User],
   })
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   @Get()
   async findAll(): Promise<User[]> {
     return this.usersService
@@ -58,7 +59,7 @@ export class UsersController {
     description: 'Receive user',
     type: User,
   })
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   @Get(':id')
   async findOne(@Param() params: FindOneParams): Promise<User> {
     return this.usersService

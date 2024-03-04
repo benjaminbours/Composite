@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { TemporaryStorageService } from './temporary-storage.service';
 import { ENVIRONMENT } from '@project-common/environment';
 import { UsersModule } from './users/users.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard, RolesGuard } from '@project-common/guards';
 
 @Module({
   imports: [
@@ -27,6 +29,22 @@ import { UsersModule } from './users/users.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TemporaryStorageService],
+  providers: [
+    AppService,
+    TemporaryStorageService,
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    // TODO: REstore ThrottlerGuard
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: CustomThrottlerGuard,
+    // },
+  ],
 })
 export class AppModule {}

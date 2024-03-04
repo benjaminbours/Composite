@@ -1,22 +1,22 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Role } from '../decorators/roles.decorator';
+import { Injectable } from '@nestjs/common';
 import { JWTUserPayload } from '../types';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthorizationService {
   async hasAccess(
     user: JWTUserPayload,
-    resourceTryingToAccess: any,
+    // resourceTryingToAccess: any,
   ): Promise<boolean> {
-    if (user.role === Role.Admin) {
+    if (user.role === Role.ADMIN) {
       return true;
     }
 
-    if (user.clientId !== resourceTryingToAccess) {
-      throw new ForbiddenException(
-        'Trying to access a resource without ownership on it',
-      );
-    }
+    // if (user.clientId !== resourceTryingToAccess) {
+    //   throw new ForbiddenException(
+    //     'Trying to access a resource without ownership on it',
+    //   );
+    // }
 
     return false;
   }

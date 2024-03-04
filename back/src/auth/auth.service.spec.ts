@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker';
 import { AuthService } from './auth.service';
 import { AuthModule } from './auth.module';
 import { PrismaService } from '../common/services/prisma.service';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -36,6 +36,7 @@ describe('AuthService', () => {
     const tokens = await authService.getTokens(
       faker.datatype.number(),
       faker.internet.email(),
+      Role.USER,
     );
     expect(tokens).toHaveProperty('access_token');
     expect(tokens).toHaveProperty('refresh_token');
