@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import { getDictionary } from '../../../getDictionary';
 import { ForgotPasswordForm } from '../../03_organisms/ForgotPasswordForm';
 import { Locale } from '../../../i18n-config';
-import { TopBar } from '../../02_molecules/TopBar';
+import { TopBar } from '../../02_molecules/TopBar/TopBar';
 import { CentralContentTemplate } from '../../04_templates/CentralContentTemplate';
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default async function ForgotPassword({ params: { lng } }: Props) {
 
     return (
         <>
-            <TopBar />
+            <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate>
                 <Paper className="form-padding" elevation={10}>
                     <h1 className="title-1">

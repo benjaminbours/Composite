@@ -8,14 +8,16 @@ import Divider from '@mui/material/Divider';
 import Toolbar from '@mui/material/Toolbar';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import { Route } from '../types';
-import IconButton from '@mui/material/IconButton';
-import { useStoreState } from '../hooks';
+import { Route } from '../../types';
+import { useStoreState } from '../../hooks';
+import { UserMenu } from './UserMenu';
+import { getDictionary } from '../../../getDictionary';
 
-interface Props {}
+interface Props {
+    dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
+}
 
-export const TopBar: React.FC<Props> = () => {
+export const TopBar: React.FC<Props> = ({ dictionary }) => {
     const isAuthenticated = useStoreState(
         (state) => state.user.isAuthenticated,
     );
@@ -58,29 +60,10 @@ export const TopBar: React.FC<Props> = () => {
                         Editor
                     </Button>
                 </Link>
-                <div className="top-bar__account-container">
-                    {isAuthenticated ? (
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            // onClick={handleMenu}
-                            color="inherit"
-                        >
-                            <AccountCircle />
-                        </IconButton>
-                    ) : (
-                        <Link href={Route.LOGIN} legacyBehavior passHref>
-                            <Button
-                                className="top-bar__login-button"
-                                size="small"
-                            >
-                                Login
-                            </Button>
-                        </Link>
-                    )}
-                </div>
+                <UserMenu
+                    isAuthenticated={isAuthenticated}
+                    dictionary={dictionary}
+                />
             </Toolbar>
         </AppBar>
     );

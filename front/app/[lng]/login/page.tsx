@@ -4,7 +4,7 @@ import { CentralContentTemplate } from '../../04_templates/CentralContentTemplat
 import { getDictionary } from '../../../getDictionary';
 import { LoginForm } from '../../03_organisms/LoginForm';
 import { Locale } from '../../../i18n-config';
-import { TopBar } from '../../02_molecules/TopBar';
+import { TopBar } from '../../02_molecules/TopBar/TopBar';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',
@@ -22,7 +22,7 @@ export default async function Login({ params: { lng } }: Props) {
     const dictionary = await getDictionary(lng);
     return (
         <>
-            <TopBar />
+            <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate className="login-page">
                 <Paper className="form-padding" elevation={10}>
                     <h1>{`Login`}</h1>

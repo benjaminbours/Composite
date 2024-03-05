@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -13,23 +12,34 @@ import CameraIcon from '@mui/icons-material/Camera';
 import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
 import Divider from '@mui/material/Divider';
+import Link from 'next/link';
+import { getDictionary } from '../../../getDictionary';
+import { UserMenu } from '../../02_molecules/TopBar/UserMenu';
 
 interface Props {
+    dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     onResetCamera: () => void;
     onToggleCollisionArea: () => void;
     onStartTestMode: () => void;
     onResetPlayersPosition: () => void;
     levelName: string;
+    isMissingLevelName: boolean;
     onLevelNameChange: (e: any) => void;
+    onSave: () => void;
+    isAuthenticated: boolean;
 }
 
-export const TopBar: React.FC<Props> = ({
+export const TopBarLevelEditor: React.FC<Props> = ({
+    dictionary,
     levelName,
     onLevelNameChange,
     onResetCamera,
     onToggleCollisionArea,
     onStartTestMode,
     onResetPlayersPosition,
+    onSave,
+    isAuthenticated,
+    isMissingLevelName,
 }) => {
     const actionItems = useMemo(() => {
         return [
@@ -62,17 +72,22 @@ export const TopBar: React.FC<Props> = ({
     ]);
 
     return (
-        <AppBar className="level-builder__app-bar top-bar" position="static">
+        <AppBar className="level-editor__app-bar top-bar" position="static">
             <Toolbar className="top-bar__tool-bar">
-                <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
-                    Back
-                </Button>
+                <Link href="/" className="top-bar__logo">
+                    <h2>Composite</h2>
+                </Link>
                 <Divider orientation="vertical" flexItem />
+                {/* <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
+                    Back
+                </Button> */}
+                {/* <Divider orientation="vertical" flexItem /> */}
                 <TextField
                     variant="standard"
                     placeholder="Level name"
                     value={levelName}
                     onChange={onLevelNameChange}
+                    error={isMissingLevelName}
                 />
                 <Divider orientation="vertical" flexItem />
                 <DropDownMenu
@@ -80,9 +95,18 @@ export const TopBar: React.FC<Props> = ({
                     items={actionItems}
                     icon={<KeyboardArrowDownIcon />}
                 />
-                <Button size="small" variant="contained" endIcon={<SaveIcon />}>
+                <Button
+                    size="small"
+                    variant="contained"
+                    endIcon={<SaveIcon />}
+                    onClick={onSave}
+                >
                     Save
                 </Button>
+                <UserMenu
+                    isAuthenticated={isAuthenticated}
+                    dictionary={dictionary}
+                />
             </Toolbar>
         </AppBar>
     );

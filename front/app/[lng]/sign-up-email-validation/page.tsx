@@ -1,7 +1,7 @@
 // vendors
 import type { Metadata } from 'next';
 // project
-import { TopBar } from '../../02_molecules/TopBar';
+import { TopBar } from '../../02_molecules/TopBar/TopBar';
 import { getDictionary } from '../../../getDictionary';
 import { Locale } from '../../../i18n-config';
 import { CentralContentTemplate } from '../../04_templates/CentralContentTemplate';
@@ -25,7 +25,7 @@ export default async function SignUpEmailActivated({ params: { lng } }: Props) {
 
     return (
         <>
-            <TopBar />
+            <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate className="sign-up-email-validation-page">
                 <Paper className="form-padding" elevation={10}>
                     <h1>{dictionary['sign-up-email-validation'].title}</h1>
