@@ -1,4 +1,4 @@
-import { Object3D, Vector3 } from 'three';
+import { Mesh, Object3D, Vector3 } from 'three';
 import {
     ElementName,
     ElementToBounce,
@@ -21,13 +21,14 @@ import {
     ColumnFatProperties,
     WallDoorProperties,
     DoorOpenerProperties,
+    LevelElement,
 } from './types';
-import { SkinBounce } from '../Game/elements/SkinBounce';
-import { Pulse } from '../Game/elements/Pulse';
-import { SkinBounceShadow } from '../Game/elements/SkinBounceShadow';
-import App from '../Game/App';
-import { EndLevel } from '../Game/elements/EndLevel';
-import { DoorInfo, DoorOpener } from '../Game/elements/DoorOpener';
+import { SkinBounce } from '../../Game/elements/SkinBounce';
+import { Pulse } from '../../Game/elements/Pulse';
+import { SkinBounceShadow } from '../../Game/elements/SkinBounceShadow';
+import App from '../../Game/App';
+import { EndLevel } from '../../Game/elements/EndLevel';
+import { DoorInfo, DoorOpener } from '../../Game/elements/DoorOpener';
 
 export function computeDoorInfo(
     wallDoor: Object3D,
@@ -193,4 +194,64 @@ export function createElement(
                 properties: props,
             };
     }
+}
+
+export function removeMeshFromScene(
+    app: App,
+    elements: LevelElement[],
+    index: number,
+) {
+    const mesh = elements[index].mesh;
+    app.scene.remove(mesh);
+    if (mesh.id === app.controlledMesh?.id) {
+        app.detachTransformControls();
+    }
+    app.removeFromCollidingElements(mesh);
+    if (mesh.name.includes('WALL_DOOR')) {
+        const id = mesh.name.split('_')[0];
+        delete app.gameStateManager.currentState.level.doors[id];
+    }
+    if (mesh.name.includes('BOUNCE')) {
+        const bounce = mesh.children[0] as ElementToBounce;
+        const index = app.level.bounces.findIndex((el) => el === mesh);
+        app.level.bounces.splice(index, 1);
+        delete app.gameStateManager.currentState.level.bounces[bounce.bounceID];
+        if (bounce.side === Side.LIGHT) {
+            app.rendererManager.removeLightBounceComposer(bounce);
+        }
+    }
+}
+
+export function addMeshToScene(app: App, type: ElementType, group: Object3D) {
+    app.scene.add(group);
+    app.attachTransformControls(group);
+    addToCollidingElements(app, group);
+}
+
+export function addToCollidingElements(app: App, group: Object3D) {
+    const addToCollidingElements = (mesh: Mesh) => {
+        if (app.detectIfMeshIsCollidable(mesh)) {
+            (mesh.geometry as any).computeBoundsTree();
+            app.collidingElements.push(mesh);
+        }
+    };
+    const checkChildren = (elements: Object3D[]) => {
+        for (let i = 0; i < elements.length; i++) {
+            const child = elements[i];
+            const notCollidable = ['particles'];
+            if (
+                child.name.includes('Occlusion') ||
+                notCollidable.includes(child.name) ||
+                child instanceof SkinBounce === true
+            ) {
+                continue;
+            }
+            if (child.children.length > 0) {
+                checkChildren(child.children);
+            } else {
+                addToCollidingElements(child as Mesh);
+            }
+        }
+    };
+    checkChildren(group.children);
 }

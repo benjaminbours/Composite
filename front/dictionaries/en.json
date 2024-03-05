@@ -1,5 +1,9 @@
 {
     "common": {
+        "nav": {
+            "logout": "Logout",
+            "profile": "My profile"
+        },
         "form": {
             "label": {
                 "email": "Email",
@@ -29,16 +33,19 @@
         },
         "notification": {
             "success-login": "Successfully login!",
+            "success-logout": "Successfully logout",
             "success-sign-up": "I just sent an email to {{email}}. Please click on the link in the mail to confirm your account.",
             "success-resend-validation-email": "A new email has been send to {{email}}",
             "success-reset-password-sent-email": "An email as successfully been sent to reset your password",
             "success-new-password": "Your password has been successfully updated",
             "error-login": "Invalid email or password!",
+            "error-logout": "Unknown error, couldn't logout",
             "error-forbidden": "Access denied",
             "error-unknown": "An unknown error occurred, please try again later",
             "error-bad-request": {
                 "email": "Email must be a valid email"
-            }
+            },
+            "error-missing-level-name": "Please enter a name for your level"
         }
     },
     "register": {

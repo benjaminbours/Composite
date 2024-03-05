@@ -16,7 +16,7 @@ interface Props {
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
-    levelBuilderAppRef?: React.MutableRefObject<App | undefined>;
+    levelEditorAppRef?: React.MutableRefObject<App | undefined>;
     // TODO: Don't like so much the management of this callback
     onTransformControlsObjectChange?: (object: THREE.Object3D) => void;
 }
@@ -28,7 +28,7 @@ function Game({
     tabIsHidden,
     stats,
     inputsManager,
-    levelBuilderAppRef,
+    levelEditorAppRef,
     onTransformControlsObjectChange,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,7 +72,7 @@ function Game({
                 if (!canvasRef.current) {
                     return;
                 }
-                const mode = levelBuilderAppRef ? AppMode.EDITOR : AppMode.GAME;
+                const mode = levelEditorAppRef ? AppMode.EDITOR : AppMode.GAME;
                 appRef.current = new App(
                     canvasRef.current,
                     initialGameState,
@@ -82,8 +82,8 @@ function Game({
                     socketController,
                     onTransformControlsObjectChange,
                 );
-                if (levelBuilderAppRef) {
-                    levelBuilderAppRef.current = appRef.current;
+                if (levelEditorAppRef) {
+                    levelEditorAppRef.current = appRef.current;
                 }
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);
