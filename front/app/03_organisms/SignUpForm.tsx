@@ -255,6 +255,8 @@ export const SignUpForm: React.FC<Props> = ({
                                         : {}),
                                 },
                             }}
+                            legacyBehavior
+                            passHref
                         >
                             <Button
                                 color="primary"
@@ -266,20 +268,15 @@ export const SignUpForm: React.FC<Props> = ({
                             </Button>
                         </Link>
                     )}
-                    <Link
-                        href={{
-                            pathname: Route.SIGN_UP_EMAIL_VALIDATION,
-                            href: Route.SIGN_UP_EMAIL_VALIDATION,
-                        }}
+                    <Button
+                        href={Route.SIGN_UP_EMAIL_VALIDATION}
+                        target="_blank"
+                        color="primary"
+                        className="round-button signUp__form__emailValidationButton"
+                        fullWidth
                     >
-                        <Button
-                            color="primary"
-                            className="round-button signUp__form__emailValidationButton"
-                            fullWidth
-                        >
-                            {dictionary.form.button['no-received-email']}
-                        </Button>
-                    </Link>
+                        {dictionary.form.button['no-received-email']}
+                    </Button>
                 </div>
             </Form>
         </div>

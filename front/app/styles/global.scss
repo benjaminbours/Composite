@@ -335,15 +335,19 @@ $buttonSizeLarge: 120px;
 
 .buttons-container {
     display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
     gap: 10px;
     text-align: center;
 }
 
 .central-content-template {
     width: 100%;
-    height: calc(100vh - 56px);
+    height: calc(100vh - 54px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 100px;
+    box-sizing: border-box;
     justify-content: center;
     justify-items: center;
     border-radius: 0;
@@ -360,6 +364,10 @@ $buttonSizeLarge: 120px;
 
 .form-padding {
     padding: 30px;
+}
+
+.top-bar {
+    height: 54px;
 }
 
 .top-bar__tool-bar {

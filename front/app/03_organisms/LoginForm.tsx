@@ -95,12 +95,10 @@ export const LoginForm: React.FC<Props> = ({
             signIn(e.formData)
                 .then(() => {
                     if (withRedirect && pathToRedirect) {
-                        const href = new URL(
-                            isRelative(pathToRedirect as string)
-                                ? (pathToRedirect as string)
-                                : '/',
-                        );
-                        router.push(href.toString());
+                        const href = isRelative(pathToRedirect as string)
+                            ? (pathToRedirect as string)
+                            : '/';
+                        router.push(href);
                     }
                     enqueueSnackbar(dictionary.notification['success-login'], {
                         variant: 'success',
@@ -176,6 +174,8 @@ export const LoginForm: React.FC<Props> = ({
                                     : {}),
                             },
                         }}
+                        legacyBehavior
+                        passHref
                     >
                         <Button
                             color="primary"
@@ -187,16 +187,15 @@ export const LoginForm: React.FC<Props> = ({
                         </Button>
                     </Link>
                 )}
-                <Link
-                    href={{
-                        pathname: Route.FORGOT_PASSWORD,
-                        href: Route.FORGOT_PASSWORD,
-                    }}
+                <Button
+                    href={Route.FORGOT_PASSWORD}
+                    target="_blank"
+                    color="primary"
+                    className="round-button"
+                    fullWidth
                 >
-                    <Button color="primary" className="round-button" fullWidth>
-                        {dictionary.form.button['forgot-password']}
-                    </Button>
-                </Link>
+                    {dictionary.form.button['forgot-password']}
+                </Button>
             </div>
         </Form>
     );
