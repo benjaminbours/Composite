@@ -72,6 +72,7 @@ services:
       - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost
       - traefik.http.middlewares.api_middleware.headers.accessControlAllowCredentials=true
       - traefik.http.middlewares.api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization
+      - traefik.http.middlewares.api_middleware.headers.accessControlAllowMethods=GET,POST,DELETE,PATCH
       - traefik.http.routers.api.middlewares=api_middleware
 
   front:
