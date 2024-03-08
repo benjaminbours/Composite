@@ -1,3 +1,4 @@
+'use client';
 import React, { useCallback } from 'react';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -5,17 +6,20 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { getDictionary } from '../../../getDictionary';
-import { useStoreActions } from '../../hooks/store';
+import { useStoreActions, useStoreState } from '../../hooks/store';
 import { useSnackbar } from 'notistack';
 import Link from 'next/link';
 import { Route } from '../../types';
 
 interface Props {
-    isAuthenticated: boolean;
+    disabled?: boolean;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
 }
 
-export const UserMenu: React.FC<Props> = ({ isAuthenticated, dictionary }) => {
+export const UserMenu: React.FC<Props> = ({ dictionary, disabled }) => {
+    const isAuthenticated = useStoreState(
+        (state) => state.user.isAuthenticated,
+    );
     const { enqueueSnackbar } = useSnackbar();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const signOut = useStoreActions((store) => store.user.signOut);
@@ -53,6 +57,7 @@ export const UserMenu: React.FC<Props> = ({ isAuthenticated, dictionary }) => {
                         aria-haspopup="true"
                         onClick={handleClick}
                         color="inherit"
+                        disabled={disabled}
                     >
                         <AccountCircle />
                     </IconButton>
@@ -81,7 +86,11 @@ export const UserMenu: React.FC<Props> = ({ isAuthenticated, dictionary }) => {
                 </>
             ) : (
                 <Link href={Route.LOGIN} legacyBehavior passHref>
-                    <Button className="top-bar__login-button" size="small">
+                    <Button
+                        disabled={disabled}
+                        className="top-bar__login-button"
+                        size="small"
+                    >
                         Login
                     </Button>
                 </Link>

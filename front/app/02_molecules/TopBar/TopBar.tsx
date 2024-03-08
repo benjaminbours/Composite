@@ -1,4 +1,3 @@
-'use client';
 // vendors
 import React from 'react';
 import Link from 'next/link';
@@ -9,7 +8,6 @@ import Toolbar from '@mui/material/Toolbar';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { Route } from '../../types';
-import { useStoreState } from '../../hooks';
 import { UserMenu } from './UserMenu';
 import { getDictionary } from '../../../getDictionary';
 
@@ -18,9 +16,6 @@ interface Props {
 }
 
 export const TopBar: React.FC<Props> = ({ dictionary }) => {
-    const isAuthenticated = useStoreState(
-        (state) => state.user.isAuthenticated,
-    );
     return (
         <AppBar
             elevation={10}
@@ -47,7 +42,7 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
                     </Button>
                 </Link>
                 <Link
-                    href={Route.LEVEL_EDITOR}
+                    href={Route.LEVEL_EDITOR('new')}
                     legacyBehavior
                     passHref
                     className="top-bar__logo"
@@ -60,10 +55,7 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
                         Editor
                     </Button>
                 </Link>
-                <UserMenu
-                    isAuthenticated={isAuthenticated}
-                    dictionary={dictionary}
-                />
+                <UserMenu dictionary={dictionary} />
             </Toolbar>
         </AppBar>
     );
