@@ -1,4 +1,5 @@
 import { Container } from 'inversify';
+import 'reflect-metadata';
 import { ApiClient } from '../services';
 
 const servicesContainer = new Container();

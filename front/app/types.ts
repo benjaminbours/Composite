@@ -42,18 +42,21 @@ export interface IWaveOptions {
     speed: number;
 }
 
-export enum Route {
-    HOME = '/',
-    LOBBY = '/lobby',
-    INVITE = '/invite',
+export const Route = {
+    HOME: '/',
+    LOBBY: '/lobby',
+    INVITE: '/invite',
 
-    TIMELINE = '/timeline',
-    ROADMAP = '/timeline#roadmap',
-    LEVEL_EDITOR = '/level-editor',
-    LOGIN = '/login',
-    REGISTER = '/register',
-    SIGN_UP_EMAIL_VALIDATION = '/sign-up-email-validation',
-    SIGN_UP_EMAIL_ACTIVATED = '/sign-up-email-activated',
-    FORGOT_PASSWORD = '/forgot-password',
-    NEW_PASSWORD = '/new-password',
-}
+    TIMELINE: '/timeline',
+    ROADMAP: '/timeline#roadmap',
+    LEVEL_EDITOR_ROOT: '/level-editor',
+    LEVEL_EDITOR: (levelId: number | string) => `/level-editor/${levelId}`,
+    LOGIN: '/login',
+    REGISTER: '/register',
+    SIGN_UP_EMAIL_VALIDATION: '/sign-up-email-validation',
+    SIGN_UP_EMAIL_ACTIVATED: '/sign-up-email-activated',
+    FORGOT_PASSWORD: '/forgot-password',
+    NEW_PASSWORD: '/new-password',
+
+    NOT_FOUND: '/not-found',
+};

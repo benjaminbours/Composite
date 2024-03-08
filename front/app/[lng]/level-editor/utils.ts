@@ -1,4 +1,4 @@
-import { Mesh, Object3D, Vector3 } from 'three';
+import { Euler, Mesh, Object3D, ObjectLoader, Vector3 } from 'three';
 import {
     ElementName,
     ElementToBounce,
@@ -254,4 +254,45 @@ export function addToCollidingElements(app: App, group: Object3D) {
         }
     };
     checkChildren(group.children);
+}
+
+export function parseLevelElements(elementList: any[]): LevelElement[] {
+    const loader = new ObjectLoader();
+    const elements = elementList.map((el: any) => {
+        const properties: Record<string, any> = {};
+        Object.entries(el.properties).forEach(
+            ([key, value]: [key: string, value: any]) => {
+                switch (key) {
+                    case 'rotation':
+                        properties[key] = new Euler(
+                            value._x,
+                            value._y,
+                            value._z,
+                        );
+                        break;
+                    case 'position':
+                    case 'size':
+                    case 'doorPosition':
+                        properties[key] = new Vector3(
+                            value.x,
+                            value.y,
+                            value.z,
+                        );
+                        break;
+                    default:
+                        properties[key] = value;
+                        break;
+                }
+            },
+        );
+
+        return {
+            type: el.type as ElementType,
+            name: el.name,
+            mesh: loader.parse(el.mesh),
+            properties: properties,
+        };
+    });
+
+    return elements as LevelElement[];
 }

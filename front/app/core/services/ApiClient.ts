@@ -1,8 +1,6 @@
 import { injectable } from 'inversify';
 import { Configuration, DefaultApi } from '@benjaminbours/composite-api-client';
 
-new Configuration();
-
 @injectable()
 export class ApiClient {
     configuration = new Configuration();
@@ -26,7 +24,7 @@ export class ApiClient {
     public set token(token: string | undefined) {
         this._token = token;
         this.configuration = new Configuration({
-            ...this.configuration,
+            basePath: this.configuration.basePath,
             headers: this.headers,
         });
         this.defaultApi = new DefaultApi(this.configuration);
