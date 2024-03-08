@@ -1,15 +1,13 @@
+'use client';
 import Modal from '@mui/material/Modal';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import React, { useCallback, useState } from 'react';
 import { LoginForm } from '../../03_organisms/LoginForm';
 import { getDictionary } from '../../../getDictionary';
-import { SignUpForm } from '../../03_organisms/SignUpForm';
-
-enum Mode {
-    SIGN_IN,
-    SIGN_UP,
-}
+import { SignUpForm, WrapperReCaptcha } from '../../03_organisms/SignUpForm';
 
 interface Props {
     isModalOpen: boolean;
@@ -17,16 +15,14 @@ interface Props {
 }
 
 export const AuthModal: React.FC<Props> = ({ isModalOpen, dictionary }) => {
-    const [mode, setMode] = useState<Mode>(Mode.SIGN_IN);
+    const [currentTab, setCurrentTab] = useState(0);
 
-    const onClickSignIn = useCallback(() => {
-        setMode(Mode.SIGN_IN);
-    }, []);
-
-    const onClickSignUp = useCallback(() => {
-        console.log('HERE');
-        setMode(Mode.REGISTER);
-    }, []);
+    const handleChangeTab = useCallback(
+        (_e: React.SyntheticEvent, newValue: number) => {
+            setCurrentTab(newValue);
+        },
+        [],
+    );
 
     return (
         <Modal
@@ -38,17 +34,20 @@ export const AuthModal: React.FC<Props> = ({ isModalOpen, dictionary }) => {
                 <Typography variant="h6" component="h2">
                     In order to save your level, I need to know to whom it is
                 </Typography>
-                {mode === Mode.SIGN_IN && (
-                    <LoginForm
-                        dictionary={dictionary}
-                        withSignUp={{ callback: onClickSignUp }}
-                    />
-                )}
-                {mode === Mode.REGISTER && (
-                    <SignUpForm
-                        dictionary={dictionary}
-                        withSignIn={{ callback: onClickSignIn }}
-                    />
+                <Tabs
+                    value={currentTab}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    onChange={handleChangeTab}
+                >
+                    <Tab label="Login" />
+                    <Tab label="Register" />
+                </Tabs>
+                {currentTab === 0 && <LoginForm dictionary={dictionary} />}
+                {currentTab === 1 && (
+                    <WrapperReCaptcha lng="en">
+                        <SignUpForm dictionary={dictionary} />
+                    </WrapperReCaptcha>
                 )}
             </Paper>
         </Modal>

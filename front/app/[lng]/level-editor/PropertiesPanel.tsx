@@ -24,12 +24,14 @@ interface Props {
     state: LevelElement[];
     element: LevelElement;
     onUpdateProperty: (key: string, value: any) => void;
+    disabled?: boolean;
 }
 
 export const PropertiesPanel: React.FC<Props> = ({
     state,
     element,
     onUpdateProperty,
+    disabled,
 }) => {
     return (
         <Paper className="panel properties-panel">
@@ -67,6 +69,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                 </label>
                                 {hasDoorInTheScene ? (
                                     <Select
+                                        disabled={disabled}
                                         value={
                                             value !== undefined
                                                 ? value
@@ -109,6 +112,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                 <div className="properties-panel__inputs-container">
                                     <MUISwitch
                                         checked={value}
+                                        disabled={disabled}
                                         onChange={(event: any) => {
                                             onUpdateProperty(
                                                 key,
@@ -127,6 +131,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                 <label>{(propertyTextMap as any)[key]}</label>
                                 <div className="properties-panel__inputs-container">
                                     <Switch
+                                        disabled={disabled}
                                         checked={value}
                                         onChange={(event: any) => {
                                             onUpdateProperty(
@@ -156,6 +161,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                             <label>{(propertyTextMap as any)[key]}</label>
                             <div className="properties-panel__inputs-container">
                                 <NumberInput
+                                    disabled={disabled}
                                     step={step}
                                     min={key === 'size' ? 1 : undefined}
                                     value={value.x}
@@ -165,6 +171,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                     onChange={onChange('x') as any}
                                 />
                                 <NumberInput
+                                    disabled={disabled}
                                     step={step}
                                     min={key === 'size' ? 1 : undefined}
                                     value={value.y}
@@ -175,6 +182,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                 />
                                 {key !== 'size' && (
                                     <NumberInput
+                                        disabled={disabled}
                                         step={step}
                                         value={value.z}
                                         startAdornment={

@@ -17,6 +17,7 @@ interface Props {
     onElementDelete: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     onAddElement: (type: ElementType) => void;
+    disabled?: boolean;
 }
 
 export const SceneContentPanel: React.FC<Props> = React.memo(
@@ -27,6 +28,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
         onChangeName,
         onElementDelete,
         onAddElement,
+        disabled,
     }) => {
         const libraryItems = useMemo(() => {
             return [
@@ -75,6 +77,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                         buttonText="Add"
                         items={libraryItems}
                         icon={<AddIcon />}
+                        disabled={disabled}
                     />
                 </div>
                 <Divider className="scene-content-panel__divider" />
@@ -88,6 +91,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                             onDelete={onElementDelete}
                             onChangeName={onChangeName}
                             onClick={onElementClick}
+                            disabled={disabled}
                         />
                     ))}
                 </List>

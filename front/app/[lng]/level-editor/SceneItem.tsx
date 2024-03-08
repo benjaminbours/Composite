@@ -15,10 +15,19 @@ type Props = LevelElement & {
     onClick: (index: number) => () => void;
     onDelete: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
+    disabled?: boolean;
 };
 
 export const SceneItem: React.FC<Props> = React.memo(
-    ({ isSelected, name, index, onClick, onDelete, onChangeName }) => {
+    ({
+        isSelected,
+        name,
+        index,
+        onClick,
+        onDelete,
+        onChangeName,
+        disabled,
+    }) => {
         return (
             <ListItem
                 className="scene-content-panel__item"
@@ -27,12 +36,17 @@ export const SceneItem: React.FC<Props> = React.memo(
                         edge="end"
                         aria-label="delete"
                         onClick={onDelete(index)}
+                        disabled={disabled}
                     >
                         <DeleteIcon />
                     </IconButton>
                 }
             >
-                <ListItemButton selected={isSelected} onClick={onClick(index)}>
+                <ListItemButton
+                    disabled={disabled}
+                    selected={isSelected}
+                    onClick={onClick(index)}
+                >
                     <ListItemIcon>
                         <SquareIcon />
                     </ListItemIcon>

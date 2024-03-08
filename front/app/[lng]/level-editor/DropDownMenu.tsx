@@ -13,9 +13,15 @@ interface Props {
         text: string;
     }[];
     icon: React.ReactNode;
+    disabled?: boolean;
 }
 
-export const DropDownMenu: React.FC<Props> = ({ items, buttonText, icon }) => {
+export const DropDownMenu: React.FC<Props> = ({
+    items,
+    buttonText,
+    icon,
+    disabled,
+}) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -36,6 +42,7 @@ export const DropDownMenu: React.FC<Props> = ({ items, buttonText, icon }) => {
                 variant="outlined"
                 endIcon={icon}
                 size="small"
+                disabled={disabled}
             >
                 {buttonText}
             </Button>

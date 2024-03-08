@@ -15,9 +15,11 @@ import Divider from '@mui/material/Divider';
 import Link from 'next/link';
 import { getDictionary } from '../../../getDictionary';
 import { UserMenu } from '../../02_molecules/TopBar/UserMenu';
+import { CircularProgress } from '@mui/material';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
+    isSaving: boolean;
     onResetCamera: () => void;
     onToggleCollisionArea: () => void;
     onStartTestMode: () => void;
@@ -26,7 +28,6 @@ interface Props {
     isMissingLevelName: boolean;
     onLevelNameChange: (e: any) => void;
     onSave: () => void;
-    isAuthenticated: boolean;
 }
 
 export const TopBarLevelEditor: React.FC<Props> = ({
@@ -38,8 +39,8 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     onStartTestMode,
     onResetPlayersPosition,
     onSave,
-    isAuthenticated,
     isMissingLevelName,
+    isSaving,
 }) => {
     const actionItems = useMemo(() => {
         return [
@@ -88,25 +89,28 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                     value={levelName}
                     onChange={onLevelNameChange}
                     error={isMissingLevelName}
+                    disabled={isSaving}
                 />
                 <Divider orientation="vertical" flexItem />
                 <DropDownMenu
                     buttonText="Actions"
                     items={actionItems}
                     icon={<KeyboardArrowDownIcon />}
+                    disabled={isSaving}
                 />
-                <Button
-                    size="small"
-                    variant="contained"
-                    endIcon={<SaveIcon />}
-                    onClick={onSave}
-                >
-                    Save
-                </Button>
-                <UserMenu
-                    isAuthenticated={isAuthenticated}
-                    dictionary={dictionary}
-                />
+                {isSaving ? (
+                    <CircularProgress size={30} />
+                ) : (
+                    <Button
+                        size="small"
+                        variant="contained"
+                        endIcon={<SaveIcon />}
+                        onClick={onSave}
+                    >
+                        Save
+                    </Button>
+                )}
+                <UserMenu dictionary={dictionary} disabled={isSaving} />
             </Toolbar>
         </AppBar>
     );
