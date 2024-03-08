@@ -8,7 +8,7 @@ import {
     removeMeshFromScene,
 } from './utils';
 import { useSnackbar } from 'notistack';
-import { getDictionary } from '../../../getDictionary';
+import { getDictionary } from '../../../../getDictionary';
 import { Euler, Object3D, Vector3 } from 'three';
 import {
     ElementName,
@@ -24,14 +24,14 @@ import {
     LevelElement,
     WallDoorProperties,
 } from './types';
-import App from '../../Game/App';
-import { DoorOpener } from '../../Game/elements/DoorOpener';
-import { servicesContainer } from '../../core/frameworks';
-import { ApiClient } from '../../core/services';
+import App from '../../../Game/App';
+import { DoorOpener } from '../../../Game/elements/DoorOpener';
+import { servicesContainer } from '../../../core/frameworks';
+import { ApiClient } from '../../../core/services';
 import { useRouter } from 'next/navigation';
-import { Route } from '../../types';
+import { Route } from '../../../types';
 import { Level } from '@benjaminbours/composite-api-client';
-import { useStoreState } from '../../hooks';
+import { useStoreState } from '../../../hooks';
 
 export function useController(
     level_id: string,

@@ -5,9 +5,9 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import React, { useCallback, useState } from 'react';
-import { LoginForm } from '../../03_organisms/LoginForm';
-import { getDictionary } from '../../../getDictionary';
-import { SignUpForm, WrapperReCaptcha } from '../../03_organisms/SignUpForm';
+import { LoginForm } from '../../../03_organisms/LoginForm';
+import { getDictionary } from '../../../../getDictionary';
+import { SignUpForm, WrapperReCaptcha } from '../../../03_organisms/SignUpForm';
 
 interface Props {
     isModalOpen: boolean;

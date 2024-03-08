@@ -1,11 +1,11 @@
 // vendors
 import type { Metadata } from 'next';
 // project
-import { TopBar } from '../../02_molecules/TopBar/TopBar';
-import { getDictionary } from '../../../getDictionary';
-import { Locale } from '../../../i18n-config';
-import { CentralContentTemplate } from '../../04_templates/CentralContentTemplate';
-import { EmailValidationForm } from '../../03_organisms/EmailValidationForm';
+import { TopBar } from '../../../02_molecules/TopBar/TopBar';
+import { getDictionary } from '../../../../getDictionary';
+import { Locale } from '../../../../i18n-config';
+import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
+import { EmailValidationForm } from '../../../03_organisms/EmailValidationForm';
 import Paper from '@mui/material/Paper';
 
 export const metadata: Metadata = {

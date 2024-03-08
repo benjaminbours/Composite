@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 import Paper from '@mui/material/Paper';
-import { CentralContentTemplate } from '../../04_templates/CentralContentTemplate';
-import { getDictionary } from '../../../getDictionary';
-import { LoginForm } from '../../03_organisms/LoginForm';
-import { Locale } from '../../../i18n-config';
-import { TopBar } from '../../02_molecules/TopBar/TopBar';
+import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
+import { getDictionary } from '../../../../getDictionary';
+import { LoginForm } from '../../../03_organisms/LoginForm';
+import { Locale } from '../../../../i18n-config';
+import { TopBar } from '../../../02_molecules/TopBar/TopBar';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',

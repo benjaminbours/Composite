@@ -7,7 +7,7 @@ import { StoreProvider } from 'easy-peasy';
 import MainApp from './MainApp';
 import { configureStore } from './core/frameworks';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Route } from './types';
+import { MenuScene, Route } from './types';
 import { useStoreActions } from './hooks';
 import { setupProjectEnv } from './utils/setup';
 
@@ -23,6 +23,7 @@ const store = configureStore({});
 
 interface Props {
     children: React.ReactNode;
+    lng: string;
 }
 
 const WithRetrieveSession: React.FC<Props> = ({ children }) => {
@@ -37,30 +38,43 @@ const WithRetrieveSession: React.FC<Props> = ({ children }) => {
     return children;
 };
 
-export const WithMainApp: React.FC<Props> = ({ children }) => {
+export const WithMainApp: React.FC<Props> = ({ children, lng }) => {
     const path = usePathname();
-
-    const content = useMemo(() => {
+    const mainApp = useMemo(() => {
+        const pathWithoutLng = path.replace(`/${lng}`, '');
         if (
-            path.includes(Route.TIMELINE) ||
-            path.includes(Route.LEVEL_EDITOR_ROOT) ||
-            path.includes(Route.LOGIN) ||
-            path.includes(Route.REGISTER) ||
-            path.includes(Route.SIGN_UP_EMAIL_ACTIVATED) ||
-            path.includes(Route.SIGN_UP_EMAIL_VALIDATION) ||
-            path.includes(Route.NEW_PASSWORD) ||
-            path.includes(Route.FORGOT_PASSWORD)
+            pathWithoutLng === '' ||
+            path.includes(Route.INVITE) ||
+            path.includes(Route.LOBBY) ||
+            (children as any).props.notFound
         ) {
-            return children;
+            console.log('render main app');
+            const initialScene = (() => {
+                switch (true) {
+                    // case Boolean((children as any).props.notFound):
+                    //     return MenuScene.NOT_FOUND;
+                    case pathWithoutLng === '':
+                        return MenuScene.HOME;
+                    case path.includes(Route.INVITE):
+                        return MenuScene.INVITE_FRIEND;
+                    case path.includes(Route.LOBBY):
+                        return MenuScene.TEAM_LOBBY;
+                }
+            })();
+
+            return <MainApp initialScene={initialScene} />;
         }
-        return <MainApp>{children}</MainApp>;
-    }, [children, path]);
+        return null;
+    }, [children, path, lng]);
 
     return (
         <ThemeProvider theme={darkTheme}>
             <SnackbarProvider>
                 <StoreProvider store={store}>
-                    <WithRetrieveSession>{content}</WithRetrieveSession>
+                    <WithRetrieveSession lng={lng}>
+                        {mainApp}
+                        {children}
+                    </WithRetrieveSession>
                 </StoreProvider>
             </SnackbarProvider>
         </ThemeProvider>

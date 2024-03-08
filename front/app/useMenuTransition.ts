@@ -29,8 +29,8 @@ export interface RefHashMap {
     notFoundRef: React.RefObject<HTMLDivElement>;
 }
 
-export function useMenuTransition() {
-    const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
+export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
+    const [menuScene, setMenuScene] = useState<MenuScene>(initialScene);
     const [nextMenuScene, setNextMenuScene] = useState<MenuScene | undefined>(
         undefined,
     );

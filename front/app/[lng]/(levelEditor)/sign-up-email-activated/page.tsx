@@ -4,11 +4,11 @@ import Link from 'next/link';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 // project
-import { TopBar } from '../../02_molecules/TopBar/TopBar';
-import { getDictionary } from '../../../getDictionary';
-import { Locale } from '../../../i18n-config';
-import { CentralContentTemplate } from '../../04_templates/CentralContentTemplate';
-import { Route } from '../../types';
+import { TopBar } from '../../../02_molecules/TopBar/TopBar';
+import { getDictionary } from '../../../../getDictionary';
+import { Locale } from '../../../../i18n-config';
+import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
+import { Route } from '../../../types';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',

@@ -10,17 +10,17 @@ import {
     Side,
 } from '@benjaminbours/composite-core';
 // project
-import InputsManager from '../../Game/Player/InputsManager';
-import { EmptyLevel } from '../../Game/levels/EmptyLevel';
-import { AppMode } from '../../Game/App';
+import InputsManager from '../../../Game/Player/InputsManager';
+import { EmptyLevel } from '../../../Game/levels/EmptyLevel';
+import { AppMode } from '../../../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
 import { PropertiesPanel } from './PropertiesPanel';
 import { TopBarLevelEditor } from './TopBarLevelEditor';
-import type { getDictionary } from '../../../getDictionary';
+import type { getDictionary } from '../../../../getDictionary';
 import { AuthModal } from './AuthModal';
 import { useController } from './useController';
 
-const Game = dynamic(() => import('../../Game'), {
+const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
     ssr: false,
 });

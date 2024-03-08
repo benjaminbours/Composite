@@ -2,11 +2,11 @@
 import type { Metadata } from 'next';
 import Paper from '@mui/material/Paper';
 // project
-import { getDictionary } from '../../../getDictionary';
-import { Locale } from '../../../i18n-config';
-import { NewPasswordForm } from '../../03_organisms/NewPasswordForm';
-import { TopBar } from '../../02_molecules/TopBar/TopBar';
-import { CentralContentTemplate } from '../../04_templates/CentralContentTemplate';
+import { getDictionary } from '../../../../getDictionary';
+import { Locale } from '../../../../i18n-config';
+import { NewPasswordForm } from '../../../03_organisms/NewPasswordForm';
+import { TopBar } from '../../../02_molecules/TopBar/TopBar';
+import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - New password',

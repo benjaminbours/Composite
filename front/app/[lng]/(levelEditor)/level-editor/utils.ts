@@ -23,12 +23,12 @@ import {
     DoorOpenerProperties,
     LevelElement,
 } from './types';
-import { SkinBounce } from '../../Game/elements/SkinBounce';
-import { Pulse } from '../../Game/elements/Pulse';
-import { SkinBounceShadow } from '../../Game/elements/SkinBounceShadow';
-import App from '../../Game/App';
-import { EndLevel } from '../../Game/elements/EndLevel';
-import { DoorInfo, DoorOpener } from '../../Game/elements/DoorOpener';
+import { SkinBounce } from '../../../Game/elements/SkinBounce';
+import { Pulse } from '../../../Game/elements/Pulse';
+import { SkinBounceShadow } from '../../../Game/elements/SkinBounceShadow';
+import App from '../../../Game/App';
+import { EndLevel } from '../../../Game/elements/EndLevel';
+import { DoorInfo, DoorOpener } from '../../../Game/elements/DoorOpener';
 
 export function computeDoorInfo(
     wallDoor: Object3D,

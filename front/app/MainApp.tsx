@@ -36,13 +36,13 @@ const Game = dynamic(() => import('./Game'), {
 // almost the same state in Menu
 
 interface Props {
-    children: React.ReactNode;
+    initialScene?: MenuScene;
 }
 
 /**
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
-function MainApp({ children }: Props) {
+function MainApp({ initialScene }: Props) {
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -58,7 +58,7 @@ function MainApp({ children }: Props) {
         setMenuScene,
         lightToStep,
         shadowToStep,
-    } = useMenuTransition();
+    } = useMenuTransition(initialScene);
 
     const {
         state,
@@ -179,7 +179,6 @@ function MainApp({ children }: Props) {
                 />
             )}
             <BottomRightInfo onSettingsClick={handleClickOnSettings} />
-            {children}
         </AppContext.Provider>
     );
 }

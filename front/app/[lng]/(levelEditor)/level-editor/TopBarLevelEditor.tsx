@@ -4,6 +4,7 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SaveIcon from '@mui/icons-material/Save';
@@ -13,8 +14,8 @@ import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
 import Divider from '@mui/material/Divider';
 import Link from 'next/link';
-import { getDictionary } from '../../../getDictionary';
-import { UserMenu } from '../../02_molecules/TopBar/UserMenu';
+import { getDictionary } from '../../../../getDictionary';
+import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 import { CircularProgress } from '@mui/material';
 
 interface Props {
@@ -78,6 +79,9 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 <Link href="/" className="top-bar__logo">
                     <h2>Composite</h2>
                 </Link>
+                <Divider orientation="vertical" flexItem />
+                <HandymanIcon />
+                <h4>Level editor</h4>
                 <Divider orientation="vertical" flexItem />
                 {/* <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
                     Back

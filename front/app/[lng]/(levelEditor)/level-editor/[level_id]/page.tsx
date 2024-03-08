@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { LevelEditor } from '../LevelEditor';
-import { getDictionary } from '../../../../getDictionary';
-import { Locale } from '../../../../i18n-config';
-import { setupProjectEnv } from '../../../utils/setup';
-import { servicesContainer } from '../../../core/frameworks/inversify.config';
-import { ApiClient } from '../../../core/services';
+import { getDictionary } from '../../../../../getDictionary';
+import { Locale } from '../../../../../i18n-config';
+import { setupProjectEnv } from '../../../../utils/setup';
+import { servicesContainer } from '../../../../core/frameworks/inversify.config';
+import { ApiClient } from '../../../../core/services';
 import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {

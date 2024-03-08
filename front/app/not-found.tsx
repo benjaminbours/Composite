@@ -1,5 +1,6 @@
-import { NotFoundPage } from './NotFoundPage';
+import MainApp from './MainApp';
+import { MenuScene } from './types';
 
 export default function NotFound() {
-    return <NotFoundPage />;
+    return <MainApp initialScene={MenuScene.NOT_FOUND} />;
 }

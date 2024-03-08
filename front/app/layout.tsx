@@ -1,7 +1,5 @@
 import Script from 'next/script';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import './styles/main.scss';
-import { WithMainApp } from './WithMainApp';
 
 export default function RootLayout({
     children,
@@ -24,17 +22,13 @@ export default function RootLayout({
                             __html: `window.dataLayer = window.dataLayer || [];
                                 function gtag(){dataLayer.push(arguments);}
                                 gtag('js', new Date());
-                              
+
                                 gtag('config', 'G-8YTQH59D71');`,
                         }}
                     />
                 </>
             )}
-            <body data-app-version={process.env.APP_VERSION}>
-                <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-                    <WithMainApp>{children}</WithMainApp>
-                </AppRouterCacheProvider>
-            </body>
+            <body data-app-version={process.env.APP_VERSION}>{children}</body>
         </html>
     );
 }
