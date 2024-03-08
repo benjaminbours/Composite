@@ -17,11 +17,13 @@
   "dependencies": {
     "@benjaminbours/composite-api-client": "^0.0.1",
     "@benjaminbours/composite-core": "^0.3.0",
+    "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@formatjs/intl-localematcher": "^0.5.4",
     "@mui/icons-material": "^5.15.9",
     "@mui/material": "^5.15.9",
+    "@mui/material-nextjs": "^5.15.11",
     "@next/bundle-analyzer": "^13.5.4",
     "@rjsf/core": "^5.17.0",
     "@rjsf/mui": "^5.17.0",

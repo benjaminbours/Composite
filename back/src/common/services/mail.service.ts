@@ -32,6 +32,10 @@ export class MailService {
       subject,
     });
 
+    if (process.env.STAGE === 'development') {
+      messageData.to = 'boursbenjamin@gmail.com';
+    }
+
     const transporter = nodemailer.createTransport(
       smtpTransport({
         service: 'gmail',
