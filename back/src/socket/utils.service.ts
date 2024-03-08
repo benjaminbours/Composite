@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 // our libs
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { PlayerState, PlayerStatus } from 'src/PlayerState';
+import { PlayerState, PlayerStatus } from '../PlayerState';
 import { SocketService } from './socket.service';
 // import { Levels } from '@benjaminbours/composite-core';
 

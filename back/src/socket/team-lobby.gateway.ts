@@ -14,7 +14,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { RedisPlayerState } from 'src/PlayerState';
+import { RedisPlayerState } from '../PlayerState';
 import { SocketGateway } from './socket.gateway';
 import { UtilsService } from './utils.service';
 

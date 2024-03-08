@@ -35,7 +35,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { PlayerState, PlayerStatus, RedisPlayerState } from 'src/PlayerState';
+import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 // import { GameStatus } from '@prisma/client';
 import { UtilsService } from './utils.service';
 import { SocketService } from './socket.service';

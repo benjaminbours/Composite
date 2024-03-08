@@ -10,6 +10,7 @@ import { ENVIRONMENT } from '@project-common/environment';
 import { UsersModule } from './users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard, RolesGuard } from '@project-common/guards';
+import { LevelsModule } from './levels/levels.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AccessTokenGuard, RolesGuard } from '@project-common/guards';
     SocketModule,
     AuthModule,
     UsersModule,
+    LevelsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -46,9 +46,11 @@ export class TemporaryStorageService {
   private redisClient: RedisClientType;
 
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
-    this.redisClient = (
-      this.cacheManager.store as unknown as RedisStore
-    ).getClient();
+    if ((this.cacheManager.store as unknown as RedisStore).getClient) {
+      this.redisClient = (
+        this.cacheManager.store as unknown as RedisStore
+      ).getClient();
+    }
   }
 
   // players
