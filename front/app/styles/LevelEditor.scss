@@ -49,6 +49,64 @@
 .properties-panel {
     order: 1;
     margin-right: 10px;
+
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    li {
+        margin: 5px 0;
+    }
+
+    .property {
+        width: 100%;
+
+        &.door_id,
+        &.id {
+            order: 0;
+        }
+
+        &.size {
+            order: 1;
+        }
+
+        &.side,
+        &.interactive {
+            width: 50%;
+            order: 2;
+        }
+
+        &.doorPosition {
+            order: 3;
+        }
+
+        &.position {
+            order: 4;
+        }
+
+        &.rotation {
+            order: 5;
+        }
+    }
+}
+
+.properties-panel__inputs-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+
+    input {
+        width: 100%;
+        font-size: 12px;
+        padding: 5px;
+        padding-right: 14px;
+    }
+
+    > * {
+        margin: 10px 0;
+    }
 }
 
 .scene-content-panel {
@@ -85,24 +143,6 @@
 
 #camera-button {
     margin-left: auto;
-}
-
-.properties-panel__inputs-container {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-
-    input {
-        width: 100%;
-        font-size: 12px;
-        padding: 5px;
-        padding-right: 14px;
-    }
-
-    > * {
-        margin: 10px 0;
-    }
 }
 
 .my-num-input {

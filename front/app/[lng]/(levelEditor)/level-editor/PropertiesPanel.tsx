@@ -13,6 +13,7 @@ import {
 // project
 import { NumberInput, InputAdornment } from './NumericInput';
 import { MUISwitch } from './CustomSwitch';
+import classNames from 'classnames';
 
 const propertyTextMap = {
     id: 'ID',
@@ -43,6 +44,10 @@ export const PropertiesPanel: React.FC<Props> = ({
             <h3>{`${element.name} - Properties`}</h3>
             <ul>
                 {Object.entries(element.properties).map(([key, value]) => {
+                    const cssClass = classNames({
+                        property: true,
+                        [key]: true,
+                    });
                     if (key === 'door_id') {
                         const doors = state
                             .filter((el) => el.type === ElementType.WALL_DOOR)
@@ -68,7 +73,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                             </MenuItem>,
                         );
                         return (
-                            <li key={key} className="property">
+                            <li key={key} className={cssClass}>
                                 <label style={{ display: 'block' }}>
                                     {(propertyTextMap as any)[key]}
                                 </label>
@@ -99,7 +104,7 @@ export const PropertiesPanel: React.FC<Props> = ({
 
                     if (key === 'id') {
                         return (
-                            <li key={key} className="property">
+                            <li key={key} className={cssClass}>
                                 <label>
                                     {`${element.type} ${
                                         (propertyTextMap as any)[key]
@@ -112,7 +117,7 @@ export const PropertiesPanel: React.FC<Props> = ({
 
                     if (key === 'side') {
                         return (
-                            <li key={key} className="property">
+                            <li key={key} className={cssClass}>
                                 <label>{(propertyTextMap as any)[key]}</label>
                                 <div className="properties-panel__inputs-container">
                                     <MUISwitch
@@ -132,7 +137,7 @@ export const PropertiesPanel: React.FC<Props> = ({
 
                     if (key === 'interactive') {
                         return (
-                            <li key={key} className="property">
+                            <li key={key} className={cssClass}>
                                 <label>{(propertyTextMap as any)[key]}</label>
                                 <div className="properties-panel__inputs-container">
                                     <Switch
@@ -162,7 +167,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                         };
                     const step = key === 'rotation' ? 10 : 0.1;
                     return (
-                        <li key={key} className="property">
+                        <li key={key} className={cssClass}>
                             <label>{(propertyTextMap as any)[key]}</label>
                             <div className="properties-panel__inputs-container">
                                 <NumberInput
