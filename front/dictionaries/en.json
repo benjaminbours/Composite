@@ -38,6 +38,8 @@
             "success-resend-validation-email": "A new email has been send to {{email}}",
             "success-reset-password-sent-email": "An email as successfully been sent to reset your password",
             "success-new-password": "Your password has been successfully updated",
+            "success-level-saved": "Your level has been successfully saved",
+            "error-level-name-taken": "This level name already exists. Please choose another name",
             "error-login": "Invalid email or password!",
             "error-logout": "Unknown error, couldn't logout",
             "error-forbidden": "Access denied",

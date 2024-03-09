@@ -26,7 +26,7 @@ interface Props {
     onStartTestMode: () => void;
     onResetPlayersPosition: () => void;
     levelName: string;
-    isMissingLevelName: boolean;
+    hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
     onSave: () => void;
 }
@@ -40,7 +40,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     onStartTestMode,
     onResetPlayersPosition,
     onSave,
-    isMissingLevelName,
+    hasErrorWithLevelName,
     isSaving,
 }) => {
     const actionItems = useMemo(() => {
@@ -92,7 +92,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                     placeholder="Level name"
                     value={levelName}
                     onChange={onLevelNameChange}
-                    error={isMissingLevelName}
+                    error={hasErrorWithLevelName}
                     disabled={isSaving}
                 />
                 <Divider orientation="vertical" flexItem />

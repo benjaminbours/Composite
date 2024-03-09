@@ -78,7 +78,7 @@ export const LevelEditor: React.FC<Props> = ({
     const {
         levelName,
         elements,
-        isMissingLevelName,
+        hasErrorWithLevelName,
         currentEditingIndex,
         currentEditingElement,
         app,
@@ -138,7 +138,7 @@ export const LevelEditor: React.FC<Props> = ({
                 levelName={levelName}
                 onLevelNameChange={handleLevelNameChange}
                 onSave={handleClickOnSave}
-                isMissingLevelName={isMissingLevelName}
+                hasErrorWithLevelName={hasErrorWithLevelName}
             />
             <div className="level-editor__top-right-container">
                 <SceneContentPanel

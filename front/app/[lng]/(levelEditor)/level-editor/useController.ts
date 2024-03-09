@@ -32,6 +32,7 @@ import { useRouter } from 'next/navigation';
 import { Route } from '../../../types';
 import { Level } from '@benjaminbours/composite-api-client';
 import { useStoreState } from '../../../hooks';
+import { generateErrorNotification } from '../../../utils/errors/generateErrorNotification';
 
 export function useController(
     level_id: string,
@@ -51,13 +52,13 @@ export function useController(
     const [elements, setElements] = useState(() =>
         parseLevelElements(initialLevel.data),
     );
-    const [isMissingLevelName, setIsMissingLevelName] = useState(false);
+    const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
     const handleLevelNameChange = useCallback(
         (e: any) => {
             setLevelName(e.target.value);
             if (e.target.value) {
-                setIsMissingLevelName(false);
+                setHasErrorWithLevelName(false);
             }
         },
         [setLevelName],
@@ -71,7 +72,7 @@ export function useController(
                     variant: 'error',
                 },
             );
-            setIsMissingLevelName(true);
+            setHasErrorWithLevelName(true);
             return;
         }
 
@@ -101,6 +102,24 @@ export function useController(
                     },
                 })
                 .then(onSuccess)
+                .catch(async (error: any) => {
+                    console.error(error);
+                    const errorData = await error.response.json();
+                    let message;
+                    if (errorData.message === 'Unique constraint violation') {
+                        message =
+                            dictionary.notification['error-level-name-taken'];
+                        setHasErrorWithLevelName(true);
+                    } else {
+                        message = generateErrorNotification(
+                            errorData,
+                            dictionary,
+                        );
+                    }
+                    enqueueSnackbar(message, {
+                        variant: 'error',
+                    });
+                })
                 .finally(onFinally);
         } else {
             apiClient.defaultApi
@@ -428,7 +447,7 @@ export function useController(
     return {
         levelName,
         elements,
-        isMissingLevelName,
+        hasErrorWithLevelName,
         currentEditingIndex,
         currentEditingElement,
         app,
