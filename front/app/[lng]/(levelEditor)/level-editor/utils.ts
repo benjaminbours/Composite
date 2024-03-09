@@ -204,11 +204,9 @@ export function createElement(
 }
 
 export function removeMeshFromScene(app: App, mesh: Object3D) {
-    app.scene.remove(mesh);
     if (mesh.id === app.controlledMesh?.id) {
         app.detachTransformControls();
     }
-    app.removeFromCollidingElements(mesh);
     if (mesh.name.includes('WALL_DOOR')) {
         const id = mesh.name.split('_')[0];
         delete app.gameStateManager.currentState.level.doors[id];
@@ -222,6 +220,8 @@ export function removeMeshFromScene(app: App, mesh: Object3D) {
             app.rendererManager.removeLightBounceComposer(bounce);
         }
     }
+    app.removeFromCollidingElements(mesh);
+    app.scene.remove(mesh);
 }
 
 export function addMeshToScene(app: App, type: ElementType, group: Object3D) {
@@ -230,7 +230,7 @@ export function addMeshToScene(app: App, type: ElementType, group: Object3D) {
 }
 
 export function addToCollidingElements(app: App, group: Object3D) {
-    const addToCollidingElements = (mesh: Mesh) => {
+    const pushToCollidingElements = (mesh: Mesh) => {
         if (app.detectIfMeshIsCollidable(mesh)) {
             (mesh.geometry as any).computeBoundsTree();
             app.collidingElements.push(mesh);
@@ -250,7 +250,7 @@ export function addToCollidingElements(app: App, group: Object3D) {
             if (child.children.length > 0) {
                 checkChildren(child.children);
             } else {
-                addToCollidingElements(child as Mesh);
+                pushToCollidingElements(child as Mesh);
             }
         }
     };

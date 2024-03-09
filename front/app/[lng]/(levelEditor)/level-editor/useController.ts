@@ -44,6 +44,7 @@ export function useController(
     const router = useRouter();
     const [app, setApp] = useState<App>();
     const [isSaving, setIsSaving] = useState(false);
+    const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentEditingIndex, setCurrentEditingIndex] = useState<number>();
     const [levelName, setLevelName] = useState(initialLevel.name);
@@ -82,18 +83,20 @@ export function useController(
             if (!app) {
                 return;
             }
-            router.push(Route.LEVEL_EDITOR(level.id));
+            if (level_id === 'new') {
+                router.push(Route.LEVEL_EDITOR(level.id));
+            }
             // remove all elements from the scene
-            elements.forEach((el) => {
-                removeMeshFromScene(app, el.mesh);
-            });
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                removeMeshFromScene(app, element.mesh);
+            }
             // prepare the next state
             const nextState = parseLevelElements(app, level.data);
             // console.log(
             //     'before',
             //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
             // );
-            setElements(nextState);
             // load the next state into the scene
             const loadElementsToScene = (elementList: LevelElement[]) => {
                 for (let i = 0; i < elementList.length; i++) {
@@ -109,6 +112,7 @@ export function useController(
             enqueueSnackbar(dictionary.notification['success-level-saved'], {
                 variant: 'success',
             });
+            setElements(nextState);
         };
         const onFinally = () => {
             setIsSaving(false);
@@ -456,7 +460,7 @@ export function useController(
     // effect responsible to mount the 3d scene only once and when the app is ready
     useEffect(() => {
         // if the app is not ready, don't do anything
-        if (!app) {
+        if (!app || isInitialLoadDone) {
             return;
         }
         // parse the initial level elements
@@ -471,7 +475,8 @@ export function useController(
         loadElementsToScene(elementList);
         // set the state
         setElements(elementList);
-    }, [app, initialLevel]);
+        setIsInitialLoadDone(true);
+    }, [app, initialLevel, isInitialLoadDone]);
 
     return {
         levelName,
