@@ -15,7 +15,7 @@ export class LevelsService {
         name: createLevelDto.name,
         data: createLevelDto.data,
         status: LevelStatus.DRAFT,
-        userId: user.sub,
+        authorId: user.sub,
       },
     });
   }

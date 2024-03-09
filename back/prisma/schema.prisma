@@ -25,8 +25,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   email    String @unique @db.VarChar(255)
+  name     String @unique @db.VarChar(50)
   password String @db.VarChar(255)
-  name     String @db.VarChar(50)
 
   confirmationToken  String? @db.VarChar(255)
   hashedRefreshToken String? @db.VarChar(255)
@@ -59,9 +59,9 @@ model Level {
   data   Json
 
   // relations
-  games  Game[]
-  user   User   @relation(fields: [userId], references: [id])
-  userId Int
+  games    Game[]
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId Int
 }
 
 enum GameStatus {

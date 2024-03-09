@@ -34,7 +34,7 @@ export class Level implements PrismaLevel {
   @ApiProperty({ enum: LevelStatus })
   status: LevelStatus;
   @ApiProperty()
-  userId: number;
+  authorId: number;
   @ApiProperty({ type: String })
   createdAt: Date;
   @ApiProperty({ type: String })

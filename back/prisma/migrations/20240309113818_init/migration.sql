@@ -16,8 +16,8 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
     "name" VARCHAR(50) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
     "confirmationToken" VARCHAR(255),
     "hashedRefreshToken" VARCHAR(255),
     "resetPasswordToken" VARCHAR(255),
@@ -35,7 +35,7 @@ CREATE TABLE "Level" (
     "likes" INTEGER NOT NULL DEFAULT 0,
     "status" "LevelStatus" NOT NULL,
     "data" JSONB NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "authorId" INTEGER NOT NULL,
 
     CONSTRAINT "Level_pkey" PRIMARY KEY ("id")
 );
@@ -74,6 +74,9 @@ CREATE TABLE "_GameToPlayer" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_name_key" ON "User"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Level_name_key" ON "Level"("name");
 
 -- CreateIndex
@@ -83,7 +86,7 @@ CREATE UNIQUE INDEX "_GameToPlayer_AB_unique" ON "_GameToPlayer"("A", "B");
 CREATE INDEX "_GameToPlayer_B_index" ON "_GameToPlayer"("B");
 
 -- AddForeignKey
-ALTER TABLE "Level" ADD CONSTRAINT "Level_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Level" ADD CONSTRAINT "Level_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_levelId_fkey" FOREIGN KEY ("levelId") REFERENCES "Level"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
