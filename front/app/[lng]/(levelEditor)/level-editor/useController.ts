@@ -83,16 +83,17 @@ export function useController(
                 return;
             }
             router.push(Route.LEVEL_EDITOR(level.id));
-            // prepare the next state
-            const nextState = parseLevelElements(level.data);
-            setElements((prev) => {
-                // remove all elements from the scene
-                prev.forEach((el) => {
-                    removeMeshFromScene(app, el.mesh);
-                });
-                // return the next state
-                return nextState;
+            // remove all elements from the scene
+            elements.forEach((el) => {
+                removeMeshFromScene(app, el.mesh);
             });
+            // prepare the next state
+            const nextState = parseLevelElements(app, level.data);
+            // console.log(
+            //     'before',
+            //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
+            // );
+            setElements(nextState);
             // load the next state into the scene
             const loadElementsToScene = (elementList: LevelElement[]) => {
                 for (let i = 0; i < elementList.length; i++) {
@@ -101,6 +102,10 @@ export function useController(
                 }
             };
             loadElementsToScene(nextState);
+            // console.log(
+            //     'after',
+            //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
+            // );
             enqueueSnackbar(dictionary.notification['success-level-saved'], {
                 variant: 'success',
             });
