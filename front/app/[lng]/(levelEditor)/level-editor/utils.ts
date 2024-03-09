@@ -70,14 +70,14 @@ export function createElement(
                 new DoorOpenerProperties();
             const group = new Object3D();
             group.name = `door-opener-group-${props.door_id}`;
-            group.add(
-                new InteractiveArea(
-                    ElementName.AREA_DOOR_OPENER(String(props.door_id)),
-                ),
+            const areaDoorOpener = new InteractiveArea(
+                ElementName.AREA_DOOR_OPENER(String(props.door_id)),
             );
-            group.add(
-                new DoorOpener(ElementName.DOOR_OPENER(String(props.door_id))),
+            const doorOpener = new DoorOpener(
+                ElementName.DOOR_OPENER(String(props.door_id)),
             );
+            group.add(areaDoorOpener);
+            group.add(doorOpener);
             group.position.copy(
                 props.position.clone().multiplyScalar(gridSize),
             );
@@ -261,6 +261,7 @@ export function parseLevelElements(
     app: App,
     elementList: any[],
 ): LevelElement[] {
+    // create each elements
     const elements = elementList.map((el: any) => {
         const properties: Record<string, any> = {};
         Object.entries(el.properties).forEach(
@@ -298,6 +299,25 @@ export function parseLevelElements(
             properties: properties,
         };
     });
+
+    // connect door openers and doors
+    elements
+        .filter((el) => el.type === ElementType.DOOR_OPENER)
+        .forEach((el) => {
+            const doorOpener = el.mesh.children[1] as DoorOpener;
+            const doorId = (el.properties as DoorOpenerProperties).door_id;
+            const door = elements.find(
+                (el) =>
+                    el.type === ElementType.WALL_DOOR &&
+                    (el.properties as WallDoorProperties).id === doorId,
+            );
+            if (door) {
+                const doorInfo = computeDoorInfo(door.mesh, doorOpener);
+                doorOpener.doorInfo = doorInfo;
+            } else {
+                doorOpener.doorInfo = undefined;
+            }
+        });
 
     return elements as LevelElement[];
 }
