@@ -78,6 +78,13 @@ export function createElement(
             group.add(
                 new DoorOpener(ElementName.DOOR_OPENER(String(props.door_id))),
             );
+            group.position.copy(
+                props.position.clone().multiplyScalar(gridSize),
+            );
+            const rotationX = degreesToRadians(props.rotation.x);
+            const rotationY = degreesToRadians(props.rotation.y);
+            const rotationZ = degreesToRadians(props.rotation.z);
+            group.rotation.set(rotationX, rotationY, rotationZ);
             return {
                 mesh: group,
                 properties: props,
