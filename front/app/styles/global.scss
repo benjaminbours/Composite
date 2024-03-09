@@ -33,6 +33,7 @@ canvas,
     mix-blend-mode: difference;
 
     .settings {
+        all: unset;
         transition: 0.3s ease-in;
         display: flex;
         align-items: center;
@@ -84,11 +85,8 @@ canvas,
     font-weight: 300;
 }
 
-button {
-    all: unset;
-}
-
 .buttonRect {
+    all: unset;
     width: auto;
     text-align: center;
     border: solid white 1px;
@@ -137,6 +135,7 @@ $buttonSize: 90px;
 $buttonSizeSmall: 80px;
 $buttonSizeLarge: 120px;
 .buttonCircle {
+    all: unset;
     text-align: center;
     width: $buttonSize;
     height: $buttonSize;
@@ -368,6 +367,15 @@ $buttonSizeLarge: 120px;
 
 .top-bar {
     height: 54px;
+
+    h4 {
+        color: white;
+        margin: 0;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
 }
 
 .top-bar__tool-bar {
