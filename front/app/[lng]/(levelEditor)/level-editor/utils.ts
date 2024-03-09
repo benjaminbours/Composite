@@ -126,7 +126,7 @@ export function createElement(
             endLevelGroup.add(new InteractiveArea(ElementName.AREA_END_LEVEL));
             // graphic
             endLevelGroup.add(new EndLevel());
-            positionOnGrid(endLevelGroup, props.position);
+            positionOnGrid(endLevelGroup, props.position.clone());
             return {
                 mesh: endLevelGroup,
                 properties: props,
