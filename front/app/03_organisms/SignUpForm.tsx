@@ -60,12 +60,14 @@ interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     withRedirect?: boolean;
     withSignIn?: boolean;
+    onSuccess?: () => void;
 }
 
 export const SignUpForm: React.FC<Props> = ({
     className,
     dictionary,
     withSignIn,
+    onSuccess,
     // withRedirect,
 }) => {
     const router = useRouter();
@@ -119,6 +121,9 @@ export const SignUpForm: React.FC<Props> = ({
                             variant: 'success',
                         },
                     );
+                    if (onSuccess) {
+                        onSuccess();
+                    }
                     // if (withRedirect) {
                     //     router.replace(
                     //         {
@@ -148,6 +153,7 @@ export const SignUpForm: React.FC<Props> = ({
             executeRecaptcha,
             enqueueSnackbar,
             dictionary,
+            onSuccess,
             // router,
             // withRedirect,
         ],

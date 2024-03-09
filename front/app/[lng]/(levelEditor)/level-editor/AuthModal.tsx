@@ -46,7 +46,12 @@ export const AuthModal: React.FC<Props> = ({ isModalOpen, dictionary }) => {
                 {currentTab === 0 && <LoginForm dictionary={dictionary} />}
                 {currentTab === 1 && (
                     <WrapperReCaptcha lng="en">
-                        <SignUpForm dictionary={dictionary} />
+                        <SignUpForm
+                            dictionary={dictionary}
+                            onSuccess={() => {
+                                setCurrentTab(0);
+                            }}
+                        />
                     </WrapperReCaptcha>
                 )}
             </Paper>
