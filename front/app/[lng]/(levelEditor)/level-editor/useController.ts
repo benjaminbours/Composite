@@ -83,8 +83,28 @@ export function useController(
 
         const apiClient = servicesContainer.get(ApiClient);
         const onSuccess = (level: Level) => {
+            if (!app) {
+                return;
+            }
             router.push(Route.LEVEL_EDITOR(level.id));
-            setElements(parseLevelElements(level.data));
+            // prepare the next state
+            const nextState = parseLevelElements(level.data);
+            setElements((prev) => {
+                // remove all elements from the scene
+                prev.forEach((el) => {
+                    removeMeshFromScene(app, el.mesh);
+                });
+                // return the next state
+                return nextState;
+            });
+            // load the next state into the scene
+            const loadElementsToScene = (elementList: LevelElement[]) => {
+                for (let i = 0; i < elementList.length; i++) {
+                    const { type, mesh } = elementList[i];
+                    addMeshToScene(app, type, mesh);
+                }
+            };
+            loadElementsToScene(nextState);
             enqueueSnackbar(dictionary.notification['success-level-saved'], {
                 variant: 'success',
             });
@@ -141,6 +161,7 @@ export function useController(
         router,
         level_id,
         isAuthenticated,
+        app,
     ]);
 
     const updateElementName = useCallback(
@@ -229,8 +250,7 @@ export function useController(
                         // remove element
                         removeMeshFromScene(
                             app,
-                            nextState,
-                            currentEditingIndex,
+                            nextState[currentEditingIndex].mesh,
                         );
                         // create a new one
                         const { mesh: newMesh } = createElement(
@@ -299,12 +319,12 @@ export function useController(
             }
             setElements((prev) => {
                 const newState = [...prev];
-                newState.splice(index, 1);
+                const deletedElement = newState.splice(index, 1);
+                removeMeshFromScene(app, deletedElement[0].mesh);
                 return newState;
             });
-            removeMeshFromScene(app, elements, index);
         },
-        [app, elements],
+        [app],
     );
 
     const selectElement = useCallback(

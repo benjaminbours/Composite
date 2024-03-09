@@ -196,12 +196,7 @@ export function createElement(
     }
 }
 
-export function removeMeshFromScene(
-    app: App,
-    elements: LevelElement[],
-    index: number,
-) {
-    const mesh = elements[index].mesh;
+export function removeMeshFromScene(app: App, mesh: Object3D) {
     app.scene.remove(mesh);
     if (mesh.id === app.controlledMesh?.id) {
         app.detachTransformControls();
@@ -224,7 +219,6 @@ export function removeMeshFromScene(
 
 export function addMeshToScene(app: App, type: ElementType, group: Object3D) {
     app.scene.add(group);
-    app.attachTransformControls(group);
     addToCollidingElements(app, group);
 }
 
