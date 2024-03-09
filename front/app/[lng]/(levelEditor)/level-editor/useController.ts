@@ -265,6 +265,7 @@ export function useController(
                             type,
                             nextState[currentEditingIndex].mesh,
                         );
+                        app.attachTransformControls(newMesh);
                         break;
                     // Transformations
                     case 'rotation':
