@@ -106,7 +106,6 @@ interface WallOptions {
     position: Vector3;
     rotation: Euler;
     withOcclusion?: boolean;
-    isGeometryCentered?: boolean;
     receiveShadow?: boolean;
 }
 
@@ -116,18 +115,16 @@ export function createWall({
     position,
     rotation,
     withOcclusion,
-    isGeometryCentered,
     receiveShadow,
 }: WallOptions) {
     const sizeForGrid = size.multiplyScalar(gridSize);
     const geometry = new BoxGeometry(sizeForGrid.x, sizeForGrid.y, wallDepth);
 
-    if (isGeometryCentered) {
-        geometry.center();
-    } else {
-        geometry.translate(sizeForGrid.x / 2, sizeForGrid.y / 2, wallDepth / 2);
-    }
+    geometry.center();
     const wall = new Mesh(geometry, materials.phong);
+    wall.translateX(sizeForGrid.x / 2);
+    wall.translateY(sizeForGrid.y / 2);
+    wall.translateZ(wallDepth / 2);
     wall.castShadow = true;
     if (receiveShadow) {
         wall.receiveShadow = true;
