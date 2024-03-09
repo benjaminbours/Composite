@@ -17,13 +17,11 @@ import {
     degreesToRadians,
     gridSize,
     radiansToDegrees,
-} from '@benjaminbours/composite-core';
-import {
     DoorOpenerProperties,
     ElementType,
     LevelElement,
     WallDoorProperties,
-} from './types';
+} from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
 import { DoorOpener } from '../../../Game/elements/DoorOpener';
 import { servicesContainer } from '../../../core/frameworks';
@@ -49,9 +47,7 @@ export function useController(
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentEditingIndex, setCurrentEditingIndex] = useState<number>();
     const [levelName, setLevelName] = useState(initialLevel.name);
-    const [elements, setElements] = useState(() =>
-        parseLevelElements(initialLevel.data),
-    );
+    const [elements, setElements] = useState<LevelElement[]>([]);
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
     const handleLevelNameChange = useCallback(
@@ -113,12 +109,17 @@ export function useController(
             setIsSaving(false);
         };
         setIsSaving(true);
+        const elementsToSend = elements.map((el) => ({
+            type: el.type,
+            properties: el.properties,
+            name: el.name,
+        }));
         if (level_id === 'new') {
             apiClient.defaultApi
                 .levelsControllerCreate({
                     createLevelDto: {
                         name: levelName,
-                        data: elements as any,
+                        data: elementsToSend,
                     },
                 })
                 .then(onSuccess)
@@ -147,7 +148,7 @@ export function useController(
                     id: level_id,
                     updateLevelDto: {
                         name: levelName,
-                        data: elements as any,
+                        data: elementsToSend,
                     },
                 })
                 .then(onSuccess)
@@ -452,17 +453,19 @@ export function useController(
         if (!app) {
             return;
         }
-
+        // parse the initial level elements
+        const elementList = parseLevelElements(app, initialLevel.data);
         const loadElementsToScene = (elementList: LevelElement[]) => {
             for (let i = 0; i < elementList.length; i++) {
                 const { type, mesh } = elementList[i];
                 addMeshToScene(app, type, mesh);
             }
         };
-        loadElementsToScene(elements);
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [app]);
+        // load elements to the scene
+        loadElementsToScene(elementList);
+        // set the state
+        setElements(elementList);
+    }, [app, initialLevel]);
 
     return {
         levelName,

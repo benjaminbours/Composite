@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import SquareIcon from '@mui/icons-material/Square';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { LevelElement } from './types';
+import { LevelElement } from '@benjaminbours/composite-core';
 
 type Props = LevelElement & {
     index: number;

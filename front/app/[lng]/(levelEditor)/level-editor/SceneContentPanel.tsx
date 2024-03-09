@@ -4,8 +4,9 @@ import Paper from '@mui/material/Paper';
 import List from '@mui/material/List';
 import SquareIcon from '@mui/icons-material/Square';
 import AddIcon from '@mui/icons-material/Add';
+// our libs
+import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 // project
-import { ElementType, LevelElement } from './types';
 import { Divider } from '@mui/material';
 import { SceneItem } from './SceneItem';
 import { DropDownMenu } from './DropDownMenu';

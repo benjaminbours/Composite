@@ -1,34 +1,28 @@
+import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 import { ApiProperty } from '@nestjs/swagger';
 import { LevelStatus, Level as PrismaLevel } from '@prisma/client';
+import { IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
 
-// export enum ElementType {
-//   WALL = 'wall',
-//   WALL_DOOR = 'wall_door',
-//   DOOR_OPENER = 'door_opener',
-//   ARCH = 'arch',
-//   BOUNCE = 'bounce',
-//   END_LEVEL = 'end_level',
-//   FAT_COLUMN = 'fat_column',
-// }
-
-// export class LevelElement {
-//   @ApiProperty({ type: String })
-//   name: string;
-//   @ApiProperty({ enum: ElementType })
-//   type: ElementType;
-//   @ApiProperty({ type: Object })
-//   properties: any; // json
-//   @ApiProperty({ type: Object })
-//   mesh: any; // json
-// }
+export class Element implements Omit<LevelElement, 'mesh'> {
+  @ApiProperty({ type: String })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+  @ApiProperty({ enum: ElementType })
+  @IsEnum(ElementType)
+  type: ElementType;
+  @ApiProperty({ type: Object })
+  @IsObject()
+  properties: any; // json
+}
 
 export class Level implements PrismaLevel {
   @ApiProperty()
   id: number;
   @ApiProperty({ type: String })
   name: string;
-  @ApiProperty({ type: Array })
-  data: any; // json
+  @ApiProperty({ type: [Element] })
+  data: any; // json Element[]
   @ApiProperty()
   likes: number;
   @ApiProperty({ enum: LevelStatus })

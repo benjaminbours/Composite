@@ -1,4 +1,4 @@
-import { Euler, Mesh, Object3D, ObjectLoader, Vector3 } from 'three';
+import { Euler, Mesh, Object3D, Vector3 } from 'three';
 import {
     ElementName,
     ElementToBounce,
@@ -10,8 +10,6 @@ import {
     createWall,
     createWallDoor,
     positionOnGrid,
-} from '@benjaminbours/composite-core';
-import {
     BounceProperties,
     ElementProperties,
     ElementType,
@@ -22,7 +20,9 @@ import {
     WallDoorProperties,
     DoorOpenerProperties,
     LevelElement,
-} from './types';
+    gridSize,
+    degreesToRadians,
+} from '@benjaminbours/composite-core';
 import { SkinBounce } from '../../../Game/elements/SkinBounce';
 import { Pulse } from '../../../Game/elements/Pulse';
 import { SkinBounceShadow } from '../../../Game/elements/SkinBounceShadow';
@@ -250,8 +250,10 @@ export function addToCollidingElements(app: App, group: Object3D) {
     checkChildren(group.children);
 }
 
-export function parseLevelElements(elementList: any[]): LevelElement[] {
-    const loader = new ObjectLoader();
+export function parseLevelElements(
+    app: App,
+    elementList: any[],
+): LevelElement[] {
     const elements = elementList.map((el: any) => {
         const properties: Record<string, any> = {};
         Object.entries(el.properties).forEach(
@@ -280,10 +282,12 @@ export function parseLevelElements(elementList: any[]): LevelElement[] {
             },
         );
 
+        const { mesh } = createElement(app, el.type, properties as any);
+
         return {
             type: el.type as ElementType,
             name: el.name,
-            mesh: loader.parse(el.mesh),
+            mesh,
             properties: properties,
         };
     });

@@ -4,8 +4,13 @@ import Paper from '@mui/material/Paper';
 import Switch from '@mui/material/Switch';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+// our libs
+import {
+    ElementType,
+    LevelElement,
+    WallDoorProperties,
+} from '@benjaminbours/composite-core';
 // project
-import { ElementType, LevelElement, WallDoorProperties } from './types';
 import { NumberInput, InputAdornment } from './NumericInput';
 import { MUISwitch } from './CustomSwitch';
 

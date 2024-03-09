@@ -15,7 +15,7 @@ export class LevelsService {
       .create({
         data: {
           name: createLevelDto.name,
-          data: createLevelDto.data,
+          data: createLevelDto.data as any, // json
           status: LevelStatus.DRAFT,
           authorId: user.sub,
         },
@@ -45,7 +45,7 @@ export class LevelsService {
         where: { id },
         data: {
           name: updateLevelDto.name,
-          data: updateLevelDto.data,
+          data: updateLevelDto.data as any,
           status: updateLevelDto.status,
         },
       })

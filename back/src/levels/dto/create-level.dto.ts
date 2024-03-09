@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { Element } from '../entities/level.entity';
+import { Type } from 'class-transformer';
 
 export class CreateLevelDto {
   @ApiProperty({ type: String })
@@ -7,7 +9,9 @@ export class CreateLevelDto {
   @IsNotEmpty()
   name: string;
   // array of LevelElement from type in level editor
-  @ApiProperty({ type: Array })
+  @ApiProperty({ type: [Element] })
   @IsArray()
-  data: any[];
+  @ValidateNested({ each: true })
+  @Type(() => Element)
+  data: Element[];
 }
