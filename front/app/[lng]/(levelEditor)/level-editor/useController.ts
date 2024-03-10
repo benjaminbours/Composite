@@ -61,118 +61,134 @@ export function useController(
         [setLevelName],
     );
 
-    const handleClickOnSave = useCallback(() => {
-        if (!levelName) {
-            enqueueSnackbar(
-                dictionary.notification['error-missing-level-name'],
-                {
-                    variant: 'error',
-                },
-            );
-            setHasErrorWithLevelName(true);
-            return;
-        }
-
-        if (!isAuthenticated) {
-            setIsModalOpen(true);
-            return;
-        }
-
-        const apiClient = servicesContainer.get(ApiClient);
-        const onSuccess = (level: Level) => {
-            if (!app) {
+    const handleClickOnSave = useCallback(
+        (isFork?: boolean) => {
+            if (!levelName) {
+                enqueueSnackbar(
+                    dictionary.notification['error-missing-level-name'],
+                    {
+                        variant: 'error',
+                    },
+                );
+                setHasErrorWithLevelName(true);
                 return;
             }
-            if (level_id === 'new') {
-                router.push(Route.LEVEL_EDITOR(level.id));
+
+            if (!isAuthenticated) {
+                setIsModalOpen(true);
+                return;
             }
-            // remove all elements from the scene
-            for (let i = 0; i < elements.length; i++) {
-                const element = elements[i];
-                removeMeshFromScene(app, element.mesh);
-            }
-            // prepare the next state
-            const nextState = parseLevelElements(app, level.data);
-            // console.log(
-            //     'before',
-            //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
-            // );
-            // load the next state into the scene
-            const loadElementsToScene = (elementList: LevelElement[]) => {
-                for (let i = 0; i < elementList.length; i++) {
-                    const { type, mesh } = elementList[i];
-                    addMeshToScene(app, type, mesh);
+
+            const apiClient = servicesContainer.get(ApiClient);
+            const onSuccess = (level: Level) => {
+                if (!app) {
+                    return;
                 }
-            };
-            loadElementsToScene(nextState);
-            // console.log(
-            //     'after',
-            //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
-            // );
-            enqueueSnackbar(dictionary.notification['success-level-saved'], {
-                variant: 'success',
-            });
-            setElements(nextState);
-        };
-        const onFinally = () => {
-            setIsSaving(false);
-        };
-        setIsSaving(true);
-        const elementsToSend = elements.map((el) => ({
-            type: el.type,
-            properties: el.properties,
-            name: el.name,
-        }));
-        if (level_id === 'new') {
-            apiClient.defaultApi
-                .levelsControllerCreate({
-                    createLevelDto: {
-                        name: levelName,
-                        data: elementsToSend,
-                    },
-                })
-                .then(onSuccess)
-                .catch(async (error: any) => {
-                    console.error(error);
-                    const errorData = await error.response.json();
-                    let message;
-                    if (errorData.message === 'Unique constraint violation') {
-                        message =
-                            dictionary.notification['error-level-name-taken'];
-                        setHasErrorWithLevelName(true);
-                    } else {
-                        message = generateErrorNotification(
-                            errorData,
-                            dictionary,
-                        );
+                router.push(Route.LEVEL_EDITOR(level.id));
+                // remove all elements from the scene
+                for (let i = 0; i < elements.length; i++) {
+                    const element = elements[i];
+                    removeMeshFromScene(app, element.mesh);
+                }
+                // prepare the next state
+                const nextState = parseLevelElements(app, level.data);
+                // console.log(
+                //     'before',
+                //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
+                // );
+                // load the next state into the scene
+                const loadElementsToScene = (elementList: LevelElement[]) => {
+                    for (let i = 0; i < elementList.length; i++) {
+                        const { type, mesh } = elementList[i];
+                        addMeshToScene(app, type, mesh);
                     }
-                    enqueueSnackbar(message, {
-                        variant: 'error',
-                    });
-                })
-                .finally(onFinally);
-        } else {
-            apiClient.defaultApi
-                .levelsControllerUpdate({
-                    id: level_id,
-                    updateLevelDto: {
-                        name: levelName,
-                        data: elementsToSend,
+                };
+                loadElementsToScene(nextState);
+                // console.log(
+                //     'after',
+                //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
+                // );
+                enqueueSnackbar(
+                    dictionary.notification['success-level-saved'],
+                    {
+                        variant: 'success',
                     },
-                })
-                .then(onSuccess)
-                .finally(onFinally);
-        }
-    }, [
-        enqueueSnackbar,
-        dictionary,
-        elements,
-        levelName,
-        router,
-        level_id,
-        isAuthenticated,
-        app,
-    ]);
+                );
+                setElements(nextState);
+            };
+            const onFinally = () => {
+                setIsSaving(false);
+            };
+            setIsSaving(true);
+            const elementsToSend = elements.map((el) => ({
+                type: el.type,
+                properties: el.properties,
+                name: el.name,
+            }));
+            if (level_id === 'new' || isFork) {
+                apiClient.defaultApi
+                    .levelsControllerCreate({
+                        createLevelDto: {
+                            name: isFork ? `${levelName}_forked` : levelName,
+                            data: elementsToSend,
+                        },
+                    })
+                    .then(onSuccess)
+                    .catch(async (error: any) => {
+                        console.error(error);
+                        const errorData = await error.response.json();
+                        let message;
+                        if (
+                            errorData.message === 'Unique constraint violation'
+                        ) {
+                            message =
+                                dictionary.notification[
+                                    'error-level-name-taken'
+                                ];
+                            setHasErrorWithLevelName(true);
+                        } else if (
+                            errorData.message.includes('Value is too long')
+                        ) {
+                            message =
+                                dictionary.notification[
+                                    'error-level-name-too-long'
+                                ];
+                            setHasErrorWithLevelName(true);
+                        } else {
+                            message = generateErrorNotification(
+                                errorData,
+                                dictionary,
+                            );
+                        }
+                        enqueueSnackbar(message, {
+                            variant: 'error',
+                        });
+                    })
+                    .finally(onFinally);
+            } else {
+                apiClient.defaultApi
+                    .levelsControllerUpdate({
+                        id: level_id,
+                        updateLevelDto: {
+                            name: levelName,
+                            data: elementsToSend,
+                        },
+                    })
+                    .then(onSuccess)
+                    .finally(onFinally);
+            }
+        },
+        [
+            enqueueSnackbar,
+            dictionary,
+            elements,
+            levelName,
+            router,
+            level_id,
+            isAuthenticated,
+            app,
+        ],
+    );
 
     const updateElementName = useCallback(
         (index: number) => (e: any) => {

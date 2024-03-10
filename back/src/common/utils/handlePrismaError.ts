@@ -17,6 +17,10 @@ export function handlePrismaError(e: any): Promise<any> {
     switch (e.code) {
       case 'P2025':
         throw new NotFoundException();
+      case 'P2000':
+        throw new BadRequestException(
+          `Value is too long for the field: ${e.meta?.field_name}`,
+        );
       case 'P2002':
         throw new ConflictException('Unique constraint violation');
       case 'P2003':

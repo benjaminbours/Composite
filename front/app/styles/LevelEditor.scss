@@ -210,6 +210,10 @@
     font-family: 'Source Code Pro', monospace;
     font-size: 18px;
     text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
 }
 
 .level-list-item__image-container {

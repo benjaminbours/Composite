@@ -129,6 +129,7 @@ export const LevelEditor: React.FC<Props> = ({
         <main className="level-editor">
             <AuthModal isModalOpen={isModalOpen} dictionary={dictionary} />
             <TopBarLevelEditor
+                level_id={level_id}
                 isSaving={isSaving}
                 dictionary={dictionary}
                 onResetCamera={resetCamera}

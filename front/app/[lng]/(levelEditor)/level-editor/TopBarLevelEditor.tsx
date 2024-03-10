@@ -9,6 +9,7 @@ import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SaveIcon from '@mui/icons-material/Save';
+import ForkRightIcon from '@mui/icons-material/ForkRight';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CameraIcon from '@mui/icons-material/Camera';
 import TextField from '@mui/material/TextField';
@@ -21,6 +22,7 @@ import { CircularProgress } from '@mui/material';
 import { Route } from '../../../types';
 
 interface Props {
+    level_id: string;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     isSaving: boolean;
     onResetCamera: () => void;
@@ -30,7 +32,7 @@ interface Props {
     levelName: string;
     hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
-    onSave: () => void;
+    onSave: (isFork?: boolean) => void;
 }
 
 export const TopBarLevelEditor: React.FC<Props> = ({
@@ -44,6 +46,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     onSave,
     hasErrorWithLevelName,
     isSaving,
+    level_id,
 }) => {
     const actionItems = useMemo(() => {
         return [
@@ -83,11 +86,11 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 </Link>
                 <Divider orientation="vertical" flexItem />
                 <HandymanIcon />
-                <h4>Level editor</h4>
+                <h4>Level&nbsp;editor</h4>
                 <Divider orientation="vertical" flexItem />
                 <Link href={Route.LEVEL_EDITOR_ROOT} legacyBehavior passHref>
                     <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
-                        Back to list
+                        Back
                     </Button>
                 </Link>
                 <Divider orientation="vertical" flexItem />
@@ -113,12 +116,27 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                         size="small"
                         variant="contained"
                         endIcon={<SaveIcon />}
-                        onClick={onSave}
+                        onClick={() => onSave()}
                     >
                         Save
                     </Button>
                 )}
-                <UserMenu dictionary={dictionary} disabled={isSaving} />
+                {level_id !== 'new' && (
+                    <>
+                        {isSaving ? (
+                            <CircularProgress size={30} />
+                        ) : (
+                            <Button
+                                size="small"
+                                variant="contained"
+                                endIcon={<ForkRightIcon />}
+                                onClick={() => onSave(true)}
+                            >
+                                Fork
+                            </Button>
+                        )}
+                    </>
+                )}
             </Toolbar>
         </AppBar>
     );

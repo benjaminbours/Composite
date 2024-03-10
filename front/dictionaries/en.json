@@ -49,6 +49,7 @@
             "success-level-saved": "Your level has been successfully saved",
             "success-level-deleted": "Your level has been successfully deleted",
             "error-level-name-taken": "This level name already exists. Please choose another name",
+            "error-level-name-too-long": "This level name is too long",
             "error-login": "Invalid email or password!",
             "error-logout": "Unknown error, couldn't logout",
             "error-forbidden": "Access denied",
