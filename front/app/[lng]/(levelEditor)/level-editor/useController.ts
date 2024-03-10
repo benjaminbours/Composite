@@ -21,6 +21,7 @@ import {
     ElementType,
     LevelElement,
     WallDoorProperties,
+    BounceProperties,
 } from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
 import { DoorOpener } from '../../../Game/elements/DoorOpener';
@@ -296,10 +297,18 @@ export function useController(
                     case 'rotation':
                         (properties as any)[propertyKey] = value;
                         app.removeFromCollidingElements(mesh);
-                        const rotationX = degreesToRadians(value.x);
-                        const rotationY = degreesToRadians(value.y);
-                        const rotationZ = degreesToRadians(value.z);
-                        mesh.rotation.set(rotationX, rotationY, rotationZ);
+                        if (type === ElementType.BOUNCE) {
+                            app.gameStateManager.currentState.level.bounces[
+                                (properties as BounceProperties).id
+                            ] = {
+                                rotationY: value.y,
+                            };
+                        } else {
+                            const rotationX = degreesToRadians(value.x);
+                            const rotationY = degreesToRadians(value.y);
+                            const rotationZ = degreesToRadians(value.z);
+                            mesh.rotation.set(rotationX, rotationY, rotationZ);
+                        }
                         addToCollidingElements(app, mesh);
                         break;
                     case 'position':

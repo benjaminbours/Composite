@@ -180,8 +180,7 @@ export function createElement(
                 );
             }
             app.gameStateManager.currentState.level.bounces[props.id] = {
-                rotationY: (bounceGroup.children[0] as ElementToBounce).rotation
-                    .y,
+                rotationY: props.rotation.y,
             };
             app.level.bounces.push(bounceGroup);
 
