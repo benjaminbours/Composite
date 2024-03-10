@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SaveIcon from '@mui/icons-material/Save';
@@ -29,6 +30,7 @@ interface Props {
     onToggleCollisionArea: () => void;
     onStartTestMode: () => void;
     onResetPlayersPosition: () => void;
+    onSwitchPlayer: () => void;
     levelName: string;
     hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
@@ -39,6 +41,7 @@ interface Props {
 export const TopBarLevelEditor: React.FC<Props> = ({
     dictionary,
     levelName,
+    onSwitchPlayer,
     onLevelNameChange,
     onResetCamera,
     onToggleCollisionArea,
@@ -68,6 +71,11 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 onClick: onStartTestMode,
             },
             {
+                icon: <SwitchAccountIcon fontSize="small" />,
+                text: 'Switch player',
+                onClick: onSwitchPlayer,
+            },
+            {
                 icon: <RestartAltIcon fontSize="small" />,
                 text: 'Reset players position',
                 onClick: onResetPlayersPosition,
@@ -78,6 +86,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
         onToggleCollisionArea,
         onStartTestMode,
         onResetPlayersPosition,
+        onSwitchPlayer,
     ]);
 
     return (

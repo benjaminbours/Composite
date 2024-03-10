@@ -126,6 +126,17 @@ export const LevelEditor: React.FC<Props> = ({
         }
     }, [app]);
 
+    const switchPlayer = useCallback(() => {
+        if (app) {
+            const nextSide =
+                app.mainPlayerSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
+            app.mainPlayerSide = nextSide;
+            app.secondPlayerSide =
+                nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
+            app.setGameCamera();
+        }
+    }, [app]);
+
     return (
         <main className="level-editor">
             <AuthModal
@@ -141,6 +152,7 @@ export const LevelEditor: React.FC<Props> = ({
                 onToggleCollisionArea={toggleCollisionArea}
                 onStartTestMode={toggleTestMode}
                 onResetPlayersPosition={resetPlayersPosition}
+                onSwitchPlayer={switchPlayer}
                 levelName={levelName}
                 onLevelNameChange={handleLevelNameChange}
                 onSave={handleClickOnSave}

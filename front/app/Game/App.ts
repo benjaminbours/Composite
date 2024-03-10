@@ -97,8 +97,8 @@ export default class App {
     public rendererManager: RendererManager;
     public gameStateManager: GameStateManager;
 
-    private mainPlayerSide: Side;
-    private secondPlayerSide: Side;
+    public mainPlayerSide: Side;
+    public secondPlayerSide: Side;
 
     public level: AbstractLevel;
 
@@ -316,7 +316,10 @@ export default class App {
         });
     };
 
-    private setGameCamera = () => {
+    public setGameCamera = () => {
+        if (!this.players[this.mainPlayerSide]) {
+            return;
+        }
         this.camera.setDefaultTarget(
             this.players[this.mainPlayerSide].position,
         );
