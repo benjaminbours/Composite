@@ -1,5 +1,4 @@
 'use client';
-import 'reflect-metadata';
 import React, { useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
