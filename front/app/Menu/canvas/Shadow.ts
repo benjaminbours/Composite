@@ -4,7 +4,7 @@ import { Side } from '@benjaminbours/composite-core';
 import { ResizeOptions } from '../../types';
 
 const shadow = new Image();
-shadow.src = '/shadow.png';
+shadow.src = '/images/shadow.png';
 
 export default class Shadow {
     public startY: number = 30;

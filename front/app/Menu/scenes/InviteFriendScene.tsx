@@ -28,7 +28,7 @@ export const InviteFriendScene: React.FC<Props> = ({
     return (
         <div ref={inviteFriendRef} className={cssClass}>
             {actions}
-            <h2 className="title-h2 title-h2--white">Invite a friend</h2>
+            <h2 className="title-h1">Invite a friend</h2>
             <p>Send this link to your friend to automatically match with him</p>
             <CopyToClipBoardButton
                 color="white"

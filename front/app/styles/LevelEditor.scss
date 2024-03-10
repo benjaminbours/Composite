@@ -179,3 +179,56 @@
         margin-top: 20px;
     }
 }
+
+.level-editor-dashboard {
+    background-color: #121212;
+    color: white;
+    padding: 20px 0;
+    min-height: calc(100vh - 54px);
+    box-sizing: border-box;
+}
+
+.level-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+        margin: 10px;
+    }
+}
+
+.level-list-item__actions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.level-list-item__title {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.level-list-item__image-container {
+    display: flex;
+}
+
+.level-list-item__image {
+    background-color: rgba(255, 255, 255, 0.13);
+    border-radius: 15px;
+    width: 300px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.level-list__not-logged {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

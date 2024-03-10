@@ -156,7 +156,7 @@ export function Menu({
             {
                 id: Levels.CRACK_THE_DOOR,
                 name: 'Crack the door',
-                img: '/crack_the_door.png',
+                img: '/images/crack_the_door.png',
                 disabled: false,
                 selectedByTeamMate:
                     mainState.levelSelectedByTeamMate === Levels.CRACK_THE_DOOR,
@@ -164,7 +164,7 @@ export function Menu({
             {
                 id: Levels.LEARN_TO_FLY,
                 name: 'Learn to fly',
-                img: '/learn_to_fly.png',
+                img: '/images/learn_to_fly.png',
                 disabled: false,
                 selectedByTeamMate:
                     mainState.levelSelectedByTeamMate === Levels.LEARN_TO_FLY,
@@ -172,7 +172,7 @@ export function Menu({
             {
                 id: Levels.THE_HIGH_SPHERES,
                 name: 'The high spheres',
-                img: '/the_high_spheres.png',
+                img: '/images/the_high_spheres.png',
                 disabled: true,
                 selectedByTeamMate:
                     mainState.levelSelectedByTeamMate ===

@@ -21,7 +21,7 @@ export const NotFoundScene: React.FC<Props> = ({
         <div ref={notFoundRef} className={cssClass}>
             <div className="content-container">
                 <h2 className="title-h2">{`Oops! It seems like you're lost in the shadows.`}</h2>
-                <h3>Find your light</h3>
+                <h3 className="title-h3">Find your light</h3>
                 <a href="/" className="buttonCircle white">
                     Home
                 </a>

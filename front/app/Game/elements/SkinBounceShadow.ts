@@ -60,6 +60,7 @@ export class SkinBounceShadow extends Object3D {
         });
 
         this.particles = new Points(bufferGeometry, material);
+        this.particles.name = 'particles';
         this.add(this.particles);
     }
 

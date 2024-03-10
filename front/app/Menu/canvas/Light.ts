@@ -6,9 +6,9 @@ import { Side } from '@benjaminbours/composite-core';
 import { ResizeOptions } from '../../types';
 
 const light = new Image();
-light.src = '/light.png';
+light.src = `/images/light.png`;
 const lightHalo = new Image();
-lightHalo.src = '/light_halo.png';
+lightHalo.src = '/images/light_halo.png';
 
 export interface IPulseOptions {
     startScale: number;

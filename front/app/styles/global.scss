@@ -67,7 +67,20 @@ canvas,
     width: 100%;
 }
 
+.title-h1 {
+    text-transform: uppercase;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: bold;
+    font-size: 48px;
+    letter-spacing: 10px;
+}
+
 .title-h2 {
+    font-family: 'Source Code Pro', monospace;
+    text-transform: uppercase;
+    font-size: 36px;
+    font-weight: 300;
+
     &--black {
         color: black;
     }
@@ -79,6 +92,15 @@ canvas,
     @media (max-width: 768px) {
         font-size: 20px;
     }
+}
+
+.title-h3 {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 24px;
+}
+
+p {
+    font-family: 'Source Code Pro', monospace;
 }
 
 .menu-label {

@@ -1,0 +1,76 @@
+import { Level } from '@benjaminbours/composite-api-client';
+import IconButton from '@mui/material/IconButton';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import React from 'react';
+import Link from 'next/link';
+import { Route } from '../../../types';
+
+interface Props {
+    level: Level;
+    onDelete: (levelId: number, levelName: string) => void;
+    disabled?: boolean;
+}
+
+export const LevelListItem: React.FC<Props> = ({
+    level,
+    onDelete,
+    disabled,
+}) => {
+    return (
+        <li className="level-list-item">
+            <h3 className="level-list-item__title">{level.name}</h3>
+            <div className="level-list-item__image-container">
+                <div className="level-list-item__image">
+                    <p>
+                        Thumbnail feature
+                        <br /> coming soon
+                    </p>
+                </div>
+                <ul className="level-list-item__actions">
+                    <li>
+                        <IconButton
+                            size="small"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            color="inherit"
+                            disabled
+                        >
+                            <SportsEsportsIcon />
+                        </IconButton>
+                    </li>
+                    <li>
+                        <Link
+                            href={Route.LEVEL_EDITOR(level.id)}
+                            passHref
+                            legacyBehavior
+                        >
+                            <IconButton
+                                size="small"
+                                aria-controls="menu-appbar"
+                                aria-haspopup="true"
+                                color="inherit"
+                                disabled={disabled}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                        </Link>
+                    </li>
+                    <li>
+                        <IconButton
+                            size="small"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            color="inherit"
+                            disabled={disabled}
+                            onClick={() => onDelete(level.id, level.name)}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    </li>
+                </ul>
+            </div>
+        </li>
+    );
+};

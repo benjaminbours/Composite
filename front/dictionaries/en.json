@@ -1,8 +1,16 @@
 {
     "common": {
+        "cancel-text": "Cancel",
+        "confirm-text": "Confirm",
         "nav": {
             "logout": "Logout",
-            "profile": "My profile"
+            "profile": "My profile",
+            "my-levels": "My levels",
+            "close": "Close",
+            "play": "Play",
+            "editor": "Editor",
+            "community": "Community",
+            "create-level": "Create new level"
         },
         "form": {
             "label": {
@@ -39,6 +47,7 @@
             "success-reset-password-sent-email": "An email as successfully been sent to reset your password",
             "success-new-password": "Your password has been successfully updated",
             "success-level-saved": "Your level has been successfully saved",
+            "success-level-deleted": "Your level has been successfully deleted",
             "error-level-name-taken": "This level name already exists. Please choose another name",
             "error-login": "Invalid email or password!",
             "error-logout": "Unknown error, couldn't logout",
@@ -76,5 +85,11 @@
     "sign-up-email-activated": {
         "title": "Email activated!",
         "description": "Congratulations, your email has been activated. You can now login."
+    },
+    "level-editor-dashboard": {
+        "delete-confirmation": {
+            "title": "Delete level",
+            "description": "Are you sure you want to delete the level \"{{levelName}}\"? This operation cannot be undone."
+        }
     }
 }
