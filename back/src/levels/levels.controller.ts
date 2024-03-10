@@ -74,8 +74,12 @@ export class LevelsController {
   })
   @Roles(Role.USER)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLevelDto: UpdateLevelDto) {
-    return this.levelsService.update(+id, updateLevelDto);
+  update(
+    @Param('id') id: string,
+    @GetUser() user: JWTUserPayload,
+    @Body() updateLevelDto: UpdateLevelDto,
+  ) {
+    return this.levelsService.update(+id, updateLevelDto, user);
   }
 
   @ApiOkResponse({
@@ -84,7 +88,7 @@ export class LevelsController {
   })
   @Roles(Role.USER)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.levelsService.remove(+id);
+  remove(@Param('id') id: string, @GetUser() user: JWTUserPayload) {
+    return this.levelsService.remove(+id, user);
   }
 }

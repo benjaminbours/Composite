@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateLevelDto } from './dto/create-level.dto';
 import { UpdateLevelDto } from './dto/update-level.dto';
 import { PrismaService } from '@project-common/services';
@@ -47,7 +47,12 @@ export class LevelsService {
       });
   }
 
-  async update(id: number, updateLevelDto: UpdateLevelDto) {
+  async update(
+    id: number,
+    updateLevelDto: UpdateLevelDto,
+    user: JWTUserPayload,
+  ) {
+    await this.checkUserHasAccessToLevel(id, user);
     return this.prisma.level
       .update({
         where: { id },
@@ -62,7 +67,8 @@ export class LevelsService {
       });
   }
 
-  async remove(id: number) {
+  async remove(id: number, user: JWTUserPayload) {
+    await this.checkUserHasAccessToLevel(id, user);
     return this.prisma.level
       .delete({
         where: { id },
@@ -70,5 +76,21 @@ export class LevelsService {
       .catch((err) => {
         throw handlePrismaError(err);
       });
+  }
+
+  async checkUserHasAccessToLevel(id: number, user: JWTUserPayload) {
+    const level = await this.prisma.level
+      .findUnique({
+        where: { id },
+      })
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
+
+    if (level.authorId !== user.sub) {
+      throw new ForbiddenException(
+        'Trying to access a resource without ownership on it.',
+      );
+    }
   }
 }
