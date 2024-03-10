@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SaveIcon from '@mui/icons-material/Save';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -17,6 +18,7 @@ import Link from 'next/link';
 import { getDictionary } from '../../../../getDictionary';
 import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 import { CircularProgress } from '@mui/material';
+import { Route } from '../../../types';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
@@ -83,10 +85,12 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 <HandymanIcon />
                 <h4>Level editor</h4>
                 <Divider orientation="vertical" flexItem />
-                {/* <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
-                    Back
-                </Button> */}
-                {/* <Divider orientation="vertical" flexItem /> */}
+                <Link href={Route.LEVEL_EDITOR_ROOT} legacyBehavior passHref>
+                    <Button size="small" startIcon={<KeyboardArrowLeftIcon />}>
+                        Back to list
+                    </Button>
+                </Link>
+                <Divider orientation="vertical" flexItem />
                 <TextField
                     variant="standard"
                     placeholder="Level name"
