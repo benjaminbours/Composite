@@ -90,7 +90,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 <TextField
                     variant="standard"
                     placeholder="Level name"
-                    value={levelName}
+                    value={levelName.toUpperCase()}
                     onChange={onLevelNameChange}
                     error={hasErrorWithLevelName}
                     disabled={isSaving}
