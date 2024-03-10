@@ -25,8 +25,16 @@ export class LevelsService {
       });
   }
 
-  findAll() {
-    return `This action returns all levels`;
+  async findAll(authorId?: number | undefined) {
+    return this.prisma.level
+      .findMany({
+        where: {
+          authorId: authorId,
+        },
+      })
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
   }
 
   async findOne(id: number) {

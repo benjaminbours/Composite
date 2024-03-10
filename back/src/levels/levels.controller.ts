@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { LevelsService } from './levels.service';
 import { CreateLevelDto } from './dto/create-level.dto';
@@ -17,6 +18,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Level } from './entities/level.entity';
 
@@ -38,10 +40,22 @@ export class LevelsController {
     return this.levelsService.create(user, createLevelDto);
   }
 
+  @ApiOkResponse({
+    description: 'Receive level list',
+    type: [Level],
+  })
+  @ApiQuery({
+    name: 'author',
+    description: 'Filter response by author id',
+    type: 'string',
+    required: false,
+  })
   @Public()
   @Get()
-  findAll() {
-    return this.levelsService.findAll();
+  findAll(
+    @Query('author') author: string | undefined, // boolean
+  ) {
+    return this.levelsService.findAll(author ? Number(author) : undefined);
   }
 
   @ApiOkResponse({
