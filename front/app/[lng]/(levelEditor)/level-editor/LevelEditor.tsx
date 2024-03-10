@@ -93,6 +93,7 @@ export const LevelEditor: React.FC<Props> = ({
         removeElement,
         setApp,
         selectElement,
+        setIsModalOpen,
     } = useController(level_id, initialLevel, dictionary);
 
     // local refs
@@ -127,7 +128,11 @@ export const LevelEditor: React.FC<Props> = ({
 
     return (
         <main className="level-editor">
-            <AuthModal isModalOpen={isModalOpen} dictionary={dictionary} />
+            <AuthModal
+                setIsModalOpen={setIsModalOpen}
+                isModalOpen={isModalOpen}
+                dictionary={dictionary}
+            />
             <TopBarLevelEditor
                 level_id={level_id}
                 isSaving={isSaving}
@@ -140,6 +145,7 @@ export const LevelEditor: React.FC<Props> = ({
                 onLevelNameChange={handleLevelNameChange}
                 onSave={handleClickOnSave}
                 hasErrorWithLevelName={hasErrorWithLevelName}
+                setIsModalOpen={setIsModalOpen}
             />
             <div className="level-editor__top-right-container">
                 <SceneContentPanel

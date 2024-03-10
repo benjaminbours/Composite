@@ -512,5 +512,6 @@ export function useController(
         removeElement,
         setApp,
         selectElement,
+        setIsModalOpen,
     };
 }

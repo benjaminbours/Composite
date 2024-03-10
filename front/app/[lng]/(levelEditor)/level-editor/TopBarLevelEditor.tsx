@@ -33,6 +33,7 @@ interface Props {
     hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
     onSave: (isFork?: boolean) => void;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const TopBarLevelEditor: React.FC<Props> = ({
@@ -46,6 +47,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     onSave,
     hasErrorWithLevelName,
     isSaving,
+    setIsModalOpen,
     level_id,
 }) => {
     const actionItems = useMemo(() => {
@@ -137,6 +139,11 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                         )}
                     </>
                 )}
+                <UserMenu
+                    dictionary={dictionary}
+                    disabled={isSaving}
+                    onLoginClick={() => setIsModalOpen(true)}
+                />
             </Toolbar>
         </AppBar>
     );

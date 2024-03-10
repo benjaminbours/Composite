@@ -12,9 +12,14 @@ import { SignUpForm, WrapperReCaptcha } from '../../../03_organisms/SignUpForm';
 interface Props {
     isModalOpen: boolean;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AuthModal: React.FC<Props> = ({ isModalOpen, dictionary }) => {
+export const AuthModal: React.FC<Props> = ({
+    isModalOpen,
+    dictionary,
+    setIsModalOpen,
+}) => {
     const [currentTab, setCurrentTab] = useState(0);
 
     const handleChangeTab = useCallback(
@@ -28,7 +33,7 @@ export const AuthModal: React.FC<Props> = ({ isModalOpen, dictionary }) => {
         <Modal
             className="level-editor__auth-modal auth-modal"
             open={isModalOpen}
-            onClose={() => {}}
+            onClose={() => setIsModalOpen(false)}
         >
             <Paper className="auth-modal__container">
                 <Typography variant="h6" component="h2">

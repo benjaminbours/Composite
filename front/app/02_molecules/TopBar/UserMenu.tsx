@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -14,9 +14,14 @@ import { Route } from '../../types';
 interface Props {
     disabled?: boolean;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
+    onLoginClick?: () => void;
 }
 
-export const UserMenu: React.FC<Props> = ({ dictionary, disabled }) => {
+export const UserMenu: React.FC<Props> = ({
+    dictionary,
+    disabled,
+    onLoginClick,
+}) => {
     const isAuthenticated = useStoreState(
         (state) => state.user.isAuthenticated,
     );
@@ -45,6 +50,29 @@ export const UserMenu: React.FC<Props> = ({ dictionary, disabled }) => {
             });
         setAnchorEl(null);
     }, [signOut, enqueueSnackbar, dictionary.notification]);
+
+    const loginButton = useMemo(() => {
+        const button = (
+            <Button
+                disabled={disabled}
+                className="top-bar__login-button"
+                size="small"
+                onClick={onLoginClick}
+            >
+                {dictionary.form.button.login}
+            </Button>
+        );
+
+        if (onLoginClick) {
+            return button;
+        }
+
+        return (
+            <Link href={Route.LOGIN} legacyBehavior passHref>
+                {button}
+            </Link>
+        );
+    }, [disabled, dictionary, onLoginClick]);
 
     return (
         <div className="top-bar__account-container">
@@ -85,15 +113,7 @@ export const UserMenu: React.FC<Props> = ({ dictionary, disabled }) => {
                     </Menu>
                 </>
             ) : (
-                <Link href={Route.LOGIN} legacyBehavior passHref>
-                    <Button
-                        disabled={disabled}
-                        className="top-bar__login-button"
-                        size="small"
-                    >
-                        Login
-                    </Button>
-                </Link>
+                loginButton
             )}
         </div>
     );
