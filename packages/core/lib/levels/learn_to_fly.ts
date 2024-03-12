@@ -9,7 +9,7 @@ import {
     createWall,
     positionOnGrid,
 } from './levels.utils';
-import { Levels, LevelState } from '../GameState';
+import { LevelState } from '../GameState';
 import { Side } from '../types';
 import { ElementToBounce, InteractiveArea } from '../elements';
 
@@ -35,7 +35,7 @@ export class LearnToFlyLevel extends Group implements AbstractLevel {
     public state: LevelState = {
         doors: {},
         bounces: {},
-        id: Levels.LEARN_TO_FLY,
+        id: 289,
         end_level: [],
     };
 

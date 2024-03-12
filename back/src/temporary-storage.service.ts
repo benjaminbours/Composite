@@ -9,7 +9,6 @@ import {
   AllQueueInfo,
   GamePlayerInputPayload,
   GameState,
-  Levels,
   MatchMakingPayload,
   QueueInfo,
   RedisGameState,
@@ -17,6 +16,7 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import { PlayerState, RedisPlayerState, PlayerStatus } from './PlayerState';
+import { PrismaService } from '@project-common/services';
 
 const REDIS_KEYS = {
   // List
@@ -26,7 +26,7 @@ const REDIS_KEYS = {
   // Hash map
   QUEUE_INFO: 'QUEUE_INFO',
   // Hash map
-  QUEUE_LEVEL_INFO: (level: Levels | string) => `QUEUE_LEVEL_${level}_INFO`,
+  QUEUE_LEVEL_INFO: (level: number | string) => `QUEUE_LEVEL_${level}_INFO`,
   // Hash map
   PLAYER: (socketId: string) => socketId,
   // Hash map
@@ -45,7 +45,10 @@ export interface PlayerFoundInQueue {
 export class TemporaryStorageService {
   private redisClient: RedisClientType;
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private prismaService: PrismaService,
+  ) {
     if ((this.cacheManager.store as unknown as RedisStore).getClient) {
       this.redisClient = (
         this.cacheManager.store as unknown as RedisStore
@@ -112,12 +115,15 @@ export class TemporaryStorageService {
   }
 
   async getQueueInfo(): Promise<AllQueueInfo> {
+    const levels = await this.prismaService.level.findMany({
+      select: { id: true },
+    });
     return Promise.all([
       this.redisClient.HGETALL(REDIS_KEYS.QUEUE_INFO),
-      ...Object.values(Levels)
+      ...levels
         .filter((val) => typeof val === 'number')
-        .map((level) =>
-          this.redisClient.HGETALL(REDIS_KEYS.QUEUE_LEVEL_INFO(level)),
+        .map(({ id }) =>
+          this.redisClient.HGETALL(REDIS_KEYS.QUEUE_LEVEL_INFO(id)),
         ),
     ]).then(([allQueueInfo, ...levelsQueueInfo]) => {
       const unwrapValue = (val: string | undefined): number =>

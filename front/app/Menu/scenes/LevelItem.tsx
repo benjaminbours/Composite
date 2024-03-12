@@ -1,14 +1,14 @@
-import { Levels, QueueInfo } from '@benjaminbours/composite-core';
+import { QueueInfo } from '@benjaminbours/composite-core';
 import React from 'react';
 import classNames from 'classnames';
 import { QueueInfoText } from '../QueueInfo';
 
 interface IProps {
-    id: Levels;
+    id: number;
     name: string;
-    img: string;
-    disabled: boolean;
-    onClick: (level: Levels) => void;
+    img?: string;
+    disabled?: boolean;
+    onClick: (level: number) => void;
     queueInfo?: QueueInfo;
 }
 
@@ -33,7 +33,11 @@ export default function LevelItem({
                 }
             }}
         >
-            <img src={img} alt={`screenshot of the level ${name}`} />
+            {img ? (
+                <img src={img} alt={`screenshot of the level ${name}`} />
+            ) : (
+                <div className="level-item__placeholder" />
+            )}
             <div className="level-item__center">
                 <h3>{name}</h3>
                 {disabled && <p>Coming soong</p>}

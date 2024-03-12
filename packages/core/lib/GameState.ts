@@ -1,15 +1,8 @@
 import type { Vec2 } from 'three';
 import { MovableComponentState } from './types';
 
-export enum Levels {
-    EMPTY,
-    CRACK_THE_DOOR,
-    LEARN_TO_FLY,
-    THE_HIGH_SPHERES,
-}
-
 export interface LevelState {
-    id: Levels;
+    id: number;
     doors: {
         [key: string]: number[];
     };
@@ -80,7 +73,7 @@ export class GameState {
 
     // parse from the one level object allowed by redis
     static parseFromRedisGameState(state: RedisGameState) {
-        const level: Levels = Number(state.level);
+        const level = Number(state.level);
         const levelState: LevelState = {
             id: level,
             end_level: parseActivators(state.end_level),
@@ -98,7 +91,7 @@ export class GameState {
                 };
             }
         });
-        return new GameState(
+        const gameState = new GameState(
             [
                 {
                     position: {
@@ -135,6 +128,7 @@ export class GameState {
             Number(state.lastValidatedInput),
             Number(state.game_time),
         );
+        return gameState;
     }
 
     static parseToRedisGameState(state: GameState) {

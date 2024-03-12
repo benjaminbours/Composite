@@ -11,7 +11,6 @@ import {
     GamePlayerInputPayload,
     InviteFriendTokenPayload,
     SocketEventTeamLobby,
-    Levels,
     Side,
 } from '@benjaminbours/composite-core';
 
@@ -32,7 +31,7 @@ export class SocketController {
         onTeamMateInfo: (data: TeammateInfoPayload) => void,
         onReceiveInviteFriendToken: (data: InviteFriendTokenPayload) => void,
         onJoinLobby: () => void,
-        handleReceiveLevelOnLobby: (levelId: Levels) => void,
+        handleReceiveLevelOnLobby: (levelId: number) => void,
         handleReceiveSideOnLobby: (side: Side) => void,
     ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
@@ -46,7 +45,7 @@ export class SocketController {
         this.socket.on(
             SocketEventType.GAME_START,
             (data: GameStateUpdatePayload) => {
-                console.log('received game start event');
+                console.log('received game start event', data.gameState);
                 onGameStart(data.gameState);
             },
         );

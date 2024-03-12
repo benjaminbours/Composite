@@ -10,10 +10,10 @@ import React, {
 // our libs
 import {
     AllQueueInfo,
-    Levels,
     Side,
     TeammateInfoPayload,
 } from '@benjaminbours/composite-core';
+import { Level } from '@benjaminbours/composite-api-client';
 // local
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
@@ -42,12 +42,13 @@ interface Props {
     refHashMap: RefHashMap;
     stats: React.MutableRefObject<Stats | undefined>;
     inviteFriendToken: string | undefined;
+    levels: Level[];
     // main controller events
     handleClickPlayWithFriend: () => void;
     handleClickPlayWithRandom: () => void;
-    handleSelectLevelOnLobby: (levelId: Levels) => void;
+    handleSelectLevelOnLobby: (levelId: number) => void;
     handleSelectSideOnLobby: (side: Side) => void;
-    handleSelectLevel: (levelId: Levels) => void;
+    handleSelectLevel: (levelId: number) => void;
     handleEnterRandomQueue: (side: Side) => void;
     handleClickOnBack: () => void;
     handleClickOnQuitTeam: () => void;
@@ -64,6 +65,7 @@ export function Menu({
     stats,
     nextMenuScene,
     inviteFriendToken,
+    levels,
     refHashMap,
     handleClickPlayWithFriend,
     handleClickPlayWithRandom,
@@ -150,37 +152,6 @@ export function Menu({
             window.removeEventListener('resize', resize);
         };
     }, [resize]);
-
-    const levels = useMemo(
-        () => [
-            {
-                id: Levels.CRACK_THE_DOOR,
-                name: 'Crack the door',
-                img: '/images/crack_the_door.png',
-                disabled: false,
-                selectedByTeamMate:
-                    mainState.levelSelectedByTeamMate === Levels.CRACK_THE_DOOR,
-            },
-            {
-                id: Levels.LEARN_TO_FLY,
-                name: 'Learn to fly',
-                img: '/images/learn_to_fly.png',
-                disabled: false,
-                selectedByTeamMate:
-                    mainState.levelSelectedByTeamMate === Levels.LEARN_TO_FLY,
-            },
-            {
-                id: Levels.THE_HIGH_SPHERES,
-                name: 'The high spheres',
-                img: '/images/the_high_spheres.png',
-                disabled: true,
-                selectedByTeamMate:
-                    mainState.levelSelectedByTeamMate ===
-                    Levels.THE_HIGH_SPHERES,
-            },
-        ],
-        [mainState.levelSelectedByTeamMate],
-    );
 
     const levelName = levels.find(
         (level) => level.id === mainState.selectedLevel,
@@ -288,6 +259,7 @@ export function Menu({
                 }
                 handleSelectLevel={handleSelectLevelOnLobby}
                 handleSelectSide={handleSelectSideOnLobby}
+                selectedLevel={mainState.selectedLevel}
                 selectedSide={mainState.side}
                 sideSelectedByTeamMate={mainState.sideSelectedByTeamMate}
                 teamLobbyRef={refHashMap.teamLobbyRef}

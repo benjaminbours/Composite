@@ -5,7 +5,6 @@ import {
     AbstractLevel,
     ElementToBounce,
     LevelState,
-    Levels,
 } from '@benjaminbours/composite-core';
 // local
 
@@ -22,7 +21,7 @@ export class EmptyLevel extends Group implements AbstractLevel {
     };
 
     public state: LevelState = {
-        id: Levels.EMPTY,
+        id: 0,
         doors: {},
         bounces: {},
         end_level: [],

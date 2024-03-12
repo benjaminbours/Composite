@@ -7,11 +7,7 @@ import {
 } from '@nestjs/websockets';
 import type { Socket } from 'socket.io';
 // our libs
-import {
-  Levels,
-  Side,
-  SocketEventTeamLobby,
-} from '@benjaminbours/composite-core';
+import { Side, SocketEventTeamLobby } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { RedisPlayerState } from '../PlayerState';
@@ -41,7 +37,7 @@ export class TeamLobbyGateway {
   @SubscribeMessage(SocketEventTeamLobby.SELECT_LEVEL)
   async handleSelectLevel(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() level: Levels,
+    @MessageBody() level: number,
   ) {
     const player = await this.temporaryStorage.getPlayer(socket.id);
 

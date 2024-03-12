@@ -1,4 +1,4 @@
-import type { Levels, Side } from '@benjaminbours/composite-core';
+import type { Side } from '@benjaminbours/composite-core';
 
 export enum PlayerStatus {
   IS_PLAYING,
@@ -37,7 +37,7 @@ export class PlayerState {
   constructor(
     public status: PlayerStatus,
     public side?: Side,
-    public selectedLevel?: Levels,
+    public selectedLevel?: number,
     /**
      * key use with redis to store game state (the name of the room with socket io)
      */
@@ -49,7 +49,7 @@ export class PlayerState {
     return new PlayerState(
       Number(state.status) as PlayerStatus,
       Number(state.side) as Side,
-      Number(state.selectedLevel) as Levels,
+      Number(state.selectedLevel),
       Number(state.gameId),
       state.roomName,
     );

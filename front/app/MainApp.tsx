@@ -68,9 +68,7 @@ function MainApp({ initialScene }: Props) {
         gameIsPlaying,
         menuMode,
         teamMateDisconnected,
-        handleGameStart,
-        establishConnection,
-        sendMatchMakingInfo,
+        levels,
         handleClickOnJoinTeamMate,
         handleClickFindAnotherTeamMate,
         handleEnterTeamLobby,
@@ -149,6 +147,7 @@ function MainApp({ initialScene }: Props) {
                     stats={statsRef}
                     inviteFriendToken={inviteFriendToken}
                     refHashMap={refHashMap}
+                    levels={levels}
                     handleEnterRandomQueue={handleEnterRandomQueue}
                     handleClickPlayWithFriend={handleClickPlayWithFriend}
                     handleClickPlayWithRandom={handleClickPlayWithRandom}
@@ -162,10 +161,11 @@ function MainApp({ initialScene }: Props) {
                     handleClickPlayAgain={handleClickPlayAgain}
                 />
             )}
-            {state.gameState && gameIsPlaying && (
+            {state.gameState && state.loadedLevel && gameIsPlaying && (
                 <Game
                     side={state.side!}
                     initialGameState={state.gameState}
+                    level={state.loadedLevel}
                     socketController={socketController.current}
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}

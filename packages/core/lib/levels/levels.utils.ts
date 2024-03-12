@@ -10,6 +10,8 @@ import {
     Group,
     Object3DEventMap,
     Euler,
+    Box3,
+    PlaneGeometry,
 } from 'three';
 import {
     computeBoundsTree,
@@ -18,8 +20,20 @@ import {
 } from 'three-mesh-bvh';
 import { degreesToRadians } from '../helpers/math';
 import { Layer, Side } from '../types';
-import { ElementToBounce } from '../elements';
+import { ElementToBounce, InteractiveArea } from '../elements';
 import { LevelState } from '../GameState';
+import {
+    ArchProperties,
+    BounceProperties,
+    ColumnFatProperties,
+    DoorOpenerProperties,
+    ElementProperties,
+    ElementType,
+    EndLevelProperties,
+    LevelElement,
+    WallDoorProperties,
+    WallProperties,
+} from './types';
 
 // Add the extension functions
 BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -151,6 +165,7 @@ interface WallDoorOptions {
     position: Vector3;
     doorPosition: Vector3;
     rotation: Euler;
+    id: number;
 }
 
 export function createWallDoor({
@@ -158,6 +173,7 @@ export function createWallDoor({
     position,
     doorPosition,
     rotation,
+    id,
 }: WallDoorOptions) {
     const group = new Object3D();
     // wall left to the door
@@ -249,7 +265,7 @@ export function createWallDoor({
         group.add(wall);
     }
     positionOnGrid(group, position, rotation);
-
+    group.name = ElementName.WALL_DOOR(String(id));
     return group;
 }
 
@@ -484,7 +500,6 @@ export function createMountain() {
 
 export interface AbstractLevel {
     collidingElements: Object3D[];
-    name: string;
     startPosition: {
         light: Vector3;
         shadow: Vector3;
@@ -497,4 +512,268 @@ export interface AbstractLevel {
     bounces: Object3D[];
     lightBounces: ElementToBounce[];
     updateMatrixWorld(force?: boolean): void;
+}
+
+function createDoorOpener(props: DoorOpenerProperties) {
+    const group = new Object3D();
+    group.name = `door-opener-group-${props.door_id}`;
+    const areaDoorOpener = new InteractiveArea(
+        ElementName.AREA_DOOR_OPENER(String(props.door_id)),
+    );
+    group.add(areaDoorOpener);
+    group.position.copy(props.position.clone().multiplyScalar(gridSize));
+    const rotationX = degreesToRadians(props.rotation.x);
+    const rotationY = degreesToRadians(props.rotation.y);
+    const rotationZ = degreesToRadians(props.rotation.z);
+    group.rotation.set(rotationX, rotationY, rotationZ);
+    return group;
+}
+
+function parseProperties(props: any) {
+    const properties: Record<string, any> = {};
+    Object.entries(props).forEach(([key, value]: [key: string, value: any]) => {
+        switch (key) {
+            case 'rotation':
+                properties[key] = new Euler(value._x, value._y, value._z);
+                break;
+            case 'position':
+            case 'size':
+            case 'doorPosition':
+                properties[key] = new Vector3(value.x, value.y, value.z);
+                break;
+            default:
+                properties[key] = value;
+                break;
+        }
+    });
+    return properties;
+}
+
+interface ClientGraphicHelpers {
+    addEndLevelGraphic: (group: Object3D) => void;
+    addBounceGraphic: (
+        group: Object3D,
+        props: BounceProperties,
+        addLightBounceComposer: (bounce: ElementToBounce) => void,
+    ) => void;
+    addDoorOpenerGraphic: (
+        group: Object3D,
+        door_id: number | undefined,
+    ) => void;
+    addLightBounceComposer: (bounce: ElementToBounce) => void;
+    connectDoors: (elements: LevelElement[]) => void;
+}
+
+export interface WorldContext {
+    levelState: LevelState;
+    bounceList: Object3D[];
+    clientGraphicHelpers?: ClientGraphicHelpers;
+}
+
+export function createElement(
+    { levelState, bounceList, clientGraphicHelpers }: WorldContext,
+    type: ElementType,
+    properties?: ElementProperties,
+): {
+    mesh: Object3D;
+    properties: ElementProperties;
+} {
+    let props;
+    switch (type) {
+        case ElementType.DOOR_OPENER:
+            props =
+                (properties as DoorOpenerProperties) ||
+                new DoorOpenerProperties();
+            const group = createDoorOpener(props);
+            if (clientGraphicHelpers) {
+                clientGraphicHelpers.addDoorOpenerGraphic(group, props.door_id);
+            }
+            return {
+                mesh: group,
+                properties: props,
+            };
+        case ElementType.WALL_DOOR:
+            props =
+                (properties as WallDoorProperties) ||
+                new WallDoorProperties(Object.keys(levelState.doors).length);
+            const wallDoorGroup = createWallDoor({
+                size: props.size.clone(),
+                position: props.position.clone(),
+                doorPosition: props.doorPosition.clone(),
+                rotation: props.rotation.clone(),
+                id: props.id,
+            });
+            levelState.doors[props.id] = [];
+            return {
+                mesh: wallDoorGroup,
+                properties: props,
+            };
+        case ElementType.FAT_COLUMN:
+            props =
+                (properties as ColumnFatProperties) ||
+                new ColumnFatProperties();
+            const column = createColumnGroup(props.size.y, 'big');
+            positionOnGrid(column, props.position.clone());
+            return {
+                mesh: column,
+                properties: props,
+            };
+        case ElementType.END_LEVEL:
+            props =
+                (properties as EndLevelProperties) || new EndLevelProperties();
+            const endLevelGroup = new Object3D();
+            endLevelGroup.add(new InteractiveArea(ElementName.AREA_END_LEVEL));
+            // graphic
+            if (clientGraphicHelpers) {
+                clientGraphicHelpers.addEndLevelGraphic(endLevelGroup);
+            }
+            positionOnGrid(endLevelGroup, props.position.clone());
+            return {
+                mesh: endLevelGroup,
+                properties: props,
+            };
+        case ElementType.ARCH:
+            props = (properties as ArchProperties) || new ArchProperties();
+            return {
+                mesh: createArchGroup({
+                    size: props.size.clone(),
+                    position: props.position.clone(),
+                }),
+                properties: props,
+            };
+        case ElementType.BOUNCE:
+            props =
+                (properties as BounceProperties) ||
+                new BounceProperties(Object.keys(levelState.bounces).length);
+            const bounceGroup = createBounce({
+                // size: props.size.clone(),
+                position: props.position.clone(),
+                rotation: props.rotation.clone(),
+                id: props.id,
+                side: props.side,
+                interactive: props.interactive,
+            });
+            levelState.bounces[props.id] = {
+                rotationY: props.rotation.y,
+            };
+            bounceList.push(bounceGroup);
+            if (clientGraphicHelpers) {
+                clientGraphicHelpers.addBounceGraphic(
+                    bounceGroup,
+                    props,
+                    clientGraphicHelpers.addLightBounceComposer,
+                );
+            }
+            return {
+                mesh: bounceGroup,
+                properties: props,
+            };
+        case ElementType.WALL:
+        default:
+            props = (properties as WallProperties) || new WallProperties();
+            return {
+                mesh: createWall({
+                    size: props.size.clone(),
+                    position: props.position.clone(),
+                    rotation: props.rotation.clone(),
+                }),
+                properties: props,
+            };
+    }
+}
+
+export function parseLevelElements(
+    worldContext: WorldContext,
+    elementList: any[],
+): LevelElement[] {
+    // create each elements
+    const elements = elementList.map((el: any) => {
+        const properties = parseProperties(el.properties);
+        const { mesh } = createElement(
+            worldContext,
+            el.type,
+            properties as any,
+        );
+
+        return {
+            type: el.type as ElementType,
+            name: el.name,
+            mesh,
+            properties: properties,
+        };
+    });
+
+    if (worldContext.clientGraphicHelpers) {
+        worldContext.clientGraphicHelpers.connectDoors(
+            elements as LevelElement[],
+        );
+    }
+    return elements as LevelElement[];
+}
+
+export function createCollisionAreaMesh() {
+    const geometry = new PlaneGeometry(10000, 10000);
+    const material = new MeshBasicMaterial({
+        color: 0xff0000, // red color
+        transparent: true,
+        opacity: 0.1,
+    });
+    const mesh = new Mesh(geometry, material);
+    mesh.name = 'collision-area';
+    mesh.position.y = 10000 / 2;
+    return mesh;
+}
+
+const collisionAreaMesh = createCollisionAreaMesh();
+function detectIfMeshIsCollidable(mesh: Mesh): boolean {
+    mesh.updateMatrixWorld(true);
+    // this.scene.updateMatrixWorld(true);
+
+    const geometry = mesh.geometry.clone();
+    geometry.applyMatrix4(mesh.matrixWorld);
+
+    const transformedVertices = [];
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        const vertex = new Vector3(
+            geometry.attributes.position.getX(i),
+            geometry.attributes.position.getY(i),
+            geometry.attributes.position.getZ(i),
+        );
+        transformedVertices.push(vertex);
+    }
+
+    const meshBBox = new Box3().setFromPoints(transformedVertices);
+    const collisionBBox = new Box3().setFromObject(collisionAreaMesh);
+    return meshBBox.intersectsBox(collisionBBox);
+}
+
+export function addToCollidingElements(
+    group: Object3D,
+    collidingElements: Object3D[],
+) {
+    const pushToCollidingElements = (mesh: Mesh) => {
+        if (detectIfMeshIsCollidable(mesh)) {
+            (mesh.geometry as any).computeBoundsTree();
+            collidingElements.push(mesh);
+        }
+    };
+    const checkChildren = (elements: Object3D[]) => {
+        for (let i = 0; i < elements.length; i++) {
+            const child = elements[i];
+            const notCollidable = ['particles'];
+            if (
+                child.name.includes('Occlusion') ||
+                child.name.includes('skin-bounce') ||
+                notCollidable.includes(child.name)
+            ) {
+                continue;
+            }
+            if (child.children.length > 0) {
+                checkChildren(child.children);
+            } else {
+                pushToCollidingElements(child as Mesh);
+            }
+        }
+    };
+    checkChildren(group.children);
 }

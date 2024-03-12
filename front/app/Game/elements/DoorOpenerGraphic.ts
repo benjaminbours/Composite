@@ -31,7 +31,7 @@ const FAST_SPEED_MODIFIER = 2;
 const DEFAULT_ORGANIC_RATIO = 1;
 const FAST_ORGANIC_RATIO = 0.2;
 
-export class DoorOpener extends Object3D implements InteractiveComponent {
+export class DoorOpenerGraphic extends Object3D implements InteractiveComponent {
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
     protected speedModifier: number = DEFAULT_SPEED_MODIFIER;

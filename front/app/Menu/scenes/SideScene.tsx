@@ -2,14 +2,14 @@
 import classNames from 'classnames';
 import React from 'react';
 // our libs
-import { AllQueueInfo, Levels, Side } from '@benjaminbours/composite-core';
+import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
 // local
 import { QueueInfoText } from '../QueueInfo';
 import { MenuStateInfo } from '../MenuStateInfo';
 
 interface Props {
     sideRef: React.RefObject<HTMLDivElement>;
-    selectedLevel?: Levels;
+    selectedLevel?: number;
     levelName?: string;
     onClickOnFaction: (side: Side) => void;
     allQueueInfo?: AllQueueInfo;
@@ -56,18 +56,20 @@ export const SideScene: React.FC<Props> = ({
             >
                 shadow
             </button>
-            {allQueueInfo && selectedLevel !== undefined && (
-                <>
-                    <QueueInfoText
-                        side="light"
-                        value={allQueueInfo.levels[selectedLevel].light}
-                    />
-                    <QueueInfoText
-                        side="shadow"
-                        value={allQueueInfo.levels[selectedLevel].shadow}
-                    />
-                </>
-            )}
+            {allQueueInfo &&
+                selectedLevel !== undefined &&
+                allQueueInfo.levels[selectedLevel] && (
+                    <>
+                        <QueueInfoText
+                            side="light"
+                            value={allQueueInfo.levels[selectedLevel].light}
+                        />
+                        <QueueInfoText
+                            side="shadow"
+                            value={allQueueInfo.levels[selectedLevel].shadow}
+                        />
+                    </>
+                )}
         </div>
     );
 };

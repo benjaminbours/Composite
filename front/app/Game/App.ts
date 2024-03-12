@@ -14,8 +14,6 @@ import {
     Box3Helper,
     Object3DEventMap,
     Group,
-    PlaneGeometry,
-    MeshBasicMaterial,
     Vector2,
     Raycaster,
 } from 'three';
@@ -36,15 +34,16 @@ import {
     ElementToBounce,
     createMountain,
     Inputs,
-    Levels,
     AbstractLevel,
     degreesToRadians,
+    createCollisionAreaMesh,
+    LevelMapping,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
 // import CustomCamera from './CustomCamera';
-import { DoorOpener } from './elements/DoorOpener';
+import { DoorOpenerGraphic } from './elements/DoorOpenerGraphic';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';
 import { SocketController } from '../SocketController';
@@ -53,10 +52,7 @@ import { SkinBounce } from './elements/SkinBounce';
 import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
 import { GameStateManager } from './GameStateManager';
-import { EmptyLevel } from './levels/EmptyLevel';
-import { CrackTheDoorLevelWithGraphic } from './levels/CrackTheDoorLevelWithGraphic';
-import { LearnToFlyLevelWithGraphic } from './levels/LearnToFlyLevelWithGraphic';
-import { TheHighSpheresLevelWithGraphic } from './levels/TheHighSpheresWithGraphic';
+import { Level } from '@benjaminbours/composite-api-client';
 
 export enum AppMode {
     EDITOR = 'EDITOR',
@@ -116,6 +112,7 @@ export default class App {
         playersConfig: Side[],
         public inputsManager: InputsManager,
         initialMode: AppMode,
+        level: Level,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
     ) {
@@ -132,20 +129,7 @@ export default class App {
         }
 
         // levels
-        this.level = (() => {
-            switch (initialGameState.level.id) {
-                case Levels.EMPTY:
-                    return new EmptyLevel();
-                case Levels.CRACK_THE_DOOR:
-                    return new CrackTheDoorLevelWithGraphic();
-                case Levels.LEARN_TO_FLY:
-                    return new LearnToFlyLevelWithGraphic();
-                case Levels.THE_HIGH_SPHERES:
-                    return new TheHighSpheresLevelWithGraphic();
-                default:
-                    return new EmptyLevel();
-            }
-        })();
+        this.level = new LevelMapping(level.id, level.data);
         this.scene.add(this.level as unknown as Group);
 
         if (this.mode === AppMode.GAME) {
@@ -177,15 +161,7 @@ export default class App {
             this.scene.add(this.transformControls);
             this.createEditorCamera();
             // draw collision plane / axis
-            const geometry = new PlaneGeometry(10000, 10000);
-            const material = new MeshBasicMaterial({
-                color: 0xff0000, // red color
-                transparent: true,
-                opacity: 0.1,
-            });
-            this.collisionAreaMesh = new Mesh(geometry, material);
-            this.collisionAreaMesh.name = 'collision-area';
-            this.collisionAreaMesh.position.y = 10000 / 2;
+            this.collisionAreaMesh = createCollisionAreaMesh();
         } else {
             this.setGameCamera();
         }
@@ -244,30 +220,6 @@ export default class App {
                 this.collidingElements.splice(collidingIndex, 1);
             }
         }
-    };
-
-    public detectIfMeshIsCollidable = (mesh: Mesh) => {
-        if (!this.collisionAreaMesh) {
-            return false;
-        }
-        this.scene.updateMatrixWorld(true);
-
-        const geometry = mesh.geometry.clone();
-        geometry.applyMatrix4(mesh.matrixWorld);
-
-        const transformedVertices = [];
-        for (let i = 0; i < geometry.attributes.position.count; i++) {
-            const vertex = new Vector3(
-                geometry.attributes.position.getX(i),
-                geometry.attributes.position.getY(i),
-                geometry.attributes.position.getZ(i),
-            );
-            transformedVertices.push(vertex);
-        }
-
-        const meshBBox = new Box3().setFromPoints(transformedVertices);
-        const collisionBBox = new Box3().setFromObject(this.collisionAreaMesh);
-        return meshBBox.intersectsBox(collisionBBox);
     };
 
     public resetEditorCamera = () => {
@@ -623,7 +575,7 @@ export default class App {
 
             const doorOpener = this.collidingElements.find(
                 (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
-            )?.parent?.children[1] as DoorOpener | undefined;
+            )?.parent?.children[1] as DoorOpenerGraphic | undefined;
 
             if (doorOpener) {
                 if (activators.length > 0 && !doorOpener.shouldActivate) {

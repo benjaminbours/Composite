@@ -1,5 +1,5 @@
 import type { Group, Mesh, Object3D, Vec2 } from 'three';
-import { GameState, Levels } from './GameState';
+import { GameState } from './GameState';
 
 export enum Side {
     SHADOW,
@@ -64,7 +64,7 @@ export interface Inputs {
 // payloads
 export interface MatchMakingPayload {
     side: Side;
-    selectedLevel: Levels;
+    selectedLevel: number;
 }
 
 export interface InviteFriendTokenPayload {
@@ -73,7 +73,7 @@ export interface InviteFriendTokenPayload {
 
 export interface TeammateInfoPayload {
     side: Side;
-    selectedLevel: Levels;
+    selectedLevel: number;
 }
 
 export interface GamePlayerInputPayload {
@@ -164,7 +164,7 @@ export type GameDeactivateElementEvent = [
 
 export type TeamSelectLevel = [
     type: SocketEventTeamLobby.SELECT_LEVEL,
-    payload: Levels,
+    payload: number,
 ];
 
 export type TeamSelectSide = [
@@ -195,7 +195,7 @@ export class QueueInfo {
 
 export class AllQueueInfo extends QueueInfo {
     constructor(
-        public levels: QueueInfo[],
+        public levels: Record<number, QueueInfo>,
         public all = 0,
         public light = 0,
         public shadow = 0,

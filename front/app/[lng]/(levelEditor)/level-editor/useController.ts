@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-    addMeshToScene,
-    addToCollidingElements,
-    computeDoorInfo,
-    createElement,
-    parseLevelElements,
-    removeMeshFromScene,
-} from './utils';
+import { removeMeshFromScene } from './utils';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { Euler, Object3D, Vector3 } from 'three';
@@ -22,9 +15,13 @@ import {
     LevelElement,
     WallDoorProperties,
     BounceProperties,
+    createElement,
+    parseLevelElements,
+    WorldContext,
+    addToCollidingElements,
 } from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
-import { DoorOpener } from '../../../Game/elements/DoorOpener';
+import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
 import { servicesContainer } from '../../../core/frameworks';
 import { ApiClient } from '../../../core/services';
 import { useRouter } from 'next/navigation';
@@ -32,6 +29,13 @@ import { Route } from '../../../types';
 import { Level } from '@benjaminbours/composite-api-client';
 import { useStoreState } from '../../../hooks';
 import { generateErrorNotification } from '../../../utils/errors/generateErrorNotification';
+import {
+    addBounceGraphic,
+    addDoorOpenerGraphic,
+    addEndLevelGraphic,
+    computeDoorInfo,
+    connectDoors,
+} from '../../../Game/elements/graphic.utils';
 
 export function useController(
     level_id: string,
@@ -51,6 +55,24 @@ export function useController(
     const [levelName, setLevelName] = useState(initialLevel.name);
     const [elements, setElements] = useState<LevelElement[]>([]);
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
+
+    const worldContext: WorldContext | null = useMemo(() => {
+        if (!app) {
+            return null;
+        }
+        return {
+            levelState: app.gameStateManager.currentState.level,
+            bounceList: app.level.bounces,
+            clientGraphicHelpers: {
+                addBounceGraphic,
+                addDoorOpenerGraphic,
+                addEndLevelGraphic,
+                connectDoors,
+                addLightBounceComposer:
+                    app.rendererManager.addLightBounceComposer,
+            },
+        };
+    }, [app]);
 
     const handleLevelNameChange = useCallback(
         (e: any) => {
@@ -82,7 +104,7 @@ export function useController(
 
             const apiClient = servicesContainer.get(ApiClient);
             const onSuccess = (level: Level) => {
-                if (!app) {
+                if (!app || !worldContext) {
                     return;
                 }
                 router.push(Route.LEVEL_EDITOR(level.id));
@@ -92,7 +114,7 @@ export function useController(
                     removeMeshFromScene(app, element.mesh);
                 }
                 // prepare the next state
-                const nextState = parseLevelElements(app, level.data);
+                const nextState = parseLevelElements(worldContext, level.data);
                 // console.log(
                 //     'before',
                 //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
@@ -100,8 +122,9 @@ export function useController(
                 // load the next state into the scene
                 const loadElementsToScene = (elementList: LevelElement[]) => {
                     for (let i = 0; i < elementList.length; i++) {
-                        const { type, mesh } = elementList[i];
-                        addMeshToScene(app, type, mesh);
+                        const { mesh } = elementList[i];
+                        app.scene.add(mesh);
+                        addToCollidingElements(mesh, app.collidingElements);
                     }
                 };
                 loadElementsToScene(nextState);
@@ -188,6 +211,7 @@ export function useController(
             level_id,
             isAuthenticated,
             app,
+            worldContext,
         ],
     );
 
@@ -224,7 +248,7 @@ export function useController(
 
     const handleUpdateElementProperty = useCallback(
         (propertyKey: string, value: any) => {
-            if (currentEditingIndex === undefined || !app) {
+            if (currentEditingIndex === undefined || !app || !worldContext) {
                 return;
             }
 
@@ -238,7 +262,8 @@ export function useController(
                         // mesh is a door opener group here
                         const areaDoorOpener = mesh
                             .children[0] as InteractiveArea;
-                        const doorOpener = mesh.children[1] as DoorOpener;
+                        const doorOpener = mesh
+                            .children[1] as DoorOpenerGraphic;
                         const wallDoor = nextState.find(
                             (el) =>
                                 el.type === ElementType.WALL_DOOR &&
@@ -281,15 +306,16 @@ export function useController(
                         );
                         // create a new one
                         const { mesh: newMesh } = createElement(
-                            app,
+                            worldContext,
                             type,
                             nextState[currentEditingIndex].properties,
                         );
                         nextState[currentEditingIndex].mesh = newMesh;
-                        addMeshToScene(
-                            app,
-                            type,
+                        // add element
+                        app.scene.add(nextState[currentEditingIndex].mesh);
+                        addToCollidingElements(
                             nextState[currentEditingIndex].mesh,
+                            app.collidingElements,
                         );
                         app.attachTransformControls(newMesh);
                         break;
@@ -309,7 +335,7 @@ export function useController(
                             const rotationZ = degreesToRadians(value.z);
                             mesh.rotation.set(rotationX, rotationY, rotationZ);
                         }
-                        addToCollidingElements(app, mesh);
+                        addToCollidingElements(mesh, app.collidingElements);
                         break;
                     case 'position':
                         (properties as any)[propertyKey] = value;
@@ -317,21 +343,21 @@ export function useController(
                         mesh.position.copy(
                             (value as Vector3).clone().multiplyScalar(gridSize),
                         );
-                        addToCollidingElements(app, mesh);
+                        addToCollidingElements(mesh, app.collidingElements);
                         break;
                 }
                 return nextState;
             });
         },
-        [currentEditingIndex, app],
+        [currentEditingIndex, app, worldContext],
     );
 
     const addElement = useCallback(
         (type: ElementType) => {
-            if (!app) {
+            if (!app || !worldContext) {
                 return;
             }
-            const { mesh, properties } = createElement(app, type);
+            const { mesh, properties } = createElement(worldContext, type);
             setElements((prev) => {
                 const nextState = [...prev];
                 nextState.push({
@@ -343,9 +369,10 @@ export function useController(
                 return nextState;
             });
             setCurrentEditingIndex(elements.length);
-            addMeshToScene(app, type, mesh);
+            app.scene.add(mesh);
+            addToCollidingElements(mesh, app.collidingElements);
         },
-        [app, elements, setCurrentEditingIndex],
+        [app, elements, setCurrentEditingIndex, worldContext],
     );
 
     const removeElement = useCallback(
@@ -485,15 +512,16 @@ export function useController(
     // effect responsible to mount the 3d scene only once and when the app is ready
     useEffect(() => {
         // if the app is not ready, don't do anything
-        if (!app || isInitialLoadDone) {
+        if (!app || !worldContext || isInitialLoadDone) {
             return;
         }
         // parse the initial level elements
-        const elementList = parseLevelElements(app, initialLevel.data);
+        const elementList = parseLevelElements(worldContext, initialLevel.data);
         const loadElementsToScene = (elementList: LevelElement[]) => {
             for (let i = 0; i < elementList.length; i++) {
-                const { type, mesh } = elementList[i];
-                addMeshToScene(app, type, mesh);
+                const { mesh } = elementList[i];
+                app.scene.add(mesh);
+                addToCollidingElements(mesh, app.collidingElements);
             }
         };
         // load elements to the scene
@@ -501,7 +529,7 @@ export function useController(
         // set the state
         setElements(elementList);
         setIsInitialLoadDone(true);
-    }, [app, initialLevel, isInitialLoadDone]);
+    }, [app, initialLevel, isInitialLoadDone, worldContext]);
 
     return {
         levelName,

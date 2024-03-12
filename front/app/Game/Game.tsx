@@ -9,10 +9,12 @@ import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
+import { Level } from '@benjaminbours/composite-api-client';
 
 interface Props {
     side: Side;
     initialGameState: GameState;
+    level: Level;
     socketController?: SocketController;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
@@ -27,6 +29,7 @@ function Game({
     side,
     socketController,
     initialGameState,
+    level,
     tabIsHidden,
     stats,
     inputsManager,
@@ -81,6 +84,7 @@ function Game({
                     [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                     inputsManager,
                     mode,
+                    level,
                     socketController,
                     onTransformControlsObjectChange,
                 );

@@ -1,14 +1,12 @@
 import {
     GameState,
     InviteFriendTokenPayload,
-    Levels,
     MatchMakingPayload,
     MovableComponentState,
     Side,
     SocketEventTeamLobby,
     SocketEventType,
     TeammateInfoPayload,
-    TheHighSpheresLevel,
 } from '@benjaminbours/composite-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuMode, MenuScene, Route } from './types';
@@ -16,15 +14,17 @@ import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
-import { CrackTheDoorLevelWithGraphic } from './Game/levels/CrackTheDoorLevelWithGraphic';
-import { LearnToFlyLevelWithGraphic } from './Game/levels/LearnToFlyLevelWithGraphic';
+import { servicesContainer } from './core/frameworks';
+import { ApiClient } from './core/services';
+import { Level } from '@benjaminbours/composite-api-client';
 
 export interface MainState {
     side: Side | undefined;
-    selectedLevel: Levels | undefined;
+    selectedLevel: number | undefined;
     gameState: GameState | undefined;
-    levelSelectedByTeamMate: Levels | undefined;
+    levelSelectedByTeamMate: number | undefined;
     sideSelectedByTeamMate: Side | undefined;
+    loadedLevel: Level | undefined;
 }
 
 export function useMainController(
@@ -50,14 +50,14 @@ export function useMainController(
                     (str) => Number(str),
                 );
                 side = parts[0] as Side;
-                selectedLevel = parts[1] as Levels;
+                selectedLevel = parts[1];
             }
 
             const param = queryParams.get('dev_state');
             if (param) {
                 const parts = param.split(',').map((str) => Number(str));
                 side = parts[0] as Side;
-                selectedLevel = parts[1] as Levels;
+                selectedLevel = parts[1];
             }
 
             return {
@@ -66,6 +66,7 @@ export function useMainController(
                 gameState: undefined,
                 levelSelectedByTeamMate: undefined,
                 sideSelectedByTeamMate: undefined,
+                loadedLevel: undefined,
             };
         }
 
@@ -75,8 +76,10 @@ export function useMainController(
             gameState: undefined,
             levelSelectedByTeamMate: undefined,
             sideSelectedByTeamMate: undefined,
+            loadedLevel: undefined,
         };
     });
+    const [levels, setLevels] = useState<Level[]>([]);
 
     const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
@@ -101,7 +104,11 @@ export function useMainController(
 
         const isMobile = window.innerWidth < 768;
         // curve
-        if (state.selectedLevel === state.levelSelectedByTeamMate) {
+        if (
+            state.selectedLevel !== undefined &&
+            state.levelSelectedByTeamMate !== undefined &&
+            state.selectedLevel === state.levelSelectedByTeamMate
+        ) {
             Curve.setWaveOptions({
                 speed: 0.4,
             });
@@ -127,6 +134,14 @@ export function useMainController(
             shadowToStep({ step: MenuScene.HOME }, isMobile);
         }
     }, [state, menuScene, lightToStep, shadowToStep]);
+
+    // responsible to fetch the levels
+    useEffect(() => {
+        const apiClient = servicesContainer.get(ApiClient);
+        apiClient.defaultApi.levelsControllerFindAll().then((levels) => {
+            setLevels(levels);
+        });
+    }, []);
 
     const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
         socketController.current?.emit([
@@ -181,7 +196,7 @@ export function useMainController(
         [],
     );
 
-    const handleSelectLevelOnLobby = useCallback((levelId: Levels) => {
+    const handleSelectLevelOnLobby = useCallback((levelId: number) => {
         setState((prev) => ({
             ...prev,
             selectedLevel: levelId,
@@ -228,9 +243,18 @@ export function useMainController(
     }, [handleDestroyConnection]);
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
-        setState((prev) => ({ ...prev, gameState: initialGameState }));
-        setGameIsPlaying(true);
-        setMenuMode(MenuMode.IN_TEAM);
+        const apiClient = servicesContainer.get(ApiClient);
+        apiClient.defaultApi
+            .levelsControllerFindOne({ id: String(initialGameState.level.id) })
+            .then((level) => {
+                setState((prev) => ({
+                    ...prev,
+                    gameState: initialGameState,
+                    loadedLevel: level,
+                }));
+                setGameIsPlaying(true);
+                setMenuMode(MenuMode.IN_TEAM);
+            });
     }, []);
 
     const handleGameFinished = useCallback(() => {
@@ -240,6 +264,7 @@ export function useMainController(
             sideSelectedByTeamMate: undefined,
             levelSelectedByTeamMate: undefined,
             gameState: undefined,
+            loadedLevel: undefined,
         }));
         setGameIsPlaying(false);
         setMenuScene(MenuScene.END_LEVEL);
@@ -250,7 +275,7 @@ export function useMainController(
         setTeamMateInfo(data);
     }, []);
 
-    const handleReceiveLevelOnLobby = useCallback((levelId: Levels) => {
+    const handleReceiveLevelOnLobby = useCallback((levelId: number) => {
         setState((prev) => ({
             ...prev,
             levelSelectedByTeamMate: levelId,
@@ -349,7 +374,7 @@ export function useMainController(
     );
 
     const handleSelectLevel = useCallback(
-        (levelId: Levels) => {
+        (levelId: number) => {
             if (onTransition.current) {
                 return;
             }
@@ -456,74 +481,74 @@ export function useMainController(
         });
     }, [goToStep, onTransition, setState]);
 
-    // development effect
-    useEffect(() => {
-        if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-            establishConnection().then(() => {
-                const level = (() => {
-                    switch (state.selectedLevel) {
-                        case Levels.CRACK_THE_DOOR:
-                            return new CrackTheDoorLevelWithGraphic();
-                        case Levels.LEARN_TO_FLY:
-                            return new LearnToFlyLevelWithGraphic();
-                        case Levels.THE_HIGH_SPHERES:
-                            return new TheHighSpheresLevel();
-                        default:
-                            return new CrackTheDoorLevelWithGraphic();
-                    }
-                })();
-                const initialGameState = new GameState(
-                    [
-                        {
-                            position: {
-                                x: level.startPosition.shadow.x,
-                                y: level.startPosition.shadow.y,
-                            },
-                            velocity: {
-                                x: 0,
-                                y: 0,
-                            },
-                            state: MovableComponentState.onFloor,
-                            insideElementID: undefined,
-                        },
-                        {
-                            position: {
-                                x: level.startPosition.light.x,
-                                y: level.startPosition.light.y,
-                            },
-                            velocity: {
-                                x: 0,
-                                y: 0,
-                            },
-                            state: MovableComponentState.onFloor,
-                            insideElementID: undefined,
-                        },
-                    ],
-                    {
-                        ...level.state,
-                    },
-                    Date.now(),
-                    0,
-                );
-                handleGameStart(initialGameState);
-            });
-            return () => {
-                handleDestroyConnection();
-            };
-        }
-        if (
-            process.env.NEXT_PUBLIC_STAGE === 'development' &&
-            state.side !== undefined &&
-            socketController.current === undefined
-        ) {
-            console.log('enter random queue');
-            handleEnterRandomQueue(state.side);
-        }
+    // // development effect
+    // useEffect(() => {
+    //     if (process.env.NEXT_PUBLIC_SOLO_MODE) {
+    //         establishConnection().then(() => {
+    //             const level = (() => {
+    //                 switch (state.selectedLevel) {
+    //                     // case Levels.CRACK_THE_DOOR:
+    //                     //     return new CrackTheDoorLevelWithGraphic();
+    //                     // case Levels.LEARN_TO_FLY:
+    //                     //     return new LearnToFlyLevelWithGraphic();
+    //                     // case Levels.THE_HIGH_SPHERES:
+    //                     //     return new TheHighSpheresLevelWithGraphic();
+    //                     default:
+    //                         return new CrackTheDoorLevelWithGraphic();
+    //                 }
+    //             })();
+    //             const initialGameState = new GameState(
+    //                 [
+    //                     {
+    //                         position: {
+    //                             x: level.startPosition.shadow.x,
+    //                             y: level.startPosition.shadow.y,
+    //                         },
+    //                         velocity: {
+    //                             x: 0,
+    //                             y: 0,
+    //                         },
+    //                         state: MovableComponentState.onFloor,
+    //                         insideElementID: undefined,
+    //                     },
+    //                     {
+    //                         position: {
+    //                             x: level.startPosition.light.x,
+    //                             y: level.startPosition.light.y,
+    //                         },
+    //                         velocity: {
+    //                             x: 0,
+    //                             y: 0,
+    //                         },
+    //                         state: MovableComponentState.onFloor,
+    //                         insideElementID: undefined,
+    //                     },
+    //                 ],
+    //                 {
+    //                     ...level.state,
+    //                 },
+    //                 Date.now(),
+    //                 0,
+    //             );
+    //             handleGameStart(initialGameState);
+    //         });
+    //         return () => {
+    //             handleDestroyConnection();
+    //         };
+    //     }
+    //     if (
+    //         process.env.NEXT_PUBLIC_STAGE === 'development' &&
+    //         state.side !== undefined &&
+    //         socketController.current === undefined
+    //     ) {
+    //         console.log('enter random queue');
+    //         handleEnterRandomQueue(state.side);
+    //     }
 
-        return () => {
-            handleDestroyConnection();
-        };
-    }, []);
+    //     return () => {
+    //         handleDestroyConnection();
+    //     };
+    // }, []);
 
     return {
         state,
@@ -533,9 +558,9 @@ export function useMainController(
         gameIsPlaying,
         menuMode,
         teamMateDisconnected,
+        levels,
         handleGameStart,
         establishConnection,
-        sendMatchMakingInfo,
         handleClickOnJoinTeamMate,
         handleClickFindAnotherTeamMate,
         handleEnterTeamLobby,

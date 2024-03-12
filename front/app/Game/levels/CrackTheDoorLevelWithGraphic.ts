@@ -3,7 +3,7 @@ import { Vector3 } from 'three';
 // our libs
 import { ElementName, CrackTheDoorLevel } from '@benjaminbours/composite-core';
 // local
-import { DoorOpener } from '../elements/DoorOpener';
+import { DoorOpenerGraphic } from '../elements/DoorOpenerGraphic';
 import { EndLevel } from '../elements/EndLevel';
 
 export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
@@ -32,7 +32,7 @@ export class CrackTheDoorLevelWithGraphic extends CrackTheDoorLevel {
                     : 1;
 
             const cameraPosition = new Vector3(100 * sign, 200);
-            const doorOpener = new DoorOpener(
+            const doorOpener = new DoorOpenerGraphic(
                 ElementName.DOOR_OPENER(String(index)),
                 // {
                 //     cameraPosition: doorWorldPosition.add(cameraPosition),

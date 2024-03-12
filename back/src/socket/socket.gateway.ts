@@ -10,17 +10,15 @@ import type { Server, Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import * as uuid from 'uuid';
 import ShortUniqueId from 'short-unique-id';
+import { GameStatus } from '@prisma/client';
 // our libs
 import {
   SocketEventType,
   MatchMakingPayload,
-  Levels,
   GamePlayerInputPayload,
   Side,
   SocketEvent,
   MovableComponentState,
-  CrackTheDoorLevel,
-  LearnToFlyLevel,
   FLOOR,
   TimeSyncPayload,
   PhysicSimulation,
@@ -31,7 +29,7 @@ import {
   collectInputsForTick,
   InviteFriendTokenPayload,
   AbstractLevel,
-  TheHighSpheresLevel,
+  LevelMapping,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -39,6 +37,8 @@ import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 // import { GameStatus } from '@prisma/client';
 import { UtilsService } from './utils.service';
 import { SocketService } from './socket.service';
+import { PrismaService } from '@project-common/services';
+import { handlePrismaError } from '@project-common/utils/handlePrismaError';
 // import { PrismaService } from '@project-common/services';
 
 @WebSocketGateway({
@@ -60,7 +60,7 @@ export class SocketGateway {
   @WebSocketServer() server: Server;
 
   constructor(
-    // private prismaService: PrismaService,
+    private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
     private socketService: SocketService,
     private utils: UtilsService,
@@ -275,6 +275,7 @@ export class SocketGateway {
     const dbGame = await this.createPersistentGameData(
       players[0].player.selectedLevel,
     );
+    Logger.log(`GAME ID: ${dbGame.id}`);
     const teamRoomName = uuid.v4();
     const gameRoomName = String(dbGame.id);
     players.forEach(({ player, socketId }) => {
@@ -316,47 +317,28 @@ export class SocketGateway {
   //   this.handlePlayerMatch(players);
   // };
 
-  async createPersistentGameData(level: any) {
-    console.log(level);
-    // const dbLevel = (() => {
-    //   switch (level) {
-    //     case Levels.CRACK_THE_DOOR:
-    //       return Level.CRACK_THE_DOOR;
-    //     case Levels.LEARN_TO_FLY:
-    //       return Level.LEARN_TO_FLY;
-    //     case Levels.THE_HIGH_SPHERES:
-    //       return Level.THE_HIGH_SPHERES;
-    //     default:
-    //       return Level.EMPTY_LEVEL;
-    //   }
-    // })();
-    // return this.prismaService.game.create({
-    //   data: {
-    //     level: 0 as any,
-    //     status: GameStatus.STARTED,
-    //   },
-    // });
-    return {
-      id: 0,
-    };
+  async createPersistentGameData(levelId: number) {
+    return this.prismaService.game.create({
+      data: {
+        levelId,
+        status: GameStatus.STARTED,
+        startTime: new Date(),
+      },
+    });
   }
 
   async createGame(
     players: { socketId: string; player: PlayerState; indexToClear?: number }[],
     gameId: number,
   ) {
-    const level = (() => {
-      switch (players[0].player.selectedLevel) {
-        case Levels.CRACK_THE_DOOR:
-          return new CrackTheDoorLevel();
-        case Levels.LEARN_TO_FLY:
-          return new LearnToFlyLevel();
-        case Levels.THE_HIGH_SPHERES:
-          return new TheHighSpheresLevel();
-        default:
-          return new CrackTheDoorLevel();
-      }
-    })();
+    const level = await this.prismaService.level
+      .findUnique({
+        where: { id: players[0].player.selectedLevel },
+      })
+      .then((l) => new LevelMapping(l.id, l.data as any[]))
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
 
     if (!level) {
       throw new Error(

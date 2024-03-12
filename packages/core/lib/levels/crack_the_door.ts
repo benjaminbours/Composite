@@ -10,7 +10,7 @@ import {
     positionOnGrid,
 } from './levels.utils';
 import { InteractiveArea } from '../elements/InteractiveArea';
-import { Levels, LevelState } from '../GameState';
+import { LevelState } from '../GameState';
 import { ElementToBounce } from '../elements';
 
 export class CrackTheDoorLevel extends Group implements AbstractLevel {
@@ -29,7 +29,7 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
     };
 
     public state: LevelState = {
-        id: Levels.CRACK_THE_DOOR,
+        id: 1022,
         doors: {},
         bounces: {},
         end_level: [],
@@ -95,26 +95,26 @@ export class CrackTheDoorLevel extends Group implements AbstractLevel {
         });
 
         this.doors = [
-            {
-                wall: createWallDoor({
-                    size: new Vector3(0, 3, 0),
-                    position: new Vector3(9, 0, 0),
-                    doorPosition: new Vector3(0, 0, 0),
-                    rotation: new Euler(0, 0, 0),
-                    // orientation: 'vertical',
-                }),
-                openerPosition: new Vector3(10, 1.02, 0),
-            },
-            {
-                wall: createWallDoor({
-                    size: new Vector3(2, 6, 0),
-                    position: new Vector3(8, 3, 0),
-                    doorPosition: new Vector3(0, 3, 0),
-                    rotation: new Euler(0, 0, 0),
-                    // orientation: 'horizontal',
-                }),
-                openerPosition: new Vector3(10, 3, 0),
-            },
+            // {
+            //     wall: createWallDoor({
+            //         size: new Vector3(0, 3, 0),
+            //         position: new Vector3(9, 0, 0),
+            //         doorPosition: new Vector3(0, 0, 0),
+            //         rotation: new Euler(0, 0, 0),
+            //         // orientation: 'vertical',
+            //     }),
+            //     openerPosition: new Vector3(10, 1.02, 0),
+            // },
+            // {
+            //     wall: createWallDoor({
+            //         size: new Vector3(2, 6, 0),
+            //         position: new Vector3(8, 3, 0),
+            //         doorPosition: new Vector3(0, 3, 0),
+            //         rotation: new Euler(0, 0, 0),
+            //         // orientation: 'horizontal',
+            //     }),
+            //     openerPosition: new Vector3(10, 3, 0),
+            // },
         ];
 
         this.doors.forEach(({ wall, openerPosition }, index) => {

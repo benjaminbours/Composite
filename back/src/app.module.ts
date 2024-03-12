@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard, RolesGuard } from '@project-common/guards';
 import { LevelsModule } from './levels/levels.module';
+import { PrismaService } from '@project-common/services';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { LevelsModule } from './levels/levels.module';
   controllers: [AppController],
   providers: [
     AppService,
+    PrismaService,
     TemporaryStorageService,
     {
       provide: APP_GUARD,
