@@ -1,8 +1,8 @@
 'use client';
 // vendors
 import React, {
-    createContext,
     useCallback,
+    useContext,
     useEffect,
     useRef,
     useState,
@@ -17,11 +17,7 @@ import { BottomRightInfo } from './BottomRightInfo';
 import { useMainController } from './useMainController';
 import { useMenuTransition } from './useMenuTransition';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
-
-export const AppContext = createContext({
-    setMenuScene: (_scene: MenuScene) => {},
-    enterTeamLobby: (_token: string) => {},
-});
+import { AppContext } from './WithMainApp';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -43,6 +39,7 @@ interface Props {
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
 function MainApp({ initialScene }: Props) {
+    const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -101,6 +98,10 @@ function MainApp({ initialScene }: Props) {
 
     // effect dedicated to tab switching
     useEffect(() => {
+        setMainAppContext({
+            setMenuScene,
+            enterTeamLobby: handleEnterTeamLobby,
+        });
         if (process.env.NEXT_PUBLIC_STAGE === 'development') {
             const stats = new STATS.default();
             stats.showPanel(1);
@@ -127,12 +128,7 @@ function MainApp({ initialScene }: Props) {
     }, []);
 
     return (
-        <AppContext.Provider
-            value={{
-                setMenuScene,
-                enterTeamLobby: handleEnterTeamLobby,
-            }}
-        >
+        <>
             <TeamMateDisconnectNotification
                 teamMateDisconnected={teamMateDisconnected}
                 handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
@@ -179,7 +175,7 @@ function MainApp({ initialScene }: Props) {
                 />
             )}
             <BottomRightInfo onSettingsClick={handleClickOnSettings} />
-        </AppContext.Provider>
+        </>
     );
 }
 

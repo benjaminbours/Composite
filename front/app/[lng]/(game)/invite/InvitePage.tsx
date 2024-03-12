@@ -1,8 +1,8 @@
 'use client';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, notFound } from 'next/navigation';
-import { AppContext } from '../../../MainApp';
 import { MenuScene } from '../../../types';
+import { AppContext } from '../../../WithMainApp';
 
 /**
  * This page is only here to "please" next router, it's in fact just a redirect.
@@ -10,7 +10,7 @@ import { MenuScene } from '../../../types';
  * and manage the 404 in the MainApp.
  */
 export const InvitePage: React.FC = ({}) => {
-    const context = useContext(AppContext);
+    const { mainAppContext } = useContext(AppContext);
     const [isTokenValid, setIsTokenValid] = React.useState<boolean>(false);
     const [isChecking, setIsChecking] = React.useState<boolean>(true);
     const [enteredLobby, setEnteredLobby] = React.useState<boolean>(false);
@@ -42,15 +42,15 @@ export const InvitePage: React.FC = ({}) => {
         }
 
         if (!token || (!isChecking && !isTokenValid)) {
-            context.setMenuScene(MenuScene.NOT_FOUND);
+            mainAppContext?.setMenuScene(MenuScene.NOT_FOUND);
             notFound();
         }
 
         if (isTokenValid && !isChecking) {
             setEnteredLobby(true);
-            context.enterTeamLobby(token);
+            mainAppContext?.enterTeamLobby(token);
         }
-    }, [context, enteredLobby, router, isChecking, isTokenValid, token]);
+    }, [mainAppContext, enteredLobby, router, isChecking, isTokenValid, token]);
 
     return <></>;
 };

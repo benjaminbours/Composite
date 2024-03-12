@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
 import { StoreProvider } from 'easy-peasy';
@@ -37,7 +37,15 @@ const WithRetrieveSession: React.FC<Props> = ({ children }) => {
     return children;
 };
 
+export const AppContext = createContext({
+    mainAppContext: {} as Record<string, any>,
+    setMainAppContext: (ctx: Record<string, any>) => {},
+});
+
 export const WithMainApp: React.FC<Props> = ({ children, lng }) => {
+    const [mainAppContext, setMainAppContext] = useState<Record<string, any>>(
+        {},
+    );
     const path = usePathname();
     const mainApp = useMemo(() => {
         const pathWithoutLng = path.replace(`/${lng}`, '');
@@ -71,8 +79,15 @@ export const WithMainApp: React.FC<Props> = ({ children, lng }) => {
             <SnackbarProvider>
                 <StoreProvider store={store}>
                     <WithRetrieveSession lng={lng}>
-                        {mainApp}
-                        {children}
+                        <AppContext.Provider
+                            value={{
+                                mainAppContext,
+                                setMainAppContext,
+                            }}
+                        >
+                            {mainApp}
+                            {children}
+                        </AppContext.Provider>
                     </WithRetrieveSession>
                 </StoreProvider>
             </SnackbarProvider>
