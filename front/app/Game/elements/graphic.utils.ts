@@ -77,12 +77,14 @@ export function addEndLevelGraphic(group: Object3D) {
 export function addBounceGraphic(
     group: Object3D,
     props: BounceProperties,
-    addLightBounceComposer: (bounce: ElementToBounce) => void,
+    addLightBounceComposer?: (bounce: ElementToBounce) => void,
 ) {
     group.add(new SkinBounce(group.children[0] as ElementToBounce));
 
     if (props.side === Side.LIGHT) {
-        addLightBounceComposer(group.children[0] as ElementToBounce);
+        if (addLightBounceComposer) {
+            addLightBounceComposer(group.children[0] as ElementToBounce);
+        }
         // initialization of the skin is done with postprocessing, it is spread around the App class, at the root of the game rendering
         if (props.interactive) {
             group.add(new Pulse(group.children[0] as ElementToBounce));

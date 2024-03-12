@@ -549,18 +549,18 @@ function parseProperties(props: any) {
     return properties;
 }
 
-interface ClientGraphicHelpers {
+export interface ClientGraphicHelpers {
     addEndLevelGraphic: (group: Object3D) => void;
     addBounceGraphic: (
         group: Object3D,
         props: BounceProperties,
-        addLightBounceComposer: (bounce: ElementToBounce) => void,
+        addLightBounceComposer?: (bounce: ElementToBounce) => void,
     ) => void;
     addDoorOpenerGraphic: (
         group: Object3D,
         door_id: number | undefined,
     ) => void;
-    addLightBounceComposer: (bounce: ElementToBounce) => void;
+    addLightBounceComposer?: (bounce: ElementToBounce) => void;
     connectDoors: (elements: LevelElement[]) => void;
 }
 
@@ -661,7 +661,7 @@ export function createElement(
                 clientGraphicHelpers.addBounceGraphic(
                     bounceGroup,
                     props,
-                    clientGraphicHelpers.addLightBounceComposer,
+                    clientGraphicHelpers?.addLightBounceComposer,
                 );
             }
             return {

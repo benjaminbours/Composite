@@ -38,6 +38,7 @@ import {
     degreesToRadians,
     createCollisionAreaMesh,
     LevelMapping,
+    ClientGraphicHelpers,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -53,6 +54,12 @@ import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
 import { GameStateManager } from './GameStateManager';
 import { Level } from '@benjaminbours/composite-api-client';
+import {
+    addBounceGraphic,
+    addDoorOpenerGraphic,
+    addEndLevelGraphic,
+    connectDoors,
+} from './elements/graphic.utils';
 
 export enum AppMode {
     EDITOR = 'EDITOR',
@@ -129,7 +136,17 @@ export default class App {
         }
 
         // levels
-        this.level = new LevelMapping(level.id, level.data);
+        const clientGraphicHelpers: ClientGraphicHelpers = {
+            addBounceGraphic,
+            addDoorOpenerGraphic,
+            addEndLevelGraphic,
+            connectDoors,
+        };
+        this.level = new LevelMapping(
+            level.id,
+            level.data,
+            clientGraphicHelpers,
+        );
         this.scene.add(this.level as unknown as Group);
 
         if (this.mode === AppMode.GAME) {

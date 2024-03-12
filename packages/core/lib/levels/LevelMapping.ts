@@ -2,6 +2,7 @@ import { Group, Object3D, Object3DEventMap, Vector3 } from 'three';
 import { LevelState } from '../GameState';
 import {
     AbstractLevel,
+    ClientGraphicHelpers,
     WorldContext,
     addToCollidingElements,
     parseLevelElements,
@@ -26,7 +27,11 @@ export class LevelMapping extends Group implements AbstractLevel {
         openerPosition: Vector3;
     }[] = [];
 
-    constructor(id: number, data: any[]) {
+    constructor(
+        id: number,
+        data: any[],
+        clientGraphicHelpers?: ClientGraphicHelpers,
+    ) {
         super();
         this.state = {
             id,
@@ -38,6 +43,7 @@ export class LevelMapping extends Group implements AbstractLevel {
         const worldContext: WorldContext = {
             levelState: this.state,
             bounceList: this.bounces,
+            clientGraphicHelpers,
         };
         const elements = parseLevelElements(worldContext, data);
 
