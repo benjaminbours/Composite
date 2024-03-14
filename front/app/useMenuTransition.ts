@@ -66,19 +66,23 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
     const lightToStep = useCallback(
         (options: TweenOptions, isMobileDevice: boolean) => {
             const { step, side } = options;
-            const coordinate =
-                refHashMap.canvasBlack.current!.light.resizeOptions[step](
-                    refHashMap.canvasBlack.current!.ctx.canvas.width,
-                    refHashMap.canvasBlack.current!.ctx.canvas.height,
-                    isMobileDevice,
-                    side,
-                );
+            const { coordinates, width } =
+                refHashMap.canvasBlack.current!.light.getParamsForScene({
+                    scene: step,
+                    canvasWidth:
+                        refHashMap.canvasBlack.current!.ctx.canvas.width,
+                    canvasHeight:
+                        refHashMap.canvasBlack.current!.ctx.canvas.height,
+                    isMobile: isMobileDevice,
+                    faction: side,
+                });
 
             return gsap.to(refHashMap.canvasBlack.current!.light, {
                 duration: 0.5,
                 delay: 0.1,
-                startX: coordinate.x,
-                startY: coordinate.y,
+                startX: coordinates.x,
+                startY: coordinates.y,
+                width,
             });
         },
         [refHashMap],
@@ -87,19 +91,22 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
     const shadowToStep = useCallback(
         (options: TweenOptions, isMobileDevice: boolean) => {
             const { step, side } = options;
-            const coordinate =
-                refHashMap.canvasWhite.current!.shadow.resizeOptions[step](
-                    refHashMap.canvasWhite.current!.ctx.canvas.width,
-                    refHashMap.canvasWhite.current!.ctx.canvas.height,
-                    isMobileDevice,
-                    side,
-                );
-
+            const { coordinates, width } =
+                refHashMap.canvasWhite.current!.shadow.getParamsForScene({
+                    scene: step,
+                    canvasWidth:
+                        refHashMap.canvasBlack.current!.ctx.canvas.width,
+                    canvasHeight:
+                        refHashMap.canvasBlack.current!.ctx.canvas.height,
+                    isMobile: isMobileDevice,
+                    faction: side,
+                });
             return gsap.to(refHashMap.canvasWhite.current!.shadow, {
                 duration: 0.5,
                 delay: 0.1,
-                startX: coordinate.x,
-                startY: coordinate.y,
+                startX: coordinates.x,
+                startY: coordinates.y,
+                width,
             });
         },
         [refHashMap],

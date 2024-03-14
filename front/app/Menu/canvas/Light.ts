@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
-import { ResizeOptions } from '../../types';
+import { MenuScene, ResizeOptions } from '../../types';
 
 const light = new Image();
 light.src = `/images/light.png`;
@@ -18,6 +18,8 @@ export interface IPulseOptions {
     opacity: number;
     delay: number;
 }
+
+const DEFAULT_WIDTH = 450;
 
 export default class Light {
     public startY: number = 30;
@@ -59,95 +61,85 @@ export default class Light {
         },
     ];
 
-    public resizeOptions = {
-        not_found(width: number, height: number, isOnMobile: boolean) {
-            const positionX = 0.5;
-            const positionY = 0.5;
-            if (isOnMobile) {
+    public getParamsForScene = ({
+        scene,
+        canvasHeight,
+        canvasWidth,
+        isMobile,
+        faction,
+    }: {
+        scene: MenuScene;
+        canvasWidth: number;
+        canvasHeight: number;
+        isMobile: boolean;
+        faction?: Side;
+    }) => {
+        let width = DEFAULT_WIDTH;
+        if (window.innerHeight < 700 || window.innerWidth <= 768) {
+            width = 400;
+        }
+        if (window.innerWidth > 2000) {
+            width = 600;
+        }
+        switch (scene) {
+            case MenuScene.NOT_FOUND:
                 return {
-                    x: width * 0.5,
-                    y: height * 0.85,
+                    coordinates: {
+                        x: canvasWidth * 0.5,
+                        y: canvasHeight * (isMobile ? 0.85 : 0.5),
+                    },
+                    width,
                 };
-            }
-            return {
-                x: width * positionX,
-                y: height * positionY,
-            };
-        },
-        home(width: number, height: number) {
-            return {
-                x: width * 0.5,
-                y: height * 0.75,
-            };
-        },
-        team_lobby(width: number, height: number) {
-            return {
-                x: width * 0.25,
-                y: height * 0.75,
-            };
-        },
-        invite_friend(width: number, height: number) {
-            return {
-                x: width * 0.15,
-                y: height * 0.5,
-            };
-        },
-        level(width: number, height: number) {
-            return {
-                x: width * 0.85,
-                y: height * 0.5,
-            };
-        },
-        faction(width: number, height: number, isOnMobile: boolean) {
-            if (isOnMobile) {
+            case MenuScene.HOME:
                 return {
-                    x: width * 0.5,
-                    y: height * 0.35,
+                    coordinates: {
+                        x: canvasWidth * 0.5,
+                        y: canvasHeight * 0.75,
+                    },
+                    width,
                 };
-            }
-            return {
-                x: width * 0.25,
-                y: height * 0.5,
-            };
-        },
-        queue(
-            width: number,
-            height: number,
-            isOnMobile: boolean,
-            faction?: Side,
-        ) {
-            const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
-            const positionY = 0.5;
-            if (isOnMobile) {
+            case MenuScene.TEAM_LOBBY:
                 return {
-                    x: width * 0.5,
-                    y: height * 0.85,
+                    coordinates: {
+                        x: canvasWidth * 0.25,
+                        y: canvasHeight * 0.75,
+                    },
+                    width: 350,
                 };
-            }
-            return {
-                x: width * positionX,
-                y: height * positionY,
-            };
-        },
-        end_level(
-            width: number,
-            height: number,
-            isOnMobile: boolean,
-            faction?: Side,
-        ) {
-            const positionX = faction === Side.LIGHT ? 0.5 : -0.5;
-            const positionY = 0.5;
-            if (isOnMobile) {
+            case MenuScene.INVITE_FRIEND:
                 return {
-                    x: width * 0.5,
-                    y: height * 0.85,
+                    coordinates: {
+                        x: canvasWidth * 0.15,
+                        y: canvasHeight * 0.5,
+                    },
+                    width: 350,
                 };
-            }
-            return {
-                x: width * positionX,
-                y: height * positionY,
-            };
-        },
+            case MenuScene.LEVEL:
+                return {
+                    coordinates: {
+                        x: canvasWidth * 0.85,
+                        y: canvasHeight * 0.5,
+                    },
+                    width,
+                };
+            case MenuScene.FACTION:
+                return {
+                    coordinates: {
+                        x: canvasWidth * (isMobile ? 0.5 : 0.25),
+                        y: canvasHeight * (isMobile ? 0.35 : 0.5),
+                    },
+                    width,
+                };
+            case MenuScene.QUEUE:
+            case MenuScene.END_LEVEL:
+                return {
+                    coordinates: {
+                        x: canvasWidth * (faction === Side.LIGHT ? 0.5 : -0.5),
+                        y: canvasHeight * (isMobile ? 0.85 : 0.5),
+                    },
+                    width,
+                };
+        }
     };
 
     private width: number = 450;
@@ -180,21 +172,16 @@ export default class Light {
     };
 
     public resize = (options: ResizeOptions) => {
-        const coordinate = this.resizeOptions[options.currentScene](
-            this.ctx.canvas.width,
-            this.ctx.canvas.height,
-            options.isMobileDevice,
-            options.side,
-        );
-        this.startX = coordinate.x;
-        this.startY = coordinate.y;
-        this.width = 450;
-        if (window.innerHeight < 700 || window.innerWidth <= 768) {
-            this.width = 400;
-        }
-        if (window.innerWidth > 2000) {
-            this.width = 600;
-        }
+        const { coordinates, width } = this.getParamsForScene({
+            scene: options.currentScene,
+            canvasWidth: this.ctx.canvas.width,
+            canvasHeight: this.ctx.canvas.height,
+            isMobile: options.isMobileDevice,
+            faction: options.side,
+        });
+        this.startX = coordinates.x;
+        this.startY = coordinates.y;
+        this.width = width;
     };
 
     private renderLightHalo = () => {
