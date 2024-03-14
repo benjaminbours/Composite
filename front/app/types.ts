@@ -60,3 +60,9 @@ export const Route = {
 
     NOT_FOUND: '/not-found',
 };
+
+export interface PartialLevel {
+    id: number;
+    name: string;
+    data: any;
+}

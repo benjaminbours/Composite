@@ -6,6 +6,7 @@ import { setupProjectEnv } from '../../../../utils/setup';
 import { servicesContainer } from '../../../../core/frameworks/inversify.config';
 import { ApiClient } from '../../../../core/services';
 import { notFound } from 'next/navigation';
+import { PartialLevel } from '../../../../types';
 
 export const metadata: Metadata = {
     title: 'Composite - Level editor',
@@ -19,9 +20,10 @@ interface Props {
     };
 }
 
-async function getData(level_id: string) {
+async function getData(level_id: string): Promise<PartialLevel | undefined> {
     if (level_id === 'new') {
         const defaultLevel = {
+            id: 0,
             name: '',
             data: [],
         };

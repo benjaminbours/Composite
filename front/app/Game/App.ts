@@ -53,13 +53,13 @@ import { SkinBounce } from './elements/SkinBounce';
 import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
 import { GameStateManager } from './GameStateManager';
-import { Level } from '@benjaminbours/composite-api-client';
 import {
     addBounceGraphic,
     addDoorOpenerGraphic,
     addEndLevelGraphic,
     connectDoors,
 } from './elements/graphic.utils';
+import { PartialLevel } from '../types';
 
 export enum AppMode {
     EDITOR = 'EDITOR',
@@ -119,7 +119,7 @@ export default class App {
         playersConfig: Side[],
         public inputsManager: InputsManager,
         initialMode: AppMode,
-        level: Level,
+        level: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
     ) {

@@ -19,6 +19,7 @@ import { TopBarLevelEditor } from './TopBarLevelEditor';
 import type { getDictionary } from '../../../../getDictionary';
 import { AuthModal } from './AuthModal';
 import { useController } from './useController';
+import { PartialLevel } from '../../../types';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -64,10 +65,7 @@ const initialGameState = new GameState(
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     level_id: string;
-    initialLevel: {
-        name: string;
-        data: any;
-    };
+    initialLevel: PartialLevel;
 }
 
 export const LevelEditor: React.FC<Props> = ({
@@ -181,6 +179,7 @@ export const LevelEditor: React.FC<Props> = ({
             <Game
                 side={Side.SHADOW}
                 initialGameState={initialGameState}
+                level={initialLevel}
                 tabIsHidden={false}
                 stats={statsRef}
                 inputsManager={inputsManager.current}

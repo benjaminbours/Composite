@@ -9,12 +9,12 @@ import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
-import { Level } from '@benjaminbours/composite-api-client';
+import { PartialLevel } from '../types';
 
 interface Props {
     side: Side;
     initialGameState: GameState;
-    level: Level;
+    level: PartialLevel;
     socketController?: SocketController;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
