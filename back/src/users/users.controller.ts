@@ -1,6 +1,6 @@
 // vendor
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 // project
 import { SerializeService } from '@project-common/services/serialize.service';
@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 import { FindOneParams } from './dto/find-one.params';
 import { User } from './entity';
 
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(

@@ -7,25 +7,76 @@ import {
   Param,
   Delete,
   Query,
+  UploadedFile,
+  ParseFilePipeBuilder,
+  HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import { LevelsService } from './levels.service';
 import { CreateLevelDto } from './dto/create-level.dto';
 import { UpdateLevelDto } from './dto/update-level.dto';
 import { GetUser, Public, Roles } from '@project-common/decorators';
 import { Role } from '@prisma/client';
+import * as path from 'path';
+import * as fs from 'fs';
 import { JWTUserPayload } from '@project-common/types';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiQuery,
 } from '@nestjs/swagger';
 import { Level } from './entities/level.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()
 @Controller('levels')
 export class LevelsController {
   constructor(private readonly levelsService: LevelsService) {}
+
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Upload thumbnail image for a level',
+    type: String,
+  })
+  @Roles(Role.USER)
+  @Post(':id/thumbnail')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadThumbnail(
+    @GetUser() user: JWTUserPayload,
+    @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: 'image/png',
+        })
+        .addMaxSizeValidator({
+          maxSize: 200000,
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file: Express.Multer.File,
+  ) {
+    await this.levelsService.checkUserHasAccessToLevel(+id, user);
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    const fileName = `level_${id}_thumbnail.png`;
+    fs.createWriteStream(path.join(uploadsDir, fileName)).write(file.buffer);
+  }
 
   @ApiCreatedResponse({
     description: 'The purchase has been successfully created.',
