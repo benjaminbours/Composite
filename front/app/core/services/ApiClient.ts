@@ -12,7 +12,6 @@ export class ApiClient {
     public set origin(url: string | undefined) {
         this.configuration = new Configuration({
             basePath: url,
-            headers: this.headers,
         });
         this.defaultApi = new DefaultApi(this.configuration);
     }
@@ -25,17 +24,8 @@ export class ApiClient {
         this._token = token;
         this.configuration = new Configuration({
             basePath: this.configuration.basePath,
-            headers: this.headers,
+            accessToken: token,
         });
         this.defaultApi = new DefaultApi(this.configuration);
-    }
-
-    private get headers() {
-        const token = this._token;
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${this._token}` } : {}),
-        };
-        return headers;
     }
 }

@@ -29,6 +29,7 @@ services:
       - ./back/test:/app/back/test
       - ./back/prisma:/app/back/prisma
       - ./packages/core:/app/packages/core
+      - ./back/uploads:/app/back/uploads
 
   front:
     build:

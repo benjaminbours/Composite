@@ -3,38 +3,47 @@
 import { gsap } from 'gsap';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 // our libs
-import { GameState, Side } from '@benjaminbours/composite-core';
+import {
+    GameState,
+    MovableComponentState,
+    Side,
+} from '@benjaminbours/composite-core';
 import App, { AppMode } from './App';
 import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
-import { PartialLevel } from '../types';
+import { Level } from '@benjaminbours/composite-api-client';
+
+interface LevelEditorProps {
+    // use do save the app instance somewhere else
+    setApp: React.Dispatch<React.SetStateAction<App | undefined>>;
+    // TODO: Don't like so much the management of this callback
+    onTransformControlsObjectChange: (object: THREE.Object3D) => void;
+}
+
+interface MultiplayerGameProps {
+    initialGameState: GameState;
+    socketController: SocketController;
+    level: Level;
+}
 
 interface Props {
     side: Side;
-    initialGameState: GameState;
-    level: PartialLevel;
-    socketController?: SocketController;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
-    // use do save the app instance somewhere else
-    setApp?: React.Dispatch<React.SetStateAction<App | undefined>>;
-    // TODO: Don't like so much the management of this callback
-    onTransformControlsObjectChange?: (object: THREE.Object3D) => void;
+    multiplayerGameProps?: MultiplayerGameProps;
+    levelEditorProps?: LevelEditorProps;
 }
 
 function Game({
     side,
-    socketController,
-    initialGameState,
-    level,
     tabIsHidden,
     stats,
     inputsManager,
-    setApp,
-    onTransformControlsObjectChange,
+    multiplayerGameProps,
+    levelEditorProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameStarted = useRef(false);
@@ -52,6 +61,9 @@ function Game({
             appRef.current?.gameStateManager.displayState,
             appRef.current?.delta,
         );
+        if (appRef.current?.shouldCaptureSnapshot) {
+            appRef.current?.captureSnapshot();
+        }
         stats.current?.end();
     }, []);
 
@@ -77,25 +89,66 @@ function Game({
                 if (!canvasRef.current) {
                     return;
                 }
-                const mode = setApp ? AppMode.EDITOR : AppMode.GAME;
-                appRef.current = new App(
-                    canvasRef.current,
-                    initialGameState,
-                    [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                    inputsManager,
-                    mode,
-                    level,
-                    socketController,
-                    onTransformControlsObjectChange,
-                );
-                if (setApp) {
-                    setApp(appRef.current);
+                if (multiplayerGameProps) {
+                    appRef.current = new App(
+                        canvasRef.current,
+                        multiplayerGameProps.initialGameState,
+                        [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                        inputsManager,
+                        AppMode.GAME,
+                        multiplayerGameProps.level,
+                        multiplayerGameProps.socketController,
+                    );
+                } else if (levelEditorProps) {
+                    const initialGameState = new GameState(
+                        [
+                            {
+                                position: {
+                                    x: 200,
+                                    // TODO: Try better solution than putting the player position below the ground
+                                    y: 20,
+                                },
+                                velocity: {
+                                    x: 0,
+                                    y: 0,
+                                },
+                                state: MovableComponentState.onFloor,
+                                insideElementID: undefined,
+                            },
+                            {
+                                position: {
+                                    x: 10,
+                                    y: 20,
+                                },
+                                velocity: {
+                                    x: 0,
+                                    y: 0,
+                                },
+                                state: MovableComponentState.onFloor,
+                                insideElementID: undefined,
+                            },
+                        ],
+                        { id: 0, doors: {}, bounces: {}, end_level: [] },
+                        Date.now(),
+                        0,
+                    );
+                    appRef.current = new App(
+                        canvasRef.current,
+                        initialGameState,
+                        [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                        inputsManager,
+                        AppMode.EDITOR,
+                        undefined,
+                        undefined,
+                        levelEditorProps.onTransformControlsObjectChange,
+                    );
+                    levelEditorProps.setApp(appRef.current);
                 }
                 // https://greensock.com/docs/v3/GSAP/gsap.ticker
                 gsap.ticker.fps(60);
                 gsap.ticker.add(gameLoop);
                 gameStarted.current = true;
-                if (socketController) {
+                if (multiplayerGameProps) {
                     setIsSynchronizingTime(true);
                 }
             });
@@ -108,7 +161,7 @@ function Game({
     }, []);
 
     useEffect(() => {
-        if (!tabIsHidden && isSynchronizingTime && socketController) {
+        if (!tabIsHidden && isSynchronizingTime && multiplayerGameProps) {
             const onTimeSynchronized = ([serverTime, rtt]: [
                 serverTime: number,
                 rtt: number,
@@ -126,14 +179,16 @@ function Game({
                 // onTimeSynchronized();
             } else {
                 setIsSynchronizingTime(true);
-                socketController.synchronizeTime().then(onTimeSynchronized);
+                multiplayerGameProps.socketController
+                    .synchronizeTime()
+                    .then(onTimeSynchronized);
             }
         }
 
         return () => {
             appRef.current?.inputsManager.destroyEventListeners();
         };
-    }, [tabIsHidden, socketController, isSynchronizingTime]);
+    }, [tabIsHidden, multiplayerGameProps, isSynchronizingTime]);
 
     return (
         <>

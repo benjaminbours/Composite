@@ -13,6 +13,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CameraIcon from '@mui/icons-material/Camera';
+import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
 import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
 import Divider from '@mui/material/Divider';
@@ -31,6 +32,7 @@ interface Props {
     onStartTestMode: () => void;
     onResetPlayersPosition: () => void;
     onSwitchPlayer: () => void;
+    onCaptureSnapshot: () => void;
     levelName: string;
     hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
@@ -47,6 +49,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     onToggleCollisionArea,
     onStartTestMode,
     onResetPlayersPosition,
+    onCaptureSnapshot,
     onSave,
     hasErrorWithLevelName,
     isSaving,
@@ -64,6 +67,11 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 icon: <CameraIcon fontSize="small" />,
                 text: 'Reset camera',
                 onClick: onResetCamera,
+            },
+            {
+                icon: <CameraEnhanceIcon fontSize="small" />,
+                text: 'Capture snapshot',
+                onClick: onCaptureSnapshot,
             },
             {
                 icon: <SportsEsportsIcon fontSize="small" />,
@@ -87,6 +95,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
         onStartTestMode,
         onResetPlayersPosition,
         onSwitchPlayer,
+        onCaptureSnapshot,
     ]);
 
     return (

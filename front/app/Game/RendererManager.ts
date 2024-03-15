@@ -86,7 +86,7 @@ export class RendererManager {
     constructor(
         players: Player[],
         camera: CustomCamera,
-        canvasDom: HTMLCanvasElement,
+        public canvasDom: HTMLCanvasElement,
         scene: Scene,
         lightBounces: ElementToBounce[],
     ) {

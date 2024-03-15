@@ -50,7 +50,11 @@ export function useController(
     const [app, setApp] = useState<App>();
     const [isSaving, setIsSaving] = useState(false);
     const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [isThumbnailModalOpen, setIsThumbnailModalOpen] = useState(false);
+    const [thumbnailSrc, setIsThumbnailSrc] = useState<string | undefined>(
+        undefined,
+    );
     const [currentEditingIndex, setCurrentEditingIndex] = useState<number>();
     const [levelName, setLevelName] = useState(initialLevel.name);
     const [elements, setElements] = useState<LevelElement[]>([]);
@@ -98,7 +102,7 @@ export function useController(
             }
 
             if (!isAuthenticated) {
-                setIsModalOpen(true);
+                setIsAuthModalOpen(true);
                 return;
             }
 
@@ -214,6 +218,62 @@ export function useController(
             worldContext,
         ],
     );
+
+    const handleSaveThumbnail = useCallback(() => {
+        if (!thumbnailSrc || level_id === 'new') {
+            return;
+        }
+        setIsThumbnailModalOpen(false);
+
+        function base64ToBlob(base64: string, mimeType = '') {
+            // Decode base64 string
+            const byteCharacters = atob(base64);
+
+            // Create byte array
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+
+            const byteArray = new Uint8Array(byteNumbers);
+
+            // Create blob
+            const blob = new Blob([byteArray], { type: mimeType });
+
+            return blob;
+        }
+
+        const apiClient = servicesContainer.get(ApiClient);
+        const base64Data = thumbnailSrc.replace(
+            /^data:image\/(png|jpg|jpeg);base64,/,
+            '',
+        );
+        const blob = base64ToBlob(base64Data, 'image/png');
+
+        apiClient.defaultApi
+            .levelsControllerUploadThumbnail({
+                id: level_id,
+                file: blob,
+            })
+            .then((res) => {
+                console.log(res);
+                enqueueSnackbar(
+                    dictionary.notification['success-level-thumbnail-uploaded'],
+                    {
+                        variant: 'success',
+                    },
+                );
+            })
+            .catch((err) => {
+                console.log(err);
+                enqueueSnackbar(
+                    dictionary.notification['error-level-thumbnail-upload'],
+                    {
+                        variant: 'error',
+                    },
+                );
+            });
+    }, [thumbnailSrc, enqueueSnackbar, dictionary, level_id]);
 
     const updateElementName = useCallback(
         (index: number) => (e: any) => {
@@ -504,10 +564,10 @@ export function useController(
 
     // effect responsible to close the auth modal after successful login
     useEffect(() => {
-        if (isAuthenticated && isModalOpen) {
-            setIsModalOpen(false);
+        if (isAuthenticated && isAuthModalOpen) {
+            setIsAuthModalOpen(false);
         }
-    }, [isAuthenticated, isModalOpen, elements]);
+    }, [isAuthenticated, isAuthModalOpen, elements]);
 
     // effect responsible to mount the 3d scene only once and when the app is ready
     useEffect(() => {
@@ -538,10 +598,13 @@ export function useController(
         currentEditingIndex,
         currentEditingElement,
         app,
-        isModalOpen,
+        isAuthModalOpen,
+        isThumbnailModalOpen,
+        thumbnailSrc,
         isSaving,
         handleLevelNameChange,
         handleClickOnSave,
+        handleSaveThumbnail,
         updateElementName,
         handleControlObjectChange,
         handleUpdateElementProperty,
@@ -549,6 +612,8 @@ export function useController(
         removeElement,
         setApp,
         selectElement,
-        setIsModalOpen,
+        setIsAuthModalOpen,
+        setIsThumbnailModalOpen,
+        setIsThumbnailSrc,
     };
 }

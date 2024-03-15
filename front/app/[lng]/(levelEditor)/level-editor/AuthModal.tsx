@@ -31,11 +31,11 @@ export const AuthModal: React.FC<Props> = ({
 
     return (
         <Modal
-            className="level-editor__auth-modal auth-modal"
+            className="level-editor-modal"
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
         >
-            <Paper className="auth-modal__container">
+            <Paper className="level-editor-modal__container">
                 <Typography variant="h6" component="h2">
                     In order to save your level, I need to know to whom it is
                 </Typography>

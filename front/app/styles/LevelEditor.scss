@@ -155,28 +155,38 @@
     }
 }
 
-.level-editor__auth-modal {
+.level-editor-modal {
     display: flex;
     align-items: flex-start;
     justify-content: center;
 }
 
-.auth-modal__container {
+.level-editor-modal__container {
     padding: 30px;
     margin-top: 100px;
     max-width: 400px;
-    // flex: 0;
 }
 
-.auth-modal__button-container {
+.level-editor-modal__button-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
 
-    :last-child {
+    & > :last-child {
         margin-top: 20px;
+    }
+}
+
+.thumbnail-modal {
+    .level-editor-modal__button-container {
+        flex-direction: row;
+
+        & > :last-child {
+            margin-top: 0px;
+            margin-left: 20px;
+        }
     }
 }
 

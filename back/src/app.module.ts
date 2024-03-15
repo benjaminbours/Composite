@@ -12,9 +12,15 @@ import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard, RolesGuard } from '@project-common/guards';
 import { LevelsModule } from './levels/levels.module';
 import { PrismaService } from '@project-common/services';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'), // provide path to the folder with images
+      serveRoot: '/thumbnails', // provide route to access images
+    }),
     CacheModule.registerAsync<any>({
       isGlobal: true,
       useFactory: async () => {

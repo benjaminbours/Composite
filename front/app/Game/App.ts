@@ -119,7 +119,7 @@ export default class App {
         playersConfig: Side[],
         public inputsManager: InputsManager,
         initialMode: AppMode,
-        level: PartialLevel,
+        level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
     ) {
@@ -143,8 +143,8 @@ export default class App {
             connectDoors,
         };
         this.level = new LevelMapping(
-            level.id,
-            level.data,
+            level?.id || 0,
+            level?.data || [],
             clientGraphicHelpers,
         );
         this.scene.add(this.level as unknown as Group);
@@ -189,6 +189,15 @@ export default class App {
             );
         }
     }
+
+    public shouldCaptureSnapshot = false;
+    public onCaptureSnapshot = (_image: string) => {};
+    public captureSnapshot = () => {
+        const canvas = this.rendererManager.canvasDom;
+        const image = canvas.toDataURL('image/png');
+        this.onCaptureSnapshot(image);
+        this.shouldCaptureSnapshot = false;
+    };
 
     public controlledMesh: Object3D | undefined;
     public attachTransformControls = (mesh: Object3D) => {

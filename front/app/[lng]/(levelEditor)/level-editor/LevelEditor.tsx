@@ -4,14 +4,9 @@ import React, { useCallback } from 'react';
 import { useRef } from 'react';
 import dynamic from 'next/dynamic';
 // our libs
-import {
-    GameState,
-    MovableComponentState,
-    Side,
-} from '@benjaminbours/composite-core';
+import { Side } from '@benjaminbours/composite-core';
 // project
 import InputsManager from '../../../Game/Player/InputsManager';
-import { EmptyLevel } from '../../../Game/levels/EmptyLevel';
 import { AppMode } from '../../../Game/App';
 import { SceneContentPanel } from './SceneContentPanel';
 import { PropertiesPanel } from './PropertiesPanel';
@@ -20,47 +15,12 @@ import type { getDictionary } from '../../../../getDictionary';
 import { AuthModal } from './AuthModal';
 import { useController } from './useController';
 import { PartialLevel } from '../../../types';
+import { ThumbnailModal } from './ThumbnailModal';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
     ssr: false,
 });
-
-const level = new EmptyLevel();
-const initialGameState = new GameState(
-    [
-        {
-            position: {
-                x: 200,
-                // TODO: Try better solution than putting the player position below the ground
-                y: 20,
-            },
-            velocity: {
-                x: 0,
-                y: 0,
-            },
-            state: MovableComponentState.onFloor,
-            insideElementID: undefined,
-        },
-        {
-            position: {
-                x: 10,
-                y: 20,
-            },
-            velocity: {
-                x: 0,
-                y: 0,
-            },
-            state: MovableComponentState.onFloor,
-            insideElementID: undefined,
-        },
-    ],
-    {
-        ...level.state,
-    },
-    Date.now(),
-    0,
-);
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
@@ -80,10 +40,13 @@ export const LevelEditor: React.FC<Props> = ({
         currentEditingIndex,
         currentEditingElement,
         app,
-        isModalOpen,
+        isAuthModalOpen,
+        isThumbnailModalOpen,
+        thumbnailSrc,
         isSaving,
         handleLevelNameChange,
         handleClickOnSave,
+        handleSaveThumbnail,
         handleControlObjectChange,
         handleUpdateElementProperty,
         updateElementName,
@@ -91,7 +54,9 @@ export const LevelEditor: React.FC<Props> = ({
         removeElement,
         setApp,
         selectElement,
-        setIsModalOpen,
+        setIsAuthModalOpen,
+        setIsThumbnailModalOpen,
+        setIsThumbnailSrc,
     } = useController(level_id, initialLevel, dictionary);
 
     // local refs
@@ -118,6 +83,16 @@ export const LevelEditor: React.FC<Props> = ({
         }
     }, [app]);
 
+    const captureSnapshot = useCallback(() => {
+        if (app) {
+            app.onCaptureSnapshot = (image: string) => {
+                setIsThumbnailSrc(image);
+                setIsThumbnailModalOpen(true);
+            };
+            app.shouldCaptureSnapshot = true;
+        }
+    }, [app, setIsThumbnailModalOpen, setIsThumbnailSrc]);
+
     const resetPlayersPosition = useCallback(() => {
         if (app) {
             app.resetPlayersPosition();
@@ -138,9 +113,17 @@ export const LevelEditor: React.FC<Props> = ({
     return (
         <main className="level-editor">
             <AuthModal
-                setIsModalOpen={setIsModalOpen}
-                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsAuthModalOpen}
+                isModalOpen={isAuthModalOpen}
                 dictionary={dictionary}
+            />
+            <ThumbnailModal
+                setIsModalOpen={setIsThumbnailModalOpen}
+                isModalOpen={isThumbnailModalOpen}
+                dictionary={dictionary}
+                thumbnailSrc={thumbnailSrc}
+                levelName={levelName}
+                onSave={handleSaveThumbnail}
             />
             <TopBarLevelEditor
                 level_id={level_id}
@@ -154,8 +137,9 @@ export const LevelEditor: React.FC<Props> = ({
                 levelName={levelName}
                 onLevelNameChange={handleLevelNameChange}
                 onSave={handleClickOnSave}
+                onCaptureSnapshot={captureSnapshot}
                 hasErrorWithLevelName={hasErrorWithLevelName}
-                setIsModalOpen={setIsModalOpen}
+                setIsModalOpen={setIsAuthModalOpen}
             />
             <div className="level-editor__top-right-container">
                 <SceneContentPanel
@@ -178,13 +162,13 @@ export const LevelEditor: React.FC<Props> = ({
             </div>
             <Game
                 side={Side.SHADOW}
-                initialGameState={initialGameState}
-                level={initialLevel}
+                levelEditorProps={{
+                    setApp: setApp,
+                    onTransformControlsObjectChange: handleControlObjectChange,
+                }}
                 tabIsHidden={false}
                 stats={statsRef}
                 inputsManager={inputsManager.current}
-                setApp={setApp}
-                onTransformControlsObjectChange={handleControlObjectChange}
             />
         </main>
     );

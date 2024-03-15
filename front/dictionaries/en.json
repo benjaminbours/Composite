@@ -48,6 +48,7 @@
             "success-new-password": "Your password has been successfully updated",
             "success-level-saved": "Your level has been successfully saved",
             "success-level-deleted": "Your level has been successfully deleted",
+            "success-level-thumbnail-uploaded": "Your level thumbnail has been successfully uploaded",
             "error-level-name-taken": "This level name already exists. Please choose another name",
             "error-level-name-too-long": "This level name is too long",
             "error-login": "Invalid email or password!",
@@ -57,7 +58,8 @@
             "error-bad-request": {
                 "email": "Email must be a valid email"
             },
-            "error-missing-level-name": "Please enter a name for your level"
+            "error-missing-level-name": "Please enter a name for your level",
+            "error-level-thumbnail-upload": "Your thumbnail has not been uploaded"
         }
     },
     "register": {

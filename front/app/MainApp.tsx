@@ -157,17 +157,22 @@ function MainApp({ initialScene }: Props) {
                     handleClickPlayAgain={handleClickPlayAgain}
                 />
             )}
-            {state.gameState && state.loadedLevel && gameIsPlaying && (
-                <Game
-                    side={state.side!}
-                    initialGameState={state.gameState}
-                    level={state.loadedLevel}
-                    socketController={socketController.current}
-                    tabIsHidden={tabIsHidden}
-                    stats={statsRef}
-                    inputsManager={inputsManager.current}
-                />
-            )}
+            {state.gameState &&
+                state.loadedLevel &&
+                gameIsPlaying &&
+                socketController.current && (
+                    <Game
+                        side={state.side!}
+                        multiplayerGameProps={{
+                            socketController: socketController.current,
+                            initialGameState: state.gameState,
+                            level: state.loadedLevel,
+                        }}
+                        tabIsHidden={tabIsHidden}
+                        stats={statsRef}
+                        inputsManager={inputsManager.current}
+                    />
+                )}
             {isSettingsOpen && (
                 <SettingsMenu
                     inputsManager={inputsManager.current}
