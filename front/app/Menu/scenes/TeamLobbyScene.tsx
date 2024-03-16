@@ -72,6 +72,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
             centerMode: true,
             infinite: true,
             centerPadding: '10px',
+            useTransform: false,
             slidesToShow: 3,
             speed: 500,
             waitForAnimate: false,

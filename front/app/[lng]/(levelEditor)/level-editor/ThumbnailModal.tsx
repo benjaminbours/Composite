@@ -53,7 +53,6 @@ export const ThumbnailModal: React.FC<Props> = ({
                     <Button
                         variant="contained"
                         size="small"
-                        color="success"
                         startIcon={<SaveIcon />}
                         onClick={onSave}
                     >

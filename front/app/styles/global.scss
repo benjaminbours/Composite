@@ -444,11 +444,22 @@ $buttonSizeLarge: 120px;
     --speed: 150ms;
 }
 
+.slick-list,
+.slick-track {
+    transform: none !important;
+}
+
 .level-portal {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    p {
+        mix-blend-mode: difference;
+        color: white;
+        text-align: center;
+    }
 
     &__graphic-wrapper {
         width: 230px;
@@ -466,10 +477,11 @@ $buttonSizeLarge: 120px;
         background-image: url('/images/crack_the_door.png');
         background-size: cover;
         background-position: center center;
-        mask-image: radial-gradient(rgba(0, 0, 0, 1) 50%, transparent 65%);
+        mask-image: radial-gradient(rgba(0, 0, 0, 1) 50%, transparent 70%);
     }
 
     &__border-container {
+        mix-blend-mode: difference;
         width: 100%;
         height: 100%;
         position: relative;
