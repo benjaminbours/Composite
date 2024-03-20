@@ -28,11 +28,11 @@ export const ThumbnailModal: React.FC<Props> = ({
 }) => {
     return (
         <Modal
-            className="level-editor-modal thumbnail-modal"
+            className="composite-modal thumbnail-modal"
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
         >
-            <Paper className="level-editor-modal__container">
+            <Paper className="composite-modal__container">
                 <Typography variant="h6" component="h2">
                     The portal to your level is gonna look like this, is it good
                     enough for you?
@@ -40,7 +40,7 @@ export const ThumbnailModal: React.FC<Props> = ({
                 {thumbnailSrc && (
                     <LevelPortal name={levelName} src={thumbnailSrc} />
                 )}
-                <div className="level-editor-modal__button-container">
+                <div className="composite-modal__button-container">
                     <Button
                         variant="contained"
                         size="small"

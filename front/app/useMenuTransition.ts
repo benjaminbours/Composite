@@ -65,19 +65,22 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
 
     const lightToStep = useCallback(
         (options: TweenOptions, isMobileDevice: boolean) => {
+            if (refHashMap.canvasBlack.current === undefined) {
+                return;
+            }
             const { step, side } = options;
             const { coordinates, width } =
-                refHashMap.canvasBlack.current!.light.getParamsForScene({
+                refHashMap.canvasBlack.current.light.getParamsForScene({
                     scene: step,
                     canvasWidth:
-                        refHashMap.canvasBlack.current!.ctx.canvas.width,
+                        refHashMap.canvasBlack.current.ctx.canvas.width,
                     canvasHeight:
-                        refHashMap.canvasBlack.current!.ctx.canvas.height,
+                        refHashMap.canvasBlack.current.ctx.canvas.height,
                     isMobile: isMobileDevice,
                     faction: side,
                 });
 
-            return gsap.to(refHashMap.canvasBlack.current!.light, {
+            return gsap.to(refHashMap.canvasBlack.current.light, {
                 duration: 0.5,
                 delay: 0.1,
                 startX: coordinates.x,
@@ -90,18 +93,22 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
 
     const shadowToStep = useCallback(
         (options: TweenOptions, isMobileDevice: boolean) => {
+            if (refHashMap.canvasWhite.current === undefined) {
+                return;
+            }
+
             const { step, side } = options;
             const { coordinates, width } =
-                refHashMap.canvasWhite.current!.shadow.getParamsForScene({
+                refHashMap.canvasWhite.current.shadow.getParamsForScene({
                     scene: step,
                     canvasWidth:
-                        refHashMap.canvasBlack.current!.ctx.canvas.width,
+                        refHashMap.canvasWhite.current.ctx.canvas.width,
                     canvasHeight:
-                        refHashMap.canvasBlack.current!.ctx.canvas.height,
+                        refHashMap.canvasWhite.current.ctx.canvas.height,
                     isMobile: isMobileDevice,
                     faction: side,
                 });
-            return gsap.to(refHashMap.canvasWhite.current!.shadow, {
+            return gsap.to(refHashMap.canvasWhite.current.shadow, {
                 duration: 0.5,
                 delay: 0.1,
                 startX: coordinates.x,
@@ -157,6 +164,9 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
 
             setNextMenuScene(tweenOptions.step);
             onTransition.current = true;
+            const lightAnim = lightToStep(tweenOptions, isMobileDevice);
+            const shadowAnim = shadowToStep(tweenOptions, isMobileDevice);
+
             gsap.timeline({
                 onComplete: () => {
                     onTransition.current = false;
@@ -176,8 +186,8 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
                 )
                 .add(
                     [
-                        lightToStep(tweenOptions, isMobileDevice),
-                        shadowToStep(tweenOptions, isMobileDevice),
+                        ...(lightAnim ? [lightAnim] : []),
+                        ...(shadowAnim ? [shadowAnim] : []),
                         ...allMenuScenesOut(refHashMap),
                     ],
                     '-=0.5',

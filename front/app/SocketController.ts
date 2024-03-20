@@ -7,18 +7,17 @@ import {
     GameStateUpdatePayload,
     GameState,
     TimeSyncPayload,
-    TeammateInfoPayload,
     GamePlayerInputPayload,
-    InviteFriendTokenPayload,
     SocketEventTeamLobby,
     Side,
+    FriendJoinLobbyPayload,
 } from '@benjaminbours/composite-core';
 
 const TIME_SAMPLE_COUNT = 20;
 const TIME_SAMPLE_INTERVAL = 150;
 
 export class SocketController {
-    private socket: Socket;
+    public socket: Socket;
     private timeSamplesSent: TimeSyncPayload[] = [];
     // Round-trip time or ping
     private timeSamples: { rtt: number }[] = [];
@@ -28,9 +27,7 @@ export class SocketController {
         onGameStart: (initialGameState: GameState) => void,
         onGameFinish: () => void,
         onTeamMateDisconnect: () => void,
-        onTeamMateInfo: (data: TeammateInfoPayload) => void,
-        onReceiveInviteFriendToken: (data: InviteFriendTokenPayload) => void,
-        onJoinLobby: () => void,
+        onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
         handleReceiveLevelOnLobby: (levelId: number) => void,
         handleReceiveSideOnLobby: (side: Side) => void,
     ) {
@@ -50,11 +47,9 @@ export class SocketController {
             },
         );
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
-        this.socket.on(SocketEventType.TEAMMATE_INFO, onTeamMateInfo);
-        this.socket.on(SocketEventType.JOIN_LOBBY, onJoinLobby);
         this.socket.on(
-            SocketEventType.INVITE_FRIEND_TOKEN,
-            onReceiveInviteFriendToken,
+            SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+            onFriendJoinLobby,
         );
         this.socket.on(
             SocketEventType.TEAMMATE_DISCONNECT,

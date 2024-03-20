@@ -9,6 +9,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { MenuScene, Route } from './types';
 import { useStoreActions } from './hooks';
 import { setupProjectEnv } from './utils/setup';
+import { getDictionary } from '../getDictionary';
 
 setupProjectEnv('client');
 
@@ -23,6 +24,7 @@ const store = configureStore({});
 interface Props {
     children: React.ReactNode;
     lng: string;
+    dictionary: Awaited<ReturnType<typeof getDictionary>>;
 }
 
 const WithRetrieveSession: React.FC<Props> = ({ children }) => {
@@ -42,7 +44,7 @@ export const AppContext = createContext({
     setMainAppContext: (ctx: Record<string, any>) => {},
 });
 
-export const WithMainApp: React.FC<Props> = ({ children, lng }) => {
+export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
     const [mainAppContext, setMainAppContext] = useState<Record<string, any>>(
         {},
     );
@@ -69,16 +71,18 @@ export const WithMainApp: React.FC<Props> = ({ children, lng }) => {
                 }
             })();
 
-            return <MainApp initialScene={initialScene} />;
+            return (
+                <MainApp dictionary={dictionary} initialScene={initialScene} />
+            );
         }
         return null;
-    }, [children, path, lng]);
+    }, [children, path, lng, dictionary]);
 
     return (
         <ThemeProvider theme={darkTheme}>
             <SnackbarProvider>
                 <StoreProvider store={store}>
-                    <WithRetrieveSession lng={lng}>
+                    <WithRetrieveSession dictionary={dictionary} lng={lng}>
                         <AppContext.Provider
                             value={{
                                 mainAppContext,

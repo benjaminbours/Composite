@@ -50,10 +50,39 @@ export default class Shadow {
                     width,
                 };
             case MenuScene.TEAM_LOBBY:
+                const levelContainer = document.querySelector(
+                    '.team-lobby-scene__level-container',
+                );
+                let x = 0.5;
+                if (levelContainer) {
+                    const bbox = levelContainer.getBoundingClientRect();
+                    const percent =
+                        (bbox.left + bbox.width / 2) / window.innerWidth;
+                    x = percent;
+                }
+                x += 0.15;
                 return {
                     coordinates: {
-                        x: canvasWidth * 0.75,
-                        y: canvasHeight * 0.75,
+                        x: canvasWidth * x,
+                        y: canvasHeight * 0.8,
+                    },
+                    width: 350,
+                };
+            case MenuScene.TEAM_LOBBY_SELECTED:
+                const container = document.querySelector(
+                    '.team-lobby-scene__level-container',
+                );
+                let xPos = 0.5;
+                if (container) {
+                    const bbox = container.getBoundingClientRect();
+                    const percent =
+                        (bbox.left + bbox.width / 2) / window.innerWidth;
+                    xPos = percent;
+                }
+                return {
+                    coordinates: {
+                        x: canvasWidth * xPos,
+                        y: canvasHeight * 0.8,
                     },
                     width: 350,
                 };

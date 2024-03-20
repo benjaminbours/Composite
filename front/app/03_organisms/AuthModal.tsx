@@ -5,22 +5,29 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import React, { useCallback, useState } from 'react';
-import { LoginForm } from '../../../03_organisms/LoginForm';
-import { getDictionary } from '../../../../getDictionary';
-import { SignUpForm, WrapperReCaptcha } from '../../../03_organisms/SignUpForm';
+import { getDictionary } from '../../getDictionary';
+import { SignUpForm, WrapperReCaptcha } from './SignUpForm';
+import { LoginForm } from './LoginForm';
+import { Button } from '@mui/material';
+import { useStoreActions } from '../hooks';
 
 interface Props {
+    text: string;
     isModalOpen: boolean;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    withGuest?: boolean;
 }
 
 export const AuthModal: React.FC<Props> = ({
+    text,
     isModalOpen,
     dictionary,
     setIsModalOpen,
+    withGuest,
 }) => {
     const [currentTab, setCurrentTab] = useState(0);
+    const setIsGuest = useStoreActions((store) => store.user.setIsGuest);
 
     const handleChangeTab = useCallback(
         (_e: React.SyntheticEvent, newValue: number) => {
@@ -31,14 +38,32 @@ export const AuthModal: React.FC<Props> = ({
 
     return (
         <Modal
-            className="level-editor-modal"
+            className="composite-modal"
             open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => {
+                if (withGuest) {
+                    return;
+                }
+                setIsModalOpen(false);
+            }}
         >
-            <Paper className="level-editor-modal__container">
+            <Paper className="composite-modal__container">
                 <Typography variant="h6" component="h2">
-                    In order to save your level, I need to know to whom it is
+                    {text}
                 </Typography>
+                {withGuest && (
+                    <Button
+                        className="composite-modal__guest-button"
+                        variant="contained"
+                        fullWidth
+                        onClick={() => {
+                            setIsGuest(true);
+                            setIsModalOpen(false);
+                        }}
+                    >
+                        Continue as guest
+                    </Button>
+                )}
                 <Tabs
                     value={currentTab}
                     indicatorColor="primary"

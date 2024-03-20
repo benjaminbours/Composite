@@ -27,9 +27,11 @@ import type { StoreModel } from '../../frameworks/easy-peasy';
 export interface UserModel {
     // properties
     currentUser: User | undefined;
+    isGuest: boolean;
     isRetrievingSession: boolean;
     isAuthenticated: Computed<UserModel, boolean>;
     // actions
+    setIsGuest: Action<UserModel, boolean>;
     setCurrentUser: Action<UserModel, User | undefined>;
     setIsRetrievingSession: Action<UserModel, boolean>;
     // thunks
@@ -105,6 +107,7 @@ export const userModel: UserModel = {
     // properties
     isAuthenticated: computed((state) => Boolean(state.currentUser)),
     isRetrievingSession: true,
+    isGuest: false,
     currentUser: undefined,
     // actions
     setCurrentUser: action((state, payload) => {
@@ -112,6 +115,9 @@ export const userModel: UserModel = {
     }),
     setIsRetrievingSession: action((state, payload) => {
         state.isRetrievingSession = payload;
+    }),
+    setIsGuest: action((state, payload) => {
+        state.isGuest = payload;
     }),
     // thunks
     retrieveSession: thunk(async (actions) => {

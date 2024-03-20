@@ -155,32 +155,8 @@
     }
 }
 
-.level-editor-modal {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.level-editor-modal__container {
-    padding: 30px;
-    margin-top: 100px;
-    max-width: 400px;
-}
-
-.level-editor-modal__button-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-
-    & > :last-child {
-        margin-top: 20px;
-    }
-}
-
 .thumbnail-modal {
-    .level-editor-modal__button-container {
+    .composite-modal__button-container {
         flex-direction: row;
 
         & > :last-child {

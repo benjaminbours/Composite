@@ -18,6 +18,7 @@ import { useMainController } from './useMainController';
 import { useMenuTransition } from './useMenuTransition';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
 import { AppContext } from './WithMainApp';
+import { getDictionary } from '../getDictionary';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -33,12 +34,13 @@ const Game = dynamic(() => import('./Game'), {
 
 interface Props {
     initialScene?: MenuScene;
+    dictionary: Awaited<ReturnType<typeof getDictionary>>;
 }
 
 /**
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
-function MainApp({ initialScene }: Props) {
+function MainApp({ initialScene, dictionary }: Props) {
     const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
@@ -60,15 +62,10 @@ function MainApp({ initialScene }: Props) {
     const {
         state,
         socketController,
-        inviteFriendToken,
-        teamMateInfo,
         gameIsPlaying,
-        menuMode,
-        teamMateDisconnected,
         levels,
-        handleClickOnJoinTeamMate,
-        handleClickFindAnotherTeamMate,
         handleEnterTeamLobby,
+        handleInviteFriend,
         handleClickPlayWithFriend,
         handleClickPlayWithRandom,
         handleEnterRandomQueue,
@@ -100,7 +97,7 @@ function MainApp({ initialScene }: Props) {
     useEffect(() => {
         setMainAppContext({
             setMenuScene,
-            enterTeamLobby: handleEnterTeamLobby,
+            // enterTeamLobby: handleEnterTeamLobby,
         });
         if (process.env.NEXT_PUBLIC_STAGE === 'development') {
             const stats = new STATS.default();
@@ -130,18 +127,16 @@ function MainApp({ initialScene }: Props) {
     return (
         <>
             <TeamMateDisconnectNotification
-                teamMateDisconnected={teamMateDisconnected}
-                handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
+                teamMateDisconnected={state.teamMate === 'disconnected'}
+                // handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
             />
             {!gameIsPlaying && (
                 <Menu
+                    dictionary={dictionary}
                     mainState={state}
                     menuScene={menuScene}
                     nextMenuScene={nextMenuScene}
-                    mode={menuMode}
-                    teamMateInfo={teamMateInfo}
                     stats={statsRef}
-                    inviteFriendToken={inviteFriendToken}
                     refHashMap={refHashMap}
                     levels={levels}
                     handleEnterRandomQueue={handleEnterRandomQueue}
@@ -153,8 +148,9 @@ function MainApp({ initialScene }: Props) {
                     handleClickOnBack={handleClickOnBack}
                     handleClickOnQuitTeam={handleClickOnQuitTeam}
                     handleClickHome={handleClickHome}
-                    handleClickOnJoinTeamMate={handleClickOnJoinTeamMate}
                     handleClickPlayAgain={handleClickPlayAgain}
+                    handleInviteFriend={handleInviteFriend}
+                    handleEnterTeamLobby={handleEnterTeamLobby}
                 />
             )}
             {state.gameState &&

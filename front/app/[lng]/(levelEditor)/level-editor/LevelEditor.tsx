@@ -12,10 +12,10 @@ import { SceneContentPanel } from './SceneContentPanel';
 import { PropertiesPanel } from './PropertiesPanel';
 import { TopBarLevelEditor } from './TopBarLevelEditor';
 import type { getDictionary } from '../../../../getDictionary';
-import { AuthModal } from './AuthModal';
 import { useController } from './useController';
 import { PartialLevel } from '../../../types';
 import { ThumbnailModal } from './ThumbnailModal';
+import { AuthModal } from '../../../03_organisms/AuthModal';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -116,6 +116,7 @@ export const LevelEditor: React.FC<Props> = ({
                 setIsModalOpen={setIsAuthModalOpen}
                 isModalOpen={isAuthModalOpen}
                 dictionary={dictionary}
+                text="In order to save your level, I need to know to whom it is"
             />
             <ThumbnailModal
                 setIsModalOpen={setIsThumbnailModalOpen}

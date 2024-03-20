@@ -1,4 +1,5 @@
-import React from 'react';
+import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
 
 const YingYang: React.FC = () => (
     <svg className="ying-yang" viewBox="0 0 800 800">
@@ -19,18 +20,49 @@ const YingYang: React.FC = () => (
     </svg>
 );
 
+function loadImage(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(url);
+        img.onerror = () => reject();
+        img.src = url;
+    });
+}
+
 interface Props {
     name: string;
     src: string;
+    isSelectedByTeamMate?: boolean;
 }
 
-export const LevelPortal: React.FC<Props> = ({ name, src }) => {
+const defaultImageUrl = '/images/crack_the_door.png';
+
+export const LevelPortal: React.FC<Props> = ({
+    name,
+    src,
+    isSelectedByTeamMate,
+}) => {
+    const [imageUrl, setImageUrl] = useState(defaultImageUrl);
+
+    useEffect(() => {
+        loadImage(src)
+            .catch(() => defaultImageUrl)
+            .then((url) => {
+                setImageUrl(url);
+            });
+    }, [src]);
+
+    const cssClass = classNames({
+        'level-portal': true,
+        'level-portal--selected-by-team-mate': isSelectedByTeamMate,
+    });
+
     return (
-        <div className="level-portal">
+        <div className={cssClass}>
             <div className="level-portal__graphic-wrapper">
                 <div
                     className="level-portal__image-container"
-                    style={{ backgroundImage: `url("${src}")` }}
+                    style={{ backgroundImage: `url("${imageUrl}")` }}
                 />
                 <div className="level-portal__border-container">
                     <div />
@@ -39,8 +71,8 @@ export const LevelPortal: React.FC<Props> = ({ name, src }) => {
                     <div />
                     <div />
                 </div>
+                <YingYang />
             </div>
-            {/* <YingYang /> */}
             <p>{name}</p>
         </div>
     );

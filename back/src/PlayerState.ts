@@ -12,6 +12,8 @@ export class RedisPlayerState {
     public status: string,
     public side: string,
     public selectedLevel: string,
+    public inviteToken?: string,
+    public userId?: string,
     /**
      * its also the name of the game instance room
      */
@@ -27,6 +29,8 @@ export class RedisPlayerState {
       String(state.status),
       String(state.side),
       String(state.selectedLevel),
+      state.inviteToken ? String(state.inviteToken) : undefined,
+      state.userId ? String(state.userId) : undefined,
       state.gameId ? String(state.gameId) : undefined,
       state.roomName,
     );
@@ -38,6 +42,8 @@ export class PlayerState {
     public status: PlayerStatus,
     public side?: Side,
     public selectedLevel?: number,
+    public inviteToken?: string,
+    public userId?: number,
     /**
      * key use with redis to store game state (the name of the room with socket io)
      */
@@ -50,6 +56,8 @@ export class PlayerState {
       Number(state.status) as PlayerStatus,
       Number(state.side) as Side,
       Number(state.selectedLevel),
+      state.inviteToken,
+      Number(state.userId),
       Number(state.gameId),
       state.roomName,
     );

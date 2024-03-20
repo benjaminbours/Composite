@@ -219,8 +219,12 @@ export class TemporaryStorageService {
     return this.redisClient.HSET(REDIS_KEYS.INVITE_TOKEN_MAP, token, socketId);
   }
 
-  async getInviteEmitter(token: string) {
+  async getInviteHost(token: string) {
     return this.redisClient.HGET(REDIS_KEYS.INVITE_TOKEN_MAP, token);
+  }
+
+  async deleteInviteToken(token: string) {
+    return this.redisClient.HDEL(REDIS_KEYS.INVITE_TOKEN_MAP, token);
   }
 
   // games

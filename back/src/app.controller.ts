@@ -32,7 +32,7 @@ export class AppController {
     @Param('inviteToken') inviteToken: string,
   ): Promise<boolean> {
     const inviteEmitter =
-      await this.temporaryStorage.getInviteEmitter(inviteToken);
+      await this.temporaryStorage.getInviteHost(inviteToken);
     return Boolean(inviteEmitter);
   }
 }

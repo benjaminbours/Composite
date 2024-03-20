@@ -6,13 +6,23 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import type { Socket } from 'socket.io';
+import * as uuid from 'uuid';
 // our libs
-import { Side, SocketEventTeamLobby } from '@benjaminbours/composite-core';
+import {
+  FriendJoinLobbyPayload,
+  InviteFriendTokenPayload,
+  CreateLobbyPayload,
+  Side,
+  SocketEventTeamLobby,
+} from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { RedisPlayerState } from '../PlayerState';
+import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 import { SocketGateway } from './socket.gateway';
 import { UtilsService } from './utils.service';
+import ShortUniqueId from 'short-unique-id';
+import { PrismaService } from '@project-common/services';
+import { User } from '@prisma/client';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -29,10 +39,86 @@ import { UtilsService } from './utils.service';
 })
 export class TeamLobbyGateway {
   constructor(
+    private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
     private utils: UtilsService,
     private mainGateway: SocketGateway,
   ) {}
+
+  @SubscribeMessage(SocketEventTeamLobby.CREATE_LOBBY)
+  async handleCreateLobby(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() payload: CreateLobbyPayload,
+  ) {
+    const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
+    const teamRoomName = uuid.v4();
+    await this.temporaryStorage.storeInviteToken(inviteToken, socket.id);
+    const player = new PlayerState(
+      PlayerStatus.IS_WAITING_TEAMMATE,
+      payload.side,
+      payload.level,
+      inviteToken,
+      payload.userId,
+      undefined,
+      teamRoomName,
+    );
+    await this.temporaryStorage.setPlayer(
+      socket.id,
+      RedisPlayerState.parsePlayerState(player),
+    );
+    this.mainGateway.addSocketToRoom(socket.id, teamRoomName);
+    this.mainGateway.server
+      .to(socket.id)
+      .emit(SocketEventTeamLobby.INVITE_FRIEND_TOKEN, {
+        token: inviteToken,
+      } as InviteFriendTokenPayload);
+  }
+
+  @SubscribeMessage(SocketEventTeamLobby.FRIEND_JOIN_LOBBY)
+  async handleFriendJoinLobby(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() payload: FriendJoinLobbyPayload,
+  ) {
+    const socketIdHost = await this.temporaryStorage.getInviteHost(
+      payload.token,
+    );
+    const playerHost = await this.temporaryStorage.getPlayer(socketIdHost);
+    const hostUser = await (() => {
+      if (playerHost.userId === undefined) {
+        return undefined;
+      }
+      return this.prismaService.user.findUnique({
+        where: { id: playerHost.userId },
+      });
+    })();
+    const player = new PlayerState(
+      PlayerStatus.IS_WAITING_TEAMMATE,
+      undefined,
+      undefined,
+      undefined,
+      (payload.user as User)?.id || undefined,
+      undefined,
+      playerHost.roomName,
+    );
+    this.temporaryStorage.setPlayer(
+      socket.id,
+      RedisPlayerState.parsePlayerState(player),
+    );
+    this.mainGateway.addSocketToRoom(socket.id, playerHost.roomName!);
+    this.mainGateway.emit(socketIdHost, [
+      SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+      payload,
+    ]);
+    this.mainGateway.emit(socket.id, [
+      SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+      {
+        token: payload.token,
+        user: hostUser,
+        side: playerHost.side,
+        level: playerHost.selectedLevel,
+      },
+    ]);
+  }
 
   @SubscribeMessage(SocketEventTeamLobby.SELECT_LEVEL)
   async handleSelectLevel(

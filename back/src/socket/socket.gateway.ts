@@ -9,7 +9,6 @@ import {
 import type { Server, Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import * as uuid from 'uuid';
-import ShortUniqueId from 'short-unique-id';
 import { GameStatus } from '@prisma/client';
 // our libs
 import {
@@ -27,7 +26,6 @@ import {
   updateServerBounces,
   GameState,
   collectInputsForTick,
-  InviteFriendTokenPayload,
   AbstractLevel,
   LevelMapping,
 } from '@benjaminbours/composite-core';
@@ -137,46 +135,6 @@ export class SocketGateway {
     this.handlePlayerMatch(players);
   }
 
-  @SubscribeMessage(SocketEventType.REQUEST_INVITE_FRIEND_TOKEN)
-  async handleRequestInviteFriendToken(@ConnectedSocket() socket: Socket) {
-    const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
-    await this.temporaryStorage.storeInviteToken(inviteToken, socket.id);
-    this.server.to(socket.id).emit(SocketEventType.INVITE_FRIEND_TOKEN, {
-      token: inviteToken,
-    } as InviteFriendTokenPayload);
-  }
-
-  @SubscribeMessage(SocketEventType.FRIEND_JOIN_LOBBY)
-  async handleFriendJoinLobby(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() inviteToken: string,
-  ) {
-    // TODO: When emitter disconnect, clear token
-    const socketIdEmitter =
-      await this.temporaryStorage.getInviteEmitter(inviteToken);
-    const teamRoomName = uuid.v4();
-
-    const players = [socket.id, socketIdEmitter];
-    for (let i = 0; i < players.length; i++) {
-      const player = new PlayerState(
-        PlayerStatus.IS_WAITING_TEAMMATE,
-        undefined,
-        undefined,
-        undefined,
-        teamRoomName,
-      );
-      // TODO: Should be a transaction
-      this.temporaryStorage.setPlayer(
-        players[i],
-        RedisPlayerState.parsePlayerState(player),
-      );
-    }
-
-    this.addSocketToRoom(socket.id, teamRoomName);
-    this.addSocketToRoom(socketIdEmitter, teamRoomName);
-    this.emit(socketIdEmitter, [SocketEventType.JOIN_LOBBY]);
-  }
-
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
   async handleGamePlayerInput(
     @ConnectedSocket() socket: Socket,
@@ -240,6 +198,11 @@ export class SocketGateway {
     const player = await this.temporaryStorage.getPlayer(socket.id);
     if (!player) {
       return;
+    }
+
+    if (player.inviteToken) {
+      // clean invite token created by the user
+      this.temporaryStorage.deleteInviteToken(player.inviteToken);
     }
 
     // room name is equivalent to team name

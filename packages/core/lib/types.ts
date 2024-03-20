@@ -24,14 +24,9 @@ export enum SocketEventType {
     DISCONNECT = 'disconnect',
     // send only by the client after connect in random queue
     MATCHMAKING_INFO = 'MATCHMAKING_INFO',
-    // send only by the client after arriving invite friend scene
-    REQUEST_INVITE_FRIEND_TOKEN = 'REQUEST_INVITE_FRIEND_TOKEN',
-    // send only by the server after receiving request from client
-    INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
-    // send by the client just after joining lobby and connecting
-    FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
+
     // send by the server to the invite emitter after the friend joined the lobby
-    JOIN_LOBBY = 'JOIN_LOBBY',
+    // JOIN_LOBBY = 'JOIN_LOBBY',
     // send by the server when 2 players connects and a game start
     GAME_START = 'GAME_START',
     // send by the 2 clients to the server and to each others during the game is on going
@@ -42,8 +37,6 @@ export enum SocketEventType {
     GAME_STATE_UPDATE = 'GAME_STATE_UPDATE',
     // send by the server when the players reach the end level
     GAME_FINISHED = 'GAME_FINISHED',
-    // send by the server to inform a team mate made a choice
-    TEAMMATE_INFO = 'TEAMMATE_INFO',
     // send by the server to inform a team mate disconnected
     TEAMMATE_DISCONNECT = 'TEAMMATE_DISCONNECT',
 }
@@ -51,6 +44,9 @@ export enum SocketEventType {
 export enum SocketEventTeamLobby {
     SELECT_LEVEL = 'SELECT_LEVEL',
     SELECT_SIDE = 'SELECT_SIDE',
+    CREATE_LOBBY = 'CREATE_LOBBY',
+    FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
+    INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
 }
 
 export interface Inputs {
@@ -71,9 +67,17 @@ export interface InviteFriendTokenPayload {
     token: string;
 }
 
-export interface TeammateInfoPayload {
-    side: Side;
-    selectedLevel: number;
+export interface FriendJoinLobbyPayload {
+    token: string;
+    user?: any; // User type from database, not accessible here but should be casted to this type on the front
+    side?: Side;
+    level?: number;
+}
+
+export interface CreateLobbyPayload {
+    userId?: number;
+    side?: Side;
+    level?: number;
 }
 
 export interface GamePlayerInputPayload {
@@ -114,27 +118,6 @@ export type MatchMakingEvent = [
     payload: MatchMakingPayload,
 ];
 
-export type RequestInviteFriendTokenEvent = [
-    type: SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
-];
-
-export type FriendJoinLobbyEvent = [
-    type: SocketEventType.FRIEND_JOIN_LOBBY,
-    payload: string,
-];
-
-export type JoinLobbyEvent = [type: SocketEventType.JOIN_LOBBY];
-
-export type InviteFriendTokenEvent = [
-    type: SocketEventType.INVITE_FRIEND_TOKEN,
-    payload: InviteFriendTokenPayload,
-];
-
-export type TeammateInfoEvent = [
-    type: SocketEventType.TEAMMATE_INFO,
-    payload: TeammateInfoPayload,
-];
-
 export type GameStartEvent = [
     type: SocketEventType.GAME_START,
     payload: GameStateUpdatePayload,
@@ -162,6 +145,8 @@ export type GameDeactivateElementEvent = [
     payload: GameActivateElementPayload,
 ];
 
+///////////////// LOBBY EVENTS
+
 export type TeamSelectLevel = [
     type: SocketEventTeamLobby.SELECT_LEVEL,
     payload: number,
@@ -172,9 +157,23 @@ export type TeamSelectSide = [
     payload: Side,
 ];
 
+export type CreateLobbyEvent = [
+    type: SocketEventTeamLobby.CREATE_LOBBY,
+    payload: CreateLobbyPayload,
+];
+
+export type FriendJoinLobbyEvent = [
+    type: SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+    payload: FriendJoinLobbyPayload,
+];
+
+export type InviteFriendTokenEvent = [
+    type: SocketEventTeamLobby.INVITE_FRIEND_TOKEN,
+    payload: InviteFriendTokenPayload,
+];
+
 export type SocketEvent =
     | MatchMakingEvent
-    | TeammateInfoEvent
     | GameStartEvent
     | GameFinishedEvent
     | GameStateUpdateEvent
@@ -182,10 +181,9 @@ export type SocketEvent =
     | GameActivateElementEvent
     | GameDeactivateElementEvent
     | PingEvent
-    | RequestInviteFriendTokenEvent
+    | CreateLobbyEvent
     | InviteFriendTokenEvent
     | FriendJoinLobbyEvent
-    | JoinLobbyEvent
     | TeamSelectLevel
     | TeamSelectSide;
 

@@ -1,6 +1,6 @@
-html {
-    overflow-y: scroll;
-}
+// html {
+//     overflow-y: scroll;
+// }
 
 body {
     padding: 0;
@@ -97,6 +97,19 @@ canvas,
 .title-h3 {
     font-family: 'Source Code Pro', monospace;
     font-size: 24px;
+
+    &--white {
+        color: white;
+    }
+}
+
+.title-h4 {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 20px;
+
+    &--white {
+        color: white;
+    }
 }
 
 p {
@@ -111,12 +124,12 @@ p {
     all: unset;
     width: auto;
     text-align: center;
-    border: solid white 1px;
-    padding: 20px;
+    padding: 10px;
     letter-spacing: 5px;
     text-transform: uppercase;
     transition: 0.7s;
     cursor: pointer;
+    position: relation;
 
     &.white {
         color: white;
@@ -139,13 +152,13 @@ p {
     }
 
     // different border management for back button
-    &.back {
-        border-color: transparent;
+    // &.back {
+    //     border-color: transparent;
 
-        &:hover {
-            border-color: white;
-        }
-    }
+    //     &:hover {
+    //         border-color: white;
+    //     }
+    // }
 
     @media (max-width: 768px) {
         padding: 10px;
@@ -321,11 +334,11 @@ $buttonSizeLarge: 120px;
     justify-content: center;
     font-size: 12px;
 
-    svg {
-        width: 35px;
-        margin-right: 10px;
-        transition: 0.7s;
-    }
+    // svg {
+    //     width: 35px;
+    //     // margin-left: 10px;
+    //     transition: 0.7s;
+    // }
 
     &.black {
         svg {
@@ -436,29 +449,46 @@ $buttonSizeLarge: 120px;
     width: 250px;
 }
 
-// level portal
-:root {
-    --deg: 1;
-    --x: -50%;
-    --y: -50%;
-    --speed: 150ms;
-}
-
 .slick-list,
 .slick-track {
     transform: none !important;
 }
 
+.slick-list {
+    overflow: visible !important;
+}
+
 .level-portal {
+    --deg: 1;
+    --x: -50%;
+    --y: -50%;
+    --speed: 150ms;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    cursor: grab;
 
     p {
         mix-blend-mode: difference;
         color: white;
         text-align: center;
+    }
+
+    .ying-yang {
+        width: 70px;
+        height: 70px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        animation: rotate 5s infinite linear;
+
+        .black,
+        .white {
+            opacity: 0;
+            transition: 0.3s ease-out;
+        }
     }
 
     &__graphic-wrapper {
@@ -537,4 +567,42 @@ $buttonSizeLarge: 120px;
     to {
         transform: translate(var(--x), var(--y)) rotate(360deg);
     }
+}
+
+@keyframes rotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.composite-modal {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.composite-modal__container {
+    padding: 30px;
+    margin-top: 100px;
+    max-width: 400px;
+}
+
+.composite-modal__button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+
+    & > :last-child {
+        margin-top: 20px;
+    }
+}
+
+.composite-modal__guest-button {
+    margin: 10px 0;
 }
