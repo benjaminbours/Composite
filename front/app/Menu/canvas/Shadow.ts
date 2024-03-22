@@ -66,7 +66,7 @@ export default class Shadow {
                         x: canvasWidth * x,
                         y: canvasHeight * 0.8,
                     },
-                    width: 350,
+                    width: 450,
                 };
             case MenuScene.TEAM_LOBBY_SELECTED:
                 const container = document.querySelector(
@@ -84,7 +84,7 @@ export default class Shadow {
                         x: canvasWidth * xPos,
                         y: canvasHeight * 0.8,
                     },
-                    width: 350,
+                    width: 500,
                 };
             case MenuScene.INVITE_FRIEND:
                 return {

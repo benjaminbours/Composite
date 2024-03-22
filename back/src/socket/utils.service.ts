@@ -5,7 +5,6 @@ import { Injectable } from '@nestjs/common';
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus } from '../PlayerState';
 import { SocketService } from './socket.service';
-// import { Levels } from '@benjaminbours/composite-core';
 
 const COMING_SOON_LEVELS = [];
 
@@ -35,7 +34,8 @@ export class UtilsService {
       await this.temporaryStorage.getPlayer(teamMateSocketId);
 
     const isTeamReady =
-      teamMatePlayer.status === PlayerStatus.IS_WAITING_TEAMMATE &&
+      player.status === PlayerStatus.IS_READY_TO_PLAY &&
+      teamMatePlayer.status === PlayerStatus.IS_READY_TO_PLAY &&
       !Number.isNaN(player.side) &&
       !Number.isNaN(teamMatePlayer.side) &&
       teamMatePlayer.side !== player.side &&

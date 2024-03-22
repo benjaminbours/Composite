@@ -20,14 +20,19 @@ import { Level, User } from '@benjaminbours/composite-api-client';
 import { useSnackbar } from 'notistack';
 import { useStoreState } from './hooks';
 
-export interface MainState {
+export interface PlayerState {
     side: Side | undefined;
-    selectedLevel: number | undefined;
+    level: number | undefined;
+    isReady: boolean;
+    account: User | undefined;
+}
+
+export interface MainState {
     gameState: GameState | undefined;
-    teamMate: User | 'guest' | 'disconnected' | undefined;
-    levelSelectedByTeamMate: number | undefined;
-    sideSelectedByTeamMate: Side | undefined;
     loadedLevel: Level | undefined;
+    you: PlayerState;
+    mate: PlayerState | undefined;
+    mateDisconnected: boolean;
 }
 
 export function useMainController(
@@ -44,6 +49,13 @@ export function useMainController(
     const router = useRouter();
     // const path = usePathname();
     const socketController = useRef<SocketController>();
+
+    useEffect(() => {
+        setState((prev) => ({
+            ...prev,
+            you: { ...prev.you, account: currentUser },
+        }));
+    }, [currentUser]);
 
     const [state, setState] = useState<MainState>(() => {
         if (process.env.NEXT_PUBLIC_STAGE === 'development') {
@@ -66,29 +78,34 @@ export function useMainController(
             }
 
             return {
-                side,
-                selectedLevel,
                 gameState: undefined,
-                levelSelectedByTeamMate: undefined,
-                sideSelectedByTeamMate: undefined,
                 loadedLevel: undefined,
-                teamMate: undefined,
+                you: {
+                    side,
+                    level: selectedLevel,
+                    isReady: false,
+                    account: undefined,
+                },
+                mate: undefined,
+                mateDisconnected: false,
             };
         }
 
         return {
-            side: undefined,
-            selectedLevel: undefined,
             gameState: undefined,
-            levelSelectedByTeamMate: undefined,
-            sideSelectedByTeamMate: undefined,
             loadedLevel: undefined,
-            teamMate: undefined,
+            you: {
+                side: undefined,
+                level: undefined,
+                isReady: false,
+                account: undefined,
+            },
+            mate: undefined,
+            mateDisconnected: false,
         };
     });
     const [levels, setLevels] = useState<Level[]>([]);
 
-    // const [teamMateDisconnected, setTeamMateDisconnected] = useState(false);
     // TODO: change this concept, not sustainable, bad design from before
     // const [menuMode, setMenuMode] = useState<MenuMode>(MenuMode.DEFAULT);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
@@ -102,9 +119,9 @@ export function useMainController(
         const isMobile = window.innerWidth < 768;
         // curve
         if (
-            state.selectedLevel !== undefined &&
-            state.levelSelectedByTeamMate !== undefined &&
-            state.selectedLevel === state.levelSelectedByTeamMate
+            state.you.level !== undefined &&
+            state.mate?.level !== undefined &&
+            state.you.level === state.mate?.level
         ) {
             Curve.setWaveOptions({
                 speed: 0.4,
@@ -116,10 +133,7 @@ export function useMainController(
         }
 
         // light
-        if (
-            state.side === Side.LIGHT ||
-            state.sideSelectedByTeamMate === Side.LIGHT
-        ) {
+        if (state.you.side === Side.LIGHT || state.mate?.side === Side.LIGHT) {
             lightToStep({ step: MenuScene.TEAM_LOBBY_SELECTED }, isMobile);
         } else {
             lightToStep({ step: MenuScene.TEAM_LOBBY }, isMobile);
@@ -127,8 +141,8 @@ export function useMainController(
 
         // shadow
         if (
-            state.side === Side.SHADOW ||
-            state.sideSelectedByTeamMate === Side.SHADOW
+            state.you.side === Side.SHADOW ||
+            state.mate?.side === Side.SHADOW
         ) {
             shadowToStep({ step: MenuScene.TEAM_LOBBY_SELECTED }, isMobile);
         } else {
@@ -144,12 +158,12 @@ export function useMainController(
         });
     }, []);
 
-    const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
-        socketController.current?.emit([
-            SocketEventType.MATCHMAKING_INFO,
-            payload,
-        ]);
-    }, []);
+    // const sendMatchMakingInfo = useCallback((payload: MatchMakingPayload) => {
+    //     socketController.current?.emit([
+    //         SocketEventType.MATCHMAKING_INFO,
+    //         payload,
+    //     ]);
+    // }, []);
 
     // const handleClickOnJoinTeamMate = useCallback(() => {
     //     if (!teamMateInfo) {
@@ -193,7 +207,11 @@ export function useMainController(
     const handleSelectLevelOnLobby = useCallback((levelId: number) => {
         setState((prev) => ({
             ...prev,
-            selectedLevel: levelId,
+            you: {
+                ...prev.you,
+                level: levelId,
+                isReady: false,
+            },
         }));
         socketController.current?.emit([
             SocketEventTeamLobby.SELECT_LEVEL,
@@ -204,7 +222,11 @@ export function useMainController(
     const handleSelectSideOnLobby = useCallback((side: Side) => {
         setState((prev) => ({
             ...prev,
-            side,
+            you: {
+                ...prev.you,
+                side,
+                isReady: false,
+            },
         }));
         socketController.current?.emit([
             SocketEventTeamLobby.SELECT_SIDE,
@@ -212,13 +234,42 @@ export function useMainController(
         ]);
     }, []);
 
+    const handleClickReadyToPlay = useCallback(() => {
+        setState((prev) => ({
+            ...prev,
+            you: {
+                ...prev.you,
+                isReady: !state.you.isReady,
+            },
+        }));
+        socketController.current?.emit([
+            SocketEventTeamLobby.READY_TO_PLAY,
+            !state.you.isReady,
+        ]);
+    }, [state]);
+
+    const handleReceiveReadyToPlay = useCallback((data: boolean) => {
+        console.log('receive team mate ready to play', data);
+        setState((prev) => ({
+            ...prev,
+            mate: {
+                ...prev.mate!,
+                isReady: data,
+            },
+        }));
+    }, []);
+
     const handleTeamMateJoinLobby = useCallback(
         (data: FriendJoinLobbyPayload) => {
             setState((prev) => ({
                 ...prev,
-                teamMate: data.user || 'guest',
-                sideSelectedByTeamMate: data.side,
-                levelSelectedByTeamMate: data.level || levels[0].id,
+                mate: {
+                    account: data.user,
+                    isReady: false,
+                    side: data.side,
+                    level: data.level || levels[0].id,
+                },
+                mateDisconnected: false,
             }));
             enqueueSnackbar('Your friend successfully joined the lobby', {
                 variant: 'success',
@@ -235,11 +286,8 @@ export function useMainController(
     const handleTeamMateDisconnect = useCallback(() => {
         setState((prev) => ({
             ...prev,
-            side: undefined,
-            selectedLevel: undefined,
-            teamMate: 'disconnected',
-            sideSelectedByTeamMate: undefined,
-            levelSelectedByTeamMate: undefined,
+            mate: undefined,
+            mateDisconnected: true,
         }));
         handleDestroyConnection();
     }, [handleDestroyConnection]);
@@ -261,13 +309,21 @@ export function useMainController(
 
     const handleGameFinished = useCallback(() => {
         setState((prev) => ({
-            side: prev.side,
-            selectedLevel: undefined,
-            sideSelectedByTeamMate: undefined,
-            levelSelectedByTeamMate: undefined,
-            gameState: undefined,
             loadedLevel: undefined,
-            teamMate: undefined,
+            gameState: undefined,
+            you: {
+                account: prev.you.account,
+                side: undefined,
+                level: undefined,
+                isReady: false,
+            },
+            mate: {
+                account: prev.mate?.account,
+                side: undefined,
+                level: undefined,
+                isReady: false,
+            },
+            mateDisconnected: false,
         }));
         setGameIsPlaying(false);
         setMenuScene(MenuScene.END_LEVEL);
@@ -276,18 +332,29 @@ export function useMainController(
     const handleReceiveLevelOnLobby = useCallback((levelId: number) => {
         setState((prev) => ({
             ...prev,
-            levelSelectedByTeamMate: levelId,
+            mate: {
+                ...prev.mate!,
+                level: levelId,
+                isReady: false,
+            },
         }));
     }, []);
 
     const handleReceiveSideOnLobby = useCallback((side: Side) => {
         setState((prev) => ({
             ...prev,
-            sideSelectedByTeamMate: side,
+            mate: {
+                ...prev.mate!,
+                side,
+                isReady: false,
+            },
         }));
     }, []);
 
     const establishConnection = useCallback(async () => {
+        if (socketController.current?.isConnected) {
+            return;
+        }
         return import('./SocketController')
             .then((mod) => mod.SocketController)
             .then((SocketController) => {
@@ -298,6 +365,7 @@ export function useMainController(
                     handleTeamMateJoinLobby,
                     handleReceiveLevelOnLobby,
                     handleReceiveSideOnLobby,
+                    handleReceiveReadyToPlay,
                 );
                 return;
             });
@@ -308,6 +376,7 @@ export function useMainController(
         handleTeamMateJoinLobby,
         handleReceiveLevelOnLobby,
         handleReceiveSideOnLobby,
+        handleReceiveReadyToPlay,
     ]);
 
     // callback when the invited user is joining the lobby
@@ -353,39 +422,39 @@ export function useMainController(
                     SocketEventTeamLobby.CREATE_LOBBY,
                     {
                         userId: currentUser?.id || undefined,
-                        side: state.side,
-                        level: state.selectedLevel,
+                        side: state.you.side,
+                        level: state.you.level,
                     } as CreateLobbyPayload,
                 ]);
             });
         });
     }, [establishConnection, currentUser, state]);
 
-    const handleEnterRandomQueue = useCallback(
-        (side: Side) => {
-            if (onTransition.current || state.selectedLevel === undefined) {
-                return;
-            }
-            establishConnection().then(() => {
-                setState((prev) => ({ ...prev, side }));
-                sendMatchMakingInfo({
-                    selectedLevel: state.selectedLevel!,
-                    side,
-                });
-            });
-            goToStep({
-                step: MenuScene.QUEUE,
-                side,
-            });
-        },
-        [
-            establishConnection,
-            sendMatchMakingInfo,
-            goToStep,
-            onTransition,
-            state,
-        ],
-    );
+    // const handleEnterRandomQueue = useCallback(
+    //     (side: Side) => {
+    //         if (onTransition.current || state.selectedLevel === undefined) {
+    //             return;
+    //         }
+    //         establishConnection().then(() => {
+    //             setState((prev) => ({ ...prev, side }));
+    //             sendMatchMakingInfo({
+    //                 selectedLevel: state.selectedLevel!,
+    //                 side,
+    //             });
+    //         });
+    //         goToStep({
+    //             step: MenuScene.QUEUE,
+    //             side,
+    //         });
+    //     },
+    //     [
+    //         establishConnection,
+    //         sendMatchMakingInfo,
+    //         goToStep,
+    //         onTransition,
+    //         state,
+    //     ],
+    // );
 
     const handleSelectLevel = useCallback(
         (levelId: number) => {
@@ -394,7 +463,10 @@ export function useMainController(
             }
             setState((prev) => ({
                 ...prev,
-                selectedLevel: levelId,
+                you: {
+                    ...prev.you,
+                    level: levelId,
+                },
             }));
             goToStep({
                 step: MenuScene.FACTION,
@@ -422,12 +494,15 @@ export function useMainController(
                 goToStep(
                     {
                         step: MenuScene.FACTION,
-                        side: state.side,
+                        side: state.you.side,
                     },
                     () => {
                         setState((prev) => ({
                             ...prev,
-                            side: undefined,
+                            you: {
+                                ...prev.you,
+                                side: undefined,
+                            },
                         }));
                         // TODO: Be careful about this part, test all behaviors with last changes
                         // if (menuMode === MenuMode.DEFAULT) {
@@ -449,7 +524,7 @@ export function useMainController(
         }
     }, [
         menuScene,
-        state.side,
+        state.you.side,
         // handleDestroyConnection,
         goToStep,
         onTransition,
@@ -491,7 +566,10 @@ export function useMainController(
         goToStep({ step: MenuScene.TEAM_LOBBY, side: undefined }, () => {
             setState((prev) => ({
                 ...prev,
-                side: undefined,
+                you: {
+                    ...prev.you,
+                    side: undefined,
+                },
             }));
         });
     }, [goToStep, onTransition, setState]);
@@ -571,6 +649,7 @@ export function useMainController(
         // teamMateInfo,
         gameIsPlaying,
         levels,
+        handleClickReadyToPlay,
         handleGameStart,
         establishConnection,
         // handleClickOnJoinTeamMate,
@@ -579,7 +658,7 @@ export function useMainController(
         handleEnterTeamLobby,
         handleClickPlayWithFriend: handleInviteFriend,
         handleClickPlayWithRandom,
-        handleEnterRandomQueue,
+        // handleEnterRandomQueue,
         handleSelectLevelOnLobby,
         handleSelectSideOnLobby,
         handleSelectLevel,

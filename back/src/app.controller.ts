@@ -1,5 +1,6 @@
 // vendors
 import { Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiOkResponse } from '@nestjs/swagger';
 // our libs
 import type { AllQueueInfo } from '@benjaminbours/composite-core';
 // local
@@ -26,6 +27,10 @@ export class AppController {
     return this.temporaryStorage.getQueueInfo();
   }
 
+  @ApiOkResponse({
+    description: 'Tell if the provided token is still valid',
+    type: Boolean,
+  })
   @Public()
   @Post('/check-invite/:inviteToken')
   async checkInviteValidity(

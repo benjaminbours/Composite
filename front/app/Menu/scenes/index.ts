@@ -4,5 +4,5 @@ export * from './SideScene';
 export * from './LevelScene';
 export * from './HomeScene';
 export * from './InviteFriendScene';
-export * from './TeamLobbyScene';
+export * from './TeamLobbyScene/TeamLobbyScene';
 export * from './NotFoundScene';

@@ -1,0 +1,93 @@
+.root {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    position: relative;
+    align-items: flex-start;
+
+    h2 {
+        margin-top: 0;
+        width: 100%;
+    }
+
+    h3 {
+        text-align: center;
+        mix-blend-mode: difference;
+    }
+}
+
+.side-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.side-button {
+    all: unset;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    mix-blend-mode: difference;
+
+    h3 {
+        transition: ease-in-out 0.3s;
+    }
+}
+
+.rect-button {
+    all: unset;
+    padding: 20px;
+    background: black;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    text-align: center;
+    border: solid white 2px;
+    font-family: 'Source Code Pro', monospace;
+    transition: 0.3s ease-out;
+
+    &:hover {
+        background: white;
+        color: black;
+    }
+}
+
+.ready-button {
+    position: absolute;
+    top: 47%;
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    @media (min-width: 768px) {
+        transition: 0.3s ease-out;
+
+        &:hover {
+            background: white;
+            color: black;
+        }
+    }
+}
+
+// TODO: Clean this, it's a duplicate (almost) from PlayersState.module.scss
+.invite-button {
+    background: white;
+    color: black;
+    padding: 0px 5px;
+    margin-top: 10px;
+    letter-spacing: 1px;
+    mix-blend-mode: difference;
+
+    .copy-to-clipboard__icon {
+        margin-left: 10px;
+        color: black;
+    }
+}
+
+.enter-queue-button {
+    margin-top: 50px;
+}

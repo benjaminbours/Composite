@@ -2,9 +2,9 @@ import type { Side } from '@benjaminbours/composite-core';
 
 export enum PlayerStatus {
   IS_PLAYING,
-  IS_IN_QUEUE,
+  IS_IN_RANDOM_QUEUE,
+  IS_READY_TO_PLAY,
   IS_WAITING_TEAMMATE,
-  IS_PENDING,
 }
 
 export class RedisPlayerState {
@@ -27,9 +27,9 @@ export class RedisPlayerState {
   static parsePlayerState(state: PlayerState) {
     return new RedisPlayerState(
       String(state.status),
-      String(state.side),
-      String(state.selectedLevel),
-      state.inviteToken ? String(state.inviteToken) : undefined,
+      state.side ? String(state.side) : undefined,
+      state.selectedLevel ? String(state.selectedLevel) : undefined,
+      state.inviteToken,
       state.userId ? String(state.userId) : undefined,
       state.gameId ? String(state.gameId) : undefined,
       state.roomName,
@@ -54,11 +54,11 @@ export class PlayerState {
   static parseRedisPlayerState(state: RedisPlayerState) {
     return new PlayerState(
       Number(state.status) as PlayerStatus,
-      Number(state.side) as Side,
-      Number(state.selectedLevel),
+      state.side ? (Number(state.side) as Side) : undefined,
+      state.selectedLevel ? Number(state.selectedLevel) : undefined,
       state.inviteToken,
-      Number(state.userId),
-      Number(state.gameId),
+      state.userId ? Number(state.userId) : undefined,
+      state.gameId ? Number(state.gameId) : undefined,
       state.roomName,
     );
   }

@@ -22,6 +22,7 @@ export class SocketController {
     // Round-trip time or ping
     private timeSamples: { rtt: number }[] = [];
     private isTimeSynced = false;
+    public isConnected = false;
 
     constructor(
         onGameStart: (initialGameState: GameState) => void,
@@ -30,6 +31,7 @@ export class SocketController {
         onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
         handleReceiveLevelOnLobby: (levelId: number) => void,
         handleReceiveSideOnLobby: (side: Side) => void,
+        handleReceiveReadyToPlay: (isReady: boolean) => void,
     ) {
         this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
             withCredentials: true,
@@ -38,6 +40,7 @@ export class SocketController {
         // menu listeners
         this.socket.on(SocketEventType.CONNECT, () => {
             console.log('connected', this.socket.id);
+            this.isConnected = true;
         });
         this.socket.on(
             SocketEventType.GAME_START,
@@ -64,6 +67,10 @@ export class SocketController {
         this.socket.on(
             SocketEventTeamLobby.SELECT_SIDE,
             handleReceiveSideOnLobby,
+        );
+        this.socket.on(
+            SocketEventTeamLobby.READY_TO_PLAY,
+            handleReceiveReadyToPlay,
         );
     }
 
@@ -143,5 +150,6 @@ export class SocketController {
     public destroy = () => {
         console.log('disconnect');
         this.socket.disconnect();
+        this.isConnected = false;
     };
 }

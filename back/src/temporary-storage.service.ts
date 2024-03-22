@@ -84,7 +84,7 @@ export class TemporaryStorageService {
   async removePlayer(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     transaction.DEL(REDIS_KEYS.PLAYER(socketId));
-    if (player.status === PlayerStatus.IS_IN_QUEUE) {
+    if (player.status === PlayerStatus.IS_IN_RANDOM_QUEUE) {
       this.removeFromQueue(socketId, 0, transaction);
       this.updateQueueInfo('subtract', player, transaction);
     }

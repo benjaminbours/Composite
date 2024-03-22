@@ -8,17 +8,12 @@ import React, {
     useState,
 } from 'react';
 // our libs
-import {
-    AllQueueInfo,
-    Side,
-    TeammateInfoPayload,
-} from '@benjaminbours/composite-core';
-import { Level } from '@benjaminbours/composite-api-client';
+import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
 // local
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
-import { MenuMode, MenuScene } from '../types';
+import { MenuScene } from '../types';
 import {
     QueueScene,
     SideScene,
@@ -31,57 +26,45 @@ import {
 } from './scenes';
 import { Actions } from './Actions';
 import { RefHashMap } from '../useMenuTransition';
-import { MainState } from '../useMainController';
+import { useMainController } from '../useMainController';
+import { getDictionary } from '../../getDictionary';
 
 interface Props {
-    mainState: MainState;
     menuScene: MenuScene;
     nextMenuScene: MenuScene | undefined;
-    mode: MenuMode;
-    teamMateInfo: TeammateInfoPayload | undefined;
     refHashMap: RefHashMap;
     stats: React.MutableRefObject<Stats | undefined>;
-    inviteFriendToken: string | undefined;
-    levels: Level[];
-    // main controller events
-    handleClickPlayWithFriend: () => void;
-    handleClickPlayWithRandom: () => void;
-    handleSelectLevelOnLobby: (levelId: number) => void;
-    handleSelectSideOnLobby: (side: Side) => void;
-    handleSelectLevel: (levelId: number) => void;
-    handleEnterRandomQueue: (side: Side) => void;
-    handleClickOnBack: () => void;
-    handleClickOnQuitTeam: () => void;
-    handleClickHome: () => void;
-    handleClickOnJoinTeamMate: () => void;
-    handleClickPlayAgain: () => void;
+    dictionary: Awaited<ReturnType<typeof getDictionary>>;
+    mainController: ReturnType<typeof useMainController>;
 }
 
 export function Menu({
-    mainState,
+    dictionary,
     menuScene,
-    mode,
-    teamMateInfo,
     stats,
     nextMenuScene,
-    inviteFriendToken,
-    levels,
     refHashMap,
-    handleClickPlayWithFriend,
-    handleClickPlayWithRandom,
-    handleSelectLevel,
-    handleEnterRandomQueue,
-    handleSelectLevelOnLobby,
-    handleSelectSideOnLobby,
-    handleClickOnBack,
-    handleClickOnQuitTeam,
-    handleClickHome,
-    handleClickOnJoinTeamMate,
-    handleClickPlayAgain,
+    mainController,
 }: Props) {
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
+
+    const {
+        state,
+        levels,
+        handleClickOnBack,
+        handleClickHome,
+        handleClickPlayAgain,
+        handleClickPlayWithFriend,
+        handleClickPlayWithRandom,
+        handleClickReadyToPlay,
+        handleSelectLevelOnLobby,
+        handleSelectSideOnLobby,
+        handleInviteFriend,
+        handleSelectLevel,
+        handleEnterTeamLobby,
+    } = mainController;
 
     const resize = useCallback(() => {
         if (
@@ -94,14 +77,14 @@ export function Menu({
         refHashMap.canvasBlack.current.resize({
             isMobileDevice,
             currentScene: menuScene,
-            side: mainState.side,
+            side: state.you.side,
         });
         refHashMap.canvasWhite.current.resize({
             isMobileDevice,
             currentScene: menuScene,
-            side: mainState.side,
+            side: state.you.side,
         });
-    }, [menuScene, mainState.side, refHashMap]);
+    }, [menuScene, state.you.side, refHashMap]);
 
     const canvasLoop = useCallback(() => {
         stats.current?.begin();
@@ -154,34 +137,29 @@ export function Menu({
     }, [resize]);
 
     const levelName = levels.find(
-        (level) => level.id === mainState.selectedLevel,
+        (level) => level.id === state.you.level,
     )?.name;
 
     const actions = useMemo(() => {
         return (
             <Actions
                 onBack={handleClickOnBack}
-                onQuitTeam={
-                    mode === MenuMode.IN_TEAM
-                        ? handleClickOnQuitTeam
-                        : undefined
-                }
-                onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                teamMate={{
-                    info: teamMateInfo,
-                    levelName: levels.find(
-                        (level) => level.id === teamMateInfo?.selectedLevel,
-                    )?.name,
-                }}
+                // onQuitTeam={mode === '' ? handleClickOnQuitTeam : undefined}
+                // onClickJoinTeamMate={handleClickOnJoinTeamMate}
+                // teamMate={{
+                //     info: teamMateInfo,
+                //     levelName: levels.find(
+                //         (level) => level.id === teamMateInfo?.selectedLevel,
+                //     )?.name,
+                // }}
             />
         );
     }, [
         handleClickOnBack,
-        handleClickOnJoinTeamMate,
-        handleClickOnQuitTeam,
-        levels,
-        mode,
-        teamMateInfo,
+        // handleClickOnJoinTeamMate,
+        // handleClickOnQuitTeam,
+        // levels,
+        // teamMateInfo,
     ]);
 
     const setLightIsPulsingFast = useCallback(
@@ -206,6 +184,31 @@ export function Menu({
             });
         },
         [refHashMap.canvasWhite],
+    );
+
+    const setSideSize = useCallback(
+        (side: Side, size: number) => {
+            if (side === Side.LIGHT) {
+                if (!refHashMap.canvasBlack.current) {
+                    return;
+                }
+                gsap.to(refHashMap.canvasBlack.current.light, {
+                    duration: 1,
+                    width: size,
+                    ease: 'power3.easeOut',
+                });
+            } else {
+                if (!refHashMap.canvasWhite.current) {
+                    return;
+                }
+                gsap.to(refHashMap.canvasWhite.current.shadow, {
+                    duration: 1,
+                    width: size,
+                    ease: 'power3.easeOut',
+                });
+            }
+        },
+        [refHashMap.canvasWhite, refHashMap.canvasBlack],
     );
 
     return (
@@ -242,8 +245,7 @@ export function Menu({
                 setLightIsPulsingFast={setLightIsPulsingFast}
                 setShadowRotationSpeed={setShadowRotationSpeed}
             />
-            <InviteFriendScene
-                inviteFriendToken={inviteFriendToken}
+            {/* <InviteFriendScene
                 isMount={
                     menuScene === MenuScene.INVITE_FRIEND ||
                     nextMenuScene === MenuScene.INVITE_FRIEND
@@ -251,22 +253,26 @@ export function Menu({
                 handleClickOnRandom={handleClickPlayWithRandom}
                 inviteFriendRef={refHashMap.inviteFriendRef}
                 actions={actions}
-            />
+            /> */}
             <TeamLobbyScene
+                dictionary={dictionary}
                 isMount={
                     menuScene === MenuScene.TEAM_LOBBY ||
                     nextMenuScene === MenuScene.TEAM_LOBBY
                 }
+                handleClickReadyToPlay={handleClickReadyToPlay}
                 handleSelectLevel={handleSelectLevelOnLobby}
                 handleSelectSide={handleSelectSideOnLobby}
-                selectedLevel={mainState.selectedLevel}
-                selectedSide={mainState.side}
-                sideSelectedByTeamMate={mainState.sideSelectedByTeamMate}
+                you={state.you}
+                mate={state.mate}
                 teamLobbyRef={refHashMap.teamLobbyRef}
                 levels={levels}
                 actions={actions}
                 setLightIsPulsingFast={setLightIsPulsingFast}
                 setShadowRotationSpeed={setShadowRotationSpeed}
+                inviteFriend={handleInviteFriend}
+                handleEnterTeamLobby={handleEnterTeamLobby}
+                setSideSize={setSideSize}
             />
             <LevelScene
                 actions={actions}
@@ -282,9 +288,9 @@ export function Menu({
             <SideScene
                 sideRef={refHashMap.sideRef}
                 actions={actions}
-                selectedLevel={mainState.selectedLevel}
+                selectedLevel={state.you.level}
                 levelName={levelName}
-                onClickOnFaction={handleEnterRandomQueue}
+                // onClickOnFaction={handleEnterRandomQueue}
                 allQueueInfo={allQueueInfo}
                 isMount={
                     menuScene === MenuScene.FACTION ||
@@ -293,7 +299,7 @@ export function Menu({
             />
             <QueueScene
                 queueRef={refHashMap.queueRef}
-                side={mainState.side}
+                side={state.you.side}
                 levelName={levelName}
                 isInQueue={menuScene === MenuScene.QUEUE}
                 actions={actions}
@@ -308,7 +314,7 @@ export function Menu({
                     nextMenuScene === MenuScene.END_LEVEL
                 }
                 endLevelRef={refHashMap.endLevelRef}
-                side={mainState.side}
+                side={state.you.side}
                 levelName={levelName}
                 handleClickOnPlay={handleClickPlayAgain}
                 actions={actions}

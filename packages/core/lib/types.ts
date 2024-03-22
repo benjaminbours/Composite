@@ -22,8 +22,8 @@ export enum SocketEventType {
     CONNECTION = 'connection',
     // receive automatically by the server when losing connection with a client
     DISCONNECT = 'disconnect',
-    // send only by the client after connect in random queue
-    MATCHMAKING_INFO = 'MATCHMAKING_INFO',
+    // // send only by the client after connect in random queue
+    // MATCHMAKING_INFO = 'MATCHMAKING_INFO',
 
     // send by the server to the invite emitter after the friend joined the lobby
     // JOIN_LOBBY = 'JOIN_LOBBY',
@@ -47,6 +47,7 @@ export enum SocketEventTeamLobby {
     CREATE_LOBBY = 'CREATE_LOBBY',
     FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
     INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
+    READY_TO_PLAY = 'READY_TO_PLAY',
 }
 
 export interface Inputs {
@@ -113,10 +114,10 @@ export type PingEvent = [
     payload: TimeSyncPayload,
 ];
 
-export type MatchMakingEvent = [
-    type: SocketEventType.MATCHMAKING_INFO,
-    payload: MatchMakingPayload,
-];
+// export type MatchMakingEvent = [
+//     type: SocketEventType.MATCHMAKING_INFO,
+//     payload: MatchMakingPayload,
+// ];
 
 export type GameStartEvent = [
     type: SocketEventType.GAME_START,
@@ -172,8 +173,13 @@ export type InviteFriendTokenEvent = [
     payload: InviteFriendTokenPayload,
 ];
 
+export type ReadyToStartEvent = [
+    type: SocketEventTeamLobby.READY_TO_PLAY,
+    payload: boolean,
+];
+
 export type SocketEvent =
-    | MatchMakingEvent
+    // | MatchMakingEvent
     | GameStartEvent
     | GameFinishedEvent
     | GameStateUpdateEvent
@@ -185,7 +191,8 @@ export type SocketEvent =
     | InviteFriendTokenEvent
     | FriendJoinLobbyEvent
     | TeamSelectLevel
-    | TeamSelectSide;
+    | TeamSelectSide
+    | ReadyToStartEvent;
 
 export class QueueInfo {
     constructor(public all = 0, public light = 0, public shadow = 0) {}

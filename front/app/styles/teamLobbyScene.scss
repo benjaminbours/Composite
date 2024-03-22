@@ -34,80 +34,9 @@
     }
 }
 
-.team-lobby-scene__players {
-    width: 300px;
-    border: solid 1px white;
-    background: black;
-    color: white;
-    padding: 10px;
-    align-self: flex-start;
-    margin-right: auto;
-    margin-top: 20px;
-    position: relative;
-    z-index: 100;
-
-    h3 {
-        margin: 0;
-    }
-}
-
-.team-lobby-scene__player {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    p {
-        margin-top: 10px;
-        margin-bottom: 5px;
-        margin-right: 20px;
-    }
-}
-
-.team-lobby-scene__divider {
-    background: white;
-}
-
-.team-lobby-scene__player-invite {
-    background: white;
-    color: black;
-    padding: 0px 5px;
-    margin-left: auto;
-    margin-top: 10px;
-    letter-spacing: 1px;
-
-    .copy-to-clipboard__icon {
-        margin-left: 10px;
-        color: black;
-    }
-}
-
-.team-lobby-scene__player-loading {
-    svg {
-        color: white;
-    }
-}
-
-.team-lobby-scene__player-side {
-    display: block;
-    border-radius: 100px;
-    width: 20px;
-    height: 20px;
-    border: solid 1px transparent;
-
-    &.light {
-        background: white;
-    }
-
-    &.shadow {
-        border-color: white;
-    }
-}
-
-.team-lobby-scene__slider-arrows {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    mix-blend-mode: difference;
+.level-slider {
+    width: 100%;
+    padding: 0 25%;
 }
 
 .slick-center {
@@ -138,45 +67,22 @@
     flex-direction: column;
 }
 
-.team-lobby-scene__side-container {
+.team-lobby-scene__slider-controls {
     display: flex;
-    flex-wrap: wrap;
-    flex: 1;
-
-    h2 {
-        margin-top: 0;
-        width: 100%;
-    }
-
-    h3 {
-        width: 50%;
-        text-align: center;
-        mix-blend-mode: difference;
-    }
-}
-
-.level-slider {
-    width: 100%;
-}
-
-.team-lobby-scene__side-button {
-    all: unset;
-    width: 50%;
-    height: 100%;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    justify-content: space-between;
+    align-items: center;
     mix-blend-mode: difference;
 
-    h3 {
-        transition: ease-in-out 0.3s;
-    }
+    > * {
+        width: 33.3333%;
 
-    &:hover {
-        h3 {
-            transform: scale(1.2);
-            text-decoration: underline;
+        &:nth-child(2) {
+            display: flex;
+            justify-content: center;
         }
     }
+}
+
+.team-lobby-scene__slider-range {
+    color: white;
 }

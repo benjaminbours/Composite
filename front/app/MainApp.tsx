@@ -59,24 +59,7 @@ function MainApp({ initialScene, dictionary }: Props) {
         shadowToStep,
     } = useMenuTransition(initialScene);
 
-    const {
-        state,
-        socketController,
-        gameIsPlaying,
-        levels,
-        handleEnterTeamLobby,
-        handleInviteFriend,
-        handleClickPlayWithFriend,
-        handleClickPlayWithRandom,
-        handleEnterRandomQueue,
-        handleSelectLevelOnLobby,
-        handleSelectSideOnLobby,
-        handleSelectLevel,
-        handleClickOnBack,
-        handleClickOnQuitTeam,
-        handleClickHome,
-        handleClickPlayAgain,
-    } = useMainController(
+    const mainController = useMainController(
         menuScene,
         setMenuScene,
         goToStep,
@@ -124,33 +107,22 @@ function MainApp({ initialScene, dictionary }: Props) {
         };
     }, []);
 
+    const { state, gameIsPlaying, socketController } = mainController;
+
     return (
         <>
             <TeamMateDisconnectNotification
-                teamMateDisconnected={state.teamMate === 'disconnected'}
+                teamMateDisconnected={state.mateDisconnected}
                 // handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
             />
             {!gameIsPlaying && (
                 <Menu
+                    mainController={mainController}
                     dictionary={dictionary}
-                    mainState={state}
                     menuScene={menuScene}
                     nextMenuScene={nextMenuScene}
                     stats={statsRef}
                     refHashMap={refHashMap}
-                    levels={levels}
-                    handleEnterRandomQueue={handleEnterRandomQueue}
-                    handleClickPlayWithFriend={handleClickPlayWithFriend}
-                    handleClickPlayWithRandom={handleClickPlayWithRandom}
-                    handleSelectLevelOnLobby={handleSelectLevelOnLobby}
-                    handleSelectSideOnLobby={handleSelectSideOnLobby}
-                    handleSelectLevel={handleSelectLevel}
-                    handleClickOnBack={handleClickOnBack}
-                    handleClickOnQuitTeam={handleClickOnQuitTeam}
-                    handleClickHome={handleClickHome}
-                    handleClickPlayAgain={handleClickPlayAgain}
-                    handleInviteFriend={handleInviteFriend}
-                    handleEnterTeamLobby={handleEnterTeamLobby}
                 />
             )}
             {state.gameState &&
@@ -158,7 +130,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                 gameIsPlaying &&
                 socketController.current && (
                     <Game
-                        side={state.side!}
+                        side={state.you.side!}
                         multiplayerGameProps={{
                             socketController: socketController.current,
                             initialGameState: state.gameState,

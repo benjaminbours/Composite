@@ -131,19 +131,13 @@ export class TeamLobbyGateway {
       // TODO: error handling
       return;
     }
+    player.status = PlayerStatus.IS_WAITING_TEAMMATE;
     player.selectedLevel = level;
     this.temporaryStorage.setPlayer(
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
     socket.to(player.roomName).emit(SocketEventTeamLobby.SELECT_LEVEL, level);
-
-    const players = await this.utils.detectIfGameCanStart(socket, player);
-
-    if (!players) {
-      return;
-    }
-    this.mainGateway.handlePlayerMatch(players);
   }
 
   @SubscribeMessage(SocketEventTeamLobby.SELECT_SIDE)
@@ -157,19 +151,41 @@ export class TeamLobbyGateway {
       // TODO: error handling
       return;
     }
+    player.status = PlayerStatus.IS_WAITING_TEAMMATE;
     player.side = side;
     this.temporaryStorage.setPlayer(
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
     socket.to(player.roomName).emit(SocketEventTeamLobby.SELECT_SIDE, side);
+  }
 
-    const players = await this.utils.detectIfGameCanStart(socket, player);
+  @SubscribeMessage(SocketEventTeamLobby.READY_TO_PLAY)
+  async handleReadyToStart(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() isReady: boolean,
+  ) {
+    const player = await this.temporaryStorage.getPlayer(socket.id);
 
-    if (!players) {
+    if (!player) {
+      // TODO: error handling
       return;
     }
-
+    player.status = isReady
+      ? PlayerStatus.IS_READY_TO_PLAY
+      : PlayerStatus.IS_WAITING_TEAMMATE;
+    const players = await this.utils.detectIfGameCanStart(socket, player);
+    // if the game can't start, store state and send to the room you are ready
+    if (!players) {
+      this.temporaryStorage.setPlayer(
+        socket.id,
+        RedisPlayerState.parsePlayerState(player),
+      );
+      socket
+        .to(player.roomName)
+        .emit(SocketEventTeamLobby.READY_TO_PLAY, isReady);
+      return;
+    }
     this.mainGateway.handlePlayerMatch(players);
   }
 }

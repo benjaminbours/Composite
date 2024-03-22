@@ -133,7 +133,7 @@ export default class Light {
                         x: canvasWidth * xPos,
                         y: canvasHeight * 0.8,
                     },
-                    width: 350,
+                    width: 400,
                 };
             case MenuScene.INVITE_FRIEND:
                 return {
