@@ -24,7 +24,7 @@ interface LevelEditorProps {
 
 interface MultiplayerGameProps {
     initialGameState: GameState;
-    socketController: SocketController;
+    socketController?: SocketController;
     level: Level;
 }
 
@@ -180,7 +180,7 @@ function Game({
             } else {
                 setIsSynchronizingTime(true);
                 multiplayerGameProps.socketController
-                    .synchronizeTime()
+                    ?.synchronizeTime()
                     .then(onTimeSynchronized);
             }
         }
