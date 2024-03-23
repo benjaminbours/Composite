@@ -21,7 +21,6 @@ import {
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 import { SocketGateway } from './socket.gateway';
-import { UtilsService } from './utils.service';
 import ShortUniqueId from 'short-unique-id';
 import { PrismaService } from '@project-common/services';
 import { GameStatus, User } from '@prisma/client';
@@ -44,7 +43,6 @@ export class LobbyGateway {
   constructor(
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
-    private utils: UtilsService,
     private mainGateway: SocketGateway,
   ) {}
 
@@ -163,6 +161,45 @@ export class LobbyGateway {
     socket.to(player.roomName).emit(SocketEventLobby.SELECT_SIDE, side);
   }
 
+  detectIfGameCanStart = async (socket: Socket, player: PlayerState) => {
+    // find team mate socket id
+    const teamMateSocketId = await this.mainGateway.server
+      .in(String(player.roomName))
+      .fetchSockets()
+      .then((sockets) => {
+        const teamMate = sockets.find(({ id }) => id !== socket.id);
+        return teamMate?.id || undefined;
+      });
+
+    if (!teamMateSocketId) {
+      return false;
+    }
+
+    // find team mate player state
+    const teamMatePlayer =
+      await this.temporaryStorage.getPlayer(teamMateSocketId);
+
+    const isTeamReady =
+      player.status === PlayerStatus.IS_READY_TO_PLAY &&
+      teamMatePlayer.status === PlayerStatus.IS_READY_TO_PLAY &&
+      !Number.isNaN(player.side) &&
+      !Number.isNaN(teamMatePlayer.side) &&
+      teamMatePlayer.side !== player.side &&
+      teamMatePlayer.selectedLevel === player.selectedLevel;
+    // !COMING_SOON_LEVELS.includes(player.selectedLevel);
+
+    if (!isTeamReady) {
+      return false;
+    }
+
+    const players = [
+      { player, socketId: socket.id },
+      { player: teamMatePlayer, socketId: teamMateSocketId },
+    ];
+
+    return players;
+  };
+
   @SubscribeMessage(SocketEventLobby.READY_TO_PLAY)
   async handleReadyToStart(
     @ConnectedSocket() socket: Socket,
@@ -177,7 +214,7 @@ export class LobbyGateway {
     player.status = isReady
       ? PlayerStatus.IS_READY_TO_PLAY
       : PlayerStatus.IS_WAITING_TEAMMATE;
-    const players = await this.utils.detectIfGameCanStart(socket, player);
+    const players = await this.detectIfGameCanStart(socket, player);
     // if the game can't start, store state and send to the room you are ready
     if (!players) {
       this.temporaryStorage.setPlayer(
@@ -241,7 +278,9 @@ export class LobbyGateway {
     const dbPlayers = await this.prismaService.user.findMany({
       where: {
         id: {
-          in: players.map((p) => p.player.userId),
+          in: players
+            .filter((p) => p.player.userId !== undefined)
+            .map((p) => p.player.userId),
         },
       },
     });
@@ -271,30 +310,30 @@ export class LobbyGateway {
   handlePlayerMatch = async (
     players: { socketId: string; player: PlayerState; indexToClear?: number }[],
   ) => {
-    // Logger.log('match found, create game');
-    // const dbGame = await this.prismaService.game.create({
-    //   data: {
-    //     levelId: players[0].player.selectedLevel,
-    //     status: GameStatus.STARTED,
-    //     startTime: new Date(),
-    //   },
-    // });
-    // Logger.log(`GAME ID: ${dbGame.id}`);
-    // const teamRoomName = uuid.v4();
-    // const gameRoomName = String(dbGame.id);
-    // players.forEach(({ player, socketId }) => {
-    //   // mutations
-    //   player.status = PlayerStatus.IS_PLAYING;
-    //   player.gameId = dbGame.id;
-    //   player.roomName = teamRoomName;
-    //   this.addSocketToRoom(socketId, teamRoomName);
-    //   this.addSocketToRoom(socketId, gameRoomName);
-    // });
-    // const initialGameState = await this.createGame(players, dbGame.id);
-    // this.mainGateway.emit(gameRoomName, [
-    //   SocketEventType.GAME_START,
-    //   { gameState: initialGameState, lastInputs: [undefined, undefined] },
-    // ]);
+    Logger.log('create game');
+    const dbGame = await this.prismaService.game.create({
+      data: {
+        levelId: players[0].player.selectedLevel,
+        status: GameStatus.STARTED,
+        startTime: new Date(),
+      },
+    });
+    Logger.log(`GAME ID: ${dbGame.id}`);
+    const gameRoomName = String(dbGame.id);
+    players.forEach(({ player, socketId }) => {
+      // mutations
+      player.status = PlayerStatus.IS_PLAYING;
+      player.gameId = dbGame.id;
+      this.addSocketToRoom(socketId, gameRoomName);
+    });
+    const initialGameState = await this.mainGateway.createGame(
+      players,
+      dbGame.id,
+    );
+    this.mainGateway.emit(gameRoomName, [
+      SocketEventType.GAME_START,
+      { gameState: initialGameState, lastInputs: [undefined, undefined] },
+    ]);
   };
 
   addSocketToRoom(socketId: string, room: string) {

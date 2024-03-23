@@ -22,6 +22,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    .invite-button {
+        margin-top: 0;
+    }
 }
 
 .side-button {
@@ -94,4 +98,8 @@
 
 .queue-time-info {
     color: white;
+
+    h3 {
+        margin: 10px 0;
+    }
 }

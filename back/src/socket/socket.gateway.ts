@@ -7,13 +7,10 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
-import { Injectable, Logger } from '@nestjs/common';
-import * as uuid from 'uuid';
-import { GameStatus } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 // our libs
 import {
   SocketEventType,
-  MatchMakingPayload,
   GamePlayerInputPayload,
   Side,
   SocketEvent,
@@ -32,12 +29,9 @@ import {
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
-// import { GameStatus } from '@prisma/client';
-import { UtilsService } from './utils.service';
 import { SocketService } from './socket.service';
 import { PrismaService } from '@project-common/services';
 import { handlePrismaError } from '@project-common/utils/handlePrismaError';
-// import { PrismaService } from '@project-common/services';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -61,7 +55,6 @@ export class SocketGateway {
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
     private socketService: SocketService,
-    private utils: UtilsService,
   ) {}
 
   afterInit(server: Server) {
@@ -83,58 +76,6 @@ export class SocketGateway {
     }
   }
 
-  @SubscribeMessage(SocketEventType.MATCHMAKING_INFO)
-  async handleMatchMakingInfo(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() data: MatchMakingPayload,
-  ) {
-    Logger.log('matchmaking info', socket.id, data);
-    // const player = await this.temporaryStorage.getPlayer(socket.id);
-    // Logger.log('player', player);
-
-    // if (!player) {
-    //   return;
-    // }
-    // if the player is already in a team room
-    // if (player && player.roomName) {
-    //   Logger.log('player already in a team room');
-    //   this.handleTeamMatchMakingInfo(player, data, socket);
-    //   return;
-    // }
-
-    const playerFound = await this.temporaryStorage.findMatchInQueue(data, 0);
-    if (!playerFound) {
-      Logger.log('no match');
-      const isPlayerAlreadyInQueue =
-        await this.temporaryStorage.checkIfExistInQueue(socket.id);
-      if (!isPlayerAlreadyInQueue) {
-        Logger.log('add to queue');
-        const player = new PlayerState(
-          PlayerStatus.IS_IN_QUEUE,
-          data.side,
-          data.selectedLevel,
-        );
-        this.temporaryStorage.addToQueue(socket.id, player);
-      } else {
-        Logger.log('already in queue');
-      }
-      return;
-    }
-
-    const players = [
-      playerFound,
-      {
-        socketId: socket.id,
-        player: new PlayerState(
-          PlayerStatus.IS_PLAYING,
-          data.side,
-          data.selectedLevel,
-        ),
-      },
-    ];
-    this.handlePlayerMatch(players);
-  }
-
   @SubscribeMessage(SocketEventType.GAME_PLAYER_INPUT)
   async handleGamePlayerInput(
     @ConnectedSocket() socket: Socket,
@@ -151,24 +92,6 @@ export class SocketGateway {
       ),
     );
   }
-
-  // @SubscribeMessage(SocketEventType.GAME_ACTIVATE_ELEMENT)
-  // async handleGameActivateElement(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: GameActivateElementPayload,
-  // ) {
-  //   const gameRoom = Array.from(socket.rooms)[1];
-  //   socket.to(gameRoom).emit(SocketEventType.GAME_ACTIVATE_ELEMENT, data);
-  // }
-
-  // @SubscribeMessage(SocketEventType.GAME_DEACTIVATE_ELEMENT)
-  // async handleGameDeactivateElement(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: GameActivateElementPayload,
-  // ) {
-  //   const gameRoom = Array.from(socket.rooms)[1];
-  //   socket.to(gameRoom).emit(SocketEventType.GAME_DEACTIVATE_ELEMENT, data);
-  // }
 
   @SubscribeMessage(SocketEventType.TIME_SYNC)
   async handleTimeSync(
@@ -219,132 +142,6 @@ export class SocketGateway {
     }
 
     this.temporaryStorage.removePlayer(socket.id, player);
-  }
-
-  //////////// UTILS ////////////
-
-  // TODO: As a room is equivalent to a game, lets make a proper
-  // room rotation (leave the last one and add to next one) while finishing
-  // a game and going into another one
-  addSocketToRoom(socketId: string, room: string) {
-    const socket = this.server.sockets.sockets.get(socketId);
-    socket.join(room);
-  }
-
-  handlePlayerMatch = async (
-    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
-  ) => {
-    Logger.log('match found, create game');
-    const dbGame = await this.createPersistentGameData(
-      players[0].player.selectedLevel,
-    );
-    Logger.log(`GAME ID: ${dbGame.id}`);
-    const teamRoomName = uuid.v4();
-    const gameRoomName = String(dbGame.id);
-    players.forEach(({ player, socketId }) => {
-      // mutations
-      player.status = PlayerStatus.IS_PLAYING;
-      player.gameId = dbGame.id;
-      player.roomName = teamRoomName;
-      this.addSocketToRoom(socketId, teamRoomName);
-      this.addSocketToRoom(socketId, gameRoomName);
-    });
-    const initialGameState = await this.createGame(players, dbGame.id);
-    this.emit(gameRoomName, [
-      SocketEventType.GAME_START,
-      { gameState: initialGameState, lastInputs: [undefined, undefined] },
-    ]);
-  };
-
-  // handleTeamMatchMakingInfo = async (
-  //   player: PlayerState,
-  //   data: MatchMakingPayload,
-  //   socket: Socket,
-  // ) => {
-  //   // update local instance of fetched player with new data
-  //   player.selectedLevel = data.selectedLevel;
-  //   player.side = data.side;
-  //   // update player store in storage
-  //   await this.temporaryStorage.setPlayer(socket.id, {
-  //     selectedLevel: String(data.selectedLevel),
-  //     side: String(data.side),
-  //     status: String(PlayerStatus.IS_WAITING_TEAMMATE),
-  //   });
-
-  //   const players = await this.utils.detectIfGameCanStart(socket, player);
-
-  //   if (!players) {
-  //     return;
-  //   }
-
-  //   this.handlePlayerMatch(players);
-  // };
-
-  async createPersistentGameData(levelId: number) {
-    return this.prismaService.game.create({
-      data: {
-        levelId,
-        status: GameStatus.STARTED,
-        startTime: new Date(),
-      },
-    });
-  }
-
-  async createGame(
-    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
-    gameId: number,
-  ) {
-    const level = await this.prismaService.level
-      .findUnique({
-        where: { id: players[0].player.selectedLevel },
-      })
-      .then((l) => new LevelMapping(l.id, l.data as any[]))
-      .catch((err) => {
-        throw handlePrismaError(err);
-      });
-
-    if (!level) {
-      throw new Error(
-        `Level doesn't exist or is not ready yet: ${players[0].player.selectedLevel}`,
-      );
-    }
-
-    // create initial game data
-    const initialGameState = new GameState(
-      [
-        {
-          position: {
-            x: level.startPosition.shadow.x,
-            y: level.startPosition.shadow.y,
-          },
-          velocity: {
-            x: 0,
-            y: 0,
-          },
-          state: MovableComponentState.onFloor,
-          insideElementID: undefined,
-        },
-        {
-          position: {
-            x: level.startPosition.light.x,
-            y: level.startPosition.light.y,
-          },
-          velocity: {
-            x: 0,
-            y: 0,
-          },
-          state: MovableComponentState.onFloor,
-          insideElementID: undefined,
-        },
-      ],
-      level.state,
-      0,
-      0,
-    );
-    // store game state and update queue in temporary storage
-    await this.temporaryStorage.createGame(players, gameId, initialGameState);
-    this.registerGameLoop(gameId, level);
-    return initialGameState;
   }
 
   fetchGameData = async (gameId: number) => {
@@ -469,6 +266,63 @@ export class SocketGateway {
       delete this.gameLoopsRegistry[`game:${gameId}:endGame`];
     }
   };
+
+  async createGame(
+    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
+    gameId: number,
+  ) {
+    const level = await this.prismaService.level
+      .findUnique({
+        where: { id: players[0].player.selectedLevel },
+      })
+      .then((l) => new LevelMapping(l.id, l.data as any[]))
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
+
+    if (!level) {
+      throw new Error(
+        `Level doesn't exist or is not ready yet: ${players[0].player.selectedLevel}`,
+      );
+    }
+
+    // create initial game data
+    const initialGameState = new GameState(
+      [
+        {
+          position: {
+            x: level.startPosition.shadow.x,
+            y: level.startPosition.shadow.y,
+          },
+          velocity: {
+            x: 0,
+            y: 0,
+          },
+          state: MovableComponentState.onFloor,
+          insideElementID: undefined,
+        },
+        {
+          position: {
+            x: level.startPosition.light.x,
+            y: level.startPosition.light.y,
+          },
+          velocity: {
+            x: 0,
+            y: 0,
+          },
+          state: MovableComponentState.onFloor,
+          insideElementID: undefined,
+        },
+      ],
+      level.state,
+      0,
+      0,
+    );
+    // store game state and update queue in temporary storage
+    await this.temporaryStorage.createGame(players, gameId, initialGameState);
+    this.registerGameLoop(gameId, level);
+    return initialGameState;
+  }
 
   finishGame = (gameId: number) => {
     const gameRoomName = String(gameId);

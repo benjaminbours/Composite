@@ -129,8 +129,6 @@ export function Menu({
     const fetchQueueInfo = useCallback(async () => {
         const apiClient = servicesContainer.get(ApiClient);
         return apiClient.defaultApi.appControllerGetQueueInfo().then((data) => {
-            console.log('HERE queue', data);
-
             // clear previous interval
             clearInterval(queueInfoInterval);
             clearInterval(fetchCompletionInterval);

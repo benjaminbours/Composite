@@ -62,13 +62,13 @@ export const SideSelector: React.FC<Props> = ({
         if (isInQueue) {
             return (
                 <>
+                    <QueueTimeInfo />
                     <button
                         className={`${styles['rect-button']} ${styles['enter-queue-button']}`}
                         onClick={handleExitRandomQueue}
                     >
                         Exit matchmaking queue
                     </button>
-                    <QueueTimeInfo />
                 </>
             );
         }
