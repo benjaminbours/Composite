@@ -3,8 +3,10 @@ import React, { useMemo } from 'react';
 import { CopyToClipBoardButton } from '../../CopyToClipboardButton';
 import { PlayerState } from '../../../useMainController';
 import styles from './SideSelector.module.scss';
+import { QueueTimeInfo } from './QueueTimeInfo';
 
 interface Props {
+    isInQueue: boolean;
     you: PlayerState;
     mate?: PlayerState;
     setLightIsPulsingFast: (isPulsingFast: boolean) => void;
@@ -13,9 +15,12 @@ interface Props {
     setSideSize: (side: Side, size: number) => void;
     handleClickReadyToPlay: () => void;
     inviteFriend: () => Promise<string>;
+    handleEnterRandomQueue: () => void;
+    handleExitRandomQueue: () => void;
 }
 
 export const SideSelector: React.FC<Props> = ({
+    isInQueue,
     you,
     mate,
     setLightIsPulsingFast,
@@ -24,18 +29,20 @@ export const SideSelector: React.FC<Props> = ({
     handleClickReadyToPlay,
     setSideSize,
     inviteFriend,
+    handleEnterRandomQueue,
+    handleExitRandomQueue,
 }) => {
     const light = {
         isReady:
             (you.side === Side.LIGHT && you.isReady) ||
             (mate?.side === Side.LIGHT && mate.isReady),
-        isSelected: mate?.side !== Side.LIGHT && you.side !== Side.LIGHT,
+        isSelectable: mate?.side !== Side.LIGHT && you.side !== Side.LIGHT,
     };
     const shadow = {
         isReady:
             (you.side === Side.SHADOW && you.isReady) ||
             (mate?.side === Side.SHADOW && mate.isReady),
-        isSelected: mate?.side !== Side.SHADOW && you.side !== Side.SHADOW,
+        isSelectable: mate?.side !== Side.SHADOW && you.side !== Side.SHADOW,
     };
     const shouldDisplayChoicesLight =
         you.side === Side.LIGHT && mate === undefined;
@@ -50,7 +57,21 @@ export const SideSelector: React.FC<Props> = ({
         );
     }, [you, mate]);
 
+    // TODO: Add button to find a game asap, kind of fill in league of legend
     const choices = useMemo(() => {
+        if (isInQueue) {
+            return (
+                <>
+                    <button
+                        className={`${styles['rect-button']} ${styles['enter-queue-button']}`}
+                        onClick={handleExitRandomQueue}
+                    >
+                        Exit matchmaking queue
+                    </button>
+                    <QueueTimeInfo />
+                </>
+            );
+        }
         return (
             <>
                 <CopyToClipBoardButton
@@ -60,20 +81,26 @@ export const SideSelector: React.FC<Props> = ({
                 />
                 <button
                     className={`${styles['rect-button']} ${styles['enter-queue-button']}`}
-                    // onClick={handleClickReadyToPlay}
+                    onClick={handleEnterRandomQueue}
                 >
                     Enter matchmaking queue
                 </button>
             </>
         );
-    }, [inviteFriend]);
+    }, [
+        inviteFriend,
+        handleEnterRandomQueue,
+        handleExitRandomQueue,
+        isInQueue,
+    ]);
 
     return (
         <div className={styles.root}>
             <h2 className="title-h3 title-h3--white">Select your side</h2>
             <div className={styles['side-container']}>
-                {light.isSelected ? (
+                {light.isSelectable ? (
                     <button
+                        disabled={isInQueue}
                         className={styles['side-button']}
                         onMouseEnter={() => {
                             setLightIsPulsingFast(true);
@@ -98,9 +125,10 @@ export const SideSelector: React.FC<Props> = ({
                 {shouldDisplayChoicesLight && choices}
             </div>
             <div className={styles['side-container']}>
-                {shadow.isSelected ? (
+                {shadow.isSelectable ? (
                     <button
                         className={styles['side-button']}
+                        disabled={isInQueue}
                         onMouseEnter={() => {
                             setShadowRotationSpeed(0.02);
                             setSideSize(Side.SHADOW, 500);

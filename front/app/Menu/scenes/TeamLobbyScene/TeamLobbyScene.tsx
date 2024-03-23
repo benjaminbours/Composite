@@ -1,12 +1,10 @@
 // vendors
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import SlickSlider, { Settings } from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { Side } from '@benjaminbours/composite-core';
+import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
 import { Level } from '@benjaminbours/composite-api-client';
-import { LevelPortal } from '../LevelPortal';
 import { useSearchParams } from 'next/navigation';
 import { servicesContainer } from '../../../core/frameworks';
 import { ApiClient } from '../../../core/services';
@@ -14,13 +12,11 @@ import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { useStoreState } from '../../../hooks';
 import { AuthModal } from '../../../03_organisms/AuthModal';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import Slider from '@mui/material/Slider';
-import IconButton from '@mui/material/IconButton';
+
 import { PlayerState } from '../../../useMainController';
 import { PlayersState } from './PlayersState';
 import { SideSelector } from './SideSelector';
+import { LevelSelector } from './LevelSelector';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -32,12 +28,20 @@ interface Props {
     levels: Level[];
     you: PlayerState;
     mate?: PlayerState;
+    isInQueue: boolean;
+    shouldDisplayQueueInfo: boolean;
+    queueInfo?: AllQueueInfo;
+    fetchTime: number;
     setLightIsPulsingFast: (isPulsingFast: boolean) => void;
     setShadowRotationSpeed: (speed: number) => void;
     setSideSize: (side: Side, size: number) => void;
     inviteFriend: () => Promise<string>;
     handleEnterTeamLobby: (inviteFriendToken: string) => void;
+    handleEnterRandomQueue: () => void;
+    handleExitRandomQueue: () => void;
     handleClickReadyToPlay: () => void;
+    fetchQueueInfo: () => Promise<void>;
+    handleClickOnQueueInfo: () => void;
 }
 
 // TODO: Wrap all scenes with react.memo to prevent useless re-render
@@ -50,6 +54,10 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         levels,
         you,
         mate,
+        isInQueue,
+        shouldDisplayQueueInfo,
+        queueInfo,
+        fetchTime,
         handleSelectLevel,
         handleSelectSide,
         setLightIsPulsingFast,
@@ -58,10 +66,13 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         handleEnterTeamLobby,
         handleClickReadyToPlay,
         setSideSize,
+        handleEnterRandomQueue,
+        handleExitRandomQueue,
+        fetchQueueInfo,
+        handleClickOnQueueInfo,
     }) => {
         const { enqueueSnackbar } = useSnackbar();
         const urlSearchParams = useSearchParams();
-        const [slideIndex, setSlideIndex] = useState(0);
         const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
         const isConnecting = useRef(false);
         const isGuest = useStoreState((actions) => actions.user.isGuest);
@@ -71,60 +82,20 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         const isRetrievingSession = useStoreState(
             (actions) => actions.user.isRetrievingSession,
         );
-        const sliderRef = useRef<any>(null);
         const cssClass = classNames({
             'content-container': true,
             'team-lobby-scene': true,
             unmount: !isMount,
         });
 
-        const next = () => {
-            sliderRef.current?.slickNext();
-        };
-        const previous = () => {
-            sliderRef.current?.slickPrev();
-        };
-
-        const settings: Settings = {
-            className: 'center level-slider',
-            centerMode: true,
-            focusOnSelect: true,
-            infinite: false,
-            centerPadding: '20px',
-            useTransform: false,
-            slidesToShow: 1,
-            speed: 500,
-            arrows: false,
-            draggable: false,
-            // waitForAnimate: false,
-            beforeChange: function (currentSlide: number, nextSlide: number) {
-                const level = levels[nextSlide];
-                handleSelectLevel(level.id);
-            },
-            afterChange: function (currentSlide: number) {
-                setSlideIndex(currentSlide);
-            },
-        };
-
-        // effect to randomize portal animations
-        useEffect(() => {
-            document
-                .querySelectorAll<HTMLElement>('.level-portal')
-                .forEach((portal) => {
-                    portal.style.setProperty(
-                        '--x',
-                        `${Math.random() * 100 - 50}%`,
-                    ); // Random x between -50% and 50%
-                    portal.style.setProperty(
-                        '--y',
-                        `${Math.random() * 100 - 50}%`,
-                    ); // Random y between -50% and 50%
-                });
-        }, []);
-
         // on mount
         useEffect(() => {
-            if (!isGuest && !isAuthenticated && !isRetrievingSession) {
+            if (
+                !isGuest &&
+                !isAuthenticated &&
+                !isRetrievingSession &&
+                isMount
+            ) {
                 setIsAuthModalOpen(true);
                 return;
             }
@@ -175,6 +146,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
             isAuthenticated,
             isGuest,
             handleEnterTeamLobby,
+            isMount,
         ]);
 
         // initial loading
@@ -202,54 +174,21 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                     <PlayersState
                         players={[you, mate]}
                         onInviteFriend={inviteFriend}
+                        isInQueue={isInQueue}
                     />
                 </div>
                 <div className="team-lobby-scene__column-right">
-                    <div className="team-lobby-scene__level-container">
-                        <h2 className="title-h3 title-h3--white">
-                            Select a level
-                        </h2>
-                        <SlickSlider ref={sliderRef} {...settings}>
-                            {levels.map(({ id, name }) => {
-                                return (
-                                    <LevelPortal
-                                        name={name}
-                                        key={id}
-                                        isSelectedByTeamMate={
-                                            id === mate?.level
-                                        }
-                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
-                                    />
-                                );
-                            })}
-                        </SlickSlider>
-                        <div className="team-lobby-scene__slider-controls">
-                            <Slider
-                                className="team-lobby-scene__slider-range"
-                                size="small"
-                                value={slideIndex}
-                                min={0}
-                                max={levels.length - 1}
-                                onChange={(e, value) => {
-                                    setSlideIndex(value as number);
-                                }}
-                                onChangeCommitted={(_, value) => {
-                                    sliderRef.current?.slickGoTo(
-                                        value as number,
-                                    );
-                                }}
-                            />
-                            <div>
-                                <IconButton onClick={previous}>
-                                    <ArrowBackIosNewIcon />
-                                </IconButton>
-                                <IconButton onClick={next}>
-                                    <ArrowForwardIosIcon />
-                                </IconButton>
-                            </div>
-                            <div />
-                        </div>
-                    </div>
+                    <LevelSelector
+                        disabled={isInQueue}
+                        levels={levels}
+                        levelSelectedByMate={mate?.level}
+                        handleSelectLevel={handleSelectLevel}
+                        fetchQueueInfo={fetchQueueInfo}
+                        handleClickOnQueueInfo={handleClickOnQueueInfo}
+                        shouldDisplayQueueInfo={shouldDisplayQueueInfo}
+                        fetchTime={fetchTime}
+                        queueInfo={queueInfo}
+                    />
                     <SideSelector
                         you={you}
                         mate={mate}
@@ -259,6 +198,9 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         handleClickReadyToPlay={handleClickReadyToPlay}
                         setSideSize={setSideSize}
                         inviteFriend={inviteFriend}
+                        handleEnterRandomQueue={handleEnterRandomQueue}
+                        handleExitRandomQueue={handleExitRandomQueue}
+                        isInQueue={isInQueue}
                     />
                 </div>
             </div>

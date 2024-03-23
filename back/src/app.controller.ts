@@ -2,7 +2,7 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 // our libs
-import type { AllQueueInfo } from '@benjaminbours/composite-core';
+import { AllQueueInfo } from '@benjaminbours/composite-core';
 // local
 import { AppService } from './app.service';
 import { TemporaryStorageService } from './temporary-storage.service';
@@ -21,6 +21,10 @@ export class AppController {
     return this.appService.getVersion();
   }
 
+  @ApiOkResponse({
+    description: 'Match making queue info',
+    type: AllQueueInfo,
+  })
   @Public()
   @Get('/queue-info')
   getQueueInfo(): Promise<AllQueueInfo> {

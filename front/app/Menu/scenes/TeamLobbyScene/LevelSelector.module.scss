@@ -1,0 +1,73 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.queue-info-icon {
+    all: unset;
+    margin-left: 10px;
+    border-radius: 100px;
+    padding: 5px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: solid 1px transparent;
+    transition: 0.3s ease-out;
+
+    svg {
+        transition: 0.3s ease-out;
+    }
+
+    &:hover {
+        background: black;
+        border-color: white;
+
+        svg {
+            fill: white;
+        }
+    }
+}
+
+.queue-info-popper {
+    color: white;
+    background: black;
+    border: solid white 1px;
+    padding: 0 10px;
+    margin-left: 10px !important;
+    font-size: 14px;
+
+    p {
+        margin: 4px 0;
+    }
+}
+
+.queue-fetch-progress {
+    // margin-left: auto;
+    margin-left: 10px;
+    mix-blend-mode: difference;
+
+    svg {
+        color: white;
+    }
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    mix-blend-mode: difference;
+    margin: 0 auto;
+    width: 300px;
+}
+
+.carousel-container {
+    width: 100%;
+    padding: 0 25%;
+}
+
+.slider {
+    color: white;
+}

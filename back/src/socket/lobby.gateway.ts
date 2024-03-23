@@ -13,7 +13,9 @@ import {
   InviteFriendTokenPayload,
   CreateLobbyPayload,
   Side,
-  SocketEventTeamLobby,
+  SocketEventLobby,
+  JoinRandomQueuePayload,
+  SocketEventType,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -22,7 +24,8 @@ import { SocketGateway } from './socket.gateway';
 import { UtilsService } from './utils.service';
 import ShortUniqueId from 'short-unique-id';
 import { PrismaService } from '@project-common/services';
-import { User } from '@prisma/client';
+import { GameStatus, User } from '@prisma/client';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -37,7 +40,7 @@ import { User } from '@prisma/client';
   //   origin: [ENVIRONMENT.CLIENT_URL],
   // },
 })
-export class TeamLobbyGateway {
+export class LobbyGateway {
   constructor(
     private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
@@ -45,7 +48,7 @@ export class TeamLobbyGateway {
     private mainGateway: SocketGateway,
   ) {}
 
-  @SubscribeMessage(SocketEventTeamLobby.CREATE_LOBBY)
+  @SubscribeMessage(SocketEventLobby.CREATE_LOBBY)
   async handleCreateLobby(
     @ConnectedSocket() socket: Socket,
     @MessageBody() payload: CreateLobbyPayload,
@@ -66,15 +69,15 @@ export class TeamLobbyGateway {
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
-    this.mainGateway.addSocketToRoom(socket.id, teamRoomName);
+    this.addSocketToRoom(socket.id, teamRoomName);
     this.mainGateway.server
       .to(socket.id)
-      .emit(SocketEventTeamLobby.INVITE_FRIEND_TOKEN, {
+      .emit(SocketEventLobby.INVITE_FRIEND_TOKEN, {
         token: inviteToken,
       } as InviteFriendTokenPayload);
   }
 
-  @SubscribeMessage(SocketEventTeamLobby.FRIEND_JOIN_LOBBY)
+  @SubscribeMessage(SocketEventLobby.FRIEND_JOIN_LOBBY)
   async handleFriendJoinLobby(
     @ConnectedSocket() socket: Socket,
     @MessageBody() payload: FriendJoinLobbyPayload,
@@ -104,13 +107,13 @@ export class TeamLobbyGateway {
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
-    this.mainGateway.addSocketToRoom(socket.id, playerHost.roomName!);
+    this.addSocketToRoom(socket.id, playerHost.roomName!);
     this.mainGateway.emit(socketIdHost, [
-      SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+      SocketEventLobby.FRIEND_JOIN_LOBBY,
       payload,
     ]);
     this.mainGateway.emit(socket.id, [
-      SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+      SocketEventLobby.FRIEND_JOIN_LOBBY,
       {
         token: payload.token,
         user: hostUser,
@@ -120,7 +123,7 @@ export class TeamLobbyGateway {
     ]);
   }
 
-  @SubscribeMessage(SocketEventTeamLobby.SELECT_LEVEL)
+  @SubscribeMessage(SocketEventLobby.SELECT_LEVEL)
   async handleSelectLevel(
     @ConnectedSocket() socket: Socket,
     @MessageBody() level: number,
@@ -137,10 +140,10 @@ export class TeamLobbyGateway {
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
-    socket.to(player.roomName).emit(SocketEventTeamLobby.SELECT_LEVEL, level);
+    socket.to(player.roomName).emit(SocketEventLobby.SELECT_LEVEL, level);
   }
 
-  @SubscribeMessage(SocketEventTeamLobby.SELECT_SIDE)
+  @SubscribeMessage(SocketEventLobby.SELECT_SIDE)
   async handleSelectSide(
     @ConnectedSocket() socket: Socket,
     @MessageBody() side: Side,
@@ -157,10 +160,10 @@ export class TeamLobbyGateway {
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
-    socket.to(player.roomName).emit(SocketEventTeamLobby.SELECT_SIDE, side);
+    socket.to(player.roomName).emit(SocketEventLobby.SELECT_SIDE, side);
   }
 
-  @SubscribeMessage(SocketEventTeamLobby.READY_TO_PLAY)
+  @SubscribeMessage(SocketEventLobby.READY_TO_PLAY)
   async handleReadyToStart(
     @ConnectedSocket() socket: Socket,
     @MessageBody() isReady: boolean,
@@ -181,11 +184,121 @@ export class TeamLobbyGateway {
         socket.id,
         RedisPlayerState.parsePlayerState(player),
       );
-      socket
-        .to(player.roomName)
-        .emit(SocketEventTeamLobby.READY_TO_PLAY, isReady);
+      socket.to(player.roomName).emit(SocketEventLobby.READY_TO_PLAY, isReady);
       return;
     }
-    this.mainGateway.handlePlayerMatch(players);
+    this.handlePlayerMatch(players);
+  }
+
+  @SubscribeMessage(SocketEventLobby.JOIN_RANDOM_QUEUE)
+  async handleJoinRandomQueue(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: JoinRandomQueuePayload,
+  ) {
+    Logger.log('matchmaking info', socket.id, data);
+    const playerFound = await this.temporaryStorage.findMatchInQueue(data, 0);
+    // if no player found, add to queue is not already in queue
+    if (!playerFound) {
+      Logger.log('no match');
+      const isPlayerAlreadyInQueue =
+        await this.temporaryStorage.checkIfExistInQueue(socket.id);
+      if (!isPlayerAlreadyInQueue) {
+        Logger.log('add to queue');
+        const player = new PlayerState(
+          PlayerStatus.IS_IN_RANDOM_QUEUE,
+          data.side,
+          data.level,
+          undefined,
+          data.userId,
+        );
+        this.temporaryStorage.addToQueue(socket.id, player);
+      } else {
+        Logger.log('already in queue');
+      }
+      return;
+    }
+
+    // if player found, remove from queue and create lobby with the 2 players
+    const teamRoomName = uuid.v4();
+    playerFound.player.roomName = teamRoomName;
+    playerFound.player.status = PlayerStatus.IS_WAITING_TEAMMATE;
+    const players = [
+      playerFound,
+      {
+        socketId: socket.id,
+        player: new PlayerState(
+          PlayerStatus.IS_WAITING_TEAMMATE,
+          data.side,
+          data.level,
+          undefined,
+          data.userId,
+          undefined,
+          teamRoomName,
+        ),
+      },
+    ];
+    await this.temporaryStorage.createLobbyFromRandomQueue(players);
+    const dbPlayers = await this.prismaService.user.findMany({
+      where: {
+        id: {
+          in: players.map((p) => p.player.userId),
+        },
+      },
+    });
+    players.forEach(({ socketId }) => {
+      this.addSocketToRoom(socketId, teamRoomName);
+    });
+    this.mainGateway.emit(players[0].socketId, [
+      SocketEventLobby.FRIEND_JOIN_LOBBY,
+      {
+        token: undefined,
+        user: dbPlayers[1],
+        side: players[1].player.side,
+        level: players[1].player.selectedLevel,
+      },
+    ]);
+    this.mainGateway.emit(players[1].socketId, [
+      SocketEventLobby.FRIEND_JOIN_LOBBY,
+      {
+        token: undefined,
+        user: dbPlayers[0],
+        side: players[0].player.side,
+        level: players[0].player.selectedLevel,
+      },
+    ]);
+  }
+
+  handlePlayerMatch = async (
+    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
+  ) => {
+    // Logger.log('match found, create game');
+    // const dbGame = await this.prismaService.game.create({
+    //   data: {
+    //     levelId: players[0].player.selectedLevel,
+    //     status: GameStatus.STARTED,
+    //     startTime: new Date(),
+    //   },
+    // });
+    // Logger.log(`GAME ID: ${dbGame.id}`);
+    // const teamRoomName = uuid.v4();
+    // const gameRoomName = String(dbGame.id);
+    // players.forEach(({ player, socketId }) => {
+    //   // mutations
+    //   player.status = PlayerStatus.IS_PLAYING;
+    //   player.gameId = dbGame.id;
+    //   player.roomName = teamRoomName;
+    //   this.addSocketToRoom(socketId, teamRoomName);
+    //   this.addSocketToRoom(socketId, gameRoomName);
+    // });
+    // const initialGameState = await this.createGame(players, dbGame.id);
+    // this.mainGateway.emit(gameRoomName, [
+    //   SocketEventType.GAME_START,
+    //   { gameState: initialGameState, lastInputs: [undefined, undefined] },
+    // ]);
+  };
+
+  addSocketToRoom(socketId: string, room: string) {
+    const socket = this.mainGateway.server.sockets.sockets.get(socketId);
+    socket.join(room);
   }
 }

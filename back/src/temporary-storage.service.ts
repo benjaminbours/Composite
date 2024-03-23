@@ -9,7 +9,7 @@ import {
   AllQueueInfo,
   GamePlayerInputPayload,
   GameState,
-  MatchMakingPayload,
+  JoinRandomQueuePayload,
   QueueInfo,
   RedisGameState,
   Side,
@@ -43,7 +43,7 @@ export interface PlayerFoundInQueue {
 
 @Injectable()
 export class TemporaryStorageService {
-  private redisClient: RedisClientType;
+  public redisClient: RedisClientType;
 
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -120,22 +120,29 @@ export class TemporaryStorageService {
     });
     return Promise.all([
       this.redisClient.HGETALL(REDIS_KEYS.QUEUE_INFO),
-      ...levels
-        .filter((val) => typeof val === 'number')
-        .map(({ id }) =>
-          this.redisClient.HGETALL(REDIS_KEYS.QUEUE_LEVEL_INFO(id)),
-        ),
+      ...levels.map(async ({ id }) => {
+        const data = await this.redisClient.HGETALL(
+          REDIS_KEYS.QUEUE_LEVEL_INFO(id),
+        );
+        return {
+          id,
+          data,
+        };
+      }),
     ]).then(([allQueueInfo, ...levelsQueueInfo]) => {
       const unwrapValue = (val: string | undefined): number =>
         val ? Number(val) : 0;
       return new AllQueueInfo(
-        levelsQueueInfo.map(
-          (data) =>
-            new QueueInfo(
-              unwrapValue(data.all),
-              unwrapValue(data.light),
-              unwrapValue(data.shadow),
-            ),
+        levelsQueueInfo.reduce(
+          (acc, item: any) => {
+            acc[item.id] = new QueueInfo(
+              unwrapValue(item.data.all),
+              unwrapValue(item.data.light),
+              unwrapValue(item.data.shadow),
+            );
+            return acc;
+          },
+          {} as Record<number, QueueInfo>,
         ),
         unwrapValue(allQueueInfo.all),
         unwrapValue(allQueueInfo.light),
@@ -176,7 +183,7 @@ export class TemporaryStorageService {
   }
 
   async findMatchInQueue(
-    data: MatchMakingPayload,
+    data: JoinRandomQueuePayload,
     index: number,
   ): Promise<PlayerFoundInQueue | undefined> {
     const increaseRangeFactor = 5;
@@ -195,7 +202,7 @@ export class TemporaryStorageService {
       console.log('data retrieved', player);
       console.log('data retrieved', player.selectedLevel);
 
-      const isSameLevel = data.selectedLevel === Number(player.selectedLevel);
+      const isSameLevel = data.level === Number(player.selectedLevel);
       const isOppositeSide = data.side !== Number(player.side);
 
       if (isSameLevel && isOppositeSide) {
@@ -225,6 +232,24 @@ export class TemporaryStorageService {
 
   async deleteInviteToken(token: string) {
     return this.redisClient.HDEL(REDIS_KEYS.INVITE_TOKEN_MAP, token);
+  }
+
+  async createLobbyFromRandomQueue(
+    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
+  ) {
+    const transaction = this.redisClient.MULTI();
+    players.forEach(({ socketId, player, indexToClear }) => {
+      if (indexToClear !== undefined) {
+        this.removeFromQueue(socketId, indexToClear, transaction);
+        this.updateQueueInfo('subtract', player, transaction);
+      }
+      this.setPlayer(
+        socketId,
+        RedisPlayerState.parsePlayerState(player),
+        transaction,
+      );
+    });
+    return transaction.exec();
   }
 
   // games

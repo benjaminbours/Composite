@@ -340,6 +340,11 @@ $buttonSizeLarge: 120px;
     //     transition: 0.7s;
     // }
 
+    &.disabled {
+        background: grey;
+        cursor: default;
+    }
+
     &.black {
         svg {
             fill: black;
@@ -468,11 +473,14 @@ $buttonSizeLarge: 120px;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    position: relative;
 
     p {
         mix-blend-mode: difference;
         color: white;
         text-align: center;
+        margin-bottom: 0;
+        padding: 0 10px;
     }
 
     .ying-yang {
@@ -488,6 +496,29 @@ $buttonSizeLarge: 120px;
         .white {
             opacity: 0;
             transition: 0.3s ease-out;
+        }
+    }
+
+    .MuiBadge-badge {
+        background: white;
+    }
+
+    &__queue-info {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        mix-blend-mode: difference;
+
+        svg {
+            fill: white;
+        }
+
+        > * {
+            margin: 5px 0;
         }
     }
 

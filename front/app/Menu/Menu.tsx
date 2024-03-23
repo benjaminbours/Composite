@@ -28,6 +28,8 @@ import { Actions } from './Actions';
 import { RefHashMap } from '../useMenuTransition';
 import { useMainController } from '../useMainController';
 import { getDictionary } from '../../getDictionary';
+import { servicesContainer } from '../core/frameworks';
+import { ApiClient } from '../core/services';
 
 interface Props {
     menuScene: MenuScene;
@@ -38,6 +40,8 @@ interface Props {
     mainController: ReturnType<typeof useMainController>;
 }
 
+export const QUEUE_INFO_FETCH_INTERVAL = 20000;
+
 export function Menu({
     dictionary,
     menuScene,
@@ -46,12 +50,18 @@ export function Menu({
     refHashMap,
     mainController,
 }: Props) {
+    const [queueInfoInterval, setQueueInfoInterval] =
+        useState<NodeJS.Timeout>();
+    const [fetchCompletionInterval, setFetchCompletionInterval] =
+        useState<NodeJS.Timeout>();
     const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
+    const [fetchTime, setFetchTime] = useState(0);
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
 
     const {
         state,
+        setState,
         levels,
         handleClickOnBack,
         handleClickHome,
@@ -64,6 +74,8 @@ export function Menu({
         handleInviteFriend,
         handleSelectLevel,
         handleEnterTeamLobby,
+        handleEnterRandomQueue,
+        handleExitRandomQueue,
     } = mainController;
 
     const resize = useCallback(() => {
@@ -114,19 +126,62 @@ export function Menu({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // effect to fetch queue info
+    const fetchQueueInfo = useCallback(async () => {
+        const apiClient = servicesContainer.get(ApiClient);
+        return apiClient.defaultApi.appControllerGetQueueInfo().then((data) => {
+            console.log('HERE queue', data);
+
+            // clear previous interval
+            clearInterval(queueInfoInterval);
+            clearInterval(fetchCompletionInterval);
+            const intervalId = setInterval(() => {
+                // console.log('fetch');
+                fetchQueueInfo();
+            }, QUEUE_INFO_FETCH_INTERVAL);
+
+            const completionIntervalId = setInterval(() => {
+                // console.log('time update');
+                setFetchTime((prev) => prev + 1000);
+            }, 1000);
+
+            setFetchTime(0);
+            setFetchCompletionInterval(completionIntervalId);
+            setQueueInfoInterval(intervalId);
+            setAllQueueInfo(data as AllQueueInfo);
+            setState((prev) => ({
+                ...prev,
+                shouldDisplayQueueInfo: true,
+            }));
+        });
+    }, [setState, queueInfoInterval, fetchCompletionInterval]);
+
+    const handleClickOnQueueInfo = useCallback(() => {
+        if (!state.shouldDisplayQueueInfo) {
+            fetchQueueInfo();
+        } else {
+            setState((prev) => ({
+                ...prev,
+                shouldDisplayQueueInfo: false,
+            }));
+        }
+    }, [fetchQueueInfo, state, setState]);
+
     useEffect(() => {
-        const fetchQueueInfo = () => {
-            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/queue-info`)
-                .then((res) => res.json())
-                .then((data: AllQueueInfo) => setAllQueueInfo(data));
-        };
-        fetchQueueInfo();
-        const intervalId = setInterval(fetchQueueInfo, 2000);
+        if (!state.shouldDisplayQueueInfo && queueInfoInterval) {
+            clearInterval(fetchCompletionInterval);
+            clearInterval(queueInfoInterval);
+            setQueueInfoInterval(undefined);
+        }
+
         return () => {
-            clearInterval(intervalId);
+            clearInterval(queueInfoInterval);
+            clearInterval(fetchCompletionInterval);
         };
-    }, []);
+    }, [
+        state.shouldDisplayQueueInfo,
+        queueInfoInterval,
+        fetchCompletionInterval,
+    ]);
 
     // on resize
     useEffect(() => {
@@ -273,6 +328,14 @@ export function Menu({
                 inviteFriend={handleInviteFriend}
                 handleEnterTeamLobby={handleEnterTeamLobby}
                 setSideSize={setSideSize}
+                handleEnterRandomQueue={handleEnterRandomQueue}
+                handleExitRandomQueue={handleExitRandomQueue}
+                isInQueue={state.isInQueue}
+                fetchQueueInfo={fetchQueueInfo}
+                handleClickOnQueueInfo={handleClickOnQueueInfo}
+                fetchTime={fetchTime}
+                queueInfo={allQueueInfo}
+                shouldDisplayQueueInfo={state.shouldDisplayQueueInfo}
             />
             <LevelScene
                 actions={actions}

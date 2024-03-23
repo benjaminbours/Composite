@@ -9,9 +9,14 @@ import styles from './PlayersState.module.scss';
 interface Props {
     players: (PlayerState | undefined)[];
     onInviteFriend: () => Promise<string>;
+    isInQueue: boolean;
 }
 
-export const PlayersState: React.FC<Props> = ({ players, onInviteFriend }) => {
+export const PlayersState: React.FC<Props> = ({
+    players,
+    isInQueue,
+    onInviteFriend,
+}) => {
     const playersState = useMemo(() => {
         return players.map((player, i) => {
             if (player === undefined) {
@@ -50,6 +55,7 @@ export const PlayersState: React.FC<Props> = ({ players, onInviteFriend }) => {
                 className={styles['invite-button']}
                 text="Invite link"
                 asyncAction={onInviteFriend}
+                disabled={isInQueue}
             />
         </div>
     );

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SocketGateway } from './socket.gateway';
 import { CacheModule } from '@nestjs/cache-manager';
 import { SocketService } from './socket.service';
-import { TeamLobbyGateway } from './team-lobby.gateway';
+import { LobbyGateway } from './lobby.gateway';
 import { PrismaService } from '@project-common/services';
 import { TemporaryStorageService } from '../temporary-storage.service';
 import { UtilsService } from './utils.service';
@@ -22,7 +22,7 @@ describe('SocketGateway', () => {
       providers: [
         SocketService,
         SocketGateway,
-        TeamLobbyGateway,
+        LobbyGateway,
         PrismaService,
         TemporaryStorageService,
         UtilsService,

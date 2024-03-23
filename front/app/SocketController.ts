@@ -8,7 +8,7 @@ import {
     GameState,
     TimeSyncPayload,
     GamePlayerInputPayload,
-    SocketEventTeamLobby,
+    SocketEventLobby,
     Side,
     FriendJoinLobbyPayload,
 } from '@benjaminbours/composite-core';
@@ -51,7 +51,7 @@ export class SocketController {
         );
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
         this.socket.on(
-            SocketEventTeamLobby.FRIEND_JOIN_LOBBY,
+            SocketEventLobby.FRIEND_JOIN_LOBBY,
             onFriendJoinLobby,
         );
         this.socket.on(
@@ -61,15 +61,15 @@ export class SocketController {
 
         // team lobby event
         this.socket.on(
-            SocketEventTeamLobby.SELECT_LEVEL,
+            SocketEventLobby.SELECT_LEVEL,
             handleReceiveLevelOnLobby,
         );
         this.socket.on(
-            SocketEventTeamLobby.SELECT_SIDE,
+            SocketEventLobby.SELECT_SIDE,
             handleReceiveSideOnLobby,
         );
         this.socket.on(
-            SocketEventTeamLobby.READY_TO_PLAY,
+            SocketEventLobby.READY_TO_PLAY,
             handleReceiveReadyToPlay,
         );
     }
