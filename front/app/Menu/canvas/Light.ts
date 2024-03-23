@@ -99,16 +99,9 @@ export default class Light {
                     width,
                 };
             case MenuScene.TEAM_LOBBY:
-                const levelContainer = document.querySelector(
-                    '.team-lobby-scene__level-container',
-                );
-                let x = 0.5;
-                if (levelContainer) {
-                    const bbox = levelContainer.getBoundingClientRect();
-                    const percent =
-                        (bbox.left + bbox.width / 2) / window.innerWidth;
-                    x = percent;
-                }
+                let x =
+                    ((canvasWidth * 0.6) / 2 + canvasWidth * 0.075 + 322) /
+                    canvasWidth;
                 x -= 0.15;
                 return {
                     coordinates: {
@@ -118,16 +111,9 @@ export default class Light {
                     width: 350,
                 };
             case MenuScene.TEAM_LOBBY_SELECTED:
-                const container = document.querySelector(
-                    '.team-lobby-scene__level-container',
-                );
-                let xPos = 0.5;
-                if (container) {
-                    const bbox = container.getBoundingClientRect();
-                    const percent =
-                        (bbox.left + bbox.width / 2) / window.innerWidth;
-                    xPos = percent;
-                }
+                let xPos =
+                    ((canvasWidth * 0.6) / 2 + canvasWidth * 0.075 + 322) /
+                    canvasWidth;
                 return {
                     coordinates: {
                         x: canvasWidth * xPos,

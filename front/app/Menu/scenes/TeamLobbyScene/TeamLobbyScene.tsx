@@ -21,10 +21,10 @@ import { LevelSelector } from './LevelSelector';
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
     teamLobbyRef: React.RefObject<HTMLDivElement>;
-    actions: React.ReactNode;
     isMount: boolean;
     handleSelectLevel: (levelId: number) => void;
     handleSelectSide: (side: Side) => void;
+    handleClickOnExit: () => void;
     levels: Level[];
     you: PlayerState;
     mate?: PlayerState;
@@ -49,7 +49,6 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
     ({
         teamLobbyRef,
         dictionary,
-        actions,
         isMount,
         levels,
         you,
@@ -70,6 +69,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         handleExitRandomQueue,
         fetchQueueInfo,
         handleClickOnQueueInfo,
+        handleClickOnExit,
     }) => {
         const { enqueueSnackbar } = useSnackbar();
         const urlSearchParams = useSearchParams();
@@ -167,7 +167,12 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                     withGuest
                 />
                 <div className="team-lobby-scene__header">
-                    {actions}
+                    <button
+                        className="buttonRect white"
+                        onClick={handleClickOnExit}
+                    >
+                        Exit
+                    </button>
                     <h1 className="title-h3 title-h3--white">Lobby</h1>
                 </div>
                 <div className="team-lobby-scene__column-left">

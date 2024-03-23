@@ -83,13 +83,13 @@ export const LevelPortal: React.FC<Props> = ({
             <p>{name}</p>
             {queueInfo !== undefined && (
                 <div className="level-portal__queue-info">
-                    <Badge badgeContent={queueInfo.all}>
+                    <Badge badgeContent={String(queueInfo.all)}>
                         <GroupsIcon />
                     </Badge>
-                    <Badge badgeContent={queueInfo.light}>
+                    <Badge badgeContent={String(queueInfo.light)}>
                         <Brightness7Icon />
                     </Badge>
-                    <Badge badgeContent={queueInfo.shadow}>
+                    <Badge badgeContent={String(queueInfo.shadow)}>
                         <ModeNightIcon />
                     </Badge>
                 </div>

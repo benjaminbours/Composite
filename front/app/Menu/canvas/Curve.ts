@@ -52,16 +52,7 @@ export default class Curve {
             return width * 0.5;
         },
         team_lobby(width: number, height: number, isOnMobile: boolean) {
-            const levelContainer = document.querySelector(
-                '.team-lobby-scene__level-container',
-            );
-            let x = 0.5;
-            if (levelContainer) {
-                const bbox = levelContainer.getBoundingClientRect();
-                const percent =
-                    (bbox.left + bbox.width / 2) / window.innerWidth;
-                x = percent;
-            }
+            let x = ((width * 0.6) / 2 + width * 0.075 + 322) / width;
             if (isOnMobile) {
                 return height * 0.75;
             }

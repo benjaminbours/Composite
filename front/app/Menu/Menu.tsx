@@ -63,19 +63,18 @@ export function Menu({
         state,
         setState,
         levels,
-        handleClickOnBack,
+        // handleClickOnBack,
         handleClickHome,
         handleClickPlayAgain,
-        handleClickPlayWithFriend,
-        handleClickPlayWithRandom,
+        handleClickPlay,
         handleClickReadyToPlay,
         handleSelectLevelOnLobby,
         handleSelectSideOnLobby,
         handleInviteFriend,
-        handleSelectLevel,
         handleEnterTeamLobby,
         handleEnterRandomQueue,
         handleExitRandomQueue,
+        exitLobby,
     } = mainController;
 
     const resize = useCallback(() => {
@@ -193,27 +192,27 @@ export function Menu({
         (level) => level.id === state.you.level,
     )?.name;
 
-    const actions = useMemo(() => {
-        return (
-            <Actions
-                onBack={handleClickOnBack}
-                // onQuitTeam={mode === '' ? handleClickOnQuitTeam : undefined}
-                // onClickJoinTeamMate={handleClickOnJoinTeamMate}
-                // teamMate={{
-                //     info: teamMateInfo,
-                //     levelName: levels.find(
-                //         (level) => level.id === teamMateInfo?.selectedLevel,
-                //     )?.name,
-                // }}
-            />
-        );
-    }, [
-        handleClickOnBack,
-        // handleClickOnJoinTeamMate,
-        // handleClickOnQuitTeam,
-        // levels,
-        // teamMateInfo,
-    ]);
+    // const actions = useMemo(() => {
+    //     return (
+    //         <Actions
+    //             onBack={handleClickOnBack}
+    //             // onQuitTeam={mode === '' ? handleClickOnQuitTeam : undefined}
+    //             // onClickJoinTeamMate={handleClickOnJoinTeamMate}
+    //             // teamMate={{
+    //             //     info: teamMateInfo,
+    //             //     levelName: levels.find(
+    //             //         (level) => level.id === teamMateInfo?.selectedLevel,
+    //             //     )?.name,
+    //             // }}
+    //         />
+    //     );
+    // }, [
+    //     handleClickOnBack,
+    //     // handleClickOnJoinTeamMate,
+    //     // handleClickOnQuitTeam,
+    //     // levels,
+    //     // teamMateInfo,
+    // ]);
 
     const setLightIsPulsingFast = useCallback(
         (value: boolean) => {
@@ -289,8 +288,7 @@ export function Menu({
                 canvasWhite={refHashMap.canvasWhite}
                 homeRef={refHashMap.homeRef}
                 allQueueInfo={allQueueInfo}
-                handleClickOnRandom={handleClickPlayWithRandom}
-                handleClickOnFriend={handleClickPlayWithFriend}
+                handleClickPlay={handleClickPlay}
                 isMount={
                     menuScene === MenuScene.HOME ||
                     nextMenuScene === MenuScene.HOME
@@ -313,6 +311,7 @@ export function Menu({
                     menuScene === MenuScene.TEAM_LOBBY ||
                     nextMenuScene === MenuScene.TEAM_LOBBY
                 }
+                handleClickOnExit={exitLobby}
                 handleClickReadyToPlay={handleClickReadyToPlay}
                 handleSelectLevel={handleSelectLevelOnLobby}
                 handleSelectSide={handleSelectSideOnLobby}
@@ -320,7 +319,6 @@ export function Menu({
                 mate={state.mate}
                 teamLobbyRef={refHashMap.teamLobbyRef}
                 levels={levels}
-                actions={actions}
                 setLightIsPulsingFast={setLightIsPulsingFast}
                 setShadowRotationSpeed={setShadowRotationSpeed}
                 inviteFriend={handleInviteFriend}
@@ -335,7 +333,7 @@ export function Menu({
                 queueInfo={allQueueInfo}
                 shouldDisplayQueueInfo={state.shouldDisplayQueueInfo}
             />
-            <LevelScene
+            {/* <LevelScene
                 actions={actions}
                 allQueueInfo={allQueueInfo}
                 onClickOnLevel={handleSelectLevel}
@@ -368,7 +366,7 @@ export function Menu({
                     menuScene === MenuScene.QUEUE ||
                     nextMenuScene === MenuScene.QUEUE
                 }
-            />
+            /> */}
             <EndLevelScene
                 isMount={
                     menuScene === MenuScene.END_LEVEL ||
@@ -378,7 +376,7 @@ export function Menu({
                 side={state.you.side}
                 levelName={levelName}
                 handleClickOnPlay={handleClickPlayAgain}
-                actions={actions}
+                // actions={actions}
                 setLightIsPulsingFast={setLightIsPulsingFast}
                 setShadowRotationSpeed={setShadowRotationSpeed}
             />

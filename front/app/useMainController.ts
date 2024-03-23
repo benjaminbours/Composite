@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuScene, Route } from './types';
 import { SocketController } from './SocketController';
 import { TweenOptions } from './Menu/tweens';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
 import { servicesContainer } from './core/frameworks';
 import { ApiClient } from './core/services';
@@ -47,7 +47,6 @@ export function useMainController(
     const currentUser = useStoreState((state) => state.user.currentUser);
     const queryParams = useSearchParams();
     const router = useRouter();
-    // const path = usePathname();
     const socketController = useRef<SocketController>();
 
     useEffect(() => {
@@ -424,85 +423,71 @@ export function useMainController(
         });
     }, [establishConnection, state, currentUser?.id]);
 
-    const handleSelectLevel = useCallback(
-        (levelId: number) => {
-            if (onTransition.current) {
-                return;
-            }
+    const exitLobby = useCallback(() => {
+        if (onTransition.current) {
+            return;
+        }
+        socketController.current?.destroy();
+        router.push(Route.HOME);
+        goToStep({ step: MenuScene.HOME }, () => {
+            setMenuScene(MenuScene.HOME);
             setState((prev) => ({
                 ...prev,
+                mate: undefined,
+                mateDisconnected: false,
                 you: {
-                    ...prev.you,
-                    level: levelId,
+                    isReady: false,
+                    level: undefined,
+                    side: undefined,
+                    account: currentUser || undefined,
                 },
             }));
-            goToStep({
-                step: MenuScene.FACTION,
-                side: undefined,
-            });
-        },
-        [goToStep, onTransition],
-    );
-
-    const handleClickOnBack = useCallback(() => {
-        if (onTransition.current) {
-            return;
-        }
-        const backOptions = {
-            invite_friend() {
-                goToStep({ step: MenuScene.HOME, side: undefined });
-            },
-            level() {
-                goToStep({ step: MenuScene.HOME, side: undefined });
-            },
-            faction() {
-                goToStep({ step: MenuScene.LEVEL, side: undefined });
-            },
-            queue() {
-                goToStep(
-                    {
-                        step: MenuScene.FACTION,
-                        side: state.you.side,
-                    },
-                    () => {
-                        setState((prev) => ({
-                            ...prev,
-                            you: {
-                                ...prev.you,
-                                side: undefined,
-                            },
-                        }));
-                    },
-                );
-            },
-        };
-        // there is no back button on these scenes
-        if (
-            menuScene !== MenuScene.HOME &&
-            menuScene !== MenuScene.END_LEVEL &&
-            menuScene !== MenuScene.TEAM_LOBBY &&
-            menuScene !== MenuScene.TEAM_LOBBY_SELECTED &&
-            menuScene !== MenuScene.NOT_FOUND
-        ) {
-            backOptions[menuScene]();
-        }
-    }, [
-        menuScene,
-        state.you.side,
-        // handleDestroyConnection,
-        goToStep,
-        onTransition,
-    ]);
-
-    const handleClickOnQuitTeam = useCallback(() => {
-        if (onTransition.current) {
-            return;
-        }
-        router.push(Route.HOME);
-        goToStep({ step: MenuScene.HOME, side: undefined }, () => {
-            handleDestroyConnection();
         });
-    }, [goToStep, handleDestroyConnection, onTransition, router]);
+    }, [setMenuScene, onTransition, currentUser, goToStep, router]);
+
+    // const handleClickOnBack = useCallback(() => {
+    //     if (onTransition.current) {
+    //         return;
+    //     }
+    //     const backOptions = {
+    //         invite_friend() {
+    //             goToStep({ step: MenuScene.HOME, side: undefined });
+    //         },
+    //         level() {
+    //             goToStep({ step: MenuScene.HOME, side: undefined });
+    //         },
+    //         faction() {
+    //             goToStep({ step: MenuScene.LEVEL, side: undefined });
+    //         },
+    //         queue() {
+    //             goToStep(
+    //                 {
+    //                     step: MenuScene.FACTION,
+    //                     side: state.you.side,
+    //                 },
+    //                 () => {
+    //                     setState((prev) => ({
+    //                         ...prev,
+    //                         you: {
+    //                             ...prev.you,
+    //                             side: undefined,
+    //                         },
+    //                     }));
+    //                 },
+    //             );
+    //         },
+    //     };
+    //     // there is no back button on these scenes
+    //     if (
+    //         menuScene !== MenuScene.HOME &&
+    //         menuScene !== MenuScene.END_LEVEL &&
+    //         menuScene !== MenuScene.TEAM_LOBBY &&
+    //         menuScene !== MenuScene.TEAM_LOBBY_SELECTED &&
+    //         menuScene !== MenuScene.NOT_FOUND
+    //     ) {
+    //         backOptions[menuScene]();
+    //     }
+    // }, [menuScene, state.you.side, goToStep, onTransition]);
 
     // use only on not found page so far
     const handleClickHome = useCallback(() => {
@@ -516,12 +501,13 @@ export function useMainController(
         });
     }, [goToStep, router, onTransition]);
 
-    const handleClickPlayWithRandom = useCallback(() => {
+    const handleClickPlay = useCallback(() => {
         if (onTransition.current) {
             return;
         }
-        goToStep({ step: MenuScene.LEVEL, side: undefined });
-    }, [goToStep, onTransition]);
+        router.push(Route.LOBBY);
+        goToStep({ step: MenuScene.TEAM_LOBBY });
+    }, [goToStep, onTransition, router]);
 
     const handleClickPlayAgain = useCallback(() => {
         if (onTransition.current) {
@@ -612,6 +598,7 @@ export function useMainController(
         socketController,
         gameIsPlaying,
         levels,
+        exitLobby,
         setState,
         handleClickReadyToPlay,
         handleGameStart,
@@ -619,15 +606,12 @@ export function useMainController(
         handleClickFindAnotherTeamMate,
         handleInviteFriend,
         handleEnterTeamLobby,
-        handleClickPlayWithFriend: handleInviteFriend,
-        handleClickPlayWithRandom,
+        handleClickPlay,
         handleEnterRandomQueue,
         handleExitRandomQueue,
         handleSelectLevelOnLobby,
         handleSelectSideOnLobby,
-        handleSelectLevel,
-        handleClickOnBack,
-        handleClickOnQuitTeam,
+        // handleClickOnBack,
         handleClickHome,
         handleClickPlayAgain,
     };
