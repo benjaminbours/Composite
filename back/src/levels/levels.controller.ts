@@ -64,7 +64,7 @@ export class LevelsController {
           fileType: 'image/png',
         })
         .addMaxSizeValidator({
-          maxSize: 200000,
+          maxSize: 1000000,
         })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,

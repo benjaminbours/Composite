@@ -6,6 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import React from 'react';
 import Link from 'next/link';
 import { Route } from '../../../types';
+import { LevelPortal } from '../../../Menu/scenes/LevelPortal';
 
 interface Props {
     level: Level;
@@ -20,14 +21,11 @@ export const LevelListItem: React.FC<Props> = ({
 }) => {
     return (
         <li className="level-list-item">
-            <h3 className="level-list-item__title">{level.name}</h3>
             <div className="level-list-item__image-container">
-                <div className="level-list-item__image">
-                    <p>
-                        Thumbnail feature
-                        <br /> coming soon
-                    </p>
-                </div>
+                <LevelPortal
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${level.id}_thumbnail.png`}
+                    name={level.name}
+                />
                 <ul className="level-list-item__actions">
                     <li>
                         <Link
