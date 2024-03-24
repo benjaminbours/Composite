@@ -220,22 +220,14 @@
     }
 }
 
-#buttonPlay {
+.home-container__button {
+    mix-blend-mode: difference;
     background: white;
     color: black;
-    border: solid black 7px;
+    font-size: 14px;
     font-weight: 100;
-    font-size: 20px;
+    border: solid black 7px;
     transition: 0.3s ease-out;
-    overflow: hidden;
-    mix-blend-mode: difference;
-    border-color: black;
-    color: black;
-    mix-blend-mode: difference;
-    position: fixed;
-    left: 50%;
-    transform: translate(-50%, 0%);
-    top: calc(75% - 52px);
 
     @media (min-width: 768px) {
         &:hover {
@@ -244,8 +236,30 @@
             transition: 0.3s ease-out;
         }
     }
+}
 
-    @media (max-height: 700px), (max-width: 768px) {
-        top: calc(75% - 47px);
-    }
+#buttonPlay {
+    font-size: 16px;
+    overflow: hidden;
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    top: calc(75% - 52px);
+
+    // @media (max-height: 700px), (max-width: 768px) {
+    //     top: calc(75% - 47px);
+    // }
+}
+
+#buttonBuild {
+    position: absolute;
+    top: calc(75% - 52px);
+    left: 75%;
+}
+
+#buttonPath {
+    position: absolute;
+    top: calc(75% - 52px);
+    left: 25%;
+    transform: translate(-50%, 0%);
 }

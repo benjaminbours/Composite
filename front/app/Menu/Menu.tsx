@@ -1,12 +1,6 @@
 // vendors
 import { gsap } from 'gsap';
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 // our libs
 import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
 // local
@@ -284,9 +278,8 @@ export function Menu({
                 onHomeClick={handleClickHome}
             />
             <HomeScene
-                canvasBlack={refHashMap.canvasBlack}
-                canvasWhite={refHashMap.canvasWhite}
                 homeRef={refHashMap.homeRef}
+                refHashMap={refHashMap}
                 allQueueInfo={allQueueInfo}
                 handleClickPlay={handleClickPlay}
                 isMount={
