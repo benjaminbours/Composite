@@ -57,6 +57,7 @@ canvas,
     }
 
     .version {
+        font-size: 12px;
         color: white;
     }
 }
@@ -129,6 +130,7 @@ p {
     transition: 0.7s;
     cursor: pointer;
     position: relation;
+    font-size: 14px;
 
     &.white {
         color: white;

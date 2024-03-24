@@ -90,20 +90,6 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
 
         // on mount
         useEffect(() => {
-            if (
-                !isGuest &&
-                !isAuthenticated &&
-                !isRetrievingSession &&
-                isMount
-            ) {
-                setIsAuthModalOpen(true);
-                return;
-            }
-
-            if (isGuest || isAuthenticated) {
-                setIsAuthModalOpen(false);
-            }
-
             const token = urlSearchParams.get('token');
             if (!token || isConnecting.current) {
                 return;
@@ -174,6 +160,12 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         Exit
                     </button>
                     <h1 className="title-h3 title-h3--white">Lobby</h1>
+                    <button
+                        className="buttonRect white team-lobby-scene__login-button"
+                        onClick={() => setIsAuthModalOpen(true)}
+                    >
+                        Login
+                    </button>
                 </div>
                 <div className="team-lobby-scene__column-left">
                     <PlayersState
