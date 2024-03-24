@@ -7,11 +7,17 @@ import {
 } from '@benjaminbours/composite-core';
 
 export function parseToUIKeyBindings(keyBindings: KeyBindings) {
-    const uiKeyBindings = {} as { [key: string]: string[] };
+    const uiKeyBindings = {} as { [key: string]: (string | undefined)[] };
     MOVEMENTS.forEach((movement) => {
-        const keys = Object.keys(keyBindings).filter(
+        const keys: (string | undefined)[] = Object.keys(keyBindings).filter(
             (key) => keyBindings[key] === movement,
         );
+        if (keys.length === 0) {
+            keys.push(undefined, undefined);
+        }
+        if (keys.length === 1) {
+            keys.push(undefined);
+        }
         uiKeyBindings[movement] = keys;
     });
     return Object.entries(uiKeyBindings) as UIKeyBindings;
@@ -21,6 +27,9 @@ export function parseToKeyBindings(uiKeyBindings: UIKeyBindings) {
     const keyBindings: KeyBindings = {};
     uiKeyBindings.forEach(([movement, keys]) => {
         keys.forEach((key) => {
+            if (!key) {
+                return;
+            }
             keyBindings[key] = movement;
         });
     });

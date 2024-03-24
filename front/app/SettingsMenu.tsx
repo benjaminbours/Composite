@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Cross } from './Game/icons/Cross';
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
 import InputsManager, {
     parseToKeyBindings,
     parseToUIKeyBindings,
@@ -22,9 +23,24 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
     const handleClickOnKey = useCallback(
         (movementIndex: number, keyIndex: number) => (clickEvent: any) => {
             setCurrentlyEditing([movementIndex, keyIndex]);
-
             const handleNewKey = (e: KeyboardEvent) => {
                 const nextUIKeyBindings = [...uiKeyBindings];
+                const itemAlreadyUsingKey = nextUIKeyBindings.find(
+                    ([, keys]) => {
+                        return keys.includes(e.code);
+                    },
+                );
+                if (itemAlreadyUsingKey) {
+                    // remove the key from the other movement
+                    itemAlreadyUsingKey[1] = itemAlreadyUsingKey[1].map(
+                        (key) => {
+                            if (key === e.code) {
+                                return null;
+                            }
+                            return key;
+                        },
+                    ) as [string | undefined, string | undefined];
+                }
 
                 nextUIKeyBindings[movementIndex][1][keyIndex] = e.code;
                 const nextKeyBindings = parseToKeyBindings(nextUIKeyBindings);
@@ -37,19 +53,19 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
 
             window.addEventListener('keydown', handleNewKey);
         },
-        [],
+        [inputsManager, uiKeyBindings],
     );
 
     return (
         <div className="settings-menu">
             <div className="settings-menu__header">
                 <h2>Key bindings</h2>
-                <button
+                <IconButton
                     className="settings-menu__close-button"
                     onClick={onClose}
                 >
-                    <Cross />
-                </button>
+                    <CloseIcon />
+                </IconButton>
             </div>
 
             <ul className="settings-menu__key-bindings-list key-bindings-list">
@@ -62,7 +78,6 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
                             <span className="key-bindings-list__movement">
                                 {movement}
                             </span>
-
                             {keys.map((key, keyIndex) => {
                                 const isEditing = (() => {
                                     if (!currentlyEditing) {
@@ -78,6 +93,10 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
                                 const keyText = (() => {
                                     if (isEditing) {
                                         return 'Press a key';
+                                    }
+
+                                    if (!key) {
+                                        return 'No key';
                                     }
 
                                     if (key.includes('Key')) {

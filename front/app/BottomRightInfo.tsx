@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { CogWheel } from './Game/icons/CogWheel';
+import SettingsIcon from '@mui/icons-material/Settings';
+import IconButton from '@mui/material/IconButton';
 import { Route } from './types';
 
 interface Props {
@@ -10,9 +11,9 @@ interface Props {
 export const BottomRightInfo: React.FC<Props> = ({ onSettingsClick }) => {
     return (
         <div className="bottom-right-info">
-            <button className="settings" onClick={onSettingsClick}>
-                <CogWheel />
-            </button>
+            <IconButton className="settings" onClick={onSettingsClick}>
+                <SettingsIcon />
+            </IconButton>
             <Link href={Route.ROADMAP} className="inline-link">
                 Roadmap
             </Link>

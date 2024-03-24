@@ -230,11 +230,14 @@ export interface InteractiveComponent {
 }
 
 export const MOVEMENTS = ['left', 'right', 'top', 'bottom', 'jump'] as const;
-type MovementTuple = typeof MOVEMENTS; // readonly ['hearts', 'diamonds', 'spades', 'clubs']
+type MovementTuple = typeof MOVEMENTS;
 export type Movement = MovementTuple[number];
 
 export class KeyBindings {
     [key: string]: Movement;
 }
 
-export type UIKeyBindings = [Movement, string[]][];
+export type UIKeyBindings = [
+    Movement,
+    [string | undefined, string | undefined],
+][];
