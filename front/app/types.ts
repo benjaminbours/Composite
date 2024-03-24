@@ -37,6 +37,7 @@ export interface IWaveOptions {
 export const Route = {
     HOME: '/',
     LOBBY: '/lobby',
+    LOBBY_LEVEL: (levelId: number) => `/lobby?level=${levelId}`,
     INVITE: '/invite',
 
     TIMELINE: '/timeline',

@@ -23,6 +23,7 @@ interface Props {
     queueInfo?: AllQueueInfo;
     fetchTime: number;
     levelSelectedByMate?: number;
+    selectedLevel?: number;
 }
 
 export const LevelSelector: React.FC<Props> = ({
@@ -35,6 +36,7 @@ export const LevelSelector: React.FC<Props> = ({
     levelSelectedByMate,
     queueInfo,
     handleClickOnQueueInfo,
+    selectedLevel,
 }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [slideIndex, setSlideIndex] = useState(0);
@@ -46,6 +48,21 @@ export const LevelSelector: React.FC<Props> = ({
     const previous = () => {
         sliderRef.current?.slickPrev();
     };
+
+    useEffect(() => {
+        if (selectedLevel && levels.length > 0) {
+            const index = levels.findIndex(
+                (level) => level.id === selectedLevel,
+            );
+            if (index !== -1) {
+                setSlideIndex(index);
+                handleSelectLevel(selectedLevel);
+                console.log(sliderRef.current);
+
+                sliderRef.current?.slickGoTo(index);
+            }
+        }
+    }, [selectedLevel, levels, handleSelectLevel]);
 
     const settings: Settings = {
         className: styles['carousel-container'],

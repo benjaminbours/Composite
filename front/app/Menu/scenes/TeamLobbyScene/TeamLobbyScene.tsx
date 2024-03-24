@@ -45,6 +45,7 @@ interface Props {
 }
 
 // TODO: Wrap all scenes with react.memo to prevent useless re-render
+// TODO: too much duplicate between useController, TeamLobbyScene and Menu. Clean this shit please
 export const TeamLobbyScene: React.FC<Props> = React.memo(
     ({
         teamLobbyRef,
@@ -137,8 +138,9 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
 
         // initial loading
         useEffect(() => {
+            const level = Number(urlSearchParams.get('level'));
             if (isMount) {
-                handleSelectLevel(levels[0].id);
+                handleSelectLevel(Number.isNaN(level) ? levels[0].id : level);
             }
             // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [isMount]);
@@ -185,6 +187,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         shouldDisplayQueueInfo={shouldDisplayQueueInfo}
                         fetchTime={fetchTime}
                         queueInfo={queueInfo}
+                        selectedLevel={you.level}
                     />
                     <SideSelector
                         you={you}

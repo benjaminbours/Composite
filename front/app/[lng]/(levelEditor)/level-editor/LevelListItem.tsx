@@ -30,15 +30,21 @@ export const LevelListItem: React.FC<Props> = ({
                 </div>
                 <ul className="level-list-item__actions">
                     <li>
-                        <IconButton
-                            size="small"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            color="inherit"
-                            disabled
+                        <Link
+                            href={Route.LOBBY_LEVEL(level.id)}
+                            passHref
+                            legacyBehavior
                         >
-                            <SportsEsportsIcon />
-                        </IconButton>
+                            <IconButton
+                                size="small"
+                                aria-controls="menu-appbar"
+                                aria-haspopup="true"
+                                color="inherit"
+                                disabled={disabled}
+                            >
+                                <SportsEsportsIcon />
+                            </IconButton>
+                        </Link>
                     </li>
                     <li>
                         <Link
