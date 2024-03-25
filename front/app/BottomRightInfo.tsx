@@ -11,12 +11,12 @@ interface Props {
 export const BottomRightInfo: React.FC<Props> = ({ onSettingsClick }) => {
     return (
         <div className="bottom-right-info">
-            <IconButton className="settings" onClick={onSettingsClick}>
+            {/* <IconButton className="settings" onClick={onSettingsClick}>
                 <SettingsIcon />
             </IconButton>
             <Link href={Route.ROADMAP} className="inline-link">
                 Roadmap
-            </Link>
+            </Link> */}
             <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
         </div>
     );

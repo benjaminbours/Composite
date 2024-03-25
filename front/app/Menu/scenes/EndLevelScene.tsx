@@ -13,7 +13,7 @@ interface Props {
     side?: Side;
     levelName?: string;
     handleClickOnPlay: () => void;
-    actions: React.ReactNode;
+    // actions: React.ReactNode;
     isMount: boolean;
     setLightIsPulsingFast: (isPulsingFast: boolean) => void;
     setShadowRotationSpeed: (speed: number) => void;
@@ -24,7 +24,7 @@ export const EndLevelScene: React.FC<Props> = ({
     side,
     levelName,
     handleClickOnPlay,
-    actions,
+    // actions,
     isMount,
     setLightIsPulsingFast,
     setShadowRotationSpeed,
@@ -63,7 +63,7 @@ export const EndLevelScene: React.FC<Props> = ({
 
     return (
         <div ref={endLevelRef} className={cssClass}>
-            {actions}
+            {/* {actions} */}
             <h2>Well done!</h2>
             <h3>
                 <span className="menu-label">You just finished the level:</span>{' '}
@@ -146,8 +146,12 @@ export const EndLevelScene: React.FC<Props> = ({
                 </div>
                 <div>
                     <CopyToClipBoardButton
-                        color="black"
+                        // color="black"
                         text={
+                            process.env.NEXT_PUBLIC_URL ||
+                            'Missing env variable'
+                        }
+                        textToCopy={
                             process.env.NEXT_PUBLIC_URL ||
                             'Missing env variable'
                         }

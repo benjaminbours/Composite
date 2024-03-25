@@ -58,11 +58,11 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                     text: 'Bounce',
                     onClick: () => onAddElement(ElementType.BOUNCE),
                 },
-                {
-                    icon: <SquareIcon fontSize="small" />,
-                    text: 'End level',
-                    onClick: () => onAddElement(ElementType.END_LEVEL),
-                },
+                // {
+                //     icon: <SquareIcon fontSize="small" />,
+                //     text: 'End level',
+                //     onClick: () => onAddElement(ElementType.END_LEVEL),
+                // },
                 {
                     icon: <SquareIcon fontSize="small" />,
                     text: 'Fat column',
@@ -93,6 +93,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                             onChangeName={onChangeName}
                             onClick={onElementClick}
                             disabled={disabled}
+                            cantDelete={element.type === ElementType.END_LEVEL}
                         />
                     ))}
                 </List>

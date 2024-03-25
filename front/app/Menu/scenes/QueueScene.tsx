@@ -75,8 +75,11 @@ export const QueueScene: React.FC<Props> = ({
                 <p>{`Waiting time is too long?`}</p>
                 <p>{`Share this link with your friends`}</p>
                 <CopyToClipBoardButton
-                    color="black"
+                    // color="black"
                     text={process.env.NEXT_PUBLIC_URL || 'Missing env variable'}
+                    textToCopy={
+                        process.env.NEXT_PUBLIC_URL || 'Missing env variable'
+                    }
                 />
             </div>
         </div>

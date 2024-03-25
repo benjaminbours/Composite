@@ -14,7 +14,7 @@ export class LevelsService {
     return this.prisma.level
       .create({
         data: {
-          name: createLevelDto.name.toUpperCase(),
+          name: createLevelDto.name,
           data: createLevelDto.data as any, // json
           status: LevelStatus.DRAFT,
           authorId: user.sub,

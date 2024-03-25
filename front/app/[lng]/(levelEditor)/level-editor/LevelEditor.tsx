@@ -35,6 +35,7 @@ export const LevelEditor: React.FC<Props> = ({
 }) => {
     const {
         levelName,
+        levelStatus,
         elements,
         hasErrorWithLevelName,
         currentEditingIndex,
@@ -136,6 +137,7 @@ export const LevelEditor: React.FC<Props> = ({
                 onResetPlayersPosition={resetPlayersPosition}
                 onSwitchPlayer={switchPlayer}
                 levelName={levelName}
+                levelStatus={levelStatus}
                 onLevelNameChange={handleLevelNameChange}
                 onSave={handleClickOnSave}
                 onCaptureSnapshot={captureSnapshot}

@@ -14,6 +14,7 @@ import ForkRightIcon from '@mui/icons-material/ForkRight';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CameraIcon from '@mui/icons-material/Camera';
 import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
+import PublishIcon from '@mui/icons-material/Publish';
 import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
 import Divider from '@mui/material/Divider';
@@ -22,6 +23,7 @@ import { getDictionary } from '../../../../getDictionary';
 import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 import { CircularProgress } from '@mui/material';
 import { Route } from '../../../types';
+import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 
 interface Props {
     level_id: string;
@@ -34,15 +36,17 @@ interface Props {
     onSwitchPlayer: () => void;
     onCaptureSnapshot: () => void;
     levelName: string;
+    levelStatus: LevelStatusEnum;
     hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
-    onSave: (isFork?: boolean) => void;
+    onSave: (isFork?: boolean, status?: LevelStatusEnum) => void;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const TopBarLevelEditor: React.FC<Props> = ({
     dictionary,
     levelName,
+    levelStatus,
     onSwitchPlayer,
     onLevelNameChange,
     onResetCamera,
@@ -117,7 +121,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 <TextField
                     variant="standard"
                     placeholder="Level name"
-                    value={levelName.toUpperCase()}
+                    value={levelName}
                     onChange={onLevelNameChange}
                     error={hasErrorWithLevelName}
                     disabled={isSaving}
@@ -156,6 +160,28 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                             </Button>
                         )}
                     </>
+                )}
+                {isSaving ? (
+                    <CircularProgress size={30} />
+                ) : (
+                    <Button
+                        size="small"
+                        variant="contained"
+                        endIcon={<PublishIcon />}
+                        onClick={() =>
+                            onSave(
+                                false,
+                                levelStatus === LevelStatusEnum.Published
+                                    ? LevelStatusEnum.Draft
+                                    : LevelStatusEnum.Published,
+                            )
+                        }
+                        disabled={level_id === 'new'}
+                    >
+                        {levelStatus === LevelStatusEnum.Published
+                            ? 'Unpublish'
+                            : 'Publish'}
+                    </Button>
                 )}
                 <UserMenu
                     dictionary={dictionary}

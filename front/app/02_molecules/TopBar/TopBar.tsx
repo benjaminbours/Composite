@@ -7,9 +7,11 @@ import Divider from '@mui/material/Divider';
 import Toolbar from '@mui/material/Toolbar';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+// import PeopleIcon from '@mui/icons-material/People';
 import { Route } from '../../types';
 import { UserMenu } from './UserMenu';
 import { getDictionary } from '../../../getDictionary';
+// import { SideMenu } from '../../03_organisms/SideMenu';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
@@ -38,11 +40,11 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
                         variant="contained"
                         startIcon={<SportsEsportsIcon />}
                     >
-                        Play
+                        {dictionary.nav.play}
                     </Button>
                 </Link>
                 <Link
-                    href={Route.LEVEL_EDITOR('new')}
+                    href={Route.LEVEL_EDITOR_ROOT}
                     legacyBehavior
                     passHref
                     className="top-bar__logo"
@@ -52,10 +54,25 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
                         variant="contained"
                         startIcon={<HandymanIcon />}
                     >
-                        Editor
+                        {dictionary.nav.editor}
                     </Button>
                 </Link>
+                {/* <Link
+                    href={Route.LEVEL_EDITOR_ROOT}
+                    legacyBehavior
+                    passHref
+                    className="top-bar__logo"
+                >
+                    <Button
+                        size="small"
+                        variant="contained"
+                        startIcon={<PeopleIcon />}
+                    >
+                        {dictionary.nav.community}
+                    </Button>
+                </Link> */}
                 <UserMenu dictionary={dictionary} />
+                {/* <SideMenu dictionary={dictionary} /> */}
             </Toolbar>
         </AppBar>
     );

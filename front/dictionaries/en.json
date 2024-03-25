@@ -47,6 +47,8 @@
             "success-reset-password-sent-email": "An email as successfully been sent to reset your password",
             "success-new-password": "Your password has been successfully updated",
             "success-level-saved": "Your level has been successfully saved",
+            "success-level-published": "Your level has been successfully published",
+            "success-level-unpublished": "Your level has been successfully unpublished",
             "success-level-deleted": "Your level has been successfully deleted",
             "success-level-thumbnail-uploaded": "Your level thumbnail has been successfully uploaded",
             "error-level-name-taken": "This level name already exists. Please choose another name",

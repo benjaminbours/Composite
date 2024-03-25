@@ -16,6 +16,7 @@ type Props = LevelElement & {
     onDelete: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     disabled?: boolean;
+    cantDelete?: boolean;
 };
 
 export const SceneItem: React.FC<Props> = React.memo(
@@ -27,6 +28,7 @@ export const SceneItem: React.FC<Props> = React.memo(
         onDelete,
         onChangeName,
         disabled,
+        cantDelete,
     }) => {
         return (
             <ListItem
@@ -36,7 +38,7 @@ export const SceneItem: React.FC<Props> = React.memo(
                         edge="end"
                         aria-label="delete"
                         onClick={onDelete(index)}
-                        disabled={disabled}
+                        disabled={disabled || cantDelete}
                     >
                         <DeleteIcon />
                     </IconButton>

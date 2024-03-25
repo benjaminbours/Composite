@@ -9,7 +9,7 @@ interface IProps {
 export default function ButtonBack({ onClick }: IProps) {
     const cssClass = classNames({
         buttonRect: true,
-        back: true,
+        white: true,
     });
     return (
         <button className={cssClass} onClick={onClick}>

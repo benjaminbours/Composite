@@ -38,6 +38,7 @@ interface Props {
     name: string;
     src: string;
     isSelectedByTeamMate?: boolean;
+    isSelectedByYou?: boolean;
     queueInfo?: QueueInfo;
 }
 
@@ -47,6 +48,7 @@ export const LevelPortal: React.FC<Props> = ({
     name,
     src,
     isSelectedByTeamMate,
+    isSelectedByYou,
     queueInfo,
 }) => {
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
@@ -62,6 +64,7 @@ export const LevelPortal: React.FC<Props> = ({
     const cssClass = classNames({
         'level-portal': true,
         'level-portal--selected-by-team-mate': isSelectedByTeamMate,
+        'level-portal--selected-by-you': isSelectedByYou,
     });
 
     return (

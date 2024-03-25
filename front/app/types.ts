@@ -1,3 +1,4 @@
+import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 import { Side } from '@benjaminbours/composite-core';
 
 export enum MenuScene {
@@ -58,4 +59,5 @@ export interface PartialLevel {
     id: number;
     name: string;
     data: any;
+    status: LevelStatusEnum;
 }

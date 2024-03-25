@@ -20,13 +20,16 @@ import {
     WorldContext,
     addToCollidingElements,
 } from '@benjaminbours/composite-core';
+import {
+    LevelStatusEnum,
+    type Level,
+} from '@benjaminbours/composite-api-client';
 import App from '../../../Game/App';
 import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
 import { servicesContainer } from '../../../core/frameworks';
 import { ApiClient } from '../../../core/services';
 import { useRouter } from 'next/navigation';
 import { Route } from '../../../types';
-import { Level } from '@benjaminbours/composite-api-client';
 import { useStoreState } from '../../../hooks';
 import { generateErrorNotification } from '../../../utils/errors/generateErrorNotification';
 import {
@@ -39,7 +42,7 @@ import {
 
 export function useController(
     level_id: string,
-    initialLevel: { name: string; data: any },
+    initialLevel: { name: string; data: any; status: LevelStatusEnum },
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'],
 ) {
     const isAuthenticated = useStoreState(
@@ -57,6 +60,7 @@ export function useController(
     );
     const [currentEditingIndex, setCurrentEditingIndex] = useState<number>();
     const [levelName, setLevelName] = useState(initialLevel.name);
+    const [levelStatus, setLevelStatus] = useState(initialLevel.status);
     const [elements, setElements] = useState<LevelElement[]>([]);
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
@@ -89,7 +93,7 @@ export function useController(
     );
 
     const handleClickOnSave = useCallback(
-        (isFork?: boolean) => {
+        (isFork?: boolean, status?: LevelStatusEnum) => {
             if (!levelName) {
                 enqueueSnackbar(
                     dictionary.notification['error-missing-level-name'],
@@ -136,17 +140,48 @@ export function useController(
                 //     'after',
                 //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
                 // );
-                enqueueSnackbar(
-                    dictionary.notification['success-level-saved'],
-                    {
-                        variant: 'success',
-                    },
-                );
+                const successMessage = (() => {
+                    if (status === LevelStatusEnum.Published) {
+                        return dictionary.notification[
+                            'success-level-published'
+                        ];
+                    }
+
+                    if (status === LevelStatusEnum.Draft) {
+                        return dictionary.notification[
+                            'success-level-unpublished'
+                        ];
+                    }
+                    return dictionary.notification['success-level-saved'];
+                })();
+                enqueueSnackbar(successMessage, {
+                    variant: 'success',
+                });
                 setElements(nextState);
+                setLevelStatus(level.status);
+            };
+            const onCatch = async (error: any) => {
+                console.error(error);
+                const errorData = await error.response.json();
+                let message;
+                if (errorData.message === 'Unique constraint violation') {
+                    message = dictionary.notification['error-level-name-taken'];
+                    setHasErrorWithLevelName(true);
+                } else if (errorData.message.includes('Value is too long')) {
+                    message =
+                        dictionary.notification['error-level-name-too-long'];
+                    setHasErrorWithLevelName(true);
+                } else {
+                    message = generateErrorNotification(errorData, dictionary);
+                }
+                enqueueSnackbar(message, {
+                    variant: 'error',
+                });
             };
             const onFinally = () => {
                 setIsSaving(false);
             };
+
             setIsSaving(true);
             const elementsToSend = elements.map((el) => ({
                 type: el.type,
@@ -162,36 +197,7 @@ export function useController(
                         },
                     })
                     .then(onSuccess)
-                    .catch(async (error: any) => {
-                        console.error(error);
-                        const errorData = await error.response.json();
-                        let message;
-                        if (
-                            errorData.message === 'Unique constraint violation'
-                        ) {
-                            message =
-                                dictionary.notification[
-                                    'error-level-name-taken'
-                                ];
-                            setHasErrorWithLevelName(true);
-                        } else if (
-                            errorData.message.includes('Value is too long')
-                        ) {
-                            message =
-                                dictionary.notification[
-                                    'error-level-name-too-long'
-                                ];
-                            setHasErrorWithLevelName(true);
-                        } else {
-                            message = generateErrorNotification(
-                                errorData,
-                                dictionary,
-                            );
-                        }
-                        enqueueSnackbar(message, {
-                            variant: 'error',
-                        });
-                    })
+                    .catch(onCatch)
                     .finally(onFinally);
             } else {
                 apiClient.defaultApi
@@ -200,9 +206,11 @@ export function useController(
                         updateLevelDto: {
                             name: levelName,
                             data: elementsToSend,
+                            status,
                         },
                     })
                     .then(onSuccess)
+                    .catch(onCatch)
                     .finally(onFinally);
             }
         },
@@ -593,6 +601,7 @@ export function useController(
 
     return {
         levelName,
+        levelStatus,
         elements,
         hasErrorWithLevelName,
         currentEditingIndex,

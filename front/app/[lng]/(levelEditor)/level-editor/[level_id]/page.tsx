@@ -7,6 +7,8 @@ import { servicesContainer } from '../../../../core/frameworks/inversify.config'
 import { ApiClient } from '../../../../core/services';
 import { notFound } from 'next/navigation';
 import { PartialLevel } from '../../../../types';
+import { ElementType, EndLevelProperties } from '@benjaminbours/composite-core';
+import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 
 export const metadata: Metadata = {
     title: 'Composite - Level editor',
@@ -25,7 +27,16 @@ async function getData(level_id: string): Promise<PartialLevel | undefined> {
         const defaultLevel = {
             id: 0,
             name: '',
-            data: [],
+            data: [
+                {
+                    name: 'end_level',
+                    type: ElementType.END_LEVEL,
+                    properties: JSON.parse(
+                        JSON.stringify(new EndLevelProperties()),
+                    ),
+                },
+            ],
+            status: LevelStatusEnum.Draft,
         };
         return defaultLevel;
     }

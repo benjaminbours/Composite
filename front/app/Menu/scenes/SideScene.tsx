@@ -11,7 +11,7 @@ interface Props {
     sideRef: React.RefObject<HTMLDivElement>;
     selectedLevel?: number;
     levelName?: string;
-    onClickOnFaction: (side: Side) => void;
+    // onClickOnFaction: (side: Side) => void;
     allQueueInfo?: AllQueueInfo;
     actions: React.ReactNode;
     isMount: boolean;
@@ -21,7 +21,7 @@ export const SideScene: React.FC<Props> = ({
     sideRef,
     selectedLevel,
     levelName,
-    onClickOnFaction,
+    // onClickOnFaction,
     allQueueInfo,
     actions,
     isMount,
@@ -43,7 +43,7 @@ export const SideScene: React.FC<Props> = ({
                 // TODO: had same interaction as on home page
                 // onMouseEnter={handleMouseEnterPlay}
                 // onMouseLeave={handleMouseLeavePlay}
-                onClick={() => onClickOnFaction(Side.LIGHT)}
+                // onClick={() => onClickOnFaction(Side.LIGHT)}
             >
                 light
             </button>
@@ -52,7 +52,7 @@ export const SideScene: React.FC<Props> = ({
                 // TODO: had same interaction as on home page
                 // onMouseEnter={handleMouseEnterPlay}
                 // onMouseLeave={handleMouseLeavePlay}
-                onClick={() => onClickOnFaction(Side.SHADOW)}
+                // onClick={() => onClickOnFaction(Side.SHADOW)}
             >
                 shadow
             </button>
