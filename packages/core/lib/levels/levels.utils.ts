@@ -753,8 +753,11 @@ export function addToCollidingElements(
 ) {
     const pushToCollidingElements = (mesh: Mesh) => {
         if (detectIfMeshIsCollidable(mesh)) {
-            (mesh.geometry as any).computeBoundsTree();
-            collidingElements.push(mesh);
+            // TODO: Investigate why this condition is needed. Is it because sometimes it's not a mesh or it's not a buffer geometry?
+            if (mesh.geometry && (mesh.geometry as any).computeBoundsTree) {
+                (mesh.geometry as any)?.computeBoundsTree();
+                collidingElements.push(mesh);
+            }
         }
     };
     const checkChildren = (elements: Object3D[]) => {
