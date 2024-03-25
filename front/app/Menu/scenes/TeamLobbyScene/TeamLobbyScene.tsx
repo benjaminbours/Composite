@@ -1,8 +1,6 @@
 // vendors
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
 import { Level } from '@benjaminbours/composite-api-client';
 import { useSearchParams } from 'next/navigation';
@@ -140,10 +138,12 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         useEffect(() => {
             const level = Number(urlSearchParams.get('level'));
             if (isMount) {
-                handleSelectLevel(Number.isNaN(level) ? levels[0].id : level);
+                handleSelectLevel(
+                    Number.isNaN(level) || level === 0 ? levels[0].id : level,
+                );
             }
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [isMount]);
+        }, [isMount, levels]);
 
         return (
             <div ref={teamLobbyRef} className={cssClass}>

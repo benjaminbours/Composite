@@ -1,3 +1,7 @@
+.root {
+    width: 100%;
+}
+
 .header {
     display: flex;
     align-items: center;
@@ -66,6 +70,7 @@
 .carousel-container {
     width: 100%;
     padding: 0 25%;
+    box-sizing: border-box;
 }
 
 .slider {

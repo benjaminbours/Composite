@@ -472,7 +472,7 @@ $buttonSizeLarge: 120px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    // cursor: pointer;
     position: relative;
 
     p {
@@ -590,6 +590,18 @@ $buttonSizeLarge: 120px;
                 --y: -45%;
                 --t: 62;
             }
+        }
+    }
+
+    &--selected-by-you {
+        .ying-yang .white {
+            opacity: 0.8;
+        }
+    }
+
+    &--selected-by-team-mate {
+        .ying-yang .black {
+            opacity: 0.8;
         }
     }
 }

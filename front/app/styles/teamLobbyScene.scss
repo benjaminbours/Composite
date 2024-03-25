@@ -48,12 +48,6 @@
     }
 }
 
-.level-portal--selected-by-team-mate {
-    .ying-yang .black {
-        opacity: 0.8;
-    }
-}
-
 // end global carousel styles
 
 .team-lobby-scene__column-left {
@@ -70,4 +64,22 @@
 
 .team-lobby-scene__login-button {
     margin-left: auto;
+}
+
+.custom-carousel {
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+        display: flex;
+        transition: left 300ms ease-in-out;
+    }
+
+    li {
+        width: 400px;
+        min-width: 400px;
+        box-sizing: border-box;
+        padding: 0 50px;
+    }
 }

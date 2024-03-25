@@ -3,7 +3,6 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Slider from '@mui/material/Slider';
 import IconButton from '@mui/material/IconButton';
-import SlickSlider, { Settings } from 'react-slick';
 import JoinLeftIcon from '@mui/icons-material/JoinLeft';
 import { LevelPortal } from '../LevelPortal';
 import { Level } from '@benjaminbours/composite-api-client';
@@ -39,51 +38,15 @@ export const LevelSelector: React.FC<Props> = ({
     selectedLevel,
 }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [slideIndex, setSlideIndex] = useState(0);
-    const sliderRef = useRef<any>(null);
-
-    const next = () => {
-        sliderRef.current?.slickNext();
-    };
-    const previous = () => {
-        sliderRef.current?.slickPrev();
-    };
-
-    useEffect(() => {
+    const [slideIndex, setSlideIndex] = useState(() => {
         if (selectedLevel && levels.length > 0) {
             const index = levels.findIndex(
                 (level) => level.id === selectedLevel,
             );
-            if (index !== -1) {
-                setSlideIndex(index);
-                handleSelectLevel(selectedLevel);
-                console.log(sliderRef.current);
-
-                sliderRef.current?.slickGoTo(index);
-            }
+            return index !== -1 ? index + 1 : 1;
         }
-    }, [selectedLevel, levels, handleSelectLevel]);
-
-    const settings: Settings = {
-        className: styles['carousel-container'],
-        centerMode: true,
-        focusOnSelect: !disabled,
-        infinite: false,
-        centerPadding: '20px',
-        useTransform: false,
-        slidesToShow: 1,
-        speed: 500,
-        arrows: false,
-        draggable: false,
-        // waitForAnimate: false,
-        beforeChange: function (currentSlide: number, nextSlide: number) {
-            const level = levels[nextSlide];
-            handleSelectLevel(level.id);
-        },
-        afterChange: function (currentSlide: number) {
-            setSlideIndex(currentSlide);
-        },
-    };
+        return 1;
+    });
 
     // effect to randomize portal animations
     useEffect(() => {
@@ -99,8 +62,46 @@ export const LevelSelector: React.FC<Props> = ({
         return (fetchTime / QUEUE_INFO_FETCH_INTERVAL) * 100;
     }, [fetchTime]);
 
+    const customCarouselList = useRef<HTMLUListElement>(null);
+    const childWidth = 400;
+    const [carouselTransform, setCarouselTransform] = useState(childWidth / 2);
+
+    const next = () => {
+        if (slideIndex === levels.length) {
+            return;
+        }
+        setCarouselTransform((prev) => prev + childWidth);
+        setSlideIndex((prev) => prev + 1);
+    };
+
+    const previous = () => {
+        if (slideIndex === 1) {
+            return;
+        }
+        setCarouselTransform((prev) => prev - childWidth);
+        setSlideIndex((prev) => prev - 1);
+    };
+
+    useEffect(() => {
+        if (!selectedLevel) {
+            return;
+        }
+        const index = levels.findIndex((level) => level.id === selectedLevel);
+        if (index === -1) {
+            return;
+        }
+
+        setCarouselTransform((index + 1) * childWidth - childWidth / 2);
+        setSlideIndex(index + 1);
+    }, [selectedLevel, levels]);
+
+    useEffect(() => {
+        const level = levels[slideIndex - 1];
+        handleSelectLevel(level.id);
+    }, [slideIndex, handleSelectLevel, levels]);
+
     return (
-        <div className="team-lobby-scene__level-container">
+        <div className={styles.root}>
             <div className={styles.header}>
                 <h2 className="title-h3 title-h3--white">Select a level</h2>
                 <button
@@ -138,23 +139,35 @@ export const LevelSelector: React.FC<Props> = ({
                     </IconButton>
                 )}
             </div>
-            <SlickSlider ref={sliderRef} {...settings}>
-                {levels.map(({ id, name }) => {
-                    return (
-                        <LevelPortal
-                            name={name}
-                            key={id}
-                            isSelectedByTeamMate={id === levelSelectedByMate}
-                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
-                            queueInfo={
-                                shouldDisplayQueueInfo
-                                    ? queueInfo?.levels[String(id) as any]
-                                    : undefined
-                            }
-                        />
-                    );
-                })}
-            </SlickSlider>
+
+            <div className="custom-carousel">
+                <ul
+                    style={{ left: `calc(50% - ${carouselTransform}px)` }}
+                    ref={customCarouselList}
+                >
+                    {levels.map(({ id, name }) => {
+                        return (
+                            <li key={id}>
+                                <LevelPortal
+                                    name={name}
+                                    isSelectedByYou={id === selectedLevel}
+                                    isSelectedByTeamMate={
+                                        id === levelSelectedByMate
+                                    }
+                                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
+                                    queueInfo={
+                                        shouldDisplayQueueInfo
+                                            ? queueInfo?.levels[
+                                                  String(id) as any
+                                              ]
+                                            : undefined
+                                    }
+                                />
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
             <div className={styles.controls}>
                 <IconButton disabled={disabled} onClick={previous}>
                     <ArrowBackIosNewIcon />
@@ -164,13 +177,15 @@ export const LevelSelector: React.FC<Props> = ({
                     className={styles.slider}
                     size="small"
                     value={slideIndex}
-                    min={0}
-                    max={levels.length - 1}
+                    min={1}
+                    max={levels.length}
                     onChange={(e, value) => {
                         setSlideIndex(value as number);
                     }}
                     onChangeCommitted={(_, value) => {
-                        sliderRef.current?.slickGoTo(value as number);
+                        setCarouselTransform(
+                            (value as number) * childWidth - childWidth / 2,
+                        );
                     }}
                 />
                 <IconButton disabled={disabled} onClick={next}>
