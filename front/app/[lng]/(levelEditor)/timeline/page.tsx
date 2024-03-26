@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { TopBar } from '../../../02_molecules/TopBar';
+import { Locale } from '../../../../i18n-config';
+import { getDictionary } from '../../../../getDictionary';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Timeline',
@@ -161,7 +164,7 @@ const pastEvents: TimelineEvent[] = [
                                 href="https://www.gabrielgambetta.com/client-server-game-architecture.html"
                                 target="_blank"
                             >
-                                series of article from Gabriel Gambetta
+                                series&nbsp;of&nbsp;article&nbsp;from&nbsp;Gabriel&nbsp;Gambetta
                             </a>{' '}
                             to name only one, I moved from my initial proof of
                             concept, which was very naive and not scalable at
@@ -473,8 +476,10 @@ const pastEvents: TimelineEvent[] = [
                         </p>
                     </li>
                     <li>
-                        Deploy all changes from week 3 and 4 on dev environment
-                        for testing.
+                        <p>
+                            Deploy all changes from week 3 and 4 on dev
+                            environment for testing.
+                        </p>
                     </li>
                 </ul>
             </>
@@ -567,8 +572,10 @@ const futureEvents: TimelineEvent[] = [
                 <h3>Objectives</h3>
                 <ul>
                     <li>
-                        Electron app installable on desktop, with auto update,
-                        and register it on steam.
+                        <p>
+                            Electron app installable on desktop, with auto
+                            update, and register it on steam.
+                        </p>
                     </li>
                     <li>
                         <p>Many more levels</p>
@@ -597,7 +604,7 @@ const futureEvents: TimelineEvent[] = [
                                 target="_blank"
                                 className="inline-link"
                             >
-                                curve fever style
+                                curve&nbsp;fever style
                             </a>
                             ).
                         </p>
@@ -635,43 +642,53 @@ const futureEvents: TimelineEvent[] = [
     },
 ];
 
-export default async function Timeline() {
-    return (
-        <main className="timeline-page">
-            <div className="main-container">
-                <h1>Composite - Timeline</h1>
-                <ul className="timeline">
-                    {pastEvents.map((event, index) => (
-                        <li key={index} className="timeline-event">
-                            <h2 className="timeline-event-date">
-                                {event.date}
-                            </h2>
-                            <div className="timeline-event-description">
-                                {event.description}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-                <h2 id="roadmap">Roadmap</h2>
-                <ul className="timeline">
-                    {futureEvents.map((event, index) => (
-                        <li key={index} className="timeline-event">
-                            <div className="timeline-event-date">
-                                {event.date}
-                            </div>
-                            <div className="timeline-event-description">
-                                {event.description}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+interface Props {
+    params: {
+        lng: Locale;
+    };
+}
 
-                <div className="button-container">
-                    <Link href="/" className="buttonCircle" id="buttonPlay">
-                        Play
-                    </Link>
+export default async function Timeline({ params: { lng } }: Props) {
+    const dictionary = await getDictionary(lng);
+    return (
+        <>
+            <TopBar dictionary={dictionary.common} />
+            <main className="timeline-page">
+                <div className="main-container">
+                    <h1>Composite - Timeline</h1>
+                    <ul className="timeline">
+                        {pastEvents.map((event, index) => (
+                            <li key={index} className="timeline-event">
+                                <h2 className="timeline-event-date">
+                                    {event.date}
+                                </h2>
+                                <div className="timeline-event-description">
+                                    {event.description}
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <h2 id="roadmap">Roadmap</h2>
+                    <ul className="timeline">
+                        {futureEvents.map((event, index) => (
+                            <li key={index} className="timeline-event">
+                                <div className="timeline-event-date">
+                                    {event.date}
+                                </div>
+                                <div className="timeline-event-description">
+                                    {event.description}
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <div className="button-container">
+                        <Link href="/" className="buttonCircle" id="buttonPlay">
+                            Play
+                        </Link>
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </>
     );
 }
