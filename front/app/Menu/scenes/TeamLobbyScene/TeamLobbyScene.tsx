@@ -174,6 +174,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         players={[you, mate]}
                         onInviteFriend={inviteFriend}
                         isInQueue={isInQueue}
+                        levels={levels}
                     />
                 </div>
                 <div className="team-lobby-scene__column-right">
