@@ -37,25 +37,14 @@
     }
 }
 
-// start global carousel styles
-.slick-center {
-    // .level-portal {
-    // transform: scale(1.2);
-    // }
-
-    .ying-yang .white {
-        opacity: 0.8;
-    }
-}
-
-// end global carousel styles
-
 .team-lobby-scene__column-left {
     margin-left: 2.5%;
 }
 
 .team-lobby-scene__column-right {
     width: 60%;
+    flex: 1;
+    margin-right: 2.5%;
     height: 100%;
     margin-left: 5%;
     display: flex;

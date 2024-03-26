@@ -31,6 +31,13 @@ export class LevelsService {
         where: {
           authorId: authorId,
         },
+        include: {
+          author: {
+            select: {
+              name: true,
+            },
+          },
+        },
       })
       .catch((err) => {
         throw handlePrismaError(err);

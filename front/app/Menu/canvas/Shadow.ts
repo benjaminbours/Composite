@@ -32,6 +32,8 @@ export default class Shadow {
         if (window.innerWidth > 2000) {
             width = 800;
         }
+
+        const marginLeft = canvasWidth * 0.075 + 322;
         switch (scene) {
             case MenuScene.NOT_FOUND:
                 return {
@@ -52,9 +54,10 @@ export default class Shadow {
             case MenuScene.TEAM_LOBBY:
                 // TODO: Fix this, its too related to the layout of team lobby page, in light and curve as well
                 let x =
-                    ((canvasWidth * 0.6) / 2 + canvasWidth * 0.075 + 322) /
+                    ((canvasWidth - marginLeft - canvasWidth * 0.025) / 2 +
+                        marginLeft) /
                     canvasWidth;
-                x += 0.15;
+                x += 0.175;
                 return {
                     coordinates: {
                         x: canvasWidth * x,
@@ -64,7 +67,8 @@ export default class Shadow {
                 };
             case MenuScene.TEAM_LOBBY_SELECTED:
                 let xPos =
-                    ((canvasWidth * 0.6) / 2 + canvasWidth * 0.075 + 322) /
+                    ((canvasWidth - marginLeft - canvasWidth * 0.025) / 2 +
+                        marginLeft) /
                     canvasWidth;
                 return {
                     coordinates: {

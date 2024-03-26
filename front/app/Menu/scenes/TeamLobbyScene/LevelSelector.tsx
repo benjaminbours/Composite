@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Slider from '@mui/material/Slider';
@@ -11,6 +17,8 @@ import styles from './LevelSelector.module.scss';
 import { AllQueueInfo } from '@benjaminbours/composite-core';
 import CircularProgress from '@mui/material/CircularProgress';
 import { QUEUE_INFO_FETCH_INTERVAL } from '../../Menu';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 interface Props {
     levels: Level[];
@@ -37,6 +45,15 @@ export const LevelSelector: React.FC<Props> = ({
     handleClickOnQueueInfo,
     selectedLevel,
 }) => {
+    const authorList = useMemo(() => {
+        const list = levels.reduce((acc, level) => {
+            acc.includes(level.author!.name) || acc.push(level.author!.name);
+            return acc;
+        }, [] as string[]);
+        list.unshift('All');
+        return list;
+    }, [levels]);
+    const [author, setAuthor] = useState<string>(authorList[0]);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [slideIndex, setSlideIndex] = useState(() => {
         if (selectedLevel && levels.length > 0) {
@@ -66,54 +83,85 @@ export const LevelSelector: React.FC<Props> = ({
     const childWidth = 400;
     const [carouselTransform, setCarouselTransform] = useState(childWidth / 2);
 
-    const next = () => {
-        if (slideIndex === levels.length) {
+    const levelsToDisplay = useMemo(() => {
+        if (author === 'All') {
+            return levels;
+        }
+        return levels.filter((level) => level.author!.name === author);
+    }, [levels, author]);
+
+    const next = useCallback(() => {
+        if (slideIndex === levelsToDisplay.length) {
             return;
         }
         setCarouselTransform((prev) => prev + childWidth);
         setSlideIndex((prev) => prev + 1);
-    };
+        const level = levelsToDisplay[slideIndex];
+        if (level) {
+            handleSelectLevel(level.id);
+        }
+    }, [slideIndex, levelsToDisplay, handleSelectLevel]);
 
-    const previous = () => {
+    const previous = useCallback(() => {
         if (slideIndex === 1) {
             return;
         }
         setCarouselTransform((prev) => prev - childWidth);
         setSlideIndex((prev) => prev - 1);
-    };
+        const level = levelsToDisplay[slideIndex - 2];
+        if (level) {
+            handleSelectLevel(level.id);
+        }
+    }, [slideIndex, handleSelectLevel, levelsToDisplay]);
 
+    // effect responsible to update the carousel when selected level change
     useEffect(() => {
         if (!selectedLevel) {
             return;
         }
-        const index = levels.findIndex((level) => level.id === selectedLevel);
+        const index = levelsToDisplay.findIndex(
+            (level) => level.id === selectedLevel,
+        );
         if (index === -1) {
             return;
         }
 
         setCarouselTransform((index + 1) * childWidth - childWidth / 2);
         setSlideIndex(index + 1);
-    }, [selectedLevel, levels]);
+    }, [selectedLevel, levelsToDisplay]);
 
+    // effect responsible to update selected level when author change
     useEffect(() => {
-        const level = levels[slideIndex - 1];
+        if (author === 'All') {
+            return;
+        }
+        const level = levelsToDisplay[0];
         handleSelectLevel(level.id);
-    }, [slideIndex, handleSelectLevel, levels]);
+        setSlideIndex(1);
+    }, [author, levelsToDisplay, handleSelectLevel]);
 
     return (
         <div className={styles.root}>
             <div className={styles.header}>
                 <h2 className="title-h3 title-h3--white">Select a level</h2>
-                <button
-                    className={styles['queue-info-icon']}
-                    onMouseEnter={(event: React.MouseEvent<HTMLElement>) =>
-                        setAnchorEl(event.currentTarget)
-                    }
-                    onMouseLeave={() => setAnchorEl(null)}
-                    onClick={handleClickOnQueueInfo}
-                >
-                    <JoinLeftIcon />
-                </button>
+
+                <Autocomplete
+                    className={styles['author-selector']}
+                    disablePortal
+                    onChange={(_, value) => {
+                        setAuthor(value ? (value as string) : 'All');
+                    }}
+                    includeInputInList
+                    value={author}
+                    options={authorList}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="standard"
+                            label="Author"
+                        />
+                    )}
+                />
                 <Popper
                     open={Boolean(anchorEl)}
                     anchorEl={anchorEl}
@@ -126,18 +174,30 @@ export const LevelSelector: React.FC<Props> = ({
                             : 'Display matchmaking queue info'}
                     </p>
                 </Popper>
-                {shouldDisplayQueueInfo && (
-                    <IconButton
-                        className={styles['queue-fetch-progress']}
-                        onClick={fetchQueueInfo}
+                <div className={styles['queue-container']}>
+                    {shouldDisplayQueueInfo && (
+                        <IconButton
+                            className={styles['queue-fetch-progress']}
+                            onClick={fetchQueueInfo}
+                        >
+                            <CircularProgress
+                                variant="determinate"
+                                size={30}
+                                value={progress}
+                            />
+                        </IconButton>
+                    )}
+                    <button
+                        className={styles['queue-info-icon']}
+                        onMouseEnter={(event: React.MouseEvent<HTMLElement>) =>
+                            setAnchorEl(event.currentTarget)
+                        }
+                        onMouseLeave={() => setAnchorEl(null)}
+                        onClick={handleClickOnQueueInfo}
                     >
-                        <CircularProgress
-                            variant="determinate"
-                            size={30}
-                            value={progress}
-                        />
-                    </IconButton>
-                )}
+                        <JoinLeftIcon />
+                    </button>
+                </div>
             </div>
 
             <div className="custom-carousel">
@@ -145,7 +205,7 @@ export const LevelSelector: React.FC<Props> = ({
                     style={{ left: `calc(50% - ${carouselTransform}px)` }}
                     ref={customCarouselList}
                 >
-                    {levels.map(({ id, name }) => {
+                    {levelsToDisplay.map(({ id, name }) => {
                         return (
                             <li key={id}>
                                 <LevelPortal
@@ -178,7 +238,7 @@ export const LevelSelector: React.FC<Props> = ({
                     size="small"
                     value={slideIndex}
                     min={1}
-                    max={levels.length}
+                    max={levelsToDisplay.length}
                     onChange={(e, value) => {
                         setSlideIndex(value as number);
                     }}
@@ -186,6 +246,10 @@ export const LevelSelector: React.FC<Props> = ({
                         setCarouselTransform(
                             (value as number) * childWidth - childWidth / 2,
                         );
+                        const level = levelsToDisplay[(value as number) - 1];
+                        if (level) {
+                            handleSelectLevel(level.id);
+                        }
                     }}
                 />
                 <IconButton disabled={disabled} onClick={next}>

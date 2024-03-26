@@ -16,6 +16,11 @@ export class Element implements Omit<LevelElement, 'mesh'> {
   properties: any; // json
 }
 
+class Author {
+  @ApiProperty({ type: String })
+  name: string;
+}
+
 export class Level implements PrismaLevel {
   @ApiProperty()
   id: number;
@@ -33,4 +38,6 @@ export class Level implements PrismaLevel {
   createdAt: Date;
   @ApiProperty({ type: String })
   updatedAt: Date;
+  @ApiProperty({ type: Author, required: false })
+  author?: Author;
 }

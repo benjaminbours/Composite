@@ -8,6 +8,12 @@
     justify-content: flex-start;
 }
 
+.queue-container {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
 .queue-info-icon {
     all: unset;
     margin-left: 10px;
@@ -20,6 +26,8 @@
     cursor: pointer;
     border: solid 1px transparent;
     transition: 0.3s ease-out;
+    border: solid white 1px;
+    mix-blend-mode: difference;
 
     svg {
         transition: 0.3s ease-out;
@@ -75,4 +83,18 @@
 
 .slider {
     color: white;
+}
+
+.author-selector {
+    margin-left: 20px;
+    mix-blend-mode: difference;
+    width: 200px;
+
+    * {
+        color: white !important;
+    }
+
+    :after {
+        border-color: white !important;
+    }
 }
