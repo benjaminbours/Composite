@@ -9,16 +9,11 @@ import CanvasWhite from './canvas/CanvasWhite';
 import Mouse from './canvas/Mouse';
 import { MenuScene } from '../types';
 import {
-    QueueScene,
-    SideScene,
     EndLevelScene,
-    LevelScene,
     HomeScene,
-    InviteFriendScene,
     TeamLobbyScene,
     NotFoundScene,
 } from './scenes';
-import { Actions } from './Actions';
 import { RefHashMap } from '../useMenuTransition';
 import { useMainController } from '../useMainController';
 import { getDictionary } from '../../getDictionary';
@@ -57,7 +52,6 @@ export function Menu({
         state,
         setState,
         levels,
-        // handleClickOnBack,
         handleClickHome,
         handleClickPlayAgain,
         handleClickPlay,
@@ -182,32 +176,6 @@ export function Menu({
         };
     }, [resize]);
 
-    const levelName = levels.find(
-        (level) => level.id === state.you.level,
-    )?.name;
-
-    // const actions = useMemo(() => {
-    //     return (
-    //         <Actions
-    //             onBack={handleClickOnBack}
-    //             // onQuitTeam={mode === '' ? handleClickOnQuitTeam : undefined}
-    //             // onClickJoinTeamMate={handleClickOnJoinTeamMate}
-    //             // teamMate={{
-    //             //     info: teamMateInfo,
-    //             //     levelName: levels.find(
-    //             //         (level) => level.id === teamMateInfo?.selectedLevel,
-    //             //     )?.name,
-    //             // }}
-    //         />
-    //     );
-    // }, [
-    //     handleClickOnBack,
-    //     // handleClickOnJoinTeamMate,
-    //     // handleClickOnQuitTeam,
-    //     // levels,
-    //     // teamMateInfo,
-    // ]);
-
     const setLightIsPulsingFast = useCallback(
         (value: boolean) => {
             if (!refHashMap.canvasBlack.current) {
@@ -289,15 +257,6 @@ export function Menu({
                 setLightIsPulsingFast={setLightIsPulsingFast}
                 setShadowRotationSpeed={setShadowRotationSpeed}
             />
-            {/* <InviteFriendScene
-                isMount={
-                    menuScene === MenuScene.INVITE_FRIEND ||
-                    nextMenuScene === MenuScene.INVITE_FRIEND
-                }
-                handleClickOnRandom={handleClickPlayWithRandom}
-                inviteFriendRef={refHashMap.inviteFriendRef}
-                actions={actions}
-            /> */}
             <TeamLobbyScene
                 dictionary={dictionary}
                 isMount={
@@ -326,40 +285,6 @@ export function Menu({
                 queueInfo={allQueueInfo}
                 shouldDisplayQueueInfo={state.shouldDisplayQueueInfo}
             />
-            {/* <LevelScene
-                actions={actions}
-                allQueueInfo={allQueueInfo}
-                onClickOnLevel={handleSelectLevel}
-                levels={levels}
-                levelRef={refHashMap.levelRef}
-                isMount={
-                    menuScene === MenuScene.LEVEL ||
-                    nextMenuScene === MenuScene.LEVEL
-                }
-            />
-            <SideScene
-                sideRef={refHashMap.sideRef}
-                actions={actions}
-                selectedLevel={state.you.level}
-                levelName={levelName}
-                // onClickOnFaction={handleEnterRandomQueue}
-                allQueueInfo={allQueueInfo}
-                isMount={
-                    menuScene === MenuScene.FACTION ||
-                    nextMenuScene === MenuScene.FACTION
-                }
-            />
-            <QueueScene
-                queueRef={refHashMap.queueRef}
-                side={state.you.side}
-                levelName={levelName}
-                isInQueue={menuScene === MenuScene.QUEUE}
-                actions={actions}
-                isMount={
-                    menuScene === MenuScene.QUEUE ||
-                    nextMenuScene === MenuScene.QUEUE
-                }
-            /> */}
             <EndLevelScene
                 isMount={
                     menuScene === MenuScene.END_LEVEL ||
