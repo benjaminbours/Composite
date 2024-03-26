@@ -367,9 +367,10 @@ export function Menu({
                 }
                 endLevelRef={refHashMap.endLevelRef}
                 side={state.you.side}
-                levelName={levelName}
+                level={state.loadedLevel}
+                mate={state.mate}
                 handleClickOnPlay={handleClickPlayAgain}
-                // actions={actions}
+                handleClickOnExit={exitLobby}
                 setLightIsPulsingFast={setLightIsPulsingFast}
                 setShadowRotationSpeed={setShadowRotationSpeed}
             />

@@ -4,58 +4,69 @@
         text-align: center;
     }
 
-    h2 {
-        width: 100%;
-        margin-top: 30px;
-    }
-
-    &--black {
-        color: black;
-
-        .inline-link {
-            color: black;
-
-            &::before {
-                border-color: black;
-            }
-        }
-    }
-
-    &--white {
+    h2,
+    h3,
+    p {
+        mix-blend-mode: difference;
         color: white;
+    }
+
+    .thank-emoji {
+        mix-blend-mode: initial;
+        margin-left: 10px;
+    }
+
+    .thank-you {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+    }
+}
+
+.end-level-container__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 25px 0;
+
+    h2 {
+        margin: 0;
+    }
+}
+
+.end-level-container__text-container {
+    width: 70%;
+    margin: 0 auto;
+}
+
+.end-level-container__like-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    h3 {
+        width: 100%;
+    }
+
+    button {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+
+        svg {
+            margin-left: 10px;
+        }
     }
 }
 
 .end-level-container__share {
-    @include centerAbsoluteHorizontal();
-    position: fixed;
-    width: 70%;
-    bottom: 5%;
+    margin: 50px 0;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-
-    .text-container {
-        width: 100%;
-        min-width: 100%;
-        flex-direction: column;
-        align-items: center;
-
-        p {
-            width: 70%;
-            line-height: 2;
-            font-weight: 100;
-            font-size: 20px;
-        }
-    }
-
-    h3 {
-        text-transform: uppercase;
-        letter-spacing: 5px;
-        font-weight: 100;
-    }
 
     > div {
         flex: 1;
@@ -65,6 +76,7 @@
 
     .patreon-container iframe {
         width: 180px !important;
+        background: white;
     }
 
     @media (max-width: 768px) {
@@ -89,22 +101,18 @@
     }
 }
 
+.end-level-container__play-button-container {
+    display: flex;
+    justify-content: center;
+    margin: 100px 0;
+}
+
 .end-level-container__play-button {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    color: white;
+    background: black;
+    mix-blend-mode: initial;
 
-    &.white {
-        color: black;
-    }
-
-    &.black {
+    &:hover {
         color: white;
-    }
-
-    @media (max-width: 768px) {
-        transform: translate(-50%, 0);
-        top: calc(85% - 40px);
     }
 }

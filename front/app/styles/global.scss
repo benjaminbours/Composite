@@ -129,37 +129,16 @@ p {
     text-transform: uppercase;
     transition: 0.7s;
     cursor: pointer;
-    position: relation;
     font-size: 14px;
+    mix-blend-mode: difference;
+    color: white;
+    border: solid white 1px;
+    font-family: 'Source Code Pro', monospace;
 
-    &.white {
-        color: white;
-        border-color: white;
-        &:hover {
-            border-color: white;
-            background: white;
-            color: black;
-        }
-    }
-
-    &.black {
+    &:hover {
+        background: white;
         color: black;
-        border-color: black;
-        &:hover {
-            border-color: black;
-            background: black;
-            color: white;
-        }
     }
-
-    // different border management for back button
-    // &.back {
-    //     border-color: transparent;
-
-    //     &:hover {
-    //         border-color: white;
-    //     }
-    // }
 
     @media (max-width: 768px) {
         padding: 10px;
@@ -172,34 +151,33 @@ $buttonSizeSmall: 80px;
 $buttonSizeLarge: 120px;
 .buttonCircle {
     all: unset;
+    mix-blend-mode: difference;
+    background: white;
+    color: black;
     text-align: center;
+    font-size: 14px;
+    font-weight: 100;
     width: $buttonSize;
     height: $buttonSize;
     border-radius: $buttonSize;
+    border: solid black 7px;
     text-transform: uppercase;
     letter-spacing: 5px;
-    font-weight: 900;
     cursor: pointer;
     z-index: 100;
-    border: none;
+    transition: 0.3s ease-out;
 
-    &:focus {
-        outline: none;
+    &.white,
+    &.black {
+        mix-blend-mode: initial;
     }
 
-    @media (max-height: 700px), (max-width: 768px) {
-        width: $buttonSizeSmall;
-        height: $buttonSizeSmall;
-        font-size: 18px;
-        line-height: $buttonSizeSmall;
-        font-weight: 500;
-    }
-
-    @media (min-width: 2000px) {
-        width: $buttonSizeLarge;
-        height: $buttonSizeLarge;
-        font-size: 30px;
-        line-height: $buttonSizeLarge;
+    @media (min-width: 768px) {
+        &:hover {
+            border-color: white;
+            color: black;
+            transition: 0.3s ease-out;
+        }
     }
 }
 
@@ -274,26 +252,46 @@ $buttonSizeLarge: 120px;
 .inline-link {
     color: white;
     position: relative;
+    text-decoration: none;
+    mix-blend-mode: difference;
 
     &::before {
         content: '';
-        display: block;
         position: absolute;
-        width: 70px;
-        height: 70px;
-        border-radius: 100px;
-        border: solid white 1px;
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 2px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        background-color: white;
+        mix-blend-mode: difference;
+        border: solid black 1px;
+        transition: 0.3s ease-in;
+    }
+
+    &::after {
+        content: '➤️';
+        position: absolute;
+        top: -19px;
+        right: -12px;
+        color: white;
+        mix-blend-mode: difference;
+        transform: rotate(-45deg);
         opacity: 0;
         transition: 0.3s ease-in;
     }
 
     @media (min-width: 769px) {
         &:hover {
-            &::before {
+            &::after {
                 opacity: 1;
+            }
+
+            &::before {
+                background-color: black;
+                border-color: white;
             }
         }
     }

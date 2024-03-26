@@ -150,12 +150,20 @@ export default class Light {
                 };
             case MenuScene.QUEUE:
             case MenuScene.END_LEVEL:
+                const button = document.querySelector(
+                    '.end-level-container__play-button',
+                );
+                let y = 0.5;
+                if (button) {
+                    const bbox = button.getBoundingClientRect();
+                    y = (bbox.y + bbox.height / 2) / canvasHeight;
+                }
                 return {
                     coordinates: {
                         x: canvasWidth * (faction === Side.LIGHT ? 0.5 : -0.5),
-                        y: canvasHeight * (isMobile ? 0.85 : 0.5),
+                        y: canvasHeight * y,
                     },
-                    width,
+                    width: 325,
                 };
         }
     };

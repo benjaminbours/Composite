@@ -103,12 +103,20 @@ export default class Shadow {
                 };
             case MenuScene.QUEUE:
             case MenuScene.END_LEVEL:
+                const button = document.querySelector(
+                    '.end-level-container__play-button',
+                );
+                let y = 0.5;
+                if (button) {
+                    const bbox = button.getBoundingClientRect();
+                    y = (bbox.y + bbox.height / 2) / canvasHeight;
+                }
                 return {
                     coordinates: {
                         x: canvasWidth * (faction === Side.SHADOW ? 0.5 : 1),
-                        y: canvasHeight * (isMobile ? 0.85 : 0.5),
+                        y: canvasHeight * y,
                     },
-                    width,
+                    width: 500,
                 };
         }
     };

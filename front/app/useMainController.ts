@@ -276,25 +276,21 @@ export function useMainController(
     }, []);
 
     const handleGameFinished = useCallback(() => {
-        setState((prev) => ({
-            loadedLevel: undefined,
-            gameState: undefined,
-            you: {
-                account: prev.you.account,
-                side: undefined,
-                level: undefined,
-                isReady: false,
-            },
-            mate: {
-                account: prev.mate?.account,
-                side: undefined,
-                level: undefined,
-                isReady: false,
-            },
-            mateDisconnected: false,
-            isInQueue: false,
-            shouldDisplayQueueInfo: false,
-        }));
+        setState((prev) => {
+            const next = {
+                ...prev,
+                gameState: undefined,
+                mate: {
+                    ...prev.mate!,
+                    side: undefined,
+                    isReady: false,
+                },
+                isInQueue: false,
+                shouldDisplayQueueInfo: false,
+            };
+
+            return next;
+        });
         setGameIsPlaying(false);
         setMenuScene(MenuScene.END_LEVEL);
     }, [setMenuScene]);
@@ -311,14 +307,17 @@ export function useMainController(
     }, []);
 
     const handleReceiveSideOnLobby = useCallback((side: Side) => {
-        setState((prev) => ({
-            ...prev,
-            mate: {
-                ...prev.mate!,
-                side,
-                isReady: false,
-            },
-        }));
+        setState((prev) => {
+            const next = {
+                ...prev,
+                mate: {
+                    ...prev.mate!,
+                    side,
+                    isReady: false,
+                },
+            };
+            return next;
+        });
     }, []);
 
     const establishConnection = useCallback(async () => {
@@ -445,50 +444,6 @@ export function useMainController(
         });
     }, [setMenuScene, onTransition, currentUser, goToStep, router]);
 
-    // const handleClickOnBack = useCallback(() => {
-    //     if (onTransition.current) {
-    //         return;
-    //     }
-    //     const backOptions = {
-    //         invite_friend() {
-    //             goToStep({ step: MenuScene.HOME, side: undefined });
-    //         },
-    //         level() {
-    //             goToStep({ step: MenuScene.HOME, side: undefined });
-    //         },
-    //         faction() {
-    //             goToStep({ step: MenuScene.LEVEL, side: undefined });
-    //         },
-    //         queue() {
-    //             goToStep(
-    //                 {
-    //                     step: MenuScene.FACTION,
-    //                     side: state.you.side,
-    //                 },
-    //                 () => {
-    //                     setState((prev) => ({
-    //                         ...prev,
-    //                         you: {
-    //                             ...prev.you,
-    //                             side: undefined,
-    //                         },
-    //                     }));
-    //                 },
-    //             );
-    //         },
-    //     };
-    //     // there is no back button on these scenes
-    //     if (
-    //         menuScene !== MenuScene.HOME &&
-    //         menuScene !== MenuScene.END_LEVEL &&
-    //         menuScene !== MenuScene.TEAM_LOBBY &&
-    //         menuScene !== MenuScene.TEAM_LOBBY_SELECTED &&
-    //         menuScene !== MenuScene.NOT_FOUND
-    //     ) {
-    //         backOptions[menuScene]();
-    //     }
-    // }, [menuScene, state.you.side, goToStep, onTransition]);
-
     // use only on not found page so far
     const handleClickHome = useCallback(() => {
         if (onTransition.current) {
@@ -520,6 +475,11 @@ export function useMainController(
                     ...prev.you,
                     side: undefined,
                 },
+                mate: prev.mate
+                    ? {
+                          ...prev.mate,
+                      }
+                    : undefined,
             }));
         });
     }, [goToStep, onTransition, setState]);
@@ -611,7 +571,6 @@ export function useMainController(
         handleExitRandomQueue,
         handleSelectLevelOnLobby,
         handleSelectSideOnLobby,
-        // handleClickOnBack,
         handleClickHome,
         handleClickPlayAgain,
     };

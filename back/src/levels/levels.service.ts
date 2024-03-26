@@ -48,6 +48,13 @@ export class LevelsService {
     return this.prisma.level
       .findUnique({
         where: { id },
+        include: {
+          author: {
+            select: {
+              name: true,
+            },
+          },
+        },
       })
       .catch((err) => {
         throw handlePrismaError(err);

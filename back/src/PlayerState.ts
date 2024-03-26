@@ -27,7 +27,7 @@ export class RedisPlayerState {
   static parsePlayerState(state: PlayerState) {
     return new RedisPlayerState(
       String(state.status),
-      state.side ? String(state.side) : undefined,
+      state.side !== undefined ? String(state.side) : undefined,
       state.selectedLevel ? String(state.selectedLevel) : undefined,
       state.inviteToken,
       state.userId ? String(state.userId) : undefined,
@@ -54,7 +54,7 @@ export class PlayerState {
   static parseRedisPlayerState(state: RedisPlayerState) {
     return new PlayerState(
       Number(state.status) as PlayerStatus,
-      state.side ? (Number(state.side) as Side) : undefined,
+      state.side !== undefined ? (Number(state.side) as Side) : undefined,
       state.selectedLevel ? Number(state.selectedLevel) : undefined,
       state.inviteToken,
       state.userId ? Number(state.userId) : undefined,
