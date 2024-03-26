@@ -124,12 +124,12 @@ p {
     all: unset;
     width: auto;
     text-align: center;
-    padding: 10px;
+    padding: 8px;
     letter-spacing: 5px;
     text-transform: uppercase;
     transition: 0.7s;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     mix-blend-mode: difference;
     color: white;
     border: solid white 1px;
@@ -428,6 +428,8 @@ $buttonSizeLarge: 120px;
 
 .top-bar__account-container {
     margin-left: auto;
+    mix-blend-mode: difference;
+    color: white;
 }
 
 .top-bar__logo {

@@ -53,14 +53,13 @@ export const UserMenu: React.FC<Props> = ({
 
     const loginButton = useMemo(() => {
         const button = (
-            <Button
+            <button
                 disabled={disabled}
-                className="top-bar__login-button"
-                size="small"
+                className="buttonRect"
                 onClick={onLoginClick}
             >
                 {dictionary.form.button.login}
-            </Button>
+            </button>
         );
 
         if (onLoginClick) {

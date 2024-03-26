@@ -15,6 +15,7 @@ import { PlayerState } from '../../../useMainController';
 import { PlayersState } from './PlayersState';
 import { SideSelector } from './SideSelector';
 import { LevelSelector } from './LevelSelector';
+import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -86,6 +87,14 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
             'team-lobby-scene': true,
             unmount: !isMount,
         });
+
+        // TODO: Duplicate from useController level editor
+        // effect responsible to close the auth modal after successful login
+        useEffect(() => {
+            if (isAuthenticated && isAuthModalOpen) {
+                setIsAuthModalOpen(false);
+            }
+        }, [isAuthenticated, isAuthModalOpen]);
 
         // on mount
         useEffect(() => {
@@ -162,12 +171,11 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         Exit
                     </button>
                     <h1 className="title-h3 title-h3--white">Lobby</h1>
-                    <button
-                        className="buttonRect white team-lobby-scene__login-button"
-                        onClick={() => setIsAuthModalOpen(true)}
-                    >
-                        Login
-                    </button>
+                    <UserMenu
+                        dictionary={dictionary.common}
+                        disabled={isInQueue}
+                        onLoginClick={() => setIsAuthModalOpen(true)}
+                    />
                 </div>
                 <div className="team-lobby-scene__column-left">
                     <PlayersState
