@@ -70,6 +70,9 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
 
             <ul className="settings-menu__key-bindings-list key-bindings-list">
                 {uiKeyBindings.map(([movement, keys], movementIndex) => {
+                    if (movement === 'top' || movement === 'bottom') {
+                        return null;
+                    }
                     return (
                         <li
                             key={movementIndex}
