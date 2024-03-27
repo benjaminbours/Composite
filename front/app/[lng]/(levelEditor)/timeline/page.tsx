@@ -604,7 +604,7 @@ const futureEvents: TimelineEvent[] = [
                                 target="_blank"
                                 className="inline-link"
                             >
-                                curve&nbsp;fever style
+                                curve&nbsp;fever&nbsp;style
                             </a>
                             ).
                         </p>

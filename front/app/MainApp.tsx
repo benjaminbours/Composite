@@ -146,7 +146,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onClose={handleClickOnCloseSettings}
                 />
             )}
-            <BottomRightInfo onSettingsClick={handleClickOnSettings} />
+            <BottomRightInfo gameIsPlaying={gameIsPlaying} onSettingsClick={handleClickOnSettings} />
         </>
     );
 }

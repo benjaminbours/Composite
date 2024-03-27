@@ -148,6 +148,7 @@ export const LevelSelector: React.FC<Props> = ({
                 <Autocomplete
                     className={styles['author-selector']}
                     disablePortal
+                    disabled={disabled}
                     onChange={(_, value) => {
                         setAuthor(value ? (value as string) : 'All');
                     }}
