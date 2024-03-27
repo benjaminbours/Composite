@@ -1,6 +1,5 @@
 'use client';
 import React, { useCallback, useMemo } from 'react';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
@@ -10,6 +9,7 @@ import { useStoreActions, useStoreState } from '../../hooks/store';
 import { useSnackbar } from 'notistack';
 import Link from 'next/link';
 import { Route } from '../../types';
+import Divider from '@mui/material/Divider';
 
 interface Props {
     disabled?: boolean;
@@ -25,6 +25,7 @@ export const UserMenu: React.FC<Props> = ({
     const isAuthenticated = useStoreState(
         (state) => state.user.isAuthenticated,
     );
+    const currentUser = useStoreState((state) => state.user.currentUser);
     const { enqueueSnackbar } = useSnackbar();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const signOut = useStoreActions((store) => store.user.signOut);
@@ -103,7 +104,9 @@ export const UserMenu: React.FC<Props> = ({
                             horizontal: 'left',
                         }}
                     >
-                        <MenuItem onClick={handleClose}>
+                        <MenuItem>{currentUser?.name}</MenuItem>
+                        <Divider />
+                        <MenuItem disabled onClick={handleClose}>
                             {dictionary.nav.profile}
                         </MenuItem>
                         <MenuItem onClick={handleLogout}>
