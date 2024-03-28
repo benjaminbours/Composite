@@ -4,6 +4,7 @@ import '../../styles/main.scss';
 import { WithMainApp } from '../../WithMainApp';
 import { i18n, type Locale } from '../../../i18n-config';
 import { getDictionary } from '../../../getDictionary';
+import { Suspense } from 'react';
 
 export async function generateStaticParams() {
     return i18n.locales.map((lng) => ({ lng }));
@@ -25,9 +26,11 @@ export default async function RootLayout({
     const dictionary = await getDictionary(lng);
     return (
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-            <WithMainApp dictionary={dictionary} lng={lng}>
-                {children}
-            </WithMainApp>
+            <Suspense>
+                <WithMainApp dictionary={dictionary} lng={lng}>
+                    {children}
+                </WithMainApp>
+            </Suspense>
         </AppRouterCacheProvider>
     );
 }

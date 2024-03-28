@@ -91,8 +91,6 @@ export const ConfirmDialogContextProvider: React.FC<
         onHide();
     };
 
-    console.log('dialog ctx', dialogContext);
-
     return (
         <ConfirmDialogContext.Provider value={dialogContext}>
             {children}

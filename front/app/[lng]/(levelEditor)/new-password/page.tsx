@@ -1,6 +1,7 @@
 // vendors
 import type { Metadata } from 'next';
 import Paper from '@mui/material/Paper';
+import { Suspense } from 'react';
 // project
 import { getDictionary } from '../../../../getDictionary';
 import { Locale } from '../../../../i18n-config';
@@ -28,7 +29,9 @@ export default async function NewPasswordPage({ params: { lng } }: Props) {
                 <Paper className="form-padding" elevation={10}>
                     <h1>{dictionary['new-password'].title}</h1>
                     <p>{dictionary['new-password'].description}</p>
-                    <NewPasswordForm dictionary={dictionary.common} />
+                    <Suspense>
+                        <NewPasswordForm dictionary={dictionary.common} />
+                    </Suspense>
                 </Paper>
             </CentralContentTemplate>
         </>

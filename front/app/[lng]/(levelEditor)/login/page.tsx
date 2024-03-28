@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import Paper from '@mui/material/Paper';
 import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
 import { getDictionary } from '../../../../getDictionary';
@@ -26,11 +27,13 @@ export default async function Login({ params: { lng } }: Props) {
             <CentralContentTemplate className="login-page">
                 <Paper className="form-padding" elevation={10}>
                     <h1>{`Login`}</h1>
-                    <LoginForm
-                        dictionary={dictionary.common}
-                        withSignUp
-                        withRedirect
-                    />
+                    <Suspense>
+                        <LoginForm
+                            dictionary={dictionary.common}
+                            withSignUp
+                            withRedirect
+                        />
+                    </Suspense>
                 </Paper>
             </CentralContentTemplate>
         </>
