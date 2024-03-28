@@ -4,6 +4,7 @@ import * as pjson from '../package.json';
 import { CacheModule } from '@nestjs/cache-manager';
 import { TemporaryStorageService } from './temporary-storage.service';
 import { AppService } from './app.service';
+import { PrismaService } from '@project-common/services';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -18,7 +19,7 @@ describe('AppController', () => {
         }),
       ],
       controllers: [AppController],
-      providers: [AppService, TemporaryStorageService],
+      providers: [AppService, TemporaryStorageService, PrismaService],
     }).compile();
 
     appController = app.get<AppController>(AppController);

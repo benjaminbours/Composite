@@ -34,7 +34,7 @@ describe('AuthService', () => {
 
   it('should get tokens', async () => {
     const tokens = await authService.getTokens(
-      faker.datatype.number(),
+      faker.number.int(),
       faker.internet.email(),
       Role.USER,
     );
@@ -60,7 +60,7 @@ describe('AuthService', () => {
   it('should sign in an existing user with correct password', async () => {
     const password = faker.internet.password();
     user = {
-      id: faker.datatype.number({ precision: 1 }),
+      id: faker.number.int(),
       email: faker.internet.email(),
       password: await argon.hash(password),
       hashedRefreshToken: null,
@@ -142,7 +142,7 @@ describe('AuthService', () => {
   it('should refresh token', async () => {
     const fakeToken = 'test-token';
     user = {
-      id: faker.datatype.number({ precision: 1 }),
+      id: faker.number.int(),
       email: faker.internet.email(),
       hashedRefreshToken: await argon.hash(fakeToken),
     };

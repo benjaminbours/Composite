@@ -5,7 +5,6 @@ import { SocketService } from './socket.service';
 import { LobbyGateway } from './lobby.gateway';
 import { PrismaService } from '@project-common/services';
 import { TemporaryStorageService } from '../temporary-storage.service';
-import { UtilsService } from './utils.service';
 
 describe('SocketGateway', () => {
   let gateway: SocketGateway;
@@ -25,7 +24,6 @@ describe('SocketGateway', () => {
         LobbyGateway,
         PrismaService,
         TemporaryStorageService,
-        UtilsService,
       ],
     }).compile();
 
