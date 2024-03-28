@@ -3,5 +3,6 @@
   "compilerOptions": {
     "strictNullChecks": false
   },
-  "include": ["**/*spec.ts"]
+  "include": ["**/*spec.ts"],
+  "exclude": ["node_modules", "dist"]
 }
