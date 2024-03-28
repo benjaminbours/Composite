@@ -15,13 +15,21 @@
 
 import * as runtime from '../runtime';
 import type {
+  CreateLevelDto,
+  Level,
   LoginDto,
   RegisterDto,
   ResetPasswordDto,
   TokensDto,
+  UpdateLevelDto,
   UpdatePasswordDto,
+  User,
 } from '../models/index';
 import {
+    CreateLevelDtoFromJSON,
+    CreateLevelDtoToJSON,
+    LevelFromJSON,
+    LevelToJSON,
     LoginDtoFromJSON,
     LoginDtoToJSON,
     RegisterDtoFromJSON,
@@ -30,8 +38,12 @@ import {
     ResetPasswordDtoToJSON,
     TokensDtoFromJSON,
     TokensDtoToJSON,
+    UpdateLevelDtoFromJSON,
+    UpdateLevelDtoToJSON,
     UpdatePasswordDtoFromJSON,
     UpdatePasswordDtoToJSON,
+    UserFromJSON,
+    UserToJSON,
 } from '../models/index';
 
 export interface AppControllerCheckInviteValidityRequest {
@@ -63,6 +75,36 @@ export interface AuthControllerUpdatePasswordRequest {
     updatePasswordDto: UpdatePasswordDto;
 }
 
+export interface LevelsControllerCreateRequest {
+    createLevelDto: CreateLevelDto;
+}
+
+export interface LevelsControllerFindAllRequest {
+    author?: string;
+}
+
+export interface LevelsControllerFindOneRequest {
+    id: string;
+}
+
+export interface LevelsControllerRemoveRequest {
+    id: string;
+}
+
+export interface LevelsControllerUpdateRequest {
+    id: string;
+    updateLevelDto: UpdateLevelDto;
+}
+
+export interface LevelsControllerUploadThumbnailRequest {
+    id: string;
+    file?: Blob;
+}
+
+export interface UsersControllerFindOneRequest {
+    id: number;
+}
+
 /**
  * 
  */
@@ -70,7 +112,7 @@ export class DefaultApi extends runtime.BaseAPI {
 
     /**
      */
-    async appControllerCheckInviteValidityRaw(requestParameters: AppControllerCheckInviteValidityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async appControllerCheckInviteValidityRaw(requestParameters: AppControllerCheckInviteValidityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<boolean>> {
         if (requestParameters.inviteToken === null || requestParameters.inviteToken === undefined) {
             throw new runtime.RequiredError('inviteToken','Required parameter requestParameters.inviteToken was null or undefined when calling appControllerCheckInviteValidity.');
         }
@@ -86,18 +128,23 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<boolean>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      */
-    async appControllerCheckInviteValidity(requestParameters: AppControllerCheckInviteValidityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.appControllerCheckInviteValidityRaw(requestParameters, initOverrides);
+    async appControllerCheckInviteValidity(requestParameters: AppControllerCheckInviteValidityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<boolean> {
+        const response = await this.appControllerCheckInviteValidityRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
      */
-    async appControllerGetQueueInfoRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async appControllerGetQueueInfoRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -109,13 +156,14 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
      */
-    async appControllerGetQueueInfo(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.appControllerGetQueueInfoRaw(initOverrides);
+    async appControllerGetQueueInfo(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.appControllerGetQueueInfoRaw(initOverrides);
+        return await response.value();
     }
 
     /**
@@ -388,6 +436,357 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async authControllerUpdatePassword(requestParameters: AuthControllerUpdatePasswordRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<boolean> {
         const response = await this.authControllerUpdatePasswordRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async levelsControllerCreateRaw(requestParameters: LevelsControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Level>> {
+        if (requestParameters.createLevelDto === null || requestParameters.createLevelDto === undefined) {
+            throw new runtime.RequiredError('createLevelDto','Required parameter requestParameters.createLevelDto was null or undefined when calling levelsControllerCreate.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/levels`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateLevelDtoToJSON(requestParameters.createLevelDto),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LevelFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async levelsControllerCreate(requestParameters: LevelsControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Level> {
+        const response = await this.levelsControllerCreateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async levelsControllerFindAllRaw(requestParameters: LevelsControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Level>>> {
+        const queryParameters: any = {};
+
+        if (requestParameters.author !== undefined) {
+            queryParameters['author'] = requestParameters.author;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/levels`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(LevelFromJSON));
+    }
+
+    /**
+     */
+    async levelsControllerFindAll(requestParameters: LevelsControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Level>> {
+        const response = await this.levelsControllerFindAllRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async levelsControllerFindOneRaw(requestParameters: LevelsControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Level>> {
+        if (requestParameters.id === null || requestParameters.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter requestParameters.id was null or undefined when calling levelsControllerFindOne.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/levels/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LevelFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async levelsControllerFindOne(requestParameters: LevelsControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Level> {
+        const response = await this.levelsControllerFindOneRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async levelsControllerRemoveRaw(requestParameters: LevelsControllerRemoveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Level>> {
+        if (requestParameters.id === null || requestParameters.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter requestParameters.id was null or undefined when calling levelsControllerRemove.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/levels/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters.id))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LevelFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async levelsControllerRemove(requestParameters: LevelsControllerRemoveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Level> {
+        const response = await this.levelsControllerRemoveRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async levelsControllerUpdateRaw(requestParameters: LevelsControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Level>> {
+        if (requestParameters.id === null || requestParameters.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter requestParameters.id was null or undefined when calling levelsControllerUpdate.');
+        }
+
+        if (requestParameters.updateLevelDto === null || requestParameters.updateLevelDto === undefined) {
+            throw new runtime.RequiredError('updateLevelDto','Required parameter requestParameters.updateLevelDto was null or undefined when calling levelsControllerUpdate.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/levels/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters.id))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdateLevelDtoToJSON(requestParameters.updateLevelDto),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LevelFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async levelsControllerUpdate(requestParameters: LevelsControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Level> {
+        const response = await this.levelsControllerUpdateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async levelsControllerUploadThumbnailRaw(requestParameters: LevelsControllerUploadThumbnailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters.id === null || requestParameters.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter requestParameters.id was null or undefined when calling levelsControllerUploadThumbnail.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters.file !== undefined) {
+            formParams.append('file', requestParameters.file as any);
+        }
+
+        const response = await this.request({
+            path: `/levels/{id}/thumbnail`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters.id))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     */
+    async levelsControllerUploadThumbnail(requestParameters: LevelsControllerUploadThumbnailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.levelsControllerUploadThumbnailRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async usersControllerFindAllRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<User>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(UserFromJSON));
+    }
+
+    /**
+     */
+    async usersControllerFindAll(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<User>> {
+        const response = await this.usersControllerFindAllRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async usersControllerFindOneRaw(requestParameters: UsersControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<User>> {
+        if (requestParameters.id === null || requestParameters.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter requestParameters.id was null or undefined when calling usersControllerFindOne.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async usersControllerFindOne(requestParameters: UsersControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User> {
+        const response = await this.usersControllerFindOneRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async usersControllerGetProfileRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<User>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/users/profile`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async usersControllerGetProfile(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<User> {
+        const response = await this.usersControllerGetProfileRaw(initOverrides);
         return await response.value();
     }
 

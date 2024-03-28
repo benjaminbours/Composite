@@ -1,10 +1,16 @@
 apis/DefaultApi.ts
 apis/index.ts
 index.ts
+models/Author.ts
+models/CreateLevelDto.ts
+models/Element.ts
+models/Level.ts
 models/LoginDto.ts
 models/RegisterDto.ts
 models/ResetPasswordDto.ts
 models/TokensDto.ts
+models/UpdateLevelDto.ts
 models/UpdatePasswordDto.ts
+models/User.ts
 models/index.ts
 runtime.ts
