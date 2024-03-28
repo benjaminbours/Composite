@@ -20,6 +20,9 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'), // provide path to the folder with images
       serveRoot: '/thumbnails', // provide route to access images
+      serveStaticOptions: {
+        index: false,
+      },
     }),
     CacheModule.registerAsync<any>({
       isGlobal: true,
