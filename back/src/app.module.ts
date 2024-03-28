@@ -22,6 +22,8 @@ import { join } from 'path';
       serveRoot: '/thumbnails', // provide route to access images
       serveStaticOptions: {
         index: false,
+        redirect: false,
+        fallthrough: false,
       },
     }),
     CacheModule.registerAsync<any>({

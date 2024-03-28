@@ -1,5 +1,16 @@
 # composite-back
 
+## 1.0.0-next.0
+
+### Major Changes
+
+- First major version
+
+### Patch Changes
+
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.0
+
 ## 0.4.0
 
 ### Minor Changes

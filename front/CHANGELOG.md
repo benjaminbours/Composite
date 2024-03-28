@@ -1,5 +1,18 @@
 # composite-front
 
+## 1.0.0-next.0
+
+### Major Changes
+
+- First major version
+
+### Patch Changes
+
+- e18bae8: Display bounce arrow helper only when player is inside
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.0
+  - @benjaminbours/composite-core@1.0.0-next.0
+
 ## 0.4.0
 
 ### Minor Changes

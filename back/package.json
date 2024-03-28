@@ -1,6 +1,6 @@
 {
   "name": "composite-back",
-  "version": "0.4.0",
+  "version": "1.0.0-next.0",
   "description": "",
   "author": "",
   "private": true,
@@ -23,7 +23,7 @@
     "prisma:migrate:reset:local": "env-cmd -f .env.local prisma migrate reset"
   },
   "dependencies": {
-    "@benjaminbours/composite-core": "^0.3.0",
+    "@benjaminbours/composite-core": "^1.0.0-next.0",
     "@injectit/threejs-nodejs-exporters": "^0.0.2",
     "@nestjs/cache-manager": "^2.2.1",
     "@nestjs/common": "^10.3.3",
