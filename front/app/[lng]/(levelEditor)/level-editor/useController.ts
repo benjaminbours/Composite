@@ -115,7 +115,9 @@ export function useController(
                 if (!app || !worldContext) {
                     return;
                 }
-                router.push(Route.LEVEL_EDITOR(level.id));
+                if (level_id === 'new' || isFork) {
+                    router.push(Route.LEVEL_EDITOR(level.id));
+                }
                 // remove all elements from the scene
                 for (let i = 0; i < elements.length; i++) {
                     const element = elements[i];
