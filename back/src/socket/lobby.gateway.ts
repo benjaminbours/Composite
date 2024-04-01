@@ -23,7 +23,7 @@ import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 import { SocketGateway } from './socket.gateway';
 import ShortUniqueId from 'short-unique-id';
 import { PrismaService } from '@project-common/services';
-import { GameStatus, User } from '@prisma/client';
+import { GameStatus, PlayerSide, User } from '@prisma/client';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
@@ -317,10 +317,14 @@ export class LobbyGateway {
         status: GameStatus.STARTED,
         startTime: new Date(),
         players: {
-          connect: players
+          create: players
             .filter((p) => p.player.userId !== undefined)
             .map((p) => ({
-              id: p.player.userId,
+              side:
+                p.player.side === Side.LIGHT
+                  ? PlayerSide.LIGHT
+                  : PlayerSide.SHADOW,
+              userId: p.player.userId,
             })),
         },
       },
