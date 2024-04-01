@@ -316,6 +316,13 @@ export class LobbyGateway {
         levelId: players[0].player.selectedLevel,
         status: GameStatus.STARTED,
         startTime: new Date(),
+        players: {
+          connect: players
+            .filter((p) => p.player.userId !== undefined)
+            .map((p) => ({
+              id: p.player.userId,
+            })),
+        },
       },
     });
     Logger.log(`GAME ID: ${dbGame.id}`);
