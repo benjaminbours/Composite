@@ -14,7 +14,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
 import { servicesContainer } from './core/frameworks';
 import { ApiClient } from './core/services';
-import { Level, User } from '@benjaminbours/composite-api-client';
+import {
+    Level,
+    LevelStatusEnum,
+    User,
+} from '@benjaminbours/composite-api-client';
 import { useSnackbar } from 'notistack';
 import { useStoreState } from './hooks';
 
@@ -153,9 +157,11 @@ export function useMainController(
     // responsible to fetch the levels
     useEffect(() => {
         const apiClient = servicesContainer.get(ApiClient);
-        apiClient.defaultApi.levelsControllerFindAll().then((levels) => {
-            setLevels(levels);
-        });
+        apiClient.defaultApi
+            .levelsControllerFindAll({ status: LevelStatusEnum.Published })
+            .then((levels) => {
+                setLevels(levels);
+            });
     }, []);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {

@@ -96,6 +96,13 @@ export class LevelsController {
     type: [Level],
   })
   @ApiQuery({
+    name: 'status',
+    description: 'Filter response by level status',
+    type: 'string',
+    enum: ['DRAFT', 'PUBLISHED'],
+    required: false,
+  })
+  @ApiQuery({
     name: 'author',
     description: 'Filter response by author id',
     type: 'string',
@@ -105,8 +112,12 @@ export class LevelsController {
   @Get()
   findAll(
     @Query('author') author: string | undefined, // boolean
+    @Query('status') status: string | undefined,
   ) {
-    return this.levelsService.findAll(author ? Number(author) : undefined);
+    return this.levelsService.findAll(
+      author ? Number(author) : undefined,
+      status,
+    );
   }
 
   @ApiOkResponse({

@@ -25,11 +25,12 @@ export class LevelsService {
       });
   }
 
-  async findAll(authorId?: number | undefined) {
+  async findAll(authorId?: number | undefined, status?: string) {
     return this.prisma.level
       .findMany({
         where: {
           authorId: authorId,
+          status: status ? (status as LevelStatus) : undefined,
         },
         include: {
           author: {
