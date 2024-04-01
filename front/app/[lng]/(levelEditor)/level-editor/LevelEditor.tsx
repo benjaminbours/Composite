@@ -25,14 +25,9 @@ const Game = dynamic(() => import('../../../Game'), {
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     level_id: string;
-    initialLevel: PartialLevel;
 }
 
-export const LevelEditor: React.FC<Props> = ({
-    dictionary,
-    level_id,
-    initialLevel,
-}) => {
+export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     const {
         levelName,
         levelStatus,
@@ -58,7 +53,7 @@ export const LevelEditor: React.FC<Props> = ({
         setIsAuthModalOpen,
         setIsThumbnailModalOpen,
         setIsThumbnailSrc,
-    } = useController(level_id, initialLevel, dictionary);
+    } = useController(level_id, dictionary);
 
     // local refs
     const statsRef = useRef<Stats>();

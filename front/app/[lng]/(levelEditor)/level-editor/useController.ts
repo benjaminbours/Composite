@@ -19,6 +19,7 @@ import {
     parseLevelElements,
     WorldContext,
     addToCollidingElements,
+    EndLevelProperties,
 } from '@benjaminbours/composite-core';
 import {
     LevelStatusEnum,
@@ -28,8 +29,8 @@ import App from '../../../Game/App';
 import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
 import { servicesContainer } from '../../../core/frameworks';
 import { ApiClient } from '../../../core/services';
-import { useRouter } from 'next/navigation';
-import { Route } from '../../../types';
+import { notFound, useRouter } from 'next/navigation';
+import { PartialLevel, Route } from '../../../types';
 import { useStoreState } from '../../../hooks';
 import { generateErrorNotification } from '../../../utils/errors/generateErrorNotification';
 import {
@@ -40,9 +41,21 @@ import {
     connectDoors,
 } from '../../../Game/elements/graphic.utils';
 
+const defaultLevel = {
+    id: 0,
+    name: '',
+    data: [
+        {
+            name: 'end_level',
+            type: ElementType.END_LEVEL,
+            properties: JSON.parse(JSON.stringify(new EndLevelProperties())),
+        },
+    ],
+    status: LevelStatusEnum.Draft,
+};
+
 export function useController(
     level_id: string,
-    initialLevel: { name: string; data: any; status: LevelStatusEnum },
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'],
 ) {
     const isAuthenticated = useStoreState(
@@ -51,6 +64,8 @@ export function useController(
     const { enqueueSnackbar } = useSnackbar();
     const router = useRouter();
     const [app, setApp] = useState<App>();
+    const [isLoading, setIsLoading] = useState(false);
+    const [isNotFound, setIsNotFound] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -59,8 +74,13 @@ export function useController(
         undefined,
     );
     const [currentEditingIndex, setCurrentEditingIndex] = useState<number>();
-    const [levelName, setLevelName] = useState(initialLevel.name);
-    const [levelStatus, setLevelStatus] = useState(initialLevel.status);
+    const [initialLevel, setInitialLevel] = useState<
+        PartialLevel | undefined
+    >();
+    const [levelName, setLevelName] = useState(defaultLevel.name);
+    const [levelStatus, setLevelStatus] = useState<LevelStatusEnum>(
+        defaultLevel.status,
+    );
     const [elements, setElements] = useState<LevelElement[]>([]);
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
@@ -579,10 +599,38 @@ export function useController(
         }
     }, [isAuthenticated, isAuthModalOpen, elements]);
 
+    // effect responsible to load the level data from the api
+    useEffect(() => {
+        if (level_id === 'new') {
+            setInitialLevel({ ...defaultLevel });
+            return;
+        }
+        const apiClient = servicesContainer.get(ApiClient);
+        // load level
+        setIsLoading(true);
+        apiClient.defaultApi
+            .levelsControllerFindOne({
+                id: level_id,
+            })
+            .then((level) => {
+                console.log('level loaded', level);
+                setLevelName(level.name);
+                setLevelStatus(level.status);
+                setInitialLevel(level);
+            })
+            .catch((error) => {
+                console.error(error);
+                setIsNotFound(true);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, [level_id]);
+
     // effect responsible to mount the 3d scene only once and when the app is ready
     useEffect(() => {
         // if the app is not ready, don't do anything
-        if (!app || !worldContext || isInitialLoadDone) {
+        if (!app || !worldContext || isInitialLoadDone || !initialLevel) {
             return;
         }
         // parse the initial level elements
@@ -600,6 +648,10 @@ export function useController(
         setElements(elementList);
         setIsInitialLoadDone(true);
     }, [app, initialLevel, isInitialLoadDone, worldContext]);
+
+    if (isNotFound) {
+        notFound();
+    }
 
     return {
         levelName,
