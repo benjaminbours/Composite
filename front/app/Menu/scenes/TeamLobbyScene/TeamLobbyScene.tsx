@@ -147,6 +147,9 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         useEffect(() => {
             const level = Number(urlSearchParams.get('level'));
             if (isMount) {
+                if (levels.length === 0) {
+                    return;
+                }
                 handleSelectLevel(
                     Number.isNaN(level) || level === 0 ? levels[0].id : level,
                 );

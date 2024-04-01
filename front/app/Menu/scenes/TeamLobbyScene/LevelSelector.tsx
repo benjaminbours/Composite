@@ -19,6 +19,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { QUEUE_INFO_FETCH_INTERVAL } from '../../Menu';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import Link from 'next/link';
+import { Route } from '../../../types';
 
 interface Props {
     levels: Level[];
@@ -201,34 +203,45 @@ export const LevelSelector: React.FC<Props> = ({
                 </div>
             </div>
 
-            <div className="custom-carousel">
-                <ul
-                    style={{ left: `calc(50% - ${carouselTransform}px)` }}
-                    ref={customCarouselList}
-                >
-                    {levelsToDisplay.map(({ id, name }) => {
-                        return (
-                            <li key={id}>
-                                <LevelPortal
-                                    name={name}
-                                    isSelectedByYou={id === selectedLevel}
-                                    isSelectedByTeamMate={
-                                        id === levelSelectedByMate
-                                    }
-                                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
-                                    queueInfo={
-                                        shouldDisplayQueueInfo
-                                            ? queueInfo?.levels[
-                                                  String(id) as any
-                                              ]
-                                            : undefined
-                                    }
-                                />
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
+            {levelsToDisplay.length === 0 ? (
+                <div className={styles['no-level-container']}>
+                    <p>There is no level available so far.</p>
+                    <Link href={Route.LEVEL_EDITOR_ROOT}>
+                        <button className="buttonRect">
+                            Be the first creator!
+                        </button>
+                    </Link>
+                </div>
+            ) : (
+                <div className="custom-carousel">
+                    <ul
+                        style={{ left: `calc(50% - ${carouselTransform}px)` }}
+                        ref={customCarouselList}
+                    >
+                        {levelsToDisplay.map(({ id, name }) => {
+                            return (
+                                <li key={id}>
+                                    <LevelPortal
+                                        name={name}
+                                        isSelectedByYou={id === selectedLevel}
+                                        isSelectedByTeamMate={
+                                            id === levelSelectedByMate
+                                        }
+                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
+                                        queueInfo={
+                                            shouldDisplayQueueInfo
+                                                ? queueInfo?.levels[
+                                                      String(id) as any
+                                                  ]
+                                                : undefined
+                                        }
+                                    />
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            )}
             <div className={styles.controls}>
                 <IconButton disabled={disabled} onClick={previous}>
                     <ArrowBackIosNewIcon />
