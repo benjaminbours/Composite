@@ -53,6 +53,11 @@ async function getData(level_id: string): Promise<PartialLevel | undefined> {
             console.error(error);
             return undefined;
         });
+    console.log(
+        'api client internal base path',
+        apiClient.configuration.basePath,
+    );
+    console.log('level loading from internal api', level);
     return level;
 }
 
