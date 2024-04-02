@@ -21,6 +21,7 @@ import {
 } from '@benjaminbours/composite-api-client';
 import { useSnackbar } from 'notistack';
 import { useStoreState } from './hooks';
+import { startLoadingAssets } from './Game/assetsLoader';
 
 export interface PlayerState {
     side: Side | undefined;
@@ -269,16 +270,19 @@ export function useMainController(
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
         const apiClient = servicesContainer.get(ApiClient);
-        apiClient.defaultApi
-            .levelsControllerFindOne({ id: String(initialGameState.level.id) })
-            .then((level) => {
-                setState((prev) => ({
-                    ...prev,
-                    gameState: initialGameState,
-                    loadedLevel: level,
-                }));
-                setGameIsPlaying(true);
-            });
+        Promise.all([
+            apiClient.defaultApi.levelsControllerFindOne({
+                id: String(initialGameState.level.id),
+            }),
+            startLoadingAssets(),
+        ]).then(([level]) => {
+            setState((prev) => ({
+                ...prev,
+                gameState: initialGameState,
+                loadedLevel: level,
+            }));
+            setGameIsPlaying(true);
+        });
     }, []);
 
     const handleGameFinished = useCallback(() => {

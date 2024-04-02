@@ -1,7 +1,7 @@
 'use client';
 // vendors
 import { gsap } from 'gsap';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // our libs
 import {
     GameState,
@@ -9,7 +9,6 @@ import {
     Side,
 } from '@benjaminbours/composite-core';
 import App, { AppMode } from './App';
-import { startLoadingAssets } from './assetsLoader';
 import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
@@ -17,7 +16,7 @@ import { Level } from '@benjaminbours/composite-api-client';
 
 interface LevelEditorProps {
     // use do save the app instance somewhere else
-    setApp: React.Dispatch<React.SetStateAction<App | undefined>>;
+    onAppLoaded: (app: App) => void;
     // TODO: Don't like so much the management of this callback
     onTransformControlsObjectChange: (object: THREE.Object3D) => void;
 }
@@ -46,26 +45,10 @@ function Game({
     levelEditorProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const gameStarted = useRef(false);
     const appRef = useRef<App>();
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
 
     const isMobile = window.innerWidth <= 768;
-
-    const gameLoop = useCallback(() => {
-        stats.current?.begin();
-        if (appRef.current?.clock.running) {
-            appRef.current?.run();
-        }
-        appRef.current?.rendererManager.render(
-            appRef.current?.gameStateManager.displayState,
-            appRef.current?.delta,
-        );
-        if (appRef.current?.shouldCaptureSnapshot) {
-            appRef.current?.captureSnapshot();
-        }
-        stats.current?.end();
-    }, []);
 
     useEffect(() => {
         const onResize = () => {
@@ -81,82 +64,96 @@ function Game({
     }, []);
 
     useEffect(() => {
-        if (!appRef.current) {
-            startLoadingAssets().finally(() => {
-                if (gameStarted.current) {
-                    return;
-                }
-                if (!canvasRef.current) {
-                    return;
-                }
-                if (multiplayerGameProps) {
-                    appRef.current = new App(
-                        canvasRef.current,
-                        multiplayerGameProps.initialGameState,
-                        [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                        inputsManager,
-                        AppMode.GAME,
-                        multiplayerGameProps.level,
-                        multiplayerGameProps.socketController,
-                    );
-                } else if (levelEditorProps) {
-                    const initialGameState = new GameState(
-                        [
-                            {
-                                position: {
-                                    x: 200,
-                                    // TODO: Try better solution than putting the player position below the ground
-                                    y: 20,
-                                },
-                                velocity: {
-                                    x: 0,
-                                    y: 0,
-                                },
-                                state: MovableComponentState.onFloor,
-                                insideElementID: undefined,
-                            },
-                            {
-                                position: {
-                                    x: 10,
-                                    y: 20,
-                                },
-                                velocity: {
-                                    x: 0,
-                                    y: 0,
-                                },
-                                state: MovableComponentState.onFloor,
-                                insideElementID: undefined,
-                            },
-                        ],
-                        { id: 0, doors: {}, bounces: {}, end_level: [] },
-                        Date.now(),
-                        0,
-                    );
-                    appRef.current = new App(
-                        canvasRef.current,
-                        initialGameState,
-                        [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                        inputsManager,
-                        AppMode.EDITOR,
-                        undefined,
-                        undefined,
-                        levelEditorProps.onTransformControlsObjectChange,
-                    );
-                    levelEditorProps.setApp(appRef.current);
-                }
-                // https://greensock.com/docs/v3/GSAP/gsap.ticker
-                gsap.ticker.fps(60);
-                gsap.ticker.add(gameLoop);
-                gameStarted.current = true;
-                if (multiplayerGameProps) {
-                    setIsSynchronizingTime(true);
-                }
-            });
+        const gameLoop = () => {
+            stats.current?.begin();
+            if (appRef.current?.clock.running) {
+                appRef.current?.run();
+            }
+            appRef.current?.rendererManager.render(
+                appRef.current?.gameStateManager.displayState,
+                appRef.current?.delta,
+            );
+            if (appRef.current?.shouldCaptureSnapshot) {
+                appRef.current?.captureSnapshot();
+            }
+            stats.current?.end();
+        };
+        // TODO: game loop should probably be in app, we use mainly app function inside
+        const cleanUp = () => {
+            if (appRef.current) {
+                gsap.ticker.remove(gameLoop);
+                appRef.current?.destroy();
+                appRef.current = undefined;
+            }
+        };
+
+        if (!canvasRef.current) {
+            return;
         }
 
+        if (multiplayerGameProps) {
+            appRef.current = new App(
+                canvasRef.current,
+                multiplayerGameProps.initialGameState,
+                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                inputsManager,
+                AppMode.GAME,
+                multiplayerGameProps.level,
+                multiplayerGameProps.socketController,
+            );
+            setIsSynchronizingTime(true);
+        } else if (levelEditorProps) {
+            const initialGameState = new GameState(
+                [
+                    {
+                        position: {
+                            x: 200,
+                            // TODO: Try better solution than putting the player position below the ground
+                            y: 20,
+                        },
+                        velocity: {
+                            x: 0,
+                            y: 0,
+                        },
+                        state: MovableComponentState.onFloor,
+                        insideElementID: undefined,
+                    },
+                    {
+                        position: {
+                            x: 10,
+                            y: 20,
+                        },
+                        velocity: {
+                            x: 0,
+                            y: 0,
+                        },
+                        state: MovableComponentState.onFloor,
+                        insideElementID: undefined,
+                    },
+                ],
+                { id: 0, doors: {}, bounces: {}, end_level: [] },
+                Date.now(),
+                0,
+            );
+            appRef.current = new App(
+                canvasRef.current,
+                initialGameState,
+                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                inputsManager,
+                AppMode.EDITOR,
+                undefined,
+                undefined,
+                levelEditorProps.onTransformControlsObjectChange,
+            );
+            levelEditorProps.onAppLoaded(appRef.current);
+        }
+        // https://greensock.com/docs/v3/GSAP/gsap.ticker
+
+        gsap.ticker.fps(60);
+        gsap.ticker.add(gameLoop);
+
         return () => {
-            gsap.ticker.remove(gameLoop);
-            appRef.current?.destroy();
+            cleanUp();
         };
     }, []);
 

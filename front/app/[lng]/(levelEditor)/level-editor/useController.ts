@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+    useRef,
+    useState,
+} from 'react';
 import { removeMeshFromScene } from './utils';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
@@ -40,6 +47,7 @@ import {
     computeDoorInfo,
     connectDoors,
 } from '../../../Game/elements/graphic.utils';
+import { startLoadingAssets } from '../../../Game/assetsLoader';
 
 const defaultLevel = {
     id: 0,
@@ -54,6 +62,51 @@ const defaultLevel = {
     status: LevelStatusEnum.Draft,
 };
 
+const initialState = {
+    // app: undefined,
+    appIsLoaded: false,
+    isLoading: false,
+    isNotFound: false,
+    isSaving: false,
+    isInitialLoadDone: false,
+    isAuthModalOpen: false,
+    isThumbnailModalOpen: false,
+    thumbnailSrc: undefined,
+    currentEditingIndex: undefined,
+    initialLevel: undefined,
+    levelName: defaultLevel.name,
+    levelStatus: defaultLevel.status,
+    elements: [],
+    history: [],
+    historyIndex: 0,
+    hasErrorWithLevelName: false,
+};
+
+enum LevelEditorAction {
+    SET_APP_IS_LOADED = 'SET_APP_IS_LOADED',
+}
+
+interface SetAppAction {
+    type: LevelEditorAction;
+    payload?: any;
+}
+
+function reducer(state: typeof initialState, action: SetAppAction) {
+    switch (action.type) {
+        case LevelEditorAction.SET_APP_IS_LOADED:
+            return { ...state, appIsLoaded: true };
+        // case 'SET_APP':
+        //     return { ...state, app: action.payload };
+        // case 'SET_IS_LOADING':
+        //     return { ...state, isLoading: action.payload };
+        // case 'SET_IS_NOT_FOUND':
+        //     return { ...state, isNotFound: action.payload };
+        // Add more cases for each state variable
+        default:
+            throw new Error();
+    }
+}
+
 export function useController(
     level_id: string,
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'],
@@ -63,7 +116,15 @@ export function useController(
     );
     const { enqueueSnackbar } = useSnackbar();
     const router = useRouter();
-    const [app, setApp] = useState<App>();
+    const appRef = useRef<App>();
+
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    const onAppLoaded = useCallback((app: App) => {
+        appRef.current = app;
+        dispatch({ type: LevelEditorAction.SET_APP_IS_LOADED });
+    }, []);
+
     const [isLoading, setIsLoading] = useState(false);
     const [isNotFound, setIsNotFound] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -85,22 +146,22 @@ export function useController(
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
     const worldContext: WorldContext | null = useMemo(() => {
-        if (!app) {
+        if (!appRef.current || !state.appIsLoaded) {
             return null;
         }
         return {
-            levelState: app.gameStateManager.currentState.level,
-            bounceList: app.level.bounces,
+            levelState: appRef.current.gameStateManager.currentState.level,
+            bounceList: appRef.current.level.bounces,
             clientGraphicHelpers: {
                 addBounceGraphic,
                 addDoorOpenerGraphic,
                 addEndLevelGraphic,
                 connectDoors,
                 addLightBounceComposer:
-                    app.rendererManager.addLightBounceComposer,
+                    appRef.current.rendererManager.addLightBounceComposer,
             },
         };
-    }, [app]);
+    }, [state.appIsLoaded]);
 
     const handleLevelNameChange = useCallback(
         (e: any) => {
@@ -114,6 +175,10 @@ export function useController(
 
     const handleClickOnSave = useCallback(
         (isFork?: boolean, status?: LevelStatusEnum) => {
+            if (!appRef.current) {
+                return;
+            }
+            const app = appRef.current;
             if (!levelName) {
                 enqueueSnackbar(
                     dictionary.notification['error-missing-level-name'],
@@ -244,7 +309,6 @@ export function useController(
             router,
             level_id,
             isAuthenticated,
-            app,
             worldContext,
         ],
     );
@@ -338,10 +402,14 @@ export function useController(
 
     const handleUpdateElementProperty = useCallback(
         (propertyKey: string, value: any) => {
-            if (currentEditingIndex === undefined || !app || !worldContext) {
+            if (
+                currentEditingIndex === undefined ||
+                !appRef.current ||
+                !worldContext
+            ) {
                 return;
             }
-
+            const app = appRef.current;
             setElements((prev) => {
                 const nextState = [...prev];
                 let { properties, mesh, type } = nextState[currentEditingIndex];
@@ -439,14 +507,15 @@ export function useController(
                 return nextState;
             });
         },
-        [currentEditingIndex, app, worldContext],
+        [currentEditingIndex, worldContext],
     );
 
     const addElement = useCallback(
         (type: ElementType) => {
-            if (!app || !worldContext) {
+            if (!appRef.current || !worldContext) {
                 return;
             }
+            const app = appRef.current;
             const { mesh, properties } = createElement(worldContext, type);
             setElements((prev) => {
                 const nextState = [...prev];
@@ -462,14 +531,15 @@ export function useController(
             app.scene.add(mesh);
             addToCollidingElements(mesh, app.collidingElements);
         },
-        [app, elements, setCurrentEditingIndex, worldContext],
+        [elements, setCurrentEditingIndex, worldContext],
     );
 
     const removeElement = useCallback(
         (index: number) => () => {
-            if (!app) {
+            if (!appRef.current) {
                 return;
             }
+            const app = appRef.current;
             setElements((prev) => {
                 const newState = [...prev];
                 const deletedElement = newState.splice(index, 1);
@@ -477,7 +547,7 @@ export function useController(
                 return newState;
             });
         },
-        [app],
+        [],
     );
 
     const selectElement = useCallback(
@@ -501,21 +571,23 @@ export function useController(
 
     // effect responsible to update the current attach transform control element in three.js accordingly with the react state
     useEffect(() => {
-        if (!app) {
+        if (!appRef.current) {
             return;
         }
+        const app = appRef.current;
         if (currentEditingElement) {
             app.attachTransformControls(currentEditingElement.mesh);
         } else {
             app.detachTransformControls();
         }
-    }, [currentEditingElement, app]);
+    }, [currentEditingElement]);
 
     // responsible to register and clear event listeners for the level editor
     useEffect(() => {
-        if (!app) {
+        if (!appRef.current) {
             return;
         }
+        const app = appRef.current;
         function isMouseLeftButton(event: any) {
             if (
                 event.metaKey ||
@@ -590,7 +662,7 @@ export function useController(
             app.canvasDom.removeEventListener('mousedown', onMouseDown);
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, [app, elements, setCurrentEditingIndex]);
+    }, [elements, setCurrentEditingIndex]);
 
     // effect responsible to close the auth modal after successful login
     useEffect(() => {
@@ -599,7 +671,7 @@ export function useController(
         }
     }, [isAuthenticated, isAuthModalOpen, elements]);
 
-    // effect responsible to load the level data from the api
+    // effect responsible to load the level data from the api and the assets
     useEffect(() => {
         if (level_id === 'new') {
             setInitialLevel({ ...defaultLevel });
@@ -608,11 +680,13 @@ export function useController(
         const apiClient = servicesContainer.get(ApiClient);
         // load level
         setIsLoading(true);
-        apiClient.defaultApi
-            .levelsControllerFindOne({
+        Promise.all([
+            apiClient.defaultApi.levelsControllerFindOne({
                 id: level_id,
-            })
-            .then((level) => {
+            }),
+            startLoadingAssets(),
+        ])
+            .then(([level]) => {
                 console.log('level loaded', level);
                 setLevelName(level.name);
                 setLevelStatus(level.status);
@@ -630,9 +704,16 @@ export function useController(
     // effect responsible to mount the 3d scene only once and when the app is ready
     useEffect(() => {
         // if the app is not ready, don't do anything
-        if (!app || !worldContext || isInitialLoadDone || !initialLevel) {
+        if (
+            !appRef.current ||
+            !state.appIsLoaded ||
+            !worldContext ||
+            isInitialLoadDone ||
+            !initialLevel
+        ) {
             return;
         }
+        const app = appRef.current;
         // parse the initial level elements
         const elementList = parseLevelElements(worldContext, initialLevel.data);
         const loadElementsToScene = (elementList: LevelElement[]) => {
@@ -647,7 +728,7 @@ export function useController(
         // set the state
         setElements(elementList);
         setIsInitialLoadDone(true);
-    }, [app, initialLevel, isInitialLoadDone, worldContext]);
+    }, [initialLevel, isInitialLoadDone, worldContext, state]);
 
     if (isNotFound) {
         notFound();
@@ -660,7 +741,6 @@ export function useController(
         hasErrorWithLevelName,
         currentEditingIndex,
         currentEditingElement,
-        app,
         isAuthModalOpen,
         isThumbnailModalOpen,
         thumbnailSrc,
@@ -673,7 +753,8 @@ export function useController(
         handleUpdateElementProperty,
         addElement,
         removeElement,
-        setApp,
+        appRef,
+        onAppLoaded,
         selectElement,
         setIsAuthModalOpen,
         setIsThumbnailModalOpen,

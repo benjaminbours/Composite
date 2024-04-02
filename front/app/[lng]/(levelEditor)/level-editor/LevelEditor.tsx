@@ -35,11 +35,12 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         hasErrorWithLevelName,
         currentEditingIndex,
         currentEditingElement,
-        app,
+        appRef,
         isAuthModalOpen,
         isThumbnailModalOpen,
         thumbnailSrc,
         isSaving,
+        onAppLoaded,
         handleLevelNameChange,
         handleClickOnSave,
         handleSaveThumbnail,
@@ -48,7 +49,6 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         updateElementName,
         addElement,
         removeElement,
-        setApp,
         selectElement,
         setIsAuthModalOpen,
         setIsThumbnailModalOpen,
@@ -60,51 +60,55 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const resetCamera = useCallback(() => {
-        if (app) {
-            app.resetEditorCamera();
+        if (appRef.current) {
+            appRef.current.resetEditorCamera();
         }
-    }, [app]);
+    }, [appRef]);
 
     const toggleCollisionArea = useCallback(() => {
-        if (app) {
-            app.toggleCollisionArea();
+        if (appRef.current) {
+            appRef.current.toggleCollisionArea();
         }
-    }, [app]);
+    }, [appRef]);
 
     const toggleTestMode = useCallback(() => {
-        if (app) {
-            app.setAppMode(
-                app.mode === AppMode.GAME ? AppMode.EDITOR : AppMode.GAME,
+        if (appRef.current) {
+            appRef.current.setAppMode(
+                appRef.current.mode === AppMode.GAME
+                    ? AppMode.EDITOR
+                    : AppMode.GAME,
             );
         }
-    }, [app]);
+    }, [appRef]);
 
     const captureSnapshot = useCallback(() => {
-        if (app) {
-            app.onCaptureSnapshot = (image: string) => {
+        if (appRef.current) {
+            appRef.current.onCaptureSnapshot = (image: string) => {
                 setIsThumbnailSrc(image);
                 setIsThumbnailModalOpen(true);
             };
-            app.shouldCaptureSnapshot = true;
+            appRef.current.shouldCaptureSnapshot = true;
         }
-    }, [app, setIsThumbnailModalOpen, setIsThumbnailSrc]);
+    }, [appRef, setIsThumbnailModalOpen, setIsThumbnailSrc]);
 
     const resetPlayersPosition = useCallback(() => {
-        if (app) {
-            app.resetPlayersPosition();
+        if (appRef.current) {
+            appRef.current.resetPlayersPosition();
         }
-    }, [app]);
+    }, [appRef]);
 
     const switchPlayer = useCallback(() => {
-        if (app) {
+        if (appRef.current) {
             const nextSide =
-                app.mainPlayerSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
-            app.mainPlayerSide = nextSide;
-            app.secondPlayerSide =
+                appRef.current.mainPlayerSide === Side.SHADOW
+                    ? Side.LIGHT
+                    : Side.SHADOW;
+            appRef.current.mainPlayerSide = nextSide;
+            appRef.current.secondPlayerSide =
                 nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
-            app.setGameCamera();
+            appRef.current.setGameCamera();
         }
-    }, [app]);
+    }, [appRef]);
 
     return (
         <main className="level-editor">
@@ -161,7 +165,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
             <Game
                 side={Side.SHADOW}
                 levelEditorProps={{
-                    setApp: setApp,
+                    onAppLoaded,
                     onTransformControlsObjectChange: handleControlObjectChange,
                 }}
                 tabIsHidden={false}
