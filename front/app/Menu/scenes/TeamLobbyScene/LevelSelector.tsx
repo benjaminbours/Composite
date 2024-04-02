@@ -146,7 +146,6 @@ export const LevelSelector: React.FC<Props> = ({
         <div className={styles.root}>
             <div className={styles.header}>
                 <h2 className="title-h3 title-h3--white">Select a level</h2>
-
                 <Autocomplete
                     className={styles['author-selector']}
                     disablePortal
@@ -177,6 +176,12 @@ export const LevelSelector: React.FC<Props> = ({
                             : 'Display matchmaking queue info'}
                     </p>
                 </Popper>
+                <Link
+                    href={Route.LEVEL_EDITOR_ROOT}
+                    className={styles['header-creator-button']}
+                >
+                    <button className="buttonRect">Become a creator</button>
+                </Link>
                 <div className={styles['queue-container']}>
                     {shouldDisplayQueueInfo && (
                         <IconButton
