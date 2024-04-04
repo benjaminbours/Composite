@@ -33,6 +33,7 @@ export class LevelMapping extends Group implements AbstractLevel {
         clientGraphicHelpers?: ClientGraphicHelpers,
     ) {
         super();
+        this.name = `level_${id}`;
         this.state = {
             id,
             doors: {},

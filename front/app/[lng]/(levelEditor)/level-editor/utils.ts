@@ -2,7 +2,7 @@ import { Object3D } from 'three';
 import { ElementToBounce, Side } from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
 
-export function removeMeshFromScene(app: App, mesh: Object3D) {
+export function removeMeshFromLevel(app: App, mesh: Object3D) {
     if (mesh.id === app.controlledMesh?.id) {
         app.detachTransformControls();
     }
@@ -20,5 +20,5 @@ export function removeMeshFromScene(app: App, mesh: Object3D) {
         }
     }
     app.removeFromCollidingElements(mesh);
-    app.scene.remove(mesh);
+    app.level.remove(mesh);
 }

@@ -1,12 +1,5 @@
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useReducer,
-    useRef,
-    useState,
-} from 'react';
-import { removeMeshFromScene } from './utils';
+import { useCallback, useEffect, useReducer, useState } from 'react';
+import { removeMeshFromLevel } from './utils';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { Euler, Object3D, Vector3 } from 'three';
@@ -63,48 +56,380 @@ const defaultLevel = {
 };
 
 const initialState = {
-    // app: undefined,
-    appIsLoaded: false,
-    isLoading: false,
+    app: undefined as App | undefined,
     isNotFound: false,
     isSaving: false,
     isInitialLoadDone: false,
     isAuthModalOpen: false,
     isThumbnailModalOpen: false,
     thumbnailSrc: undefined,
-    currentEditingIndex: undefined,
-    initialLevel: undefined,
+    currentEditingIndex: undefined as number | undefined,
+    initialLevel: undefined as PartialLevel | undefined,
     levelName: defaultLevel.name,
-    levelStatus: defaultLevel.status,
-    elements: [],
+    levelStatus: defaultLevel.status as LevelStatusEnum,
+    elements: [] as LevelElement[],
     history: [],
     historyIndex: 0,
     hasErrorWithLevelName: false,
 };
 
-enum LevelEditorAction {
-    SET_APP_IS_LOADED = 'SET_APP_IS_LOADED',
+enum ActionType {
+    LOAD_APP = 'LOAD_APP',
+    LOAD_LEVEL = 'LOAD_LEVEL',
+    SAVE_INITIAL_LEVEL = 'SAVE_INITIAL_LEVEL',
+    LEVEL_IS_NOT_FOUND = 'LEVEL_IS_NOT_FOUND',
+    UPDATE_LEVEL_NAME = 'UPDATE_LEVEL_NAME',
+    UPDATE_ELEMENT_NAME = 'UPDATE_ELEMENT_NAME',
+    UPDATE_ELEMENT_PROPERTY = 'UPDATE_ELEMENT_PROPERTY',
+    REMOVE_ELEMENT = 'REMOVE_ELEMENT',
+    ADD_ELEMENT = 'ADD_ELEMENT',
+    SELECT_ELEMENT = 'SELECT_ELEMENT',
 }
 
-interface SetAppAction {
-    type: LevelEditorAction;
-    payload?: any;
+interface UpdateLevelNameAction {
+    type: ActionType.UPDATE_LEVEL_NAME;
+    payload: string;
 }
 
-function reducer(state: typeof initialState, action: SetAppAction) {
+interface UpdateElementNameAction {
+    type: ActionType.UPDATE_ELEMENT_NAME;
+    payload: { index: number; name: string };
+}
+
+interface UpdateElementPropertyAction {
+    type: ActionType.UPDATE_ELEMENT_PROPERTY;
+    payload: { propertyKey: string; value: any };
+}
+
+interface LoadLevelAction {
+    type: ActionType.LOAD_LEVEL;
+    payload: PartialLevel;
+}
+
+interface LoadAppAction {
+    type: ActionType.LOAD_APP;
+    payload: App;
+}
+
+interface SaveInitialLevelAction {
+    type: ActionType.SAVE_INITIAL_LEVEL;
+    payload: PartialLevel;
+}
+
+interface LevelNotFoundAction {
+    type: ActionType.LEVEL_IS_NOT_FOUND;
+}
+
+interface RemoveElementAction {
+    type: ActionType.REMOVE_ELEMENT;
+    /**
+     * Element index
+     */
+    payload: number;
+}
+
+interface AddElementAction {
+    type: ActionType.ADD_ELEMENT;
+    payload: ElementType;
+}
+
+interface SelectElementAction {
+    type: ActionType.SELECT_ELEMENT;
+    /**
+     * Element index
+     */
+    payload: number;
+    canUnselect?: boolean;
+}
+
+type Action =
+    | UpdateLevelNameAction
+    | LoadLevelAction
+    | LoadAppAction
+    | SaveInitialLevelAction
+    | LevelNotFoundAction
+    | RemoveElementAction
+    | AddElementAction
+    | UpdateElementNameAction
+    | SelectElementAction
+    | UpdateElementPropertyAction;
+
+function reducer(
+    state: typeof initialState,
+    action: Action,
+): typeof initialState {
+    let elements;
+    let currentEditingIndex;
     switch (action.type) {
-        case LevelEditorAction.SET_APP_IS_LOADED:
-            return { ...state, appIsLoaded: true };
-        // case 'SET_APP':
-        //     return { ...state, app: action.payload };
-        // case 'SET_IS_LOADING':
-        //     return { ...state, isLoading: action.payload };
-        // case 'SET_IS_NOT_FOUND':
-        //     return { ...state, isNotFound: action.payload };
-        // Add more cases for each state variable
+        case ActionType.LOAD_APP:
+            return {
+                ...state,
+                app: action.payload,
+            };
+        case ActionType.LEVEL_IS_NOT_FOUND:
+            return {
+                ...state,
+                isNotFound: true,
+            };
+        case ActionType.UPDATE_LEVEL_NAME:
+            return {
+                ...state,
+                levelName: action.payload,
+            };
+        case ActionType.UPDATE_ELEMENT_NAME:
+            elements = [...state.elements];
+            elements[action.payload.index].name = action.payload.name;
+            elements[action.payload.index].mesh.name = action.payload.name;
+            return {
+                ...state,
+                elements,
+            };
+        case ActionType.UPDATE_ELEMENT_PROPERTY:
+            if (state.currentEditingIndex === undefined || !state.app) {
+                return state;
+            }
+            elements = [...state.elements];
+            const element = elements[state.currentEditingIndex];
+            const { propertyKey, value } = action.payload;
+
+            switch (propertyKey) {
+                case 'door_id':
+                    (element.properties as DoorOpenerProperties)[propertyKey] =
+                        value;
+                    // mesh is a door opener group here
+                    const areaDoorOpener = element.mesh
+                        .children[0] as InteractiveArea;
+                    const doorOpener = element.mesh
+                        .children[1] as DoorOpenerGraphic;
+                    const wallDoor = elements.find(
+                        (el) =>
+                            el.type === ElementType.WALL_DOOR &&
+                            (el.properties as WallDoorProperties).id === value,
+                    );
+                    element.mesh.name = `door-opener-group-${value}`;
+                    areaDoorOpener.name = ElementName.AREA_DOOR_OPENER(
+                        String(value),
+                    );
+                    doorOpener.name = ElementName.DOOR_OPENER(String(value));
+                    if (wallDoor && value !== undefined) {
+                        const doorInfo = computeDoorInfo(
+                            wallDoor.mesh,
+                            doorOpener,
+                        );
+                        doorOpener.doorInfo = doorInfo;
+                    } else {
+                        doorOpener.doorInfo = undefined;
+                    }
+                    break;
+                case 'side':
+                case 'interactive':
+                case 'doorPosition':
+                case 'size':
+                    (element.properties as any)[propertyKey] = (() => {
+                        if (propertyKey === 'side') {
+                            return value === true ? Side.LIGHT : Side.SHADOW;
+                        }
+                        return value;
+                    })();
+                    // remove element
+                    removeMeshFromLevel(state.app, element.mesh);
+                    // create a new one
+                    const { mesh: newMesh } = createElement(
+                        buildWorldContext(state.app),
+                        element.type,
+                        element.properties,
+                    );
+                    element.mesh = newMesh;
+                    // add element
+                    state.app.level.add(element.mesh);
+                    addToCollidingElements(
+                        element.mesh,
+                        state.app.collidingElements,
+                    );
+                    state.app.attachTransformControls(newMesh);
+                    break;
+                // Transformations
+                case 'transform':
+                    state.app.removeFromCollidingElements(element.mesh);
+                    // compute position
+                    (element.properties as any)[propertyKey].position =
+                        value.position;
+                    // compute rotation
+                    if (element.type === ElementType.BOUNCE) {
+                        (element.properties as any)[propertyKey].rotation.y =
+                            value.rotation.y;
+                        state.app.gameStateManager.currentState.level.bounces[
+                            (element.properties as BounceProperties).id
+                        ] = {
+                            rotationY: value.rotation.y,
+                        };
+                    } else {
+                        (element.properties as any)[propertyKey].rotation =
+                            value.rotation;
+                    }
+                    const rotationX = degreesToRadians(
+                        (element.properties as any)[propertyKey].rotation.x,
+                    );
+                    const rotationY = degreesToRadians(
+                        (element.properties as any)[propertyKey].rotation.y,
+                    );
+                    const rotationZ = degreesToRadians(
+                        (element.properties as any)[propertyKey].rotation.z,
+                    );
+                    // apply rotation and position to mesh
+                    element.mesh.position.copy(
+                        (value.position as Vector3)
+                            .clone()
+                            .multiplyScalar(gridSize),
+                    );
+                    element.mesh.rotation.set(rotationX, rotationY, rotationZ);
+                    addToCollidingElements(
+                        element.mesh,
+                        state.app.collidingElements,
+                    );
+                    break;
+            }
+
+            return {
+                ...state,
+                elements,
+            };
+        case ActionType.SAVE_INITIAL_LEVEL:
+            return {
+                ...state,
+                initialLevel: action.payload,
+            };
+        case ActionType.SELECT_ELEMENT:
+            if (
+                state.currentEditingIndex === action.payload &&
+                action.canUnselect
+            ) {
+                // unselect
+                currentEditingIndex = undefined;
+                state.app!.detachTransformControls();
+            } else {
+                // select
+                currentEditingIndex = action.payload;
+                state.app!.attachTransformControls(
+                    state.elements[currentEditingIndex].mesh,
+                );
+            }
+            // for bounce, only allow rotation on Z (Y)
+            if (
+                currentEditingIndex !== undefined &&
+                state.elements[currentEditingIndex] &&
+                state.elements[currentEditingIndex].type ===
+                    ElementType.BOUNCE &&
+                state.app!.transformControls?.mode === 'rotate'
+            ) {
+                state.app!.transformControls!.showX = false;
+                state.app!.transformControls!.showY = false;
+            } else {
+                state.app!.transformControls!.showX = true;
+                state.app!.transformControls!.showY = true;
+            }
+            return {
+                ...state,
+                currentEditingIndex,
+            };
+        case ActionType.ADD_ELEMENT:
+            elements = [...state.elements];
+            const elementName = `${action.payload}_${elements.length}`;
+            if (process.env.NODE_ENV === 'development') {
+                // TODO: I think it's small but performance could be improve here. This code
+                // exist because of react strict mode.
+                // if element already in the scene, remove it. Suppose to be trigger only in dev with react strict mode
+                const elem = state.app!.level.children.find(
+                    (el) => el.name === elementName,
+                );
+                if (elem) {
+                    removeMeshFromLevel(state.app!, elem);
+                }
+            }
+            const { mesh, properties } = createElement(
+                buildWorldContext(state.app!),
+                action.payload,
+            );
+
+            elements.push({
+                type: action.payload,
+                properties,
+                mesh,
+                name: elementName,
+            });
+            mesh.name = elementName;
+            currentEditingIndex = elements.length;
+            state.app!.level.add(mesh);
+            addToCollidingElements(mesh, state.app!.collidingElements);
+            console.log('HERE add element');
+
+            return {
+                ...state,
+                elements,
+                currentEditingIndex,
+            };
+        case ActionType.REMOVE_ELEMENT:
+            elements = [...state.elements];
+            const deletedElement = elements.splice(action.payload, 1);
+            removeMeshFromLevel(state.app!, deletedElement[0].mesh);
+            return {
+                ...state,
+                elements,
+            };
+        case ActionType.LOAD_LEVEL:
+            // remove all elements from the scene
+            for (let i = 0; i < state.elements.length; i++) {
+                const element = state.elements[i];
+                removeMeshFromLevel(state.app!, element.mesh);
+            }
+            const elementList = parseLevelElements(
+                buildWorldContext(state.app!),
+                action.payload.data,
+            );
+            const loadElementsToScene = (elementList: LevelElement[]) => {
+                for (let i = 0; i < elementList.length; i++) {
+                    const { mesh } = elementList[i];
+                    if (process.env.NODE_ENV === 'development') {
+                        // TODO: I think it's small but performance could be improve here. This code
+                        // exist because of react strict mode.
+                        // if element already in the scene, remove it. Suppose to be trigger only in dev with react strict mode
+                        const elem = state.app!.level.children.find(
+                            (el) => el.name === mesh.name,
+                        );
+                        if (elem) {
+                            removeMeshFromLevel(state.app!, elem);
+                        }
+                    }
+                    state.app!.level.add(mesh);
+                    addToCollidingElements(mesh, state.app!.collidingElements);
+                }
+            };
+            // load elements to the scene
+            loadElementsToScene(elementList);
+            return {
+                ...state,
+                elements: elementList,
+                levelName: action.payload.name,
+                levelStatus: action.payload.status,
+                isInitialLoadDone: true,
+            };
         default:
             throw new Error();
     }
+}
+
+function buildWorldContext(app: App): WorldContext {
+    return {
+        levelState: app.gameStateManager.currentState.level,
+        bounceList: app.level.bounces,
+        clientGraphicHelpers: {
+            addBounceGraphic,
+            addDoorOpenerGraphic,
+            addEndLevelGraphic,
+            connectDoors,
+            addLightBounceComposer: app.rendererManager.addLightBounceComposer,
+        },
+    };
 }
 
 export function useController(
@@ -116,70 +441,36 @@ export function useController(
     );
     const { enqueueSnackbar } = useSnackbar();
     const router = useRouter();
-    const appRef = useRef<App>();
 
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const onAppLoaded = useCallback((app: App) => {
-        appRef.current = app;
-        dispatch({ type: LevelEditorAction.SET_APP_IS_LOADED });
+        dispatch({ type: ActionType.LOAD_APP, payload: app });
     }, []);
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [isNotFound, setIsNotFound] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isThumbnailModalOpen, setIsThumbnailModalOpen] = useState(false);
     const [thumbnailSrc, setIsThumbnailSrc] = useState<string | undefined>(
         undefined,
     );
-    const [currentEditingIndex, setCurrentEditingIndex] = useState<number>();
-    const [initialLevel, setInitialLevel] = useState<
-        PartialLevel | undefined
-    >();
-    const [levelName, setLevelName] = useState(defaultLevel.name);
-    const [levelStatus, setLevelStatus] = useState<LevelStatusEnum>(
-        defaultLevel.status,
-    );
-    const [elements, setElements] = useState<LevelElement[]>([]);
+    const [history, setHistory] = useState<LevelElement[][]>([]);
+    const [historyIndex, setHistoryIndex] = useState(0);
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
-    const worldContext: WorldContext | null = useMemo(() => {
-        if (!appRef.current || !state.appIsLoaded) {
-            return null;
+    const handleLevelNameChange = useCallback((e: any) => {
+        dispatch({
+            type: ActionType.UPDATE_LEVEL_NAME,
+            payload: e.target.value,
+        });
+        if (e.target.value) {
+            setHasErrorWithLevelName(false);
         }
-        return {
-            levelState: appRef.current.gameStateManager.currentState.level,
-            bounceList: appRef.current.level.bounces,
-            clientGraphicHelpers: {
-                addBounceGraphic,
-                addDoorOpenerGraphic,
-                addEndLevelGraphic,
-                connectDoors,
-                addLightBounceComposer:
-                    appRef.current.rendererManager.addLightBounceComposer,
-            },
-        };
-    }, [state.appIsLoaded]);
-
-    const handleLevelNameChange = useCallback(
-        (e: any) => {
-            setLevelName(e.target.value);
-            if (e.target.value) {
-                setHasErrorWithLevelName(false);
-            }
-        },
-        [setLevelName],
-    );
+    }, []);
 
     const handleClickOnSave = useCallback(
         (isFork?: boolean, status?: LevelStatusEnum) => {
-            if (!appRef.current) {
-                return;
-            }
-            const app = appRef.current;
-            if (!levelName) {
+            if (!state.levelName) {
                 enqueueSnackbar(
                     dictionary.notification['error-missing-level-name'],
                     {
@@ -197,36 +488,13 @@ export function useController(
 
             const apiClient = servicesContainer.get(ApiClient);
             const onSuccess = (level: Level) => {
-                if (!app || !worldContext) {
-                    return;
-                }
                 if (level_id === 'new' || isFork) {
                     router.push(Route.LEVEL_EDITOR(level.id));
                 }
-                // remove all elements from the scene
-                for (let i = 0; i < elements.length; i++) {
-                    const element = elements[i];
-                    removeMeshFromScene(app, element.mesh);
-                }
-                // prepare the next state
-                const nextState = parseLevelElements(worldContext, level.data);
-                // console.log(
-                //     'before',
-                //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
-                // );
-                // load the next state into the scene
-                const loadElementsToScene = (elementList: LevelElement[]) => {
-                    for (let i = 0; i < elementList.length; i++) {
-                        const { mesh } = elementList[i];
-                        app.scene.add(mesh);
-                        addToCollidingElements(mesh, app.collidingElements);
-                    }
-                };
-                loadElementsToScene(nextState);
-                // console.log(
-                //     'after',
-                //     JSON.parse(JSON.stringify(app.gameStateManager.currentState)),
-                // );
+                dispatch({
+                    type: ActionType.LOAD_LEVEL,
+                    payload: level,
+                });
                 const successMessage = (() => {
                     if (status === LevelStatusEnum.Published) {
                         return dictionary.notification[
@@ -244,8 +512,6 @@ export function useController(
                 enqueueSnackbar(successMessage, {
                     variant: 'success',
                 });
-                setElements(nextState);
-                setLevelStatus(level.status);
             };
             const onCatch = async (error: any) => {
                 console.error(error);
@@ -270,7 +536,7 @@ export function useController(
             };
 
             setIsSaving(true);
-            const elementsToSend = elements.map((el) => ({
+            const elementsToSend = state.elements.map((el) => ({
                 type: el.type,
                 properties: el.properties,
                 name: el.name,
@@ -279,7 +545,9 @@ export function useController(
                 apiClient.defaultApi
                     .levelsControllerCreate({
                         createLevelDto: {
-                            name: isFork ? `${levelName}_forked` : levelName,
+                            name: isFork
+                                ? `${state.levelName}_forked`
+                                : state.levelName,
                             data: elementsToSend,
                         },
                     })
@@ -291,7 +559,7 @@ export function useController(
                     .levelsControllerUpdate({
                         id: level_id,
                         updateLevelDto: {
-                            name: levelName,
+                            name: state.levelName,
                             data: elementsToSend,
                             status,
                         },
@@ -301,16 +569,7 @@ export function useController(
                     .finally(onFinally);
             }
         },
-        [
-            enqueueSnackbar,
-            dictionary,
-            elements,
-            levelName,
-            router,
-            level_id,
-            isAuthenticated,
-            worldContext,
-        ],
+        [enqueueSnackbar, dictionary, state, router, level_id, isAuthenticated],
     );
 
     const handleSaveThumbnail = useCallback(() => {
@@ -371,10 +630,9 @@ export function useController(
 
     const updateElementName = useCallback(
         (index: number) => (e: any) => {
-            setElements((prev) => {
-                const newState = [...prev];
-                newState[index].name = e.target.value;
-                return newState;
+            dispatch({
+                type: ActionType.UPDATE_ELEMENT_NAME,
+                payload: { index, name: e.target.value },
             });
         },
         [],
@@ -382,212 +640,85 @@ export function useController(
 
     const handleControlObjectChange = useCallback((object: Object3D) => {
         // update element transformations
-        setElements((prev) => {
-            const nextState = [...prev];
-            const index = nextState.findIndex((el) => el.mesh === object);
-            nextState[index].properties.position = object.position
-                .clone()
-                .divideScalar(gridSize);
-            const rotationX = radiansToDegrees(object.rotation.x);
-            const rotationY = radiansToDegrees(object.rotation.y);
-            const rotationZ = radiansToDegrees(object.rotation.z);
-            (nextState[index].properties as any).rotation = new Euler(
-                rotationX,
-                rotationY,
-                rotationZ,
-            );
-            return nextState;
+        const rotationX = radiansToDegrees(object.rotation.x);
+        const rotationY = radiansToDegrees(object.rotation.y);
+        const rotationZ = radiansToDegrees(object.rotation.z);
+        dispatch({
+            type: ActionType.UPDATE_ELEMENT_PROPERTY,
+            payload: {
+                propertyKey: 'transform',
+                value: {
+                    position: object.position.clone().divideScalar(gridSize),
+                    rotation: new Euler(rotationX, rotationY, rotationZ),
+                },
+            },
         });
     }, []);
 
     const handleUpdateElementProperty = useCallback(
         (propertyKey: string, value: any) => {
-            if (
-                currentEditingIndex === undefined ||
-                !appRef.current ||
-                !worldContext
-            ) {
-                return;
-            }
-            const app = appRef.current;
-            setElements((prev) => {
-                const nextState = [...prev];
-                let { properties, mesh, type } = nextState[currentEditingIndex];
-                switch (propertyKey) {
-                    case 'door_id':
-                        (properties as DoorOpenerProperties)[propertyKey] =
-                            value;
-                        // mesh is a door opener group here
-                        const areaDoorOpener = mesh
-                            .children[0] as InteractiveArea;
-                        const doorOpener = mesh
-                            .children[1] as DoorOpenerGraphic;
-                        const wallDoor = nextState.find(
-                            (el) =>
-                                el.type === ElementType.WALL_DOOR &&
-                                (el.properties as WallDoorProperties).id ===
-                                    value,
-                        );
-                        mesh.name = `door-opener-group-${value}`;
-                        areaDoorOpener.name = ElementName.AREA_DOOR_OPENER(
-                            String(value),
-                        );
-                        doorOpener.name = ElementName.DOOR_OPENER(
-                            String(value),
-                        );
-                        if (wallDoor && value !== undefined) {
-                            const doorInfo = computeDoorInfo(
-                                wallDoor.mesh,
-                                doorOpener,
-                            );
-                            doorOpener.doorInfo = doorInfo;
-                        } else {
-                            doorOpener.doorInfo = undefined;
-                        }
-                        break;
-                    case 'side':
-                    case 'interactive':
-                    case 'doorPosition':
-                    case 'size':
-                        (properties as any)[propertyKey] = (() => {
-                            if (propertyKey === 'side') {
-                                return value === true
-                                    ? Side.LIGHT
-                                    : Side.SHADOW;
-                            }
-                            return value;
-                        })();
-                        // remove element
-                        removeMeshFromScene(
-                            app,
-                            nextState[currentEditingIndex].mesh,
-                        );
-                        // create a new one
-                        const { mesh: newMesh } = createElement(
-                            worldContext,
-                            type,
-                            nextState[currentEditingIndex].properties,
-                        );
-                        nextState[currentEditingIndex].mesh = newMesh;
-                        // add element
-                        app.scene.add(nextState[currentEditingIndex].mesh);
-                        addToCollidingElements(
-                            nextState[currentEditingIndex].mesh,
-                            app.collidingElements,
-                        );
-                        app.attachTransformControls(newMesh);
-                        break;
-                    // Transformations
-                    case 'rotation':
-                        (properties as any)[propertyKey] = value;
-                        app.removeFromCollidingElements(mesh);
-                        if (type === ElementType.BOUNCE) {
-                            app.gameStateManager.currentState.level.bounces[
-                                (properties as BounceProperties).id
-                            ] = {
-                                rotationY: value.y,
-                            };
-                        } else {
-                            const rotationX = degreesToRadians(value.x);
-                            const rotationY = degreesToRadians(value.y);
-                            const rotationZ = degreesToRadians(value.z);
-                            mesh.rotation.set(rotationX, rotationY, rotationZ);
-                        }
-                        addToCollidingElements(mesh, app.collidingElements);
-                        break;
-                    case 'position':
-                        (properties as any)[propertyKey] = value;
-                        app.removeFromCollidingElements(mesh);
-                        mesh.position.copy(
-                            (value as Vector3).clone().multiplyScalar(gridSize),
-                        );
-                        addToCollidingElements(mesh, app.collidingElements);
-                        break;
-                }
-                return nextState;
+            dispatch({
+                type: ActionType.UPDATE_ELEMENT_PROPERTY,
+                payload: { propertyKey, value },
             });
         },
-        [currentEditingIndex, worldContext],
+        [],
     );
 
-    const addElement = useCallback(
-        (type: ElementType) => {
-            if (!appRef.current || !worldContext) {
-                return;
-            }
-            const app = appRef.current;
-            const { mesh, properties } = createElement(worldContext, type);
-            setElements((prev) => {
-                const nextState = [...prev];
-                nextState.push({
-                    type,
-                    properties,
-                    mesh,
-                    name: `${type}_${nextState.length}`,
-                });
-                return nextState;
-            });
-            setCurrentEditingIndex(elements.length);
-            app.scene.add(mesh);
-            addToCollidingElements(mesh, app.collidingElements);
-        },
-        [elements, setCurrentEditingIndex, worldContext],
-    );
+    const addElement = useCallback((type: ElementType) => {
+        dispatch({ type: ActionType.ADD_ELEMENT, payload: type });
+    }, []);
 
     const removeElement = useCallback(
         (index: number) => () => {
-            if (!appRef.current) {
-                return;
-            }
-            const app = appRef.current;
-            setElements((prev) => {
-                const newState = [...prev];
-                const deletedElement = newState.splice(index, 1);
-                removeMeshFromScene(app, deletedElement[0].mesh);
-                return newState;
-            });
+            dispatch({ type: ActionType.REMOVE_ELEMENT, payload: index });
         },
         [],
     );
 
     const selectElement = useCallback(
         (index: number) => () => {
-            setCurrentEditingIndex((prev) => {
-                if (prev === index) {
-                    return undefined;
-                }
-                return index;
+            dispatch({
+                type: ActionType.SELECT_ELEMENT,
+                payload: index,
+                canUnselect: true,
             });
         },
-        [setCurrentEditingIndex],
+        [],
     );
 
-    const currentEditingElement = useMemo(() => {
-        if (currentEditingIndex === undefined) {
-            return null;
-        }
-        return elements[currentEditingIndex];
-    }, [currentEditingIndex, elements]);
+    // // Update history when state changes
+    // useEffect(() => {
+    //     setHistory((prev) => [...prev.slice(0, historyIndex + 1), elements]);
+    //     setHistoryIndex((prev) => prev + 1);
+    // }, [elements, historyIndex]);
 
-    // effect responsible to update the current attach transform control element in three.js accordingly with the react state
-    useEffect(() => {
-        if (!appRef.current) {
-            return;
-        }
-        const app = appRef.current;
-        if (currentEditingElement) {
-            app.attachTransformControls(currentEditingElement.mesh);
-        } else {
-            app.detachTransformControls();
-        }
-    }, [currentEditingElement]);
+    // // Listen for Ctrl + Z and Ctrl + Shift + Z
+    // useEffect(() => {
+    //     const handleKeyDown = (event: any) => {
+    //         if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+    //             event.preventDefault();
+    //             // Don't undo past the initial state
+    //             if (!event.shiftKey && historyIndex > 0) {
+    //                 setHistoryIndex((prev) => prev - 1);
+    //             }
+    //             // Don't redo past the latest state
+    //             else if (event.shiftKey && historyIndex < history.length - 1) {
+    //                 setHistoryIndex((prev) => prev + 1);
+    //             }
+    //         }
+    //     };
+
+    //     window.addEventListener('keydown', handleKeyDown);
+    //     return () => window.removeEventListener('keydown', handleKeyDown);
+    // }, [history, historyIndex]);
 
     // responsible to register and clear event listeners for the level editor
     useEffect(() => {
-        if (!appRef.current) {
+        if (!state.app) {
             return;
         }
-        const app = appRef.current;
+        const app = state.app;
         function isMouseLeftButton(event: any) {
             if (
                 event.metaKey ||
@@ -632,14 +763,14 @@ export function useController(
                 return null;
             }
 
-            const index = elements.findIndex((el) => {
+            const index = state.elements.findIndex((el) => {
                 return Boolean(
                     findItemInParents(app.mouseSelectedObject, el.mesh),
                 );
             });
 
             if (index !== -1) {
-                setCurrentEditingIndex(index);
+                dispatch({ type: ActionType.SELECT_ELEMENT, payload: index });
             }
         };
         const onKeyDown = (e: KeyboardEvent) => {
@@ -653,6 +784,20 @@ export function useController(
                 default:
                     break;
             }
+            // for bounce, only allow rotation on Z (Y)
+            if (
+                state.currentEditingIndex !== undefined &&
+                state.elements[state.currentEditingIndex] &&
+                state.elements[state.currentEditingIndex].type ===
+                    ElementType.BOUNCE &&
+                app.transformControls?.mode === 'rotate'
+            ) {
+                app.transformControls!.showX = false;
+                app.transformControls!.showY = false;
+            } else {
+                app.transformControls!.showX = true;
+                app.transformControls!.showY = true;
+            }
         };
         app.canvasDom.addEventListener('mousemove', onMouseMove);
         app.canvasDom.addEventListener('mousedown', onMouseDown);
@@ -662,85 +807,61 @@ export function useController(
             app.canvasDom.removeEventListener('mousedown', onMouseDown);
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, [elements, setCurrentEditingIndex]);
+    }, [state]);
 
     // effect responsible to close the auth modal after successful login
     useEffect(() => {
         if (isAuthenticated && isAuthModalOpen) {
             setIsAuthModalOpen(false);
         }
-    }, [isAuthenticated, isAuthModalOpen, elements]);
+    }, [isAuthenticated, isAuthModalOpen]);
 
-    // effect responsible to load the level data from the api and the assets
+    // effect responsible to load the level data from the api
     useEffect(() => {
-        if (level_id === 'new') {
-            setInitialLevel({ ...defaultLevel });
-            return;
-        }
         const apiClient = servicesContainer.get(ApiClient);
         // load level
-        setIsLoading(true);
         Promise.all([
-            apiClient.defaultApi.levelsControllerFindOne({
-                id: level_id,
-            }),
             startLoadingAssets(),
+            level_id === 'new'
+                ? undefined
+                : apiClient.defaultApi.levelsControllerFindOne({
+                      id: level_id,
+                  }),
         ])
-            .then(([level]) => {
+            .then(([_, level]) => {
                 console.log('level loaded', level);
-                setLevelName(level.name);
-                setLevelStatus(level.status);
-                setInitialLevel(level);
+                dispatch({
+                    type: ActionType.SAVE_INITIAL_LEVEL,
+                    payload: level || defaultLevel,
+                });
             })
             .catch((error) => {
                 console.error(error);
-                setIsNotFound(true);
-            })
-            .finally(() => {
-                setIsLoading(false);
+                dispatch({ type: ActionType.LEVEL_IS_NOT_FOUND });
             });
     }, [level_id]);
 
-    // effect responsible to mount the 3d scene only once and when the app is ready
+    // effect loading the scene when assets and level data are ready
+    // TODO: Can be remove and do in the reducer potentially
     useEffect(() => {
         // if the app is not ready, don't do anything
-        if (
-            !appRef.current ||
-            !state.appIsLoaded ||
-            !worldContext ||
-            isInitialLoadDone ||
-            !initialLevel
-        ) {
+        if (!state.app || !state.initialLevel || state.isInitialLoadDone) {
             return;
         }
-        const app = appRef.current;
-        // parse the initial level elements
-        const elementList = parseLevelElements(worldContext, initialLevel.data);
-        const loadElementsToScene = (elementList: LevelElement[]) => {
-            for (let i = 0; i < elementList.length; i++) {
-                const { mesh } = elementList[i];
-                app.scene.add(mesh);
-                addToCollidingElements(mesh, app.collidingElements);
-            }
-        };
-        // load elements to the scene
-        loadElementsToScene(elementList);
-        // set the state
-        setElements(elementList);
-        setIsInitialLoadDone(true);
-    }, [initialLevel, isInitialLoadDone, worldContext, state]);
 
-    if (isNotFound) {
+        dispatch({
+            type: ActionType.LOAD_LEVEL,
+            payload: state.initialLevel,
+        });
+    }, [state]);
+
+    if (state.isNotFound) {
         notFound();
     }
 
     return {
-        levelName,
-        levelStatus,
-        elements,
+        state,
         hasErrorWithLevelName,
-        currentEditingIndex,
-        currentEditingElement,
         isAuthModalOpen,
         isThumbnailModalOpen,
         thumbnailSrc,
@@ -753,7 +874,6 @@ export function useController(
         handleUpdateElementProperty,
         addElement,
         removeElement,
-        appRef,
         onAppLoaded,
         selectElement,
         setIsAuthModalOpen,

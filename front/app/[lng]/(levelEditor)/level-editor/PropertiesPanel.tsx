@@ -11,9 +11,13 @@ import {
     WallDoorProperties,
 } from '@benjaminbours/composite-core';
 // project
-import { NumberInput, InputAdornment } from './NumericInput';
 import { MUISwitch } from './CustomSwitch';
 import classNames from 'classnames';
+import { Vec3Row } from './Vec3Row';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const propertyTextMap = {
     id: 'ID',
@@ -24,6 +28,7 @@ const propertyTextMap = {
     rotation: 'Rotation',
     side: 'Side',
     interactive: 'Interactive',
+    transform: 'Transform',
 };
 
 interface Props {
@@ -155,55 +160,121 @@ export const PropertiesPanel: React.FC<Props> = ({
                         );
                     }
 
-                    const onChange =
-                        (field: 'x' | 'y' | 'z') =>
-                        (_event: any, fieldValue: number) => {
-                            if (fieldValue === undefined) {
-                                return;
-                            }
-                            const nextValue = value.clone();
-                            nextValue[field] = fieldValue;
-                            onUpdateProperty(key, nextValue);
-                        };
-                    const step = key === 'rotation' ? 10 : 0.1;
-                    return (
-                        <li key={key} className={cssClass}>
-                            <label>{(propertyTextMap as any)[key]}</label>
-                            <div className="properties-panel__inputs-container">
-                                <NumberInput
-                                    disabled={disabled}
-                                    step={step}
-                                    min={key === 'size' ? 1 : undefined}
-                                    value={value.x}
-                                    startAdornment={
-                                        <InputAdornment>X</InputAdornment>
-                                    }
-                                    onChange={onChange('x') as any}
-                                />
-                                <NumberInput
-                                    disabled={disabled}
-                                    step={step}
-                                    min={key === 'size' ? 1 : undefined}
-                                    value={value.y}
-                                    startAdornment={
-                                        <InputAdornment>Y</InputAdornment>
-                                    }
-                                    onChange={onChange('y') as any}
-                                />
-                                {key !== 'size' && (
-                                    <NumberInput
-                                        disabled={disabled}
-                                        step={step}
-                                        value={value.z}
-                                        startAdornment={
-                                            <InputAdornment>Z</InputAdornment>
-                                        }
-                                        onChange={onChange('z') as any}
-                                    />
-                                )}
-                            </div>
-                        </li>
-                    );
+                    if (key === 'size') {
+                        const onChange =
+                            (field: 'x' | 'y' | 'z') =>
+                            (_event: any, fieldValue: number) => {
+                                if (fieldValue === undefined) {
+                                    return;
+                                }
+                                const nextValue = value.clone();
+                                nextValue[field] = fieldValue;
+                                onUpdateProperty(key, nextValue);
+                            };
+                        return (
+                            <li key={key} className={cssClass}>
+                                <Accordion elevation={10}>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1-content"
+                                        id="panel1-header"
+                                    >
+                                        {(propertyTextMap as any)[key]}
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Vec3Row
+                                            step={0.1}
+                                            min={1}
+                                            disabled={disabled}
+                                            onChange={onChange}
+                                            value={value}
+                                        />
+                                    </AccordionDetails>
+                                </Accordion>
+                            </li>
+                        );
+                    }
+
+                    if (key === 'transform') {
+                        type TransformationKeys = 'position' | 'rotation';
+                        const transformations = ['position', 'rotation'];
+                        const onChange =
+                            (transform: TransformationKeys) =>
+                            (field: 'x' | 'y' | 'z') =>
+                            (_event: any, fieldValue: number) => {
+                                if (fieldValue === undefined) {
+                                    return;
+                                }
+                                const nextValue = {
+                                    position: value.position.clone(),
+                                    rotation: value.rotation.clone(),
+                                };
+                                nextValue[transform][field] = fieldValue;
+                                onUpdateProperty(key, nextValue);
+                            };
+                        return (
+                            <li key={key} className={cssClass}>
+                                <Accordion elevation={10}>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1-content"
+                                        id="panel1-header"
+                                    >
+                                        {(propertyTextMap as any)[key]}
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <ul>
+                                            {transformations.map(
+                                                (transformationKey) => {
+                                                    const step =
+                                                        transformationKey ===
+                                                        'rotation'
+                                                            ? 10
+                                                            : 0.1;
+                                                    return (
+                                                        <li
+                                                            key={
+                                                                transformationKey
+                                                            }
+                                                            className={cssClass}
+                                                        >
+                                                            <label>
+                                                                {
+                                                                    (
+                                                                        propertyTextMap as any
+                                                                    )[
+                                                                        transformationKey
+                                                                    ]
+                                                                }
+                                                            </label>
+                                                            <Vec3Row
+                                                                step={step}
+                                                                min={undefined}
+                                                                disabled={
+                                                                    disabled
+                                                                }
+                                                                onChange={onChange(
+                                                                    transformationKey as TransformationKeys,
+                                                                )}
+                                                                value={
+                                                                    value[
+                                                                        transformationKey
+                                                                    ] as any
+                                                                }
+                                                                withZ
+                                                            />
+                                                        </li>
+                                                    );
+                                                },
+                                            )}
+                                        </ul>
+                                    </AccordionDetails>
+                                </Accordion>
+                            </li>
+                        );
+                    }
+
+                    return null;
                 })}
             </ul>
         </Paper>

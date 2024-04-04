@@ -13,7 +13,6 @@ import { PropertiesPanel } from './PropertiesPanel';
 import { TopBarLevelEditor } from './TopBarLevelEditor';
 import type { getDictionary } from '../../../../getDictionary';
 import { useController } from './useController';
-import { PartialLevel } from '../../../types';
 import { ThumbnailModal } from './ThumbnailModal';
 import { AuthModal } from '../../../03_organisms/AuthModal';
 
@@ -29,13 +28,8 @@ interface Props {
 
 export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     const {
-        levelName,
-        levelStatus,
-        elements,
+        state,
         hasErrorWithLevelName,
-        currentEditingIndex,
-        currentEditingElement,
-        appRef,
         isAuthModalOpen,
         isThumbnailModalOpen,
         thumbnailSrc,
@@ -60,55 +54,53 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const resetCamera = useCallback(() => {
-        if (appRef.current) {
-            appRef.current.resetEditorCamera();
+        if (state.app) {
+            state.app.resetEditorCamera();
         }
-    }, [appRef]);
+    }, [state.app]);
 
     const toggleCollisionArea = useCallback(() => {
-        if (appRef.current) {
-            appRef.current.toggleCollisionArea();
+        if (state.app) {
+            state.app.toggleCollisionArea();
         }
-    }, [appRef]);
+    }, [state.app]);
 
     const toggleTestMode = useCallback(() => {
-        if (appRef.current) {
-            appRef.current.setAppMode(
-                appRef.current.mode === AppMode.GAME
-                    ? AppMode.EDITOR
-                    : AppMode.GAME,
+        if (state.app) {
+            state.app.setAppMode(
+                state.app.mode === AppMode.GAME ? AppMode.EDITOR : AppMode.GAME,
             );
         }
-    }, [appRef]);
+    }, [state.app]);
 
     const captureSnapshot = useCallback(() => {
-        if (appRef.current) {
-            appRef.current.onCaptureSnapshot = (image: string) => {
+        if (state.app) {
+            state.app.onCaptureSnapshot = (image: string) => {
                 setIsThumbnailSrc(image);
                 setIsThumbnailModalOpen(true);
             };
-            appRef.current.shouldCaptureSnapshot = true;
+            state.app.shouldCaptureSnapshot = true;
         }
-    }, [appRef, setIsThumbnailModalOpen, setIsThumbnailSrc]);
+    }, [state.app, setIsThumbnailModalOpen, setIsThumbnailSrc]);
 
     const resetPlayersPosition = useCallback(() => {
-        if (appRef.current) {
-            appRef.current.resetPlayersPosition();
+        if (state.app) {
+            state.app.resetPlayersPosition();
         }
-    }, [appRef]);
+    }, [state.app]);
 
     const switchPlayer = useCallback(() => {
-        if (appRef.current) {
+        if (state.app) {
             const nextSide =
-                appRef.current.mainPlayerSide === Side.SHADOW
+                state.app.mainPlayerSide === Side.SHADOW
                     ? Side.LIGHT
                     : Side.SHADOW;
-            appRef.current.mainPlayerSide = nextSide;
-            appRef.current.secondPlayerSide =
+            state.app.mainPlayerSide = nextSide;
+            state.app.secondPlayerSide =
                 nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
-            appRef.current.setGameCamera();
+            state.app.setGameCamera();
         }
-    }, [appRef]);
+    }, [state.app]);
 
     return (
         <main className="level-editor">
@@ -123,7 +115,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                 isModalOpen={isThumbnailModalOpen}
                 dictionary={dictionary}
                 thumbnailSrc={thumbnailSrc}
-                levelName={levelName}
+                levelName={state.levelName}
                 onSave={handleSaveThumbnail}
             />
             <TopBarLevelEditor
@@ -135,8 +127,8 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                 onStartTestMode={toggleTestMode}
                 onResetPlayersPosition={resetPlayersPosition}
                 onSwitchPlayer={switchPlayer}
-                levelName={levelName}
-                levelStatus={levelStatus}
+                levelName={state.levelName}
+                levelStatus={state.levelStatus}
                 onLevelNameChange={handleLevelNameChange}
                 onSave={handleClickOnSave}
                 onCaptureSnapshot={captureSnapshot}
@@ -145,33 +137,38 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
             />
             <div className="level-editor__top-right-container">
                 <SceneContentPanel
-                    elements={elements}
-                    currentEditingIndex={currentEditingIndex}
+                    elements={state.elements}
+                    currentEditingIndex={state.currentEditingIndex}
                     onElementClick={selectElement}
                     onChangeName={updateElementName}
                     onElementDelete={removeElement}
                     onAddElement={addElement}
                     disabled={isSaving}
                 />
-                {currentEditingElement && (
-                    <PropertiesPanel
-                        state={elements}
-                        onUpdateProperty={handleUpdateElementProperty}
-                        element={currentEditingElement}
-                        disabled={isSaving}
-                    />
-                )}
+                {state.currentEditingIndex !== undefined &&
+                    state.elements[state.currentEditingIndex] && (
+                        <PropertiesPanel
+                            state={state.elements}
+                            onUpdateProperty={handleUpdateElementProperty}
+                            element={state.elements[state.currentEditingIndex]}
+                            disabled={isSaving}
+                        />
+                    )}
             </div>
-            <Game
-                side={Side.SHADOW}
-                levelEditorProps={{
-                    onAppLoaded,
-                    onTransformControlsObjectChange: handleControlObjectChange,
-                }}
-                tabIsHidden={false}
-                stats={statsRef}
-                inputsManager={inputsManager.current}
-            />
+            {/* when initial level exist, it means assets are loaded */}
+            {state.initialLevel && (
+                <Game
+                    side={Side.SHADOW}
+                    levelEditorProps={{
+                        onAppLoaded,
+                        onTransformControlsObjectChange:
+                            handleControlObjectChange,
+                    }}
+                    tabIsHidden={false}
+                    stats={statsRef}
+                    inputsManager={inputsManager.current}
+                />
+            )}
         </main>
     );
 };

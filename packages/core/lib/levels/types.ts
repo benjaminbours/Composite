@@ -3,20 +3,27 @@ import { Side } from '../types';
 
 export class WallProperties {
     public size = new Vector3(1, 1, 1);
-    public position = new Vector3(0, 0, 0);
-    public rotation = new Euler(0, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        rotation: new Euler(0, 0, 0),
+    };
 }
 
 export class ArchProperties {
     public size = new Vector3(1, 1, 1);
-    public position = new Vector3(0, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        rotation: new Euler(0, 0, 0),
+    };
 }
 
 export class BounceProperties {
     // public size = new Vector3(1, 1, 1);
-    public position = new Vector3(0, 0, 0);
-    // degrees
-    public rotation = new Euler(90, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        // degrees
+        rotation: new Euler(90, 0, 0),
+    };
     public side = Side.SHADOW;
     public interactive = false;
 
@@ -24,26 +31,36 @@ export class BounceProperties {
 }
 
 export class EndLevelProperties {
-    public position = new Vector3(0, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        rotation: new Euler(0, 0, 0),
+    };
 }
 
 export class ColumnFatProperties {
     public size = new Vector3(1, 1, 1);
-    public position = new Vector3(0, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        rotation: new Euler(0, 0, 0),
+    };
 }
 
 export class WallDoorProperties {
     public size = new Vector3(1, 1, 1);
-    public position = new Vector3(0, 0, 0);
     public doorPosition = new Vector3(0, 0, 0);
-    public rotation = new Euler(0, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        rotation: new Euler(0, 0, 0),
+    };
 
     constructor(public id: number) {}
 }
 
 export class DoorOpenerProperties {
-    public position = new Vector3(0, 0, 0);
-    public rotation = new Euler(0, 0, 0);
+    public transform = {
+        position: new Vector3(0, 0, 0),
+        rotation: new Euler(0, 0, 0),
+    };
     public door_id: number | undefined = undefined;
 }
 

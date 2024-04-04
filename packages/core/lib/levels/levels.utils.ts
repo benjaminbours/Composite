@@ -521,10 +521,12 @@ function createDoorOpener(props: DoorOpenerProperties) {
         ElementName.AREA_DOOR_OPENER(String(props.door_id)),
     );
     group.add(areaDoorOpener);
-    group.position.copy(props.position.clone().multiplyScalar(gridSize));
-    const rotationX = degreesToRadians(props.rotation.x);
-    const rotationY = degreesToRadians(props.rotation.y);
-    const rotationZ = degreesToRadians(props.rotation.z);
+    group.position.copy(
+        props.transform.position.clone().multiplyScalar(gridSize),
+    );
+    const rotationX = degreesToRadians(props.transform.rotation.x);
+    const rotationY = degreesToRadians(props.transform.rotation.y);
+    const rotationZ = degreesToRadians(props.transform.rotation.z);
     group.rotation.set(rotationX, rotationY, rotationZ);
     return group;
 }
@@ -533,10 +535,20 @@ function parseProperties(props: any) {
     const properties: Record<string, any> = {};
     Object.entries(props).forEach(([key, value]: [key: string, value: any]) => {
         switch (key) {
-            case 'rotation':
-                properties[key] = new Euler(value._x, value._y, value._z);
+            case 'transform':
+                properties[key] = {
+                    rotation: new Euler(
+                        value.rotation._x,
+                        value.rotation._y,
+                        value.rotation._z,
+                    ),
+                    position: new Vector3(
+                        value.position.x,
+                        value.position.y,
+                        value.position.z,
+                    ),
+                };
                 break;
-            case 'position':
             case 'size':
             case 'doorPosition':
                 properties[key] = new Vector3(value.x, value.y, value.z);
@@ -598,9 +610,9 @@ export function createElement(
                 new WallDoorProperties(Object.keys(levelState.doors).length);
             const wallDoorGroup = createWallDoor({
                 size: props.size.clone(),
-                position: props.position.clone(),
+                position: props.transform.position.clone(),
                 doorPosition: props.doorPosition.clone(),
-                rotation: props.rotation.clone(),
+                rotation: props.transform.rotation.clone(),
                 id: props.id,
             });
             levelState.doors[props.id] = [];
@@ -613,7 +625,7 @@ export function createElement(
                 (properties as ColumnFatProperties) ||
                 new ColumnFatProperties();
             const column = createColumnGroup(props.size.y, 'big');
-            positionOnGrid(column, props.position.clone());
+            positionOnGrid(column, props.transform.position.clone());
             return {
                 mesh: column,
                 properties: props,
@@ -627,7 +639,7 @@ export function createElement(
             if (clientGraphicHelpers) {
                 clientGraphicHelpers.addEndLevelGraphic(endLevelGroup);
             }
-            positionOnGrid(endLevelGroup, props.position.clone());
+            positionOnGrid(endLevelGroup, props.transform.position.clone());
             return {
                 mesh: endLevelGroup,
                 properties: props,
@@ -637,7 +649,7 @@ export function createElement(
             return {
                 mesh: createArchGroup({
                     size: props.size.clone(),
-                    position: props.position.clone(),
+                    position: props.transform.position.clone(),
                 }),
                 properties: props,
             };
@@ -647,14 +659,14 @@ export function createElement(
                 new BounceProperties(Object.keys(levelState.bounces).length);
             const bounceGroup = createBounce({
                 // size: props.size.clone(),
-                position: props.position.clone(),
-                rotation: props.rotation.clone(),
+                position: props.transform.position.clone(),
+                rotation: props.transform.rotation.clone(),
                 id: props.id,
                 side: props.side,
                 interactive: props.interactive,
             });
             levelState.bounces[props.id] = {
-                rotationY: props.rotation.y,
+                rotationY: props.transform.rotation.y,
             };
             bounceList.push(bounceGroup);
             if (clientGraphicHelpers) {
@@ -674,8 +686,8 @@ export function createElement(
             return {
                 mesh: createWall({
                     size: props.size.clone(),
-                    position: props.position.clone(),
-                    rotation: props.rotation.clone(),
+                    position: props.transform.position.clone(),
+                    rotation: props.transform.rotation.clone(),
                 }),
                 properties: props,
             };

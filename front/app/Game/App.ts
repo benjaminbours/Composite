@@ -103,7 +103,7 @@ export default class App {
     public mainPlayerSide: Side;
     public secondPlayerSide: Side;
 
-    public level: AbstractLevel;
+    public level: AbstractLevel & Group;
 
     public controls?: OrbitControls;
     public transformControls?: TransformControls;
@@ -147,12 +147,12 @@ export default class App {
             level?.data || [],
             clientGraphicHelpers,
         );
-        this.scene.add(this.level as unknown as Group);
 
         if (this.mode === AppMode.GAME) {
             this.setupPlayers();
         }
         this.setupScene();
+        this.scene.add(this.level);
         this.scene.updateMatrixWorld();
 
         // setup renderer manager
@@ -170,6 +170,7 @@ export default class App {
                 this.camera,
                 canvasDom,
             );
+            this.transformControls.name = 'transformControls';
             this.transformControls.addEventListener('objectChange', () => {
                 if (this.controlledMesh && onTransformControlsObjectChange) {
                     onTransformControlsObjectChange(this.controlledMesh);
@@ -380,6 +381,7 @@ export default class App {
         this.scene.fog = new FogExp2(0xffffff, 0.001);
         // this.scene.fog = new FogExp2(0xffffff, 0.0002);
         const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
+        ambient.name = 'ambientLight';
 
         // dirlight
         this.dirLight.castShadow = true;
@@ -395,6 +397,8 @@ export default class App {
         // this.dirLight.position.set(-2, 1, 2);
         // this.dirLight.position.copy(this.camera.position);
         this.dirLight.target = new Object3D();
+        this.dirLight.name = 'dirLight';
+        this.dirLight.target.name = 'dirLightTarget';
         this.scene.add(this.dirLight.target);
         this.scene.add(this.dirLight);
         this.scene.add(ambient);
