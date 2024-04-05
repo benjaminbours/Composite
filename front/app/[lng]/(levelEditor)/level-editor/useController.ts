@@ -23,14 +23,13 @@ import {
     createElement,
     parseLevelElements,
     WorldContext,
-    addToCollidingElements,
     EndLevelProperties,
 } from '@benjaminbours/composite-core';
 import {
     LevelStatusEnum,
     type Level,
 } from '@benjaminbours/composite-api-client';
-import App from '../../../Game/App';
+import App, { AppMode } from '../../../Game/App';
 import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
 import { servicesContainer } from '../../../core/frameworks';
 import { ApiClient } from '../../../core/services';
@@ -62,6 +61,7 @@ const defaultLevel = {
 
 const initialState = {
     app: undefined as App | undefined,
+    appMode: AppMode.EDITOR as AppMode,
     isNotFound: false,
     isSaving: false,
     isInitialLoadDone: false,
@@ -90,6 +90,7 @@ enum ActionType {
     SELECT_ELEMENT = 'SELECT_ELEMENT',
     UNDO = 'UNDO',
     REDO = 'REDO',
+    SET_APP_MODE = 'SET_APP_MODE',
 }
 
 interface UndoAction {
@@ -98,6 +99,11 @@ interface UndoAction {
 
 interface RedoAction {
     type: ActionType.REDO;
+}
+
+interface SetAppModeAction {
+    type: ActionType.SET_APP_MODE;
+    payload: AppMode;
 }
 
 interface UpdateLevelNameAction {
@@ -168,7 +174,8 @@ type Action =
     | SelectElementAction
     | UpdateElementPropertyAction
     | UndoAction
-    | RedoAction;
+    | RedoAction
+    | SetAppModeAction;
 
 function reducer(
     state: typeof initialState,
@@ -194,6 +201,11 @@ function reducer(
             return {
                 ...state,
                 historyIndex,
+            };
+        case ActionType.SET_APP_MODE:
+            return {
+                ...state,
+                appMode: action.payload,
             };
         case ActionType.LOAD_APP:
             return {
@@ -286,15 +298,10 @@ function reducer(
                     element.mesh = newMesh;
                     // add element
                     state.app.level.add(element.mesh);
-                    // addToCollidingElements(
-                    //     element.mesh,
-                    //     state.app.collidingElements,
-                    // );
                     state.app.attachTransformControls(newMesh);
                     break;
                 // Transformations
                 case 'transform':
-                    // state.app.removeFromCollidingElements(element.mesh);
                     // compute position
                     (element.properties as any)[propertyKey].position =
                         value.position;
@@ -312,10 +319,6 @@ function reducer(
                             value.rotation;
                     }
                     applyTransformToMesh(element.mesh, value);
-                    // addToCollidingElements(
-                    //     element.mesh,
-                    //     state.app.collidingElements,
-                    // );
                     break;
             }
 
@@ -397,7 +400,6 @@ function reducer(
             mesh.name = elementName;
             currentEditingIndex = elements.length;
             state.app!.level.add(mesh);
-            // addToCollidingElements(mesh, state.app!.collidingElements);
 
             historyData = addToHistory(
                 state.history,
@@ -723,6 +725,19 @@ export function useController(
         [],
     );
 
+    const toggleTestMode = useCallback(() => {
+        if (state.app) {
+            state.app.setAppMode(
+                state.app.mode === AppMode.GAME ? AppMode.EDITOR : AppMode.GAME,
+            );
+            state.app.transformControls?.detach();
+            dispatch({
+                type: ActionType.SET_APP_MODE,
+                payload: state.app.mode,
+            });
+        }
+    }, [state.app]);
+
     // Listen for Ctrl + Z and Ctrl + Shift + Z
     useEffect(() => {
         const handleKeyDown = (event: any) => {
@@ -893,8 +908,6 @@ export function useController(
         notFound();
     }
 
-    // console.log('collidingElements', state.app?.collidingElements);
-
     return {
         state,
         hasErrorWithLevelName,
@@ -915,5 +928,6 @@ export function useController(
         setIsAuthModalOpen,
         setIsThumbnailModalOpen,
         setIsThumbnailSrc,
+        toggleTestMode,
     };
 }

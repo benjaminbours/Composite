@@ -39,6 +39,7 @@ import {
     createCollisionAreaMesh,
     LevelMapping,
     ClientGraphicHelpers,
+    addToCollidingElements,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -219,36 +220,6 @@ export default class App {
         });
     };
 
-    public removeFromCollidingElements = (mesh: Object3D) => {
-        const checkChildren = (elements: Object3D[]) => {
-            for (let i = 0; i < elements.length; i++) {
-                const child = elements[i];
-                if (child.name.includes('Occlusion')) {
-                    continue;
-                }
-
-                if (child.children.length > 0) {
-                    checkChildren(child.children);
-                } else {
-                    const collidingIndex =
-                        this.collidingElements.indexOf(child);
-                    if (collidingIndex !== -1) {
-                        this.collidingElements.splice(collidingIndex, 1);
-                    }
-                }
-            }
-        };
-
-        if (mesh.children.length > 0) {
-            checkChildren(mesh.children);
-        } else {
-            const collidingIndex = this.collidingElements.indexOf(mesh);
-            if (collidingIndex !== -1) {
-                this.collidingElements.splice(collidingIndex, 1);
-            }
-        }
-    };
-
     public resetEditorCamera = () => {
         this.camera.position.set(0, 100, 500);
         this.controls?.target.set(0, 100, 0);
@@ -315,9 +286,17 @@ export default class App {
                 this.controls.enabled = false;
                 this.setGameCamera();
             }
+            // reset colliding elements
+            this.collidingElements = [this.floor];
+            for (let i = 0; i < this.level.children.length; i++) {
+                const child = this.level.children[i];
+                addToCollidingElements(child, this.collidingElements);
+            }
         } else {
             this.removePlayers();
             this.inputsManager.destroyEventListeners();
+            // reset colliding elements
+            this.collidingElements = [this.floor];
             if (this.controls) {
                 this.controls.enabled = true;
                 this.resetEditorCamera();
@@ -512,62 +491,68 @@ export default class App {
             this.updateMouseIntersection();
         }
         this.delta = this.clock.getDelta();
-        this.gameStateManager.reconciliateState(
-            this.collidingElements,
-            this.physicSimulation.delta,
-        );
-        this.physicSimulation.run((delta) => {
-            this.gameStateManager.currentState.game_time++;
-            this.processInputs(this.mainPlayerSide);
-            this.processInputs(this.secondPlayerSide);
+        if (this.mode === AppMode.GAME) {
+            // console.log(this.collidingElements);
 
-            const inputsForTick: GamePlayerInputPayload[][] = [[], []];
-            if (this.lastInput) {
-                inputsForTick[this.mainPlayerSide] = [this.lastInput];
-            }
-            if (this.lastOtherPlayerInput) {
-                inputsForTick[this.secondPlayerSide] = [
-                    this.lastOtherPlayerInput,
-                ];
-            }
-
-            for (let i = 0; i < inputsForTick.length; i++) {
-                const inputs = inputsForTick[i];
-                applyInputListToSimulation(
-                    delta,
-                    undefined,
-                    inputs,
-                    this.collidingElements,
-                    this.gameStateManager.currentState,
-                    Context.client,
-                    false,
-                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
-                );
-            }
-            this.gameStateManager.addToPredictionHistory(
-                this.gameStateManager.currentState,
+            this.gameStateManager.reconciliateState(
+                this.collidingElements,
+                this.physicSimulation.delta,
             );
+            this.physicSimulation.run((delta) => {
+                this.gameStateManager.currentState.game_time++;
+                this.processInputs(this.mainPlayerSide);
+                this.processInputs(this.secondPlayerSide);
 
-            // END PREDICTION
-            // START DISPLAY TIME
+                const inputsForTick: GamePlayerInputPayload[][] = [[], []];
+                if (this.lastInput) {
+                    inputsForTick[this.mainPlayerSide] = [this.lastInput];
+                }
+                if (this.lastOtherPlayerInput) {
+                    inputsForTick[this.secondPlayerSide] = [
+                        this.lastOtherPlayerInput,
+                    ];
+                }
 
-            this.gameStateManager.computeDisplayState();
-
-            for (let i = 0; i < this.players.length; i++) {
-                this.players[i].position.set(
-                    this.gameStateManager.displayState.players[i].position.x,
-                    this.gameStateManager.displayState.players[i].position.y,
-                    0,
+                for (let i = 0; i < inputsForTick.length; i++) {
+                    const inputs = inputsForTick[i];
+                    applyInputListToSimulation(
+                        delta,
+                        undefined,
+                        inputs,
+                        this.collidingElements,
+                        this.gameStateManager.currentState,
+                        Context.client,
+                        false,
+                        Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
+                    );
+                }
+                this.gameStateManager.addToPredictionHistory(
+                    this.gameStateManager.currentState,
                 );
-            }
-            this.updateWorldPhysic(this.gameStateManager.displayState);
-            if (this.playerHelper) {
-                this.playerHelper.setFromCenterAndSize(
-                    this.players[0].position,
-                    new Vector3(40, 40),
-                );
-            }
-        });
+
+                // END PREDICTION
+                // START DISPLAY TIME
+
+                this.gameStateManager.computeDisplayState();
+
+                for (let i = 0; i < this.players.length; i++) {
+                    this.players[i].position.set(
+                        this.gameStateManager.displayState.players[i].position
+                            .x,
+                        this.gameStateManager.displayState.players[i].position
+                            .y,
+                        0,
+                    );
+                }
+                this.updateWorldPhysic(this.gameStateManager.displayState);
+                if (this.playerHelper) {
+                    this.playerHelper.setFromCenterAndSize(
+                        this.players[0].position,
+                        new Vector3(40, 40),
+                    );
+                }
+            });
+        }
         // TODO: fix player graphic at 60 fps whatever the main render fps is
         this.updatePlayerGraphics(this.gameStateManager.displayState);
         this.updateWorldGraphics(this.gameStateManager.displayState);

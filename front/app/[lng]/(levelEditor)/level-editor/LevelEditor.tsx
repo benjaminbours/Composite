@@ -47,6 +47,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         setIsAuthModalOpen,
         setIsThumbnailModalOpen,
         setIsThumbnailSrc,
+        toggleTestMode,
     } = useController(level_id, dictionary);
 
     // local refs
@@ -62,14 +63,6 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     const toggleCollisionArea = useCallback(() => {
         if (state.app) {
             state.app.toggleCollisionArea();
-        }
-    }, [state.app]);
-
-    const toggleTestMode = useCallback(() => {
-        if (state.app) {
-            state.app.setAppMode(
-                state.app.mode === AppMode.GAME ? AppMode.EDITOR : AppMode.GAME,
-            );
         }
     }, [state.app]);
 
@@ -148,7 +141,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                     onChangeName={updateElementName}
                     onElementDelete={removeElement}
                     onAddElement={addElement}
-                    disabled={isSaving}
+                    disabled={isSaving || state.app?.mode === AppMode.GAME}
                 />
                 {state.currentEditingIndex !== undefined &&
                     elements[state.currentEditingIndex] && (
