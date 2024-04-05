@@ -3,15 +3,16 @@ import {
     removeMeshFromLevel,
     loadElementsToLevel,
     cloneElements,
+    addToHistory,
+    applyTransformToMesh,
 } from './utils';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
-import { Euler, Object3D, Vector3 } from 'three';
+import { Euler, Object3D } from 'three';
 import {
     ElementName,
     InteractiveArea,
     Side,
-    degreesToRadians,
     gridSize,
     radiansToDegrees,
     DoorOpenerProperties,
@@ -176,6 +177,7 @@ function reducer(
     let elements;
     let currentEditingIndex;
     let historyIndex;
+    let historyData;
     switch (action.type) {
         case ActionType.UNDO:
             historyIndex = state.historyIndex - 1;
@@ -214,13 +216,15 @@ function reducer(
                 : [];
             elements[action.payload.index].name = action.payload.name;
             elements[action.payload.index].mesh.name = action.payload.name;
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
             return {
                 ...state,
-                historyIndex: state.historyIndex + 1,
-                history: [
-                    ...state.history.slice(0, state.historyIndex + 1),
-                    elements,
-                ],
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
             };
         case ActionType.UPDATE_ELEMENT_PROPERTY:
             if (state.currentEditingIndex === undefined || !state.app) {
@@ -282,15 +286,15 @@ function reducer(
                     element.mesh = newMesh;
                     // add element
                     state.app.level.add(element.mesh);
-                    addToCollidingElements(
-                        element.mesh,
-                        state.app.collidingElements,
-                    );
+                    // addToCollidingElements(
+                    //     element.mesh,
+                    //     state.app.collidingElements,
+                    // );
                     state.app.attachTransformControls(newMesh);
                     break;
                 // Transformations
                 case 'transform':
-                    state.app.removeFromCollidingElements(element.mesh);
+                    // state.app.removeFromCollidingElements(element.mesh);
                     // compute position
                     (element.properties as any)[propertyKey].position =
                         value.position;
@@ -307,36 +311,23 @@ function reducer(
                         (element.properties as any)[propertyKey].rotation =
                             value.rotation;
                     }
-                    const rotationX = degreesToRadians(
-                        (element.properties as any)[propertyKey].rotation.x,
-                    );
-                    const rotationY = degreesToRadians(
-                        (element.properties as any)[propertyKey].rotation.y,
-                    );
-                    const rotationZ = degreesToRadians(
-                        (element.properties as any)[propertyKey].rotation.z,
-                    );
-                    // apply rotation and position to mesh
-                    element.mesh.position.copy(
-                        (value.position as Vector3)
-                            .clone()
-                            .multiplyScalar(gridSize),
-                    );
-                    element.mesh.rotation.set(rotationX, rotationY, rotationZ);
-                    addToCollidingElements(
-                        element.mesh,
-                        state.app.collidingElements,
-                    );
+                    applyTransformToMesh(element.mesh, value);
+                    // addToCollidingElements(
+                    //     element.mesh,
+                    //     state.app.collidingElements,
+                    // );
                     break;
             }
 
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
             return {
                 ...state,
-                historyIndex: state.historyIndex + 1,
-                history: [
-                    ...state.history.slice(0, state.historyIndex + 1),
-                    elements,
-                ],
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
             };
         case ActionType.SAVE_INITIAL_LEVEL:
             return {
@@ -406,14 +397,17 @@ function reducer(
             mesh.name = elementName;
             currentEditingIndex = elements.length;
             state.app!.level.add(mesh);
-            addToCollidingElements(mesh, state.app!.collidingElements);
+            // addToCollidingElements(mesh, state.app!.collidingElements);
+
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
             return {
                 ...state,
-                history: [
-                    ...state.history.slice(0, state.historyIndex + 1),
-                    elements,
-                ],
-                historyIndex: state.historyIndex + 1,
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
                 currentEditingIndex,
             };
         case ActionType.REMOVE_ELEMENT:
@@ -422,13 +416,15 @@ function reducer(
                 : [];
             const deletedElement = elements.splice(action.payload, 1);
             removeMeshFromLevel(state.app!, deletedElement[0].mesh);
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
             return {
                 ...state,
-                historyIndex: state.historyIndex + 1,
-                history: [
-                    ...state.history.slice(0, state.historyIndex + 1),
-                    elements,
-                ],
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
             };
         case ActionType.LOAD_LEVEL:
             const elementList = parseLevelElements(
@@ -897,7 +893,7 @@ export function useController(
         notFound();
     }
 
-    // console.log(state.history);
+    // console.log('collidingElements', state.app?.collidingElements);
 
     return {
         state,

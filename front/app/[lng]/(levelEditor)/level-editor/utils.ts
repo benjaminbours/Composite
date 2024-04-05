@@ -5,6 +5,8 @@ import {
     LevelElement,
     Side,
     addToCollidingElements,
+    degreesToRadians,
+    gridSize,
 } from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
 
@@ -25,7 +27,7 @@ export function removeMeshFromLevel(app: App, mesh: Object3D) {
             app.rendererManager.removeLightBounceComposer(bounce);
         }
     }
-    app.removeFromCollidingElements(mesh);
+    // app.removeFromCollidingElements(mesh);
     app.level.remove(mesh);
 }
 
@@ -35,8 +37,9 @@ export function loadElementsToLevel(app: App, elements: LevelElement[]) {
     // load elements to the level
     for (let i = 0; i < elements.length; i++) {
         const { mesh } = elements[i];
+        applyTransformToMesh(mesh, elements[i].properties.transform);
         app.level.add(mesh);
-        addToCollidingElements(mesh, app.collidingElements);
+        // addToCollidingElements(mesh, app.collidingElements);
     }
 }
 
@@ -62,7 +65,42 @@ export function cloneElements(elements: LevelElement[]) {
         return {
             ...el,
             properties: cloneProperties(el.properties),
-            mesh: el.mesh.clone(),
         };
     });
+}
+
+const HISTORY_LIMIT = 500;
+export function addToHistory(
+    history: LevelElement[][],
+    historyIndex: number,
+    nextState: LevelElement[],
+) {
+    // If we are not at the end of the history, slice the history up to the current index
+    let nextHistoryIndex = historyIndex + 1;
+    const nextHistory =
+        nextHistoryIndex < history.length - 1
+            ? history.slice(0, historyIndex)
+            : [...history];
+    if (nextHistory.length >= HISTORY_LIMIT) {
+        nextHistory.shift();
+    }
+    nextHistory.push(nextState);
+    if (nextHistoryIndex > nextHistory.length - 1) {
+        nextHistoryIndex -= 1;
+    }
+    return {
+        history: nextHistory,
+        historyIndex: nextHistoryIndex,
+    };
+}
+
+export function applyTransformToMesh(
+    mesh: Object3D,
+    transform: ElementProperties['transform'],
+) {
+    const rotationX = degreesToRadians(transform.rotation.x);
+    const rotationY = degreesToRadians(transform.rotation.y);
+    const rotationZ = degreesToRadians(transform.rotation.z);
+    mesh.position.copy(transform.position.clone().multiplyScalar(gridSize));
+    mesh.rotation.set(rotationX, rotationY, rotationZ);
 }
