@@ -1,6 +1,6 @@
 'use client';
 // vendors
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useRef } from 'react';
 import dynamic from 'next/dynamic';
 // our libs
@@ -102,6 +102,11 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         }
     }, [state.app]);
 
+    const elements = useMemo(
+        () => state.history[state.historyIndex] || [],
+        [state.history, state.historyIndex],
+    );
+
     return (
         <main className="level-editor">
             <AuthModal
@@ -137,7 +142,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
             />
             <div className="level-editor__top-right-container">
                 <SceneContentPanel
-                    elements={state.elements}
+                    elements={elements}
                     currentEditingIndex={state.currentEditingIndex}
                     onElementClick={selectElement}
                     onChangeName={updateElementName}
@@ -146,11 +151,11 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                     disabled={isSaving}
                 />
                 {state.currentEditingIndex !== undefined &&
-                    state.elements[state.currentEditingIndex] && (
+                    elements[state.currentEditingIndex] && (
                         <PropertiesPanel
-                            state={state.elements}
+                            state={elements}
                             onUpdateProperty={handleUpdateElementProperty}
-                            element={state.elements[state.currentEditingIndex]}
+                            element={elements[state.currentEditingIndex]}
                             disabled={isSaving}
                         />
                     )}

@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
-import { removeMeshFromLevel } from './utils';
+import {
+    removeMeshFromLevel,
+    loadElementsToLevel,
+    cloneElements,
+} from './utils';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { Euler, Object3D, Vector3 } from 'three';
@@ -67,8 +71,7 @@ const initialState = {
     initialLevel: undefined as PartialLevel | undefined,
     levelName: defaultLevel.name,
     levelStatus: defaultLevel.status as LevelStatusEnum,
-    elements: [] as LevelElement[],
-    history: [],
+    history: [] as LevelElement[][],
     historyIndex: 0,
     hasErrorWithLevelName: false,
 };
@@ -84,6 +87,16 @@ enum ActionType {
     REMOVE_ELEMENT = 'REMOVE_ELEMENT',
     ADD_ELEMENT = 'ADD_ELEMENT',
     SELECT_ELEMENT = 'SELECT_ELEMENT',
+    UNDO = 'UNDO',
+    REDO = 'REDO',
+}
+
+interface UndoAction {
+    type: ActionType.UNDO;
+}
+
+interface RedoAction {
+    type: ActionType.REDO;
 }
 
 interface UpdateLevelNameAction {
@@ -152,7 +165,9 @@ type Action =
     | AddElementAction
     | UpdateElementNameAction
     | SelectElementAction
-    | UpdateElementPropertyAction;
+    | UpdateElementPropertyAction
+    | UndoAction
+    | RedoAction;
 
 function reducer(
     state: typeof initialState,
@@ -160,7 +175,24 @@ function reducer(
 ): typeof initialState {
     let elements;
     let currentEditingIndex;
+    let historyIndex;
     switch (action.type) {
+        case ActionType.UNDO:
+            historyIndex = state.historyIndex - 1;
+            elements = state.history[historyIndex];
+            loadElementsToLevel(state.app!, elements);
+            return {
+                ...state,
+                historyIndex,
+            };
+        case ActionType.REDO:
+            historyIndex = state.historyIndex + 1;
+            elements = state.history[historyIndex];
+            loadElementsToLevel(state.app!, elements);
+            return {
+                ...state,
+                historyIndex,
+            };
         case ActionType.LOAD_APP:
             return {
                 ...state,
@@ -177,18 +209,26 @@ function reducer(
                 levelName: action.payload,
             };
         case ActionType.UPDATE_ELEMENT_NAME:
-            elements = [...state.elements];
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
             elements[action.payload.index].name = action.payload.name;
             elements[action.payload.index].mesh.name = action.payload.name;
             return {
                 ...state,
-                elements,
+                historyIndex: state.historyIndex + 1,
+                history: [
+                    ...state.history.slice(0, state.historyIndex + 1),
+                    elements,
+                ],
             };
         case ActionType.UPDATE_ELEMENT_PROPERTY:
             if (state.currentEditingIndex === undefined || !state.app) {
                 return state;
             }
-            elements = [...state.elements];
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
             const element = elements[state.currentEditingIndex];
             const { propertyKey, value } = action.payload;
 
@@ -292,7 +332,11 @@ function reducer(
 
             return {
                 ...state,
-                elements,
+                historyIndex: state.historyIndex + 1,
+                history: [
+                    ...state.history.slice(0, state.historyIndex + 1),
+                    elements,
+                ],
             };
         case ActionType.SAVE_INITIAL_LEVEL:
             return {
@@ -300,6 +344,7 @@ function reducer(
                 initialLevel: action.payload,
             };
         case ActionType.SELECT_ELEMENT:
+            elements = state.history[state.historyIndex] || [];
             if (
                 state.currentEditingIndex === action.payload &&
                 action.canUnselect
@@ -311,15 +356,14 @@ function reducer(
                 // select
                 currentEditingIndex = action.payload;
                 state.app!.attachTransformControls(
-                    state.elements[currentEditingIndex].mesh,
+                    elements[currentEditingIndex].mesh,
                 );
             }
             // for bounce, only allow rotation on Z (Y)
             if (
                 currentEditingIndex !== undefined &&
-                state.elements[currentEditingIndex] &&
-                state.elements[currentEditingIndex].type ===
-                    ElementType.BOUNCE &&
+                elements[currentEditingIndex] &&
+                elements[currentEditingIndex].type === ElementType.BOUNCE &&
                 state.app!.transformControls?.mode === 'rotate'
             ) {
                 state.app!.transformControls!.showX = false;
@@ -333,7 +377,9 @@ function reducer(
                 currentEditingIndex,
             };
         case ActionType.ADD_ELEMENT:
-            elements = [...state.elements];
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
             const elementName = `${action.payload}_${elements.length}`;
             if (process.env.NODE_ENV === 'development') {
                 // TODO: I think it's small but performance could be improve here. This code
@@ -361,56 +407,51 @@ function reducer(
             currentEditingIndex = elements.length;
             state.app!.level.add(mesh);
             addToCollidingElements(mesh, state.app!.collidingElements);
-            console.log('HERE add element');
-
             return {
                 ...state,
-                elements,
+                history: [
+                    ...state.history.slice(0, state.historyIndex + 1),
+                    elements,
+                ],
+                historyIndex: state.historyIndex + 1,
                 currentEditingIndex,
             };
         case ActionType.REMOVE_ELEMENT:
-            elements = [...state.elements];
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
             const deletedElement = elements.splice(action.payload, 1);
             removeMeshFromLevel(state.app!, deletedElement[0].mesh);
             return {
                 ...state,
-                elements,
+                historyIndex: state.historyIndex + 1,
+                history: [
+                    ...state.history.slice(0, state.historyIndex + 1),
+                    elements,
+                ],
             };
         case ActionType.LOAD_LEVEL:
-            // remove all elements from the scene
-            for (let i = 0; i < state.elements.length; i++) {
-                const element = state.elements[i];
-                removeMeshFromLevel(state.app!, element.mesh);
-            }
             const elementList = parseLevelElements(
                 buildWorldContext(state.app!),
                 action.payload.data,
             );
-            const loadElementsToScene = (elementList: LevelElement[]) => {
-                for (let i = 0; i < elementList.length; i++) {
-                    const { mesh } = elementList[i];
-                    if (process.env.NODE_ENV === 'development') {
-                        // TODO: I think it's small but performance could be improve here. This code
-                        // exist because of react strict mode.
-                        // if element already in the scene, remove it. Suppose to be trigger only in dev with react strict mode
-                        const elem = state.app!.level.children.find(
-                            (el) => el.name === mesh.name,
-                        );
-                        if (elem) {
-                            removeMeshFromLevel(state.app!, elem);
-                        }
-                    }
-                    state.app!.level.add(mesh);
-                    addToCollidingElements(mesh, state.app!.collidingElements);
+            loadElementsToLevel(state.app!, elementList);
+            const history = (() => {
+                // first load
+                if (!state.isInitialLoadDone) {
+                    return [elementList];
                 }
-            };
-            // load elements to the scene
-            loadElementsToScene(elementList);
+                // when load level is trigger after save
+                const nextHistory = [...state.history];
+                nextHistory.splice(state.historyIndex, 1, elementList);
+                return nextHistory;
+            })();
             return {
                 ...state,
-                elements: elementList,
+                history,
                 levelName: action.payload.name,
                 levelStatus: action.payload.status,
+                currentEditingIndex: undefined,
                 isInitialLoadDone: true,
             };
         default:
@@ -454,8 +495,6 @@ export function useController(
     const [thumbnailSrc, setIsThumbnailSrc] = useState<string | undefined>(
         undefined,
     );
-    const [history, setHistory] = useState<LevelElement[][]>([]);
-    const [historyIndex, setHistoryIndex] = useState(0);
     const [hasErrorWithLevelName, setHasErrorWithLevelName] = useState(false);
 
     const handleLevelNameChange = useCallback((e: any) => {
@@ -536,7 +575,8 @@ export function useController(
             };
 
             setIsSaving(true);
-            const elementsToSend = state.elements.map((el) => ({
+            const elements = state.history[state.historyIndex] || [];
+            const elementsToSend = elements.map((el) => ({
                 type: el.type,
                 properties: el.properties,
                 name: el.name,
@@ -687,31 +727,28 @@ export function useController(
         [],
     );
 
-    // // Update history when state changes
-    // useEffect(() => {
-    //     setHistory((prev) => [...prev.slice(0, historyIndex + 1), elements]);
-    //     setHistoryIndex((prev) => prev + 1);
-    // }, [elements, historyIndex]);
+    // Listen for Ctrl + Z and Ctrl + Shift + Z
+    useEffect(() => {
+        const handleKeyDown = (event: any) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+                event.preventDefault();
+                // Don't undo past the initial state
+                if (!event.shiftKey && state.historyIndex > 0) {
+                    dispatch({ type: ActionType.UNDO });
+                }
+                // Don't redo past the latest state
+                else if (
+                    event.shiftKey &&
+                    state.historyIndex < state.history.length - 1
+                ) {
+                    dispatch({ type: ActionType.REDO });
+                }
+            }
+        };
 
-    // // Listen for Ctrl + Z and Ctrl + Shift + Z
-    // useEffect(() => {
-    //     const handleKeyDown = (event: any) => {
-    //         if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-    //             event.preventDefault();
-    //             // Don't undo past the initial state
-    //             if (!event.shiftKey && historyIndex > 0) {
-    //                 setHistoryIndex((prev) => prev - 1);
-    //             }
-    //             // Don't redo past the latest state
-    //             else if (event.shiftKey && historyIndex < history.length - 1) {
-    //                 setHistoryIndex((prev) => prev + 1);
-    //             }
-    //         }
-    //     };
-
-    //     window.addEventListener('keydown', handleKeyDown);
-    //     return () => window.removeEventListener('keydown', handleKeyDown);
-    // }, [history, historyIndex]);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [state.history, state.historyIndex]);
 
     // responsible to register and clear event listeners for the level editor
     useEffect(() => {
@@ -719,6 +756,7 @@ export function useController(
             return;
         }
         const app = state.app;
+        const elements = state.history[state.historyIndex] || [];
         function isMouseLeftButton(event: any) {
             if (
                 event.metaKey ||
@@ -763,7 +801,7 @@ export function useController(
                 return null;
             }
 
-            const index = state.elements.findIndex((el) => {
+            const index = elements.findIndex((el) => {
                 return Boolean(
                     findItemInParents(app.mouseSelectedObject, el.mesh),
                 );
@@ -787,8 +825,8 @@ export function useController(
             // for bounce, only allow rotation on Z (Y)
             if (
                 state.currentEditingIndex !== undefined &&
-                state.elements[state.currentEditingIndex] &&
-                state.elements[state.currentEditingIndex].type ===
+                elements[state.currentEditingIndex] &&
+                elements[state.currentEditingIndex].type ===
                     ElementType.BOUNCE &&
                 app.transformControls?.mode === 'rotate'
             ) {
@@ -858,6 +896,8 @@ export function useController(
     if (state.isNotFound) {
         notFound();
     }
+
+    // console.log(state.history);
 
     return {
         state,
