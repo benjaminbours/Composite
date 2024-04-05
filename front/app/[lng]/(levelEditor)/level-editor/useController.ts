@@ -725,18 +725,24 @@ export function useController(
         [],
     );
 
-    const toggleTestMode = useCallback(() => {
-        if (state.app) {
-            state.app.setAppMode(
-                state.app.mode === AppMode.GAME ? AppMode.EDITOR : AppMode.GAME,
-            );
-            state.app.transformControls?.detach();
-            dispatch({
-                type: ActionType.SET_APP_MODE,
-                payload: state.app.mode,
-            });
-        }
-    }, [state.app]);
+    const toggleTestMode = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.currentTarget.blur();
+            if (state.app) {
+                state.app.setAppMode(
+                    state.app.mode === AppMode.GAME
+                        ? AppMode.EDITOR
+                        : AppMode.GAME,
+                );
+                state.app.transformControls?.detach();
+                dispatch({
+                    type: ActionType.SET_APP_MODE,
+                    payload: state.app.mode,
+                });
+            }
+        },
+        [state.app],
+    );
 
     // Listen for Ctrl + Z and Ctrl + Shift + Z
     useEffect(() => {

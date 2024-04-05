@@ -41,6 +41,14 @@
     right: 1%;
 }
 
+.level-editor__top-left-container {
+    position: fixed;
+    top: 6%;
+    left: 1%;
+    display: flex;
+    align-items: flex-start;
+}
+
 .level-editor__top-right-container {
     position: fixed;
     top: 6%;

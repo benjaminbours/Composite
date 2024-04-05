@@ -11,6 +11,7 @@ interface Props {
         onClick: () => void;
         icon: React.ReactNode;
         text: string;
+        disabled?: boolean;
     }[];
     icon: React.ReactNode;
     disabled?: boolean;
@@ -54,9 +55,10 @@ export const DropDownMenu: React.FC<Props> = ({
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                {items.map(({ text, icon, onClick }, index) => (
+                {items.map(({ text, icon, onClick, disabled }, index) => (
                     <MenuItem
                         key={index}
+                        disabled={disabled}
                         onClick={() => {
                             handleClose();
                             onClick();

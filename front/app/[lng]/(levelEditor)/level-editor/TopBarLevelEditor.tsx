@@ -3,17 +3,12 @@ import React, { useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import HandymanIcon from '@mui/icons-material/Handyman';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SaveIcon from '@mui/icons-material/Save';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CameraIcon from '@mui/icons-material/Camera';
-import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
 import PublishIcon from '@mui/icons-material/Publish';
 import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
@@ -29,12 +24,6 @@ interface Props {
     level_id: string;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     isSaving: boolean;
-    onResetCamera: () => void;
-    onToggleCollisionArea: () => void;
-    onStartTestMode: () => void;
-    onResetPlayersPosition: () => void;
-    onSwitchPlayer: () => void;
-    onCaptureSnapshot: () => void;
     levelName: string;
     levelStatus: LevelStatusEnum;
     hasErrorWithLevelName: boolean;
@@ -47,13 +36,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     dictionary,
     levelName,
     levelStatus,
-    onSwitchPlayer,
     onLevelNameChange,
-    onResetCamera,
-    onToggleCollisionArea,
-    onStartTestMode,
-    onResetPlayersPosition,
-    onCaptureSnapshot,
     onSave,
     hasErrorWithLevelName,
     isSaving,
@@ -63,44 +46,33 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     const actionItems = useMemo(() => {
         return [
             {
-                icon: <VisibilityIcon fontSize="small" />,
-                text: 'Display collision area',
-                onClick: onToggleCollisionArea,
+                icon: <SaveIcon fontSize="small" />,
+                text: level_id === 'new' ? 'Create' : 'Update',
+                onClick: () => onSave(),
             },
             {
-                icon: <CameraIcon fontSize="small" />,
-                text: 'Reset camera',
-                onClick: onResetCamera,
+                icon: <ForkRightIcon fontSize="small" />,
+                text: 'Fork (Save as new)',
+                onClick: () => onSave(true),
+                disabled: level_id === 'new',
             },
             {
-                icon: <CameraEnhanceIcon fontSize="small" />,
-                text: 'Capture snapshot',
-                onClick: onCaptureSnapshot,
-            },
-            {
-                icon: <SportsEsportsIcon fontSize="small" />,
-                text: 'Test / Play',
-                onClick: onStartTestMode,
-            },
-            {
-                icon: <SwitchAccountIcon fontSize="small" />,
-                text: 'Switch player',
-                onClick: onSwitchPlayer,
-            },
-            {
-                icon: <RestartAltIcon fontSize="small" />,
-                text: 'Reset players position',
-                onClick: onResetPlayersPosition,
+                icon: <PublishIcon fontSize="small" />,
+                text:
+                    levelStatus === LevelStatusEnum.Published
+                        ? 'Unpublish'
+                        : 'Publish',
+                disabled: level_id === 'new',
+                onClick: () =>
+                    onSave(
+                        false,
+                        levelStatus === LevelStatusEnum.Published
+                            ? LevelStatusEnum.Draft
+                            : LevelStatusEnum.Published,
+                    ),
             },
         ];
-    }, [
-        onResetCamera,
-        onToggleCollisionArea,
-        onStartTestMode,
-        onResetPlayersPosition,
-        onSwitchPlayer,
-        onCaptureSnapshot,
-    ]);
+    }, [onSave, levelStatus, level_id]);
 
     return (
         <AppBar className="level-editor__app-bar top-bar" position="static">
@@ -128,61 +100,17 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 />
                 <Divider orientation="vertical" flexItem />
                 <DropDownMenu
-                    buttonText="Actions"
+                    buttonText="Save"
                     items={actionItems}
-                    icon={<KeyboardArrowDownIcon />}
+                    icon={
+                        isSaving ? (
+                            <CircularProgress size={20} />
+                        ) : (
+                            <KeyboardArrowDownIcon />
+                        )
+                    }
                     disabled={isSaving}
                 />
-                {isSaving ? (
-                    <CircularProgress size={30} />
-                ) : (
-                    <Button
-                        size="small"
-                        variant="contained"
-                        endIcon={<SaveIcon />}
-                        onClick={() => onSave()}
-                    >
-                        Save
-                    </Button>
-                )}
-                {level_id !== 'new' && (
-                    <>
-                        {isSaving ? (
-                            <CircularProgress size={30} />
-                        ) : (
-                            <Button
-                                size="small"
-                                variant="contained"
-                                endIcon={<ForkRightIcon />}
-                                onClick={() => onSave(true)}
-                            >
-                                Fork
-                            </Button>
-                        )}
-                    </>
-                )}
-                {isSaving ? (
-                    <CircularProgress size={30} />
-                ) : (
-                    <Button
-                        size="small"
-                        variant="contained"
-                        endIcon={<PublishIcon />}
-                        onClick={() =>
-                            onSave(
-                                false,
-                                levelStatus === LevelStatusEnum.Published
-                                    ? LevelStatusEnum.Draft
-                                    : LevelStatusEnum.Published,
-                            )
-                        }
-                        disabled={level_id === 'new'}
-                    >
-                        {levelStatus === LevelStatusEnum.Published
-                            ? 'Unpublish'
-                            : 'Publish'}
-                    </Button>
-                )}
                 <UserMenu
                     dictionary={dictionary}
                     disabled={isSaving}
