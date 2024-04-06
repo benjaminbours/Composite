@@ -51,7 +51,7 @@ export const ElementName = {
     DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
     AREA_DOOR_OPENER: (doorName: string) =>
         `${doorName}_${AREA_DOOR_OPENER_SUFFIX}`,
-    BOUNCE: (side: Side) => `${side}_BOUNCE`,
+    BOUNCE: (id: number) => `${id}_BOUNCE`,
     WALL_DOOR: (doorIndex: string) => `${doorIndex}_WALL_DOOR`,
 };
 
@@ -454,7 +454,7 @@ export function createBounce({
     const positionForGrid = position.multiplyScalar(gridSize);
 
     const group = new Object3D();
-    group.name = ElementName.BOUNCE(side);
+    group.name = ElementName.BOUNCE(id);
     group.position.set(positionForGrid.x, positionForGrid.y, positionForGrid.z);
     group.rotation.set(
         degreesToRadians(rotation.x),

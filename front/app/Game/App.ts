@@ -690,23 +690,35 @@ export default class App {
         if (
             state.players[this.mainPlayerSide].state ===
                 MovableComponentState.inside &&
-            state.players[this.mainPlayerSide].insideElementID
+            state.players[this.mainPlayerSide].insideElementID !== undefined
         ) {
-            const skinBounce = (this.level as unknown as Group).children.find(
+            const bounceGroup = this.level.children.find(
                 (child) =>
                     child.name ===
-                    `skin-bounce-${
-                        state.players[this.mainPlayerSide].insideElementID
-                    }`,
-            ) as SkinBounce | undefined;
+                    ElementName.BOUNCE(
+                        state.players[this.mainPlayerSide].insideElementID!,
+                    ),
+            );
+            // skin bounce is always the second child in a bounce group
+            const skinBounce = bounceGroup?.children[1] as
+                | SkinBounce
+                | undefined;
             if (skinBounce && !this.currentBounceName) {
                 skinBounce.add(skinBounce.directionHelper);
                 this.currentBounceName = skinBounce.name;
             }
         } else {
-            const skinBounce = (this.level as unknown as Group).children.find(
-                (child) => child.name === this.currentBounceName,
-            ) as SkinBounce | undefined;
+            const bounceGroup = this.level.children.find(
+                (child) =>
+                    child.name ===
+                    ElementName.BOUNCE(
+                        state.players[this.mainPlayerSide].insideElementID!,
+                    ),
+            );
+            // skin bounce is always the second child in a bounce group
+            const skinBounce = bounceGroup?.children[1] as
+                | SkinBounce
+                | undefined;
 
             // if there is a currentBounceName, clean it
             if (skinBounce) {
