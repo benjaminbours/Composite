@@ -22,6 +22,7 @@ import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 interface Props {
     level_id: string;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
+    isPlaying: boolean;
     isSaving: boolean;
     levelName: string;
     levelStatus: LevelStatusEnum;
@@ -39,6 +40,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
     onSave,
     hasErrorWithLevelName,
     isSaving,
+    isPlaying,
     setIsModalOpen,
     level_id,
 }) => {
@@ -108,7 +110,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                             <KeyboardArrowDownIcon />
                         )
                     }
-                    disabled={isSaving}
+                    disabled={isSaving || isPlaying}
                 />
                 <UserMenu
                     dictionary={dictionary}

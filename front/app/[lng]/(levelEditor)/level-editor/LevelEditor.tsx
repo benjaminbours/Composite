@@ -163,6 +163,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
             <TopBarLevelEditor
                 level_id={level_id}
                 isSaving={isSaving}
+                isPlaying={state.appMode === AppMode.GAME}
                 dictionary={dictionary}
                 levelName={state.levelName}
                 levelStatus={state.levelStatus}
