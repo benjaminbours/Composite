@@ -1,8 +1,9 @@
 'use client';
 // vendors
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useRef } from 'react';
 import dynamic from 'next/dynamic';
+import * as STATS from 'stats.js';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // project
@@ -66,6 +67,15 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     // local refs
     const statsRef = useRef<Stats>();
     const inputsManager = useRef<InputsManager>(new InputsManager());
+
+    useEffect(() => {
+        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+            const stats = new STATS.default();
+            stats.showPanel(1);
+            document.body.appendChild(stats.dom);
+            statsRef.current = stats;
+        }
+    }, []);
 
     const resetCamera = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
