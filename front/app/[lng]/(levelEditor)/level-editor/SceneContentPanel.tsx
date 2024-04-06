@@ -16,6 +16,7 @@ interface Props {
     currentEditingIndex: number | undefined;
     onElementClick: (index: number) => () => void;
     onElementDelete: (index: number) => () => void;
+    onElementLock: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     onAddElement: (type: ElementType) => void;
     disabled?: boolean;
@@ -26,6 +27,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
         elements,
         currentEditingIndex,
         onElementClick,
+        onElementLock,
         onChangeName,
         onElementDelete,
         onAddElement,
@@ -92,6 +94,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                             onDelete={onElementDelete}
                             onChangeName={onChangeName}
                             onClick={onElementClick}
+                            onLock={onElementLock}
                             disabled={disabled}
                             cantDelete={element.type === ElementType.END_LEVEL}
                         />

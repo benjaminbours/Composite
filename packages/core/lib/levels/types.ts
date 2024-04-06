@@ -88,4 +88,5 @@ export interface LevelElement {
     type: ElementType;
     properties: ElementProperties;
     mesh: Object3D;
+    isLocked?: boolean;
 }

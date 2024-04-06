@@ -133,10 +133,18 @@
 
 .scene-content-panel__item {
     padding: 0;
+    margin: 10px 0;
 }
 
-.scene-content-panel__item {
-    margin: 10px 0;
+.scene-content-panel__item-icon {
+    margin-right: 10px;
+}
+
+.scene-content-panel__item-action {
+    svg {
+        width: 0.75em;
+        height: 0.75em;
+    }
 }
 
 .MuiButtonBase-root {

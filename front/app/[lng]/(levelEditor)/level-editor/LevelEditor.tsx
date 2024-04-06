@@ -62,6 +62,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         setIsThumbnailSrc,
         toggleTestMode,
         toggleShortcut,
+        lockElement,
     } = useController(level_id, dictionary);
 
     // local refs
@@ -235,6 +236,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                         onChangeName={updateElementName}
                         onElementDelete={removeElement}
                         onAddElement={addElement}
+                        onElementLock={lockElement}
                         disabled={isSaving}
                     />
                     {state.currentEditingIndex !== undefined &&

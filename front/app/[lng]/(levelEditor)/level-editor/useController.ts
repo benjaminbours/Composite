@@ -89,6 +89,7 @@ enum ActionType {
     REMOVE_ELEMENT = 'REMOVE_ELEMENT',
     ADD_ELEMENT = 'ADD_ELEMENT',
     SELECT_ELEMENT = 'SELECT_ELEMENT',
+    LOCK_ELEMENT = 'LOCK_ELEMENT',
     UNDO = 'UNDO',
     REDO = 'REDO',
     SET_APP_MODE = 'SET_APP_MODE',
@@ -168,6 +169,14 @@ interface SelectElementAction {
     canUnselect?: boolean;
 }
 
+interface LockElementAction {
+    type: ActionType.LOCK_ELEMENT;
+    /**
+     * Element index
+     */
+    payload: number;
+}
+
 type Action =
     | UpdateLevelNameAction
     | LoadLevelAction
@@ -182,7 +191,8 @@ type Action =
     | UndoAction
     | RedoAction
     | SetAppModeAction
-    | ToggleShortcutAction;
+    | ToggleShortcutAction
+    | LockElementAction;
 
 function reducer(
     state: typeof initialState,
@@ -348,6 +358,27 @@ function reducer(
             return {
                 ...state,
                 initialLevel: action.payload,
+            };
+        case ActionType.LOCK_ELEMENT:
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
+            const item = elements[action.payload];
+            item.isLocked = !item.isLocked;
+            if (action.payload === state.currentEditingIndex) {
+                currentEditingIndex = undefined;
+                state.app!.detachTransformControls();
+            }
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
+            return {
+                ...state,
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
+                currentEditingIndex,
             };
         case ActionType.SELECT_ELEMENT:
             elements = state.history[state.historyIndex] || [];
@@ -737,6 +768,16 @@ export function useController(
         [],
     );
 
+    const lockElement = useCallback(
+        (index: number) => () => {
+            dispatch({
+                type: ActionType.LOCK_ELEMENT,
+                payload: index,
+            });
+        },
+        [],
+    );
+
     const toggleTestMode = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             event.currentTarget.blur();
@@ -875,8 +916,10 @@ export function useController(
             }
 
             const index = elements.findIndex((el) => {
-                return Boolean(
-                    findItemInParents(app.mouseSelectedObject, el.mesh),
+                return (
+                    // avoid searching in locked element
+                    !el.isLocked &&
+                    Boolean(findItemInParents(app.mouseSelectedObject, el.mesh))
                 );
             });
 
@@ -965,5 +1008,6 @@ export function useController(
         setIsThumbnailSrc,
         toggleTestMode,
         toggleShortcut,
+        lockElement,
     };
 }
