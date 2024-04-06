@@ -12,6 +12,7 @@ import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
 import CameraIcon from '@mui/icons-material/Camera';
 import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
 import { AppMode } from '../../../Game/App';
@@ -22,7 +23,10 @@ import type { getDictionary } from '../../../../getDictionary';
 import { useController } from './useController';
 import { ThumbnailModal } from './ThumbnailModal';
 import { AuthModal } from '../../../03_organisms/AuthModal';
-import { Button, ButtonGroup, Paper } from '@mui/material';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Paper from '@mui/material/Paper';
+import { ShortcutPanel } from './ShortcutPanel';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -56,6 +60,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         setIsThumbnailModalOpen,
         setIsThumbnailSrc,
         toggleTestMode,
+        toggleShortcut,
     } = useController(level_id, dictionary);
 
     // local refs
@@ -198,8 +203,18 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                         >
                             <CameraEnhanceIcon fontSize="small" />
                         </Button>
+                        <Button
+                            onClick={toggleShortcut}
+                            title="Display shortcuts"
+                            color={
+                                state.isShortcutVisible ? 'success' : 'primary'
+                            }
+                        >
+                            <KeyboardIcon fontSize="small" />
+                        </Button>
                     </ButtonGroup>
                 </Paper>
+                {state.isShortcutVisible && <ShortcutPanel />}
             </div>
             {state.app?.mode === AppMode.EDITOR && (
                 <div className="level-editor__top-right-container">

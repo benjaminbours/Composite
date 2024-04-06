@@ -46,6 +46,7 @@
     top: 6%;
     left: 1%;
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
 }
 
@@ -233,4 +234,27 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.shortcut-panel {
+    margin-top: 10px;
+    width: 500px;
+
+    ul {
+        padding-right: 0;
+    }
+}
+
+.shortcut-panel__item {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.shortcut-panel__item-shortcut-text {
+    margin-left: auto;
+    font-weight: bold;
+}
+
+.shortcut-panel__item-action-text {
+    margin-left: 10px;
 }

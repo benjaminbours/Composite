@@ -63,6 +63,7 @@ const initialState = {
     app: undefined as App | undefined,
     appMode: AppMode.EDITOR as AppMode,
     isNotFound: false,
+    isShortcutVisible: false,
     isSaving: false,
     isInitialLoadDone: false,
     isAuthModalOpen: false,
@@ -91,6 +92,7 @@ enum ActionType {
     UNDO = 'UNDO',
     REDO = 'REDO',
     SET_APP_MODE = 'SET_APP_MODE',
+    TOGGLE_SHORTCUT = 'TOGGLE_SHORTCUT',
 }
 
 interface UndoAction {
@@ -99,6 +101,10 @@ interface UndoAction {
 
 interface RedoAction {
     type: ActionType.REDO;
+}
+
+interface ToggleShortcutAction {
+    type: ActionType.TOGGLE_SHORTCUT;
 }
 
 interface SetAppModeAction {
@@ -175,7 +181,8 @@ type Action =
     | UpdateElementPropertyAction
     | UndoAction
     | RedoAction
-    | SetAppModeAction;
+    | SetAppModeAction
+    | ToggleShortcutAction;
 
 function reducer(
     state: typeof initialState,
@@ -201,6 +208,11 @@ function reducer(
             return {
                 ...state,
                 historyIndex,
+            };
+        case ActionType.TOGGLE_SHORTCUT:
+            return {
+                ...state,
+                isShortcutVisible: !state.isShortcutVisible,
             };
         case ActionType.SET_APP_MODE:
             return {
@@ -744,15 +756,48 @@ export function useController(
         [state.app],
     );
 
-    // Listen for Ctrl + Z and Ctrl + Shift + Z
+    const toggleShortcut = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.currentTarget.blur();
+            dispatch({
+                type: ActionType.TOGGLE_SHORTCUT,
+            });
+        },
+        [],
+    );
+
+    // register all key down events
     useEffect(() => {
-        const handleKeyDown = (event: any) => {
+        if (!state.app) {
+            return;
+        }
+        const app = state.app;
+        const elements = state.history[state.historyIndex] || [];
+        const updateTransformControlsAxis = () => {
+            // for bounce, only allow rotation on Z (Y)
+            if (
+                state.currentEditingIndex !== undefined &&
+                elements[state.currentEditingIndex] &&
+                elements[state.currentEditingIndex].type ===
+                    ElementType.BOUNCE &&
+                app.transformControls?.mode === 'rotate'
+            ) {
+                app.transformControls!.showX = false;
+                app.transformControls!.showY = false;
+            } else {
+                app.transformControls!.showX = true;
+                app.transformControls!.showY = true;
+            }
+        };
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Listen for Ctrl + Z and Ctrl + Shift + Z
             if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
                 event.preventDefault();
                 // Don't undo past the initial state
                 if (!event.shiftKey && state.historyIndex > 0) {
                     dispatch({ type: ActionType.UNDO });
                 }
+
                 // Don't redo past the latest state
                 else if (
                     event.shiftKey &&
@@ -760,14 +805,25 @@ export function useController(
                 ) {
                     dispatch({ type: ActionType.REDO });
                 }
+            } else if (event.code === 'KeyT') {
+                app.transformControls?.setMode('translate');
+                updateTransformControlsAxis();
+            } else if (event.code === 'KeyR') {
+                app.transformControls?.setMode('rotate');
+                updateTransformControlsAxis();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [state.history, state.historyIndex]);
+    }, [
+        state.history,
+        state.historyIndex,
+        state.app,
+        state.currentEditingIndex,
+    ]);
 
-    // responsible to register and clear event listeners for the level editor
+    // responsible to register and clear mouse event listeners
     useEffect(() => {
         if (!state.app) {
             return;
@@ -828,39 +884,12 @@ export function useController(
                 dispatch({ type: ActionType.SELECT_ELEMENT, payload: index });
             }
         };
-        const onKeyDown = (e: KeyboardEvent) => {
-            switch (e.code) {
-                case 'KeyT': // T
-                    app.transformControls?.setMode('translate');
-                    break;
-                case 'KeyR': // R
-                    app.transformControls?.setMode('rotate');
-                    break;
-                default:
-                    break;
-            }
-            // for bounce, only allow rotation on Z (Y)
-            if (
-                state.currentEditingIndex !== undefined &&
-                elements[state.currentEditingIndex] &&
-                elements[state.currentEditingIndex].type ===
-                    ElementType.BOUNCE &&
-                app.transformControls?.mode === 'rotate'
-            ) {
-                app.transformControls!.showX = false;
-                app.transformControls!.showY = false;
-            } else {
-                app.transformControls!.showX = true;
-                app.transformControls!.showY = true;
-            }
-        };
+
         app.canvasDom.addEventListener('mousemove', onMouseMove);
         app.canvasDom.addEventListener('mousedown', onMouseDown);
-        window.addEventListener('keydown', onKeyDown);
         return () => {
             app.canvasDom.removeEventListener('mousemove', onMouseMove);
             app.canvasDom.removeEventListener('mousedown', onMouseDown);
-            window.removeEventListener('keydown', onKeyDown);
         };
     }, [state]);
 
@@ -935,5 +964,6 @@ export function useController(
         setIsThumbnailModalOpen,
         setIsThumbnailSrc,
         toggleTestMode,
+        toggleShortcut,
     };
 }

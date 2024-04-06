@@ -8,7 +8,6 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SaveIcon from '@mui/icons-material/Save';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
-import CameraIcon from '@mui/icons-material/Camera';
 import PublishIcon from '@mui/icons-material/Publish';
 import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
