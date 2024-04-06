@@ -28,14 +28,13 @@ import { Player } from './Player';
 export class RendererManager {
     private lightBounceMixPasses: ShaderPass[] = [];
     private volumetricLightPasses: ShaderPass[] = [];
+    private playerInsideMixPass?: ShaderPass;
     private mainComposer: EffectComposer;
-    private playerInsideComposer: EffectComposer;
+    private playerInsideComposer?: EffectComposer;
     private occlusionComposers: EffectComposer[] = [];
     private playerOcclusionComposer: EffectComposer;
     private width = window.innerWidth;
     private height = window.innerHeight;
-    private players: Player[];
-    private camera: CustomCamera;
     private lightBounces: ElementToBounce[] = [];
     private renderPass: RenderPass;
 
@@ -83,15 +82,14 @@ export class RendererManager {
         return occlusionComposer;
     };
 
+    public players?: Player[];
+
     constructor(
-        players: Player[],
-        camera: CustomCamera,
+        private camera: CustomCamera,
         public canvasDom: HTMLCanvasElement,
         scene: Scene,
         lightBounces: ElementToBounce[],
     ) {
-        this.players = players;
-        this.camera = camera;
         // init renderer
         this.renderer = new WebGLRenderer({
             canvas: canvasDom,
@@ -135,15 +133,17 @@ export class RendererManager {
             occlusionRenderTarget,
         );
         const mixPass = this.createMixPass(occlusionRenderTarget);
-
         this.mainComposer.addPass(mixPass);
 
         // create occlusion render for each light bounce element
         for (let i = 0; i < lightBounces.length; i++) {
             this.addLightBounceComposer(lightBounces[i]);
         }
+    }
 
-        // create a renderer for when a player is inside an element
+    // create a renderer for when a player is inside an element
+    public addPlayerInsideComposer = () => {
+        const renderScale = 1;
         const playerInsideRenderTarget = this.createRenderTarget(renderScale);
         const playerInsidePass = new ShaderPass({
             uniforms: {
@@ -160,11 +160,18 @@ export class RendererManager {
         this.playerInsideComposer.renderToScreen = false;
         this.playerInsideComposer.addPass(this.renderPass);
         this.playerInsideComposer.addPass(playerInsidePass);
-        const playerInsideMixPass = this.createMixPass(
-            playerInsideRenderTarget,
-        );
-        this.mainComposer.addPass(playerInsideMixPass);
-    }
+        this.playerInsideMixPass = this.createMixPass(playerInsideRenderTarget);
+        this.mainComposer.addPass(this.playerInsideMixPass);
+    };
+
+    public removePlayerInsideComposer = () => {
+        if (!this.playerInsideMixPass) {
+            return;
+        }
+        this.mainComposer.removePass(this.playerInsideMixPass);
+        this.playerInsideMixPass = undefined;
+        this.playerInsideComposer = undefined;
+    };
 
     public addLightBounceComposer = (bounce: ElementToBounce) => {
         const renderScale = 1;
@@ -211,6 +218,9 @@ export class RendererManager {
     };
 
     private renderPlayerInsideComposer = (state: GameState) => {
+        if (!this.playerInsideComposer || !this.players) {
+            return;
+        }
         if (
             state.players.some(
                 (player) => player.state === MovableComponentState.inside,

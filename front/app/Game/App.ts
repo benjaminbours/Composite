@@ -149,21 +149,20 @@ export default class App {
             clientGraphicHelpers,
         );
 
+        // setup renderer manager before players, it's important
+        this.rendererManager = new RendererManager(
+            this.camera,
+            canvasDom,
+            this.scene,
+            this.level.lightBounces,
+        );
+
         if (this.mode === AppMode.GAME) {
             this.setupPlayers();
         }
         this.setupScene();
         this.scene.add(this.level);
         this.scene.updateMatrixWorld();
-
-        // setup renderer manager
-        this.rendererManager = new RendererManager(
-            this.players,
-            this.camera,
-            canvasDom,
-            this.scene,
-            this.level.lightBounces,
-        );
 
         // camera
         if (this.mode === AppMode.EDITOR) {
@@ -346,11 +345,14 @@ export default class App {
             this.players.push(player);
             this.scene.add(player);
         }
+        this.rendererManager.players = this.players;
+        this.rendererManager.addPlayerInsideComposer();
     };
 
     private removePlayers = () => {
         this.scene.remove(...this.players);
         this.players = [];
+        this.rendererManager.removePlayerInsideComposer();
     };
 
     private setupScene = () => {
