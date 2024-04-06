@@ -129,6 +129,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                         checked={value}
                                         disabled={disabled}
                                         onChange={(event: any) => {
+                                            event.currentTarget.blur();
                                             onUpdateProperty(
                                                 key,
                                                 event.currentTarget.checked,
@@ -149,6 +150,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                                         disabled={disabled}
                                         checked={value}
                                         onChange={(event: any) => {
+                                            event.currentTarget.blur();
                                             onUpdateProperty(
                                                 key,
                                                 event.currentTarget.checked,
