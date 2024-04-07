@@ -47,6 +47,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         isThumbnailModalOpen,
         thumbnailSrc,
         isSaving,
+        isAuthenticated,
         onAppLoaded,
         handleLevelNameChange,
         handleClickOnSave,
@@ -59,10 +60,10 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
         selectElement,
         setIsAuthModalOpen,
         setIsThumbnailModalOpen,
-        setIsThumbnailSrc,
         toggleTestMode,
         toggleShortcut,
         lockElement,
+        captureSnapshot,
     } = useController(level_id, dictionary);
 
     // local refs
@@ -96,20 +97,6 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
             }
         },
         [state.app],
-    );
-
-    const captureSnapshot = useCallback(
-        (event: React.MouseEvent<HTMLButtonElement>) => {
-            event.currentTarget.blur();
-            if (state.app) {
-                state.app.onCaptureSnapshot = (image: string) => {
-                    setIsThumbnailSrc(image);
-                    setIsThumbnailModalOpen(true);
-                };
-                state.app.shouldCaptureSnapshot = true;
-            }
-        },
-        [state.app, setIsThumbnailModalOpen, setIsThumbnailSrc],
     );
 
     const resetPlayersPosition = useCallback(
@@ -212,6 +199,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                         <Button
                             onClick={captureSnapshot}
                             title="Capture snapshot"
+                            disabled={!isAuthenticated || level_id === 'new'}
                         >
                             <CameraEnhanceIcon fontSize="small" />
                         </Button>

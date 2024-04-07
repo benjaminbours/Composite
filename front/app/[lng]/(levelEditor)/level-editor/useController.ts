@@ -687,6 +687,20 @@ export function useController(
         [enqueueSnackbar, dictionary, state, router, level_id, isAuthenticated],
     );
 
+    const captureSnapshot = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.currentTarget.blur();
+            if (state.app) {
+                state.app.onCaptureSnapshot = (image: string) => {
+                    setIsThumbnailSrc(image);
+                    setIsThumbnailModalOpen(true);
+                };
+                state.app.shouldCaptureSnapshot = true;
+            }
+        },
+        [state.app],
+    );
+
     const handleSaveThumbnail = useCallback(() => {
         if (!thumbnailSrc || level_id === 'new') {
             return;
@@ -1030,6 +1044,7 @@ export function useController(
         isThumbnailModalOpen,
         thumbnailSrc,
         isSaving,
+        isAuthenticated,
         handleLevelNameChange,
         handleClickOnSave,
         handleSaveThumbnail,
@@ -1046,5 +1061,6 @@ export function useController(
         toggleTestMode,
         toggleShortcut,
         lockElement,
+        captureSnapshot,
     };
 }
