@@ -9,6 +9,7 @@ import {
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { Euler, Object3D } from 'three';
+import * as uuid from 'uuid';
 import {
     ElementName,
     InteractiveArea,
@@ -125,7 +126,7 @@ interface UpdateElementNameAction {
 
 interface UpdateElementPropertyAction {
     type: ActionType.UPDATE_ELEMENT_PROPERTY;
-    payload: { propertyKey: string; value: any };
+    payload: { propertyKey: string; value: any; uuid?: string };
 }
 
 interface LoadLevelAction {
@@ -157,7 +158,10 @@ interface RemoveElementAction {
 
 interface AddElementAction {
     type: ActionType.ADD_ELEMENT;
-    payload: ElementType;
+    payload: {
+        type: ElementType;
+        uuid: string;
+    };
 }
 
 interface SelectElementAction {
@@ -309,14 +313,25 @@ function reducer(
                         }
                         return value;
                     })();
+                    // TODO: I think it's small but performance could be improve here. This code
+                    // exist because of react strict mode.
+                    // if element already in the scene, does not add it again. Suppose to be trigger only in dev with react strict mode
+                    const elem = state.app!.level.children.find(
+                        (el) => (el as any).customUUID === action.payload.uuid,
+                    );
                     // remove element
-                    removeMeshFromLevel(state.app, element.mesh);
+                    removeMeshFromLevel(
+                        state.app,
+                        elem || element.mesh,
+                        element.type,
+                    );
                     // create a new one
                     const { mesh: newMesh } = createElement(
                         buildWorldContext(state.app),
                         element.type,
                         element.properties,
                     );
+                    (newMesh as any).customUUID = action.payload.uuid;
                     element.mesh = newMesh;
                     // add element
                     state.app.level.add(element.mesh);
@@ -417,30 +432,30 @@ function reducer(
             elements = state.history[state.historyIndex]
                 ? cloneElements(state.history[state.historyIndex])
                 : [];
-            const elementName = `${action.payload}_${elements.length}`;
             if (process.env.NODE_ENV === 'development') {
                 // TODO: I think it's small but performance could be improve here. This code
                 // exist because of react strict mode.
                 // if element already in the scene, remove it. Suppose to be trigger only in dev with react strict mode
                 const elem = state.app!.level.children.find(
-                    (el) => el.name === elementName,
+                    (el) => (el as any).customUUID === action.payload.uuid,
                 );
                 if (elem) {
-                    removeMeshFromLevel(state.app!, elem);
+                    removeMeshFromLevel(state.app!, elem, action.payload.type);
                 }
             }
+            const elementName = `${action.payload.type}_${elements.length}`;
             const { mesh, properties } = createElement(
                 buildWorldContext(state.app!),
-                action.payload,
+                action.payload.type,
             );
 
             elements.push({
-                type: action.payload,
+                type: action.payload.type,
                 properties,
                 mesh,
                 name: elementName,
             });
-            mesh.name = elementName;
+            (mesh as any).customUUID = action.payload.uuid;
             currentEditingIndex = elements.length;
             state.app!.level.add(mesh);
 
@@ -460,7 +475,11 @@ function reducer(
                 ? cloneElements(state.history[state.historyIndex])
                 : [];
             const deletedElement = elements.splice(action.payload, 1);
-            removeMeshFromLevel(state.app!, deletedElement[0].mesh);
+            removeMeshFromLevel(
+                state.app!,
+                deletedElement[0].mesh,
+                deletedElement[0].type,
+            );
             historyData = addToHistory(
                 state.history,
                 state.historyIndex,
@@ -472,6 +491,21 @@ function reducer(
                 history: historyData.history,
             };
         case ActionType.LOAD_LEVEL:
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
+            // reset app state
+            for (
+                let i = 0;
+                i < state.app!.rendererManager.lightBounces.length;
+                i++
+            ) {
+                const bounce = state.app!.rendererManager.lightBounces[i];
+                state.app!.rendererManager.removeLightBounceComposer(bounce);
+            }
+            state.app!.level.bounces = [];
+            state.app!.gameStateManager.currentState.level.doors = {};
+            state.app!.gameStateManager.currentState.level.bounces = {};
             const elementList = parseLevelElements(
                 buildWorldContext(state.app!),
                 action.payload.data,
@@ -740,14 +774,17 @@ export function useController(
         (propertyKey: string, value: any) => {
             dispatch({
                 type: ActionType.UPDATE_ELEMENT_PROPERTY,
-                payload: { propertyKey, value },
+                payload: { propertyKey, value, uuid: uuid.v4() },
             });
         },
         [],
     );
 
     const addElement = useCallback((type: ElementType) => {
-        dispatch({ type: ActionType.ADD_ELEMENT, payload: type });
+        dispatch({
+            type: ActionType.ADD_ELEMENT,
+            payload: { type, uuid: uuid.v4() },
+        });
     }, []);
 
     const removeElement = useCallback(

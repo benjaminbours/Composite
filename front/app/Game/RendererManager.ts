@@ -35,7 +35,7 @@ export class RendererManager {
     private playerOcclusionComposer: EffectComposer;
     private width = window.innerWidth;
     private height = window.innerHeight;
-    private lightBounces: ElementToBounce[] = [];
+    public lightBounces: ElementToBounce[] = [];
     private renderPass: RenderPass;
 
     public renderer: WebGLRenderer;

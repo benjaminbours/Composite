@@ -2,23 +2,27 @@ import { Euler, Object3D, Vector3 } from 'three';
 import {
     ElementProperties,
     ElementToBounce,
+    ElementType,
     LevelElement,
     Side,
-    addToCollidingElements,
     degreesToRadians,
     gridSize,
 } from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
 
-export function removeMeshFromLevel(app: App, mesh: Object3D) {
+export function removeMeshFromLevel(
+    app: App,
+    mesh: Object3D,
+    type: ElementType,
+) {
     if (mesh.id === app.controlledMesh?.id) {
         app.detachTransformControls();
     }
-    if (mesh.name.includes('WALL_DOOR')) {
+    if (type === ElementType.WALL_DOOR) {
         const id = mesh.name.split('_')[0];
         delete app.gameStateManager.currentState.level.doors[id];
     }
-    if (mesh.name.includes('BOUNCE')) {
+    if (type === ElementType.BOUNCE) {
         const bounce = mesh.children[0] as ElementToBounce;
         const index = app.level.bounces.findIndex((el) => el === mesh);
         app.level.bounces.splice(index, 1);
@@ -27,7 +31,6 @@ export function removeMeshFromLevel(app: App, mesh: Object3D) {
             app.rendererManager.removeLightBounceComposer(bounce);
         }
     }
-    // app.removeFromCollidingElements(mesh);
     app.level.remove(mesh);
 }
 
@@ -39,7 +42,6 @@ export function loadElementsToLevel(app: App, elements: LevelElement[]) {
         const { mesh } = elements[i];
         applyTransformToMesh(mesh, elements[i].properties.transform);
         app.level.add(mesh);
-        // addToCollidingElements(mesh, app.collidingElements);
     }
 }
 
