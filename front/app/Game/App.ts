@@ -613,7 +613,8 @@ export default class App {
 
         for (let i = 0; i < this.level.bounces.length; i++) {
             const bounce = this.level.bounces[i];
-            const stateBounce = state.level.bounces[i];
+            const id = Number(bounce.name.split('_')[0]);
+            const stateBounce = state.level.bounces[id];
             if (bounce && stateBounce) {
                 const rotationY = stateBounce.rotationY;
                 bounce.rotation.y = degreesToRadians(rotationY);
