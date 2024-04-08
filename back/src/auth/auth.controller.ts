@@ -11,7 +11,7 @@ import {
   Redirect,
   Logger,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 // project
 import { Public, GetUser } from '@project-common/decorators';
 import { JWTUserPayload } from '@project-common/types';
@@ -112,6 +112,7 @@ export class AuthController {
     return this.authService.confirmResend(dto.email);
   }
 
+  @ApiBearerAuth()
   @ApiOkResponse({
     description: 'Successfully logged out',
     type: Boolean,
