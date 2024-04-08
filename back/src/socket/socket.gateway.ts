@@ -247,7 +247,7 @@ export class SocketGateway {
 
   handleEndLevelTimeOut = (gameState: GameState, gameId: number) => {
     if (gameState.level.end_level.length === 2) {
-      if (process.env.STAGE === 'development') {
+      if (process.env.STAGE === 'local') {
         this.finishGame(gameId);
         return;
       }

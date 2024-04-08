@@ -82,7 +82,7 @@ function MainApp({ initialScene, dictionary }: Props) {
             setMenuScene,
             // enterTeamLobby: handleEnterTeamLobby,
         });
-        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        if (process.env.NEXT_PUBLIC_STAGE === 'local') {
             const stats = new STATS.default();
             stats.showPanel(1);
             document.body.appendChild(stats.dom);
@@ -146,7 +146,10 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onClose={handleClickOnCloseSettings}
                 />
             )}
-            <BottomRightInfo gameIsPlaying={gameIsPlaying} onSettingsClick={handleClickOnSettings} />
+            <BottomRightInfo
+                gameIsPlaying={gameIsPlaying}
+                onSettingsClick={handleClickOnSettings}
+            />
         </>
     );
 }

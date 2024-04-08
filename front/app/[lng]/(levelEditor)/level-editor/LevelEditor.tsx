@@ -71,7 +71,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     useEffect(() => {
-        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        if (process.env.NEXT_PUBLIC_STAGE === 'local') {
             const stats = new STATS.default();
             stats.showPanel(1);
             document.body.appendChild(stats.dom);

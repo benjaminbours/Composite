@@ -62,7 +62,7 @@ export function useMainController(
     }, [currentUser]);
 
     const [state, setState] = useState<MainState>(() => {
-        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        if (process.env.NEXT_PUBLIC_STAGE === 'local') {
             let side = undefined;
             let selectedLevel = undefined;
 

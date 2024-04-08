@@ -30,7 +30,7 @@ export class SkinBounceShadow extends Object3D {
 
         const particlesNumber =
             bufferGeometry.attributes.position.array.length / 3;
-        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        if (process.env.NEXT_PUBLIC_STAGE === 'local') {
             console.log('particlesNumber', particlesNumber);
         }
 

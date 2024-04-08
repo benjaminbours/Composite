@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "build:staging": "env-cmd -f .env.staging -- nest build",
+    "build:dev": "env-cmd -f .env.dev -- nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "env-cmd -f .env -- nest start --watch",

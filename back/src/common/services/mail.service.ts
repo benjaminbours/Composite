@@ -32,7 +32,7 @@ export class MailService {
       subject,
     });
 
-    if (process.env.STAGE === 'development') {
+    if (process.env.STAGE === 'local') {
       messageData.to = 'boursbenjamin@gmail.com';
     }
 

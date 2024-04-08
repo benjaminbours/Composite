@@ -33,7 +33,7 @@ async function bootstrap() {
   // disable while cors is managed in load balancer
   // app.enableCors({ allowedHeaders: ['content-type'] });
 
-  if (ENVIRONMENT.STAGE === 'development') {
+  if (ENVIRONMENT.STAGE === 'local') {
     const document = generateSwaggerDocument(app);
     generateSwaggerSpec(app);
     SwaggerModule.setup('api', app, document);
