@@ -39,3 +39,6 @@ data
 
 swagger.json
 uploads
+
+.env
+.env.local
