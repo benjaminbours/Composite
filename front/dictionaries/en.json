@@ -51,6 +51,7 @@
             "success-level-unpublished": "Your level has been successfully unpublished",
             "success-level-deleted": "Your level has been successfully deleted",
             "success-level-thumbnail-uploaded": "Your level thumbnail has been successfully uploaded",
+            "error-user-name-taken": "This username already exists. Please choose another name",
             "error-level-name-taken": "This level name already exists. Please choose another name",
             "error-level-name-too-long": "This level name is too long",
             "error-login": "Invalid email or password!",

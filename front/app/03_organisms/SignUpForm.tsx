@@ -143,6 +143,14 @@ export const SignUpForm: React.FC<Props> = ({
                             variant: 'error',
                         },
                     );
+                    const errors = {} as any;
+                    if (errorData.statusCode === 409) {
+                        errors.name = {};
+                        errors.name.__errors = [
+                            dictionary.notification['error-user-name-taken'],
+                        ];
+                    }
+                    setExtraErrors(errors);
                 })
                 .finally(() => {
                     setIsLoading(false);

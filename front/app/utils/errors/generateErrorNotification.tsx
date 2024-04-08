@@ -14,6 +14,9 @@ export function generateErrorNotification(
 ): SnackbarMessage {
     let errorMessage: SnackbarMessage;
     switch (statusCode) {
+        case 409:
+            errorMessage = dictionary.notification['error-user-name-taken'];
+            break;
         case 403:
             errorMessage = dictionary.notification['error-forbidden'];
             break;
