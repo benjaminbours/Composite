@@ -1,40 +1,64 @@
 version: "3.8"
 
 services:
+  db:
+    env_file:
+      - ./back/.env.dev
+    volumes:
+      - /home/bbo/composite/postgres-data-dev:/var/lib/postgresql/data
+
+  adminer:
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.adminer.rule=Host(`adminer.dev.compositethegame.com`)"
+      - traefik.http.services.adminer.loadbalancer.server.port=8080
+      - traefik.http.routers.adminer.entrypoints=websecure
+      - traefik.http.routers.adminer.tls.certresolver=myresolver
+
+  cache:
+    volumes:
+      - /home/bbo/composite/cache-dev:/data
+
   traefik:
+    image: traefik:latest
     command:
-      # - "--log.level=DEBUG"
-      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=boursbenjamin@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/bbo/composite/letsencrypt-dev:/letsencrypt
     ports:
       # The HTTP port
       - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8081:8080"
-    # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
-
-  cache:
-    ports:
-      - 6379:6379
+      # The HTTPS port
+      - "443:443"
 
   api:
-    container_name: composite_api
-    build:
-      target: dev
+    image: boursbenjamin/composite-back:1.0.0-next.2
+    depends_on:
+      - db
+      - cache
+    env_file:
+      - ./back/.env.dev
+    labels:
+      - "traefik.http.routers.api.rule=Host(`dev.api.compositethegame.com`)"
+      - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=https://dev.compositethegame.com
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.routers.api.tls.certresolver=myresolver
     volumes:
-      - ./back/.env:/app/back/.env
-      - ./back/locales:/app/back/locales
-      - ./back/src:/app/back/src
-      - ./back/test:/app/back/test
-      - ./back/prisma:/app/back/prisma
-      - ./packages/core:/app/packages/core
-      - ./back/uploads:/app/back/uploads
+      - /home/bbo/composite/api-uploads:/app/uploads
 
   front:
-    build:
-      target: dev
-    volumes:
-      - ./front/.env:/app/front/.env
-      - ./front:/app/front
-      - ./packages:/app/packages
+    image: boursbenjamin/composite-front:1.0.0-next.2
+    depends_on:
+      - db
+    env_file:
+      - ./front/.env.dev
+    labels:
+      - traefik.http.routers.front.rule=Host(`dev.compositethegame.com`)
+      - traefik.http.routers.front.entrypoints=websecure
+      - traefik.http.routers.front.tls.certresolver=myresolver

@@ -39,5 +39,4 @@ build_database:
 	docker-compose -f ./docker-compose.yml -f ./docker-compose-development.yml stop
 
 deploy:
-	docker --context staging stack deploy --compose-file docker-compose.yml --compose-file docker-compose-staging.yml composite
-# docker-compose --context $(ENVIRONMENT) -f ./docker-compose.yml $(DOCKER_FILE_ENVIRONMENT) up -d
+	docker --context staging compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) up -d
