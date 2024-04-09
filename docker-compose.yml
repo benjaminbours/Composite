@@ -59,7 +59,7 @@ services:
       - traefik.http.services.api.loadBalancer.sticky.cookie.name=server_id
       - traefik.http.services.api.loadBalancer.sticky.cookie.httpOnly=true
       - traefik.http.middlewares.api_middleware.headers.accessControlAllowCredentials=true
-      - traefik.http.middlewares.api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization,baggage
+      - traefik.http.middlewares.api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization,baggage,sentry-trace
       - traefik.http.middlewares.api_middleware.headers.accessControlAllowMethods=GET,POST,DELETE,PATCH
       - traefik.http.routers.api.rule=Host(`api.localhost`)
       - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost

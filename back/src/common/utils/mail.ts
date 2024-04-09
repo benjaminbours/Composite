@@ -147,7 +147,7 @@ export const createFooter = () => `
             (link) => `
               <td align="right" style="padding: 0;">
                 <a href="${link.href}"alt="${link.alt}" target="_blank">
-                  <img src="${link.icon}" width="48px" height="48px" />
+                  <img src="${link.icon}" width="30px" height="30px" />
                 </a>
               </td>`,
           )
