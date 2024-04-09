@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- Major refactor of level editor app. UI improvement, bux fixes, overal improvement of the stability
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.2
+  - @benjaminbours/composite-core@1.0.0-next.2
+
 ## 1.0.0-next.1
 
 ### Patch Changes
