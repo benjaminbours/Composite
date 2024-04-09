@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- Fix more bugs
+
 ## 1.0.0-next.2
 
 ### Patch Changes
