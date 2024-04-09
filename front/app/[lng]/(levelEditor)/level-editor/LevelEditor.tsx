@@ -118,6 +118,7 @@ export const LevelEditor: React.FC<Props> = ({ dictionary, level_id }) => {
                         ? Side.LIGHT
                         : Side.SHADOW;
                 state.app.mainPlayerSide = nextSide;
+                state.app.camera.unfocus();
                 state.app.secondPlayerSide =
                     nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
                 state.app.setGameCamera();
