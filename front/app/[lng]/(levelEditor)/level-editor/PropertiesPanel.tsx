@@ -162,7 +162,7 @@ export const PropertiesPanel: React.FC<Props> = ({
                         );
                     }
 
-                    if (key === 'size') {
+                    if (key === 'size' || key === 'doorPosition') {
                         const onChange =
                             (field: 'x' | 'y' | 'z') =>
                             (_event: any, fieldValue: number) => {

@@ -79,7 +79,7 @@ export const AuthModal: React.FC<Props> = ({
                         <SignUpForm
                             dictionary={dictionary}
                             onSuccess={() => {
-                                setCurrentTab(0);
+                                setCurrentTab(1);
                             }}
                         />
                     </WrapperReCaptcha>
