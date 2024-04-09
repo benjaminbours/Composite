@@ -203,7 +203,9 @@
     flex-wrap: wrap;
 
     li {
-        margin: 10px;
+        box-sizing: border-box;
+        padding: 10px;
+        width: 350px;
     }
 }
 
@@ -225,6 +227,10 @@
 
 .level-list-item__image-container {
     display: flex;
+
+    .level-portal {
+        flex: 1;
+    }
 }
 
 .level-list-item__image {
