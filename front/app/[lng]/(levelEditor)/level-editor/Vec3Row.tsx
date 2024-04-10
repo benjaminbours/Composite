@@ -11,6 +11,7 @@ interface Props {
     ) => (_event: any, fieldValue: number) => void;
     value: Vector3;
     withZ?: boolean;
+    isBounceRotation?: boolean;
 }
 
 export const Vec3Row: React.FC<Props> = ({
@@ -20,17 +21,20 @@ export const Vec3Row: React.FC<Props> = ({
     onChange,
     value,
     withZ,
+    isBounceRotation,
 }) => {
     return (
         <div className="properties-panel__inputs-container">
-            <NumberInput
-                disabled={disabled}
-                step={step}
-                min={min}
-                value={value.x}
-                startAdornment={<InputAdornment>X</InputAdornment>}
-                onChange={onChange('x') as any}
-            />
+            {!isBounceRotation && (
+                <NumberInput
+                    disabled={disabled}
+                    step={step}
+                    min={min}
+                    value={value.x}
+                    startAdornment={<InputAdornment>X</InputAdornment>}
+                    onChange={onChange('x') as any}
+                />
+            )}
             <NumberInput
                 disabled={disabled}
                 step={step}
@@ -39,7 +43,7 @@ export const Vec3Row: React.FC<Props> = ({
                 startAdornment={<InputAdornment>Y</InputAdornment>}
                 onChange={onChange('y') as any}
             />
-            {withZ && (
+            {withZ && !isBounceRotation && (
                 <NumberInput
                     disabled={disabled}
                     step={step}

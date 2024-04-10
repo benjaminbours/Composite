@@ -264,6 +264,12 @@ export const PropertiesPanel: React.FC<Props> = ({
                                                                     ] as any
                                                                 }
                                                                 withZ
+                                                                isBounceRotation={
+                                                                    transformationKey ===
+                                                                        'rotation' &&
+                                                                    element.type ===
+                                                                        ElementType.BOUNCE
+                                                                }
                                                             />
                                                         </li>
                                                     );
