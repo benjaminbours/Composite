@@ -66,7 +66,7 @@ export function addToGeometries(mesh: Mesh) {
     geometries[mesh.name] = mesh.geometry;
 }
 
-const materials = {
+export const materials = {
     phong: new MeshPhongMaterial({
         color: 0xffffff,
         side: DoubleSide,

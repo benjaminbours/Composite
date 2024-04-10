@@ -23,7 +23,7 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import {
     GamePlayerInputPayload,
     GameState,
-    FLOOR,
+    FLOOR_GROUP,
     Side,
     applyInputListToSimulation,
     PhysicSimulation,
@@ -96,7 +96,7 @@ export default class App {
     // bounce helper
     private currentBounceName?: string;
 
-    private floor = FLOOR;
+    private floor = FLOOR_GROUP;
 
     public rendererManager: RendererManager;
     public gameStateManager: GameStateManager;
@@ -286,7 +286,7 @@ export default class App {
                 this.setGameCamera();
             }
             // reset colliding elements
-            this.collidingElements = [this.floor];
+            this.collidingElements = [this.floor.children[0]];
             for (let i = 0; i < this.level.children.length; i++) {
                 const child = this.level.children[i];
                 addToCollidingElements(child, this.collidingElements);
@@ -295,7 +295,7 @@ export default class App {
             this.removePlayers();
             this.inputsManager.destroyEventListeners();
             // reset colliding elements
-            this.collidingElements = [this.floor];
+            this.collidingElements = [this.floor.children[0]];
             if (this.controls) {
                 this.controls.enabled = true;
                 this.resetEditorCamera();
@@ -357,7 +357,7 @@ export default class App {
 
     private setupScene = () => {
         this.scene.add(this.floor);
-        this.collidingElements.push(this.floor);
+        this.collidingElements.push(this.floor.children[0]);
 
         this.scene.fog = new FogExp2(0xffffff, 0.001);
         // this.scene.fog = new FogExp2(0xffffff, 0.0002);

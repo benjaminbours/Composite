@@ -1,9 +1,11 @@
-import { CircleGeometry, Mesh, MeshPhongMaterial } from 'three';
+import { CircleGeometry, Group, Mesh, MeshPhongMaterial } from 'three';
+import { Layer } from '../types';
+import { materials } from '../levels';
 
 export * from './InteractiveArea';
 export * from './ElementToBounce';
 
-export const FLOOR = new Mesh(
+const FLOOR = new Mesh(
     new CircleGeometry(10000, 10),
     new MeshPhongMaterial({
         // color: 0x000000,
@@ -16,3 +18,11 @@ export const FLOOR = new Mesh(
 FLOOR.receiveShadow = true;
 FLOOR.name = 'floor';
 FLOOR.rotation.x = -Math.PI / 2;
+
+const OCCLUSION_FLOOR = FLOOR.clone();
+OCCLUSION_FLOOR.material = materials.occlusion;
+OCCLUSION_FLOOR.layers.set(Layer.OCCLUSION);
+OCCLUSION_FLOOR.layers.enable(Layer.OCCLUSION_PLAYER);
+
+export const FLOOR_GROUP = new Group();
+FLOOR_GROUP.add(FLOOR, OCCLUSION_FLOOR);
