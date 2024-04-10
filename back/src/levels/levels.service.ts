@@ -68,6 +68,19 @@ export class LevelsService {
     user: JWTUserPayload,
   ) {
     await this.checkUserHasAccessToLevel(id, user);
+
+    const level = await this.prisma.level
+      .findUnique({
+        where: { id },
+      })
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
+
+    if (level.status === LevelStatus.PUBLISHED) {
+      throw new ForbiddenException('Cannot update a published level.');
+    }
+
     return this.prisma.level
       .update({
         where: { id },

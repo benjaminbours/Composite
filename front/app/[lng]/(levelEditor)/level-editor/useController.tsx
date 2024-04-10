@@ -46,6 +46,7 @@ import {
     connectDoors,
 } from '../../../Game/elements/graphic.utils';
 import { startLoadingAssets } from '../../../Game/assetsLoader';
+import { useConfirmDialogContext } from '../../../contexts';
 
 const defaultLevel = {
     id: 0,
@@ -550,12 +551,13 @@ function buildWorldContext(app: App): WorldContext {
 
 export function useController(
     level_id: string,
-    dictionary: Awaited<ReturnType<typeof getDictionary>>['common'],
+    dictionary: Awaited<ReturnType<typeof getDictionary>>,
 ) {
     const isAuthenticated = useStoreState(
         (state) => state.user.isAuthenticated,
     );
     const { enqueueSnackbar } = useSnackbar();
+    const confirmDialogContext = useConfirmDialogContext();
     const router = useRouter();
 
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -586,7 +588,7 @@ export function useController(
         (isFork?: boolean, status?: LevelStatusEnum) => {
             if (!state.levelName) {
                 enqueueSnackbar(
-                    dictionary.notification['error-missing-level-name'],
+                    dictionary.common.notification['error-missing-level-name'],
                     {
                         variant: 'error',
                     },
@@ -611,17 +613,19 @@ export function useController(
                 });
                 const successMessage = (() => {
                     if (status === LevelStatusEnum.Published) {
-                        return dictionary.notification[
+                        return dictionary.common.notification[
                             'success-level-published'
                         ];
                     }
 
                     if (status === LevelStatusEnum.Draft) {
-                        return dictionary.notification[
+                        return dictionary.common.notification[
                             'success-level-unpublished'
                         ];
                     }
-                    return dictionary.notification['success-level-saved'];
+                    return dictionary.common.notification[
+                        'success-level-saved'
+                    ];
                 })();
                 enqueueSnackbar(successMessage, {
                     variant: 'success',
@@ -632,14 +636,22 @@ export function useController(
                 const errorData = await error.response.json();
                 let message;
                 if (errorData.message === 'Unique constraint violation') {
-                    message = dictionary.notification['error-level-name-taken'];
+                    message =
+                        dictionary.common.notification[
+                            'error-level-name-taken'
+                        ];
                     setHasErrorWithLevelName(true);
                 } else if (errorData.message.includes('Value is too long')) {
                     message =
-                        dictionary.notification['error-level-name-too-long'];
+                        dictionary.common.notification[
+                            'error-level-name-too-long'
+                        ];
                     setHasErrorWithLevelName(true);
                 } else {
-                    message = generateErrorNotification(errorData, dictionary);
+                    message = generateErrorNotification(
+                        errorData,
+                        dictionary.common,
+                    );
                 }
                 enqueueSnackbar(message, {
                     variant: 'error',
@@ -686,6 +698,48 @@ export function useController(
         },
         [enqueueSnackbar, dictionary, state, router, level_id, isAuthenticated],
     );
+
+    const handleClickOnPublish = useCallback(() => {
+        if (!isAuthenticated) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        confirmDialogContext
+            .showConfirmation({
+                title: dictionary['publish-confirmation'].title,
+                message: (
+                    <>
+                        <p>
+                            {dictionary[
+                                'publish-confirmation'
+                            ].description.replace(
+                                '{{levelName}}',
+                                state.levelName,
+                            )}
+                        </p>
+                        <p>
+                            {
+                                dictionary['publish-confirmation'][
+                                    'description-2'
+                                ]
+                            }
+                        </p>
+                    </>
+                ),
+                cancelText: dictionary.common['cancel-text'],
+                confirmText:
+                    dictionary['publish-confirmation']['start-publishing'],
+            })
+            .then((hasConfirmed) => {
+                if (!hasConfirmed) {
+                    return;
+                }
+
+                // TODO: Enter validation mode here
+            });
+        // handleClickOnSave(false, LevelStatusEnum.Published);
+    }, [isAuthenticated, state.levelName, confirmDialogContext, dictionary]);
 
     const captureSnapshot = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -740,7 +794,9 @@ export function useController(
             .then((res) => {
                 console.log(res);
                 enqueueSnackbar(
-                    dictionary.notification['success-level-thumbnail-uploaded'],
+                    dictionary.common.notification[
+                        'success-level-thumbnail-uploaded'
+                    ],
                     {
                         variant: 'success',
                     },
@@ -749,7 +805,9 @@ export function useController(
             .catch((err) => {
                 console.log(err);
                 enqueueSnackbar(
-                    dictionary.notification['error-level-thumbnail-upload'],
+                    dictionary.common.notification[
+                        'error-level-thumbnail-upload'
+                    ],
                     {
                         variant: 'error',
                     },
@@ -1062,5 +1120,6 @@ export function useController(
         toggleShortcut,
         lockElement,
         captureSnapshot,
+        handleClickOnPublish,
     };
 }
