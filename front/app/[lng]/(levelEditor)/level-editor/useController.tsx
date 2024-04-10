@@ -60,7 +60,7 @@ export function useController(
     }, []);
 
     const handleClickOnSave = useCallback(
-        (isFork?: boolean, status?: LevelStatusEnum) => {
+        async (isFork?: boolean, status?: LevelStatusEnum) => {
             if (!state.levelName) {
                 enqueueSnackbar(
                     dictionary.common.notification['error-missing-level-name'],
@@ -145,7 +145,7 @@ export function useController(
                 isLocked: el.isLocked,
             }));
             if (level_id === 'new' || isFork) {
-                apiClient.defaultApi
+                return apiClient.defaultApi
                     .levelsControllerCreate({
                         createLevelDto: {
                             name: isFork
@@ -158,7 +158,7 @@ export function useController(
                     .catch(onCatch)
                     .finally(onFinally);
             } else {
-                apiClient.defaultApi
+                return apiClient.defaultApi
                     .levelsControllerUpdate({
                         id: level_id,
                         updateLevelDto: {
@@ -332,6 +332,58 @@ export function useController(
         }
     }, [state.app]);
 
+    const onValidationComplete = useCallback(() => {
+        // TODO: Duplicate code from toggleTestMode function. Address it
+        if (state.app) {
+            state.app.setAppMode(AppMode.EDITOR);
+            state.app.onLevelEditorValidation = undefined;
+            dispatch({
+                type: ActionType.SET_APP_MODE,
+                payload: { mode: state.app.mode },
+            });
+        }
+        confirmDialogContext
+            .showConfirmation({
+                title: dictionary['after-publish-confirmation'].title,
+                message: (
+                    <>
+                        <p>
+                            <b>
+                                {
+                                    dictionary['after-publish-confirmation']
+                                        .subtitle
+                                }
+                            </b>
+                        </p>
+                        <p>
+                            {dictionary[
+                                'after-publish-confirmation'
+                            ].description.replace(
+                                '{{levelName}}',
+                                state.levelName,
+                            )}
+                        </p>
+                    </>
+                ),
+                cancelText: dictionary.common['cancel-text'],
+                confirmText: dictionary['after-publish-confirmation'].confirm,
+            })
+            .then((hasConfirmed) => {
+                if (!hasConfirmed) {
+                    return;
+                }
+                handleClickOnSave(false, LevelStatusEnum.Published).then(() => {
+                    confirmDialogContext.closeConfirmation();
+                });
+            });
+    }, [
+        state.levelName,
+        dictionary,
+        confirmDialogContext,
+        handleClickOnSave,
+        state.app,
+    ]);
+
     const toggleTestMode = useCallback(
         (isValidationProcess?: boolean) => {
             if (state.app) {
@@ -341,13 +393,16 @@ export function useController(
                         : AppMode.GAME,
                 );
                 state.app.transformControls?.detach();
+                state.app.onLevelEditorValidation = isValidationProcess
+                    ? onValidationComplete
+                    : undefined;
                 dispatch({
                     type: ActionType.SET_APP_MODE,
                     payload: { mode: state.app.mode, isValidationProcess },
                 });
             }
         },
-        [state.app],
+        [state.app, onValidationComplete],
     );
 
     const toggleShortcut = useCallback(() => {
@@ -390,29 +445,14 @@ export function useController(
 
         confirmDialogContext
             .showConfirmation({
-                title: dictionary['publish-confirmation'].title,
+                title: dictionary['before-publish-confirmation'].title,
                 message: (
-                    <>
-                        <p>
-                            {dictionary[
-                                'publish-confirmation'
-                            ].description.replace(
-                                '{{levelName}}',
-                                state.levelName,
-                            )}
-                        </p>
-                        <p>
-                            {
-                                dictionary['publish-confirmation'][
-                                    'description-2'
-                                ]
-                            }
-                        </p>
-                    </>
+                    <p>
+                        {dictionary['before-publish-confirmation'].description}
+                    </p>
                 ),
                 cancelText: dictionary.common['cancel-text'],
-                confirmText:
-                    dictionary['publish-confirmation']['start-publishing'],
+                confirmText: dictionary['before-publish-confirmation'].confirm,
             })
             .then((hasConfirmed) => {
                 if (!hasConfirmed) {
@@ -426,7 +466,6 @@ export function useController(
             });
     }, [
         isAuthenticated,
-        state.levelName,
         confirmDialogContext,
         dictionary,
         resetPlayersPosition,

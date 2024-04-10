@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -21,6 +22,7 @@ import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 
 interface Props {
     level_id: string;
+    levelStatus: LevelStatusEnum;
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     isPlaying: boolean;
     isSaving: boolean;
@@ -34,6 +36,7 @@ interface Props {
 
 export const TopBarLevelEditor: React.FC<Props> = ({
     dictionary,
+    levelStatus,
     levelName,
     onLevelNameChange,
     onSave,
@@ -50,6 +53,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 icon: <SaveIcon fontSize="small" />,
                 text: level_id === 'new' ? 'Create' : 'Update',
                 onClick: () => onSave(),
+                disabled: levelStatus === LevelStatusEnum.Published,
             },
             {
                 icon: <ForkRightIcon fontSize="small" />,
@@ -60,11 +64,13 @@ export const TopBarLevelEditor: React.FC<Props> = ({
             {
                 icon: <VerifiedIcon fontSize="small" />,
                 text: 'Publish',
-                disabled: level_id === 'new',
+                disabled:
+                    level_id === 'new' ||
+                    levelStatus === LevelStatusEnum.Published,
                 onClick: handleClickOnPublish,
             },
         ];
-    }, [onSave, level_id, handleClickOnPublish]);
+    }, [onSave, level_id, levelStatus, handleClickOnPublish]);
 
     return (
         <AppBar className="level-editor__app-bar top-bar" position="static">
@@ -88,7 +94,9 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                     value={levelName}
                     onChange={onLevelNameChange}
                     error={hasErrorWithLevelName}
-                    disabled={isSaving}
+                    disabled={
+                        isSaving || levelStatus === LevelStatusEnum.Published
+                    }
                 />
                 <Divider orientation="vertical" flexItem />
                 <DropDownMenu
@@ -103,6 +111,13 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                     }
                     disabled={isSaving || isPlaying}
                 />
+                {levelStatus === LevelStatusEnum.Published && (
+                    <Chip
+                        icon={<VerifiedIcon />}
+                        color="primary"
+                        label="Published level"
+                    />
+                )}
                 <UserMenu
                     dictionary={dictionary}
                     disabled={isSaving}

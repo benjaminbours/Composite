@@ -123,6 +123,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                 />
                 <TopBarLevelEditor
                     level_id={level_id}
+                    levelStatus={state.levelStatus}
                     isSaving={isSaving}
                     isPlaying={state.appMode === AppMode.GAME}
                     dictionary={dictionary.common}
@@ -169,7 +170,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                             </Button>
                             <Button
                                 onClick={wrapperBlurEvent(toggleCollisionArea)}
-                                title="Display collision area"
+                                title="Display players axis"
                             >
                                 <VisibilityIcon fontSize="small" />
                             </Button>

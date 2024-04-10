@@ -73,6 +73,17 @@
             }
         }
     },
+    "before-publish-confirmation": {
+        "title": "Level validation process",
+        "description": "In order to publish your level, you need to proof that the level is finishable. Please play it from start to finish and make sure it's possible to complete it.",
+        "confirm": "Start validation run"
+    },
+    "after-publish-confirmation": {
+        "title": "Level validation process successful",
+        "subtitle": "Congratulations, you fulfilled the validation process for your level!",
+        "description": "Are you sure you want to publish the level \"{{levelName}}\"? Once published, the level will be visible to everyone and you won't be able to edit it anymore.",
+        "confirm": "Publish"
+    },
     "forgot-password": {
         "title": "Forgot password",
         "description": "Give me your email address and I will send you a link to reset your password.",

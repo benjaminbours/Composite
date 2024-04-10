@@ -110,6 +110,7 @@ export default class App {
     public transformControls?: TransformControls;
 
     public mode: AppMode;
+    public onLevelEditorValidation: (() => void) | undefined = undefined;
     public mousePosition = new Vector2();
     private mouseRaycaster = new Raycaster();
     public mouseSelectedObject?: Object3D;
@@ -656,6 +657,13 @@ export default class App {
             }
 
             endLevelElement.update(this.delta);
+
+            if (
+                this.onLevelEditorValidation &&
+                state.level.end_level.length === 2
+            ) {
+                this.onLevelEditorValidation();
+            }
         }
     };
 
