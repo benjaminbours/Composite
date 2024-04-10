@@ -1,7 +1,14 @@
 import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 import { ApiProperty } from '@nestjs/swagger';
 import { LevelStatus, Level as PrismaLevel } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class Element implements Omit<LevelElement, 'mesh'> {
   @ApiProperty({ type: String })
@@ -14,6 +21,10 @@ export class Element implements Omit<LevelElement, 'mesh'> {
   @ApiProperty({ type: Object })
   @IsObject()
   properties: any; // json
+  @ApiProperty({ type: Boolean, required: false })
+  @IsBoolean()
+  @IsOptional()
+  isLocked?: boolean;
 }
 
 class Author {

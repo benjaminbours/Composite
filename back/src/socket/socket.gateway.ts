@@ -15,7 +15,7 @@ import {
   Side,
   SocketEvent,
   MovableComponentState,
-  FLOOR,
+  FLOOR_GROUP,
   TimeSyncPayload,
   PhysicSimulation,
   applyInputListToSimulation,
@@ -185,8 +185,11 @@ export class SocketGateway {
       undefined,
     ];
 
-    const collidingElements = [FLOOR, ...level.collidingElements];
-    FLOOR.updateMatrixWorld(true);
+    const collidingElements = [
+      FLOOR_GROUP.children[0],
+      ...level.collidingElements,
+    ];
+    FLOOR_GROUP.children[0].updateMatrixWorld(true);
     level.updateMatrixWorld(true);
 
     const TICK_RATE = 20;

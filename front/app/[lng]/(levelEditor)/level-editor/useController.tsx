@@ -142,6 +142,7 @@ export function useController(
                 type: el.type,
                 properties: el.properties,
                 name: el.name,
+                isLocked: el.isLocked,
             }));
             if (level_id === 'new' || isFork) {
                 apiClient.defaultApi

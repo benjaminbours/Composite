@@ -712,6 +712,7 @@ export function parseLevelElements(
             name: el.name,
             mesh,
             properties: properties,
+            isLocked: el.isLocked,
         };
     });
 
