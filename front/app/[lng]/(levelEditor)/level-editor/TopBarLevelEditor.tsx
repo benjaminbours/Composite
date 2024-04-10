@@ -6,9 +6,9 @@ import Button from '@mui/material/Button';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import SaveIcon from '@mui/icons-material/Save';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
-import PublishIcon from '@mui/icons-material/Publish';
 import TextField from '@mui/material/TextField';
 import { DropDownMenu } from './DropDownMenu';
 import Divider from '@mui/material/Divider';
@@ -25,9 +25,9 @@ interface Props {
     isPlaying: boolean;
     isSaving: boolean;
     levelName: string;
-    levelStatus: LevelStatusEnum;
     hasErrorWithLevelName: boolean;
     onLevelNameChange: (e: any) => void;
+    handleClickOnPublish: () => void;
     onSave: (isFork?: boolean, status?: LevelStatusEnum) => void;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -35,13 +35,13 @@ interface Props {
 export const TopBarLevelEditor: React.FC<Props> = ({
     dictionary,
     levelName,
-    levelStatus,
     onLevelNameChange,
     onSave,
     hasErrorWithLevelName,
     isSaving,
     isPlaying,
     setIsModalOpen,
+    handleClickOnPublish,
     level_id,
 }) => {
     const actionItems = useMemo(() => {
@@ -58,22 +58,13 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 disabled: level_id === 'new',
             },
             {
-                icon: <PublishIcon fontSize="small" />,
-                text:
-                    levelStatus === LevelStatusEnum.Published
-                        ? 'Unpublish'
-                        : 'Publish',
+                icon: <VerifiedIcon fontSize="small" />,
+                text: 'Publish',
                 disabled: level_id === 'new',
-                onClick: () =>
-                    onSave(
-                        false,
-                        levelStatus === LevelStatusEnum.Published
-                            ? LevelStatusEnum.Draft
-                            : LevelStatusEnum.Published,
-                    ),
+                onClick: handleClickOnPublish,
             },
         ];
-    }, [onSave, levelStatus, level_id]);
+    }, [onSave, level_id, handleClickOnPublish]);
 
     return (
         <AppBar className="level-editor__app-bar top-bar" position="static">

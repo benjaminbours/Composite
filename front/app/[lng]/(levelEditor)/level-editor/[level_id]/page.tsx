@@ -19,5 +19,5 @@ export default async function LevelEditorPage({
     params: { lng, level_id },
 }: Props) {
     const dictionary = await getDictionary(lng);
-    return <LevelEditor dictionary={dictionary.common} level_id={level_id} />;
+    return <LevelEditor dictionary={dictionary} level_id={level_id} />;
 }
