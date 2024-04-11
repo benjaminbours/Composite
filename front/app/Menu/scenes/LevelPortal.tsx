@@ -40,6 +40,7 @@ interface Props {
     isSelectedByTeamMate?: boolean;
     isSelectedByYou?: boolean;
     queueInfo?: QueueInfo;
+    onClick?: () => void;
 }
 
 const defaultImageUrl = '/images/crack_the_door.png';
@@ -50,6 +51,7 @@ export const LevelPortal: React.FC<Props> = ({
     isSelectedByTeamMate,
     isSelectedByYou,
     queueInfo,
+    onClick,
 }) => {
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
 
@@ -68,7 +70,7 @@ export const LevelPortal: React.FC<Props> = ({
     });
 
     return (
-        <div className={cssClass}>
+        <div className={cssClass} onClick={onClick}>
             <div className="level-portal__graphic-wrapper">
                 <div
                     className="level-portal__image-container"

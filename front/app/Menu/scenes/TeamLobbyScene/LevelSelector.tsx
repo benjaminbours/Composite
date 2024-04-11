@@ -240,6 +240,7 @@ export const LevelSelector: React.FC<Props> = ({
                                                   ]
                                                 : undefined
                                         }
+                                        onClick={() => handleSelectLevel(id)}
                                     />
                                 </li>
                             );
