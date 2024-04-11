@@ -49,12 +49,16 @@ export enum SocketEventLobby {
     JOIN_RANDOM_QUEUE = 'JOIN_RANDOM_QUEUE',
 }
 
-export interface Inputs {
+export interface InputsSync {
     left: boolean;
     right: boolean;
     jump: boolean;
     top: boolean;
     bottom: boolean;
+}
+
+export interface InputsClient {
+    interact: boolean;
 }
 
 // payloads
@@ -83,7 +87,7 @@ export interface CreateLobbyPayload {
 
 export interface GamePlayerInputPayload {
     player: Side;
-    inputs: Inputs;
+    inputs: InputsSync;
     // TODO: Implement protection against position hacking
     sequence: number;
     time: number;
@@ -229,15 +233,22 @@ export interface InteractiveComponent {
     isActive: boolean;
 }
 
-export const MOVEMENTS = ['left', 'right', 'top', 'bottom', 'jump'] as const;
-type MovementTuple = typeof MOVEMENTS;
-export type Movement = MovementTuple[number];
+export const ACTIONS = [
+    'left',
+    'right',
+    'top',
+    'bottom',
+    'jump',
+    'interact',
+] as const;
+type ActionTuple = typeof ACTIONS;
+export type Action = ActionTuple[number];
 
 export class KeyBindings {
-    [key: string]: Movement;
+    [key: string]: Action;
 }
 
 export type UIKeyBindings = [
-    Movement,
+    Action,
     [string | undefined, string | undefined],
 ][];

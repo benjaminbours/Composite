@@ -2,7 +2,7 @@ import { type Intersection, type Object3D } from 'three';
 import { detectCollidingObjects } from './collision.system';
 import {
     GamePlayerInputPayload,
-    Inputs,
+    InputsSync,
     MovableComponentState,
     Side,
 } from '../types';
@@ -34,7 +34,7 @@ export enum Context {
 function applyPlayerUpdate(
     delta: number,
     side: Side,
-    input: Inputs,
+    input: InputsSync,
     collisionResult: INearestObjects,
     player: PlayerGameState,
     levelState: LevelState,
@@ -185,7 +185,7 @@ export function updateServerBounces(
 export function applySingleInputToSimulation(
     delta: number,
     side: Side,
-    inputs: Inputs,
+    inputs: InputsSync,
     collidingElems: Object3D[],
     gameState: GameState,
     context: Context,

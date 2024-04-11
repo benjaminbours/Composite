@@ -33,7 +33,7 @@ import {
     MovableComponentState,
     ElementToBounce,
     createMountain,
-    Inputs,
+    InputsSync,
     AbstractLevel,
     degreesToRadians,
     createCollisionAreaMesh,
@@ -82,10 +82,6 @@ export default class App {
     public clock = new Clock();
     public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
-
-    private lastInput: GamePlayerInputPayload | undefined;
-    // TODO: disgusting, find alternative
-    private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
 
     private physicSimulation = new PhysicSimulation();
 
@@ -417,34 +413,11 @@ export default class App {
         }
     };
 
-    private processInputs = (player: Side) => {
-        let inputs: Inputs;
-        if (player === this.mainPlayerSide) {
-            inputs = { ...this.inputsManager.inputsActive };
-        } else {
-            inputs = this.gameStateManager.lastServerInputs[
-                this.secondPlayerSide
-            ]?.inputs || {
-                left: false,
-                right: false,
-                jump: false,
-                top: false,
-                bottom: false,
-            };
-        }
-        const payload = {
-            player,
-            inputs,
-            time: Date.now(),
-            sequence: this.gameStateManager.currentState.game_time,
-        };
-        if (player !== this.mainPlayerSide) {
-            this.gameStateManager.inputsHistory.push(payload);
-            this.lastOtherPlayerInput = payload;
-            return;
-        }
-
-        const isInputRelease =
+    private lastInput: GamePlayerInputPayload | undefined;
+    // TODO: disgusting, find alternative
+    private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
+    private checkAndCollectInputs = (payload: any) => {
+        const isInputReleased =
             this.lastInput &&
             ((this.lastInput.inputs.left &&
                 !this.inputsManager.inputsActive.left) ||
@@ -452,16 +425,54 @@ export default class App {
                     !this.inputsManager.inputsActive.right) ||
                 (this.lastInput.inputs.jump &&
                     !this.inputsManager.inputsActive.jump));
+        // basically, if one of the sync input is active or released
         if (
             this.inputsManager.inputsActive.left ||
             this.inputsManager.inputsActive.right ||
             this.inputsManager.inputsActive.jump ||
-            isInputRelease
+            isInputReleased
         ) {
+            // then collect it
             this.gameStateManager.inputsHistory.push(payload);
             this.gameStateManager.collectInput(payload);
         }
+    };
+
+    private createPlayerInputPayload = (player: Side, inputs: InputsSync) => {
+        return {
+            player,
+            inputs,
+            time: Date.now(),
+            sequence: this.gameStateManager.currentState.game_time,
+        };
+    };
+
+    private processMainPlayerInputs = () => {
+        let inputs: InputsSync = { ...this.inputsManager.inputsActive };
+        const payload = this.createPlayerInputPayload(
+            this.mainPlayerSide,
+            inputs,
+        );
+        this.checkAndCollectInputs(payload);
         this.lastInput = payload;
+    };
+
+    private processSecondPlayerInputs = () => {
+        let inputs: InputsSync = this.gameStateManager.lastServerInputs[
+            this.secondPlayerSide
+        ]?.inputs || {
+            left: false,
+            right: false,
+            jump: false,
+            top: false,
+            bottom: false,
+        };
+        const payload = this.createPlayerInputPayload(
+            this.secondPlayerSide,
+            inputs,
+        );
+        this.gameStateManager.inputsHistory.push(payload);
+        this.lastOtherPlayerInput = payload;
     };
 
     private updateMouseIntersection = () => {
@@ -496,16 +507,14 @@ export default class App {
         }
         this.delta = this.clock.getDelta();
         if (this.mode === AppMode.GAME) {
-            // console.log(this.collidingElements);
-
             this.gameStateManager.reconciliateState(
                 this.collidingElements,
                 this.physicSimulation.delta,
             );
             this.physicSimulation.run((delta) => {
                 this.gameStateManager.currentState.game_time++;
-                this.processInputs(this.mainPlayerSide);
-                this.processInputs(this.secondPlayerSide);
+                this.processMainPlayerInputs();
+                this.processSecondPlayerInputs();
 
                 const inputsForTick: GamePlayerInputPayload[][] = [[], []];
                 if (this.lastInput) {

@@ -1,4 +1,4 @@
-import { Inputs, MovableComponentState } from '../types';
+import { InputsSync, MovableComponentState } from '../types';
 
 const MAX_VELOCITY = 10;
 const MIN_VELOCITY = 0.1;
@@ -11,7 +11,7 @@ const updateVelocity = (speed: number, target: number, velocity: number) => {
 
 export function computeVelocity(
     delta: number,
-    input: Inputs,
+    input: InputsSync,
     state: MovableComponentState,
     velocity: number,
     axis: 'x' | 'y',

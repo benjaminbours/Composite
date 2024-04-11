@@ -1,5 +1,5 @@
 import { Intersection, Matrix4, Vector3 } from 'three';
-import { Inputs, MovableComponentState, Side } from '../types';
+import { InputsSync, MovableComponentState, Side } from '../types';
 import { LevelState, PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
 import { INearestObjects } from './raycaster';
@@ -144,7 +144,7 @@ export function handleCollision(
 }
 
 export function handleJump(
-    input: Inputs,
+    input: InputsSync,
     player: PlayerGameState,
     levelState: LevelState,
 ) {
