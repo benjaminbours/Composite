@@ -137,25 +137,26 @@ export default class App {
             this.inputsManager.registerEventListeners();
         }
 
+        // setup renderer manager
+        this.rendererManager = new RendererManager(
+            this.camera,
+            canvasDom,
+            this.scene,
+        );
+
         // levels
         const clientGraphicHelpers: ClientGraphicHelpers = {
             addBounceGraphic,
             addDoorOpenerGraphic,
             addEndLevelGraphic,
             connectDoors,
+            addLightBounceComposer: this.rendererManager.addLightBounceComposer,
         };
+
         this.level = new LevelMapping(
             level?.id || 0,
             level?.data || [],
             clientGraphicHelpers,
-        );
-
-        // setup renderer manager before players, it's important
-        this.rendererManager = new RendererManager(
-            this.camera,
-            canvasDom,
-            this.scene,
-            this.level.lightBounces,
         );
 
         if (this.mode === AppMode.GAME) {

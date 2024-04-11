@@ -88,7 +88,6 @@ export class RendererManager {
         private camera: CustomCamera,
         public canvasDom: HTMLCanvasElement,
         scene: Scene,
-        lightBounces: ElementToBounce[],
     ) {
         // init renderer
         this.renderer = new WebGLRenderer({
@@ -134,11 +133,6 @@ export class RendererManager {
         );
         const mixPass = this.createMixPass(occlusionRenderTarget);
         this.mainComposer.addPass(mixPass);
-
-        // create occlusion render for each light bounce element
-        for (let i = 0; i < lightBounces.length; i++) {
-            this.addLightBounceComposer(lightBounces[i]);
-        }
     }
 
     // create a renderer for when a player is inside an element
