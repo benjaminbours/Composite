@@ -114,12 +114,12 @@ function applyWorldUpdate(
         }
     }
 
-    for (const key in gameState.level.doors) {
-        const activators = gameState.level.doors[key];
+    for (const id in gameState.level.doors) {
+        const activators = gameState.level.doors[id];
 
         // if this door opener is not the one we are currently activating
         // remove us from the list of activators
-        if (key !== doorNameActivating) {
+        if (id !== doorNameActivating) {
             const index = activators.indexOf(side);
             if (index !== -1) {
                 activators.splice(index, 1);
@@ -130,11 +130,12 @@ function applyWorldUpdate(
         // not here where we are suppose to manage game state
         // and have a condition there about updating for server or client
         if (context === Context.server) {
-            const wallDoor = obstacles.find(
-                (e) => e.name === ElementName.WALL_DOOR(key),
-            );
-            if (wallDoor) {
-                updateDoor(wallDoor, activators.length > 0);
+            const wallDoorGroup = obstacles.find(
+                (e) => e.parent?.name === ElementName.WALL_DOOR(id),
+            )?.parent;
+
+            if (wallDoorGroup) {
+                updateDoor(wallDoorGroup, activators.length > 0);
             }
         }
     }

@@ -63,6 +63,9 @@ export const geometries: { [key: string]: any } = {
 };
 
 export function addToGeometries(mesh: Mesh) {
+    // exist because the loading system of three geometry with nodejs is this lib => @injectit/threejs-nodejs-exporters
+    (mesh.geometry as any).computeBoundsTree = computeBoundsTree;
+    (mesh.geometry as any).disposeBoundsTree = disposeBoundsTree;
     geometries[mesh.name] = mesh.geometry;
 }
 
@@ -739,9 +742,6 @@ export function createCollisionAreaMesh() {
 
 const collisionAreaMesh = createCollisionAreaMesh();
 function detectIfMeshIsCollidable(mesh: Mesh): boolean {
-    mesh.updateMatrixWorld(true);
-    // this.scene.updateMatrixWorld(true);
-
     const geometry = mesh.geometry.clone();
     geometry.applyMatrix4(mesh.matrixWorld);
 
@@ -791,5 +791,6 @@ export function addToCollidingElements(
             }
         }
     };
+    group.updateMatrixWorld(true);
     checkChildren(group.children);
 }
