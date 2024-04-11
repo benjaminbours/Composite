@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Fix and improve various things
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.3
+  - @benjaminbours/composite-core@1.0.0-next.3
+
 ## 1.0.0-next.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- Fix and improve various things
+
 ## 1.0.0-next.2
 
 ### Patch Changes
