@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- Add interact touch to focus camera on door opener. Add start position as editable in level editor.
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.4
+  - @benjaminbours/composite-core@1.0.0-next.4
+
 ## 1.0.0-next.4
 
 ### Patch Changes

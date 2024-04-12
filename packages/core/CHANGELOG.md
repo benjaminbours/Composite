@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- Add interact touch to focus camera on door opener. Add start position as editable in level editor.
+
 ## 1.0.0-next.3
 
 ### Patch Changes
