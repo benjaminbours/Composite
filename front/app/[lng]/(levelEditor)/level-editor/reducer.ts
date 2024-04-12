@@ -1,3 +1,4 @@
+import { Vector3 } from 'three';
 import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 import {
     ElementType,
@@ -47,6 +48,8 @@ export const defaultLevel = {
 export const initialState = {
     app: undefined as App | undefined,
     appMode: AppMode.EDITOR as AppMode,
+    lightStartPosition: new Vector3(10, 20, 0),
+    shadowStartPosition: new Vector3(200, 20, 0),
     isValidatingProcess: false,
     isNotFound: false,
     isShortcutVisible: false,
@@ -80,6 +83,7 @@ export enum ActionType {
     REDO = 'REDO',
     SET_APP_MODE = 'SET_APP_MODE',
     TOGGLE_SHORTCUT = 'TOGGLE_SHORTCUT',
+    UPDATE_START_POSITION = 'UPDATE_START_POSITION',
 }
 
 interface UndoAction {
@@ -92,6 +96,14 @@ interface RedoAction {
 
 interface ToggleShortcutAction {
     type: ActionType.TOGGLE_SHORTCUT;
+}
+
+interface UpdateStartPositionAction {
+    type: ActionType.UPDATE_START_POSITION;
+    payload: {
+        side: 'light' | 'shadow';
+        position: Vector3;
+    };
 }
 
 interface SetAppModeAction {
@@ -184,7 +196,8 @@ type Action =
     | RedoAction
     | SetAppModeAction
     | ToggleShortcutAction
-    | LockElementAction;
+    | LockElementAction
+    | UpdateStartPositionAction;
 
 export function reducer(
     state: typeof initialState,
@@ -210,6 +223,12 @@ export function reducer(
             return {
                 ...state,
                 historyIndex,
+            };
+        case ActionType.UPDATE_START_POSITION:
+            return {
+                ...state,
+                [`${action.payload.side}StartPosition`]:
+                    action.payload.position,
             };
         case ActionType.TOGGLE_SHORTCUT:
             return {

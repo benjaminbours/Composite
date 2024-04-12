@@ -56,11 +56,18 @@
     right: 1%;
     display: flex;
     align-items: flex-start;
+
+    > :nth-child(1) {
+        order: 1;
+        margin-right: 10px;
+    }
+
+    > :nth-child(2) {
+        order: 2;
+    }
 }
 
 .properties-panel {
-    order: 1;
-    margin-right: 10px;
     padding-right: 0;
 
     ul {
@@ -124,11 +131,10 @@
 
 .scene-content-panel {
     padding: 0;
-    order: 2;
     max-height: none;
 }
 
-.scene-content-panel__accordion {
+.level-editor__accordion {
     .MuiAccordionSummary-root.Mui-expanded {
         min-height: 48px;
         height: 48px;

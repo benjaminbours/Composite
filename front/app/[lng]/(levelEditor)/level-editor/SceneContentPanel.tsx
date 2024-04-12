@@ -76,10 +76,11 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
         }, [onAddElement]);
         return (
             <Accordion
+                defaultExpanded
                 elevation={1}
-                className="panel scene-content-panel scene-content-panel__accordion"
+                className="panel scene-content-panel level-editor__accordion"
             >
-                <AccordionSummary className='scene-content-panel__accordion-summary' expandIcon={<ExpandMoreIcon />}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <h3>Scene</h3>
                 </AccordionSummary>
                 <AccordionDetails>

@@ -186,7 +186,9 @@ export const PropertiesPanel: React.FC<Props> = ({
                                     <AccordionDetails>
                                         <Vec3Row
                                             step={0.1}
-                                            min={1}
+                                            minX={1}
+                                            minY={1}
+                                            minZ={1}
                                             disabled={disabled}
                                             onChange={onChange}
                                             value={value}
@@ -251,7 +253,6 @@ export const PropertiesPanel: React.FC<Props> = ({
                                                             </label>
                                                             <Vec3Row
                                                                 step={step}
-                                                                min={undefined}
                                                                 disabled={
                                                                     disabled
                                                                 }

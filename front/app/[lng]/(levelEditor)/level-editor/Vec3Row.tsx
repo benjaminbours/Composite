@@ -5,7 +5,9 @@ import { Vector3 } from 'three';
 interface Props {
     step: number;
     disabled?: boolean;
-    min?: number;
+    minX?: number;
+    minY?: number;
+    minZ?: number;
     onChange: (
         key: 'x' | 'y' | 'z',
     ) => (_event: any, fieldValue: number) => void;
@@ -17,7 +19,9 @@ interface Props {
 export const Vec3Row: React.FC<Props> = ({
     step,
     disabled,
-    min,
+    minX,
+    minY,
+    minZ,
     onChange,
     value,
     withZ,
@@ -29,7 +33,7 @@ export const Vec3Row: React.FC<Props> = ({
                 <NumberInput
                     disabled={disabled}
                     step={step}
-                    min={min}
+                    min={minX}
                     value={value.x}
                     startAdornment={<InputAdornment>X</InputAdornment>}
                     onChange={onChange('x') as any}
@@ -38,7 +42,7 @@ export const Vec3Row: React.FC<Props> = ({
             <NumberInput
                 disabled={disabled}
                 step={step}
-                min={min}
+                min={minY}
                 value={value.y}
                 startAdornment={<InputAdornment>Y</InputAdornment>}
                 onChange={onChange('y') as any}
@@ -47,7 +51,7 @@ export const Vec3Row: React.FC<Props> = ({
                 <NumberInput
                     disabled={disabled}
                     step={step}
-                    min={min}
+                    min={minZ}
                     value={value.z}
                     startAdornment={<InputAdornment>Z</InputAdornment>}
                     onChange={onChange('z') as any}

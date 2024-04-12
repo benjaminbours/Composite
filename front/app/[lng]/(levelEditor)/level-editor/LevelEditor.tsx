@@ -31,6 +31,7 @@ import Paper from '@mui/material/Paper';
 import { ShortcutPanel } from './ShortcutPanel';
 import { ConfirmDialogContextProvider } from '../../../contexts';
 import Chip from '@mui/material/Chip';
+import { PlayersPanel } from './PlayersPanel';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -85,6 +86,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
             switchPlayer,
             resetCamera,
             toggleCollisionArea,
+            handleUpdatePlayerStartPosition,
         } = useController(level_id, dictionary);
 
         // local refs
@@ -208,29 +210,40 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                 </div>
                 {state.app?.mode === AppMode.EDITOR && (
                     <div className="level-editor__top-right-container">
-                        <SceneContentPanel
-                            elements={elements}
-                            currentEditingIndex={state.currentEditingIndex}
-                            onElementClick={selectElement}
-                            onChangeName={updateElementName}
-                            onElementDelete={removeElement}
-                            onAddElement={addElement}
-                            onElementLock={lockElement}
-                            disabled={isSaving}
-                        />
-                        {state.currentEditingIndex !== undefined &&
-                            elements[state.currentEditingIndex] && (
-                                <PropertiesPanel
-                                    state={elements}
-                                    onUpdateProperty={
-                                        handleUpdateElementProperty
-                                    }
-                                    element={
-                                        elements[state.currentEditingIndex]
-                                    }
-                                    disabled={isSaving}
-                                />
-                            )}
+                        <div className="column">
+                            {state.currentEditingIndex !== undefined &&
+                                elements[state.currentEditingIndex] && (
+                                    <PropertiesPanel
+                                        state={elements}
+                                        onUpdateProperty={
+                                            handleUpdateElementProperty
+                                        }
+                                        element={
+                                            elements[state.currentEditingIndex]
+                                        }
+                                        disabled={isSaving}
+                                    />
+                                )}
+                        </div>
+                        <div className="column">
+                            <SceneContentPanel
+                                elements={elements}
+                                currentEditingIndex={state.currentEditingIndex}
+                                onElementClick={selectElement}
+                                onChangeName={updateElementName}
+                                onElementDelete={removeElement}
+                                onAddElement={addElement}
+                                onElementLock={lockElement}
+                                disabled={isSaving}
+                            />
+                            <PlayersPanel
+                                lightStartPosition={state.lightStartPosition}
+                                shadowStartPosition={state.shadowStartPosition}
+                                onUpdatePlayerStartPosition={
+                                    handleUpdatePlayerStartPosition
+                                }
+                            />
+                        </div>
                     </div>
                 )}
                 {/* when initial level exist, it means assets are loaded */}

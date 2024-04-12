@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
-import { Euler, Object3D } from 'three';
+import { Euler, Object3D, Vector3 } from 'three';
 import * as uuid from 'uuid';
 import {
     Side,
@@ -437,6 +437,16 @@ export function useController(
         }
     }, [state.app]);
 
+    const handleUpdatePlayerStartPosition = useCallback(
+        (side: 'light' | 'shadow', position: Vector3) => {
+            dispatch({
+                type: ActionType.UPDATE_START_POSITION,
+                payload: { side, position },
+            });
+        },
+        [],
+    );
+
     const handleClickOnPublish = useCallback(() => {
         if (!isAuthenticated) {
             setIsAuthModalOpen(true);
@@ -682,5 +692,6 @@ export function useController(
         switchPlayer,
         toggleCollisionArea,
         resetCamera,
+        handleUpdatePlayerStartPosition,
     };
 }
