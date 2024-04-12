@@ -3,7 +3,6 @@ import {
     // AdditiveBlending,
     BufferAttribute,
     BufferGeometry,
-    Color,
     Object3D,
     Points,
     ShaderMaterial,
@@ -31,7 +30,10 @@ const FAST_SPEED_MODIFIER = 2;
 const DEFAULT_ORGANIC_RATIO = 1;
 const FAST_ORGANIC_RATIO = 0.2;
 
-export class DoorOpenerGraphic extends Object3D implements InteractiveComponent {
+export class DoorOpenerGraphic
+    extends Object3D
+    implements InteractiveComponent
+{
     public shouldActivate: boolean = false;
     public isActive: boolean = false;
     protected speedModifier: number = DEFAULT_SPEED_MODIFIER;
@@ -121,11 +123,20 @@ export class DoorOpenerGraphic extends Object3D implements InteractiveComponent 
         camera: CustomCamera,
         withFocusCamera: boolean,
     ) => {
-        this.detectActivation(
-            this.activate(camera, withFocusCamera),
-            this.deactivate(camera),
-        );
+        this.detectActivation(this.activate(), this.deactivate());
         this.updateShader(delta);
+        if (withFocusCamera) {
+            if (!this.doorInfo) {
+                console.log('no door info');
+                return;
+            }
+            camera.focusTarget(
+                this.doorInfo.cameraPosition,
+                new Vector3(0, 0.2, 0),
+            );
+        } else {
+            camera?.unfocus();
+        }
     };
 
     protected updateShader = (delta: number) => {
@@ -177,26 +188,12 @@ export class DoorOpenerGraphic extends Object3D implements InteractiveComponent 
         });
     };
 
-    activate = (camera: CustomCamera, withFocusCamera: boolean) => () => {
-        if (!this.doorInfo) {
-            console.log('no door info');
-            return;
-        }
-        console.log('activate door', this.name);
-        if (withFocusCamera) {
-            camera.focusTarget(
-                this.doorInfo.cameraPosition,
-                new Vector3(0, 0.2, 0),
-            );
-        }
+    activate = () => () => {
         this.activateVFX();
         this.openTheDoor();
     };
 
-    deactivate = (camera: CustomCamera) => () => {
-        console.log('deactivate door', this.name);
-
-        camera.unfocus();
+    deactivate = () => () => {
         this.deactivateVFX();
         this.closeTheDoor();
     };

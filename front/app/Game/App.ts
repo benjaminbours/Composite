@@ -647,7 +647,8 @@ export default class App {
 
             const withFocusCamera =
                 activators.includes(this.mainPlayerSide) &&
-                this.mode === AppMode.GAME;
+                this.mode === AppMode.GAME &&
+                this.inputsManager.inputsActive.interact;
             doorOpener?.update(this.delta, this.camera, withFocusCamera);
         }
 
