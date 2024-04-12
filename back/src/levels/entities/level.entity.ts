@@ -39,6 +39,10 @@ export class Level implements PrismaLevel {
   name: string;
   @ApiProperty({ type: [Element] })
   data: any; // json Element[]
+  @ApiProperty({ type: [Number] })
+  lightStartPosition: number[];
+  @ApiProperty({ type: [Number] })
+  shadowStartPosition: number[];
   @ApiProperty()
   likes: number;
   @ApiProperty({ enum: LevelStatus })

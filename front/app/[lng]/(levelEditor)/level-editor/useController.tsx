@@ -152,6 +152,14 @@ export function useController(
                                 ? `${state.levelName}_forked`
                                 : state.levelName,
                             data: elementsToSend,
+                            lightStartPosition: [
+                                state.lightStartPosition.x,
+                                state.lightStartPosition.y,
+                            ],
+                            shadowStartPosition: [
+                                state.shadowStartPosition.x,
+                                state.shadowStartPosition.y,
+                            ],
                         },
                     })
                     .then(onSuccess)
@@ -165,6 +173,14 @@ export function useController(
                             name: state.levelName,
                             data: elementsToSend,
                             status,
+                            lightStartPosition: [
+                                state.lightStartPosition.x,
+                                state.lightStartPosition.y,
+                            ],
+                            shadowStartPosition: [
+                                state.shadowStartPosition.x,
+                                state.shadowStartPosition.y,
+                            ],
                         },
                     })
                     .then(onSuccess)
@@ -328,9 +344,23 @@ export function useController(
 
     const resetPlayersPosition = useCallback(() => {
         if (state.app) {
-            state.app.resetPlayersPosition();
+            const players = [
+                state.shadowStartPosition.clone(),
+                state.lightStartPosition.clone(),
+            ];
+
+            players.forEach((player) => {
+                player.multiplyScalar(gridSize);
+                if (player.y < 20) {
+                    player.y = 20;
+                }
+            });
+            state.app!.setPlayersPosition({
+                shadow: players[0],
+                light: players[1],
+            });
         }
-    }, [state.app]);
+    }, [state.app, state.shadowStartPosition, state.lightStartPosition]);
 
     const onValidationComplete = useCallback(() => {
         // TODO: Duplicate code from toggleTestMode function. Address it
@@ -567,6 +597,7 @@ export function useController(
             app.mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
         };
         const onMouseDown = (e: MouseEvent) => {
+            // TODO: Make players selectable by clicking on them
             if (!app.mouseSelectedObject) {
                 return;
             }

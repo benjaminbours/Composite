@@ -18,6 +18,8 @@ export class LevelsService {
           data: createLevelDto.data as any, // json
           status: LevelStatus.DRAFT,
           authorId: user.sub,
+          lightStartPosition: createLevelDto.lightStartPosition,
+          shadowStartPosition: createLevelDto.shadowStartPosition,
         },
       })
       .catch((err) => {
@@ -88,6 +90,8 @@ export class LevelsService {
           name: updateLevelDto.name,
           data: updateLevelDto.data as any,
           status: updateLevelDto.status,
+          lightStartPosition: updateLevelDto.lightStartPosition,
+          shadowStartPosition: updateLevelDto.shadowStartPosition,
         },
       })
       .catch((err) => {

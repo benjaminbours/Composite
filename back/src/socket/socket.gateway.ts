@@ -25,6 +25,7 @@ import {
   collectInputsForTick,
   AbstractLevel,
   LevelMapping,
+  gridSize,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -32,6 +33,7 @@ import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 import { SocketService } from './socket.service';
 import { PrismaService } from '@project-common/services';
 import { handlePrismaError } from '@project-common/utils/handlePrismaError';
+import { Vector3 } from 'three';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -278,7 +280,21 @@ export class SocketGateway {
       .findUnique({
         where: { id: players[0].player.selectedLevel },
       })
-      .then((l) => new LevelMapping(l.id, l.data as any[]))
+      .then(
+        (l) =>
+          new LevelMapping(l.id, l.data as any[], {
+            light: new Vector3(
+              l.lightStartPosition[0],
+              l.lightStartPosition[1] === 0 ? 0.08 : l.lightStartPosition[1],
+              l.lightStartPosition[2],
+            ).multiplyScalar(gridSize),
+            shadow: new Vector3(
+              l.shadowStartPosition[0],
+              l.shadowStartPosition[1] === 0 ? 0.08 : l.shadowStartPosition[1],
+              l.shadowStartPosition[2],
+            ).multiplyScalar(gridSize),
+          }),
+      )
       .catch((err) => {
         throw handlePrismaError(err);
       });

@@ -9,16 +9,16 @@ import {
 } from './levels.utils';
 import { ElementToBounce } from '../elements';
 
+export interface LevelStartPosition {
+    light: Vector3;
+    shadow: Vector3;
+}
+
 export class LevelMapping extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
     public interactiveElements: any[] = [];
     public bounces: ElementToBounce[] = [];
     public lightBounces: ElementToBounce[] = [];
-
-    public startPosition = {
-        light: new Vector3(10, 20), // start level
-        shadow: new Vector3(200, 20, 0),
-    };
 
     public state: LevelState;
 
@@ -30,6 +30,7 @@ export class LevelMapping extends Group implements AbstractLevel {
     constructor(
         id: number,
         data: any[],
+        public startPosition: LevelStartPosition,
         clientGraphicHelpers?: ClientGraphicHelpers,
     ) {
         super();

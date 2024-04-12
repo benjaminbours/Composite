@@ -40,6 +40,7 @@ import {
     LevelMapping,
     ClientGraphicHelpers,
     addToCollidingElements,
+    gridSize,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -83,7 +84,7 @@ export default class App {
     public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
 
-    private physicSimulation = new PhysicSimulation();
+    private physicSimulation: PhysicSimulation;
 
     public collidingElements: Object3D<Object3DEventMap>[] = [];
 
@@ -113,7 +114,7 @@ export default class App {
 
     constructor(
         public canvasDom: HTMLCanvasElement,
-        private initialGameState: GameState,
+        initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
         initialMode: AppMode,
@@ -140,6 +141,10 @@ export default class App {
             this.scene,
         );
 
+        this.physicSimulation = new PhysicSimulation(
+            initialMode === AppMode.GAME,
+        );
+
         // levels
         const clientGraphicHelpers: ClientGraphicHelpers = {
             addBounceGraphic,
@@ -152,12 +157,26 @@ export default class App {
         this.level = new LevelMapping(
             level?.id || 0,
             level?.data || [],
+            {
+                light: new Vector3(
+                    level?.lightStartPosition[0],
+                    level?.lightStartPosition[1] === 0
+                        ? 0.08
+                        : level?.lightStartPosition[1],
+                    0,
+                ).multiplyScalar(gridSize),
+                shadow: new Vector3(
+                    level?.shadowStartPosition[0],
+                    level?.shadowStartPosition[1] === 0
+                        ? 0.08
+                        : level?.shadowStartPosition[1],
+                    0,
+                ).multiplyScalar(gridSize),
+            },
             clientGraphicHelpers,
         );
 
-        if (this.mode === AppMode.GAME) {
-            this.setupPlayers();
-        }
+        this.setupPlayers(this.level.startPosition);
         this.setupScene();
         this.scene.add(this.level);
         this.scene.updateMatrixWorld();
@@ -207,14 +226,6 @@ export default class App {
     public detachTransformControls = () => {
         this.controlledMesh = undefined;
         this.transformControls?.detach();
-    };
-
-    public resetPlayersPosition = () => {
-        this.gameStateManager.currentState.players.forEach((player, index) => {
-            player.position = {
-                ...this.initialGameState.players[index].position,
-            };
-        });
     };
 
     public resetEditorCamera = () => {
@@ -277,7 +288,12 @@ export default class App {
     public setAppMode = (mode: AppMode) => {
         this.mode = mode;
         if (this.mode === AppMode.GAME) {
-            this.setupPlayers();
+            this.physicSimulation.previousElapsedTime =
+                this.physicSimulation.clock.elapsedTime;
+            this.physicSimulation.clock.start();
+            this.physicSimulation.clock.elapsedTime =
+                this.physicSimulation.previousElapsedTime;
+            this.rendererManager.addPlayerInsideComposer();
             this.inputsManager.registerEventListeners();
             if (this.controls) {
                 this.controls.enabled = false;
@@ -290,7 +306,8 @@ export default class App {
                 addToCollidingElements(child, this.collidingElements);
             }
         } else {
-            this.removePlayers();
+            this.physicSimulation.clock.stop();
+            this.rendererManager.removePlayerInsideComposer();
             this.inputsManager.destroyEventListeners();
             // reset colliding elements
             this.collidingElements = [this.floor.children[0]];
@@ -324,17 +341,36 @@ export default class App {
         this.gameStateManager.destroy();
     };
 
-    private setupPlayers = () => {
+    public setPlayersPosition = (position: {
+        light: Vector3;
+        shadow: Vector3;
+    }) => {
+        for (let i = 0; i < this.players.length; i++) {
+            const vec = i === 0 ? position.shadow : position.light;
+            this.players[i].position.set(vec.x, vec.y, 0);
+            this.gameStateManager.currentState.players[i].position = {
+                x: vec.x,
+                y: vec.y,
+            };
+        }
+    };
+
+    private setupPlayers = (startPosition: {
+        light: Vector3;
+        shadow: Vector3;
+    }) => {
         for (let i = 0; i < 2; i++) {
             const player = (() => {
                 switch (i) {
                     case Side.LIGHT:
                         const lightPlayer = new LightPlayer();
                         lightPlayer.mesh.layers.set(Layer.OCCLUSION_PLAYER);
+                        lightPlayer.position.copy(startPosition.light);
                         return lightPlayer;
                     case Side.SHADOW:
                         const shadowPlayer = new ShadowPlayer();
                         shadowPlayer.mesh.layers.set(Layer.PLAYER_INSIDE);
+                        shadowPlayer.position.copy(startPosition.shadow);
                         return shadowPlayer;
                     default:
                         return new LightPlayer();
@@ -344,13 +380,6 @@ export default class App {
             this.scene.add(player);
         }
         this.rendererManager.players = this.players;
-        this.rendererManager.addPlayerInsideComposer();
-    };
-
-    private removePlayers = () => {
-        this.scene.remove(...this.players);
-        this.players = [];
-        this.rendererManager.removePlayerInsideComposer();
     };
 
     private setupScene = () => {
@@ -680,7 +709,7 @@ export default class App {
     public updateWorldGraphics = (state: GameState) => {
         this.updateChildren(this.scene);
         // update the floor to follow the player to be infinite
-        if (this.players[this.mainPlayerSide]) {
+        if (this.players[this.mainPlayerSide] && this.mode === AppMode.GAME) {
             this.floor.position.set(
                 this.players[this.mainPlayerSide].position.x,
                 0,

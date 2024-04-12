@@ -60,4 +60,6 @@ export interface PartialLevel {
     name: string;
     data: any;
     status: LevelStatusEnum;
+    lightStartPosition: number[];
+    shadowStartPosition: number[];
 }

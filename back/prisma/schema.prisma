@@ -53,10 +53,12 @@ model Level {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name   String      @unique @db.VarChar(50)
-  likes  Int         @default(0)
-  status LevelStatus
-  data   Json
+  name                String      @unique @db.VarChar(50)
+  likes               Int         @default(0)
+  status              LevelStatus
+  data                Json
+  lightStartPosition  Float[]
+  shadowStartPosition Float[]
 
   // relations
   games    Game[]

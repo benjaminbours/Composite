@@ -13,6 +13,7 @@ import {
     parseLevelElements,
     WorldContext,
     createElement,
+    gridSize,
 } from '@benjaminbours/composite-core';
 import App, { AppMode } from '../../../Game/App';
 import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
@@ -43,13 +44,15 @@ export const defaultLevel = {
         },
     ],
     status: LevelStatusEnum.Draft,
+    lightStartPosition: [-0.8, 0],
+    shadowStartPosition: [0.8, 0],
 };
 
 export const initialState = {
     app: undefined as App | undefined,
     appMode: AppMode.EDITOR as AppMode,
-    lightStartPosition: new Vector3(10, 20, 0),
-    shadowStartPosition: new Vector3(200, 20, 0),
+    lightStartPosition: new Vector3(0, 0, 0),
+    shadowStartPosition: new Vector3(0, 0, 0),
     isValidatingProcess: false,
     isNotFound: false,
     isShortcutVisible: false,
@@ -225,10 +228,29 @@ export function reducer(
                 historyIndex,
             };
         case ActionType.UPDATE_START_POSITION:
+            const nextStartPosition = {
+                lightStartPosition: state.lightStartPosition.clone(),
+                shadowStartPosition: state.shadowStartPosition.clone(),
+            };
+            nextStartPosition[`${action.payload.side}StartPosition`] =
+                action.payload.position;
+            const playersScene = [
+                nextStartPosition.shadowStartPosition.clone(),
+                nextStartPosition.lightStartPosition.clone(),
+            ];
+            playersScene.forEach((player) => {
+                player.multiplyScalar(gridSize);
+                if (player.y < 20) {
+                    player.y = 20;
+                }
+            });
+            state.app!.setPlayersPosition({
+                shadow: playersScene[0],
+                light: playersScene[1],
+            });
             return {
                 ...state,
-                [`${action.payload.side}StartPosition`]:
-                    action.payload.position,
+                ...nextStartPosition,
             };
         case ActionType.TOGGLE_SHORTCUT:
             return {
@@ -521,6 +543,22 @@ export function reducer(
                 action.payload.data,
             );
             loadElementsToLevel(state.app!, elementList);
+            // load players position
+            const players = [
+                new Vector3().fromArray(action.payload.shadowStartPosition),
+                new Vector3().fromArray(action.payload.lightStartPosition),
+            ];
+
+            players.forEach((player) => {
+                player.multiplyScalar(gridSize);
+                if (player.y < 20) {
+                    player.y = 20;
+                }
+            });
+            state.app!.setPlayersPosition({
+                shadow: players[0],
+                light: players[1],
+            });
             const history = (() => {
                 // first load
                 if (!state.isInitialLoadDone) {
@@ -538,6 +576,12 @@ export function reducer(
                 levelStatus: action.payload.status,
                 currentEditingIndex: undefined,
                 isInitialLoadDone: true,
+                lightStartPosition: new Vector3().fromArray(
+                    action.payload.lightStartPosition,
+                ),
+                shadowStartPosition: new Vector3().fromArray(
+                    action.payload.shadowStartPosition,
+                ),
             };
         default:
             throw new Error();

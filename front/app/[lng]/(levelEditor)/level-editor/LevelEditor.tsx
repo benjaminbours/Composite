@@ -157,7 +157,6 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                                 <SwitchAccountIcon fontSize="small" />
                             </Button>
                             <Button
-                                disabled={state.appMode === AppMode.EDITOR}
                                 onClick={wrapperBlurEvent(resetPlayersPosition)}
                                 title="Reset players position"
                             >

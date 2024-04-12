@@ -42,20 +42,20 @@ export const PlayersPanel: React.FC<Props> = ({
             className="panel scene-content-panel level-editor__accordion"
         >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <h3>Players</h3>
+                <h3>Players start</h3>
             </AccordionSummary>
             <AccordionDetails>
                 <label htmlFor="">Light</label>
                 <Vec3Row
                     step={0.1}
-                    minY={20}
+                    minY={0}
                     onChange={onChange('light')}
                     value={lightStartPosition}
                 />
                 <label htmlFor="">Shadow</label>
                 <Vec3Row
                     step={0.1}
-                    minY={20}
+                    minY={0}
                     onChange={onChange('shadow')}
                     value={shadowStartPosition}
                 />
