@@ -123,12 +123,32 @@
 }
 
 .scene-content-panel {
+    padding: 0;
     order: 2;
+    max-height: none;
+}
+
+.scene-content-panel__accordion {
+    .MuiAccordionSummary-root.Mui-expanded {
+        min-height: 48px;
+        height: 48px;
+    }
+
+    .MuiAccordionSummary-content {
+        margin: 5px 0 !important;
+    }
 }
 
 .scene-content-panel__header {
     display: flex;
     justify-content: space-between;
+}
+
+.scene-content-panel__content {
+    ul {
+        max-height: 400px;
+        overflow-y: auto;
+    }
 }
 
 .scene-content-panel__item {

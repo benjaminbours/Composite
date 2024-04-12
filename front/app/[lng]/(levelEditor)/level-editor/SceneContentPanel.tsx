@@ -1,13 +1,15 @@
 // vendors
 import React, { useMemo } from 'react';
-import Paper from '@mui/material/Paper';
 import List from '@mui/material/List';
 import SquareIcon from '@mui/icons-material/Square';
 import AddIcon from '@mui/icons-material/Add';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 // our libs
 import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 // project
-import { Divider } from '@mui/material';
 import { SceneItem } from './SceneItem';
 import { DropDownMenu } from './DropDownMenu';
 
@@ -73,34 +75,42 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
             ];
         }, [onAddElement]);
         return (
-            <Paper className="panel scene-content-panel">
-                <div className="scene-content-panel__header">
+            <Accordion
+                elevation={1}
+                className="panel scene-content-panel scene-content-panel__accordion"
+            >
+                <AccordionSummary className='scene-content-panel__accordion-summary' expandIcon={<ExpandMoreIcon />}>
                     <h3>Scene</h3>
-                    <DropDownMenu
-                        buttonText="Add"
-                        items={libraryItems}
-                        icon={<AddIcon />}
-                        disabled={disabled}
-                    />
-                </div>
-                <Divider className="scene-content-panel__divider" />
-                <List>
-                    {elements.map((element, index) => (
-                        <SceneItem
-                            key={index}
-                            {...element}
-                            index={index}
-                            isSelected={index === currentEditingIndex}
-                            onDelete={onElementDelete}
-                            onChangeName={onChangeName}
-                            onClick={onElementClick}
-                            onLock={onElementLock}
+                </AccordionSummary>
+                <AccordionDetails>
+                    <div className="scene-content-panel__content">
+                        <DropDownMenu
+                            buttonText="Add"
+                            items={libraryItems}
+                            icon={<AddIcon />}
                             disabled={disabled}
-                            cantDelete={element.type === ElementType.END_LEVEL}
                         />
-                    ))}
-                </List>
-            </Paper>
+                        <List>
+                            {elements.map((element, index) => (
+                                <SceneItem
+                                    key={index}
+                                    {...element}
+                                    index={index}
+                                    isSelected={index === currentEditingIndex}
+                                    onDelete={onElementDelete}
+                                    onChangeName={onChangeName}
+                                    onClick={onElementClick}
+                                    onLock={onElementLock}
+                                    disabled={disabled}
+                                    cantDelete={
+                                        element.type === ElementType.END_LEVEL
+                                    }
+                                />
+                            ))}
+                        </List>
+                    </div>
+                </AccordionDetails>
+            </Accordion>
         );
     },
 );
