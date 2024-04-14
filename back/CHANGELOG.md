@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- Some performance optimization. Fix issue with camera focus and door opener.
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.5
+
 ## 1.0.0-next.4
 
 ### Patch Changes

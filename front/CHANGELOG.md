@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- Some performance optimization. Fix issue with camera focus and door opener.
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.5
+  - @benjaminbours/composite-core@1.0.0-next.5
+
 ## 1.0.0-next.5
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "composite-back",
-  "version": "1.0.0-next.4",
+  "version": "1.0.0-next.5",
   "description": "",
   "author": "",
   "private": true,
@@ -25,7 +25,7 @@
     "prisma:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
-    "@benjaminbours/composite-core": "^1.0.0-next.4",
+    "@benjaminbours/composite-core": "^1.0.0-next.5",
     "@injectit/threejs-nodejs-exporters": "^0.0.2",
     "@nestjs/cache-manager": "^2.2.1",
     "@nestjs/common": "^10.3.3",
