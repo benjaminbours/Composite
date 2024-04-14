@@ -291,11 +291,7 @@ export default class App {
     public setAppMode = (mode: AppMode) => {
         this.mode = mode;
         if (this.mode === AppMode.GAME) {
-            this.physicSimulation.previousElapsedTime =
-                this.physicSimulation.clock.elapsedTime;
-            this.physicSimulation.clock.start();
-            this.physicSimulation.clock.elapsedTime =
-                this.physicSimulation.previousElapsedTime;
+            this.physicSimulation.start();
             this.rendererManager.addPlayerInsideComposer();
             this.inputsManager.registerEventListeners();
             if (this.controls) {
@@ -309,7 +305,7 @@ export default class App {
                 addToCollidingElements(child, this.collidingElements);
             }
         } else {
-            this.physicSimulation.clock.stop();
+            this.physicSimulation.stop();
             this.rendererManager.removePlayerInsideComposer();
             this.inputsManager.destroyEventListeners();
             // reset colliding elements
@@ -465,8 +461,10 @@ export default class App {
             isInputReleased
         ) {
             // then collect it
-            this.gameStateManager.inputsHistory.push(payload);
-            this.gameStateManager.collectInput(payload);
+            if (this.gameStateManager.gameTimeIsSynchronized) {
+                this.gameStateManager.inputsHistory.push(payload);
+                this.gameStateManager.collectInput(payload);
+            }
         }
     };
 
@@ -503,7 +501,9 @@ export default class App {
             this.secondPlayerSide,
             inputs,
         );
-        this.gameStateManager.inputsHistory.push(payload);
+        if (this.gameStateManager.gameTimeIsSynchronized) {
+            this.gameStateManager.inputsHistory.push(payload);
+        }
         this.lastOtherPlayerInput = payload;
     };
 

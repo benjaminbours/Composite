@@ -24,8 +24,8 @@ export class GameStateManager {
         shouldUpdate: false,
     };
     private shouldReconciliateState = false;
-    private gameTimeIsSynchronized = false;
-    private inputBuffer: GamePlayerInputPayload[] = [];
+    public gameTimeIsSynchronized = false;
+    public inputBuffer: GamePlayerInputPayload[] = [];
 
     /**
      * It's in fact the prediction state
@@ -73,7 +73,7 @@ export class GameStateManager {
         }
     };
 
-    // Method for collecting player inputs
+    // Method for collecting main player inputs
     public collectInput = (input: GamePlayerInputPayload) => {
         this.inputBuffer.push(input);
     };

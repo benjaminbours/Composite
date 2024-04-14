@@ -30,4 +30,14 @@ export class PhysicSimulation {
             this.total_loops++;
         }
     };
+
+    public start = () => {
+        this.previousElapsedTime = this.clock.elapsedTime;
+        this.clock.start();
+        this.clock.elapsedTime = this.previousElapsedTime;
+    };
+
+    public stop = () => {
+        this.clock.stop();
+    };
 }
