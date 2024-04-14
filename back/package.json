@@ -21,7 +21,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "generate-swagger:local": "env-cmd -f .env.local ts-node -r tsconfig-paths/register ./src/scripts/generateSwaggerSpec.ts",
-    "prisma:migrate:reset:local": "env-cmd -f .env.local prisma migrate reset"
+    "prisma:migrate:reset:local": "env-cmd -f .env.local prisma migrate reset",
+    "prisma:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@benjaminbours/composite-core": "^1.0.0-next.4",

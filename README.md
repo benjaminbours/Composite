@@ -27,3 +27,5 @@ If you'd like to help build Composite, check out the [Contributor's Guide](https
 Example of command to create new backend migration
 
 `npx env-cmd -f .env.local npx prisma migrate dev --name init`
+
+TODO: In dev mode, you have to go inside the container to regenerate the prisma client inside as well. It's not a good workflow

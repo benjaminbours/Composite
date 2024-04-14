@@ -645,11 +645,14 @@ export default class App {
                 }
             }
 
-            const withFocusCamera =
-                activators.includes(this.mainPlayerSide) &&
-                this.mode === AppMode.GAME &&
-                this.inputsManager.inputsActive.interact;
-            doorOpener?.update(this.delta, this.camera, withFocusCamera);
+            doorOpener?.update(this.delta, this.camera);
+            if (doorOpener?.isActive) {
+                const shouldFocus =
+                    activators.includes(this.mainPlayerSide) &&
+                    this.mode === AppMode.GAME &&
+                    this.inputsManager.inputsActive.interact;
+                doorOpener.focusCamera(this.camera, shouldFocus);
+            }
         }
 
         for (let i = 0; i < this.level.bounces.length; i++) {

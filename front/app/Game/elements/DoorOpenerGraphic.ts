@@ -118,14 +118,13 @@ export class DoorOpenerGraphic
 
     // TODO: Think about using a door opening system to manage this logic
     // I don't like the fact its the element door opener who set the camera target
-    public update = (
-        delta: number,
-        camera: CustomCamera,
-        withFocusCamera: boolean,
-    ) => {
-        this.detectActivation(this.activate(), this.deactivate());
+    public update = (delta: number, camera: CustomCamera) => {
+        this.detectActivation(this.activate, this.deactivate(camera));
         this.updateShader(delta);
-        if (withFocusCamera) {
+    };
+
+    public focusCamera = (camera: CustomCamera, shouldFocus: boolean) => {
+        if (shouldFocus) {
             if (!this.doorInfo) {
                 console.log('no door info');
                 return;
@@ -188,12 +187,13 @@ export class DoorOpenerGraphic
         });
     };
 
-    activate = () => () => {
+    activate = () => {
         this.activateVFX();
         this.openTheDoor();
     };
 
-    deactivate = () => () => {
+    deactivate = (camera: CustomCamera) => () => {
+        camera.unfocus();
         this.deactivateVFX();
         this.closeTheDoor();
     };
