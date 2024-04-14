@@ -10,6 +10,15 @@ import {
 } from '@benjaminbours/composite-core';
 import App from '../../../Game/App';
 
+function removeFromMouseSelectableObjects(app: App, mesh: Object3D) {
+    const mouseSelectableObjectsIndex =
+        app.mouseSelectableObjects.indexOf(mesh);
+
+    if (mouseSelectableObjectsIndex !== -1) {
+        app.mouseSelectableObjects.splice(mouseSelectableObjectsIndex, 1);
+    }
+}
+
 export function removeMeshFromLevel(
     app: App,
     mesh: Object3D,
@@ -18,18 +27,28 @@ export function removeMeshFromLevel(
     if (mesh.id === app.controlledMesh?.id) {
         app.detachTransformControls();
     }
-    if (type === ElementType.WALL_DOOR) {
-        const id = mesh.name.split('_')[0];
-        delete app.gameStateManager.currentState.level.doors[id];
-    }
-    if (type === ElementType.BOUNCE) {
-        const bounce = mesh.children[0] as ElementToBounce;
-        const index = app.level.bounces.findIndex((el) => el === mesh);
-        app.level.bounces.splice(index, 1);
-        delete app.gameStateManager.currentState.level.bounces[bounce.bounceID];
-        if (bounce.side === Side.LIGHT) {
-            app.rendererManager.removeLightBounceComposer(bounce);
-        }
+
+    switch (type) {
+        case ElementType.WALL_DOOR:
+            const id = mesh.name.split('_')[0];
+            delete app.gameStateManager.currentState.level.doors[id];
+            removeFromMouseSelectableObjects(app, mesh);
+            break;
+        case ElementType.BOUNCE:
+            const bounce = mesh.children[0] as ElementToBounce;
+            const index = app.level.bounces.findIndex((el) => el === mesh);
+            app.level.bounces.splice(index, 1);
+            delete app.gameStateManager.currentState.level.bounces[
+                bounce.bounceID
+            ];
+            removeFromMouseSelectableObjects(app, bounce);
+            if (bounce.side === Side.LIGHT) {
+                app.rendererManager.removeLightBounceComposer(bounce);
+            }
+            break;
+        default:
+            removeFromMouseSelectableObjects(app, mesh);
+            break;
     }
     app.level.remove(mesh);
 }

@@ -535,6 +535,8 @@ export function reducer(
                 const bounce = state.app!.rendererManager.lightBounces[i];
                 state.app!.rendererManager.removeLightBounceComposer(bounce);
             }
+
+            state.app!.mouseSelectableObjects = [];
             state.app!.level.bounces = [];
             state.app!.gameStateManager.currentState.level.doors = {};
             state.app!.gameStateManager.currentState.level.bounces = {};
@@ -592,6 +594,7 @@ function buildWorldContext(app: App): WorldContext {
     return {
         levelState: app.gameStateManager.currentState.level,
         bounceList: app.level.bounces,
+        mouseSelectableObjects: app.mouseSelectableObjects,
         clientGraphicHelpers: {
             addBounceGraphic,
             addDoorOpenerGraphic,

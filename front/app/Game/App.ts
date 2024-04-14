@@ -108,6 +108,7 @@ export default class App {
 
     public mode: AppMode;
     public onLevelEditorValidation: (() => void) | undefined = undefined;
+    public mouseSelectableObjects: Object3D[] = [];
     public mousePosition = new Vector2();
     private mouseRaycaster = new Raycaster();
     public mouseSelectedObject?: Object3D;
@@ -122,6 +123,8 @@ export default class App {
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
     ) {
+        (this.mouseRaycaster as any).firstHitOnly = true;
+
         this.mode = initialMode;
         this.mainPlayerSide = playersConfig[0];
         this.secondPlayerSide = playersConfig[1];
@@ -507,26 +510,15 @@ export default class App {
     private updateMouseIntersection = () => {
         // Update the picking ray with the camera and mouse position
         this.mouseRaycaster.setFromCamera(this.mousePosition, this.camera);
-
         // Calculate objects intersecting the picking ray
         const intersects = this.mouseRaycaster.intersectObjects(
-            this.scene.children,
+            this.mouseSelectableObjects,
         );
-
         // If there's an intersection
         if (intersects.length > 0) {
-            // console.log('Selected object', intersects[0].object);
-            const notEditable = [
-                'floor',
-                'sky-box',
-                'mountain',
-                'collision-area',
-            ];
-            if (notEditable.includes(intersects[0].object.name)) {
-                this.mouseSelectedObject = undefined;
-            } else {
-                this.mouseSelectedObject = intersects[0].object;
-            }
+            this.mouseSelectedObject = intersects[0].object;
+        } else {
+            this.mouseSelectedObject = undefined;
         }
     };
 

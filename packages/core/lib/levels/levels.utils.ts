@@ -582,11 +582,17 @@ export interface ClientGraphicHelpers {
 export interface WorldContext {
     levelState: LevelState;
     bounceList: Object3D[];
+    mouseSelectableObjects?: Object3D[];
     clientGraphicHelpers?: ClientGraphicHelpers;
 }
 
 export function createElement(
-    { levelState, bounceList, clientGraphicHelpers }: WorldContext,
+    {
+        levelState,
+        bounceList,
+        mouseSelectableObjects,
+        clientGraphicHelpers,
+    }: WorldContext,
     type: ElementType,
     properties?: ElementProperties,
 ): {
@@ -603,6 +609,7 @@ export function createElement(
             if (clientGraphicHelpers) {
                 clientGraphicHelpers.addDoorOpenerGraphic(group, props.door_id);
             }
+            mouseSelectableObjects?.push(group);
             return {
                 mesh: group,
                 properties: props,
@@ -619,6 +626,7 @@ export function createElement(
                 id: props.id,
             });
             levelState.doors[props.id] = [];
+            mouseSelectableObjects?.push(wallDoorGroup);
             return {
                 mesh: wallDoorGroup,
                 properties: props,
@@ -629,6 +637,7 @@ export function createElement(
                 new ColumnFatProperties();
             const column = createColumnGroup(props.size.y, 'big');
             positionOnGrid(column, props.transform.position.clone());
+            mouseSelectableObjects?.push(column);
             return {
                 mesh: column,
                 properties: props,
@@ -643,17 +652,20 @@ export function createElement(
                 clientGraphicHelpers.addEndLevelGraphic(endLevelGroup);
             }
             positionOnGrid(endLevelGroup, props.transform.position.clone());
+            mouseSelectableObjects?.push(endLevelGroup);
             return {
                 mesh: endLevelGroup,
                 properties: props,
             };
         case ElementType.ARCH:
             props = (properties as ArchProperties) || new ArchProperties();
+            const archGroup = createArchGroup({
+                size: props.size.clone(),
+                position: props.transform.position.clone(),
+            });
+            mouseSelectableObjects?.push(archGroup);
             return {
-                mesh: createArchGroup({
-                    size: props.size.clone(),
-                    position: props.transform.position.clone(),
-                }),
+                mesh: archGroup,
                 properties: props,
             };
         case ElementType.BOUNCE:
@@ -672,6 +684,7 @@ export function createElement(
                 rotationY: props.transform.rotation.y,
             };
             bounceList.push(bounceGroup);
+            mouseSelectableObjects?.push(bounceGroup.children[0]);
             if (clientGraphicHelpers) {
                 clientGraphicHelpers.addBounceGraphic(
                     bounceGroup,
@@ -686,12 +699,14 @@ export function createElement(
         case ElementType.WALL:
         default:
             props = (properties as WallProperties) || new WallProperties();
+            const wallGroup = createWall({
+                size: props.size.clone(),
+                position: props.transform.position.clone(),
+                rotation: props.transform.rotation.clone(),
+            });
+            mouseSelectableObjects?.push(wallGroup);
             return {
-                mesh: createWall({
-                    size: props.size.clone(),
-                    position: props.transform.position.clone(),
-                    rotation: props.transform.rotation.clone(),
-                }),
+                mesh: wallGroup,
                 properties: props,
             };
     }
