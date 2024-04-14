@@ -254,42 +254,51 @@ export class GameStateManager {
     };
 
     public onAverageRttReceived = (serverTime: number, rtt: number) => {
+        // Calculate one-way latency
+        let oneWayLatency = Math.floor(rtt / 2);
+
+        // Set gameTimeDelta based on one-way latency
+        this.gameTimeDelta = oneWayLatency;
+
+        // Set bufferHistorySize based on gameTimeDelta
+        // This could be adjusted based on the specific needs of your game
+        this.bufferHistorySize = this.gameTimeDelta * 2;
+
         // this.gameDelta = Math.floor(rtt / 2);
         // this.gameDelta = delta;
         this.gameTimeIsSynchronized = true;
         // this.bufferHistorySize = this.gameDelta;
-        console.log('average RTT', rtt);
-
         // one trip time
 
-        let sendInputsInterval;
-        if (rtt <= 15) {
-            this.gameTimeDelta = 15;
-            this.bufferHistorySize = 15;
-            sendInputsInterval = 20;
-        } else if (rtt <= 30) {
-            this.gameTimeDelta = rtt;
-            this.bufferHistorySize = 15;
-            sendInputsInterval = 20;
-        } else if (rtt <= 50) {
-            this.gameTimeDelta = Math.floor(rtt / 1.5);
-            this.bufferHistorySize = 25;
-            sendInputsInterval = 30;
-        } else if (rtt <= 100) {
-            this.gameTimeDelta = Math.floor(rtt / 2);
-            this.bufferHistorySize = 25;
-            sendInputsInterval = 50;
-        } else if (rtt <= 200) {
-            this.gameTimeDelta = Math.floor(rtt / 3);
-            this.bufferHistorySize = 50;
-            sendInputsInterval = 100;
-        } else if (rtt <= 1000) {
-            this.gameTimeDelta = Math.floor(rtt / 10);
-            this.bufferHistorySize = 50;
-            sendInputsInterval = 100;
-        }
-        console.log('game time delta', this.gameTimeDelta);
-        console.log('send inputs interval', sendInputsInterval);
+        let sendInputsInterval = 20;
+        // if (rtt <= 15) {
+        //     this.gameTimeDelta = 15;
+        //     this.bufferHistorySize = 15;
+        //     sendInputsInterval = 20;
+        // } else if (rtt <= 30) {
+        //     this.gameTimeDelta = rtt;
+        //     this.bufferHistorySize = 15;
+        //     sendInputsInterval = 20;
+        // } else if (rtt <= 50) {
+        //     this.gameTimeDelta = Math.floor(rtt / 1.5);
+        //     this.bufferHistorySize = 25;
+        //     sendInputsInterval = 30;
+        // } else if (rtt <= 100) {
+        //     this.gameTimeDelta = Math.floor(rtt / 2);
+        //     this.bufferHistorySize = 25;
+        //     sendInputsInterval = 50;
+        // } else if (rtt <= 200) {
+        //     this.gameTimeDelta = Math.floor(rtt / 3);
+        //     this.bufferHistorySize = 50;
+        //     sendInputsInterval = 100;
+        // } else if (rtt <= 1000) {
+        //     this.gameTimeDelta = Math.floor(rtt / 10);
+        //     this.bufferHistorySize = 50;
+        //     sendInputsInterval = 100;
+        // }
+        console.log('average RTT', rtt);
+        console.log('one way latency', oneWayLatency);
+        // console.log('send inputs interval', sendInputsInterval);
         console.log('buffer history size', this.bufferHistorySize);
         this.currentState.game_time = serverTime + this.gameTimeDelta;
 
@@ -311,29 +320,32 @@ export class GameStateManager {
             return;
         }
 
+        // console.log('prediction history size', this.predictionHistory.length);
+        // console.log('buffer history size', this.bufferHistorySize);
+
         // const ratio = this.gameDelta - Math.floor(this.gameDelta * 0.75);
-        if (this.predictionHistory.length >= this.bufferHistorySize) {
-            // const statesToInterpolate = this.predictionHistory.slice(-offset);
-            const interpolatedState = this.interpolateGameState(
-                // statesToInterpolate,
-                this.predictionHistory,
-                this.interpolation.ratio,
-            );
+        // if (this.predictionHistory.length >= this.bufferHistorySize) {
+        // const statesToInterpolate = this.predictionHistory.slice(-offset);
+        const interpolatedState = this.interpolateGameState(
+            // statesToInterpolate,
+            this.predictionHistory,
+            this.interpolation.ratio,
+        );
 
-            // Update the ratio for the next frame
-            this.interpolation.ratio += this.interpolation.increment;
+        // Update the ratio for the next frame
+        this.interpolation.ratio += this.interpolation.increment;
 
-            // If the ratio exceeds 1, we've reached the next state
-            if (this.interpolation.ratio >= 1) {
-                // // Remove the previous state from the buffer
-                this.predictionHistory.shift();
+        // If the ratio exceeds 1, we've reached the next state
+        if (this.interpolation.ratio >= 1) {
+            // // Remove the previous state from the buffer
+            this.predictionHistory.shift();
 
-                // Reset the ratio
-                this.interpolation.ratio = 0;
-            }
-
-            // Update the display state to the interpolated state
-            this.displayState = interpolatedState;
+            // Reset the ratio
+            this.interpolation.ratio = 0;
         }
+
+        // Update the display state to the interpolated state
+        this.displayState = interpolatedState;
+        // }
     };
 }
