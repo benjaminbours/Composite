@@ -1,4 +1,12 @@
-import { Vector3, Raycaster, Intersection, Object3D, Vec2, Box3 } from 'three';
+import {
+    Vector3,
+    Raycaster,
+    Intersection,
+    Object3D,
+    Vec2,
+    Box3,
+    type Object3DEventMap,
+} from 'three';
 
 export interface INearestObjects {
     right?: Intersection;
@@ -22,8 +30,14 @@ const RAYS = {
     // topLeft: new Vector3(-1, 1, 0),
 };
 
+const playerBBox = new Box3();
+const obstacleBox = new Box3();
+const positionVec = new Vector3();
+const filterCollisionSize = new Vector3(100, 100, 0);
 const RAYCASTER = new Raycaster();
 RAYCASTER.firstHitOnly = true;
+let obstaclesToConsider: Object3D[] = [];
+let intersectObjects: Intersection<Object3D<Object3DEventMap>>[] = [];
 
 export function getNearestObjects(
     position: Vec2,
@@ -31,26 +45,32 @@ export function getNearestObjects(
 ): INearestObjects {
     const nearestObjects: INearestObjects = {};
 
-    // TODO: Can be optimize by filtering at a higher level.
-    // like this, it is filtered once for each player
-    const obstaclesToConsider = obstacles.filter((obstacle) => {
-        const playerBBox = new Box3().setFromCenterAndSize(
-            new Vector3(position.x, position.y, 0),
-            new Vector3(100, 100, 0),
-        );
-        const obstacleBox = new Box3().setFromObject(obstacle);
-        return playerBBox.intersectsBox(obstacleBox);
-    });
+    positionVec.set(position.x, position.y, 0);
+    playerBBox.setFromCenterAndSize(positionVec, filterCollisionSize);
+
+    obstaclesToConsider = [];
+
+    for (let i = 0; i < obstacles.length; i++) {
+        const obstacle = obstacles[i];
+        obstacleBox.setFromObject(obstacle);
+        if (playerBBox.intersectsBox(obstacleBox)) {
+            obstaclesToConsider.push(obstacle);
+        }
+    }
 
     const directions = Object.keys(RAYS) as (keyof typeof RAYS)[];
     for (let i = 0; i < directions.length; i++) {
         const direction = directions[i];
 
         const ray = RAYS[direction];
-        RAYCASTER.set(new Vector3(position.x, position.y, 0), ray);
+        RAYCASTER.set(positionVec, ray);
 
-        const intersectObjects =
-            RAYCASTER.intersectObjects(obstaclesToConsider);
+        intersectObjects = [];
+        RAYCASTER.intersectObjects(
+            obstaclesToConsider,
+            undefined,
+            intersectObjects,
+        );
 
         if (!intersectObjects.length) {
             continue;
