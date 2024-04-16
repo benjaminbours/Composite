@@ -60,38 +60,30 @@ export function connectDoors(elements: LevelElement[]) {
         });
 }
 
-export function addDoorOpenerGraphic(
-    group: Object3D,
-    door_id: number | undefined,
-) {
-    const doorOpener = new DoorOpenerGraphic(
-        ElementName.DOOR_OPENER(String(door_id)),
-    );
-    group.add(doorOpener);
+export function createDoorOpenerGraphic(door_id: number | undefined) {
+    return new DoorOpenerGraphic(ElementName.DOOR_OPENER(String(door_id)));
 }
 
-export function addEndLevelGraphic(group: Object3D) {
-    group.add(new EndLevel());
+export function createEndLevelGraphic() {
+    return new EndLevel();
 }
 
-export function addBounceGraphic(
-    group: Object3D,
+export function createBounceGraphic(
+    bounce: ElementToBounce,
     props: BounceProperties,
-    addLightBounceComposer?: (bounce: ElementToBounce) => void,
 ) {
-    group.add(new SkinBounce(group.children[0] as ElementToBounce));
+    const skinBounce = new SkinBounce(bounce);
+    let graphicSkin;
 
     if (props.side === Side.LIGHT) {
-        if (addLightBounceComposer) {
-            addLightBounceComposer(group.children[0] as ElementToBounce);
-        }
-        // initialization of the skin is done with postprocessing, it is spread around the App class, at the root of the game rendering
         if (props.interactive) {
-            group.add(new Pulse(group.children[0] as ElementToBounce));
+            graphicSkin = new Pulse(bounce);
         }
     }
 
     if (props.side === Side.SHADOW) {
-        group.add(new SkinBounceShadow(group.children[0] as ElementToBounce));
+        graphicSkin = new SkinBounceShadow(bounce);
     }
+
+    return { skinBounce, graphicSkin };
 }

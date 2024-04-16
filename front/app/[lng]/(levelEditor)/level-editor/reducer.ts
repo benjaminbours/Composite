@@ -18,9 +18,9 @@ import {
 import App, { AppMode } from '../../../Game/App';
 import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
 import {
-    addBounceGraphic,
-    addDoorOpenerGraphic,
-    addEndLevelGraphic,
+    createBounceGraphic,
+    createDoorOpenerGraphic,
+    createEndLevelGraphic,
     computeDoorInfo,
     connectDoors,
 } from '../../../Game/elements/graphic.utils';
@@ -537,6 +537,7 @@ export function reducer(
             }
 
             state.app!.mouseSelectableObjects = [];
+            state.app!.updatableElements = [];
             state.app!.level.bounces = [];
             state.app!.gameStateManager.currentState.level.doors = {};
             state.app!.gameStateManager.currentState.level.bounces = {};
@@ -594,11 +595,12 @@ function buildWorldContext(app: App): WorldContext {
     return {
         levelState: app.gameStateManager.currentState.level,
         bounceList: app.level.bounces,
-        mouseSelectableObjects: app.mouseSelectableObjects,
         clientGraphicHelpers: {
-            addBounceGraphic,
-            addDoorOpenerGraphic,
-            addEndLevelGraphic,
+            updatableElements: app.updatableElements,
+            mouseSelectableObjects: app.mouseSelectableObjects,
+            createBounceGraphic,
+            createDoorOpenerGraphic,
+            createEndLevelGraphic,
             connectDoors,
             addLightBounceComposer: app.rendererManager.addLightBounceComposer,
         },

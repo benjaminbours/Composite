@@ -16,7 +16,6 @@ export interface LevelStartPosition {
 
 export class LevelMapping extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
-    public interactiveElements: any[] = [];
     public bounces: ElementToBounce[] = [];
     public lightBounces: ElementToBounce[] = [];
 

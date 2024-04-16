@@ -56,9 +56,9 @@ import { RendererManager } from './RendererManager';
 import CustomCamera from './CustomCamera';
 import { GameStateManager } from './GameStateManager';
 import {
-    addBounceGraphic,
-    addDoorOpenerGraphic,
-    addEndLevelGraphic,
+    createBounceGraphic,
+    createDoorOpenerGraphic,
+    createEndLevelGraphic,
     connectDoors,
 } from './elements/graphic.utils';
 import { PartialLevel } from '../types';
@@ -87,6 +87,7 @@ export default class App {
 
     private physicSimulation: PhysicSimulation;
 
+    public updatableElements: Object3D[] = [];
     public collidingElements: Object3D<Object3DEventMap>[] = [];
 
     private playerHelper?: Box3;
@@ -151,11 +152,13 @@ export default class App {
 
         // levels
         const clientGraphicHelpers: ClientGraphicHelpers = {
-            addBounceGraphic,
-            addDoorOpenerGraphic,
-            addEndLevelGraphic,
+            createBounceGraphic,
+            createDoorOpenerGraphic,
+            createEndLevelGraphic,
             connectDoors,
             addLightBounceComposer: this.rendererManager.addLightBounceComposer,
+            updatableElements: this.updatableElements,
+            mouseSelectableObjects: this.mouseSelectableObjects,
         };
 
         this.level = new LevelMapping(
@@ -426,22 +429,6 @@ export default class App {
         }
     };
 
-    public updateChildren = (object: Object3D) => {
-        for (let i = 0; i < object.children.length; i++) {
-            const item = object.children[i] as any;
-            if (item.update) {
-                if (item instanceof Player || item instanceof ElementToBounce) {
-                    // do nothing
-                } else {
-                    item.update(this.delta);
-                }
-            }
-            if (item.children?.length) {
-                this.updateChildren(item);
-            }
-        }
-    };
-
     private lastInput: GamePlayerInputPayload | undefined;
     // TODO: disgusting, find alternative
     private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
@@ -704,7 +691,12 @@ export default class App {
     };
 
     public updateWorldGraphics = (state: GameState) => {
-        this.updateChildren(this.scene);
+        for (let i = 0; i < this.updatableElements.length; i++) {
+            const element: any = this.updatableElements[i];
+            if (element.update) {
+                element.update(this.delta);
+            }
+        }
         // update the floor to follow the player to be infinite
         if (this.players[this.mainPlayerSide] && this.mode === AppMode.GAME) {
             this.floor.position.set(

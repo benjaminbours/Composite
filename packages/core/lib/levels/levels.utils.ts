@@ -547,34 +547,26 @@ function parseProperties(props: any) {
 }
 
 export interface ClientGraphicHelpers {
-    addEndLevelGraphic: (group: Object3D) => void;
-    addBounceGraphic: (
-        group: Object3D,
+    createEndLevelGraphic: () => Object3D;
+    createBounceGraphic: (
+        bounce: ElementToBounce,
         props: BounceProperties,
-        addLightBounceComposer?: (bounce: ElementToBounce) => void,
-    ) => void;
-    addDoorOpenerGraphic: (
-        group: Object3D,
-        door_id: number | undefined,
-    ) => void;
+    ) => { skinBounce: Object3D; graphicSkin: Object3D | undefined };
+    createDoorOpenerGraphic: (door_id: number | undefined) => Object3D;
     addLightBounceComposer?: (bounce: ElementToBounce) => void;
     connectDoors: (elements: LevelElement[]) => void;
+    mouseSelectableObjects: Object3D[];
+    updatableElements: Object3D[];
 }
 
 export interface WorldContext {
     levelState: LevelState;
     bounceList: Object3D[];
-    mouseSelectableObjects?: Object3D[];
     clientGraphicHelpers?: ClientGraphicHelpers;
 }
 
 export function createElement(
-    {
-        levelState,
-        bounceList,
-        mouseSelectableObjects,
-        clientGraphicHelpers,
-    }: WorldContext,
+    { levelState, bounceList, clientGraphicHelpers }: WorldContext,
     type: ElementType,
     properties?: ElementProperties,
 ): {
@@ -589,9 +581,12 @@ export function createElement(
                 new DoorOpenerProperties();
             const group = createDoorOpener(props);
             if (clientGraphicHelpers) {
-                clientGraphicHelpers.addDoorOpenerGraphic(group, props.door_id);
+                const doorOpener = clientGraphicHelpers.createDoorOpenerGraphic(
+                    props.door_id,
+                );
+                group.add(doorOpener);
+                clientGraphicHelpers.updatableElements.push(doorOpener);
             }
-            mouseSelectableObjects?.push(group);
             return {
                 mesh: group,
                 properties: props,
@@ -608,7 +603,7 @@ export function createElement(
                 id: props.id,
             });
             levelState.doors[props.id] = [];
-            mouseSelectableObjects?.push(wallDoorGroup);
+            clientGraphicHelpers?.mouseSelectableObjects.push(wallDoorGroup);
             return {
                 mesh: wallDoorGroup,
                 properties: props,
@@ -619,7 +614,7 @@ export function createElement(
                 new ColumnFatProperties();
             const column = createColumnGroup(props.size.y, 'big');
             positionOnGrid(column, props.transform.position.clone());
-            mouseSelectableObjects?.push(column);
+            clientGraphicHelpers?.mouseSelectableObjects.push(column);
             return {
                 mesh: column,
                 properties: props,
@@ -631,10 +626,13 @@ export function createElement(
             endLevelGroup.add(new InteractiveArea(ElementName.AREA_END_LEVEL));
             // graphic
             if (clientGraphicHelpers) {
-                clientGraphicHelpers.addEndLevelGraphic(endLevelGroup);
+                const endLevelGraphic =
+                    clientGraphicHelpers.createEndLevelGraphic();
+                endLevelGroup.add(endLevelGraphic);
+                clientGraphicHelpers.updatableElements.push(endLevelGraphic);
+                clientGraphicHelpers.mouseSelectableObjects.push(endLevelGroup);
             }
             positionOnGrid(endLevelGroup, props.transform.position.clone());
-            mouseSelectableObjects?.push(endLevelGroup);
             return {
                 mesh: endLevelGroup,
                 properties: props,
@@ -645,7 +643,7 @@ export function createElement(
                 size: props.size.clone(),
                 position: props.transform.position.clone(),
             });
-            mouseSelectableObjects?.push(archGroup);
+            clientGraphicHelpers?.mouseSelectableObjects.push(archGroup);
             return {
                 mesh: archGroup,
                 properties: props,
@@ -666,13 +664,33 @@ export function createElement(
                 rotationY: props.transform.rotation.y,
             };
             bounceList.push(bounceGroup);
-            mouseSelectableObjects?.push(bounceGroup.children[0]);
+            clientGraphicHelpers?.mouseSelectableObjects.push(
+                bounceGroup.children[0],
+            );
             if (clientGraphicHelpers) {
-                clientGraphicHelpers.addBounceGraphic(
-                    bounceGroup,
-                    props,
-                    clientGraphicHelpers?.addLightBounceComposer,
-                );
+                const { skinBounce, graphicSkin } =
+                    clientGraphicHelpers.createBounceGraphic(
+                        bounceGroup.children[0] as ElementToBounce,
+                        props,
+                    );
+                bounceGroup.add(skinBounce);
+                if (
+                    props.side === Side.LIGHT &&
+                    clientGraphicHelpers.addLightBounceComposer
+                ) {
+                    clientGraphicHelpers.addLightBounceComposer(
+                        bounceGroup.children[0] as ElementToBounce,
+                    );
+                }
+                if (graphicSkin) {
+                    bounceGroup.add(graphicSkin);
+
+                    if (props.interactive) {
+                        clientGraphicHelpers.updatableElements.push(
+                            graphicSkin,
+                        );
+                    }
+                }
             }
             return {
                 mesh: bounceGroup,
@@ -686,7 +704,7 @@ export function createElement(
                 position: props.transform.position.clone(),
                 rotation: props.transform.rotation.clone(),
             });
-            mouseSelectableObjects?.push(wallGroup);
+            clientGraphicHelpers?.mouseSelectableObjects.push(wallGroup);
             return {
                 mesh: wallGroup,
                 properties: props,

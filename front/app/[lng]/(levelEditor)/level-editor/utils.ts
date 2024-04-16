@@ -19,6 +19,14 @@ function removeFromMouseSelectableObjects(app: App, mesh: Object3D) {
     }
 }
 
+function removeFromUpdatableElements(app: App, mesh: Object3D) {
+    const updatableElementsIndex = app.updatableElements.indexOf(mesh);
+
+    if (updatableElementsIndex !== -1) {
+        app.updatableElements.splice(updatableElementsIndex, 1);
+    }
+}
+
 export function removeMeshFromLevel(
     app: App,
     mesh: Object3D,
@@ -34,14 +42,22 @@ export function removeMeshFromLevel(
             delete app.gameStateManager.currentState.level.doors[id];
             removeFromMouseSelectableObjects(app, mesh);
             break;
+        case ElementType.DOOR_OPENER:
+            removeFromUpdatableElements(app, mesh.children[1]);
+            removeFromMouseSelectableObjects(app, mesh);
+            break;
         case ElementType.BOUNCE:
             const bounce = mesh.children[0] as ElementToBounce;
+            const graphicSkin = mesh.children[2];
             const index = app.level.bounces.findIndex((el) => el === mesh);
             app.level.bounces.splice(index, 1);
             delete app.gameStateManager.currentState.level.bounces[
                 bounce.bounceID
             ];
             removeFromMouseSelectableObjects(app, bounce);
+            if (graphicSkin) {
+                removeFromUpdatableElements(app, graphicSkin);
+            }
             if (bounce.side === Side.LIGHT) {
                 app.rendererManager.removeLightBounceComposer(bounce);
             }
