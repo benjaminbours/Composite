@@ -12,24 +12,20 @@ uniform float uPowerRotationGlobal;
 uniform float uAngleGlobal;
 uniform vec3 shadowLastPosition;
 
-mat4 rotationMatrix(vec3 axis, float angle)
-{
+mat4 rotationMatrix(vec3 axis, float angle) {
     axis = normalize(axis);
     float s = sin(angle);
     float c = cos(angle);
     float oc = 1.0 - c;
-    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-                0.0,                                0.0,                                0.0,                                1.0);
+    return mat4(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, 0.0, oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0.0, oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c, 0.0, 0.0, 0.0, 0.0, 1.0);
 }
 
-void main(){
+void main() {
 
     const float PI = 3.1415926535897932384626433832795;
     float timeModifier = speed;
     float updateTime;
-    updateTime = (time+delay * 2.0) * 0.05;
+    updateTime = (time + delay * 2.0) * 0.05;
     updateTime = updateTime * timeModifier;
     float elapsedTime = updateTime;
 
@@ -45,27 +41,26 @@ void main(){
     float moduloY;
     float cosX;
 
-    if (selection > rangeSelection) {
+    if(selection > rangeSelection) {
 
         dPosition = position;
 
-        amplitudeY = 20.0 * (.5+delay) * 1.2;
-        moduloY = mod( (time + delay * 10.0 * speed) * 0.1 ,1.0);
+        amplitudeY = 20.0 * (.5 + delay) * 1.2;
+        moduloY = mod((time + delay * 10.0 * speed) * 0.1, 1.0);
         dPosition.y = amplitudeY * moduloY;
 
-        amplitudeYNormalized = dPosition.y / amplitudeY ;
+        amplitudeYNormalized = dPosition.y / amplitudeY;
         amplitudeX = 5.0 * (1.5 - amplitudeYNormalized * .5) * speed * 1.2;
 
         cosX = cos(time + PI * 10.0 * delay);
 
-         dPosition.x = amplitudeX * cosX;
+        dPosition.x = amplitudeX * cosX;
 
     } else {
         dPosition = position;
     }
 
-    vec3 axisRotationGlobal = vec3(1.0,1.0,1.0);
-
+    vec3 axisRotationGlobal = vec3(1.0, 1.0, 1.0);
 
     // rotation
     float powerRotation = 10.0;
@@ -77,7 +72,7 @@ void main(){
     mat4 rotationGlobal = rotationMatrix(axisRotation, angleRotationGlobal);
 
     vec4 lastPosition;
-    if (selection > rangeSelection) {
+    if(selection > rangeSelection) {
         lastPosition = vec4(dPosition, 1.0);
         lastPosition = lastPosition * rotationGlobal;
 
@@ -85,26 +80,20 @@ void main(){
         lastPosition = vec4(dPosition, 1.0) * rotation;
     }
 
-
-    vec4 objectPosition = modelMatrix * vec4(0.,0.,0., 1.0);
+    vec4 objectPosition = modelMatrix * vec4(0., 0., 0., 1.0);
 
     vec3 distance = objectPosition.xyz - shadowLastPosition;
 
-    lastPosition = vec4(lastPosition.xyz - distance * length(lastPosition/10.) , 1.0);
+    lastPosition = vec4(lastPosition.xyz - distance * length(lastPosition / 10.), 1.0);
 
-
-    // vec4 mvPosition = modelViewMatrix * vec4(dPosition, 1.0);
     vec4 mvPosition = modelViewMatrix * lastPosition;
-
-
-    if (selection > rangeSelection) {
-        gl_PointSize = size * (1.0 - moduloY);
-
-    } else {
-        gl_PointSize =  size * ( 300.0 / -mvPosition.z );
-
-    }
-
     gl_Position = projectionMatrix * mvPosition;
 
+    float depth = -mvPosition.z;
+    if(selection > rangeSelection) {
+        gl_PointSize = size * (1.0 - moduloY) * 600. / depth;
+
+    } else {
+        gl_PointSize = size * (300.0 / -mvPosition.z) * 600. / depth;
+    }
 }

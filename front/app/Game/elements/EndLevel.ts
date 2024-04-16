@@ -76,7 +76,8 @@ export class EndLevel extends Object3D {
             particlesDelay[i / 3] = getRange(0, 50);
             particlesSpeed[i / 3] = getRange(0.05, 0.5);
 
-            particlesSize[i / 3] = getRange(5.0, 10.0);
+            particlesSize[i / 3] =
+                getRange(5.0, 10.0) * 400 * window.devicePixelRatio;
             particlesAngleRotation[i / 3] = getRange(0, Math.PI * 2);
         }
 
