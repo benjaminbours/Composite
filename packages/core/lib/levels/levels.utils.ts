@@ -73,6 +73,7 @@ export const materials = {
     phong: new MeshPhongMaterial({
         color: 0xffffff,
         side: DoubleSide,
+        name: 'default-phong',
         // specular: 0x000000,
         // shininess: 0,
         // transparent: true,
@@ -80,21 +81,19 @@ export const materials = {
     occlusion: new MeshPhongMaterial({
         color: 0x000000,
         fog: false,
+        name: 'occlusion',
     }),
     skinBounceShadow: new MeshBasicMaterial({
         color: 0x000000,
         fog: false,
         side: DoubleSide,
-        // name: 'skin-bounce-shadow',
+        name: 'skin-bounce-shadow',
     }),
     skinBounceLight: new MeshBasicMaterial({
         color: 0xffffff,
         fog: false,
         side: DoubleSide,
-    }),
-    border: new MeshPhongMaterial({
-        color: 0xffffff,
-        side: DoubleSide,
+        name: 'skin-bounce-light',
     }),
 };
 

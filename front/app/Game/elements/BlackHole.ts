@@ -16,6 +16,7 @@ export class BlackHole extends Object3D {
         super();
 
         const geometry = new PlaneGeometry(300, 300);
+        // each instance should have his own material to isolate material animation
         this.material = new ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },
@@ -34,6 +35,7 @@ export class BlackHole extends Object3D {
             transparent: true,
             vertexShader: basicVS,
             fragmentShader: blackHoleFS,
+            name: 'black-hole-material',
         });
 
         const mesh = new Mesh(geometry, this.material);

@@ -62,6 +62,7 @@ import {
     connectDoors,
 } from './elements/graphic.utils';
 import { PartialLevel } from '../types';
+import { bounceShadowMaterialInteractive, pulseMaterial } from './materials';
 
 export enum AppMode {
     EDITOR = 'EDITOR',
@@ -712,6 +713,10 @@ export default class App {
                 0,
             );
         }
+
+        // shared materials
+        pulseMaterial.uniforms.time.value += this.delta;
+        bounceShadowMaterialInteractive.uniforms.time.value += this.delta;
 
         // sky
         const skyShaderMat = this.skyMesh.material as SkyShader;

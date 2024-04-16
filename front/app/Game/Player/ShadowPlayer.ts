@@ -5,16 +5,14 @@ import {
     ShaderMaterial,
     SphereGeometry,
     Points,
-    DoubleSide,
     Mesh,
-    MeshBasicMaterial,
 } from 'three';
 // our lib
 import { getRange } from '@benjaminbours/composite-core';
 // local
 import { Player } from './Player';
-import VS from '../glsl/playerShadow_vs.glsl';
-import FS from '../glsl/playerShadow_fs.glsl';
+
+import { playerMeshMaterial, playerShadowMaterial } from '../materials';
 
 export class ShadowPlayer extends Player {
     public mesh: Mesh;
@@ -82,31 +80,11 @@ export class ShadowPlayer extends Player {
             new BufferAttribute(shadowSelection, 1),
         );
 
-        const material = new ShaderMaterial({
-            uniforms: {
-                time: { value: 0.0 },
-                opacity: { value: 0.5 },
-                uPowerRotationGlobal: {
-                    value: getRange(0.0, 10.0),
-                },
-                uAngleGlobal: { value: getRange(1, Math.PI) },
-                shadowLastPosition: { value: new Vector3(0.5, 0.5, 0.5) },
-            },
-            vertexShader: VS,
-            fragmentShader: FS,
-            side: DoubleSide,
-            transparent: true,
-        });
-
+        const material = playerShadowMaterial;
         this.particles = new Points(geometry, material);
         this.add(this.particles);
 
-        // TODO: check if it can not be added to Player class to avoid duplication
-        const basicMaterial = new MeshBasicMaterial({
-            color: 0xffffff,
-            fog: false,
-        });
-        this.mesh = new Mesh(geometry, basicMaterial);
+        this.mesh = new Mesh(geometry, playerMeshMaterial);
         this.mesh.castShadow = false;
         this.mesh.receiveShadow = false;
         this.add(this.mesh);

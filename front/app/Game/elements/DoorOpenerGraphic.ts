@@ -99,6 +99,7 @@ export class DoorOpenerGraphic
             new BufferAttribute(particlesSize, 1),
         );
 
+        // each instance should have his own material to isolate material animation
         const particlesMat = new ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },
@@ -108,6 +109,7 @@ export class DoorOpenerGraphic
             // blending: AdditiveBlending,
             vertexShader: VS,
             fragmentShader: FS,
+            name: 'door-opener-material',
         });
 
         this.particles = new Points(particlesGeo, particlesMat);

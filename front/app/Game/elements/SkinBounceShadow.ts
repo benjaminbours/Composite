@@ -1,13 +1,9 @@
-import {
-    Object3D,
-    BoxGeometry,
-    BufferAttribute,
-    ShaderMaterial,
-    Points,
-} from 'three';
-import VS from '../glsl/boxShadow_vs.glsl';
-import FS from '../glsl/boxShadow_fs.glsl';
+import { Object3D, BoxGeometry, BufferAttribute, Points } from 'three';
 import { ElementToBounce, getRange } from '@benjaminbours/composite-core';
+import {
+    bounceShadowMaterial,
+    bounceShadowMaterialInteractive,
+} from '../materials';
 
 export class SkinBounceShadow extends Object3D {
     protected particles: Points;
@@ -51,23 +47,12 @@ export class SkinBounceShadow extends Object3D {
             new BufferAttribute(shadowDistance, 1),
         );
 
-        const material = new ShaderMaterial({
-            uniforms: {
-                time: { value: 0.0 },
-            },
-            vertexShader: VS,
-            fragmentShader: FS,
-        });
+        const material = this.bounce.interactive
+            ? bounceShadowMaterialInteractive
+            : bounceShadowMaterial;
 
         this.particles = new Points(bufferGeometry, material);
         this.particles.name = 'particles';
         this.add(this.particles);
-    }
-
-    update(delta: number) {
-        const particlesMat = this.particles.material as ShaderMaterial;
-        if (this.bounce.interactive) {
-            particlesMat.uniforms.time.value -= delta;
-        }
     }
 }
