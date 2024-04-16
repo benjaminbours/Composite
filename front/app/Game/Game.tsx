@@ -2,6 +2,16 @@
 // vendors
 import { gsap } from 'gsap';
 import React, { useEffect, useRef, useState } from 'react';
+import {
+    computeBoundsTree,
+    disposeBoundsTree,
+    acceleratedRaycast,
+} from 'three-mesh-bvh/build/index.module.js';
+import { BufferGeometry, Mesh } from 'three';
+// addExtensionFunctions
+(BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
+(BufferGeometry.prototype as any).disposeBoundsTree = disposeBoundsTree;
+Mesh.prototype.raycast = acceleratedRaycast;
 // our libs
 import {
     GameState,

@@ -35,7 +35,7 @@ const obstacleBox = new Box3();
 const positionVec = new Vector3();
 const filterCollisionSize = new Vector3(100, 100, 0);
 const RAYCASTER = new Raycaster();
-RAYCASTER.firstHitOnly = true;
+(RAYCASTER as any).firstHitOnly = true;
 let obstaclesToConsider: Object3D[] = [];
 let intersectObjects: Intersection<Object3D<Object3DEventMap>>[] = [];
 

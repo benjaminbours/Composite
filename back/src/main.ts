@@ -3,11 +3,20 @@ import { NestFactory } from '@nestjs/core';
 // eslint-disable-next-line
 const NodeThreeExporter = require('@injectit/threejs-nodejs-exporters');
 import * as fs from 'fs';
-import type { Mesh } from 'three';
+import { BufferGeometry, Mesh } from 'three';
 import { SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import {
+  computeBoundsTree,
+  disposeBoundsTree,
+  acceleratedRaycast,
+} from 'three-mesh-bvh';
+// addExtensionFunctions
+BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+Mesh.prototype.raycast = acceleratedRaycast;
 // our libs
-import { addToGeometries } from '@benjaminbours/composite-core';
+import { geometries } from '@benjaminbours/composite-core';
 
 import { AppModule } from './app.module';
 import { RedisIoAdapter } from './redis-io.adapter';
@@ -23,7 +32,9 @@ async function bootstrap() {
   const assetsFile = fs.readFileSync(`${process.cwd()}/assets.glb`);
   const onParse = (object) => {
     object.scene.children.forEach((mesh: Mesh) => {
-      addToGeometries(mesh);
+      (mesh.geometry as any).computeBoundsTree = computeBoundsTree;
+      (mesh.geometry as any).disposeBoundsTree = disposeBoundsTree;
+      geometries[mesh.name] = mesh.geometry;
     });
   };
   const exporter = new NodeThreeExporter();

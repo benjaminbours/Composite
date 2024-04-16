@@ -13,11 +13,6 @@ import {
     Box3,
     PlaneGeometry,
 } from 'three';
-import {
-    computeBoundsTree,
-    disposeBoundsTree,
-    acceleratedRaycast,
-} from 'three-mesh-bvh';
 import { degreesToRadians } from '../helpers/math';
 import { Layer, Side } from '../types';
 import { ElementToBounce, InteractiveArea } from '../elements';
@@ -34,11 +29,6 @@ import {
     WallDoorProperties,
     WallProperties,
 } from './types';
-
-// Add the extension functions
-BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
-Mesh.prototype.raycast = acceleratedRaycast;
 
 export const gridSize = 250;
 const wallDepth = 34;
@@ -61,13 +51,6 @@ export const ElementName = {
 export const geometries: { [key: string]: any } = {
     border: new BoxGeometry(100, 10, 100),
 };
-
-export function addToGeometries(mesh: Mesh) {
-    // exist because the loading system of three geometry with nodejs is this lib => @injectit/threejs-nodejs-exporters
-    (mesh.geometry as any).computeBoundsTree = computeBoundsTree;
-    (mesh.geometry as any).disposeBoundsTree = disposeBoundsTree;
-    geometries[mesh.name] = mesh.geometry;
-}
 
 export const materials = {
     phong: new MeshPhongMaterial({
