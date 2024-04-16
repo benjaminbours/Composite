@@ -94,7 +94,7 @@ export class RendererManager {
             canvas: canvasDom,
             powerPreference: 'high-performance',
             precision: 'highp',
-            antialias: true,
+            // antialias: true,
         });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
