@@ -537,7 +537,7 @@ export default class App {
                     const inputs = inputsForTick[i];
                     applyInputListToSimulation(
                         delta,
-                        undefined,
+                        [undefined, undefined],
                         inputs,
                         this.collidingElements,
                         this.gameStateManager.currentState,

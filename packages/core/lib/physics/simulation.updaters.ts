@@ -238,7 +238,7 @@ export function applySingleInputToSimulation(
 // and the game state only, it should not trigger any 3D changes
 export function applyInputListToSimulation(
     delta: number,
-    lastPlayerInput: GamePlayerInputPayload | undefined,
+    lastPlayersInput: (GamePlayerInputPayload | undefined)[],
     inputs: GamePlayerInputPayload[],
     collidingElements: Object3D[],
     gameState: GameState,
@@ -249,114 +249,79 @@ export function applyInputListToSimulation(
     if (dev) {
         console.log(gameState.game_time);
     }
-    let lastInput = lastPlayerInput;
 
-    // if there are inputs for this time tick, we process them
-    if (inputs.length) {
-        for (let j = 0; j < inputs.length; j++) {
-            const input = inputs[j];
-            if (dev) {
-                console.log('applying input for player', input.player);
-                console.log('applying input', input.time, input.sequence);
-                console.log(
-                    'applying input from position',
-                    gameState.players[input.player].position,
-                );
-                console.log(
-                    'applying input from velocity',
-                    gameState.players[input.player].velocity,
-                );
-            }
-            applySingleInputToSimulation(
-                delta,
-                input.player,
-                input.inputs,
-                collidingElements,
-                gameState,
-                context,
-                freeMovementMode,
-            );
-            if (dev) {
-                console.log(
-                    'applying input to position',
-                    gameState.players[input.player].position,
-                );
-                console.log(
-                    'applying input to velocity',
-                    gameState.players[input.player].velocity,
-                );
-            }
-            // side effect
-            lastInput = input;
-        }
-    } else {
-        // if there are no inputs for this tick, we have to deduce / interpolate player position
-        // regarding the last action he did.
+    let hasInputForLight = false;
+    let hasInputForShadow = false;
+
+    // apply all inputs received
+    for (let j = 0; j < inputs.length; j++) {
+        const input = inputs[j];
         if (dev) {
-            console.log('last player input', lastInput);
-        }
-
-        if (lastInput) {
-            if (dev) {
-                console.log(
-                    `no input for player ${lastInput.player} reapply last input`,
-                );
-                console.log(
-                    'applying input',
-                    lastInput.time,
-                    lastInput.sequence,
-                );
-                console.log(
-                    'applying input from position',
-                    gameState.players[lastInput.player].position,
-                );
-                console.log(
-                    'applying input from velocity',
-                    gameState.players[lastInput.player].velocity,
-                );
-            }
-            applySingleInputToSimulation(
-                delta,
-                lastInput.player,
-                lastInput.inputs,
-                collidingElements,
-                gameState,
-                context,
-                freeMovementMode,
+            console.log('applying input for player', input.player);
+            console.log('applying input', input.time, input.sequence);
+            console.log(
+                'applying input from position',
+                gameState.players[input.player].position,
             );
-            if (dev) {
-                console.log(
-                    'applying input to position',
-                    gameState.players[lastInput.player].position,
-                );
-                console.log(
-                    'applying input to velocity',
-                    gameState.players[lastInput.player].velocity,
-                );
-            }
+            console.log(
+                'applying input from velocity',
+                gameState.players[input.player].velocity,
+            );
         }
-    }
-    return lastInput;
-}
+        applySingleInputToSimulation(
+            delta,
+            input.player,
+            input.inputs,
+            collidingElements,
+            gameState,
+            context,
+            freeMovementMode,
+        );
+        if (dev) {
+            console.log(
+                'applying input to position',
+                gameState.players[input.player].position,
+            );
+            console.log(
+                'applying input to velocity',
+                gameState.players[input.player].velocity,
+            );
+        }
+        // side effect
+        lastPlayersInput[input.player] = input;
 
-export function collectInputsForTick(
-    inputsQueue: GamePlayerInputPayload[],
-    gameTime: number,
-) {
-    // 2 buffers, one for each player
-    const inputsForTick: GamePlayerInputPayload[][] = [[], []];
-    for (let i = 0; i < inputsQueue.length; i++) {
-        const input = inputsQueue[i];
-        if (input.sequence !== gameTime) {
-            continue;
-        }
-        // filter by player
-        if (input.player === Side.SHADOW) {
-            inputsForTick[0].push(input);
-        }
         if (input.player === Side.LIGHT) {
-            inputsForTick[1].push(input);
+            hasInputForLight = true;
+        }
+
+        if (input.player === Side.SHADOW) {
+            hasInputForShadow = true;
         }
     }
-    return inputsForTick;
+
+    // if has not input for one of the player, reapply the last input for this player
+
+    if (!hasInputForLight && lastPlayersInput[Side.LIGHT]) {
+        applySingleInputToSimulation(
+            delta,
+            lastPlayersInput[Side.LIGHT].player,
+            lastPlayersInput[Side.LIGHT].inputs,
+            collidingElements,
+            gameState,
+            context,
+            freeMovementMode,
+        );
+    }
+
+    if (!hasInputForShadow && lastPlayersInput[Side.SHADOW]) {
+        applySingleInputToSimulation(
+            delta,
+            lastPlayersInput[Side.SHADOW].player,
+            lastPlayersInput[Side.SHADOW].inputs,
+            collidingElements,
+            gameState,
+            context,
+            freeMovementMode,
+        );
+    }
 }

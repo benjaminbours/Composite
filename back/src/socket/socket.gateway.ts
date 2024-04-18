@@ -21,7 +21,6 @@ import {
   Context,
   updateServerBounces,
   GameState,
-  collectInputsForTick,
   AbstractLevel,
   LevelMapping,
   gridSize,
@@ -201,30 +200,27 @@ export class SocketGateway {
       this.fetchGameData(gameId).then(([inputsQueue, gameState]) => {
         physicSimulation.run((delta) => {
           gameState.game_time++;
-          // 2 buffers, one for each player
-          const inputsForTick = collectInputsForTick(
-            inputsQueue,
-            gameState.game_time,
-          );
+          // 1. Gather all players input in one single list, for the current tick, and remove them from the input list
+          const inputsForTick: GamePlayerInputPayload[] = [];
+          for (let i = 0; i < inputsQueue.length; i++) {
+            const input = inputsQueue[i];
+            if (input.sequence !== gameState.game_time) {
+              continue;
+            }
+            inputsForTick.push(input);
+            inputsQueue.splice(i, 1);
+          }
           // Logger.log(`Inputs for tick ${inputsForTick[1].length}`);
           // each player after another
-          for (let i = 0; i < inputsForTick.length; i++) {
-            const inputs = inputsForTick[i];
-            lastPlayersInput[i] = applyInputListToSimulation(
-              delta,
-              lastPlayersInput[i],
-              inputs,
-              collidingElements,
-              gameState,
-              Context.server,
-            );
-            updateServerBounces(level.bounces, gameState.level.bounces);
-            // then we remove it from the list
-            for (let i = 0; i < inputs.length; i++) {
-              const input = inputs[i];
-              inputsQueue.splice(inputsQueue.indexOf(input), 1);
-            }
-          }
+          applyInputListToSimulation(
+            delta,
+            lastPlayersInput,
+            inputsForTick,
+            collidingElements,
+            gameState,
+            Context.server,
+          );
+          updateServerBounces(level.bounces, gameState.level.bounces);
         });
 
         // emit updated game state to room

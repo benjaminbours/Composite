@@ -185,39 +185,45 @@ export class GameStateManager {
             JSON.parse(JSON.stringify(this.serverGameState)),
         ];
         const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
-            undefined,
-            undefined,
+            this.lastServerInputs[0]
+                ? JSON.parse(JSON.stringify(this.lastServerInputs[0]))
+                : undefined,
+            this.lastServerInputs[1]
+                ? JSON.parse(JSON.stringify(this.lastServerInputs[1]))
+                : undefined,
         ];
 
-        this.lastServerInputs.forEach((input, index) => {
-            if (input) {
-                lastPlayersInput[index] = JSON.parse(JSON.stringify(input));
-            }
-        });
+        console.log('reconciliate state');
+
         while (nextState.game_time < this.currentState.game_time) {
+            console.log('loop');
             nextState.game_time++;
-            const inputsForTick = collectInputsForTick(
-                inputs,
-                nextState.game_time,
+
+            // 1. Gather all players input in one single list, for the current tick, and remove them from the input list
+            const inputsForTick: GamePlayerInputPayload[] = [];
+            for (let i = 0; i < inputs.length; i++) {
+                const input = inputs[i];
+                if (input.sequence !== nextState.game_time) {
+                    continue;
+                }
+                inputsForTick.push(input);
+                inputs.splice(i, 1);
+            }
+
+            // 2. Apply all inputs to the simulation
+            applyInputListToSimulation(
+                delta,
+                lastPlayersInput,
+                inputsForTick,
+                collidingElements,
+                nextState,
+                Context.client,
+                false,
+                Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
 
-            for (let i = 0; i < inputsForTick.length; i++) {
-                const inputs = inputsForTick[i];
-                lastPlayersInput[i] = applyInputListToSimulation(
-                    delta,
-                    lastPlayersInput[i],
-                    inputs,
-                    collidingElements,
-                    nextState,
-                    Context.client,
-                    false,
-                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
-                );
-                for (let i = 0; i < inputs.length; i++) {
-                    const input = inputs[i];
-                    inputs.splice(inputs.indexOf(input), 1);
-                }
-            }
+            // est ce que ca vaut la peine de reconstruire le predicition history corrected
+            // alors que on est entrain de reconcilier le state et que le dernier state sera clean
 
             const snapshot = JSON.parse(JSON.stringify(nextState));
             predictionHistory.push(snapshot);
