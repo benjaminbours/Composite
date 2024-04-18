@@ -31,9 +31,8 @@ const RAYS = {
 };
 
 const playerBBox = new Box3();
-const obstacleBox = new Box3();
 const positionVec = new Vector3();
-const filterCollisionSize = new Vector3(100, 100, 0);
+const filterCollisionRange = new Vector3(100, 100, 0);
 const RAYCASTER = new Raycaster();
 (RAYCASTER as any).firstHitOnly = true;
 let obstaclesToConsider: Object3D[] = [];
@@ -46,14 +45,13 @@ export function getNearestObjects(
     const nearestObjects: INearestObjects = {};
 
     positionVec.set(position.x, position.y, 0);
-    playerBBox.setFromCenterAndSize(positionVec, filterCollisionSize);
+    playerBBox.setFromCenterAndSize(positionVec, filterCollisionRange);
 
     obstaclesToConsider = [];
 
     for (let i = 0; i < obstacles.length; i++) {
         const obstacle = obstacles[i];
-        obstacleBox.setFromObject(obstacle);
-        if (playerBBox.intersectsBox(obstacleBox)) {
+        if (playerBBox.intersectsBox((obstacle as any).boundingBox)) {
             obstaclesToConsider.push(obstacle);
         }
     }

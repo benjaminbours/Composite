@@ -140,6 +140,15 @@ export function handleCollision(
             // normal collision
             handleDefaultCollision(direction, player, collision.point);
         }
+    } else if (
+        direction === 'bottom' &&
+        player.position.y <= 0 + COLLISION_DETECTION_RANGE
+    ) {
+        handleDefaultCollision(
+            direction,
+            player,
+            new Vector3(player.position.x, 0, 0),
+        );
     }
 }
 

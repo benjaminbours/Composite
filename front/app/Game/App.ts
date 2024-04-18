@@ -31,7 +31,6 @@ import {
     Layer,
     Context,
     MovableComponentState,
-    ElementToBounce,
     createMountain,
     InputsSync,
     AbstractLevel,
@@ -303,7 +302,7 @@ export default class App {
                 this.setGameCamera();
             }
             // reset colliding elements
-            this.collidingElements = [this.floor.children[0]];
+            this.collidingElements = [];
             for (let i = 0; i < this.level.children.length; i++) {
                 const child = this.level.children[i];
                 addToCollidingElements(child, this.collidingElements);
@@ -313,7 +312,7 @@ export default class App {
             this.rendererManager.removePlayerInsideComposer();
             this.inputsManager.destroyEventListeners();
             // reset colliding elements
-            this.collidingElements = [this.floor.children[0]];
+            this.collidingElements = [];
             if (this.controls) {
                 this.controls.enabled = true;
                 this.resetEditorCamera();
@@ -387,7 +386,6 @@ export default class App {
 
     private setupScene = () => {
         this.scene.add(this.floor);
-        this.collidingElements.push(this.floor.children[0]);
 
         this.scene.fog = new FogExp2(0xffffff, 0.001);
         // this.scene.fog = new FogExp2(0xffffff, 0.0002);
