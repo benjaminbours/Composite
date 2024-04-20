@@ -3,10 +3,7 @@ import { InputsSync, MovableComponentState, Side } from '../types';
 import { LevelState, PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
 import { INearestObjects } from './raycaster';
-import {
-    COLLISION_DETECTION_RANGE,
-    COLLISION_DETECTION_RANGE_INSIDE,
-} from './collision.system';
+import { COLLISION_DETECTION_RANGE } from './collision.system';
 import { degreesToRadians } from '../helpers/math';
 
 export const MAX_FALL_SPEED = 20;
@@ -22,10 +19,7 @@ function handleDefaultCollision(
     player: PlayerGameState,
     point: Vector3,
 ) {
-    const range =
-        player.state === MovableComponentState.inside
-            ? COLLISION_DETECTION_RANGE_INSIDE
-            : COLLISION_DETECTION_RANGE;
+    const range = COLLISION_DETECTION_RANGE;
     if (direction === 'left') {
         player.velocity.x = 0;
         player.position.x = point.x + range;

@@ -4,7 +4,6 @@ import { PlayerGameState } from '../GameState';
 import { MovableComponentState } from '../types';
 
 export const COLLISION_DETECTION_RANGE = 20;
-export const COLLISION_DETECTION_RANGE_INSIDE = 10;
 
 export type CollidingObjects = INearestObjects;
 
@@ -22,16 +21,13 @@ export function detectCollidingObjects(
         bottom: undefined,
     };
 
-    if (freeMovementMode) {
+    if (freeMovementMode || state === MovableComponentState.inside) {
         return colliding;
     }
 
     const nearestObjects = getNearestObjects(position, obstacles);
 
-    const collisionDetectionRange =
-        state === MovableComponentState.inside
-            ? COLLISION_DETECTION_RANGE_INSIDE
-            : COLLISION_DETECTION_RANGE;
+    const collisionDetectionRange = COLLISION_DETECTION_RANGE;
 
     if (
         nearestObjects.bottom &&

@@ -236,6 +236,7 @@ export function applySingleInputToSimulation(
 
 // responsible to take many inputs and apply them to the game state
 // and the game state only, it should not trigger any 3D changes
+// could be name: apply inputs for tick to simulation
 export function applyInputListToSimulation(
     delta: number,
     lastPlayersInput: (GamePlayerInputPayload | undefined)[],
