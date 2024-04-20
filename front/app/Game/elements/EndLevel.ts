@@ -124,6 +124,7 @@ export class EndLevel extends Object3D {
         });
 
         this.particles = new Points(particlesGeo, particlesMat);
+        this.particles.name = 'particles';
         this.add(this.particles);
 
         this.particles.frustumCulled = false;
