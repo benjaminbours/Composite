@@ -1,7 +1,7 @@
 {
   "name": "composite-front",
   "description": "",
-  "version": "1.0.0-next.7",
+  "version": "1.0.0-next.8",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,8 +16,8 @@
   "author": "Benjamin Bours",
   "license": "ISC",
   "dependencies": {
-    "@benjaminbours/composite-api-client": "^1.0.0-next.6",
-    "@benjaminbours/composite-core": "^1.0.0-next.6",
+    "@benjaminbours/composite-api-client": "^1.0.0-next.7",
+    "@benjaminbours/composite-core": "^1.0.0-next.7",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",

@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- More performance optimization
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.7
+  - @benjaminbours/composite-core@1.0.0-next.7
+
 ## 1.0.0-next.7
 
 ### Patch Changes

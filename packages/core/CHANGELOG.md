@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- More performance optimization
+
 ## 1.0.0-next.6
 
 ### Patch Changes
