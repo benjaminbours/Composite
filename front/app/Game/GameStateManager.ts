@@ -5,7 +5,6 @@ import {
     GameState,
     GameStateUpdatePayload,
     applyInputListToSimulation,
-    collectInputsForTick,
 } from '@benjaminbours/composite-core';
 import { Object3D, Object3DEventMap } from 'three';
 
@@ -38,7 +37,7 @@ export class GameStateManager {
     public gameTimeDelta = 0;
     public bufferHistorySize = 10;
 
-    public inputsHistory: GamePlayerInputPayload[] = [];
+    public inputsHistory: Record<number, GamePlayerInputPayload[]> = {};
     public lastServerInputs: [
         GamePlayerInputPayload | undefined,
         GamePlayerInputPayload | undefined,
@@ -70,6 +69,14 @@ export class GameStateManager {
         if (this.sendInputs && this.inputBuffer.length > 0) {
             this.sendInputs(this.inputBuffer);
             this.inputBuffer = [];
+        }
+    };
+
+    public addToInputsHistory = (input: GamePlayerInputPayload) => {
+        if (this.inputsHistory[input.sequence]) {
+            this.inputsHistory[input.sequence].push(input);
+        } else {
+            this.inputsHistory[input.sequence] = [input];
         }
     };
 
@@ -152,12 +159,9 @@ export class GameStateManager {
     };
 
     public addToPredictionHistory = (state: GameState) => {
-        if (this.gameTimeIsSynchronized) {
-            this.predictionHistory.push(JSON.parse(JSON.stringify(state)));
-
-            if (this.predictionHistory.length > this.bufferHistorySize) {
-                this.predictionHistory.shift();
-            }
+        this.predictionHistory.push(JSON.parse(JSON.stringify(state)));
+        if (this.predictionHistory.length > this.bufferHistorySize) {
+            this.predictionHistory.shift();
         }
     };
 
@@ -171,15 +175,15 @@ export class GameStateManager {
 
         this.shouldReconciliateState = false;
         // remove inputs that have been validated by the server
-        this.inputsHistory = this.inputsHistory.filter(
-            ({ sequence }) =>
-                sequence >= this.serverGameState.lastValidatedInput,
-        );
+        const inputsHistoryKeys = Object.keys(this.inputsHistory);
+        for (let i = 0; i < inputsHistoryKeys.length; i++) {
+            const sequence = Number(inputsHistoryKeys[i]);
+            if (sequence < this.serverGameState.lastValidatedInput) {
+                delete this.inputsHistory[sequence];
+            }
+        }
         const nextState: GameState = JSON.parse(
             JSON.stringify(this.serverGameState),
-        );
-        const inputs: GamePlayerInputPayload[] = JSON.parse(
-            JSON.stringify(this.inputsHistory),
         );
         const predictionHistory: GameState[] = [
             JSON.parse(JSON.stringify(this.serverGameState)),
@@ -193,28 +197,13 @@ export class GameStateManager {
                 : undefined,
         ];
 
-        console.log('reconciliate state');
-
         while (nextState.game_time < this.currentState.game_time) {
-            console.log('loop');
             nextState.game_time++;
 
-            // 1. Gather all players input in one single list, for the current tick, and remove them from the input list
-            const inputsForTick: GamePlayerInputPayload[] = [];
-            for (let i = 0; i < inputs.length; i++) {
-                const input = inputs[i];
-                if (input.sequence !== nextState.game_time) {
-                    continue;
-                }
-                inputsForTick.push(input);
-                inputs.splice(i, 1);
-            }
-
-            // 2. Apply all inputs to the simulation
             applyInputListToSimulation(
                 delta,
                 lastPlayersInput,
-                inputsForTick,
+                this.inputsHistory[nextState.game_time] || [],
                 collidingElements,
                 nextState,
                 Context.client,
@@ -277,31 +266,6 @@ export class GameStateManager {
         // one trip time
 
         let sendInputsInterval = 20;
-        // if (rtt <= 15) {
-        //     this.gameTimeDelta = 15;
-        //     this.bufferHistorySize = 15;
-        //     sendInputsInterval = 20;
-        // } else if (rtt <= 30) {
-        //     this.gameTimeDelta = rtt;
-        //     this.bufferHistorySize = 15;
-        //     sendInputsInterval = 20;
-        // } else if (rtt <= 50) {
-        //     this.gameTimeDelta = Math.floor(rtt / 1.5);
-        //     this.bufferHistorySize = 25;
-        //     sendInputsInterval = 30;
-        // } else if (rtt <= 100) {
-        //     this.gameTimeDelta = Math.floor(rtt / 2);
-        //     this.bufferHistorySize = 25;
-        //     sendInputsInterval = 50;
-        // } else if (rtt <= 200) {
-        //     this.gameTimeDelta = Math.floor(rtt / 3);
-        //     this.bufferHistorySize = 50;
-        //     sendInputsInterval = 100;
-        // } else if (rtt <= 1000) {
-        //     this.gameTimeDelta = Math.floor(rtt / 10);
-        //     this.bufferHistorySize = 50;
-        //     sendInputsInterval = 100;
-        // }
         console.log('average RTT', rtt);
         console.log('one way latency', oneWayLatency);
         // console.log('send inputs interval', sendInputsInterval);

@@ -430,7 +430,7 @@ export default class App {
     private lastInput: GamePlayerInputPayload | undefined;
     // TODO: disgusting, find alternative
     private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
-    private checkAndCollectInputs = (payload: any) => {
+    private checkAndCollectInputs = (payload: GamePlayerInputPayload) => {
         const isInputReleased =
             this.lastInput &&
             ((this.lastInput.inputs.left &&
@@ -448,7 +448,7 @@ export default class App {
         ) {
             // then collect it
             if (this.gameStateManager.gameTimeIsSynchronized) {
-                this.gameStateManager.inputsHistory.push(payload);
+                this.gameStateManager.addToInputsHistory(payload);
                 this.gameStateManager.collectInput(payload);
             }
         }
@@ -488,7 +488,7 @@ export default class App {
             inputs,
         );
         if (this.gameStateManager.gameTimeIsSynchronized) {
-            this.gameStateManager.inputsHistory.push(payload);
+            this.gameStateManager.addToInputsHistory(payload);
         }
         this.lastOtherPlayerInput = payload;
     };
@@ -523,32 +523,28 @@ export default class App {
                 this.processMainPlayerInputs();
                 this.processSecondPlayerInputs();
 
-                const inputsForTick: GamePlayerInputPayload[][] = [[], []];
+                const inputs = [];
                 if (this.lastInput) {
-                    inputsForTick[this.mainPlayerSide] = [this.lastInput];
+                    inputs.push(this.lastInput);
                 }
                 if (this.lastOtherPlayerInput) {
-                    inputsForTick[this.secondPlayerSide] = [
-                        this.lastOtherPlayerInput,
-                    ];
+                    inputs.push(this.lastOtherPlayerInput);
                 }
-
-                for (let i = 0; i < inputsForTick.length; i++) {
-                    const inputs = inputsForTick[i];
-                    applyInputListToSimulation(
-                        delta,
-                        [undefined, undefined],
-                        inputs,
-                        this.collidingElements,
+                applyInputListToSimulation(
+                    delta,
+                    [undefined, undefined],
+                    inputs,
+                    this.collidingElements,
+                    this.gameStateManager.currentState,
+                    Context.client,
+                    false,
+                    Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
+                );
+                if (this.gameStateManager.gameTimeIsSynchronized) {
+                    this.gameStateManager.addToPredictionHistory(
                         this.gameStateManager.currentState,
-                        Context.client,
-                        false,
-                        Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                     );
                 }
-                this.gameStateManager.addToPredictionHistory(
-                    this.gameStateManager.currentState,
-                );
 
                 // END PREDICTION
                 // START DISPLAY TIME
