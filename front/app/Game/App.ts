@@ -341,6 +341,7 @@ export default class App {
 
     public destroy = () => {
         this.gameStateManager.destroy();
+        this.socketController?.unregisterGameStateUpdateListener();
     };
 
     public setPlayersPosition = (position: {

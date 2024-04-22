@@ -50,10 +50,7 @@ export class SocketController {
             },
         );
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
-        this.socket.on(
-            SocketEventLobby.FRIEND_JOIN_LOBBY,
-            onFriendJoinLobby,
-        );
+        this.socket.on(SocketEventLobby.FRIEND_JOIN_LOBBY, onFriendJoinLobby);
         this.socket.on(
             SocketEventType.TEAMMATE_DISCONNECT,
             onTeamMateDisconnect,
@@ -64,10 +61,7 @@ export class SocketController {
             SocketEventLobby.SELECT_LEVEL,
             handleReceiveLevelOnLobby,
         );
-        this.socket.on(
-            SocketEventLobby.SELECT_SIDE,
-            handleReceiveSideOnLobby,
-        );
+        this.socket.on(SocketEventLobby.SELECT_SIDE, handleReceiveSideOnLobby);
         this.socket.on(
             SocketEventLobby.READY_TO_PLAY,
             handleReceiveReadyToPlay,
@@ -77,7 +71,6 @@ export class SocketController {
     public registerGameStateUpdateListener = (
         onGameStateUpdate: (data: GameStateUpdatePayload) => void,
     ) => {
-        // TODO: Unregister event on destroy
         this.socket.on(
             SocketEventType.GAME_STATE_UPDATE,
             (data: GameStateUpdatePayload) => {
@@ -86,6 +79,10 @@ export class SocketController {
                 }
             },
         );
+    };
+
+    public unregisterGameStateUpdateListener = () => {
+        this.socket.removeAllListeners(SocketEventType.GAME_STATE_UPDATE);
     };
 
     public onTimeSyncReceived =
