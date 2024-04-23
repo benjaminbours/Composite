@@ -201,20 +201,37 @@ export class SocketGateway {
         physicSimulation.run((delta) => {
           gameState.game_time++;
           // 1. Gather all players input in one single list, for the current tick, and remove them from the input list
+          let hasInputForLight = false;
+          let hasInputForShadow = false;
           const inputsForTick: GamePlayerInputPayload[] = [];
-          for (let i = 0; i < inputsQueue.length; i++) {
+          for (let i = inputsQueue.length - 1; i >= 0; i--) {
             const input = inputsQueue[i];
             if (input.sequence !== gameState.game_time) {
               continue;
             }
+            if (input.player === Side.LIGHT) {
+              hasInputForLight = true;
+              lastPlayersInput[Side.LIGHT] = input;
+            }
+            if (input.player === Side.SHADOW) {
+              hasInputForShadow = true;
+              lastPlayersInput[Side.SHADOW] = input;
+            }
             inputsForTick.push(input);
             inputsQueue.splice(i, 1);
+          }
+
+          if (!hasInputForLight && lastPlayersInput[Side.LIGHT]) {
+            inputsForTick.push(lastPlayersInput[Side.LIGHT]);
+          }
+
+          if (!hasInputForShadow && lastPlayersInput[Side.SHADOW]) {
+            inputsForTick.push(lastPlayersInput[Side.SHADOW]);
           }
           // Logger.log(`Inputs for tick ${inputsForTick[1].length}`);
           // each player after another
           applyInputListToSimulation(
             delta,
-            lastPlayersInput,
             inputsForTick,
             collidingElements,
             gameState,

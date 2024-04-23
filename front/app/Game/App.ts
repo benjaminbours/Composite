@@ -114,6 +114,8 @@ export default class App {
     private mouseRaycaster = new Raycaster();
     public mouseSelectedObject?: Object3D;
 
+    private lastInput: GamePlayerInputPayload;
+
     constructor(
         public canvasDom: HTMLCanvasElement,
         initialGameState: GameState,
@@ -134,9 +136,15 @@ export default class App {
             this.socketController?.sendInputs,
         );
         // inputs
+
         if (!socketController && initialMode === AppMode.GAME) {
             this.inputsManager.registerEventListeners();
         }
+        let inputs: InputsSync = { ...this.inputsManager.inputsActive };
+        this.lastInput = this.createPlayerInputPayload(
+            this.mainPlayerSide,
+            inputs,
+        );
 
         // setup renderer manager
         this.rendererManager = new RendererManager(
@@ -428,10 +436,17 @@ export default class App {
         }
     };
 
-    private lastInput: GamePlayerInputPayload | undefined;
-    // TODO: disgusting, find alternative
-    private lastOtherPlayerInput: GamePlayerInputPayload | undefined;
-    private checkAndCollectInputs = (payload: GamePlayerInputPayload) => {
+    private createPlayerInputPayload = (player: Side, inputs: InputsSync) => {
+        return {
+            player,
+            inputs,
+            time: Date.now(),
+            sequence: this.gameStateManager.predictionState.game_time,
+        };
+    };
+
+    private processMainPlayerInputs = () => {
+        let inputs: InputsSync = { ...this.inputsManager.inputsActive };
         const isInputReleased =
             this.lastInput &&
             ((this.lastInput.inputs.left &&
@@ -447,51 +462,29 @@ export default class App {
             this.inputsManager.inputsActive.jump ||
             isInputReleased
         ) {
+            const payload = this.createPlayerInputPayload(
+                this.mainPlayerSide,
+                inputs,
+            );
+            this.lastInput = payload;
             // then collect it
             if (this.gameStateManager.gameTimeIsSynchronized) {
-                this.gameStateManager.addToInputsHistory(payload);
                 this.gameStateManager.collectInput(payload);
             }
         }
     };
 
-    private createPlayerInputPayload = (player: Side, inputs: InputsSync) => {
-        return {
-            player,
-            inputs,
-            time: Date.now(),
-            sequence: this.gameStateManager.currentState.game_time,
-        };
-    };
-
-    private processMainPlayerInputs = () => {
-        let inputs: InputsSync = { ...this.inputsManager.inputsActive };
-        const payload = this.createPlayerInputPayload(
-            this.mainPlayerSide,
-            inputs,
-        );
-        this.checkAndCollectInputs(payload);
-        this.lastInput = payload;
-    };
-
     private processSecondPlayerInputs = () => {
-        let inputs: InputsSync = this.gameStateManager.lastServerInputs[
-            this.secondPlayerSide
-        ]?.inputs || {
-            left: false,
-            right: false,
-            jump: false,
-            top: false,
-            bottom: false,
-        };
-        const payload = this.createPlayerInputPayload(
-            this.secondPlayerSide,
-            inputs,
+        return (
+            this.gameStateManager.lastServerInputs[this.secondPlayerSide] ||
+            this.createPlayerInputPayload(this.secondPlayerSide, {
+                left: false,
+                right: false,
+                jump: false,
+                top: false,
+                bottom: false,
+            })
         );
-        if (this.gameStateManager.gameTimeIsSynchronized) {
-            this.gameStateManager.addToInputsHistory(payload);
-        }
-        this.lastOtherPlayerInput = payload;
     };
 
     private updateMouseIntersection = () => {
@@ -515,35 +508,37 @@ export default class App {
         }
         this.delta = this.clock.getDelta();
         if (this.mode === AppMode.GAME) {
-            this.gameStateManager.reconciliateState(
-                this.collidingElements,
-                this.physicSimulation.delta,
-            );
             this.physicSimulation.run((delta) => {
-                this.gameStateManager.currentState.game_time++;
-                this.processMainPlayerInputs();
-                this.processSecondPlayerInputs();
+                this.gameStateManager.reconciliateState(
+                    this.collidingElements,
+                    delta,
+                );
+                this.gameStateManager.predictionState.game_time++;
 
-                const inputs = [];
-                if (this.lastInput) {
-                    inputs.push(this.lastInput);
-                }
-                if (this.lastOtherPlayerInput) {
-                    inputs.push(this.lastOtherPlayerInput);
-                }
+                this.processMainPlayerInputs();
+                const otherPlayerInput = this.processSecondPlayerInputs();
+
+                const inputs = [this.lastInput, otherPlayerInput];
                 applyInputListToSimulation(
                     delta,
-                    [undefined, undefined],
                     inputs,
                     this.collidingElements,
-                    this.gameStateManager.currentState,
+                    this.gameStateManager.predictionState,
                     Context.client,
                     false,
                     Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );
                 if (this.gameStateManager.gameTimeIsSynchronized) {
+                    this.gameStateManager.addToInputsHistory(
+                        this.lastInput,
+                        this.gameStateManager.predictionState.game_time,
+                    );
+                    this.gameStateManager.addToInputsHistory(
+                        otherPlayerInput,
+                        this.gameStateManager.predictionState.game_time,
+                    );
                     this.gameStateManager.addToPredictionHistory(
-                        this.gameStateManager.currentState,
+                        this.gameStateManager.predictionState,
                     );
                 }
 

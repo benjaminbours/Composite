@@ -239,8 +239,7 @@ export function applySingleInputToSimulation(
 // could be name: apply inputs for tick to simulation
 export function applyInputListToSimulation(
     delta: number,
-    lastPlayersInput: (GamePlayerInputPayload | undefined)[],
-    inputs: GamePlayerInputPayload[],
+    inputs: GamePlayerInputPayload[], // should always receive one input per player minimum
     collidingElements: Object3D[],
     gameState: GameState,
     context: Context,
@@ -250,9 +249,6 @@ export function applyInputListToSimulation(
     if (dev) {
         console.log(gameState.game_time);
     }
-
-    let hasInputForLight = false;
-    let hasInputForShadow = false;
 
     // apply all inputs received
     for (let j = 0; j < inputs.length; j++) {
@@ -288,41 +284,5 @@ export function applyInputListToSimulation(
                 gameState.players[input.player].velocity,
             );
         }
-        // side effect
-        lastPlayersInput[input.player] = input;
-
-        if (input.player === Side.LIGHT) {
-            hasInputForLight = true;
-        }
-
-        if (input.player === Side.SHADOW) {
-            hasInputForShadow = true;
-        }
-    }
-
-    // if has not input for one of the player, reapply the last input for this player
-
-    if (!hasInputForLight && lastPlayersInput[Side.LIGHT]) {
-        applySingleInputToSimulation(
-            delta,
-            lastPlayersInput[Side.LIGHT].player,
-            lastPlayersInput[Side.LIGHT].inputs,
-            collidingElements,
-            gameState,
-            context,
-            freeMovementMode,
-        );
-    }
-
-    if (!hasInputForShadow && lastPlayersInput[Side.SHADOW]) {
-        applySingleInputToSimulation(
-            delta,
-            lastPlayersInput[Side.SHADOW].player,
-            lastPlayersInput[Side.SHADOW].inputs,
-            collidingElements,
-            gameState,
-            context,
-            freeMovementMode,
-        );
     }
 }

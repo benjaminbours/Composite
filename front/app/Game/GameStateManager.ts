@@ -17,14 +17,9 @@ interface InterpolationConfig {
 // TODO: Keep refactoring the game state manager. So far, a lot of thing in app has
 // just been prefixed by "".
 export class GameStateManager {
-    private interpolation: InterpolationConfig = {
-        ratio: 0,
-        increment: 5,
-        shouldUpdate: false,
-    };
     private shouldReconciliateState = false;
     public gameTimeIsSynchronized = false;
-    public inputBuffer: GamePlayerInputPayload[] = [];
+    public inputsToSendBuffer: GamePlayerInputPayload[] = [];
 
     /**
      * It's in fact the prediction state
@@ -66,91 +61,27 @@ export class GameStateManager {
 
     // Method for sending buffered inputs to the server
     public sendBufferedInputs = () => {
-        if (this.sendInputs && this.inputBuffer.length > 0) {
-            this.sendInputs(this.inputBuffer);
-            this.inputBuffer = [];
+        if (this.sendInputs && this.inputsToSendBuffer.length > 0) {
+            this.sendInputs(this.inputsToSendBuffer);
+            this.inputsToSendBuffer = [];
         }
     };
 
-    public addToInputsHistory = (input: GamePlayerInputPayload) => {
-        if (this.inputsHistory[input.sequence]) {
-            this.inputsHistory[input.sequence].push(input);
+    public addToInputsHistory = (
+        input: GamePlayerInputPayload,
+        gameTime: number,
+    ) => {
+        if (this.inputsHistory[gameTime]) {
+            this.inputsHistory[gameTime].push(input);
         } else {
-            this.inputsHistory[input.sequence] = [input];
+            this.inputsHistory[gameTime] = [input];
         }
     };
 
     // Method for collecting main player inputs
     public collectInput = (input: GamePlayerInputPayload) => {
-        this.inputBuffer.push(input);
+        this.inputsToSendBuffer.push(input);
     };
-
-    private interpolateGameState(states: GameState[], t: number): GameState {
-        const interpolatedState: GameState = JSON.parse(
-            JSON.stringify(states[0]),
-        );
-
-        // Interpolate each player's position and velocity
-        for (let i = 0; i < interpolatedState.players.length; i++) {
-            interpolatedState.players[i].position = { x: 0, y: 0 };
-            interpolatedState.players[i].velocity = { x: 0, y: 0 };
-
-            for (let j = 0; j < states.length; j++) {
-                let basis = 1;
-                for (let m = 0; m < states.length; m++) {
-                    if (m != j) {
-                        basis *=
-                            (t - m / (states.length - 1)) /
-                            (j / (states.length - 1) - m / (states.length - 1));
-                    }
-                }
-
-                interpolatedState.players[i].position.x +=
-                    basis * states[j].players[i].position.x;
-                interpolatedState.players[i].position.y +=
-                    basis * states[j].players[i].position.y;
-                interpolatedState.players[i].velocity.x +=
-                    basis * states[j].players[i].velocity.x;
-                interpolatedState.players[i].velocity.y +=
-                    basis * states[j].players[i].velocity.y;
-            }
-        }
-
-        // Interpolate level state and bounces
-        if ('level' in states[0] && 'bounces' in states[0].level) {
-            const interpolatedBounces: BounceState = {};
-
-            for (const key in states[0].level.bounces) {
-                interpolatedBounces[key] = { rotationY: 0 };
-
-                for (let j = 0; j < states.length; j++) {
-                    if (key in (states[j].level as any).bounces) {
-                        let basis = 1;
-                        for (let m = 0; m < states.length; m++) {
-                            if (m != j) {
-                                basis *=
-                                    (t - m / (states.length - 1)) /
-                                    (j / (states.length - 1) -
-                                        m / (states.length - 1));
-                            }
-                        }
-
-                        interpolatedBounces[key].rotationY +=
-                            basis *
-                            (states[j].level as any).bounces[key].rotationY;
-                    }
-                }
-            }
-
-            interpolatedState.level = {
-                ...interpolatedState.level,
-                bounces: interpolatedBounces,
-                // Add other level properties here
-            } as any;
-        }
-
-        return interpolatedState;
-    }
 
     public onGameGameStateUpdate = (data: GameStateUpdatePayload) => {
         this.shouldReconciliateState = true;
@@ -172,37 +103,27 @@ export class GameStateManager {
         if (!this.shouldReconciliateState) {
             return;
         }
-
         this.shouldReconciliateState = false;
+
         // remove inputs that have been validated by the server
         const inputsHistoryKeys = Object.keys(this.inputsHistory);
         for (let i = 0; i < inputsHistoryKeys.length; i++) {
             const sequence = Number(inputsHistoryKeys[i]);
-            if (sequence < this.serverGameState.lastValidatedInput) {
+            if (sequence <= this.serverState.lastValidatedInput) {
                 delete this.inputsHistory[sequence];
             }
         }
         const nextState: GameState = JSON.parse(
             JSON.stringify(this.serverGameState),
         );
-        const predictionHistory: GameState[] = [
-            JSON.parse(JSON.stringify(this.serverGameState)),
-        ];
-        const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
-            this.lastServerInputs[0]
-                ? JSON.parse(JSON.stringify(this.lastServerInputs[0]))
-                : undefined,
-            this.lastServerInputs[1]
-                ? JSON.parse(JSON.stringify(this.lastServerInputs[1]))
-                : undefined,
+        const nextPredictionHistory: GameState[] = [
+            JSON.parse(JSON.stringify(this.serverState)),
         ];
 
         while (nextState.game_time < this.currentState.game_time) {
             nextState.game_time++;
-
             applyInputListToSimulation(
                 delta,
-                lastPlayersInput,
                 this.inputsHistory[nextState.game_time] || [],
                 collidingElements,
                 nextState,
@@ -210,9 +131,6 @@ export class GameStateManager {
                 false,
                 Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
-
-            // est ce que ca vaut la peine de reconstruire le predicition history corrected
-            // alors que on est entrain de reconcilier le state et que le dernier state sera clean
 
             const snapshot = JSON.parse(JSON.stringify(nextState));
             predictionHistory.push(snapshot);
