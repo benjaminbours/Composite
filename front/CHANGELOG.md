@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.10
+
+### Patch Changes
+
+- cd4ec0b: Display stats panel in development environment as well
+
 ## 1.0.0-next.9
 
 ### Patch Changes
