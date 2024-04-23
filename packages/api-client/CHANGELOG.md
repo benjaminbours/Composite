@@ -1,5 +1,11 @@
 # @benjaminbours/composite-api-client
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- Refactor implementatin of client prediction / reconciliation
+
 ## 1.0.0-next.7
 
 ### Patch Changes

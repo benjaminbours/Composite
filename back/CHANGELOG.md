@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.8
+
+### Patch Changes
+
+- Refactor implementatin of client prediction / reconciliation
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.8
+
 ## 1.0.0-next.7
 
 ### Patch Changes

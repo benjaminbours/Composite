@@ -1,6 +1,6 @@
 {
   "name": "@benjaminbours/composite-core",
-  "version": "1.0.0-next.7",
+  "version": "1.0.0-next.8",
   "description": "What is shared between front and back",
   "type": "module",
   "main": "cjs/index.js",

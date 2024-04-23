@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Refactor implementatin of client prediction / reconciliation
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.8
+  - @benjaminbours/composite-core@1.0.0-next.8
+
 ## 1.0.0-next.8
 
 ### Patch Changes
