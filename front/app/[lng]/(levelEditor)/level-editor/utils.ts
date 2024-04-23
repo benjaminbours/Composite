@@ -39,7 +39,7 @@ export function removeMeshFromLevel(
     switch (type) {
         case ElementType.WALL_DOOR:
             const id = mesh.name.split('_')[0];
-            delete app.gameStateManager.currentState.level.doors[id];
+            delete app.gameStateManager.predictionState.level.doors[id];
             removeFromMouseSelectableObjects(app, mesh);
             break;
         case ElementType.DOOR_OPENER:
@@ -51,7 +51,7 @@ export function removeMeshFromLevel(
             const graphicSkin = mesh.children[2];
             const index = app.level.bounces.findIndex((el) => el === mesh);
             app.level.bounces.splice(index, 1);
-            delete app.gameStateManager.currentState.level.bounces[
+            delete app.gameStateManager.predictionState.level.bounces[
                 bounce.bounceID
             ];
             removeFromMouseSelectableObjects(app, bounce);

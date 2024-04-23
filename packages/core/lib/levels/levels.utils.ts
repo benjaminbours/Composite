@@ -787,6 +787,8 @@ export function addToCollidingElements(
                 obstacleBox.setFromObject(mesh, true);
                 (mesh as any).boundingBox = obstacleBox;
                 collidingElements.push(mesh);
+            } else {
+                console.log('HERE not bounds tree', mesh);
             }
         }
     };

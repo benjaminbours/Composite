@@ -377,7 +377,7 @@ export function reducer(
                     if (element.type === ElementType.BOUNCE) {
                         (element.properties as any)[propertyKey].rotation.y =
                             value.rotation.y;
-                        state.app.gameStateManager.currentState.level.bounces[
+                        state.app.gameStateManager.predictionState.level.bounces[
                             (element.properties as BounceProperties).id
                         ] = {
                             rotationY: value.rotation.y,
@@ -539,8 +539,8 @@ export function reducer(
             state.app!.mouseSelectableObjects = [];
             state.app!.updatableElements = [];
             state.app!.level.bounces = [];
-            state.app!.gameStateManager.currentState.level.doors = {};
-            state.app!.gameStateManager.currentState.level.bounces = {};
+            state.app!.gameStateManager.predictionState.level.doors = {};
+            state.app!.gameStateManager.predictionState.level.bounces = {};
             const elementList = parseLevelElements(
                 buildWorldContext(state.app!),
                 action.payload.data,
@@ -593,7 +593,7 @@ export function reducer(
 
 function buildWorldContext(app: App): WorldContext {
     return {
-        levelState: app.gameStateManager.currentState.level,
+        levelState: app.gameStateManager.predictionState.level,
         bounceList: app.level.bounces,
         clientGraphicHelpers: {
             updatableElements: app.updatableElements,

@@ -359,7 +359,7 @@ export default class App {
         for (let i = 0; i < this.players.length; i++) {
             const vec = i === 0 ? position.shadow : position.light;
             this.players[i].position.set(vec.x, vec.y, 0);
-            this.gameStateManager.currentState.players[i].position = {
+            this.gameStateManager.predictionState.players[i].position = {
                 x: vec.x,
                 y: vec.y,
             };
