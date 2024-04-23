@@ -82,7 +82,10 @@ function MainApp({ initialScene, dictionary }: Props) {
             setMenuScene,
             // enterTeamLobby: handleEnterTeamLobby,
         });
-        if (process.env.NEXT_PUBLIC_STAGE === 'local') {
+        if (
+            process.env.NEXT_PUBLIC_STAGE === 'local' ||
+            process.env.NEXT_PUBLIC_STAGE === 'development'
+        ) {
             const stats = new STATS.default();
             stats.showPanel(1);
             document.body.appendChild(stats.dom);

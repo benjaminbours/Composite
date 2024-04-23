@@ -94,7 +94,10 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
         const inputsManager = useRef<InputsManager>(new InputsManager());
 
         useEffect(() => {
-            if (process.env.NEXT_PUBLIC_STAGE === 'local') {
+            if (
+                process.env.NEXT_PUBLIC_STAGE === 'local' ||
+                process.env.NEXT_PUBLIC_STAGE === 'development'
+            ) {
                 const stats = new STATS.default();
                 stats.showPanel(1);
                 document.body.appendChild(stats.dom);
