@@ -13,7 +13,7 @@ import * as STATS from 'stats.js';
 import { MenuScene } from './types';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
-import { BottomRightInfo } from './BottomRightInfo';
+import { BottomLeftInfo } from './BottomLeftInfo';
 import { useMainController } from './useMainController';
 import { useMenuTransition } from './useMenuTransition';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
@@ -149,7 +149,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onClose={handleClickOnCloseSettings}
                 />
             )}
-            <BottomRightInfo
+            <BottomLeftInfo
                 gameIsPlaying={gameIsPlaying}
                 onSettingsClick={handleClickOnSettings}
             />

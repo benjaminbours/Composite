@@ -7,12 +7,12 @@ interface Props {
     onSettingsClick: () => void;
 }
 
-export const BottomRightInfo: React.FC<Props> = ({
+export const BottomLeftInfo: React.FC<Props> = ({
     onSettingsClick,
     gameIsPlaying,
 }) => {
     return (
-        <div className="bottom-right-info">
+        <div className="bottom-left-info">
             {gameIsPlaying && (
                 <IconButton className="settings" onClick={onSettingsClick}>
                     <SettingsIcon />

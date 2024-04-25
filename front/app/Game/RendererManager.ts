@@ -23,7 +23,8 @@ import mixPassFS from './glsl/mixPass_fs.glsl';
 import volumetricLightBounceFS from './glsl/volumetricLightBounce_fs.glsl';
 import volumetricLightPlayerFS from './glsl/volumetricLightPlayer_fs.glsl';
 import CustomCamera from './CustomCamera';
-import { Player } from './Player';
+import { LightPlayer, Player } from './Player';
+import { MiniMapManager } from './MiniMapManager';
 
 export class RendererManager {
     private lightBounceMixPasses: ShaderPass[] = [];
@@ -41,11 +42,12 @@ export class RendererManager {
     public renderer: WebGLRenderer;
     public playerVolumetricLightPass: ShaderPass;
 
-    private createRenderTarget = (renderScale: number) => {
-        return new WebGLRenderTarget(
-            this.width * renderScale,
-            this.height * renderScale,
-        );
+    private createRenderTarget = (
+        width: number,
+        height: number,
+        renderScale: number,
+    ) => {
+        return new WebGLRenderTarget(width * renderScale, height * renderScale);
     };
 
     private createMixPass = (addTexture: WebGLRenderTarget) => {
@@ -84,10 +86,13 @@ export class RendererManager {
 
     public players?: Player[];
 
+    public miniMapManager: MiniMapManager;
+
     constructor(
         private camera: CustomCamera,
         public canvasDom: HTMLCanvasElement,
-        scene: Scene,
+        public canvasMiniMapDom: HTMLCanvasElement,
+        private scene: Scene,
     ) {
         // init renderer
         this.renderer = new WebGLRenderer({
@@ -109,7 +114,11 @@ export class RendererManager {
         this.mainComposer.addPass(this.renderPass);
 
         // create occlusion render for player light
-        const occlusionRenderTarget = this.createRenderTarget(renderScale);
+        const occlusionRenderTarget = this.createRenderTarget(
+            this.width,
+            this.height,
+            renderScale,
+        );
         this.playerVolumetricLightPass = new ShaderPass({
             uniforms: {
                 tDiffuse: { value: null },
@@ -133,12 +142,18 @@ export class RendererManager {
         );
         const mixPass = this.createMixPass(occlusionRenderTarget);
         this.mainComposer.addPass(mixPass);
+        // setup minimap
+        this.miniMapManager = new MiniMapManager(canvasMiniMapDom);
     }
 
     // create a renderer for when a player is inside an element
     public addPlayerInsideComposer = () => {
         const renderScale = 1;
-        const playerInsideRenderTarget = this.createRenderTarget(renderScale);
+        const playerInsideRenderTarget = this.createRenderTarget(
+            this.width,
+            this.height,
+            renderScale,
+        );
         const playerInsidePass = new ShaderPass({
             uniforms: {
                 tDiffuse: { value: null },
@@ -169,7 +184,11 @@ export class RendererManager {
 
     public addLightBounceComposer = (bounce: ElementToBounce) => {
         const renderScale = 1;
-        const occlusionRenderTarget = this.createRenderTarget(renderScale);
+        const occlusionRenderTarget = this.createRenderTarget(
+            this.width,
+            this.height,
+            renderScale,
+        );
         const volumetricLightPass = new ShaderPass({
             uniforms: {
                 tDiffuse: { value: null },
@@ -274,6 +293,13 @@ export class RendererManager {
         this.camera.layers.set(Layer.DEFAULT);
         this.renderer.setClearColor(0x000000);
         this.mainComposer.render();
+
+        // minimap
+        this.miniMapManager.render(
+            this.camera,
+            this.scene,
+            this.players![1] as LightPlayer,
+        );
     };
 
     public resize = () => {

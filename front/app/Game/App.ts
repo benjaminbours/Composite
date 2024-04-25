@@ -118,6 +118,7 @@ export default class App {
 
     constructor(
         public canvasDom: HTMLCanvasElement,
+        public canvasMiniMapDom: HTMLCanvasElement,
         initialGameState: GameState,
         playersConfig: Side[],
         public inputsManager: InputsManager,
@@ -150,6 +151,7 @@ export default class App {
         this.rendererManager = new RendererManager(
             this.camera,
             canvasDom,
+            canvasMiniMapDom,
             this.scene,
         );
 
@@ -376,6 +378,7 @@ export default class App {
                     case Side.LIGHT:
                         const lightPlayer = new LightPlayer();
                         lightPlayer.mesh.layers.set(Layer.OCCLUSION_PLAYER);
+                        lightPlayer.mesh.layers.enable(Layer.MINI_MAP);
                         lightPlayer.position.copy(startPosition.light);
                         return lightPlayer;
                     case Side.SHADOW:

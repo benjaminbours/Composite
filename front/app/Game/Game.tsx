@@ -55,6 +55,7 @@ function Game({
     levelEditorProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasMiniMapRef = useRef<HTMLCanvasElement>(null);
     const appRef = useRef<App>();
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
 
@@ -97,13 +98,14 @@ function Game({
             }
         };
 
-        if (!canvasRef.current) {
+        if (!canvasRef.current || !canvasMiniMapRef.current) {
             return;
         }
 
         if (multiplayerGameProps) {
             appRef.current = new App(
                 canvasRef.current,
+                canvasMiniMapRef.current,
                 multiplayerGameProps.initialGameState,
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 inputsManager,
@@ -147,6 +149,7 @@ function Game({
             );
             appRef.current = new App(
                 canvasRef.current,
+                canvasMiniMapRef.current,
                 initialGameState,
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 inputsManager,
@@ -205,7 +208,12 @@ function Game({
             {isMobile && appRef.current && (
                 <MobileHUD inputsManager={appRef.current.inputsManager} />
             )}
-            <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }}></canvas>
+            <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }} />
+            <canvas
+                ref={canvasMiniMapRef}
+                id="minimap"
+                style={{ zIndex: -3 }}
+            />
         </>
     );
 }
