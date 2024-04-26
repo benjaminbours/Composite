@@ -18,6 +18,7 @@ interface Props {
     currentEditingIndex: number | undefined;
     onElementClick: (index: number) => () => void;
     onElementDelete: (index: number) => () => void;
+    onElementDuplicate: (index: number) => () => void;
     onElementLock: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     onAddElement: (type: ElementType) => void;
@@ -32,6 +33,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
         onElementLock,
         onChangeName,
         onElementDelete,
+        onElementDuplicate,
         onAddElement,
         disabled,
     }) => {
@@ -86,6 +88,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                 <AccordionDetails>
                     <div className="scene-content-panel__content">
                         <DropDownMenu
+                            className="scene-content-panel__add-button"
                             buttonText="Add"
                             items={libraryItems}
                             icon={<AddIcon />}
@@ -99,6 +102,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                                     index={index}
                                     isSelected={index === currentEditingIndex}
                                     onDelete={onElementDelete}
+                                    onDuplicate={onElementDuplicate}
                                     onChangeName={onChangeName}
                                     onClick={onElementClick}
                                     onLock={onElementLock}

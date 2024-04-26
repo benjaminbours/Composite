@@ -9,12 +9,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { LevelElement } from '@benjaminbours/composite-core';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 type Props = LevelElement & {
     index: number;
     isSelected: boolean;
     onClick: (index: number) => () => void;
     onDelete: (index: number) => () => void;
+    onDuplicate: (index: number) => () => void;
     onLock: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     isLocked?: boolean;
@@ -31,6 +33,7 @@ export const SceneItem: React.FC<Props> = React.memo(
         onClick,
         onLock,
         onDelete,
+        onDuplicate,
         onChangeName,
         disabled,
         cantDelete,
@@ -61,6 +64,15 @@ export const SceneItem: React.FC<Props> = React.memo(
                     className="scene-content-panel__item-action"
                 >
                     {isLocked ? <LockIcon /> : <LockOpenIcon />}
+                </IconButton>
+                <IconButton
+                    size="small"
+                    title="Duplicate element"
+                    onClick={onDuplicate(index)}
+                    disabled={disabled || cantDelete || isLocked}
+                    className="scene-content-panel__item-action"
+                >
+                    <ContentCopyIcon />
                 </IconButton>
                 <IconButton
                     size="small"

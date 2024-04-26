@@ -6,6 +6,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
 interface Props {
+    className?: string;
     buttonText: string;
     items: {
         onClick: () => void;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const DropDownMenu: React.FC<Props> = ({
+    className,
     items,
     buttonText,
     icon,
@@ -36,6 +38,7 @@ export const DropDownMenu: React.FC<Props> = ({
     return (
         <>
             <Button
+                className={className}
                 aria-controls={open ? 'basic-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}

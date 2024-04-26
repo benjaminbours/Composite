@@ -312,6 +312,16 @@ export function useController(
         [],
     );
 
+    const duplicateElement = useCallback(
+        (index: number) => () => {
+            dispatch({
+                type: ActionType.DUPLICATE_ELEMENT,
+                payload: { index, uuid: uuid.v4() },
+            });
+        },
+        [],
+    );
+
     const selectElement = useCallback(
         (index: number) => () => {
             dispatch({
@@ -708,6 +718,7 @@ export function useController(
         handleUpdateElementProperty,
         addElement,
         removeElement,
+        duplicateElement,
         onAppLoaded,
         selectElement,
         setIsAuthModalOpen,

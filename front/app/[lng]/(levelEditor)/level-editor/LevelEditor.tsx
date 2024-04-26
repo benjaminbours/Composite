@@ -73,6 +73,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
             updateElementName,
             addElement,
             removeElement,
+            duplicateElement,
             selectElement,
             setIsAuthModalOpen,
             setIsThumbnailModalOpen,
@@ -234,6 +235,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                                 onElementClick={selectElement}
                                 onChangeName={updateElementName}
                                 onElementDelete={removeElement}
+                                onElementDuplicate={duplicateElement}
                                 onAddElement={addElement}
                                 onElementLock={lockElement}
                                 disabled={isSaving}

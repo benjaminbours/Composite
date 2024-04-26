@@ -175,7 +175,11 @@ export const PropertiesPanel: React.FC<Props> = ({
                             };
                         return (
                             <li key={key} className={cssClass}>
-                                <Accordion elevation={10}>
+                                <Accordion
+                                    elevation={10}
+                                    defaultExpanded
+                                    className="level-editor__accordion"
+                                >
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1-content"
@@ -218,7 +222,11 @@ export const PropertiesPanel: React.FC<Props> = ({
                             };
                         return (
                             <li key={key} className={cssClass}>
-                                <Accordion elevation={10}>
+                                <Accordion
+                                    elevation={10}
+                                    defaultExpanded
+                                    className="level-editor__accordion"
+                                >
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1-content"

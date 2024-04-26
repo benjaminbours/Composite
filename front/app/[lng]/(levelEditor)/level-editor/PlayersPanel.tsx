@@ -39,7 +39,8 @@ export const PlayersPanel: React.FC<Props> = ({
     return (
         <Accordion
             elevation={1}
-            className="panel scene-content-panel level-editor__accordion"
+            className="panel player-start-panel level-editor__accordion"
+            defaultExpanded
         >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <h3>Players start</h3>

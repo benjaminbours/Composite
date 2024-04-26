@@ -79,6 +79,7 @@ export enum ActionType {
     UPDATE_ELEMENT_NAME = 'UPDATE_ELEMENT_NAME',
     UPDATE_ELEMENT_PROPERTY = 'UPDATE_ELEMENT_PROPERTY',
     REMOVE_ELEMENT = 'REMOVE_ELEMENT',
+    DUPLICATE_ELEMENT = 'DUPLICATE_ELEMENT',
     ADD_ELEMENT = 'ADD_ELEMENT',
     SELECT_ELEMENT = 'SELECT_ELEMENT',
     LOCK_ELEMENT = 'LOCK_ELEMENT',
@@ -159,6 +160,14 @@ interface RemoveElementAction {
     payload: number;
 }
 
+interface DuplicateElementAction {
+    type: ActionType.DUPLICATE_ELEMENT;
+    payload: {
+        index: number;
+        uuid: string;
+    };
+}
+
 interface AddElementAction {
     type: ActionType.ADD_ELEMENT;
     payload: {
@@ -200,7 +209,8 @@ type Action =
     | SetAppModeAction
     | ToggleShortcutAction
     | LockElementAction
-    | UpdateStartPositionAction;
+    | UpdateStartPositionAction
+    | DuplicateElementAction;
 
 export function reducer(
     state: typeof initialState,
@@ -525,6 +535,52 @@ export function reducer(
                 ...state,
                 historyIndex: historyData.historyIndex,
                 history: historyData.history,
+            };
+        case ActionType.DUPLICATE_ELEMENT:
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
+            const elementToDuplicate = elements[action.payload.index];
+            if (process.env.NODE_ENV === 'development') {
+                // TODO: I think it's small but performance could be improve here. This code
+                // exist because of react strict mode.
+                // if element already in the scene, remove it. Suppose to be trigger only in dev with react strict mode
+                const elem = state.app!.level.children.find(
+                    (el) => (el as any).customUUID === action.payload.uuid,
+                );
+                if (elem) {
+                    removeMeshFromLevel(
+                        state.app!,
+                        elem,
+                        elementToDuplicate.type,
+                    );
+                }
+            }
+            const duplicate = createElement(
+                buildWorldContext(state.app!),
+                elementToDuplicate.type,
+                elementToDuplicate.properties,
+            );
+            elements.splice(action.payload.index + 1, 0, {
+                type: elementToDuplicate.type,
+                properties: duplicate.properties,
+                mesh: duplicate.mesh,
+                name: `${elementToDuplicate.name}_copy`,
+            });
+            (duplicate.mesh as any).customUUID = action.payload.uuid;
+            currentEditingIndex = action.payload.index + 1;
+            state.app!.level.add(duplicate.mesh);
+            state.app!.attachTransformControls(duplicate.mesh);
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
+            return {
+                ...state,
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
+                currentEditingIndex,
             };
         case ActionType.LOAD_LEVEL:
             elements = state.history[state.historyIndex]
