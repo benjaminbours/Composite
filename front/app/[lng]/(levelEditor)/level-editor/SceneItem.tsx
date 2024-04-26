@@ -1,15 +1,21 @@
 // vendors
-import React from 'react';
+import React, { useMemo } from 'react';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import TextField from '@mui/material/TextField';
 import SquareIcon from '@mui/icons-material/Square';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { LevelElement } from '@benjaminbours/composite-core';
+import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { BounceIcon } from './icons/BounceIcon';
+import { ColumnIcon } from './icons/ColumnIcon';
+import { ArchIcon } from './icons/ArchIcon';
 
 type Props = LevelElement & {
     index: number;
@@ -37,7 +43,40 @@ export const SceneItem: React.FC<Props> = React.memo(
         onChangeName,
         disabled,
         cantDelete,
+        type,
     }) => {
+        const icon = useMemo(() => {
+            switch (type) {
+                case ElementType.END_LEVEL:
+                    return (
+                        <SportsScoreIcon className="scene-content-panel__item-icon" />
+                    );
+                case ElementType.WALL_DOOR:
+                    return (
+                        <DoorSlidingIcon className="scene-content-panel__item-icon" />
+                    );
+                case ElementType.DOOR_OPENER:
+                    return (
+                        <ToggleOnIcon className="scene-content-panel__item-icon" />
+                    );
+                case ElementType.ARCH:
+                    return (
+                        <ArchIcon className="scene-content-panel__bounce-icon" />
+                    );
+                case ElementType.BOUNCE:
+                    return (
+                        <BounceIcon className="scene-content-panel__bounce-icon" />
+                    );
+                case ElementType.FAT_COLUMN:
+                    return (
+                        <ColumnIcon className="scene-content-panel__bounce-icon" />
+                    );
+                default:
+                    return (
+                        <SquareIcon className="scene-content-panel__item-icon" />
+                    );
+            }
+        }, [type]);
         return (
             <ListItem className="scene-content-panel__item">
                 <ListItemButton
@@ -46,7 +85,7 @@ export const SceneItem: React.FC<Props> = React.memo(
                     onClick={onClick(index)}
                     className="scene-content-panel__item-button"
                 >
-                    <SquareIcon className="scene-content-panel__item-icon" />
+                    {icon}
                     <TextField
                         variant="standard"
                         value={name}

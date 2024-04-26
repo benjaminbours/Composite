@@ -7,11 +7,16 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 // our libs
 import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 // project
 import { SceneItem } from './SceneItem';
 import { DropDownMenu } from './DropDownMenu';
+import { BounceIcon } from './icons/BounceIcon';
+import { ColumnIcon } from './icons/ColumnIcon';
+import { ArchIcon } from './icons/ArchIcon';
 
 interface Props {
     elements: LevelElement[];
@@ -45,32 +50,27 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                     onClick: () => onAddElement(ElementType.WALL),
                 },
                 {
-                    icon: <SquareIcon fontSize="small" />,
+                    icon: <DoorSlidingIcon fontSize="small" />,
                     text: 'Door',
                     onClick: () => onAddElement(ElementType.WALL_DOOR),
                 },
                 {
-                    icon: <SquareIcon fontSize="small" />,
+                    icon: <ToggleOnIcon fontSize="small" />,
                     text: 'Door opener',
                     onClick: () => onAddElement(ElementType.DOOR_OPENER),
                 },
                 {
-                    icon: <SquareIcon fontSize="small" />,
+                    icon: <ArchIcon className="bounce-icon-add-menu" />,
                     text: 'Arch',
                     onClick: () => onAddElement(ElementType.ARCH),
                 },
                 {
-                    icon: <SquareIcon fontSize="small" />,
+                    icon: <BounceIcon className="bounce-icon-add-menu" />,
                     text: 'Bounce',
                     onClick: () => onAddElement(ElementType.BOUNCE),
                 },
-                // {
-                //     icon: <SquareIcon fontSize="small" />,
-                //     text: 'End level',
-                //     onClick: () => onAddElement(ElementType.END_LEVEL),
-                // },
                 {
-                    icon: <SquareIcon fontSize="small" />,
+                    icon: <ColumnIcon className="bounce-icon-add-menu" />,
                     text: 'Fat column',
                     onClick: () => onAddElement(ElementType.FAT_COLUMN),
                 },
