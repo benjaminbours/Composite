@@ -1,5 +1,16 @@
 # composite-front
 
+## 1.0.0-next.11
+
+### Patch Changes
+
+- Add minimap
+- Add key to reset player position
+- Updated dependencies
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.9
+  - @benjaminbours/composite-core@1.0.0-next.9
+
 ## 1.0.0-next.10
 
 ### Patch Changes

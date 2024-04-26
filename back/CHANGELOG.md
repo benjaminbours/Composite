@@ -1,5 +1,15 @@
 # composite-back
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Add minimap
+- Add key to reset player position
+- Updated dependencies
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.9
+
 ## 1.0.0-next.8
 
 ### Patch Changes

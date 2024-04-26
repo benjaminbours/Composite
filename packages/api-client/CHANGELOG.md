@@ -1,5 +1,12 @@
 # @benjaminbours/composite-api-client
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Add minimap
+- Add key to reset player position
+
 ## 1.0.0-next.8
 
 ### Patch Changes
