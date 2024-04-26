@@ -56,6 +56,7 @@ export interface InputsSync {
     jump: boolean;
     top: boolean;
     bottom: boolean;
+    resetPosition: boolean;
 }
 
 export interface InputsClient {
@@ -241,6 +242,7 @@ export const ACTIONS = [
     'bottom',
     'jump',
     'interact',
+    'resetPosition',
 ] as const;
 type ActionTuple = typeof ACTIONS;
 export type Action = ActionTuple[number];

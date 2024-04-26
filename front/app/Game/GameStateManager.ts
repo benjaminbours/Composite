@@ -3,6 +3,7 @@ import {
     GamePlayerInputPayload,
     GameState,
     GameStateUpdatePayload,
+    LevelStartPosition,
     applyInputListToSimulation,
 } from '@benjaminbours/composite-core';
 import { Object3D, Object3DEventMap, Vec2, Vector2 } from 'three';
@@ -33,6 +34,8 @@ export class GameStateManager {
     private stateCorrection: Partial<GameState> | null = null;
     private correctionMaxIncrement = 0;
     private correctionCounter = 0;
+
+    public startPosition?: LevelStartPosition;
 
     constructor(
         initialGameState: GameState,
@@ -143,6 +146,7 @@ export class GameStateManager {
                 this.inputsHistory[nextState.game_time] || [],
                 collidingElements,
                 nextState,
+                this.startPosition!,
                 Context.client,
                 false,
                 Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),

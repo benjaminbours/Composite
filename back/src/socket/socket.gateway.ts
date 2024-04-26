@@ -164,6 +164,7 @@ export class SocketGateway {
               jump: inputs[2],
               top: inputs[3],
               bottom: inputs[4],
+              resetPosition: inputs[5],
             },
             sequence,
             player,
@@ -235,6 +236,7 @@ export class SocketGateway {
             inputsForTick,
             collidingElements,
             gameState,
+            level.startPosition,
             Context.server,
           );
           updateServerBounces(level.bounces, gameState.level.bounces);
@@ -325,7 +327,7 @@ export class SocketGateway {
             x: 0,
             y: 0,
           },
-          state: MovableComponentState.onFloor,
+          state: MovableComponentState.inAir,
           insideElementID: undefined,
         },
         {
@@ -337,7 +339,7 @@ export class SocketGateway {
             x: 0,
             y: 0,
           },
-          state: MovableComponentState.onFloor,
+          state: MovableComponentState.inAir,
           insideElementID: undefined,
         },
       ],

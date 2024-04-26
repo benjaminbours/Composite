@@ -53,6 +53,7 @@ export default class InputsManager {
             ArrowUp: 'top',
             ArrowDown: 'bottom',
             KeyF: 'interact',
+            Backspace: 'resetPosition',
         },
     ) {
         if (typeof window === 'undefined') {
@@ -86,6 +87,7 @@ export default class InputsManager {
         top: false,
         bottom: false,
         interact: false,
+        resetPosition: false,
     };
 
     public updateKeyBindings(keyBindings: KeyBindings) {

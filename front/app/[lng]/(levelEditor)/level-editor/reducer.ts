@@ -248,6 +248,10 @@ export function reducer(
                 shadow: playersScene[0],
                 light: playersScene[1],
             });
+            state.app!.level.startPosition = {
+                shadow: playersScene[0],
+                light: playersScene[1],
+            };
             return {
                 ...state,
                 ...nextStartPosition,
@@ -562,6 +566,10 @@ export function reducer(
                 shadow: players[0],
                 light: players[1],
             });
+            state.app!.level.startPosition = {
+                shadow: players[0],
+                light: players[1],
+            };
             const history = (() => {
                 // first load
                 if (!state.isInitialLoadDone) {

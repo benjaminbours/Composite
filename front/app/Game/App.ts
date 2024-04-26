@@ -192,6 +192,8 @@ export default class App {
             clientGraphicHelpers,
         );
 
+        this.gameStateManager.startPosition = this.level.startPosition;
+
         this.setupPlayers(this.level.startPosition);
         this.setupScene();
         this.scene.add(this.level);
@@ -365,6 +367,10 @@ export default class App {
                 x: vec.x,
                 y: vec.y,
             };
+            this.gameStateManager.predictionState.players[i].velocity = {
+                x: 0,
+                y: 0,
+            };
         }
     };
 
@@ -463,6 +469,7 @@ export default class App {
             this.inputsManager.inputsActive.left ||
             this.inputsManager.inputsActive.right ||
             this.inputsManager.inputsActive.jump ||
+            this.inputsManager.inputsActive.resetPosition ||
             isInputReleased
         ) {
             const payload = this.createPlayerInputPayload(
@@ -486,6 +493,7 @@ export default class App {
                 jump: false,
                 top: false,
                 bottom: false,
+                resetPosition: false,
             })
         );
     };
@@ -527,6 +535,7 @@ export default class App {
                     inputs,
                     this.collidingElements,
                     this.gameStateManager.predictionState,
+                    this.level.startPosition,
                     Context.client,
                     false,
                     Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),

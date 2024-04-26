@@ -14,7 +14,11 @@ import {
 } from '../GameState';
 import { computeVelocity } from './velocity';
 import { INearestObjects } from './raycaster';
-import { AREA_DOOR_OPENER_SUFFIX, ElementName } from '../levels';
+import {
+    AREA_DOOR_OPENER_SUFFIX,
+    ElementName,
+    LevelStartPosition,
+} from '../levels';
 import { ElementToBounce, InteractiveArea } from '../elements';
 import {
     applyGravity,
@@ -185,29 +189,39 @@ export function updateServerBounces(
 export function applySingleInputToSimulation(
     delta: number,
     side: Side,
-    inputs: InputsSync,
+    input: InputsSync,
     collidingElems: Object3D[],
     gameState: GameState,
+    startPositions: LevelStartPosition,
     context: Context,
     freeMovementMode?: boolean,
 ) {
     const player = gameState.players[side];
-    // side effect
-    player.velocity.x = computeVelocity(
-        delta,
-        inputs,
-        player.state,
-        player.velocity.x,
-        'x',
-    );
-    if (freeMovementMode || player.state === MovableComponentState.inside) {
-        player.velocity.y = computeVelocity(
+    if (input.resetPosition) {
+        const key = side === Side.LIGHT ? 'light' : 'shadow';
+        player.position.x = startPositions[key].x;
+        player.position.y = startPositions[key].y;
+        player.velocity.x = 0;
+        player.velocity.y = 0;
+        player.state = MovableComponentState.inAir;
+    } else {
+        // side effect
+        player.velocity.x = computeVelocity(
             delta,
-            inputs,
+            input,
             player.state,
-            player.velocity.y,
-            'y',
+            player.velocity.x,
+            'x',
         );
+        if (freeMovementMode || player.state === MovableComponentState.inside) {
+            player.velocity.y = computeVelocity(
+                delta,
+                input,
+                player.state,
+                player.velocity.y,
+                'y',
+            );
+        }
     }
 
     const collisionResult = detectCollidingObjects(
@@ -218,7 +232,7 @@ export function applySingleInputToSimulation(
     applyPlayerUpdate(
         delta,
         side,
-        inputs,
+        input,
         collisionResult,
         player,
         gameState.level,
@@ -242,6 +256,7 @@ export function applyInputListToSimulation(
     inputs: GamePlayerInputPayload[], // should always receive one input per player minimum
     collidingElements: Object3D[],
     gameState: GameState,
+    startPositions: LevelStartPosition,
     context: Context,
     dev?: boolean,
     freeMovementMode?: boolean,
@@ -271,6 +286,7 @@ export function applyInputListToSimulation(
             input.inputs,
             collidingElements,
             gameState,
+            startPositions,
             context,
             freeMovementMode,
         );

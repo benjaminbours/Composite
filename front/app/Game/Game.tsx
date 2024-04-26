@@ -127,7 +127,7 @@ function Game({
                             x: 0,
                             y: 0,
                         },
-                        state: MovableComponentState.onFloor,
+                        state: MovableComponentState.inAir,
                         insideElementID: undefined,
                     },
                     {
@@ -139,7 +139,7 @@ function Game({
                             x: 0,
                             y: 0,
                         },
-                        state: MovableComponentState.onFloor,
+                        state: MovableComponentState.inAir,
                         insideElementID: undefined,
                     },
                 ],
