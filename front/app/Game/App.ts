@@ -539,7 +539,8 @@ export default class App {
                     this.gameStateManager.predictionState,
                     this.level.startPosition,
                     Context.client,
-                    this.mainPlayerSide,
+                    // if no socket controller, we are in editor mode
+                    this.socketController ? this.mainPlayerSide : undefined,
                     false,
                     Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );
