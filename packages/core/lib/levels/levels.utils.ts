@@ -478,7 +478,7 @@ export function createBounce({
 export function createMountain() {
     const mountain = new Mesh(geometries.mountain, materials.phong);
     mountain.name = 'mountain';
-    positionOnGrid(mountain, new Vector3(0, 0, -30));
+    positionOnGrid(mountain, new Vector3(0, 0, -25));
     return mountain;
 }
 

@@ -407,8 +407,7 @@ export default class App {
     private setupScene = () => {
         this.scene.add(this.floor);
 
-        this.scene.fog = new FogExp2(0xffffff, 0.001);
-        // this.scene.fog = new FogExp2(0xffffff, 0.0002);
+        this.scene.fog = new FogExp2(0xffffff, 0.0004);
         const ambient = new HemisphereLight(0xffffff, 0x000000, 0.1);
         ambient.name = 'ambientLight';
 
