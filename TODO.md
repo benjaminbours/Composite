@@ -7,12 +7,10 @@
 - Display keys to help player while in game
 - Pattern anti UX sur le lobby, genre on click sur I am ready et puis il est ecrit "I am not ready". On comprend pas
 - crash if try to delete the bounce we are currently inside
-- I have seen a very big graphic bug on google chrome related to bounces shadow
 - Fine tune the fog, le fog est actuellement trop fort et brule toute une partie des contrastes de la scene. Ca enleve un potentiel aspect du jeu qui serait de jouer sur ces contrastes pour eclairer / assombrir des zones pour son partenaire, ou impacter la luminosite de maniere generale.
 
 ### Medium priority
 
-- Add new elements at the center of the current view of the scene, instead of at 0,0,0 all the time
 - When updating size and rotation of element. At some point the rotation is not considered anymore
 
 ### Low priority

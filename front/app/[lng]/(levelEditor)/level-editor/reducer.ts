@@ -505,6 +505,13 @@ export function reducer(
                 buildWorldContext(state.app!),
                 action.payload.type,
             );
+            const cameraPosition = new Vector3();
+            state.app!.camera.getWorldPosition(cameraPosition);
+
+            properties.transform.position
+                .set(cameraPosition.x, cameraPosition.y, 0)
+                .divideScalar(gridSize);
+            applyTransformToMesh(mesh, properties.transform);
 
             elements.push({
                 id: uuid.v4(),
