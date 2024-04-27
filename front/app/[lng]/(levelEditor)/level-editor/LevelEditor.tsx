@@ -1,6 +1,6 @@
 'use client';
 // vendors
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import * as STATS from 'stats.js';

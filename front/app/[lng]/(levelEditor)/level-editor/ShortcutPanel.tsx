@@ -7,6 +7,8 @@ import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw';
 import ControlCameraIcon from '@mui/icons-material/ControlCamera';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 // project
 import { Divider } from '@mui/material';
 
@@ -37,6 +39,16 @@ export const ShortcutPanel: React.FC<Props> = React.memo(() => {
                 shortcut: 'T',
                 text: 'Translate element',
                 icon: <ControlCameraIcon />,
+            },
+            {
+                shortcut: 'Delete',
+                text: 'Delete element',
+                icon: <DeleteIcon />,
+            },
+            {
+                shortcut: 'Backspace',
+                text: 'Reset player position',
+                icon: <RestartAltIcon />,
             },
         ],
         [],

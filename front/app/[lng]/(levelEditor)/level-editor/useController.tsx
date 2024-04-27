@@ -587,6 +587,13 @@ export function useController(
             } else if (event.code === 'KeyR') {
                 app.transformControls?.setMode('rotate');
                 updateTransformControlsAxis();
+            } else if (event.code === 'Delete') {
+                if (state.currentEditingIndex) {
+                    dispatch({
+                        type: ActionType.REMOVE_ELEMENT,
+                        payload: state.currentEditingIndex,
+                    });
+                }
             }
         };
 
