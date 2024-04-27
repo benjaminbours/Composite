@@ -544,7 +544,7 @@ export function useController(
 
     // register all key down events
     useEffect(() => {
-        if (!state.app) {
+        if (!state.app || state.appMode !== AppMode.EDITOR) {
             return;
         }
         const app = state.app;
@@ -597,6 +597,7 @@ export function useController(
         state.historyIndex,
         state.app,
         state.currentEditingIndex,
+        state.appMode,
     ]);
 
     // responsible to register and clear mouse event listeners
