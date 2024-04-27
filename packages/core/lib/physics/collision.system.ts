@@ -31,7 +31,7 @@ export function detectCollidingObjects(
 
     if (
         nearestObjects.bottom &&
-        position.y + velocity.y - collisionDetectionRange <=
+        Math.floor(position.y + velocity.y - collisionDetectionRange) <=
             nearestObjects.bottom.point.y
     ) {
         colliding.bottom = nearestObjects.bottom;

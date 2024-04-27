@@ -42,18 +42,19 @@ function applyPlayerUpdate(
     collisionResult: INearestObjects,
     player: PlayerGameState,
     levelState: LevelState,
+    canGoThrough: boolean,
     freeMovementMode?: boolean,
 ) {
     // console.log('HERE collision result', collisionResult);
     clearInsideElementID(collisionResult, player);
 
-    handleCollision(collisionResult, 'right', side, player);
-    handleCollision(collisionResult, 'left', side, player);
-    handleCollision(collisionResult, 'top', side, player);
-    handleCollision(collisionResult, 'bottom', side, player);
+    handleCollision(collisionResult, 'right', side, player, canGoThrough);
+    handleCollision(collisionResult, 'left', side, player, canGoThrough);
+    handleCollision(collisionResult, 'top', side, player, canGoThrough);
+    handleCollision(collisionResult, 'bottom', side, player, canGoThrough);
 
     handleJump(input, player, levelState);
-    if (player.state !== MovableComponentState.inside) {
+    if (player.state !== MovableComponentState.inside && !canGoThrough) {
         detectFalling(collisionResult, player);
 
         if (!freeMovementMode) {
@@ -194,6 +195,7 @@ export function applySingleInputToSimulation(
     gameState: GameState,
     startPositions: LevelStartPosition,
     context: Context,
+    isSecondPlayer: boolean,
     freeMovementMode?: boolean,
 ) {
     const player = gameState.players[side];
@@ -236,6 +238,10 @@ export function applySingleInputToSimulation(
         collisionResult,
         player,
         gameState.level,
+        // Second player can go through elements and is not impacted by gravity.
+        // If not active, the second player can stay stick in your simulation and never reach
+        // where the correction from the server is sending him.
+        isSecondPlayer,
         freeMovementMode,
     );
     applyWorldUpdate(
@@ -258,6 +264,7 @@ export function applyInputListToSimulation(
     gameState: GameState,
     startPositions: LevelStartPosition,
     context: Context,
+    mainPlayerSide?: Side,
     dev?: boolean,
     freeMovementMode?: boolean,
 ) {
@@ -288,6 +295,7 @@ export function applyInputListToSimulation(
             gameState,
             startPositions,
             context,
+            mainPlayerSide !== undefined && mainPlayerSide !== input.player,
             freeMovementMode,
         );
         if (dev) {

@@ -136,6 +136,7 @@ export default class App {
             initialGameState,
             this.socketController?.sendInputs,
         );
+        this.gameStateManager.mainPlayerSide = playersConfig[0];
         // inputs
 
         if (!socketController && initialMode === AppMode.GAME) {
@@ -537,6 +538,7 @@ export default class App {
                     this.gameStateManager.predictionState,
                     this.level.startPosition,
                     Context.client,
+                    this.mainPlayerSide,
                     false,
                     Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
                 );

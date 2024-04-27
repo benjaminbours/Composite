@@ -4,6 +4,7 @@ import {
     GameState,
     GameStateUpdatePayload,
     LevelStartPosition,
+    Side,
     applyInputListToSimulation,
 } from '@benjaminbours/composite-core';
 import { Object3D, Object3DEventMap, Vec2, Vector2 } from 'three';
@@ -36,6 +37,7 @@ export class GameStateManager {
     private correctionCounter = 0;
 
     public startPosition?: LevelStartPosition;
+    public mainPlayerSide?: Side;
 
     constructor(
         initialGameState: GameState,
@@ -148,6 +150,7 @@ export class GameStateManager {
                 nextState,
                 this.startPosition!,
                 Context.client,
+                this.mainPlayerSide!,
                 false,
                 Boolean(process.env.NEXT_PUBLIC_FREE_MOVEMENT_MODE),
             );
@@ -272,7 +275,9 @@ export class GameStateManager {
         // Calculate one-way latency
         let oneWayLatency = Math.floor(rtt / 2);
 
-        this.correctionMaxIncrement = Math.floor(oneWayLatency);
+        this.correctionMaxIncrement = Math.floor(
+            oneWayLatency > 25 ? 25 : oneWayLatency,
+        );
 
         // Set gameTimeDelta based on one-way latency
         this.gameTimeDelta = oneWayLatency;

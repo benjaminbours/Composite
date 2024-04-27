@@ -18,25 +18,34 @@ function handleDefaultCollision(
     direction: 'left' | 'right' | 'top' | 'bottom',
     player: PlayerGameState,
     point: Vector3,
+    canGoThrough: boolean,
 ) {
     const range = COLLISION_DETECTION_RANGE;
     if (direction === 'left') {
-        player.velocity.x = 0;
-        player.position.x = point.x + range;
+        if (!canGoThrough) {
+            player.velocity.x = 0;
+            player.position.x = point.x + range;
+        }
     }
     if (direction === 'right') {
-        player.velocity.x = 0;
-        player.position.x = point.x - range;
+        if (!canGoThrough) {
+            player.velocity.x = 0;
+            player.position.x = point.x - range;
+        }
     }
 
     if (direction === 'top') {
-        player.velocity.y = 0;
-        player.position.y = point.y - range;
+        if (!canGoThrough) {
+            player.velocity.y = 0;
+            player.position.y = point.y - range;
+        }
     }
 
     if (direction === 'bottom') {
-        player.velocity.y = 0;
-        player.position.y = point.y + range;
+        if (!canGoThrough) {
+            player.velocity.y = 0;
+            player.position.y = point.y + range;
+        }
         if (player.state !== MovableComponentState.inside) {
             player.state = MovableComponentState.onFloor;
         }
@@ -94,6 +103,7 @@ export function handleCollision(
     direction: 'left' | 'right' | 'top' | 'bottom',
     side: Side,
     player: PlayerGameState,
+    canGoThrough: boolean,
 ) {
     if (player.state === MovableComponentState.inside) {
         return;
@@ -132,7 +142,12 @@ export function handleCollision(
             );
         } else {
             // normal collision
-            handleDefaultCollision(direction, player, collision.point);
+            handleDefaultCollision(
+                direction,
+                player,
+                collision.point,
+                canGoThrough,
+            );
         }
     } else if (
         direction === 'bottom' &&
@@ -142,6 +157,7 @@ export function handleCollision(
             direction,
             player,
             new Vector3(player.position.x, 0, 0),
+            false,
         );
     }
 }
