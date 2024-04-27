@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.10
+
+### Patch Changes
+
+- Various improvements
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.10
+
 ## 1.0.0-next.9
 
 ### Patch Changes
