@@ -15,6 +15,7 @@ import {
     createElement,
     gridSize,
 } from '@benjaminbours/composite-core';
+import * as uuid from 'uuid';
 import App, { AppMode } from '../../../Game/App';
 import { DoorOpenerGraphic } from '../../../Game/elements/DoorOpenerGraphic';
 import {
@@ -82,6 +83,7 @@ export enum ActionType {
     DUPLICATE_ELEMENT = 'DUPLICATE_ELEMENT',
     ADD_ELEMENT = 'ADD_ELEMENT',
     SELECT_ELEMENT = 'SELECT_ELEMENT',
+    MOVE_ELEMENT = 'MOVE_ELEMENT',
     LOCK_ELEMENT = 'LOCK_ELEMENT',
     UNDO = 'UNDO',
     REDO = 'REDO',
@@ -168,6 +170,14 @@ interface DuplicateElementAction {
     };
 }
 
+interface MoveElementAction {
+    type: ActionType.MOVE_ELEMENT;
+    payload: {
+        dragIndex: number;
+        hoverIndex: number;
+    };
+}
+
 interface AddElementAction {
     type: ActionType.ADD_ELEMENT;
     payload: {
@@ -210,7 +220,8 @@ type Action =
     | ToggleShortcutAction
     | LockElementAction
     | UpdateStartPositionAction
-    | DuplicateElementAction;
+    | DuplicateElementAction
+    | MoveElementAction;
 
 export function reducer(
     state: typeof initialState,
@@ -496,6 +507,7 @@ export function reducer(
             );
 
             elements.push({
+                id: uuid.v4(),
                 type: action.payload.type,
                 properties,
                 mesh,
@@ -537,6 +549,24 @@ export function reducer(
                 historyIndex: historyData.historyIndex,
                 history: historyData.history,
             };
+        case ActionType.MOVE_ELEMENT:
+            elements = state.history[state.historyIndex]
+                ? cloneElements(state.history[state.historyIndex])
+                : [];
+            const elementDragged = elements.splice(action.payload.dragIndex, 1);
+            elements.splice(action.payload.hoverIndex, 0, elementDragged[0]);
+            currentEditingIndex = action.payload.hoverIndex;
+            historyData = addToHistory(
+                state.history,
+                state.historyIndex,
+                elements,
+            );
+            return {
+                ...state,
+                historyIndex: historyData.historyIndex,
+                history: historyData.history,
+                currentEditingIndex,
+            };
         case ActionType.DUPLICATE_ELEMENT:
             elements = state.history[state.historyIndex]
                 ? cloneElements(state.history[state.historyIndex])
@@ -563,6 +593,7 @@ export function reducer(
                 elementToDuplicate.properties,
             );
             elements.splice(action.payload.index + 1, 0, {
+                id: uuid.v4(),
                 type: elementToDuplicate.type,
                 properties: duplicate.properties,
                 mesh: duplicate.mesh,
@@ -606,7 +637,12 @@ export function reducer(
             const elementList = parseLevelElements(
                 buildWorldContext(state.app!),
                 action.payload.data,
-            );
+            ).map((el) => {
+                return {
+                    ...el,
+                    id: uuid.v4(),
+                };
+            });
             loadElementsToLevel(state.app!, elementList);
             // load players position
             const players = [

@@ -10,7 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class Element implements Omit<LevelElement, 'mesh'> {
+export class Element implements Omit<LevelElement, 'mesh' | 'id'> {
   @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()

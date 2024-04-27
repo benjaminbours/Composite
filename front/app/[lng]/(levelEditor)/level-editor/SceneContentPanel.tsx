@@ -9,6 +9,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 // our libs
 import { ElementType, LevelElement } from '@benjaminbours/composite-core';
 // project
@@ -27,6 +29,7 @@ interface Props {
     onElementLock: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     onAddElement: (type: ElementType) => void;
+    onElementMove: (dragIndex: number, hoverIndex: number) => void;
     disabled?: boolean;
 }
 
@@ -40,6 +43,7 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
         onElementDelete,
         onElementDuplicate,
         onAddElement,
+        onElementMove,
         disabled,
     }) => {
         const libraryItems = useMemo(() => {
@@ -94,25 +98,31 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                             icon={<AddIcon />}
                             disabled={disabled}
                         />
-                        <List>
-                            {elements.map((element, index) => (
-                                <SceneItem
-                                    key={index}
-                                    {...element}
-                                    index={index}
-                                    isSelected={index === currentEditingIndex}
-                                    onDelete={onElementDelete}
-                                    onDuplicate={onElementDuplicate}
-                                    onChangeName={onChangeName}
-                                    onClick={onElementClick}
-                                    onLock={onElementLock}
-                                    disabled={disabled}
-                                    cantDelete={
-                                        element.type === ElementType.END_LEVEL
-                                    }
-                                />
-                            ))}
-                        </List>
+                        <DndProvider backend={HTML5Backend}>
+                            <List>
+                                {elements.map((element, index) => (
+                                    <SceneItem
+                                        key={element.id}
+                                        {...element}
+                                        index={index}
+                                        isSelected={
+                                            index === currentEditingIndex
+                                        }
+                                        onDelete={onElementDelete}
+                                        onDuplicate={onElementDuplicate}
+                                        onChangeName={onChangeName}
+                                        onClick={onElementClick}
+                                        onLock={onElementLock}
+                                        onMove={onElementMove}
+                                        disabled={disabled}
+                                        cantDelete={
+                                            element.type ===
+                                            ElementType.END_LEVEL
+                                        }
+                                    />
+                                ))}
+                            </List>
+                        </DndProvider>
                     </div>
                 </AccordionDetails>
             </Accordion>

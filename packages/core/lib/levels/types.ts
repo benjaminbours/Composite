@@ -85,6 +85,7 @@ export type ElementProperties =
     | DoorOpenerProperties;
 
 export interface LevelElement {
+    id: string;
     name: string;
     type: ElementType;
     properties: ElementProperties;

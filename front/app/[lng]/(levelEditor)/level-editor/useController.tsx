@@ -322,6 +322,13 @@ export function useController(
         [],
     );
 
+    const moveElement = useCallback((dragIndex: number, hoverIndex: number) => {
+        dispatch({
+            type: ActionType.MOVE_ELEMENT,
+            payload: { dragIndex, hoverIndex },
+        });
+    }, []);
+
     const selectElement = useCallback(
         (index: number) => () => {
             dispatch({
@@ -728,6 +735,7 @@ export function useController(
         toggleTestMode,
         toggleShortcut,
         lockElement,
+        moveElement,
         captureSnapshot,
         handleClickOnPublish,
         resetPlayersPosition,

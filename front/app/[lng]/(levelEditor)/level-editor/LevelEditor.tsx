@@ -73,6 +73,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
             updateElementName,
             addElement,
             removeElement,
+            moveElement,
             duplicateElement,
             selectElement,
             setIsAuthModalOpen,
@@ -238,6 +239,7 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                                 onElementDuplicate={duplicateElement}
                                 onAddElement={addElement}
                                 onElementLock={lockElement}
+                                onElementMove={moveElement}
                                 disabled={isSaving}
                             />
                             <PlayersPanel

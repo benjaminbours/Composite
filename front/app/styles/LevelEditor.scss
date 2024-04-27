@@ -14,7 +14,7 @@
         list-style: none;
         margin: 0;
         padding: 0;
-        padding-right: 10px;
+        // padding-right: 10px;
         overflow-y: auto;
         scrollbar-width: thin; /* For Firefox */
         scrollbar-gutter: stable;
@@ -172,15 +172,20 @@
 
 .scene-content-panel__item {
     padding: 0;
-    margin: 10px 0;
+    margin: 5px 0;
+
+    input {
+        font-size: 12px !important;
+    }
 }
 
 .scene-content-panel__item-icon {
     margin-right: 10px;
+    width: 20px;
 }
 
 .scene-content-panel__bounce-icon {
-    width: 50px;
+    width: 30px;
     margin-right: 10px;
 }
 
@@ -190,8 +195,8 @@
 
 .scene-content-panel__item-action {
     svg {
-        width: 0.75em;
-        height: 0.75em;
+        width: 0.6em;
+        height: 0.6em;
     }
 }
 

@@ -37,7 +37,6 @@
 - Write medium article about the current state of the project, and about the vision and where I want to go
 - Update the timeline. Talk in the timeline about brilliant and how it help me achieve what I needed in terms of math.
 - Improve navigation in timeline, use button to go to anchor
-- Ability to order the element in the element list of level editor
 - Impossible to change level or quit the team when you are in queue and you matched
 - Add appropriate license for the project, VERY IMPORTANT
 - While the project is not responsive, display a message to invite people to comeback with a laptop
