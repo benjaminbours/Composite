@@ -19,6 +19,9 @@ import { DropDownMenu } from './DropDownMenu';
 import { BounceIcon } from './icons/BounceIcon';
 import { ColumnIcon } from './icons/ColumnIcon';
 import { ArchIcon } from './icons/ArchIcon';
+import IconButton from '@mui/material/IconButton';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 interface Props {
     elements: LevelElement[];
@@ -30,6 +33,8 @@ interface Props {
     onChangeName: (index: number) => (e: any) => void;
     onAddElement: (type: ElementType) => void;
     onElementMove: (dragIndex: number, hoverIndex: number) => void;
+    onRedo: () => void;
+    onUndo: () => void;
     disabled?: boolean;
 }
 
@@ -44,6 +49,8 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
         onElementDuplicate,
         onAddElement,
         onElementMove,
+        onRedo,
+        onUndo,
         disabled,
     }) => {
         const libraryItems = useMemo(() => {
@@ -91,13 +98,31 @@ export const SceneContentPanel: React.FC<Props> = React.memo(
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className="scene-content-panel__content">
-                        <DropDownMenu
-                            className="scene-content-panel__add-button"
-                            buttonText="Add"
-                            items={libraryItems}
-                            icon={<AddIcon />}
-                            disabled={disabled}
-                        />
+                        <div className="scene-content-panel__content-header">
+                            <DropDownMenu
+                                className="scene-content-panel__add-button"
+                                buttonText="Add"
+                                items={libraryItems}
+                                icon={<AddIcon />}
+                                disabled={disabled}
+                            />
+                            <IconButton
+                                size="small"
+                                title="Undo"
+                                onClick={onUndo}
+                                disabled={disabled}
+                            >
+                                <UndoIcon />
+                            </IconButton>
+                            <IconButton
+                                size="small"
+                                title="Redo"
+                                onClick={onRedo}
+                                disabled={disabled}
+                            >
+                                <RedoIcon />
+                            </IconButton>
+                        </div>
                         <DndProvider backend={HTML5Backend}>
                             <List>
                                 {elements.map((element, index) => (

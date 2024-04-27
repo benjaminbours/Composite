@@ -89,6 +89,8 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
             resetCamera,
             toggleCollisionArea,
             handleUpdatePlayerStartPosition,
+            handleClickUndo,
+            handleClickRedo,
         } = useController(level_id, dictionary);
 
         // local refs
@@ -240,6 +242,8 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                                 onAddElement={addElement}
                                 onElementLock={lockElement}
                                 onElementMove={moveElement}
+                                onRedo={handleClickRedo}
+                                onUndo={handleClickUndo}
                                 disabled={isSaving}
                             />
                             <PlayersPanel

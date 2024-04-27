@@ -530,6 +530,18 @@ export function useController(
         toggleTestMode,
     ]);
 
+    const handleClickUndo = useCallback(() => {
+        if (state.historyIndex > 0) {
+            dispatch({ type: ActionType.UNDO });
+        }
+    }, [state.historyIndex]);
+
+    const handleClickRedo = useCallback(() => {
+        if (state.historyIndex < state.history.length - 1) {
+            dispatch({ type: ActionType.REDO });
+        }
+    }, [state.historyIndex, state.history.length]);
+
     // register all key down events
     useEffect(() => {
         if (!state.app) {
@@ -744,5 +756,7 @@ export function useController(
         toggleCollisionArea,
         resetCamera,
         handleUpdatePlayerStartPosition,
+        handleClickUndo,
+        handleClickRedo,
     };
 }

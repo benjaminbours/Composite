@@ -144,7 +144,12 @@
 }
 
 .scene-content-panel__add-button {
-    margin-left: 10px;
+    margin-right: auto;
+}
+
+.scene-content-panel__content-header {
+    display: flex;
+    padding: 0 10px;
 }
 
 .level-editor__accordion {
