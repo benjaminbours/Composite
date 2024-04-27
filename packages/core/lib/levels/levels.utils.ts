@@ -826,7 +826,7 @@ export function addToCollidingElements(
     const checkChildren = (elements: Object3D[]) => {
         for (let i = 0; i < elements.length; i++) {
             const child = elements[i];
-            const notCollidable = ['particles'];
+            const notCollidable = ['particles', 'pulse'];
             if (
                 child.name.includes('Occlusion') ||
                 child.name.includes('skin-bounce') ||

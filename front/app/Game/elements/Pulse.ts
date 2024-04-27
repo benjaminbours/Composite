@@ -19,6 +19,7 @@ export class Pulse extends Object3D {
         this.material = pulseMaterial;
 
         const mesh = new Mesh(geometry, this.material);
+        mesh.name = 'pulse';
         this.add(mesh);
         this.rotation.set(degreesToRadians(-90), 0, 0);
     }
