@@ -192,44 +192,10 @@ export class DoorOpenerGraphic
 
     activate = () => {
         this.activateVFX();
-        this.openTheDoor();
     };
 
     deactivate = (camera: CustomCamera) => () => {
         camera.unfocus();
         this.deactivateVFX();
-        this.closeTheDoor();
-    };
-
-    openTheDoor = () => {
-        if (!this.doorInfo) {
-            console.log('no door info');
-            return;
-        }
-        gsap.to(this.doorInfo.doorLeft.position, {
-            duration: 2,
-            x: -100,
-            overwrite: true,
-        });
-        gsap.to(this.doorInfo.doorRight.position, {
-            duration: 2,
-            x: 100,
-            overwrite: true,
-        });
-    };
-
-    closeTheDoor = () => {
-        if (!this.doorInfo) {
-            console.log('no door info');
-            return;
-        }
-        gsap.to(
-            [this.doorInfo.doorLeft.position, this.doorInfo.doorRight.position],
-            {
-                duration: 0.5,
-                x: 0,
-                overwrite: true,
-            },
-        );
     };
 }

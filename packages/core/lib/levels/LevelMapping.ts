@@ -17,6 +17,7 @@ export interface LevelStartPosition {
 export class LevelMapping extends Group implements AbstractLevel {
     public collidingElements: Object3D[] = [];
     public bounces: ElementToBounce[] = [];
+    public doorOpeners: Object3D[] = [];
     public lightBounces: ElementToBounce[] = [];
 
     public state: LevelState;
@@ -43,6 +44,7 @@ export class LevelMapping extends Group implements AbstractLevel {
 
         const worldContext: WorldContext = {
             levelState: this.state,
+            doorOpenersList: this.doorOpeners,
             bounceList: this.bounces,
             clientGraphicHelpers,
         };

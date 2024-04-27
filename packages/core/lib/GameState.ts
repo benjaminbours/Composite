@@ -3,11 +3,17 @@ import { MovableComponentState } from './types';
 
 export interface LevelState {
     id: number;
-    doors: {
-        [key: string]: number[];
-    };
+    doors: DoorState;
     bounces: BounceState;
     end_level: number[];
+}
+
+export interface DoorState {
+    // key = doorId
+    [key: string]: {
+        // key = openerId
+        [key: string]: number[];
+    };
 }
 
 export interface BounceState {
@@ -49,7 +55,8 @@ interface RedisDynamicGameState {
 export type RedisGameState = RedisStaticGameState & RedisDynamicGameState;
 
 const REDIS_DYNAMIC_FIELDS = {
-    DOOR: (doorId: string) => `door_${doorId}`,
+    DOOR: (doorId: string, openerId: string) =>
+        `door_${doorId}_opener_${openerId}`,
     BOUNCE: (bounceId: string) => `bounce_${bounceId}`,
 };
 
@@ -82,8 +89,13 @@ export class GameState {
         };
         Object.entries(state).forEach(([key, value]) => {
             if (key.includes('door') && value !== undefined) {
-                levelState.doors[key.replace('door_', '')] =
-                    parseActivators(value);
+                const parts = key.split('_');
+                const doorId = parts[1];
+                const openerId = parts[3];
+                if (levelState.doors[doorId] === undefined) {
+                    levelState.doors[doorId] = {};
+                }
+                levelState.doors[doorId][openerId] = parseActivators(value);
             }
             if (key.includes('bounce') && value) {
                 levelState.bounces[Number(key.replace('bounce_', ''))] = {
@@ -156,8 +168,11 @@ export class GameState {
             game_time: String(state.game_time),
             end_level: state.level.end_level.join(),
         };
-        Object.entries(state.level.doors).forEach(([key, value]) => {
-            redisGameState[REDIS_DYNAMIC_FIELDS.DOOR(key)] = value.join();
+        Object.entries(state.level.doors).forEach(([doorId, openers]) => {
+            Object.entries(openers).forEach(([openerId, value]) => {
+                redisGameState[REDIS_DYNAMIC_FIELDS.DOOR(doorId, openerId)] =
+                    value.join();
+            });
         });
         Object.entries(state.level.bounces).forEach(([key, value]) => {
             redisGameState[REDIS_DYNAMIC_FIELDS.BOUNCE(key)] = String(

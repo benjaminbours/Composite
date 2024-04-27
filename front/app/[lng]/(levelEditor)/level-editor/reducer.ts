@@ -336,6 +336,7 @@ export function reducer(
                     element.mesh.name = `door-opener-group-${value}`;
                     areaDoorOpener.name = ElementName.AREA_DOOR_OPENER(
                         String(value),
+                        String((element.properties as DoorOpenerProperties).id),
                     );
                     doorOpener.name = ElementName.DOOR_OPENER(String(value));
                     if (wallDoor && value !== undefined) {
@@ -599,6 +600,7 @@ export function reducer(
             state.app!.mouseSelectableObjects = [];
             state.app!.updatableElements = [];
             state.app!.level.bounces = [];
+            state.app!.level.doorOpeners = [];
             state.app!.gameStateManager.predictionState.level.doors = {};
             state.app!.gameStateManager.predictionState.level.bounces = {};
             const elementList = parseLevelElements(
@@ -658,6 +660,7 @@ export function reducer(
 function buildWorldContext(app: App): WorldContext {
     return {
         levelState: app.gameStateManager.predictionState.level,
+        doorOpenersList: app.level.doorOpeners,
         bounceList: app.level.bounces,
         clientGraphicHelpers: {
             updatableElements: app.updatableElements,

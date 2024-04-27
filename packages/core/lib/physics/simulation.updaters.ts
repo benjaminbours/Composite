@@ -101,36 +101,43 @@ function applyWorldUpdate(
     context: Context,
 ) {
     // doors
-    let doorNameActivating: string | undefined = undefined;
+    let doorId: string | undefined = undefined;
+    let openerId: string | undefined = undefined;
     if (
         collisionResult.bottom &&
         isTouchingDoorOpener(collisionResult.bottom)
     ) {
         const elem = collisionResult.bottom.object as InteractiveArea;
-        doorNameActivating = `${elem.name.replace(
-            `_${AREA_DOOR_OPENER_SUFFIX}`,
-            '',
-        )}`;
+        const parts = elem.name.split('_');
+        doorId = parts[0];
+        openerId = parts[1];
         if (
-            gameState.level.doors[doorNameActivating] &&
-            gameState.level.doors[doorNameActivating].indexOf(side) === -1
+            gameState.level.doors[doorId] &&
+            gameState.level.doors[doorId][openerId] &&
+            gameState.level.doors[doorId][openerId].indexOf(side) === -1
         ) {
-            gameState.level.doors[doorNameActivating].push(side);
+            gameState.level.doors[doorId][openerId].push(side);
         }
     }
 
     for (const id in gameState.level.doors) {
-        const activators = gameState.level.doors[id];
+        const openers = gameState.level.doors[id];
+        let doorIsOpen = false;
+        for (const openerKey in openers) {
+            // if this door opener is not the one we are currently activating
+            // remove us from the list
+            const activator = openers[openerKey];
+            if (id !== doorId && openerKey !== openerId) {
+                const index = activator.indexOf(side);
+                if (index !== -1) {
+                    activator.splice(index, 1);
+                }
+            }
 
-        // if this door opener is not the one we are currently activating
-        // remove us from the list of activators
-        if (id !== doorNameActivating) {
-            const index = activators.indexOf(side);
-            if (index !== -1) {
-                activators.splice(index, 1);
+            if (activator.length > 0) {
+                doorIsOpen = true;
             }
         }
-
         // TODO: Check if at some point, this kind of update should not be directly inside the component,
         // not here where we are suppose to manage game state
         // and have a condition there about updating for server or client
@@ -140,7 +147,7 @@ function applyWorldUpdate(
             )?.parent;
 
             if (wallDoorGroup) {
-                updateDoor(wallDoorGroup, activators.length > 0);
+                updateDoor(wallDoorGroup, doorIsOpen);
             }
         }
     }

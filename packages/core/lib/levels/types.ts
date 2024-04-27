@@ -62,6 +62,7 @@ export class DoorOpenerProperties {
         rotation: new Euler(0, 0, 0),
     };
     public door_id: number | undefined = undefined;
+    constructor(public id: number) {}
 }
 
 export enum ElementType {

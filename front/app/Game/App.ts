@@ -19,6 +19,7 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+import { gsap } from 'gsap';
 // our libs
 import {
     GamePlayerInputPayload,
@@ -609,33 +610,76 @@ export default class App {
         }
     };
 
+    private openTheDoor = (doorRight: Object3D, doorLeft: Object3D) => {
+        gsap.to(doorLeft.position, {
+            duration: 2,
+            x: -100,
+            overwrite: true,
+        });
+        gsap.to(doorRight.position, {
+            duration: 2,
+            x: 100,
+            overwrite: true,
+        });
+    };
+
+    private closeTheDoor = (doorRight: Object3D, doorLeft: Object3D) => {
+        gsap.to([doorLeft.position, doorRight.position], {
+            duration: 0.5,
+            x: 0,
+            overwrite: true,
+        });
+    };
+
     private updateWorldPhysic = (state: GameState) => {
         // doors
         for (const key in state.level.doors) {
-            const activators = state.level.doors[key];
+            const openers = state.level.doors[key];
+            let doorIsOpen = false;
+            let doorRight: Object3D;
+            let doorLeft: Object3D;
 
-            const doorOpener = this.collidingElements.find(
-                (object) => object.name === ElementName.AREA_DOOR_OPENER(key),
-            )?.parent?.children[1] as DoorOpenerGraphic | undefined;
+            for (const openerKey in openers) {
+                const value = openers[openerKey];
+                const doorOpener = this.collidingElements.find(
+                    (object) =>
+                        object.name ===
+                        ElementName.AREA_DOOR_OPENER(key, openerKey),
+                )?.parent?.children[1] as DoorOpenerGraphic | undefined;
 
-            if (doorOpener) {
-                if (activators.length > 0 && !doorOpener.shouldActivate) {
-                    doorOpener.shouldActivate = true;
-                } else if (
-                    activators.length === 0 &&
-                    doorOpener.shouldActivate
+                if (doorOpener) {
+                    doorRight = doorOpener.doorInfo!.doorRight;
+                    doorLeft = doorOpener.doorInfo!.doorLeft;
+                    if (value.length > 0 && !doorOpener.shouldActivate) {
+                        doorOpener.shouldActivate = true;
+                    } else if (
+                        value.length === 0 &&
+                        doorOpener.shouldActivate
+                    ) {
+                        doorOpener.shouldActivate = false;
+                    }
+                }
+                if (value.length > 0) {
+                    doorIsOpen = true;
+                }
+
+                doorOpener?.update(this.delta, this.camera);
+                if (
+                    doorOpener?.isActive &&
+                    value.includes(this.mainPlayerSide)
                 ) {
-                    doorOpener.shouldActivate = false;
+                    const shouldFocus =
+                        value.includes(this.mainPlayerSide) &&
+                        this.mode === AppMode.GAME &&
+                        this.inputsManager.inputsActive.interact;
+                    doorOpener.focusCamera(this.camera, shouldFocus);
                 }
             }
 
-            doorOpener?.update(this.delta, this.camera);
-            if (doorOpener?.isActive) {
-                const shouldFocus =
-                    activators.includes(this.mainPlayerSide) &&
-                    this.mode === AppMode.GAME &&
-                    this.inputsManager.inputsActive.interact;
-                doorOpener.focusCamera(this.camera, shouldFocus);
+            if (doorIsOpen) {
+                this.openTheDoor(doorRight!, doorLeft!);
+            } else {
+                this.closeTheDoor(doorRight!, doorLeft!);
             }
         }
 

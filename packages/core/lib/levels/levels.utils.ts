@@ -6,7 +6,6 @@ import {
     MeshBasicMaterial,
     Object3D,
     Vector3,
-    BufferGeometry,
     Group,
     Object3DEventMap,
     Euler,
@@ -38,9 +37,9 @@ export const AREA_DOOR_OPENER_SUFFIX = 'AREA_DOOR_OPENER';
 export const ElementName = {
     END_LEVEL: 'END_LEVEL',
     AREA_END_LEVEL: 'AREA_END_LEVEL',
-    DOOR_OPENER: (doorName: string) => `${doorName}_DOOR_OPENER`,
-    AREA_DOOR_OPENER: (doorName: string) =>
-        `${doorName}_${AREA_DOOR_OPENER_SUFFIX}`,
+    DOOR_OPENER: (doorId: string) => `${doorId}_DOOR_OPENER`,
+    AREA_DOOR_OPENER: (doorId: string, openerId: string) =>
+        `${doorId}_${openerId}_${AREA_DOOR_OPENER_SUFFIX}`,
     BOUNCE: (id: number) => `${id}_BOUNCE`,
     WALL_DOOR: (doorIndex: string) => `${doorIndex}_WALL_DOOR`,
 };
@@ -495,15 +494,16 @@ export interface AbstractLevel {
         openerPosition: Vector3;
     }[];
     bounces: Object3D[];
+    doorOpeners: Object3D[];
     lightBounces: ElementToBounce[];
     updateMatrixWorld(force?: boolean): void;
 }
 
 function createDoorOpener(props: DoorOpenerProperties) {
     const group = new Object3D();
-    group.name = `door-opener-group-${props.door_id}`;
+    group.name = `door-opener-group-${props.door_id}-${props.id}`;
     const areaDoorOpener = new InteractiveArea(
-        ElementName.AREA_DOOR_OPENER(String(props.door_id)),
+        ElementName.AREA_DOOR_OPENER(String(props.door_id), String(props.id)),
     );
     group.add(areaDoorOpener);
     group.position.copy(
@@ -562,11 +562,17 @@ export interface ClientGraphicHelpers {
 export interface WorldContext {
     levelState: LevelState;
     bounceList: Object3D[];
+    doorOpenersList: Object3D[];
     clientGraphicHelpers?: ClientGraphicHelpers;
 }
 
 export function createElement(
-    { levelState, bounceList, clientGraphicHelpers }: WorldContext,
+    {
+        levelState,
+        bounceList,
+        doorOpenersList,
+        clientGraphicHelpers,
+    }: WorldContext,
     type: ElementType,
     properties?: ElementProperties,
 ): {
@@ -578,8 +584,24 @@ export function createElement(
         case ElementType.DOOR_OPENER:
             props =
                 (properties as DoorOpenerProperties) ||
-                new DoorOpenerProperties();
+                new DoorOpenerProperties(doorOpenersList.length);
             const group = createDoorOpener(props);
+
+            if (
+                props.door_id !== undefined &&
+                levelState.doors[props.door_id] === undefined
+            ) {
+                levelState.doors[props.door_id] = {
+                    [props.id]: [],
+                };
+            } else if (
+                props.door_id !== undefined &&
+                levelState.doors[props.door_id]
+            ) {
+                levelState.doors[props.door_id][props.id] = [];
+            }
+
+            doorOpenersList.push(group);
             if (clientGraphicHelpers) {
                 const doorOpener = clientGraphicHelpers.createDoorOpenerGraphic(
                     props.door_id,
@@ -602,7 +624,9 @@ export function createElement(
                 rotation: props.transform.rotation.clone(),
                 id: props.id,
             });
-            levelState.doors[props.id] = [];
+            if (levelState.doors[props.id] === undefined) {
+                levelState.doors[props.id] = {};
+            }
             clientGraphicHelpers?.mouseSelectableObjects.push(wallDoorGroup);
             return {
                 mesh: wallDoorGroup,
@@ -717,8 +741,15 @@ export function parseLevelElements(
     elementList: any[],
 ): LevelElement[] {
     // create each elements
-    const elements = elementList.map((el: any) => {
+    const elements = elementList.map((el: any, index: number) => {
         const properties = parseProperties(el.properties);
+        // TODO: remove, this is kind of a migration hack
+        if (
+            el.type === ElementType.DOOR_OPENER &&
+            properties.id === undefined
+        ) {
+            properties.id = index;
+        }
         const { mesh } = createElement(
             worldContext,
             el.type,
