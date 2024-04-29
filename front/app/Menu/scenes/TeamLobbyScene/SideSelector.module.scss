@@ -25,6 +25,10 @@
 
     .invite-button {
         margin-top: 0;
+
+        svg {
+            margin-left: 10px;
+        }
     }
 }
 
@@ -94,6 +98,12 @@
 
 .enter-queue-button {
     margin-top: 50px;
+    display: flex;
+    align-items: center;
+
+    svg {
+        margin-left: 10px;
+    }
 }
 
 .queue-time-info {

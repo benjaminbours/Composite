@@ -4,6 +4,8 @@ import { CopyToClipBoardButton } from '../../CopyToClipboardButton';
 import { PlayerState } from '../../../useMainController';
 import styles from './SideSelector.module.scss';
 import { QueueTimeInfo } from './QueueTimeInfo';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 interface Props {
     isInQueue: boolean;
@@ -67,7 +69,10 @@ export const SideSelector: React.FC<Props> = ({
                         className={`${styles['rect-button']} ${styles['enter-queue-button']}`}
                         onClick={handleExitRandomQueue}
                     >
-                        Exit matchmaking queue
+                        <span>
+                            <b>Exit</b> matchmaking queue
+                        </span>
+                        <LogoutIcon color="error" />
                     </button>
                 </>
             );
@@ -83,7 +88,10 @@ export const SideSelector: React.FC<Props> = ({
                     className={`${styles['rect-button']} ${styles['enter-queue-button']}`}
                     onClick={handleEnterRandomQueue}
                 >
-                    Enter matchmaking queue
+                    <span>
+                        <b>Enter</b> matchmaking queue
+                    </span>
+                    <LoginIcon color="success" />
                 </button>
             </>
         );
