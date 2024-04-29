@@ -41,9 +41,6 @@ export const AuthModal: React.FC<Props> = ({
             className="composite-modal"
             open={isModalOpen}
             onClose={() => {
-                if (withGuest) {
-                    return;
-                }
                 setIsModalOpen(false);
             }}
         >

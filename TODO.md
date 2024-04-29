@@ -4,7 +4,6 @@
 
 ### High priority
 
-- Login modal should be closable by clicking outside
 - Player inside composer doesn't always show in game, works well in level editor
 - Some bug when deleting elements in level editor
 - Some elements disappears from editor to game (example precision level)
