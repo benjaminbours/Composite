@@ -186,20 +186,34 @@ export function useMainController(
         }));
     }, [router, setMenuScene, currentUser]);
 
-    const handleSelectLevelOnLobby = useCallback((levelId: number) => {
-        setState((prev) => ({
-            ...prev,
-            you: {
-                ...prev.you,
-                level: levelId,
-                isReady: false,
-            },
-        }));
-        socketController.current?.emit([
-            SocketEventLobby.SELECT_LEVEL,
-            levelId,
-        ]);
+    const handleExitRandomQueue = useCallback(() => {
+        socketController.current?.destroy();
+        setState((prev) => ({ ...prev, isInQueue: false }));
     }, []);
+
+    const handleSelectLevelOnLobby = useCallback(
+        (levelId: number) => {
+            setState((prev) => ({
+                ...prev,
+                you: {
+                    ...prev.you,
+                    level: levelId,
+                    isReady: false,
+                    isInQueue: false,
+                },
+            }));
+            if (state.isInQueue) {
+                // if change level while in queue, exit queue
+                handleExitRandomQueue();
+            } else {
+                socketController.current?.emit([
+                    SocketEventLobby.SELECT_LEVEL,
+                    levelId,
+                ]);
+            }
+        },
+        [state.isInQueue, handleExitRandomQueue],
+    );
 
     const handleSelectSideOnLobby = useCallback((side: Side) => {
         setState((prev) => ({
@@ -250,6 +264,7 @@ export function useMainController(
                 },
                 mateDisconnected: false,
                 shouldDisplayQueueInfo: false,
+                isInQueue: false,
             }));
             enqueueSnackbar('Your friend successfully joined the lobby', {
                 variant: 'success',
@@ -412,11 +427,6 @@ export function useMainController(
             });
         });
     }, [establishConnection, currentUser, state]);
-
-    const handleExitRandomQueue = useCallback(() => {
-        socketController.current?.destroy();
-        setState((prev) => ({ ...prev, isInQueue: false }));
-    }, []);
 
     const handleEnterRandomQueue = useCallback(() => {
         establishConnection().then(() => {
