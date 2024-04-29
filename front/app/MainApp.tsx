@@ -19,6 +19,7 @@ import { useMenuTransition } from './useMenuTransition';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
 import { AppContext } from './WithMainApp';
 import { getDictionary } from '../getDictionary';
+import { BottomRightInfo } from './BottomRightInfo';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -153,6 +154,12 @@ function MainApp({ initialScene, dictionary }: Props) {
                 gameIsPlaying={gameIsPlaying}
                 onSettingsClick={handleClickOnSettings}
             />
+            {!gameIsPlaying && (
+                <BottomRightInfo
+                    playing={mainController.serverCounts?.playing || 0}
+                    matchmaking={mainController.serverCounts?.matchmaking || 0}
+                />
+            )}
         </>
     );
 }

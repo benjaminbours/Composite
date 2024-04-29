@@ -4,13 +4,17 @@
 
 ### High priority
 
+- Login modal should be closable by clicking outside
+- Player inside composer doesn't always show in game, works well in level editor
+- Some bug when deleting elements in level editor
+- Some elements disappears from editor to game (example precision level)
 - Display keys to help player while in game
 - Pattern anti UX sur le lobby, genre on click sur I am ready et puis il est ecrit "I am not ready". On comprend pas
 - crash if try to delete the bounce we are currently inside
-- Fine tune the fog, le fog est actuellement trop fort et brule toute une partie des contrastes de la scene. Ca enleve un potentiel aspect du jeu qui serait de jouer sur ces contrastes pour eclairer / assombrir des zones pour son partenaire, ou impacter la luminosite de maniere generale.
 
 ### Medium priority
 
+- Missing arrow helper for bounce sometimes
 - When updating size and rotation of element. At some point the rotation is not considered anymore
 
 ### Low priority
@@ -35,7 +39,6 @@
 - Write medium article about the current state of the project, and about the vision and where I want to go
 - Update the timeline. Talk in the timeline about brilliant and how it help me achieve what I needed in terms of math.
 - Improve navigation in timeline, use button to go to anchor
-- Impossible to change level or quit the team when you are in queue and you matched
 - Add appropriate license for the project, VERY IMPORTANT
 - While the project is not responsive, display a message to invite people to comeback with a laptop
 - Vue niveau creer par la communaute
@@ -52,9 +55,7 @@
 
 - Start to count accurately the exact duration of game in order to have speed run capability.
 - Enable github sponsor
-- Indicate total number of player online at the moment. Curve fever style
-- Add information in the menu about the server state
-  - Estimated waiting time
+- Try to estimate waiting time
 - Activator permanent, which doesn't require you to stay on the platform like current door openers. You activate a button to open / move another part of the level elsewhere
 - Being able to manage the bounce power with level editor
 - Aimenter les elements proche pour faciliter la creation de structure.

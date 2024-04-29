@@ -1,6 +1,6 @@
 // vendors
 import { gsap } from 'gsap';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
@@ -40,7 +40,7 @@ export function Menu({
 
     const {
         state,
-        allQueueInfo,
+        serverCounts,
         fetchTime,
         levels,
         handleClickHome,
@@ -54,7 +54,7 @@ export function Menu({
         handleEnterRandomQueue,
         handleExitRandomQueue,
         exitLobby,
-        fetchQueueInfo,
+        fetchServerInfo,
     } = mainController;
 
     const resize = useCallback(() => {
@@ -185,7 +185,6 @@ export function Menu({
             <HomeScene
                 homeRef={refHashMap.homeRef}
                 refHashMap={refHashMap}
-                allQueueInfo={allQueueInfo}
                 handleClickPlay={handleClickPlay}
                 isMount={
                     menuScene === MenuScene.HOME ||
@@ -216,10 +215,10 @@ export function Menu({
                 handleEnterRandomQueue={handleEnterRandomQueue}
                 handleExitRandomQueue={handleExitRandomQueue}
                 isInQueue={state.isInQueue}
-                fetchQueueInfo={fetchQueueInfo}
+                fetchServerInfo={fetchServerInfo}
                 // handleClickOnQueueInfo={handleClickOnQueueInfo}
                 fetchTime={fetchTime}
-                queueInfo={allQueueInfo}
+                serverCounts={serverCounts}
                 shouldDisplayQueueInfo={state.shouldDisplayQueueInfo}
             />
             <EndLevelScene

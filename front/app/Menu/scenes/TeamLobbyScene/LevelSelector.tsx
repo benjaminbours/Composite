@@ -9,27 +9,29 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Slider from '@mui/material/Slider';
 import IconButton from '@mui/material/IconButton';
-import JoinLeftIcon from '@mui/icons-material/JoinLeft';
+// import JoinLeftIcon from '@mui/icons-material/JoinLeft';
 import { LevelPortal } from '../LevelPortal';
 import { Level } from '@benjaminbours/composite-api-client';
 import Popper from '@mui/material/Popper';
 import styles from './LevelSelector.module.scss';
-import { AllQueueInfo } from '@benjaminbours/composite-core';
 import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Link from 'next/link';
 import { Route } from '../../../types';
-import { QUEUE_INFO_FETCH_INTERVAL } from '../../../useMainController';
+import {
+    QUEUE_INFO_FETCH_INTERVAL,
+    ServerCounts,
+} from '../../../useMainController';
 
 interface Props {
     levels: Level[];
     disabled?: boolean;
     handleSelectLevel: (levelId: number) => void;
-    fetchQueueInfo: () => Promise<void>;
+    fetchServerInfo: () => Promise<void>;
     // handleClickOnQueueInfo: () => void;
     shouldDisplayQueueInfo: boolean;
-    queueInfo?: AllQueueInfo;
+    serverCounts?: ServerCounts;
     fetchTime: number;
     levelSelectedByMate?: number;
     selectedLevel?: number;
@@ -39,13 +41,13 @@ export const LevelSelector: React.FC<Props> = ({
     levels,
     disabled,
     handleSelectLevel,
-    fetchQueueInfo,
+    fetchServerInfo,
     shouldDisplayQueueInfo,
     fetchTime,
     levelSelectedByMate,
-    queueInfo,
     // handleClickOnQueueInfo,
     selectedLevel,
+    serverCounts,
 }) => {
     const authorList = useMemo(() => {
         const list = levels.reduce((acc, level) => {
@@ -186,8 +188,8 @@ export const LevelSelector: React.FC<Props> = ({
                     {shouldDisplayQueueInfo && (
                         <IconButton
                             className={styles['queue-fetch-progress']}
-                            onClick={fetchQueueInfo}
-                            title="Refresh queue info"
+                            onClick={fetchServerInfo}
+                            title="Refresh server info"
                         >
                             <CircularProgress
                                 variant="determinate"
@@ -234,11 +236,15 @@ export const LevelSelector: React.FC<Props> = ({
                                             id === levelSelectedByMate
                                         }
                                         src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
-                                        queueInfo={
+                                        serverCounts={
                                             shouldDisplayQueueInfo
-                                                ? queueInfo?.levels[
+                                                ? serverCounts?.levels[
                                                       String(id) as any
-                                                  ]
+                                                  ] || {
+                                                      playing: 0,
+                                                      light_queue: 0,
+                                                      shadow_queue: 0,
+                                                  }
                                                 : undefined
                                         }
                                         onClick={() => handleSelectLevel(id)}

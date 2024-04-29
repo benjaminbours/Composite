@@ -1,5 +1,4 @@
 import {
-    AllQueueInfo,
     CreateLobbyPayload,
     FriendJoinLobbyPayload,
     GameState,
@@ -39,6 +38,15 @@ export interface MainState {
     you: PlayerState;
     mate: PlayerState | undefined;
     mateDisconnected: boolean;
+}
+
+export interface ServerCounts {
+    playing: number;
+    matchmaking: number;
+    levels: Record<
+        number,
+        { playing: number; light_queue: number; shadow_queue: number }
+    >;
 }
 
 export const QUEUE_INFO_FETCH_INTERVAL = 20000;
@@ -511,42 +519,82 @@ export function useMainController(
 
     const queueInfoInterval = useRef<NodeJS.Timeout>();
     const fetchCompletionInterval = useRef<NodeJS.Timeout>();
-    const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
+    const [serverCounts, setServerCounts] = useState<ServerCounts>();
     const [fetchTime, setFetchTime] = useState(0);
 
-    const fetchQueueInfo = useCallback(async () => {
+    const fetchServerInfo = useCallback(async () => {
         const apiClient = servicesContainer.get(ApiClient);
-        return apiClient.defaultApi.appControllerGetQueueInfo().then((data) => {
-            // clear previous interval
-            clearInterval(queueInfoInterval.current);
-            clearInterval(fetchCompletionInterval.current);
-            const intervalId = setInterval(() => {
-                // console.log('fetch');
-                fetchQueueInfo();
-            }, QUEUE_INFO_FETCH_INTERVAL);
+        return apiClient.defaultApi
+            .appControllerGetServerInfo()
+            .then((data) => {
+                // clear previous interval
+                clearInterval(queueInfoInterval.current);
+                clearInterval(fetchCompletionInterval.current);
+                const intervalId = setInterval(() => {
+                    // console.log('fetch');
+                    fetchServerInfo();
+                }, QUEUE_INFO_FETCH_INTERVAL);
 
-            const completionIntervalId = setInterval(() => {
-                // console.log('time update');
-                setFetchTime((prev) => prev + 1000);
-            }, 1000);
+                const completionIntervalId = setInterval(() => {
+                    // console.log('time update');
+                    setFetchTime((prev) => prev + 1000);
+                }, 1000);
 
-            setFetchTime(0);
-            fetchCompletionInterval.current = completionIntervalId;
-            queueInfoInterval.current = intervalId;
-            setAllQueueInfo(data as AllQueueInfo);
-            setState((prev) => ({
-                ...prev,
-                shouldDisplayQueueInfo: true,
-            }));
-        });
+                setFetchTime(0);
+                fetchCompletionInterval.current = completionIntervalId;
+                queueInfoInterval.current = intervalId;
+
+                // update states
+                const serverCounts = data.reduce(
+                    (acc, player) => {
+                        if (
+                            player.selectedLevel !== undefined &&
+                            player.side !== undefined
+                        ) {
+                            if (!acc.levels[player.selectedLevel]) {
+                                acc.levels[player.selectedLevel] = {
+                                    playing: 0,
+                                    light_queue: 0,
+                                    shadow_queue: 0,
+                                };
+                            }
+
+                            if (player.status === 0) {
+                                acc.playing++;
+                                acc.levels[player.selectedLevel].playing++;
+                            } else if (player.status === 1) {
+                                acc.matchmaking++;
+
+                                if (player.side === 0) {
+                                    acc.levels[player.selectedLevel]
+                                        .shadow_queue++;
+                                } else {
+                                    acc.levels[player.selectedLevel]
+                                        .light_queue++;
+                                }
+                            }
+                        }
+                        return acc;
+                    },
+                    {
+                        playing: 0,
+                        matchmaking: 0,
+                        levels: {},
+                    } as ServerCounts,
+                );
+
+                setServerCounts(serverCounts);
+                setState((prev) => ({
+                    ...prev,
+                    // TODO: Investigate if this boolean is still needed
+                    shouldDisplayQueueInfo: true,
+                }));
+            });
     }, [setState]);
 
     useEffect(() => {
-        if (
-            menuScene === MenuScene.TEAM_LOBBY &&
-            state.shouldDisplayQueueInfo
-        ) {
-            fetchQueueInfo();
+        if (!gameIsPlaying) {
+            fetchServerInfo();
         }
         return () => {
             clearInterval(queueInfoInterval.current);
@@ -554,7 +602,7 @@ export function useMainController(
             queueInfoInterval.current = undefined;
             fetchCompletionInterval.current = undefined;
         };
-    }, [menuScene, state.shouldDisplayQueueInfo, fetchQueueInfo]);
+    }, [gameIsPlaying, fetchServerInfo]);
 
     // // development effect
     // useEffect(() => {
@@ -630,7 +678,7 @@ export function useMainController(
         socketController,
         gameIsPlaying,
         levels,
-        allQueueInfo,
+        serverCounts,
         fetchTime,
         exitLobby,
         setState,
@@ -647,6 +695,6 @@ export function useMainController(
         handleSelectSideOnLobby,
         handleClickHome,
         handleClickPlayAgain,
-        fetchQueueInfo,
+        fetchServerInfo,
     };
 }

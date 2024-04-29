@@ -1,12 +1,23 @@
 // vendors
 import { Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
-// our libs
-import { AllQueueInfo } from '@benjaminbours/composite-core';
+import { ApiOkResponse, ApiProperty } from '@nestjs/swagger';
 // local
 import { AppService } from './app.service';
 import { TemporaryStorageService } from './temporary-storage.service';
 import { Public } from '@project-common/decorators';
+import { PlayerState, PlayerStatus } from './PlayerState';
+import { Side } from '@benjaminbours/composite-core';
+
+class PlayerStateResponse extends PlayerState {
+  @ApiProperty({ enum: PlayerStatus })
+  public status: PlayerStatus;
+
+  @ApiProperty({ enum: Side, required: false })
+  public side?: Side;
+
+  @ApiProperty({ required: false })
+  public selectedLevel?: number;
+}
 
 @Controller()
 export class AppController {
@@ -22,13 +33,13 @@ export class AppController {
   }
 
   @ApiOkResponse({
-    description: 'Match making queue info',
-    type: AllQueueInfo,
+    description: 'Server player info',
+    type: [PlayerStateResponse],
   })
   @Public()
-  @Get('/queue-info')
-  getQueueInfo(): Promise<AllQueueInfo> {
-    return this.temporaryStorage.getQueueInfo();
+  @Get('/server-info')
+  async getServerInfo(): Promise<PlayerState[]> {
+    return this.temporaryStorage.getServerInfo();
   }
 
   @ApiOkResponse({

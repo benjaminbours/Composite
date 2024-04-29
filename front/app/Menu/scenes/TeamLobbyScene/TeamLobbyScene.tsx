@@ -1,7 +1,7 @@
 // vendors
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
+import { Side } from '@benjaminbours/composite-core';
 import { Level } from '@benjaminbours/composite-api-client';
 import { useSearchParams } from 'next/navigation';
 import { servicesContainer } from '../../../core/frameworks';
@@ -11,7 +11,7 @@ import { getDictionary } from '../../../../getDictionary';
 import { useStoreState } from '../../../hooks';
 import { AuthModal } from '../../../03_organisms/AuthModal';
 
-import { PlayerState } from '../../../useMainController';
+import { PlayerState, ServerCounts } from '../../../useMainController';
 import { PlayersState } from './PlayersState';
 import { SideSelector } from './SideSelector';
 import { LevelSelector } from './LevelSelector';
@@ -29,7 +29,7 @@ interface Props {
     mate?: PlayerState;
     isInQueue: boolean;
     shouldDisplayQueueInfo: boolean;
-    queueInfo?: AllQueueInfo;
+    serverCounts?: ServerCounts;
     fetchTime: number;
     setLightIsPulsingFast: (isPulsingFast: boolean) => void;
     setShadowRotationSpeed: (speed: number) => void;
@@ -39,7 +39,7 @@ interface Props {
     handleEnterRandomQueue: () => void;
     handleExitRandomQueue: () => void;
     handleClickReadyToPlay: () => void;
-    fetchQueueInfo: () => Promise<void>;
+    fetchServerInfo: () => Promise<void>;
     // handleClickOnQueueInfo: () => void;
 }
 
@@ -55,7 +55,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         mate,
         isInQueue,
         shouldDisplayQueueInfo,
-        queueInfo,
+        serverCounts,
         fetchTime,
         handleSelectLevel,
         handleSelectSide,
@@ -67,7 +67,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         setSideSize,
         handleEnterRandomQueue,
         handleExitRandomQueue,
-        fetchQueueInfo,
+        fetchServerInfo,
         // handleClickOnQueueInfo,
         handleClickOnExit,
     }) => {
@@ -194,11 +194,11 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         levels={levels}
                         levelSelectedByMate={mate?.level}
                         handleSelectLevel={handleSelectLevel}
-                        fetchQueueInfo={fetchQueueInfo}
+                        fetchServerInfo={fetchServerInfo}
                         // handleClickOnQueueInfo={handleClickOnQueueInfo}
                         shouldDisplayQueueInfo={shouldDisplayQueueInfo}
                         fetchTime={fetchTime}
-                        queueInfo={queueInfo}
+                        serverCounts={serverCounts}
                         selectedLevel={you.level}
                     />
                     <SideSelector

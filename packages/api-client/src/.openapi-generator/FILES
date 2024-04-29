@@ -6,6 +6,7 @@ models/CreateLevelDto.ts
 models/Element.ts
 models/Level.ts
 models/LoginDto.ts
+models/PlayerStateResponse.ts
 models/RegisterDto.ts
 models/ResetPasswordDto.ts
 models/TokensDto.ts

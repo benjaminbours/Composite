@@ -3,9 +3,7 @@ import classNames from 'classnames';
 import { gsap } from 'gsap';
 import React, { useCallback, useRef } from 'react';
 // our libs
-import { AllQueueInfo } from '@benjaminbours/composite-core';
 // project
-import { QueueInfoText } from '../QueueInfo';
 import Curve, { defaultWaveOptions } from '../canvas/Curve';
 import { RefHashMap } from '../../useMenuTransition';
 import Link from 'next/link';
@@ -15,7 +13,6 @@ interface Props {
     refHashMap: RefHashMap;
     homeRef: React.RefObject<HTMLDivElement>;
     handleClickPlay: () => void;
-    allQueueInfo?: AllQueueInfo;
     isMount: boolean;
     setLightIsPulsingFast: (isPulsingFast: boolean) => void;
     setShadowRotationSpeed: (speed: number) => void;
@@ -24,7 +21,6 @@ interface Props {
 export const HomeScene: React.FC<Props> = ({
     homeRef,
     refHashMap,
-    allQueueInfo,
     handleClickPlay,
     isMount,
     setLightIsPulsingFast,
@@ -133,12 +129,6 @@ export const HomeScene: React.FC<Props> = ({
         <div ref={homeRef} className={cssClass}>
             <h1 className="title-h1">Composite</h1>
             <h2 className="main-subtitle">Think both ways</h2>
-            {allQueueInfo && (
-                <>
-                    <QueueInfoText side="light" value={allQueueInfo.light} />
-                    <QueueInfoText side="shadow" value={allQueueInfo.shadow} />
-                </>
-            )}
             <button
                 ref={playButtonRef}
                 className="buttonCircle home-container__button"

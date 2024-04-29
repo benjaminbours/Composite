@@ -1,10 +1,11 @@
-import { QueueInfo } from '@benjaminbours/composite-core';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import GroupsIcon from '@mui/icons-material/Groups';
+// import GroupsIcon from '@mui/icons-material/Groups';
+import JoinLeftIcon from '@mui/icons-material/JoinLeft';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ModeNightIcon from '@mui/icons-material/ModeNight';
 import Badge from '@mui/material/Badge';
+import { ServerCounts } from '../../useMainController';
 
 const YingYang: React.FC = () => (
     <svg className="ying-yang" viewBox="0 0 800 800">
@@ -39,7 +40,7 @@ interface Props {
     src: string;
     isSelectedByTeamMate?: boolean;
     isSelectedByYou?: boolean;
-    queueInfo?: QueueInfo;
+    serverCounts?: ServerCounts['levels'][number];
     onClick?: () => void;
 }
 
@@ -50,7 +51,7 @@ export const LevelPortal: React.FC<Props> = ({
     src,
     isSelectedByTeamMate,
     isSelectedByYou,
-    queueInfo,
+    serverCounts,
     onClick,
 }) => {
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
@@ -86,15 +87,24 @@ export const LevelPortal: React.FC<Props> = ({
                 <YingYang />
             </div>
             <p>{name}</p>
-            {queueInfo !== undefined && (
+            {serverCounts !== undefined && (
                 <div className="level-portal__queue-info">
-                    <Badge badgeContent={String(queueInfo.all)}>
-                        <GroupsIcon />
+                    <Badge
+                        title="Duo currently playing"
+                        badgeContent={String(serverCounts.playing)}
+                    >
+                        <JoinLeftIcon />
                     </Badge>
-                    <Badge badgeContent={String(queueInfo.light)}>
+                    <Badge
+                        title="Light in the queue"
+                        badgeContent={String(serverCounts.light_queue)}
+                    >
                         <Brightness7Icon />
                     </Badge>
-                    <Badge badgeContent={String(queueInfo.shadow)}>
+                    <Badge
+                        title="Shadow in the queue"
+                        badgeContent={String(serverCounts.shadow_queue)}
+                    >
                         <ModeNightIcon />
                     </Badge>
                 </div>

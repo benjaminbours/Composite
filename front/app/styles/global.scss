@@ -62,6 +62,23 @@ canvas,
     }
 }
 
+.bottom-right-info {
+    position: fixed;
+    z-index: 100;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    mix-blend-mode: difference;
+
+    .version {
+        font-size: 12px;
+        color: white;
+    }
+}
+
 .home-page {
     position: relative;
     width: 100%;

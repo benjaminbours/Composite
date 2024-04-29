@@ -6,11 +6,9 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisStore } from 'cache-manager-redis-store';
 // our libs
 import {
-  AllQueueInfo,
   GamePlayerInputPayload,
   GameState,
   JoinRandomQueuePayload,
-  QueueInfo,
   RedisGameState,
   Side,
 } from '@benjaminbours/composite-core';
@@ -21,6 +19,8 @@ import { PrismaService } from '@project-common/services';
 const REDIS_KEYS = {
   // List
   MATCH_MAKING_QUEUE: 'MATCH_MAKING_QUEUE',
+  // List
+  PLAYER_LIST: 'PLAYER_LIST',
   // Hash map
   INVITE_TOKEN_MAP: 'INVITE_TOKEN_MAP',
   // Hash map
@@ -62,13 +62,25 @@ export class TemporaryStorageService {
     data: Partial<RedisPlayerState>,
     transaction?: any,
   ) {
-    const client = transaction ? transaction : this.redisClient;
-    return client.HSET(
-      REDIS_KEYS.PLAYER(socketId),
-      Object.entries(data)
-        .filter(([, value]) => value !== undefined)
-        .flat(),
-    );
+    if (transaction) {
+      transaction.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      transaction.HSET(
+        REDIS_KEYS.PLAYER(socketId),
+        Object.entries(data)
+          .filter(([, value]) => value !== undefined)
+          .flat(),
+      );
+    } else {
+      const transac = this.redisClient.MULTI();
+      transac.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      transac.HSET(
+        REDIS_KEYS.PLAYER(socketId),
+        Object.entries(data)
+          .filter(([, value]) => value !== undefined)
+          .flat(),
+      );
+      return transac.exec();
+    }
   }
 
   async getPlayer(socketId: string): Promise<PlayerState | undefined> {
@@ -84,6 +96,7 @@ export class TemporaryStorageService {
   async removePlayer(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     transaction.DEL(REDIS_KEYS.PLAYER(socketId));
+    transaction.LREM(REDIS_KEYS.PLAYER_LIST, 1, socketId);
     if (player.status === PlayerStatus.IS_IN_RANDOM_QUEUE) {
       this.removeFromQueue(socketId, 0, transaction);
       this.updateQueueInfo('subtract', player, transaction);
@@ -114,41 +127,12 @@ export class TemporaryStorageService {
     return transaction.exec();
   }
 
-  async getQueueInfo(): Promise<AllQueueInfo> {
-    const levels = await this.prismaService.level.findMany({
-      select: { id: true },
-    });
-    return Promise.all([
-      this.redisClient.HGETALL(REDIS_KEYS.QUEUE_INFO),
-      ...levels.map(async ({ id }) => {
-        const data = await this.redisClient.HGETALL(
-          REDIS_KEYS.QUEUE_LEVEL_INFO(id),
-        );
-        return {
-          id,
-          data,
-        };
-      }),
-    ]).then(([allQueueInfo, ...levelsQueueInfo]) => {
-      const unwrapValue = (val: string | undefined): number =>
-        val ? Number(val) : 0;
-      return new AllQueueInfo(
-        levelsQueueInfo.reduce(
-          (acc, item: any) => {
-            acc[item.id] = new QueueInfo(
-              unwrapValue(item.data.all),
-              unwrapValue(item.data.light),
-              unwrapValue(item.data.shadow),
-            );
-            return acc;
-          },
-          {} as Record<number, QueueInfo>,
-        ),
-        unwrapValue(allQueueInfo.all),
-        unwrapValue(allQueueInfo.light),
-        unwrapValue(allQueueInfo.shadow),
+  async getServerInfo(): Promise<any> {
+    return this.redisClient
+      .LRANGE(REDIS_KEYS.PLAYER_LIST, 0, -1)
+      .then((playerList) =>
+        Promise.all(playerList.map((id) => this.getPlayer(id))),
       );
-    });
   }
 
   private updateQueueInfo(
