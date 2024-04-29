@@ -40,7 +40,7 @@ interface Props {
     handleExitRandomQueue: () => void;
     handleClickReadyToPlay: () => void;
     fetchQueueInfo: () => Promise<void>;
-    handleClickOnQueueInfo: () => void;
+    // handleClickOnQueueInfo: () => void;
 }
 
 // TODO: Wrap all scenes with react.memo to prevent useless re-render
@@ -68,7 +68,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
         handleEnterRandomQueue,
         handleExitRandomQueue,
         fetchQueueInfo,
-        handleClickOnQueueInfo,
+        // handleClickOnQueueInfo,
         handleClickOnExit,
     }) => {
         const { enqueueSnackbar } = useSnackbar();
@@ -195,7 +195,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         levelSelectedByMate={mate?.level}
                         handleSelectLevel={handleSelectLevel}
                         fetchQueueInfo={fetchQueueInfo}
-                        handleClickOnQueueInfo={handleClickOnQueueInfo}
+                        // handleClickOnQueueInfo={handleClickOnQueueInfo}
                         shouldDisplayQueueInfo={shouldDisplayQueueInfo}
                         fetchTime={fetchTime}
                         queueInfo={queueInfo}

@@ -16,18 +16,18 @@ import Popper from '@mui/material/Popper';
 import styles from './LevelSelector.module.scss';
 import { AllQueueInfo } from '@benjaminbours/composite-core';
 import CircularProgress from '@mui/material/CircularProgress';
-import { QUEUE_INFO_FETCH_INTERVAL } from '../../Menu';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Link from 'next/link';
 import { Route } from '../../../types';
+import { QUEUE_INFO_FETCH_INTERVAL } from '../../../useMainController';
 
 interface Props {
     levels: Level[];
     disabled?: boolean;
     handleSelectLevel: (levelId: number) => void;
     fetchQueueInfo: () => Promise<void>;
-    handleClickOnQueueInfo: () => void;
+    // handleClickOnQueueInfo: () => void;
     shouldDisplayQueueInfo: boolean;
     queueInfo?: AllQueueInfo;
     fetchTime: number;
@@ -44,7 +44,7 @@ export const LevelSelector: React.FC<Props> = ({
     fetchTime,
     levelSelectedByMate,
     queueInfo,
-    handleClickOnQueueInfo,
+    // handleClickOnQueueInfo,
     selectedLevel,
 }) => {
     const authorList = useMemo(() => {
@@ -187,6 +187,7 @@ export const LevelSelector: React.FC<Props> = ({
                         <IconButton
                             className={styles['queue-fetch-progress']}
                             onClick={fetchQueueInfo}
+                            title="Refresh queue info"
                         >
                             <CircularProgress
                                 variant="determinate"
@@ -195,7 +196,7 @@ export const LevelSelector: React.FC<Props> = ({
                             />
                         </IconButton>
                     )}
-                    <button
+                    {/* <button
                         className={styles['queue-info-icon']}
                         onMouseEnter={(event: React.MouseEvent<HTMLElement>) =>
                             setAnchorEl(event.currentTarget)
@@ -204,7 +205,7 @@ export const LevelSelector: React.FC<Props> = ({
                         onClick={handleClickOnQueueInfo}
                     >
                         <JoinLeftIcon />
-                    </button>
+                    </button> */}
                 </div>
             </div>
 

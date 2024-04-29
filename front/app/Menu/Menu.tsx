@@ -2,7 +2,7 @@
 import { gsap } from 'gsap';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 // our libs
-import { AllQueueInfo, Side } from '@benjaminbours/composite-core';
+import { Side } from '@benjaminbours/composite-core';
 // local
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
@@ -17,8 +17,6 @@ import {
 import { RefHashMap } from '../useMenuTransition';
 import { useMainController } from '../useMainController';
 import { getDictionary } from '../../getDictionary';
-import { servicesContainer } from '../core/frameworks';
-import { ApiClient } from '../core/services';
 
 interface Props {
     menuScene: MenuScene;
@@ -29,8 +27,6 @@ interface Props {
     mainController: ReturnType<typeof useMainController>;
 }
 
-export const QUEUE_INFO_FETCH_INTERVAL = 20000;
-
 export function Menu({
     dictionary,
     menuScene,
@@ -39,18 +35,13 @@ export function Menu({
     refHashMap,
     mainController,
 }: Props) {
-    const [queueInfoInterval, setQueueInfoInterval] =
-        useState<NodeJS.Timeout>();
-    const [fetchCompletionInterval, setFetchCompletionInterval] =
-        useState<NodeJS.Timeout>();
-    const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
-    const [fetchTime, setFetchTime] = useState(0);
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
 
     const {
         state,
-        setState,
+        allQueueInfo,
+        fetchTime,
         levels,
         handleClickHome,
         handleClickPlayAgain,
@@ -63,6 +54,7 @@ export function Menu({
         handleEnterRandomQueue,
         handleExitRandomQueue,
         exitLobby,
+        fetchQueueInfo,
     } = mainController;
 
     const resize = useCallback(() => {
@@ -113,62 +105,7 @@ export function Menu({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const fetchQueueInfo = useCallback(async () => {
-        const apiClient = servicesContainer.get(ApiClient);
-        return apiClient.defaultApi.appControllerGetQueueInfo().then((data) => {
-            // clear previous interval
-            clearInterval(queueInfoInterval);
-            clearInterval(fetchCompletionInterval);
-            const intervalId = setInterval(() => {
-                // console.log('fetch');
-                fetchQueueInfo();
-            }, QUEUE_INFO_FETCH_INTERVAL);
-
-            const completionIntervalId = setInterval(() => {
-                // console.log('time update');
-                setFetchTime((prev) => prev + 1000);
-            }, 1000);
-
-            setFetchTime(0);
-            setFetchCompletionInterval(completionIntervalId);
-            setQueueInfoInterval(intervalId);
-            setAllQueueInfo(data as AllQueueInfo);
-            setState((prev) => ({
-                ...prev,
-                shouldDisplayQueueInfo: true,
-            }));
-        });
-    }, [setState, queueInfoInterval, fetchCompletionInterval]);
-
-    const handleClickOnQueueInfo = useCallback(() => {
-        if (!state.shouldDisplayQueueInfo) {
-            fetchQueueInfo();
-        } else {
-            setState((prev) => ({
-                ...prev,
-                shouldDisplayQueueInfo: false,
-            }));
-        }
-    }, [fetchQueueInfo, state, setState]);
-
-    useEffect(() => {
-        if (!state.shouldDisplayQueueInfo && queueInfoInterval) {
-            clearInterval(fetchCompletionInterval);
-            clearInterval(queueInfoInterval);
-            setQueueInfoInterval(undefined);
-        }
-
-        return () => {
-            clearInterval(queueInfoInterval);
-            clearInterval(fetchCompletionInterval);
-        };
-    }, [
-        state.shouldDisplayQueueInfo,
-        queueInfoInterval,
-        fetchCompletionInterval,
-    ]);
-
-    // on resize
+    // on mount
     useEffect(() => {
         window.addEventListener('resize', resize);
         return () => {
@@ -280,7 +217,7 @@ export function Menu({
                 handleExitRandomQueue={handleExitRandomQueue}
                 isInQueue={state.isInQueue}
                 fetchQueueInfo={fetchQueueInfo}
-                handleClickOnQueueInfo={handleClickOnQueueInfo}
+                // handleClickOnQueueInfo={handleClickOnQueueInfo}
                 fetchTime={fetchTime}
                 queueInfo={allQueueInfo}
                 shouldDisplayQueueInfo={state.shouldDisplayQueueInfo}

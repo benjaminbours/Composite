@@ -1,4 +1,5 @@
 import {
+    AllQueueInfo,
     CreateLobbyPayload,
     FriendJoinLobbyPayload,
     GameState,
@@ -39,6 +40,8 @@ export interface MainState {
     mate: PlayerState | undefined;
     mateDisconnected: boolean;
 }
+
+export const QUEUE_INFO_FETCH_INTERVAL = 20000;
 
 export function useMainController(
     menuScene: MenuScene,
@@ -93,7 +96,7 @@ export function useMainController(
                 mate: undefined,
                 mateDisconnected: false,
                 isInQueue: false,
-                shouldDisplayQueueInfo: false,
+                shouldDisplayQueueInfo: true,
             };
         }
 
@@ -109,7 +112,7 @@ export function useMainController(
             mate: undefined,
             mateDisconnected: false,
             isInQueue: false,
-            shouldDisplayQueueInfo: false,
+            shouldDisplayQueueInfo: true,
         };
     });
     const [levels, setLevels] = useState<Level[]>([]);
@@ -246,6 +249,7 @@ export function useMainController(
                     level: data.level || levels[0].id,
                 },
                 mateDisconnected: false,
+                shouldDisplayQueueInfo: false,
             }));
             enqueueSnackbar('Your friend successfully joined the lobby', {
                 variant: 'success',
@@ -444,6 +448,7 @@ export function useMainController(
                 ...prev,
                 mate: undefined,
                 mateDisconnected: false,
+                shouldDisplayQueueInfo: true,
                 you: {
                     isReady: false,
                     level: undefined,
@@ -493,6 +498,53 @@ export function useMainController(
             }));
         });
     }, [goToStep, onTransition, setState]);
+
+    const queueInfoInterval = useRef<NodeJS.Timeout>();
+    const fetchCompletionInterval = useRef<NodeJS.Timeout>();
+    const [allQueueInfo, setAllQueueInfo] = useState<AllQueueInfo>();
+    const [fetchTime, setFetchTime] = useState(0);
+
+    const fetchQueueInfo = useCallback(async () => {
+        const apiClient = servicesContainer.get(ApiClient);
+        return apiClient.defaultApi.appControllerGetQueueInfo().then((data) => {
+            // clear previous interval
+            clearInterval(queueInfoInterval.current);
+            clearInterval(fetchCompletionInterval.current);
+            const intervalId = setInterval(() => {
+                // console.log('fetch');
+                fetchQueueInfo();
+            }, QUEUE_INFO_FETCH_INTERVAL);
+
+            const completionIntervalId = setInterval(() => {
+                // console.log('time update');
+                setFetchTime((prev) => prev + 1000);
+            }, 1000);
+
+            setFetchTime(0);
+            fetchCompletionInterval.current = completionIntervalId;
+            queueInfoInterval.current = intervalId;
+            setAllQueueInfo(data as AllQueueInfo);
+            setState((prev) => ({
+                ...prev,
+                shouldDisplayQueueInfo: true,
+            }));
+        });
+    }, [setState]);
+
+    useEffect(() => {
+        if (
+            menuScene === MenuScene.TEAM_LOBBY &&
+            state.shouldDisplayQueueInfo
+        ) {
+            fetchQueueInfo();
+        }
+        return () => {
+            clearInterval(queueInfoInterval.current);
+            clearInterval(fetchCompletionInterval.current);
+            queueInfoInterval.current = undefined;
+            fetchCompletionInterval.current = undefined;
+        };
+    }, [menuScene, state.shouldDisplayQueueInfo, fetchQueueInfo]);
 
     // // development effect
     // useEffect(() => {
@@ -568,6 +620,8 @@ export function useMainController(
         socketController,
         gameIsPlaying,
         levels,
+        allQueueInfo,
+        fetchTime,
         exitLobby,
         setState,
         handleClickReadyToPlay,
@@ -583,5 +637,6 @@ export function useMainController(
         handleSelectSideOnLobby,
         handleClickHome,
         handleClickPlayAgain,
+        fetchQueueInfo,
     };
 }
