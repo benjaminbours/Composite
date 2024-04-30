@@ -6,6 +6,8 @@ import styles from './SideSelector.module.scss';
 import { QueueTimeInfo } from './QueueTimeInfo';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 interface Props {
     isInQueue: boolean;
@@ -164,7 +166,12 @@ export const SideSelector: React.FC<Props> = ({
                     className={`${styles['ready-button']} ${styles['rect-button']}`}
                     onClick={handleClickReadyToPlay}
                 >
-                    {you.isReady ? 'I am not ready' : 'I am ready'}
+                    <span>Ready</span>
+                    {you.isReady ? (
+                        <CheckBoxIcon color="success" />
+                    ) : (
+                        <CheckBoxOutlineBlankIcon />
+                    )}
                 </button>
             )}
         </div>

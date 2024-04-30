@@ -8,7 +8,6 @@
 - Some bug when deleting elements in level editor
 - Some elements disappears from editor to game (example precision level)
 - Display keys to help player while in game
-- Pattern anti UX sur le lobby, genre on click sur I am ready et puis il est ecrit "I am not ready". On comprend pas
 - crash if try to delete the bounce we are currently inside
 
 ### Medium priority
