@@ -116,7 +116,7 @@ export function addToHistory(
     let nextHistoryIndex = historyIndex + 1;
     const nextHistory =
         nextHistoryIndex < history.length - 1
-            ? history.slice(0, historyIndex)
+            ? history.slice(0, historyIndex + 1)
             : [...history];
     if (nextHistory.length >= HISTORY_LIMIT) {
         nextHistory.shift();
