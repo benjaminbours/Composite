@@ -6,6 +6,16 @@ import InputsManager, {
     parseToUIKeyBindings,
 } from './Game/Player/InputsManager';
 
+const actionsText = {
+    left: 'Move left',
+    right: 'Move right',
+    jump: 'Jump',
+    top: 'Move up',
+    bottom: 'Move down',
+    interact: 'Interact',
+    resetPosition: 'Reset position',
+};
+
 interface Props {
     inputsManager: InputsManager;
     onClose: () => void;
@@ -70,7 +80,11 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
 
             <ul className="settings-menu__key-bindings-list key-bindings-list">
                 {uiKeyBindings.map(([movement, keys], movementIndex) => {
-                    if (movement === 'top' || movement === 'bottom') {
+                    if (
+                        movement === 'top' ||
+                        movement === 'bottom' ||
+                        movement === 'resetPosition'
+                    ) {
                         return null;
                     }
                     return (
@@ -79,7 +93,7 @@ export const SettingsMenu: React.FC<Props> = ({ inputsManager, onClose }) => {
                             className="key-bindings-list__item"
                         >
                             <span className="key-bindings-list__movement">
-                                {movement}
+                                {actionsText[movement]}
                             </span>
                             {keys.map((key, keyIndex) => {
                                 const isEditing = (() => {

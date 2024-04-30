@@ -1,6 +1,6 @@
 'use client';
 // vendors
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import * as STATS from 'stats.js';
@@ -32,6 +32,8 @@ import { ShortcutPanel } from './ShortcutPanel';
 import { ConfirmDialogContextProvider } from '../../../contexts';
 import Chip from '@mui/material/Chip';
 import { PlayersPanel } from './PlayersPanel';
+import { BottomLeftInfo } from '../../../BottomLeftInfo';
+import { SettingsMenu } from '../../../SettingsMenu';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -113,6 +115,16 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
             () => state.history[state.historyIndex] || [],
             [state.history, state.historyIndex],
         );
+
+        // TODO: Duplicate logic in MainApp
+        const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+        const handleClickOnSettings = useCallback(() => {
+            setIsSettingsOpen(true);
+        }, []);
+
+        const handleClickOnCloseSettings = useCallback(() => {
+            setIsSettingsOpen(false);
+        }, []);
 
         return (
             <main className="level-editor">
@@ -270,6 +282,16 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                         inputsManager={inputsManager.current}
                     />
                 )}
+                {isSettingsOpen && (
+                    <SettingsMenu
+                        inputsManager={inputsManager.current}
+                        onClose={handleClickOnCloseSettings}
+                    />
+                )}
+                <BottomLeftInfo
+                    gameIsPlaying={true}
+                    onSettingsClick={handleClickOnSettings}
+                />
             </main>
         );
     },

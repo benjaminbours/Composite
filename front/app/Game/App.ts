@@ -692,7 +692,7 @@ export default class App {
 
         if (shouldDisplayInteractHelper && !this.isTextOverlayDisplayed) {
             this.addTextOverlay(
-                'Press <span class="game-text-overlay__key">F</span> to interact',
+                'Press <span class="keyboard-key">F</span> to interact',
             );
         } else if (
             !shouldDisplayInteractHelper &&

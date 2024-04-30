@@ -59,6 +59,7 @@ canvas,
     .version {
         font-size: 12px;
         color: white;
+        margin: 5px 0;
     }
 }
 
@@ -692,7 +693,7 @@ $buttonSizeLarge: 120px;
     font-family: 'Source Code Pro', monospace;
 }
 
-.game-text-overlay__key {
+.keyboard-key {
     background: lightgray;
     border-radius: 5px;
     padding: 0px 5px;

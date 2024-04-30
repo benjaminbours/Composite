@@ -4,12 +4,11 @@
 
 ### High priority
 
-- Player inside composer doesn't always show in game, works well in level editor
-- Some bug when deleting elements in level editor
 - Some elements disappears from editor to game (example precision level)
-- Display keys to help player while in game
+- Some bug when deleting elements in level editor
 - crash if try to delete the bounce we are currently inside
-- When you have a level with a lot of element, when you select one with the mouse, would be nice to scroll to select element in the list on the right
+- Player inside composer doesn't always show in game, works well in level editor
+- Count of players playing or in matchmaking is wrong
 
 ### Medium priority
 
@@ -53,6 +52,7 @@
 
 ### Medium priority
 
+- When you have a level with a lot of element, when you select one with the mouse, would be nice to scroll to select element in the list on the right
 - Start to count accurately the exact duration of game in order to have speed run capability.
 - Enable github sponsor
 - Try to estimate waiting time
