@@ -548,6 +548,7 @@ export function useMainController(
                 const serverCounts = data.reduce(
                     (acc, player) => {
                         if (
+                            player &&
                             player.selectedLevel !== undefined &&
                             player.side !== undefined
                         ) {

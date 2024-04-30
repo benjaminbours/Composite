@@ -678,3 +678,25 @@ $buttonSizeLarge: 120px;
     border: solid 1px white;
     background: grey;
 }
+
+.game-text-overlay {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translate(-50%);
+    color: white;
+    opacity: 0;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 2px 2px 3px black;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.game-text-overlay__key {
+    background: lightgray;
+    border-radius: 5px;
+    padding: 0px 5px;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
+    color: black;
+    text-shadow: none;
+}

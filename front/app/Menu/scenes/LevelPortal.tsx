@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-// import GroupsIcon from '@mui/icons-material/Groups';
-import JoinLeftIcon from '@mui/icons-material/JoinLeft';
+import PersonIcon from '@mui/icons-material/Person';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ModeNightIcon from '@mui/icons-material/ModeNight';
 import Badge from '@mui/material/Badge';
@@ -90,10 +89,10 @@ export const LevelPortal: React.FC<Props> = ({
             {serverCounts !== undefined && (
                 <div className="level-portal__queue-info">
                     <Badge
-                        title="Duo currently playing"
+                        title="Players currently playing"
                         badgeContent={String(serverCounts.playing)}
                     >
-                        <JoinLeftIcon />
+                        <PersonIcon />
                     </Badge>
                     <Badge
                         title="Light in the queue"

@@ -633,6 +633,7 @@ export default class App {
 
     private updateWorldPhysic = (state: GameState) => {
         // doors
+        let shouldDisplayInteractHelper = false;
         for (const key in state.level.doors) {
             const openers = state.level.doors[key];
             let doorIsOpen = false;
@@ -668,10 +669,16 @@ export default class App {
                     doorOpener?.isActive &&
                     value.includes(this.mainPlayerSide)
                 ) {
+                    shouldDisplayInteractHelper = true;
+
                     const shouldFocus =
                         value.includes(this.mainPlayerSide) &&
                         this.mode === AppMode.GAME &&
                         this.inputsManager.inputsActive.interact;
+
+                    if (shouldFocus) {
+                        shouldDisplayInteractHelper = false;
+                    }
                     doorOpener.focusCamera(this.camera, shouldFocus);
                 }
             }
@@ -681,6 +688,17 @@ export default class App {
             } else {
                 this.closeTheDoor(doorRight!, doorLeft!);
             }
+        }
+
+        if (shouldDisplayInteractHelper && !this.isTextOverlayDisplayed) {
+            this.addTextOverlay(
+                'Press <span class="game-text-overlay__key">F</span> to interact',
+            );
+        } else if (
+            !shouldDisplayInteractHelper &&
+            this.isTextOverlayDisplayed
+        ) {
+            this.removeTextOverlay();
         }
 
         for (let i = 0; i < this.level.bounces.length; i++) {
@@ -737,6 +755,35 @@ export default class App {
             }
         }
     };
+
+    private isTextOverlayDisplayed = false;
+    private addTextOverlay(html: string): void {
+        const overlayDiv = document.createElement('div');
+        overlayDiv.innerHTML = html;
+        overlayDiv.classList.add('game-text-overlay');
+        document.body.appendChild(overlayDiv);
+        this.isTextOverlayDisplayed = true;
+        gsap.to(overlayDiv, {
+            duration: 0.5,
+            opacity: 1,
+            overwrite: true,
+        });
+    }
+
+    private removeTextOverlay() {
+        this.isTextOverlayDisplayed = false;
+        const overlayDiv = document.querySelector('.game-text-overlay');
+        gsap.to(overlayDiv, {
+            duration: 0.5,
+            opacity: 0,
+            overwrite: true,
+            onComplete: () => {
+                if (overlayDiv) {
+                    overlayDiv.remove();
+                }
+            },
+        });
+    }
 
     public updateWorldGraphics = (state: GameState) => {
         for (let i = 0; i < this.updatableElements.length; i++) {

@@ -9,6 +9,7 @@
 - Some elements disappears from editor to game (example precision level)
 - Display keys to help player while in game
 - crash if try to delete the bounce we are currently inside
+- When you have a level with a lot of element, when you select one with the mouse, would be nice to scroll to select element in the list on the right
 
 ### Medium priority
 
@@ -31,6 +32,7 @@
 
 ### High priority
 
+- Add scale management for all elements. So you can have super big door, or you can have small door like evry lucarne
 - Add landing page and reorganize routing
 - In level editor root, add an author selector to be able to watch the levels made by others, to open them, play them, and fork them.
 - Add request to add a like to a level
@@ -62,6 +64,7 @@
 - Et un truc peut être bête mais pouvoir mettre du text dans la map, pour aider les joueurs, indiquer des chemins, raconter une histoire ...
 - Reflechir a propos d'avoir des elements qui represente du texte comme dans outer wilds par example.
 - Add end time when game is finished.
+- Ease builder experience somehow, could be to add level templates, could be to add randomly generated maps, etc. Investigate
 
 ### Low priority
 
@@ -74,6 +77,7 @@
 - S4oul => https://roadmap.sh/cpp first, the connections and styles are interesting, then it can be nice to link roadmap points with github ticket. The goal is to reduce friction and ease a maximum the eventual collaboration experience.
 - Timeline management while testing the level, to easily come back at any moment in the level. Multiple timeline, test different things in the same time, or timeline respective for shadow and light.
 - Layout of end game scene view can be improved
+- Generate map randomly
 
 ## Nice to have
 
