@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.11
+
+### Patch Changes
+
+- Various bug fixes and UX improvements
+
 ## 1.0.0-next.10
 
 ### Patch Changes
