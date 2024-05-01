@@ -182,8 +182,32 @@ export class SocketGateway {
     // Let's try to declare them only once somewhere else, or to update
     // the game state if it should be stored per game and between iteration
     const lastPlayersInput: (GamePlayerInputPayload | undefined)[] = [
-      undefined,
-      undefined,
+      {
+        player: Side.SHADOW,
+        sequence: 0,
+        time: 0,
+        inputs: {
+          left: false,
+          right: false,
+          jump: false,
+          top: false,
+          bottom: false,
+          resetPosition: false,
+        },
+      },
+      {
+        player: Side.LIGHT,
+        sequence: 0,
+        time: 0,
+        inputs: {
+          left: false,
+          right: false,
+          jump: false,
+          top: false,
+          bottom: false,
+          resetPosition: false,
+        },
+      },
     ];
 
     const collidingElements = [...level.collidingElements];
