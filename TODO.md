@@ -4,7 +4,6 @@
 
 ### High priority
 
-- Some elements disappears from editor to game (example precision level)
 - crash if try to delete the bounce we are currently inside
 
 ### Medium priority

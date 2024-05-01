@@ -257,12 +257,14 @@ export function createWallDoor({
 interface ArchGroupOptions {
     size: Vector3;
     position: Vector3;
+    rotation: Euler;
     withoutColumns?: true;
 }
 
 export function createArchGroup({
     size,
     position,
+    rotation,
     withoutColumns,
 }: ArchGroupOptions) {
     const group = new Object3D();
@@ -342,7 +344,7 @@ export function createArchGroup({
     platformMeshOcclusion.layers.set(Layer.OCCLUSION);
     platformMeshOcclusion.layers.enable(Layer.OCCLUSION_PLAYER);
 
-    positionOnGrid(group, position);
+    positionOnGrid(group, position, rotation);
 
     return group;
 }
@@ -611,11 +613,12 @@ export function updateLevelState(
         case ElementType.BOUNCE:
             props = properties as BounceProperties;
 
-            if (props.interactive) {
-                levelState.bounces[props.id] = {
-                    rotationY: props.transform.rotation.y,
-                };
-            }
+            // if (props.interactive) {
+            // TODO: Find a way to put in the state only the bounce that are interactive without issue with the server
+            levelState.bounces[props.id] = {
+                rotationY: props.transform.rotation.y,
+            };
+            // }
 
             if (
                 props.side === Side.LIGHT &&
@@ -718,6 +721,7 @@ export function createElement(
             const archGroup = createArchGroup({
                 size: props.size.clone(),
                 position: props.transform.position.clone(),
+                rotation: props.transform.rotation.clone(),
             });
             return {
                 mesh: archGroup,
