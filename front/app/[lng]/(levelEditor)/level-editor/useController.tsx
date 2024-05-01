@@ -306,14 +306,16 @@ export function useController(
     }, []);
 
     const removeElement = useCallback(
-        (index: number) => () => {
+        (index: number) => (e: any) => {
+            e.stopPropagation();
             dispatch({ type: ActionType.REMOVE_ELEMENT, payload: index });
         },
         [],
     );
 
     const duplicateElement = useCallback(
-        (index: number) => () => {
+        (index: number) => (e: any) => {
+            e.stopPropagation();
             dispatch({
                 type: ActionType.DUPLICATE_ELEMENT,
                 payload: { index, uuid: uuid.v4() },
@@ -588,7 +590,7 @@ export function useController(
                 app.transformControls?.setMode('rotate');
                 updateTransformControlsAxis();
             } else if (event.code === 'Delete') {
-                if (state.currentEditingIndex) {
+                if (state.currentEditingIndex !== undefined) {
                     dispatch({
                         type: ActionType.REMOVE_ELEMENT,
                         payload: state.currentEditingIndex,
