@@ -61,9 +61,12 @@ export class TemporaryStorageService {
     socketId: string,
     data: Partial<RedisPlayerState>,
     transaction?: any,
+    isCreate = false,
   ) {
     if (transaction) {
-      transaction.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      if (isCreate) {
+        transaction.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      }
       transaction.HSET(
         REDIS_KEYS.PLAYER(socketId),
         Object.entries(data)
@@ -72,7 +75,9 @@ export class TemporaryStorageService {
       );
     } else {
       const transac = this.redisClient.MULTI();
-      transac.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      if (isCreate) {
+        transac.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      }
       transac.HSET(
         REDIS_KEYS.PLAYER(socketId),
         Object.entries(data)
@@ -121,6 +126,7 @@ export class TemporaryStorageService {
       socketId,
       RedisPlayerState.parsePlayerState(player),
       transaction,
+      true,
     );
     transaction.RPUSH(REDIS_KEYS.MATCH_MAKING_QUEUE, socketId);
     this.updateQueueInfo('add', player, transaction);
@@ -130,9 +136,9 @@ export class TemporaryStorageService {
   async getServerInfo(): Promise<any> {
     return this.redisClient
       .LRANGE(REDIS_KEYS.PLAYER_LIST, 0, -1)
-      .then((playerList) =>
-        Promise.all(playerList.map((id) => this.getPlayer(id))),
-      );
+      .then((playerList) => {
+        return Promise.all(playerList.map((id) => this.getPlayer(id)));
+      });
   }
 
   private updateQueueInfo(
@@ -231,6 +237,7 @@ export class TemporaryStorageService {
         socketId,
         RedisPlayerState.parsePlayerState(player),
         transaction,
+        indexToClear === undefined,
       );
     });
     return transaction.exec();

@@ -66,6 +66,8 @@ export class LobbyGateway {
     await this.temporaryStorage.setPlayer(
       socket.id,
       RedisPlayerState.parsePlayerState(player),
+      undefined,
+      true,
     );
     this.addSocketToRoom(socket.id, teamRoomName);
     this.mainGateway.server
@@ -104,6 +106,8 @@ export class LobbyGateway {
     this.temporaryStorage.setPlayer(
       socket.id,
       RedisPlayerState.parsePlayerState(player),
+      undefined,
+      true,
     );
     this.addSocketToRoom(socket.id, playerHost.roomName!);
     this.mainGateway.emit(socketIdHost, [

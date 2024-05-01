@@ -7,7 +7,6 @@
 - Some elements disappears from editor to game (example precision level)
 - crash if try to delete the bounce we are currently inside
 - Player inside composer doesn't always show in game, works well in level editor
-- Count of players playing or in matchmaking is wrong
 
 ### Medium priority
 
@@ -30,6 +29,7 @@
 
 ### High priority
 
+- Add link to socials on the website, in the bottom close the version for example
 - Add scale management for all elements. So you can have super big door, or you can have small door like evry lucarne
 - Add landing page and reorganize routing
 - In level editor root, add an author selector to be able to watch the levels made by others, to open them, play them, and fork them.
