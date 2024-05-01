@@ -188,15 +188,6 @@ export const SceneItem: React.FC<Props> = React.memo(
                     />
                     <IconButton
                         size="small"
-                        title={isLocked ? 'Unlock element' : 'Lock element'}
-                        onClick={onLock(index)}
-                        disabled={disabled}
-                        className="scene-content-panel__item-action"
-                    >
-                        {isLocked ? <LockIcon /> : <LockOpenIcon />}
-                    </IconButton>
-                    <IconButton
-                        size="small"
                         title="Duplicate element"
                         onClick={onDuplicate(index)}
                         disabled={disabled || cantDelete || isLocked}
@@ -214,6 +205,15 @@ export const SceneItem: React.FC<Props> = React.memo(
                         <DeleteIcon />
                     </IconButton>
                 </ListItemButton>
+                <IconButton
+                    size="small"
+                    title={isLocked ? 'Unlock element' : 'Lock element'}
+                    onClick={onLock(index)}
+                    disabled={disabled}
+                    className="scene-content-panel__item-action"
+                >
+                    {isLocked ? <LockIcon /> : <LockOpenIcon />}
+                </IconButton>
             </ListItem>
         );
     },
