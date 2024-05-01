@@ -6,7 +6,6 @@
 
 - Some elements disappears from editor to game (example precision level)
 - crash if try to delete the bounce we are currently inside
-- Player inside composer doesn't always show in game, works well in level editor
 
 ### Medium priority
 

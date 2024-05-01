@@ -219,6 +219,7 @@ export default class App {
             this.collisionAreaMesh = createCollisionAreaMesh();
         } else {
             this.setGameCamera();
+            this.rendererManager.addPlayerInsideComposer();
         }
 
         if (this.socketController) {
