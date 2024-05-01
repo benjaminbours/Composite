@@ -248,6 +248,21 @@ export default class App {
         this.transformControls?.detach();
     };
 
+    public resetStates = () => {
+        // reset app state
+        for (let i = 0; i < this.rendererManager.lightBounces.length; i++) {
+            const bounce = this.rendererManager.lightBounces[i];
+            this.rendererManager.removeLightBounceComposer(bounce);
+        }
+
+        this.mouseSelectableObjects = [];
+        this.updatableElements = [];
+        this.level.bounces = [];
+        this.level.doorOpeners = [];
+        this.gameStateManager.predictionState.level.doors = {};
+        this.gameStateManager.predictionState.level.bounces = {};
+    };
+
     public resetEditorCamera = () => {
         this.camera.position.set(0, 100, 500);
         this.controls?.target.set(0, 100, 0);

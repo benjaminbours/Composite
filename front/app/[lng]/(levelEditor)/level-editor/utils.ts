@@ -112,12 +112,10 @@ export function addToHistory(
     historyIndex: number,
     nextState: LevelElement[],
 ) {
-    // If we are not at the end of the history, slice the history up to the current index
+    // slice the history up to the current index
     let nextHistoryIndex = historyIndex + 1;
-    const nextHistory =
-        nextHistoryIndex < history.length - 1
-            ? history.slice(0, historyIndex + 1)
-            : [...history];
+    const nextHistory = history.slice(0, historyIndex + 1);
+
     if (nextHistory.length >= HISTORY_LIMIT) {
         nextHistory.shift();
     }

@@ -14,6 +14,7 @@ import {
     WorldContext,
     createElement,
     gridSize,
+    updateLevelState,
 } from '@benjaminbours/composite-core';
 import * as uuid from 'uuid';
 import App, { AppMode } from '../../../Game/App';
@@ -231,10 +232,23 @@ export function reducer(
     let currentEditingIndex;
     let historyIndex;
     let historyData;
+    let worldContext: WorldContext;
     switch (action.type) {
         case ActionType.UNDO:
             historyIndex = state.historyIndex - 1;
             elements = state.history[historyIndex];
+
+            state.app!.resetStates();
+            worldContext = buildWorldContext(state.app!);
+            elements.forEach((element) => {
+                updateLevelState(
+                    worldContext,
+                    element.type,
+                    element.properties,
+                    element.mesh,
+                );
+            });
+
             loadElementsToLevel(state.app!, elements);
             return {
                 ...state,
@@ -243,6 +257,18 @@ export function reducer(
         case ActionType.REDO:
             historyIndex = state.historyIndex + 1;
             elements = state.history[historyIndex];
+
+            state.app!.resetStates();
+            worldContext = buildWorldContext(state.app!);
+            elements.forEach((element) => {
+                updateLevelState(
+                    worldContext,
+                    element.type,
+                    element.properties,
+                    element.mesh,
+                );
+            });
+
             loadElementsToLevel(state.app!, elements);
             return {
                 ...state,
@@ -383,10 +409,17 @@ export function reducer(
                         element.type,
                     );
                     // create a new one
+                    worldContext = buildWorldContext(state.app);
                     const { mesh: newMesh } = createElement(
-                        buildWorldContext(state.app),
+                        worldContext,
                         element.type,
                         element.properties,
+                    );
+                    updateLevelState(
+                        worldContext,
+                        element.type,
+                        element.properties,
+                        newMesh,
                     );
                     (newMesh as any).customUUID = action.payload.uuid;
                     element.mesh = newMesh;
@@ -540,6 +573,11 @@ export function reducer(
             elements = state.history[state.historyIndex]
                 ? cloneElements(state.history[state.historyIndex])
                 : [];
+
+            if (action.payload === state.currentEditingIndex) {
+                currentEditingIndex = undefined;
+            }
+
             const deletedElement = elements.splice(action.payload, 1);
             removeMeshFromLevel(
                 state.app!,
@@ -555,6 +593,7 @@ export function reducer(
                 ...state,
                 historyIndex: historyData.historyIndex,
                 history: historyData.history,
+                currentEditingIndex,
             };
         case ActionType.MOVE_ELEMENT:
             elements = state.history[state.historyIndex]
@@ -625,22 +664,7 @@ export function reducer(
             elements = state.history[state.historyIndex]
                 ? cloneElements(state.history[state.historyIndex])
                 : [];
-            // reset app state
-            for (
-                let i = 0;
-                i < state.app!.rendererManager.lightBounces.length;
-                i++
-            ) {
-                const bounce = state.app!.rendererManager.lightBounces[i];
-                state.app!.rendererManager.removeLightBounceComposer(bounce);
-            }
-
-            state.app!.mouseSelectableObjects = [];
-            state.app!.updatableElements = [];
-            state.app!.level.bounces = [];
-            state.app!.level.doorOpeners = [];
-            state.app!.gameStateManager.predictionState.level.doors = {};
-            state.app!.gameStateManager.predictionState.level.bounces = {};
+            state.app?.resetStates();
             const elementList = parseLevelElements(
                 buildWorldContext(state.app!),
                 action.payload.data,

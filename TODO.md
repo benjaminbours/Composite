@@ -5,7 +5,6 @@
 ### High priority
 
 - Some elements disappears from editor to game (example precision level)
-- Some bug when deleting elements in level editor
 - crash if try to delete the bounce we are currently inside
 - Player inside composer doesn't always show in game, works well in level editor
 - Count of players playing or in matchmaking is wrong

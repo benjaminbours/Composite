@@ -19,7 +19,7 @@ export const BottomLeftInfo: React.FC<Props> = ({
                         <SettingsIcon />
                     </IconButton>
                     <p className="version">
-                        Blocked? Reset position{' '}
+                        Stuck? Reset position{' '}
                         <span className="keyboard-key">Backspace</span>
                     </p>
                 </>

@@ -566,7 +566,7 @@ export interface WorldContext {
     clientGraphicHelpers?: ClientGraphicHelpers;
 }
 
-export function createElement(
+export function updateLevelState(
     {
         levelState,
         bounceList,
@@ -574,19 +574,13 @@ export function createElement(
         clientGraphicHelpers,
     }: WorldContext,
     type: ElementType,
-    properties?: ElementProperties,
-): {
-    mesh: Object3D;
-    properties: ElementProperties;
-} {
+    properties: ElementProperties,
+    mesh: Object3D,
+) {
     let props;
     switch (type) {
         case ElementType.DOOR_OPENER:
-            props =
-                (properties as DoorOpenerProperties) ||
-                new DoorOpenerProperties(doorOpenersList.length);
-            const group = createDoorOpener(props);
-
+            props = properties as DoorOpenerProperties;
             if (
                 props.door_id !== undefined &&
                 levelState.doors[props.door_id] === undefined
@@ -601,13 +595,78 @@ export function createElement(
                 levelState.doors[props.door_id][props.id] = [];
             }
 
-            doorOpenersList.push(group);
+            if (clientGraphicHelpers) {
+                const doorOpenerGraphic = mesh.children[1];
+                clientGraphicHelpers.updatableElements.push(doorOpenerGraphic);
+            }
+
+            doorOpenersList.push(mesh);
+            break;
+        case ElementType.WALL_DOOR:
+            props = properties as WallDoorProperties;
+            if (levelState.doors[props.id] === undefined) {
+                levelState.doors[props.id] = {};
+            }
+            break;
+        case ElementType.BOUNCE:
+            props = properties as BounceProperties;
+
+            if (props.interactive) {
+                levelState.bounces[props.id] = {
+                    rotationY: props.transform.rotation.y,
+                };
+            }
+
+            if (
+                props.side === Side.LIGHT &&
+                clientGraphicHelpers?.addLightBounceComposer
+            ) {
+                clientGraphicHelpers.addLightBounceComposer(
+                    mesh.children[0] as ElementToBounce,
+                );
+            }
+
+            if (props.side === Side.LIGHT && props.interactive) {
+                clientGraphicHelpers?.updatableElements.push(mesh.children[2]);
+            } else if (props.side === Side.SHADOW && props.interactive) {
+                clientGraphicHelpers?.updatableElements.push(mesh.children[1]);
+            }
+
+            bounceList.push(mesh);
+
+            clientGraphicHelpers?.mouseSelectableObjects.push(mesh.children[0]);
+            break;
+        case ElementType.END_LEVEL:
+            if (clientGraphicHelpers) {
+                clientGraphicHelpers.updatableElements.push(mesh.children[1]);
+            }
+            break;
+        default:
+            clientGraphicHelpers?.mouseSelectableObjects.push(mesh);
+            break;
+    }
+}
+
+export function createElement(
+    { levelState, doorOpenersList, clientGraphicHelpers }: WorldContext,
+    type: ElementType,
+    properties?: ElementProperties,
+): {
+    mesh: Object3D;
+    properties: ElementProperties;
+} {
+    let props;
+    switch (type) {
+        case ElementType.DOOR_OPENER:
+            props =
+                (properties as DoorOpenerProperties) ||
+                new DoorOpenerProperties(doorOpenersList.length);
+            const group = createDoorOpener(props);
             if (clientGraphicHelpers) {
                 const doorOpener = clientGraphicHelpers.createDoorOpenerGraphic(
                     props.door_id,
                 );
                 group.add(doorOpener);
-                clientGraphicHelpers.updatableElements.push(doorOpener);
             }
             return {
                 mesh: group,
@@ -624,10 +683,6 @@ export function createElement(
                 rotation: props.transform.rotation.clone(),
                 id: props.id,
             });
-            if (levelState.doors[props.id] === undefined) {
-                levelState.doors[props.id] = {};
-            }
-            clientGraphicHelpers?.mouseSelectableObjects.push(wallDoorGroup);
             return {
                 mesh: wallDoorGroup,
                 properties: props,
@@ -638,7 +693,6 @@ export function createElement(
                 new ColumnFatProperties();
             const column = createColumnGroup(props.size.y, 'big');
             positionOnGrid(column, props.transform.position.clone());
-            clientGraphicHelpers?.mouseSelectableObjects.push(column);
             return {
                 mesh: column,
                 properties: props,
@@ -653,8 +707,6 @@ export function createElement(
                 const endLevelGraphic =
                     clientGraphicHelpers.createEndLevelGraphic();
                 endLevelGroup.add(endLevelGraphic);
-                clientGraphicHelpers.updatableElements.push(endLevelGraphic);
-                clientGraphicHelpers.mouseSelectableObjects.push(endLevelGroup);
             }
             positionOnGrid(endLevelGroup, props.transform.position.clone());
             return {
@@ -667,7 +719,6 @@ export function createElement(
                 size: props.size.clone(),
                 position: props.transform.position.clone(),
             });
-            clientGraphicHelpers?.mouseSelectableObjects.push(archGroup);
             return {
                 mesh: archGroup,
                 properties: props,
@@ -684,13 +735,6 @@ export function createElement(
                 side: props.side,
                 interactive: props.interactive,
             });
-            levelState.bounces[props.id] = {
-                rotationY: props.transform.rotation.y,
-            };
-            bounceList.push(bounceGroup);
-            clientGraphicHelpers?.mouseSelectableObjects.push(
-                bounceGroup.children[0],
-            );
             if (clientGraphicHelpers) {
                 const { skinBounce, graphicSkin } =
                     clientGraphicHelpers.createBounceGraphic(
@@ -698,22 +742,9 @@ export function createElement(
                         props,
                     );
                 bounceGroup.add(skinBounce);
-                if (
-                    props.side === Side.LIGHT &&
-                    clientGraphicHelpers.addLightBounceComposer
-                ) {
-                    clientGraphicHelpers.addLightBounceComposer(
-                        bounceGroup.children[0] as ElementToBounce,
-                    );
-                }
+
                 if (graphicSkin) {
                     bounceGroup.add(graphicSkin);
-
-                    if (props.interactive) {
-                        clientGraphicHelpers.updatableElements.push(
-                            graphicSkin,
-                        );
-                    }
                 }
             }
             return {
@@ -728,7 +759,6 @@ export function createElement(
                 position: props.transform.position.clone(),
                 rotation: props.transform.rotation.clone(),
             });
-            clientGraphicHelpers?.mouseSelectableObjects.push(wallGroup);
             return {
                 mesh: wallGroup,
                 properties: props,
@@ -755,6 +785,7 @@ export function parseLevelElements(
             el.type,
             properties as any,
         );
+        updateLevelState(worldContext, el.type, properties as any, mesh);
 
         return {
             type: el.type as ElementType,

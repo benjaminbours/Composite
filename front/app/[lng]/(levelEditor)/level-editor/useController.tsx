@@ -678,7 +678,7 @@ export function useController(
             app.canvasDom.removeEventListener('mousemove', onMouseMove);
             app.canvasDom.removeEventListener('mousedown', onMouseDown);
         };
-    }, [state]);
+    }, [state.app, state.historyIndex, state.history]);
 
     // effect responsible to close the auth modal after successful login
     useEffect(() => {
