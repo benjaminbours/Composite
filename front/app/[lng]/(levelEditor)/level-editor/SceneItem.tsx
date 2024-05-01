@@ -23,8 +23,8 @@ type Props = LevelElement & {
     index: number;
     isSelected: boolean;
     onClick: (index: number) => () => void;
-    onDelete: (index: number) => () => void;
-    onDuplicate: (index: number) => () => void;
+    onDelete: (index: number) => (e: any) => void;
+    onDuplicate: (index: number) => (e: any) => void;
     onLock: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     onMove: (dragIndex: number, hoverIndex: number) => void;

@@ -27,8 +27,8 @@ interface Props {
     elements: LevelElement[];
     currentEditingIndex: number | undefined;
     onElementClick: (index: number) => () => void;
-    onElementDelete: (index: number) => () => void;
-    onElementDuplicate: (index: number) => () => void;
+    onElementDelete: (index: number) => (e: any) => void;
+    onElementDuplicate: (index: number) => (e: any) => void;
     onElementLock: (index: number) => () => void;
     onChangeName: (index: number) => (e: any) => void;
     onAddElement: (type: ElementType) => void;

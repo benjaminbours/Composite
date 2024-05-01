@@ -9,7 +9,6 @@
 
 ### Medium priority
 
-- Missing arrow helper for bounce sometimes
 - When updating size and rotation of element. At some point the rotation is not considered anymore
 
 ### Low priority
