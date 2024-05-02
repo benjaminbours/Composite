@@ -341,6 +341,7 @@ export default class App {
             this.physicSimulation.stop();
             this.rendererManager.removePlayerInsideComposer();
             this.inputsManager.destroyEventListeners();
+            this.removeTextOverlay();
             // reset colliding elements
             this.collidingElements = [];
             if (this.controls) {
