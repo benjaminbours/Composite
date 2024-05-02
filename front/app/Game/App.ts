@@ -74,7 +74,7 @@ export default class App {
         75,
         window.innerWidth / window.innerHeight,
         10,
-        12000,
+        20000,
     );
     public scene = new Scene();
 

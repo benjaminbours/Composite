@@ -518,7 +518,7 @@ function createDoorOpener(props: DoorOpenerProperties) {
     return group;
 }
 
-function parseProperties(props: any) {
+export function parseProperties(props: any) {
     const properties: Record<string, any> = {};
     Object.entries(props).forEach(([key, value]: [key: string, value: any]) => {
         switch (key) {
@@ -538,10 +538,14 @@ function parseProperties(props: any) {
                 break;
             case 'size':
             case 'doorPosition':
-                properties[key] = new Vector3(value.x, value.y, value.z);
+                (properties as any)[key] = new Vector3(
+                    value.x,
+                    value.y,
+                    value.z,
+                );
                 break;
             default:
-                properties[key] = value;
+                (properties as any)[key] = value;
                 break;
         }
     });
@@ -603,12 +607,14 @@ export function updateLevelState(
             }
 
             doorOpenersList.push(mesh);
+            clientGraphicHelpers?.mouseSelectableObjects.push(mesh);
             break;
         case ElementType.WALL_DOOR:
             props = properties as WallDoorProperties;
             if (levelState.doors[props.id] === undefined) {
                 levelState.doors[props.id] = {};
             }
+            clientGraphicHelpers?.mouseSelectableObjects.push(mesh);
             break;
         case ElementType.BOUNCE:
             props = properties as BounceProperties;
@@ -695,7 +701,11 @@ export function createElement(
                 (properties as ColumnFatProperties) ||
                 new ColumnFatProperties();
             const column = createColumnGroup(props.size.y, 'big');
-            positionOnGrid(column, props.transform.position.clone());
+            positionOnGrid(
+                column,
+                props.transform.position.clone(),
+                props.transform.rotation.clone(),
+            );
             return {
                 mesh: column,
                 properties: props,
@@ -780,9 +790,16 @@ export function parseLevelElements(
         // TODO: remove, this is kind of a migration hack
         if (
             el.type === ElementType.DOOR_OPENER &&
-            properties.id === undefined
+            (properties as DoorOpenerProperties).id === undefined
         ) {
-            properties.id = index;
+            (properties as DoorOpenerProperties).id = index;
+        }
+
+        if (
+            el.type === ElementType.DOOR_OPENER &&
+            (properties as DoorOpenerProperties).door_id === undefined
+        ) {
+            (properties as DoorOpenerProperties).door_id = undefined;
         }
         const { mesh } = createElement(
             worldContext,

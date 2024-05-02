@@ -15,6 +15,7 @@ import {
     createElement,
     gridSize,
     updateLevelState,
+    parseProperties,
 } from '@benjaminbours/composite-core';
 import * as uuid from 'uuid';
 import App, { AppMode } from '../../../Game/App';
@@ -636,7 +637,19 @@ export function reducer(
             const duplicate = createElement(
                 buildWorldContext(state.app!),
                 elementToDuplicate.type,
-                elementToDuplicate.properties,
+                parseProperties(elementToDuplicate.properties) as any,
+            );
+            if (elementToDuplicate.type === ElementType.WALL_DOOR) {
+                (duplicate.properties as WallDoorProperties).id = Object.keys(
+                    state.app!.gameStateManager.predictionState.level.doors,
+                ).length;
+            }
+            worldContext = buildWorldContext(state.app!);
+            updateLevelState(
+                worldContext,
+                elementToDuplicate.type,
+                duplicate.properties,
+                duplicate.mesh,
             );
             elements.splice(action.payload.index + 1, 0, {
                 id: uuid.v4(),
