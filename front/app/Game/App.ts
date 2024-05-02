@@ -73,7 +73,7 @@ export default class App {
     public camera = new CustomCamera(
         75,
         window.innerWidth / window.innerHeight,
-        0.1,
+        10,
         12000,
     );
     public scene = new Scene();
@@ -281,7 +281,7 @@ export default class App {
         this.controls.enableDamping = false;
         this.controls.enableRotate = false;
         this.controls.autoRotate = false;
-        this.controls.maxDistance = 2000;
+        this.controls.maxDistance = 3000;
         this.controls.maxPolarAngle = Math.PI / 2;
         this.controls.minPolarAngle = Math.PI / 2;
         this.controls.minAzimuthAngle = Math.PI * 2;
