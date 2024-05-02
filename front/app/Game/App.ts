@@ -653,9 +653,9 @@ export default class App {
         let shouldDisplayInteractHelper = false;
         for (const key in state.level.doors) {
             const openers = state.level.doors[key];
-            let doorIsOpen = false;
-            let doorRight: Object3D;
-            let doorLeft: Object3D;
+            let shouldOpenTheDoor = false;
+            let doorRight: Object3D | undefined;
+            let doorLeft: Object3D | undefined;
 
             for (const openerKey in openers) {
                 const value = openers[openerKey];
@@ -678,7 +678,7 @@ export default class App {
                     }
                 }
                 if (value.length > 0) {
-                    doorIsOpen = true;
+                    shouldOpenTheDoor = true;
                 }
 
                 doorOpener?.update(this.delta, this.camera);
@@ -700,10 +700,12 @@ export default class App {
                 }
             }
 
-            if (doorIsOpen) {
-                this.openTheDoor(doorRight!, doorLeft!);
-            } else {
-                this.closeTheDoor(doorRight!, doorLeft!);
+            if (doorRight && doorLeft) {
+                if (shouldOpenTheDoor) {
+                    this.openTheDoor(doorRight, doorLeft);
+                } else {
+                    this.closeTheDoor(doorRight, doorLeft);
+                }
             }
         }
 
