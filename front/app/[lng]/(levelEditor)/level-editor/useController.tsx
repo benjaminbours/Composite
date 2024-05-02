@@ -546,7 +546,7 @@ export function useController(
 
     // register all key down events
     useEffect(() => {
-        if (!state.app || state.appMode !== AppMode.EDITOR) {
+        if (!state.app) {
             return;
         }
         const app = state.app;
@@ -571,6 +571,9 @@ export function useController(
             // Listen for Ctrl + Z and Ctrl + Shift + Z
             if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
                 event.preventDefault();
+                if (state.appMode !== AppMode.EDITOR) {
+                    return;
+                }
                 // Don't undo past the initial state
                 if (!event.shiftKey && state.historyIndex > 0) {
                     dispatch({ type: ActionType.UNDO });
@@ -584,18 +587,39 @@ export function useController(
                     dispatch({ type: ActionType.REDO });
                 }
             } else if (event.code === 'KeyT') {
+                if (state.appMode !== AppMode.EDITOR) {
+                    return;
+                }
                 app.transformControls?.setMode('translate');
                 updateTransformControlsAxis();
             } else if (event.code === 'KeyR') {
+                if (state.appMode !== AppMode.EDITOR) {
+                    return;
+                }
                 app.transformControls?.setMode('rotate');
                 updateTransformControlsAxis();
             } else if (event.code === 'Delete') {
+                if (state.appMode !== AppMode.EDITOR) {
+                    return;
+                }
                 if (state.currentEditingIndex !== undefined) {
                     dispatch({
                         type: ActionType.REMOVE_ELEMENT,
                         payload: state.currentEditingIndex,
                     });
                 }
+            } else if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                if (state.appMode !== AppMode.EDITOR) {
+                    return;
+                }
+                event.preventDefault();
+                handleClickOnSave();
+            } else if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+                event.preventDefault();
+                toggleTestMode();
+            } else if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
+                event.preventDefault();
+                switchPlayer();
             }
         };
 
@@ -607,6 +631,9 @@ export function useController(
         state.app,
         state.currentEditingIndex,
         state.appMode,
+        handleClickOnSave,
+        toggleTestMode,
+        switchPlayer,
     ]);
 
     // responsible to register and clear mouse event listeners

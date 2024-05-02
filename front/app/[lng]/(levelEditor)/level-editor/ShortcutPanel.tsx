@@ -9,6 +9,9 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SaveIcon from '@mui/icons-material/Save';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
 // project
 import { Divider } from '@mui/material';
 
@@ -49,6 +52,21 @@ export const ShortcutPanel: React.FC<Props> = React.memo(() => {
                 shortcut: 'Backspace',
                 text: 'Reset player position',
                 icon: <RestartAltIcon />,
+            },
+            {
+                shortcut: 'Ctrl + S',
+                text: 'Save',
+                icon: <SaveIcon />,
+            },
+            {
+                shortcut: 'Ctrl + P',
+                text: 'Toggle from editor mode to play mode',
+                icon: <PlayCircleIcon />,
+            },
+            {
+                shortcut: 'Ctrl + O',
+                text: 'Switch player',
+                icon: <SwitchAccountIcon />,
             },
         ],
         [],
