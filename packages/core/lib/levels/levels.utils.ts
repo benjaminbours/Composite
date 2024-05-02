@@ -826,7 +826,7 @@ export function parseLevelElements(
 }
 
 export function createCollisionAreaMesh() {
-    const geometry = new PlaneGeometry(10000, 10000);
+    const geometry = new PlaneGeometry(100000, 100000);
     const material = new MeshBasicMaterial({
         color: 0xff0000, // red color
         transparent: true,
@@ -834,7 +834,7 @@ export function createCollisionAreaMesh() {
     });
     const mesh = new Mesh(geometry, material);
     mesh.name = 'collision-area';
-    mesh.position.y = 10000 / 2;
+    mesh.position.y = 100000 / 2;
     return mesh;
 }
 
