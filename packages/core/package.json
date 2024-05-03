@@ -29,5 +29,8 @@
   "peerDependencies": {
     "gsap": "^3.12.2",
     "three": "^0.161.0"
+  },
+  "dependencies": {
+    "short-unique-id": "^5.2.0"
   }
 }

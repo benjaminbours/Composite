@@ -45,7 +45,6 @@ import {
 // local
 import InputsManager from './Player/InputsManager';
 import { LightPlayer, Player } from './Player';
-// import CustomCamera from './CustomCamera';
 import { DoorOpenerGraphic } from './elements/DoorOpenerGraphic';
 import { ShadowPlayer } from './Player/ShadowPlayer';
 import SkyShader from './SkyShader';

@@ -17,7 +17,7 @@ export interface DoorState {
 }
 
 export interface BounceState {
-    [key: number]: {
+    [key: string]: {
         rotationY: number;
     };
 }
@@ -26,7 +26,7 @@ export interface PlayerGameState {
     position: Vec2;
     velocity: Vec2;
     state: MovableComponentState;
-    insideElementID: number | undefined;
+    insideElementID: string | undefined;
 }
 
 interface RedisStaticGameState {
@@ -117,7 +117,7 @@ export class GameState {
                     state: Number(state.shadow_state) as MovableComponentState,
                     insideElementID:
                         state.shadow_inside_element_id !== undefined
-                            ? Number(state.shadow_inside_element_id)
+                            ? state.shadow_inside_element_id
                             : undefined,
                 },
                 {
@@ -132,7 +132,7 @@ export class GameState {
                     state: Number(state.light_state) as MovableComponentState,
                     insideElementID:
                         state.light_inside_element_id !== undefined
-                            ? Number(state.light_inside_element_id)
+                            ? state.light_inside_element_id
                             : undefined,
                 },
             ],

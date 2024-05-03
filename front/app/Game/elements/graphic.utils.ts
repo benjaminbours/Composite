@@ -60,7 +60,7 @@ export function connectDoors(elements: LevelElement[]) {
         });
 }
 
-export function createDoorOpenerGraphic(door_id: number | undefined) {
+export function createDoorOpenerGraphic(door_id: string | undefined) {
     return new DoorOpenerGraphic(ElementName.DOOR_OPENER(String(door_id)));
 }
 

@@ -23,6 +23,7 @@ import { generateErrorNotification } from '../../../utils/errors/generateErrorNo
 import { startLoadingAssets } from '../../../Game/assetsLoader';
 import { useConfirmDialogContext } from '../../../contexts';
 import { ActionType, defaultLevel, initialState, reducer } from './reducer';
+import ShortUniqueId from 'short-unique-id';
 
 export function useController(
     level_id: string,
@@ -318,7 +319,12 @@ export function useController(
             e.stopPropagation();
             dispatch({
                 type: ActionType.DUPLICATE_ELEMENT,
-                payload: { index, uuid: uuid.v4() },
+                payload: {
+                    index,
+                    uuid: new ShortUniqueId({
+                        length: 6,
+                    }).rnd(),
+                },
             });
         },
         [],
@@ -664,6 +670,7 @@ export function useController(
             app.mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
         };
         const onMouseDown = (e: MouseEvent) => {
+            e.preventDefault();
             // TODO: Make players selectable by clicking on them
             if (!app.mouseSelectedObject) {
                 return;

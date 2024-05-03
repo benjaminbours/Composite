@@ -639,10 +639,26 @@ export function reducer(
                 elementToDuplicate.type,
                 parseProperties(elementToDuplicate.properties) as any,
             );
-            if (elementToDuplicate.type === ElementType.WALL_DOOR) {
-                (duplicate.properties as WallDoorProperties).id = Object.keys(
-                    state.app!.gameStateManager.predictionState.level.doors,
-                ).length;
+            if (
+                elementToDuplicate.type === ElementType.DOOR_OPENER ||
+                elementToDuplicate.type === ElementType.WALL_DOOR ||
+                elementToDuplicate.type === ElementType.BOUNCE
+            ) {
+                (duplicate.properties as any).id = action.payload.uuid;
+                if (elementToDuplicate.type === ElementType.BOUNCE) {
+                    (duplicate.mesh.children[0] as any).bounceID =
+                        action.payload.uuid;
+                }
+
+                if (elementToDuplicate.type === ElementType.WALL_DOOR) {
+                    duplicate.mesh.name = `${action.payload.uuid}_WALL_DOOR`;
+                }
+
+                if (elementToDuplicate.type === ElementType.DOOR_OPENER) {
+                    const parts = duplicate.mesh.name.split('-');
+                    parts[parts.length - 1] = action.payload.uuid;
+                    duplicate.mesh.name = parts.join('-');
+                }
             }
             worldContext = buildWorldContext(state.app!);
             updateLevelState(

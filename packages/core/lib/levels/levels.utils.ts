@@ -40,7 +40,7 @@ export const ElementName = {
     DOOR_OPENER: (doorId: string) => `${doorId}_DOOR_OPENER`,
     AREA_DOOR_OPENER: (doorId: string, openerId: string) =>
         `${doorId}_${openerId}_${AREA_DOOR_OPENER_SUFFIX}`,
-    BOUNCE: (id: number) => `${id}_BOUNCE`,
+    BOUNCE: (id: string) => `${id}_BOUNCE`,
     WALL_DOOR: (doorIndex: string) => `${doorIndex}_WALL_DOOR`,
 };
 
@@ -149,7 +149,7 @@ interface WallDoorOptions {
     position: Vector3;
     doorPosition: Vector3;
     rotation: Euler;
-    id: number;
+    id: string;
 }
 
 export function createWallDoor({
@@ -424,7 +424,7 @@ export interface BounceOptions {
     position: Vector3;
     rotation: Euler;
     side: Side;
-    id: number;
+    id: string;
     interactive: boolean;
 }
 
@@ -558,7 +558,7 @@ export interface ClientGraphicHelpers {
         bounce: ElementToBounce,
         props: BounceProperties,
     ) => { skinBounce: Object3D; graphicSkin: Object3D | undefined };
-    createDoorOpenerGraphic: (door_id: number | undefined) => Object3D;
+    createDoorOpenerGraphic: (door_id: string | undefined) => Object3D;
     addLightBounceComposer?: (bounce: ElementToBounce) => void;
     connectDoors: (elements: LevelElement[]) => void;
     mouseSelectableObjects: Object3D[];
@@ -657,7 +657,7 @@ export function updateLevelState(
 }
 
 export function createElement(
-    { levelState, doorOpenersList, clientGraphicHelpers }: WorldContext,
+    { clientGraphicHelpers }: WorldContext,
     type: ElementType,
     properties?: ElementProperties,
 ): {
@@ -669,7 +669,7 @@ export function createElement(
         case ElementType.DOOR_OPENER:
             props =
                 (properties as DoorOpenerProperties) ||
-                new DoorOpenerProperties(doorOpenersList.length);
+                new DoorOpenerProperties();
             const group = createDoorOpener(props);
             if (clientGraphicHelpers) {
                 const doorOpener = clientGraphicHelpers.createDoorOpenerGraphic(
@@ -683,8 +683,7 @@ export function createElement(
             };
         case ElementType.WALL_DOOR:
             props =
-                (properties as WallDoorProperties) ||
-                new WallDoorProperties(Object.keys(levelState.doors).length);
+                (properties as WallDoorProperties) || new WallDoorProperties();
             const wallDoorGroup = createWallDoor({
                 size: props.size.clone(),
                 position: props.transform.position.clone(),
@@ -738,9 +737,7 @@ export function createElement(
                 properties: props,
             };
         case ElementType.BOUNCE:
-            props =
-                (properties as BounceProperties) ||
-                new BounceProperties(Object.keys(levelState.bounces).length);
+            props = (properties as BounceProperties) || new BounceProperties();
             const bounceGroup = createBounce({
                 // size: props.size.clone(),
                 position: props.transform.position.clone(),
@@ -785,15 +782,8 @@ export function parseLevelElements(
     elementList: any[],
 ): LevelElement[] {
     // create each elements
-    const elements = elementList.map((el: any, index: number) => {
+    const elements = elementList.map((el: any) => {
         const properties = parseProperties(el.properties);
-        // TODO: remove, this is kind of a migration hack
-        if (
-            el.type === ElementType.DOOR_OPENER &&
-            (properties as DoorOpenerProperties).id === undefined
-        ) {
-            (properties as DoorOpenerProperties).id = index;
-        }
 
         if (
             el.type === ElementType.DOOR_OPENER &&

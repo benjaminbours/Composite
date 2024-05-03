@@ -1,4 +1,5 @@
 import { Euler, Object3D, Vector3 } from 'three';
+import ShortUniqueId from 'short-unique-id';
 import { Side } from '../types';
 
 export class WallProperties {
@@ -26,8 +27,9 @@ export class BounceProperties {
     };
     public side = Side.SHADOW;
     public interactive = false;
+    public id = new ShortUniqueId({ length: 6 }).rnd();
 
-    constructor(public id: number) {}
+    constructor() {}
 }
 
 export class EndLevelProperties {
@@ -52,8 +54,9 @@ export class WallDoorProperties {
         position: new Vector3(0, 0, 0),
         rotation: new Euler(0, 0, 0),
     };
+    public id = new ShortUniqueId({ length: 6 }).rnd();
 
-    constructor(public id: number) {}
+    constructor() {}
 }
 
 export class DoorOpenerProperties {
@@ -61,8 +64,10 @@ export class DoorOpenerProperties {
         position: new Vector3(0, 0, 0),
         rotation: new Euler(0, 0, 0),
     };
-    public door_id: number | undefined = undefined;
-    constructor(public id: number) {}
+    public door_id: string | undefined = undefined;
+    public id = new ShortUniqueId({ length: 6 }).rnd();
+
+    constructor() {}
 }
 
 export enum ElementType {

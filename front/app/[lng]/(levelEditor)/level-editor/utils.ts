@@ -36,13 +36,18 @@ export function removeMeshFromLevel(
         app.detachTransformControls();
     }
 
+    let id;
     switch (type) {
         case ElementType.WALL_DOOR:
-            const id = mesh.name.split('_')[0];
+            id = mesh.name.split('_')[0];
             delete app.gameStateManager.predictionState.level.doors[id];
             removeFromMouseSelectableObjects(app, mesh);
             break;
         case ElementType.DOOR_OPENER:
+            const parts = mesh.name.split('-');
+            const doorId = parts[parts.length - 2];
+            id = parts[parts.length - 1];
+            delete app.gameStateManager.predictionState.level.doors[doorId][id];
             removeFromUpdatableElements(app, mesh.children[1]);
             removeFromMouseSelectableObjects(app, mesh);
             break;
