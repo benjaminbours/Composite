@@ -8,6 +8,7 @@
     "@benjaminbours/composite-core": "0.3.0"
   },
   "changesets": [
+    "blue-books-draw",
     "empty-parrots-scream",
     "five-wasps-mix",
     "forty-countries-repeat",

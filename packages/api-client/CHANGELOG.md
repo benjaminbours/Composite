@@ -1,5 +1,11 @@
 # @benjaminbours/composite-api-client
 
+## 1.0.0-next.12
+
+### Patch Changes
+
+- Various bug fix and improvement
+
 ## 1.0.0-next.11
 
 ### Patch Changes
