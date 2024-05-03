@@ -4,7 +4,9 @@
 
 ### High priority
 
+- Fix roadmap / timeline content
 - crash if try to delete the bounce we are currently inside
+- While switching play / editor, the camera come back to the start it's annoying
 
 ### Medium priority
 
@@ -26,6 +28,7 @@
 
 ### High priority
 
+- Add button to hide elements in level editor
 - Add link to socials on the website, in the bottom close the version for example
 - Add scale management for all elements. So you can have super big door, or you can have small door like evry lucarne
 - Add landing page and reorganize routing
@@ -48,6 +51,11 @@
 
 ### Medium priority
 
+- Ability to add doors open by default
+- Add possibility to load custom geometry in the scene, would be awesome to avoid too geometric level
+- When elements are locked, we have not visual indication about what is each element, just name
+- Possibility to add lights in level
+- Transform a wall into a wall door easily
 - When you have a level with a lot of element, when you select one with the mouse, would be nice to scroll to select element in the list on the right
 - Start to count accurately the exact duration of game in order to have speed run capability.
 - Enable github sponsor

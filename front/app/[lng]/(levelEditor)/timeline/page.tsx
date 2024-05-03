@@ -626,16 +626,6 @@ const futureEvents: TimelineEvent[] = [
                             very much, and blockchain seems a good fit for it.`}
                         </p>
                     </li>
-                    <li>
-                        <p>
-                            {`We could also imagine events, where NFTs would be
-                            hidden in some levels of the game, and the first
-                            player to find it wins it. I have no idea yet about
-                            any kind of valorization in terms of tokens or NFTs,
-                            it's just the incentive and reward ideas that I love
-                            very much, and blockchain seems a good fit for it.`}
-                        </p>
-                    </li>
                 </ul>
             </>
         ),
