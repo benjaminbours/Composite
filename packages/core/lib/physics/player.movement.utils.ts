@@ -90,7 +90,7 @@ function handleBounceAgainstElement(
     // change local normal into global normal
     global_normal.applyMatrix4(mat).normalize();
 
-    const bouncePower = normal.z === 0 ? BOUNCE_POWER / 2 : BOUNCE_POWER;
+    const bouncePower = normal.z === 0 ? BOUNCE_POWER / 3 : BOUNCE_POWER;
 
     // multiply by the bounce power
     const bounceVector = global_normal.multiplyScalar(bouncePower);
