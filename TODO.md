@@ -28,6 +28,7 @@
 
 ### High priority
 
+- Add issues on github with tag "good first contribution"
 - Add button to hide elements in level editor
 - Add link to socials on the website, in the bottom close the version for example
 - Add scale management for all elements. So you can have super big door, or you can have small door like evry lucarne

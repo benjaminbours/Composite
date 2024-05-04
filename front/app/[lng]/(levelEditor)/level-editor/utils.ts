@@ -63,9 +63,6 @@ export function removeMeshFromLevel(
             if (graphicSkin) {
                 removeFromUpdatableElements(app, graphicSkin);
             }
-            if (bounce.side === Side.LIGHT) {
-                app.rendererManager.removeLightBounceComposer(bounce);
-            }
             break;
         default:
             removeFromMouseSelectableObjects(app, mesh);

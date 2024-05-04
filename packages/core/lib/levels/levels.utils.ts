@@ -559,7 +559,6 @@ export interface ClientGraphicHelpers {
         props: BounceProperties,
     ) => { skinBounce: Object3D; graphicSkin: Object3D | undefined };
     createDoorOpenerGraphic: (door_id: string | undefined) => Object3D;
-    addLightBounceComposer?: (bounce: ElementToBounce) => void;
     connectDoors: (elements: LevelElement[]) => void;
     mouseSelectableObjects: Object3D[];
     updatableElements: Object3D[];
@@ -625,15 +624,6 @@ export function updateLevelState(
                 rotationY: props.transform.rotation.y,
             };
             // }
-
-            if (
-                props.side === Side.LIGHT &&
-                clientGraphicHelpers?.addLightBounceComposer
-            ) {
-                clientGraphicHelpers.addLightBounceComposer(
-                    mesh.children[0] as ElementToBounce,
-                );
-            }
 
             if (props.side === Side.LIGHT && props.interactive) {
                 clientGraphicHelpers?.updatableElements.push(mesh.children[2]);

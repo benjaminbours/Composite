@@ -765,7 +765,6 @@ function buildWorldContext(app: App): WorldContext {
             createDoorOpenerGraphic,
             createEndLevelGraphic,
             connectDoors,
-            addLightBounceComposer: app.rendererManager.addLightBounceComposer,
         },
     };
 }

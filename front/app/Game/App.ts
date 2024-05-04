@@ -166,7 +166,6 @@ export default class App {
             createDoorOpenerGraphic,
             createEndLevelGraphic,
             connectDoors,
-            addLightBounceComposer: this.rendererManager.addLightBounceComposer,
             updatableElements: this.updatableElements,
             mouseSelectableObjects: this.mouseSelectableObjects,
         };
@@ -250,11 +249,6 @@ export default class App {
 
     public resetStates = () => {
         // reset app state
-        for (let i = 0; i < this.rendererManager.lightBounces.length; i++) {
-            const bounce = this.rendererManager.lightBounces[i];
-            this.rendererManager.removeLightBounceComposer(bounce);
-        }
-
         this.mouseSelectableObjects = [];
         this.updatableElements = [];
         this.level.bounces = [];
