@@ -1,4 +1,10 @@
-import { Intersection, Matrix4, Vector3 } from 'three';
+import {
+    Intersection,
+    Matrix4,
+    Object3D,
+    Object3DEventMap,
+    Vector3,
+} from 'three';
 import { InputsSync, MovableComponentState, Side } from '../types';
 import { LevelState, PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
@@ -166,12 +172,28 @@ export function handleJump(
     input: InputsSync,
     player: PlayerGameState,
     levelState: LevelState,
+    side: Side,
+    collisionBottom: Intersection<Object3D<Object3DEventMap>> | undefined,
 ) {
-    if (!input.jump) {
+    const collisionBot = collisionBottom?.object as ElementToBounce;
+    if (
+        !input.jump ||
+        // disable jump if the player is touching a bounce element non interactive from his color
+        (collisionBot &&
+            collisionBot.bounce &&
+            side === collisionBot.side &&
+            !collisionBot.interactive)
+    ) {
         return;
     }
 
     if (player.state === MovableComponentState.onFloor) {
+        if (
+            !collisionBot &&
+            player.position.y > 0 + COLLISION_DETECTION_RANGE
+        ) {
+            return;
+        }
         player.velocity.y = JUMP_POWER;
     } else if (
         player.state === MovableComponentState.inside &&

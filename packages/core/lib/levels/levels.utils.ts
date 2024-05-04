@@ -118,6 +118,7 @@ export function createWall({
 
     geometry.center();
     const wall = new Mesh(geometry, materials.phong);
+    wall.name = 'wall';
     wall.translateX(sizeForGrid.x / 2);
     wall.translateY(sizeForGrid.y / 2);
     wall.translateZ(wallDepth / 2);
@@ -126,6 +127,7 @@ export function createWall({
         wall.receiveShadow = true;
     }
     const wallGroup = new Group();
+    wallGroup.name = 'wall-group';
     wallGroup.add(wall);
 
     // occlusion management
@@ -421,7 +423,7 @@ export function createBounce({
     wall.updateMatrix();
     wall.geometry.computeBoundingBox();
     wall.geometry.boundingBox?.getCenter(wall.center);
-    wall.name = 'wall';
+    wall.name = 'bounce-wall';
 
     return group;
 }
@@ -691,7 +693,9 @@ export function createElement(
                         bounceGroup.children[0] as ElementToBounce,
                         props,
                     );
-                bounceGroup.add(skinBounce);
+                if (props.interactive) {
+                    bounceGroup.add(skinBounce);
+                }
 
                 if (graphicSkin) {
                     bounceGroup.add(graphicSkin);

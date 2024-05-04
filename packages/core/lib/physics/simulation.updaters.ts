@@ -53,7 +53,7 @@ function applyPlayerUpdate(
     handleCollision(collisionResult, 'top', side, player, canGoThrough);
     handleCollision(collisionResult, 'bottom', side, player, canGoThrough);
 
-    handleJump(input, player, levelState);
+    handleJump(input, player, levelState, side, collisionResult.bottom);
     if (player.state !== MovableComponentState.inside && !canGoThrough) {
         detectFalling(collisionResult, player);
 

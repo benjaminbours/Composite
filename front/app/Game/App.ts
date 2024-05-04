@@ -127,6 +127,10 @@ export default class App {
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
     ) {
+        // canvasDom.oncontextmenu = function (e) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        // };
         (this.mouseRaycaster as any).firstHitOnly = true;
 
         this.mode = initialMode;
@@ -716,7 +720,7 @@ export default class App {
 
         for (let i = 0; i < this.level.bounces.length; i++) {
             const bounce = this.level.bounces[i];
-            const id = Number(bounce.name.split('_')[0]);
+            const id = bounce.name.split('_')[0];
             const stateBounce = state.level.bounces[id];
             if (bounce && stateBounce) {
                 const rotationY = stateBounce.rotationY;
