@@ -98,7 +98,7 @@ export class GameState {
                 levelState.doors[doorId][openerId] = parseActivators(value);
             }
             if (key.includes('bounce') && value) {
-                levelState.bounces[Number(key.replace('bounce_', ''))] = {
+                levelState.bounces[key.replace('bounce_', '')] = {
                     rotationY: Number(value),
                 };
             }
