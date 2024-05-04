@@ -1,5 +1,5 @@
 import { Camera, Mesh, Vector3 } from 'three';
-import { Layer, Side } from '../types';
+import { Side } from '../types';
 
 export class ElementToBounce extends Mesh {
     public bounce = true;
@@ -14,9 +14,6 @@ export class ElementToBounce extends Mesh {
         public interactive: boolean,
     ) {
         super(geometry, material);
-        if (side === Side.LIGHT) {
-            this.layers.enable(Layer.OCCLUSION);
-        }
     }
 
     // TODO: Rename this function, its unclear

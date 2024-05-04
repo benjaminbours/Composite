@@ -11,12 +11,15 @@ import {
     WebGLRenderTarget,
     PCFSoftShadowMap,
     ReinhardToneMapping,
+    Layers,
 } from 'three';
 // our libs
 import {
     GameState,
     Layer,
     MovableComponentState,
+    Side,
+    materials,
 } from '@benjaminbours/composite-core';
 // project
 import basicPostProdVS from './glsl/basic_postprod_vs.glsl';
@@ -26,6 +29,14 @@ import volumetricLightPlayerFS from './glsl/volumetricLightPlayer_fs.glsl';
 import CustomCamera from './CustomCamera';
 import { LightPlayer, Player } from './Player';
 import { MiniMapManager } from './MiniMapManager';
+
+const tempMaterials: Record<string, any> = {};
+
+const bloomLayer = new Layers();
+bloomLayer.set(Layer.BLOOM);
+
+const playerOcclusionLayer = new Layers();
+playerOcclusionLayer.set(Layer.OCCLUSION_PLAYER);
 
 export class RendererManager {
     public renderer: WebGLRenderer;
@@ -242,12 +253,32 @@ export class RendererManager {
     };
 
     public render = (state: GameState, delta: number) => {
-        this.camera.layers.set(Layer.OCCLUSION_PLAYER);
         this.renderer.setClearColor(0x000000);
+        // update materials for light elements
+        this.scene.traverse((obj: any) => {
+            if (
+                obj.isMesh &&
+                ((bloomLayer.test(obj.layers) === true &&
+                    obj.side !== Side.LIGHT) ||
+                    (bloomLayer.test(obj.layers) === true &&
+                        obj.side !== Side.LIGHT))
+            ) {
+                tempMaterials[obj.uuid] = obj.material;
+                obj.material = materials.occlusion;
+            }
+        });
+        this.camera.layers.set(Layer.OCCLUSION_PLAYER);
         this.playerOcclusionComposer.render();
 
-        this.camera.layers.set(Layer.OCCLUSION);
+        this.camera.layers.set(Layer.BLOOM);
         this.bloomComposer.render();
+        // restore materials
+        this.scene.traverse((obj: any) => {
+            if (tempMaterials[obj.uuid]) {
+                obj.material = tempMaterials[obj.uuid];
+                delete tempMaterials[obj.uuid];
+            }
+        });
         this.renderPlayerInsideComposer(state);
         this.camera.layers.set(Layer.DEFAULT);
         this.renderer.setClearColor(0x000000);

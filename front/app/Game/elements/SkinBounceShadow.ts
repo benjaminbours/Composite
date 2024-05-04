@@ -1,5 +1,9 @@
 import { Object3D, BoxGeometry, BufferAttribute, Points } from 'three';
-import { ElementToBounce, getRange } from '@benjaminbours/composite-core';
+import {
+    ElementToBounce,
+    Layer,
+    getRange,
+} from '@benjaminbours/composite-core';
 import {
     bounceShadowMaterial,
     bounceShadowMaterialInteractive,
@@ -52,6 +56,8 @@ export class SkinBounceShadow extends Object3D {
             : bounceShadowMaterial;
 
         this.particles = new Points(bufferGeometry, material);
+        this.particles.layers.enable(Layer.BLOOM);
+        this.particles.layers.enable(Layer.OCCLUSION_PLAYER);
         this.particles.name = 'particles';
         this.add(this.particles);
     }

@@ -8,7 +8,7 @@ export enum Side {
 
 export enum Layer {
     DEFAULT,
-    OCCLUSION, // platforms, elements
+    BLOOM, // platforms, elements
     OCCLUSION_PLAYER, // only the player
     PLAYER_INSIDE,
     MINI_MAP,

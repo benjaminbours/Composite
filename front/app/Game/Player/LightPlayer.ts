@@ -11,6 +11,7 @@ export class LightPlayer extends Player {
 
         const geometry = new SphereGeometry(5, 32, 32);
         this.mesh = new Mesh(geometry, playerMeshMaterial);
+        this.mesh.name = "light-player-mesh"
         this.mesh.castShadow = false;
         this.mesh.receiveShadow = false;
         this.add(this.mesh);

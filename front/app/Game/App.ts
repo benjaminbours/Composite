@@ -24,7 +24,7 @@ import { gsap } from 'gsap';
 import {
     GamePlayerInputPayload,
     GameState,
-    FLOOR_GROUP,
+    FLOOR,
     Side,
     applyInputListToSimulation,
     PhysicSimulation,
@@ -94,7 +94,7 @@ export default class App {
     // bounce helper
     private currentBounceName?: string;
 
-    private floor = FLOOR_GROUP;
+    private floor = FLOOR;
 
     public rendererManager: RendererManager;
     public gameStateManager: GameStateManager;
