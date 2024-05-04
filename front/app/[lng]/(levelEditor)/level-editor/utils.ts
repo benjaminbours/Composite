@@ -47,7 +47,10 @@ export function removeMeshFromLevel(
             const parts = mesh.name.split('-');
             const doorId = parts[parts.length - 2];
             id = parts[parts.length - 1];
-            delete app.gameStateManager.predictionState.level.doors[doorId][id];
+            const doorsState = app.gameStateManager.predictionState.level.doors;
+            if (doorsState[doorId] && doorsState[doorId][id]) {
+                delete doorsState[doorId][id];
+            }
             removeFromUpdatableElements(app, mesh.children[1]);
             removeFromMouseSelectableObjects(app, mesh);
             break;
