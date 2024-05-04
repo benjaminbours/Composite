@@ -334,3 +334,23 @@
 .level-editor__validation-chip {
     margin-top: 10px;
 }
+
+.level-editor__mouse-helper {
+    display: flex;
+    align-items: center;
+    mix-blend-mode: difference;
+    position: fixed;
+    top: 10%;
+    left: 1%;
+
+    svg {
+        width: 30px;
+        fill: white;
+        margin-right: 10px;
+    }
+
+    p {
+        color: white;
+        font-size: 12px;
+    }
+}

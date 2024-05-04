@@ -34,6 +34,7 @@ import Chip from '@mui/material/Chip';
 import { PlayersPanel } from './PlayersPanel';
 import { BottomLeftInfo } from '../../../BottomLeftInfo';
 import { SettingsMenu } from '../../../SettingsMenu';
+import { MouseRightIcon } from './icons/MouseRightIcon';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -226,6 +227,12 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                     )}
                     {state.isShortcutVisible && <ShortcutPanel />}
                 </div>
+                {state.appMode === AppMode.EDITOR && (
+                    <div className="level-editor__mouse-helper">
+                        <MouseRightIcon />
+                        <p>Right click to move the camera</p>
+                    </div>
+                )}
                 {state.app?.mode === AppMode.EDITOR && (
                     <div className="level-editor__top-right-container">
                         <div className="column">
