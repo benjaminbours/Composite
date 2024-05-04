@@ -1,6 +1,6 @@
 {
 	"name": "@benjaminbours/composite-api-client",
-	"version": "1.0.0-next.12",
+	"version": "1.0.0-next.13",
 	"description": "Generated from openApi cli using open api specification",
 	"main": "dist/index.js",
 	"scripts": {

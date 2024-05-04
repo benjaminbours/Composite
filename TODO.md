@@ -4,6 +4,7 @@
 
 ### High priority
 
+- Bug when adding a door and a door opener, if I don't save or reload, I can't interact with the door
 - Fix roadmap / timeline content
 - crash if try to delete the bounce we are currently inside
 - While switching play / editor, the camera come back to the start it's annoying
@@ -28,6 +29,8 @@
 
 ### High priority
 
+- While in queue, propose an alternative than waiting infinitely
+- Add button to reset bounces in level editor
 - Add issues on github with tag "good first contribution"
 - Add button to hide elements in level editor
 - Add link to socials on the website, in the bottom close the version for example
@@ -139,4 +142,3 @@
 
 - Add recurrent message such as kofibot, to print available commands for users in the chat. Or put it in the title of the stream.
 - Lobby not always detecting choice of team mate on loading -->
-<!-- - Do I need some actions to reset bounce to initial rotation? Think about it -->

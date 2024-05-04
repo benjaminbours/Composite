@@ -1,5 +1,24 @@
 # composite-front
 
+## 1.0.0-next.15
+
+### Patch Changes
+
+- Disable jump if player is touching a bounce element no interactive of his side
+- Improve / optimize rendering of light bounces
+- Editor: add helper about mouse right click displacement
+- Add help text with discord button on lobby scene
+- Improve synchronization overlay, display valuable information while the user is waiting
+- Fix various level editor bugs
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.13
+  - @benjaminbours/composite-core@1.0.0-next.13
+
 ## 1.0.0-next.14
 
 ### Patch Changes
