@@ -39,6 +39,8 @@
 
 .team-lobby-scene__column-left {
     margin-left: 2.5%;
+    flex: 2;
+    max-width: 350px;
 }
 
 .team-lobby-scene__column-right {
@@ -75,4 +77,9 @@
         box-sizing: border-box;
         padding: 0 50px;
     }
+}
+
+.team-lobby-scene__lobby-helper {
+    font-size: 14px;
+    color: white;
 }

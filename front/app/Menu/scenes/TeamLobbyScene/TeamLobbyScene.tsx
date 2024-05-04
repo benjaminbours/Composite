@@ -16,6 +16,8 @@ import { PlayersState } from './PlayersState';
 import { SideSelector } from './SideSelector';
 import { LevelSelector } from './LevelSelector';
 import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
+import { DiscordButton } from '../../../02_molecules/DiscordButton';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -187,6 +189,21 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         isInQueue={isInQueue}
                         levels={levels}
                     />
+                    <div className="team-lobby-scene__lobby-helper">
+                        <InfoIcon style={{ marginTop: 20 }} />
+                        <p>
+                            <b>Composite</b> is a <b>cooperative multiplayer</b>{' '}
+                            game. To start a game, <b>2 players are required</b>
+                            . Select a level, select a side, then{' '}
+                            <b>send an invite link to a friend</b> or match with
+                            a random player if there are some in the queue.
+                        </p>
+                        <p>
+                            {`It's funnier if you can speak by voice with your
+                            teammate. We have dedicated vocal rooms on Discord.`}
+                        </p>
+                        <DiscordButton />
+                    </div>
                 </div>
                 <div className="team-lobby-scene__column-right">
                     <LevelSelector

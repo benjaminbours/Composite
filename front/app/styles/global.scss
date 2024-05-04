@@ -273,18 +273,14 @@ $buttonSizeLarge: 120px;
     }
 
     a {
-        display: flex;
-        align-items: center;
-        justify-content: center;
         margin-top: 10px;
-
-        &:hover {
-            svg path {
-                fill: black;
-            }
-        }
     }
+}
 
+.discord-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     svg {
         margin-left: 10px;
         display: block;
@@ -294,6 +290,12 @@ $buttonSizeLarge: 120px;
         path {
             transition: 0.7s;
             fill: white;
+        }
+    }
+
+    &:hover {
+        svg path {
+            fill: black;
         }
     }
 }
