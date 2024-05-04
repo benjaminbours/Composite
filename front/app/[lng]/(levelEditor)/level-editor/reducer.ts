@@ -539,6 +539,13 @@ export function reducer(
                 buildWorldContext(state.app!),
                 action.payload.type,
             );
+            worldContext = buildWorldContext(state.app!);
+            updateLevelState(
+                worldContext,
+                action.payload.type,
+                properties,
+                mesh,
+            );
             const cameraPosition = new Vector3();
             state.app!.camera.getWorldPosition(cameraPosition);
 
