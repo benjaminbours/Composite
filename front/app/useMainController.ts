@@ -9,9 +9,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuScene, Route } from './types';
 import { SocketController } from './SocketController';
-import { TweenOptions } from './Menu/tweens';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Curve, { defaultWaveOptions } from './Menu/canvas/Curve';
 import { servicesContainer } from './core/frameworks';
 import { ApiClient } from './core/services';
 import {
@@ -22,6 +20,7 @@ import {
 import { useSnackbar } from 'notistack';
 import { useStoreState } from './hooks';
 import { startLoadingAssets } from './Game/assetsLoader';
+import { useMenuTransition } from './useMenuTransition';
 
 export interface PlayerState {
     side: Side | undefined;
@@ -31,6 +30,7 @@ export interface PlayerState {
 }
 
 export interface MainState {
+    isWaitingForFriend: boolean;
     isInQueue: boolean;
     shouldDisplayQueueInfo: boolean;
     gameState: GameState | undefined;
@@ -51,19 +51,32 @@ export interface ServerCounts {
 
 export const QUEUE_INFO_FETCH_INTERVAL = 20000;
 
-export function useMainController(
-    menuScene: MenuScene,
-    setMenuScene: React.Dispatch<React.SetStateAction<MenuScene>>,
-    goToStep: (tweenOptions: TweenOptions, onComplete?: () => void) => void,
-    lightToStep: (options: TweenOptions, isMobileDevice: boolean) => void,
-    shadowToStep: (options: TweenOptions, isMobileDevice: boolean) => void,
-    onTransition: React.MutableRefObject<boolean>,
-) {
+export enum LobbyMode {
+    SOLO = 0,
+    DUO_WITH_FRIEND = 1,
+    DUO_WITH_RANDOM = 2,
+}
+
+export function useMainController(initialScene: MenuScene | undefined) {
+    const {
+        setMenuScene,
+        goToStep,
+        moveSideElementToCoordinate,
+        sideElementToStep,
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
+        onTransition,
+        nextMenuScene,
+        menuScene,
+        refHashMap,
+    } = useMenuTransition(initialScene);
+
     const { enqueueSnackbar } = useSnackbar();
     const currentUser = useStoreState((state) => state.user.currentUser);
     const queryParams = useSearchParams();
     const router = useRouter();
     const socketController = useRef<SocketController>();
+    const [lobbyMode, setLobbyMode] = useState(LobbyMode.DUO_WITH_FRIEND);
 
     useEffect(() => {
         setState((prev) => ({
@@ -93,6 +106,7 @@ export function useMainController(
             }
 
             return {
+                isWaitingForFriend: false,
                 gameState: undefined,
                 loadedLevel: undefined,
                 you: {
@@ -109,6 +123,7 @@ export function useMainController(
         }
 
         return {
+            isWaitingForFriend: false,
             gameState: undefined,
             loadedLevel: undefined,
             you: {
@@ -125,46 +140,6 @@ export function useMainController(
     });
     const [levels, setLevels] = useState<Level[]>([]);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
-
-    // lobby animation effect
-    useEffect(() => {
-        if (menuScene !== MenuScene.TEAM_LOBBY) {
-            return;
-        }
-
-        const isMobile = window.innerWidth < 768;
-        // curve
-        if (
-            state.you.level !== undefined &&
-            state.mate?.level !== undefined &&
-            state.you.level === state.mate?.level
-        ) {
-            Curve.setWaveOptions({
-                speed: 0.4,
-            });
-        } else {
-            Curve.setWaveOptions({
-                ...defaultWaveOptions,
-            });
-        }
-
-        // light
-        if (state.you.side === Side.LIGHT || state.mate?.side === Side.LIGHT) {
-            lightToStep({ step: MenuScene.TEAM_LOBBY_SELECTED }, isMobile);
-        } else {
-            lightToStep({ step: MenuScene.TEAM_LOBBY }, isMobile);
-        }
-
-        // shadow
-        if (
-            state.you.side === Side.SHADOW ||
-            state.mate?.side === Side.SHADOW
-        ) {
-            shadowToStep({ step: MenuScene.TEAM_LOBBY_SELECTED }, isMobile);
-        } else {
-            shadowToStep({ step: MenuScene.TEAM_LOBBY }, isMobile);
-        }
-    }, [state, menuScene, lightToStep, shadowToStep]);
 
     // responsible to fetch the levels
     useEffect(() => {
@@ -191,12 +166,17 @@ export function useMainController(
                 account: currentUser || undefined,
             },
             isInQueue: false,
+            isWaitingForFriend: false,
         }));
     }, [router, setMenuScene, currentUser]);
 
     const handleExitRandomQueue = useCallback(() => {
         socketController.current?.destroy();
-        setState((prev) => ({ ...prev, isInQueue: false }));
+        setState((prev) => ({
+            ...prev,
+            isInQueue: false,
+            isWaitingForFriend: false,
+        }));
     }, []);
 
     const handleSelectLevelOnLobby = useCallback(
@@ -207,7 +187,6 @@ export function useMainController(
                     ...prev.you,
                     level: levelId,
                     isReady: false,
-                    isInQueue: false,
                 },
             }));
             if (state.isInQueue) {
@@ -223,7 +202,12 @@ export function useMainController(
         [state.isInQueue, handleExitRandomQueue],
     );
 
-    const handleSelectSideOnLobby = useCallback((side: Side) => {
+    const handleDestroyConnection = useCallback(() => {
+        socketController.current?.destroy();
+        socketController.current = undefined;
+    }, []);
+
+    const handleSelectSideOnLobby = useCallback((side: Side | undefined) => {
         setState((prev) => ({
             ...prev,
             you: {
@@ -231,6 +215,9 @@ export function useMainController(
                 side,
                 isReady: false,
             },
+            isWaitingForFriend:
+                side === undefined ? false : prev.isWaitingForFriend,
+            isInQueue: side === undefined ? false : prev.isWaitingForFriend,
         }));
         socketController.current?.emit([SocketEventLobby.SELECT_SIDE, side]);
     }, []);
@@ -273,6 +260,7 @@ export function useMainController(
                 mateDisconnected: false,
                 shouldDisplayQueueInfo: false,
                 isInQueue: false,
+                isWaitingForFriend: false,
             }));
             enqueueSnackbar('Your friend successfully joined the lobby', {
                 variant: 'success',
@@ -280,11 +268,6 @@ export function useMainController(
         },
         [enqueueSnackbar, levels],
     );
-
-    const handleDestroyConnection = useCallback(() => {
-        socketController.current?.destroy();
-        socketController.current = undefined;
-    }, []);
 
     const handleTeamMateDisconnect = useCallback(() => {
         setState((prev) => ({
@@ -323,6 +306,7 @@ export function useMainController(
                     isReady: false,
                 },
                 isInQueue: false,
+                isWaitingForFriend: false,
                 shouldDisplayQueueInfo: false,
             };
 
@@ -343,13 +327,13 @@ export function useMainController(
         }));
     }, []);
 
-    const handleReceiveSideOnLobby = useCallback((side: Side) => {
+    const handleReceiveSideOnLobby = useCallback((side: Side | undefined) => {
         setState((prev) => {
             const next = {
                 ...prev,
                 mate: {
                     ...prev.mate!,
-                    side,
+                    side: side,
                     isReady: false,
                 },
             };
@@ -403,8 +387,9 @@ export function useMainController(
                     variant: 'success',
                 });
             });
+            router.push(Route.LOBBY);
         },
-        [establishConnection, enqueueSnackbar, currentUser],
+        [establishConnection, enqueueSnackbar, currentUser, router],
     );
 
     const handleInviteFriend = useCallback(async (): Promise<string> => {
@@ -432,6 +417,8 @@ export function useMainController(
                         level: state.you.level,
                     } as CreateLobbyPayload,
                 ]);
+
+                setState((prev) => ({ ...prev, isWaitingForFriend: true }));
             });
         });
     }, [establishConnection, currentUser, state]);
@@ -488,14 +475,6 @@ export function useMainController(
             side: undefined,
         });
     }, [goToStep, router, onTransition]);
-
-    const handleClickPlay = useCallback(() => {
-        if (onTransition.current) {
-            return;
-        }
-        router.push(Route.LOBBY);
-        goToStep({ step: MenuScene.TEAM_LOBBY });
-    }, [goToStep, onTransition, router]);
 
     const handleClickPlayAgain = useCallback(() => {
         if (onTransition.current) {
@@ -593,86 +572,239 @@ export function useMainController(
             });
     }, [setState]);
 
-    useEffect(() => {
-        if (!gameIsPlaying) {
-            fetchServerInfo();
+    const handleClickPlay = useCallback(() => {
+        if (onTransition.current) {
+            return;
         }
-        return () => {
-            clearInterval(queueInfoInterval.current);
-            clearInterval(fetchCompletionInterval.current);
-            queueInfoInterval.current = undefined;
-            fetchCompletionInterval.current = undefined;
-        };
-    }, [gameIsPlaying, fetchServerInfo]);
+        fetchServerInfo();
+        router.push(Route.LOBBY);
+        goToStep({ step: MenuScene.TEAM_LOBBY });
+    }, [goToStep, fetchServerInfo, onTransition, router]);
 
-    // // development effect
+    const handleClickBackSelectLevel = useCallback(() => {
+        sideElementToStep(Side.SHADOW, { step: MenuScene.TEAM_LOBBY }, false);
+        sideElementToStep(Side.LIGHT, { step: MenuScene.TEAM_LOBBY }, false);
+        handleSelectSideOnLobby(undefined);
+        if (lobbyMode === LobbyMode.DUO_WITH_RANDOM && !state.mate) {
+            handleDestroyConnection();
+        }
+    }, [
+        sideElementToStep,
+        handleSelectSideOnLobby,
+        handleDestroyConnection,
+        lobbyMode,
+        state.mate,
+    ]);
+
+    const handleMouseEnterSideButton = useCallback(
+        (side: Side) => (e: React.MouseEvent) => {
+            const yingYang =
+                e.currentTarget.parentElement?.querySelector('.ying-yang');
+            if (!yingYang) {
+                return;
+            }
+
+            if (side === Side.LIGHT) {
+                const ying = yingYang.querySelector<SVGPathElement>('.white');
+                if (ying) {
+                    ying.classList.add('visible');
+                }
+                moveSideElementToCoordinate(
+                    Side.LIGHT,
+                    0.25 * window.innerWidth,
+                    0.75 * window.innerHeight,
+                );
+                setLightIsPulsingFast(true);
+            } else {
+                const yang = yingYang.querySelector<SVGPathElement>('.black');
+                if (yang) {
+                    yang.classList.add('visible');
+                }
+                moveSideElementToCoordinate(
+                    Side.SHADOW,
+                    0.75 * window.innerWidth,
+                    0.75 * window.innerHeight,
+                );
+                setShadowRotationSpeed(0.02);
+            }
+        },
+        [
+            setShadowRotationSpeed,
+            setLightIsPulsingFast,
+            moveSideElementToCoordinate,
+        ],
+    );
+
+    const handleMouseLeaveSideButton = useCallback(
+        (side: Side) => (e: React.MouseEvent) => {
+            const yingYang =
+                e.currentTarget.parentElement?.querySelector('.ying-yang');
+            if (!yingYang) {
+                return;
+            }
+
+            if (side === Side.LIGHT) {
+                const ying = yingYang.querySelector<SVGPathElement>('.white');
+                if (ying) {
+                    ying.classList.remove('visible');
+                }
+                setLightIsPulsingFast(false);
+                sideElementToStep(
+                    Side.LIGHT,
+                    {
+                        step:
+                            state.you.side === side
+                                ? MenuScene.TEAM_LOBBY_SELECTED
+                                : MenuScene.TEAM_LOBBY,
+                    },
+                    false,
+                );
+            } else {
+                const yang = yingYang.querySelector<SVGPathElement>('.black');
+                if (yang) {
+                    yang.classList.remove('visible');
+                }
+                setShadowRotationSpeed(0.005);
+                sideElementToStep(
+                    Side.SHADOW,
+                    {
+                        step:
+                            state.you.side === side
+                                ? MenuScene.TEAM_LOBBY_SELECTED
+                                : MenuScene.TEAM_LOBBY,
+                    },
+                    false,
+                );
+            }
+        },
+        [
+            sideElementToStep,
+            state.you,
+            setShadowRotationSpeed,
+            setLightIsPulsingFast,
+        ],
+    );
+
+    const handleClickSide = useCallback(
+        (levelId: number, side: Side) => (e: React.MouseEvent) => {
+            const yingYang =
+                e.currentTarget.parentElement?.querySelector('.ying-yang');
+            if (!yingYang) {
+                return;
+            }
+
+            const ying = yingYang.querySelector<SVGPathElement>('.white');
+            if (ying) {
+                ying.classList.remove('visible');
+            }
+            const yang = yingYang.querySelector<SVGPathElement>('.black');
+            if (yang) {
+                yang.classList.remove('visible');
+            }
+
+            if (side === Side.LIGHT) {
+                setLightIsPulsingFast(false);
+                sideElementToStep(
+                    Side.LIGHT,
+                    { step: MenuScene.TEAM_LOBBY_SELECTED },
+                    false,
+                );
+                sideElementToStep(
+                    Side.SHADOW,
+                    { step: MenuScene.TEAM_LOBBY },
+                    false,
+                );
+                handleSelectSideOnLobby(Side.LIGHT);
+            } else {
+                setShadowRotationSpeed(0.005);
+                sideElementToStep(
+                    Side.SHADOW,
+                    { step: MenuScene.TEAM_LOBBY_SELECTED },
+                    false,
+                );
+                sideElementToStep(
+                    Side.LIGHT,
+                    { step: MenuScene.TEAM_LOBBY },
+                    false,
+                );
+            }
+            handleSelectLevelOnLobby(levelId);
+            handleSelectSideOnLobby(side);
+        },
+        [
+            setShadowRotationSpeed,
+            setLightIsPulsingFast,
+            sideElementToStep,
+            handleSelectLevelOnLobby,
+            handleSelectSideOnLobby,
+        ],
+    );
+
+    const handleAlignWithTeamMate = useCallback(() => {
+        if (!state.mate) {
+            return;
+        }
+
+        const nextLevel = state.mate.level;
+        let nextSide = (() => {
+            if (state.mate.side === undefined || state.mate.side === null) {
+                return undefined;
+            } else {
+                return state.mate.side === Side.LIGHT
+                    ? Side.SHADOW
+                    : Side.LIGHT;
+            }
+        })();
+        setState((prev) => ({
+            ...prev,
+            you: {
+                ...prev.you,
+                level: nextLevel,
+                side: nextSide,
+            },
+        }));
+        socketController.current?.emit([
+            SocketEventLobby.SELECT_LEVEL,
+            nextLevel,
+        ]);
+        socketController.current?.emit([
+            SocketEventLobby.SELECT_SIDE,
+            nextSide,
+        ]);
+    }, [state.mate]);
+
+    const handleChangeLobbyMode = useCallback(
+        (mode: LobbyMode) => {
+            setLobbyMode(mode);
+            handleDestroyConnection();
+            setState((prev) => ({
+                ...prev,
+                mate: undefined,
+                mateDisconnected: false,
+                you: {
+                    isReady: false,
+                    level: undefined,
+                    side: undefined,
+                    account: currentUser || undefined,
+                },
+                isInQueue: false,
+                isWaitingForFriend: false,
+            }));
+        },
+        [handleDestroyConnection, currentUser],
+    );
+
     // useEffect(() => {
-    //     if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-    //         establishConnection().then(() => {
-    //             const level = (() => {
-    //                 switch (state.selectedLevel) {
-    //                     // case Levels.CRACK_THE_DOOR:
-    //                     //     return new CrackTheDoorLevelWithGraphic();
-    //                     // case Levels.LEARN_TO_FLY:
-    //                     //     return new LearnToFlyLevelWithGraphic();
-    //                     // case Levels.THE_HIGH_SPHERES:
-    //                     //     return new TheHighSpheresLevelWithGraphic();
-    //                     default:
-    //                         return new CrackTheDoorLevelWithGraphic();
-    //                 }
-    //             })();
-    //             const initialGameState = new GameState(
-    //                 [
-    //                     {
-    //                         position: {
-    //                             x: level.startPosition.shadow.x,
-    //                             y: level.startPosition.shadow.y,
-    //                         },
-    //                         velocity: {
-    //                             x: 0,
-    //                             y: 0,
-    //                         },
-    //                         state: MovableComponentState.onFloor,
-    //                         insideElementID: undefined,
-    //                     },
-    //                     {
-    //                         position: {
-    //                             x: level.startPosition.light.x,
-    //                             y: level.startPosition.light.y,
-    //                         },
-    //                         velocity: {
-    //                             x: 0,
-    //                             y: 0,
-    //                         },
-    //                         state: MovableComponentState.onFloor,
-    //                         insideElementID: undefined,
-    //                     },
-    //                 ],
-    //                 {
-    //                     ...level.state,
-    //                 },
-    //                 Date.now(),
-    //                 0,
-    //             );
-    //             handleGameStart(initialGameState);
-    //         });
-    //         return () => {
-    //             handleDestroyConnection();
-    //         };
+    //     if (!gameIsPlaying) {
+    //         fetchServerInfo();
     //     }
-    //     if (
-    //         process.env.NEXT_PUBLIC_STAGE === 'development' &&
-    //         state.side !== undefined &&
-    //         socketController.current === undefined
-    //     ) {
-    //         console.log('enter random queue');
-    //         handleEnterRandomQueue(state.side);
-    //     }
-
     //     return () => {
-    //         handleDestroyConnection();
+    //         clearInterval(queueInfoInterval.current);
+    //         clearInterval(fetchCompletionInterval.current);
+    //         queueInfoInterval.current = undefined;
+    //         fetchCompletionInterval.current = undefined;
     //     };
-    // }, []);
+    // }, [gameIsPlaying, fetchServerInfo]);
 
     return {
         state,
@@ -681,7 +813,13 @@ export function useMainController(
         levels,
         serverCounts,
         fetchTime,
+        nextMenuScene,
+        menuScene,
+        refHashMap,
+        lobbyMode,
+        handleChangeLobbyMode,
         exitLobby,
+        setMenuScene,
         setState,
         handleClickReadyToPlay,
         handleGameStart,
@@ -693,9 +831,15 @@ export function useMainController(
         handleEnterRandomQueue,
         handleExitRandomQueue,
         handleSelectLevelOnLobby,
-        handleSelectSideOnLobby,
         handleClickHome,
         handleClickPlayAgain,
+        handleClickBackSelectLevel,
         fetchServerInfo,
+        handleMouseLeaveSideButton,
+        handleMouseEnterSideButton,
+        handleClickSide,
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
+        handleAlignWithTeamMate,
     };
 }

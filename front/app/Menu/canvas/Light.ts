@@ -81,7 +81,6 @@ export default class Light {
         if (window.innerWidth > 2000) {
             width = 600;
         }
-        const marginLeft = canvasWidth * 0.075 + 322;
         switch (scene) {
             case MenuScene.NOT_FOUND:
                 return {
@@ -100,29 +99,22 @@ export default class Light {
                     width,
                 };
             case MenuScene.TEAM_LOBBY:
-                let x =
-                    ((canvasWidth - marginLeft - canvasWidth * 0.025) / 2 +
-                        marginLeft) /
-                    canvasWidth;
-                x -= 0.175;
+                let x = -0.1;
                 return {
                     coordinates: {
                         x: canvasWidth * x,
-                        y: canvasHeight * 0.8,
+                        y: canvasHeight * 0.75,
                     },
-                    width: 350,
+                    width,
                 };
             case MenuScene.TEAM_LOBBY_SELECTED:
-                let xPos =
-                    ((canvasWidth - marginLeft - canvasWidth * 0.025) / 2 +
-                        marginLeft) /
-                    canvasWidth;
+                let xPos = 0.5;
                 return {
                     coordinates: {
                         x: canvasWidth * xPos,
-                        y: canvasHeight * 0.8,
+                        y: canvasHeight * 0.75,
                     },
-                    width: 400,
+                    width,
                 };
             case MenuScene.INVITE_FRIEND:
                 return {
@@ -130,7 +122,7 @@ export default class Light {
                         x: canvasWidth * 0.15,
                         y: canvasHeight * 0.5,
                     },
-                    width: 350,
+                    width,
                 };
             case MenuScene.LEVEL:
                 return {

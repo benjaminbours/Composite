@@ -1,11 +1,16 @@
 .root {
-    width: 100%;
+    width: 70%;
+    margin: 0 auto;
 }
 
 .header {
     display: flex;
     align-items: center;
     justify-content: flex-start;
+
+    h2 {
+        margin: 0;
+    }
 }
 
 .header-creator-button {
@@ -71,15 +76,6 @@
     }
 }
 
-.controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    mix-blend-mode: difference;
-    margin: 0 auto;
-    width: 300px;
-}
-
 .no-level-container {
     display: flex;
     flex-direction: column;
@@ -94,16 +90,6 @@
     a {
         text-decoration: none;
     }
-}
-
-.carousel-container {
-    width: 100%;
-    padding: 0 25%;
-    box-sizing: border-box;
-}
-
-.slider {
-    color: white;
 }
 
 .author-selector {

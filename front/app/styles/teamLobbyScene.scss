@@ -1,9 +1,8 @@
 .team-lobby-scene {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     width: 100%;
     height: 100vh;
-    overflow: hidden;
 
     h1 {
         text-transform: uppercase;
@@ -21,6 +20,84 @@
     .title-h3 {
         mix-blend-mode: difference;
     }
+
+    .buttons-container {
+        display: grid;
+        gap: 10px;
+        margin-top: 10px;
+
+        p {
+            mix-blend-mode: difference;
+            color: white;
+        }
+
+        .MuiCircularProgress-root {
+            mix-blend-mode: difference;
+            color: white;
+        }
+    }
+
+    .rect-button {
+        all: unset;
+        padding: 10px 20px;
+        background: black;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        text-align: center;
+        border: solid white 2px;
+        font-family: 'Source Code Pro', monospace;
+        transition: 0.3s ease-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 300px;
+        max-width: 300px;
+
+        p {
+            margin: 0;
+        }
+
+        svg {
+            margin-left: 20px;
+        }
+
+        &:hover {
+            background: white;
+            color: black;
+            border-color: black;
+        }
+    }
+
+    .ready-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        > div {
+            display: flex;
+            align-items: center;
+        }
+
+        svg {
+            margin-left: 10px;
+        }
+    }
+
+    .select-level-button {
+        svg {
+            margin-right: 20px;
+            margin-left: 0;
+        }
+    }
+
+    .queue-time-info {
+        mix-blend-mode: difference;
+        color: white;
+    }
+
+    // @media (min-width: 768px) {
+    // }
 }
 
 .team-lobby-scene__header {
@@ -37,49 +114,439 @@
     }
 }
 
-.team-lobby-scene__column-left {
-    margin-left: 2.5%;
-    flex: 2;
-    max-width: 350px;
-}
-
-.team-lobby-scene__column-right {
-    width: 60%;
-    flex: 1;
-    margin-right: 2.5%;
-    height: 100%;
-    margin-left: 5%;
-    display: flex;
-    flex-direction: column;
-}
-
 .team-lobby-scene__login-button {
     margin-left: auto;
 }
 
-.custom-carousel {
-    .level-portal {
-        cursor: pointer;
-    }
+.team-lobby-scene__level-portal {
+    cursor: pointer;
+    transition: 0.3s ease-out;
 
-    ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        position: relative;
+    .team-mate-container {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, 0);
+        top: -8%;
         display: flex;
-        transition: left 300ms ease-in-out;
+        align-items: center;
+
+        mix-blend-mode: difference;
+        color: white;
+
+        .team-mate {
+            display: flex;
+            align-items: center;
+            cursor: help;
+        }
+
+        p {
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 150px;
+        }
+
+        .align-button {
+            // position: absolute;
+            // left: 50%;
+            // transform: translate(-50%, 0);
+            // bottom: -200%;
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            max-width: 50px;
+            min-width: auto;
+        }
     }
 
-    li {
-        width: 400px;
-        min-width: 400px;
-        box-sizing: border-box;
-        padding: 0 50px;
+    .team-mate-help-text {
+        border: solid white 1px;
+        background: black;
+        color: white;
+        padding: 5px;
+        font-size: 12px;
+        text-align: left;
+    }
+
+    .level-portal__graphic-wrapper {
+        transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        width: 350px;
+        height: 350px;
+        transform: scale(0.8);
+    }
+
+    &:hover {
+        .level-portal__graphic-wrapper {
+            transform: scale(0.85);
+        }
     }
 }
 
-.team-lobby-scene__lobby-helper {
-    font-size: 14px;
+.custom-carousel li.selected {
+    .level-portal {
+        cursor: initial;
+
+        .level-portal__graphic-wrapper {
+            transform: scale(1) !important;
+        }
+    }
+}
+
+.custom-carousel li.selected-team-mate,
+.custom-carousel li.selected {
+    &-shadow {
+        .ying-yang .black {
+            opacity: 1;
+        }
+
+        .half-circle--shadow {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+
+    &-light {
+        .ying-yang .white {
+            opacity: 1;
+        }
+
+        .half-circle--light {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+}
+
+.custom-carousel {
+    // overflow: hidden;
+    padding-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    > ul {
+        // width: 70%;
+        list-style: none;
+        padding: 0;
+        padding-top: 10px;
+        margin: 0;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        overflow-y: auto;
+        max-height: 400px;
+
+        > li {
+            width: 200px;
+            height: 150px;
+            box-sizing: border-box;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    // @media (max-height: 920px) {
+    //     min-height: 350px;
+
+    //     .level-portal {
+    //         cursor: pointer;
+    //         transition: 0.3s ease-out;
+    //     }
+    // }
+}
+
+.level-grid-item {
+    all: unset;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    position: relative;
+    transition: 0.3s ease-out;
+
+    &--hovered {
+        .level-grid-item__border-container {
+            opacity: 1;
+        }
+
+        .level-grid-item__side-buttons-container {
+            opacity: 1;
+            pointer-events: initial;
+        }
+    }
+
+    &--selected-shadow {
+        .level-grid-item__border-container {
+            opacity: 1;
+        }
+
+        .level-grid-item__side-buttons-container {
+            opacity: 1;
+            pointer-events: initial;
+        }
+
+        .ying-yang .black {
+            opacity: 1;
+        }
+    }
+
+    &--selected-light {
+        .level-grid-item__border-container {
+            opacity: 1;
+        }
+
+        .level-grid-item__side-buttons-container {
+            opacity: 1;
+            pointer-events: initial;
+        }
+
+        .ying-yang .white {
+            opacity: 1;
+        }
+    }
+}
+
+.level-grid-item__image {
+    background-image: url('/images/crack_the_door.png');
+    background-size: cover;
+    background-position: center center;
+    width: 100%;
+    flex: 1;
+    position: relative;
+    border-radius: 6px;
+}
+
+.level-grid-item__name {
+    margin: 0;
+    margin-top: 5px;
+    font-size: 12px;
+    width: 100%;
+    mix-blend-mode: difference;
     color: white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.level-grid-item__border-container {
+    --deg: 1;
+    --x: -50%;
+    --y: -50%;
+    --speed: 150ms;
+    mix-blend-mode: difference;
+    width: 125px;
+    height: 125px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: 0.3s ease-out;
+
+    & > div {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(var(--x, -50%), var(--y, -50%)) rotate(0deg);
+        font-size: 5vmin;
+        width: 85%;
+        height: 85%;
+        border-radius: 90% 95% 85% 105%;
+        mix-blend-mode: screen;
+        animation: wobble calc(var(--speed) * var(--t)) linear infinite;
+        box-shadow:
+            0 0 0.5em 0.2em #000 inset,
+            0 0 0.15em 0 #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:nth-child(1) {
+            --x: -53%;
+            --y: -53%;
+            --t: 37;
+        }
+        &:nth-child(2) {
+            --x: -47%;
+            --y: -52%;
+            --t: 58;
+        }
+        &:nth-child(3) {
+            --x: -45%;
+            --y: -50%;
+            --t: 46;
+        }
+        &:nth-child(4) {
+            --x: -53%;
+            --y: -45%;
+            --t: 72;
+        }
+        &:nth-child(5) {
+            --x: -55%;
+            --y: -45%;
+            --t: 62;
+        }
+    }
+}
+
+@keyframes wobble {
+    to {
+        transform: translate(var(--x), var(--y)) rotate(360deg);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+$size: 50px;
+.level-grid-item__side-buttons-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+
+    .ying-yang {
+        width: 35px;
+        height: 35px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        animation: rotate 5s infinite linear;
+
+        .black,
+        .white {
+            opacity: 0;
+            transition: 0.3s ease-out;
+
+            &.visible {
+                opacity: 1;
+            }
+        }
+    }
+
+    .half-circle {
+        all: unset;
+        width: $size;
+        height: $size * 2;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.3;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            transition: 0.3s ease-out;
+        }
+
+        p {
+            margin: 0;
+            mix-blend-mode: normal;
+            font-size: 10px;
+        }
+
+        &--shadow {
+            order: 2;
+
+            .background {
+                background: #fff;
+                border-bottom-right-radius: $size * 2;
+                border-top-right-radius: $size * 2;
+            }
+
+            p {
+                color: black;
+            }
+        }
+
+        &--light {
+            order: 1;
+
+            .background {
+                background: #000;
+                border-bottom-left-radius: $size * 2;
+                border-top-left-radius: $size * 2;
+            }
+
+            p {
+                color: white;
+            }
+        }
+
+        &:hover {
+            .background {
+                opacity: 1;
+            }
+        }
+    }
+
+    // &--light {
+    //     .ying-yang {
+    //         .white {
+    //             opacity: 1;
+    //         }
+    //     }
+    // }
+
+    // &--shadow {
+    //     .ying-yang {
+    //         .black {
+    //             opacity: 1;
+    //         }
+    //     }
+    // }
+}
+
+.team-lobby-scene__tabs-container {
+    display: flex;
+    justify-content: center;
+    mix-blend-mode: difference;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.team-lobby-scene__tabs {
+    color: white;
+
+    .MuiTab-root {
+        opacity: 1;
+    }
+
+    .Mui-disabled {
+        opacity: 0.5;
+    }
+
+    .mui-3sx0hq-MuiTabs-indicator {
+        background-color: white;
+    }
 }

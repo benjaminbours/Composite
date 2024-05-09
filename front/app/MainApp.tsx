@@ -15,7 +15,6 @@ import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
 import { BottomLeftInfo } from './BottomLeftInfo';
 import { useMainController } from './useMainController';
-import { useMenuTransition } from './useMenuTransition';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
 import { AppContext } from './WithMainApp';
 import { getDictionary } from '../getDictionary';
@@ -31,7 +30,9 @@ const Game = dynamic(() => import('./Game'), {
     ssr: false,
 });
 
-// almost the same state in Menu
+export const MainControllerContext = React.createContext<
+    ReturnType<typeof useMainController>
+>({} as any);
 
 interface Props {
     initialScene?: MenuScene;
@@ -49,25 +50,7 @@ function MainApp({ initialScene, dictionary }: Props) {
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const statsRef = useRef<Stats>();
 
-    const {
-        menuScene,
-        nextMenuScene,
-        refHashMap,
-        goToStep,
-        onTransition,
-        setMenuScene,
-        lightToStep,
-        shadowToStep,
-    } = useMenuTransition(initialScene);
-
-    const mainController = useMainController(
-        menuScene,
-        setMenuScene,
-        goToStep,
-        lightToStep,
-        shadowToStep,
-        onTransition,
-    );
+    const mainController = useMainController(initialScene);
 
     const handleClickOnSettings = useCallback(() => {
         setIsSettingsOpen(true);
@@ -80,7 +63,7 @@ function MainApp({ initialScene, dictionary }: Props) {
     // effect dedicated to tab switching
     useEffect(() => {
         setMainAppContext({
-            setMenuScene,
+            setMenuScene: mainController.setMenuScene,
             // enterTeamLobby: handleEnterTeamLobby,
         });
         if (
@@ -114,7 +97,7 @@ function MainApp({ initialScene, dictionary }: Props) {
     const { state, gameIsPlaying, socketController } = mainController;
 
     return (
-        <>
+        <MainControllerContext.Provider value={mainController}>
             <TeamMateDisconnectNotification
                 teamMateDisconnected={state.mateDisconnected}
                 handleClickFindAnotherTeamMate={
@@ -122,14 +105,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                 }
             />
             {!gameIsPlaying && (
-                <Menu
-                    mainController={mainController}
-                    dictionary={dictionary}
-                    menuScene={menuScene}
-                    nextMenuScene={nextMenuScene}
-                    stats={statsRef}
-                    refHashMap={refHashMap}
-                />
+                <Menu dictionary={dictionary} stats={statsRef} />
             )}
             {state.gameState && state.loadedLevel && gameIsPlaying && (
                 <Game
@@ -160,7 +136,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                     matchmaking={mainController.serverCounts?.matchmaking || 0}
                 />
             )}
-        </>
+        </MainControllerContext.Provider>
     );
 }
 

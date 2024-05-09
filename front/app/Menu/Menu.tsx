@@ -1,8 +1,7 @@
 // vendors
 import { gsap } from 'gsap';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 // our libs
-import { Side } from '@benjaminbours/composite-core';
 // local
 import CanvasBlack from './canvas/CanvasBlack';
 import CanvasWhite from './canvas/CanvasWhite';
@@ -14,48 +13,30 @@ import {
     TeamLobbyScene,
     NotFoundScene,
 } from './scenes';
-import { RefHashMap } from '../useMenuTransition';
-import { useMainController } from '../useMainController';
 import { getDictionary } from '../../getDictionary';
+import { MainControllerContext } from '../MainApp';
 
 interface Props {
-    menuScene: MenuScene;
-    nextMenuScene: MenuScene | undefined;
-    refHashMap: RefHashMap;
     stats: React.MutableRefObject<Stats | undefined>;
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
-    mainController: ReturnType<typeof useMainController>;
 }
 
-export function Menu({
-    dictionary,
-    menuScene,
-    stats,
-    nextMenuScene,
-    refHashMap,
-    mainController,
-}: Props) {
+export function Menu({ dictionary, stats }: Props) {
     const blackCanvasDomElement = useRef<HTMLCanvasElement>(null);
     const whiteCanvasDomElement = useRef<HTMLCanvasElement>(null);
 
     const {
         state,
-        serverCounts,
-        fetchTime,
-        levels,
+        refHashMap,
+        menuScene,
+        nextMenuScene,
         handleClickHome,
-        handleClickPlayAgain,
         handleClickPlay,
-        handleClickReadyToPlay,
-        handleSelectLevelOnLobby,
-        handleSelectSideOnLobby,
-        handleInviteFriend,
-        handleEnterTeamLobby,
-        handleEnterRandomQueue,
-        handleExitRandomQueue,
         exitLobby,
-        fetchServerInfo,
-    } = mainController;
+        handleClickPlayAgain,
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
+    } = useContext(MainControllerContext);
 
     const resize = useCallback(() => {
         if (
@@ -113,54 +94,30 @@ export function Menu({
         };
     }, [resize]);
 
-    const setLightIsPulsingFast = useCallback(
-        (value: boolean) => {
-            if (!refHashMap.canvasBlack.current) {
-                return;
-            }
-            refHashMap.canvasBlack.current.light.isPulsingFast = value;
-        },
-        [refHashMap.canvasBlack],
-    );
-
-    const setShadowRotationSpeed = useCallback(
-        (rotationSpeed: number) => {
-            if (!refHashMap.canvasWhite.current) {
-                return;
-            }
-            gsap.to(refHashMap.canvasWhite.current.shadow, {
-                duration: 1,
-                rotationSpeed,
-                ease: 'power3.easeOut',
-            });
-        },
-        [refHashMap.canvasWhite],
-    );
-
-    const setSideSize = useCallback(
-        (side: Side, size: number) => {
-            if (side === Side.LIGHT) {
-                if (!refHashMap.canvasBlack.current) {
-                    return;
-                }
-                gsap.to(refHashMap.canvasBlack.current.light, {
-                    duration: 1,
-                    width: size,
-                    ease: 'power3.easeOut',
-                });
-            } else {
-                if (!refHashMap.canvasWhite.current) {
-                    return;
-                }
-                gsap.to(refHashMap.canvasWhite.current.shadow, {
-                    duration: 1,
-                    width: size,
-                    ease: 'power3.easeOut',
-                });
-            }
-        },
-        [refHashMap.canvasWhite, refHashMap.canvasBlack],
-    );
+    // const setSideSize = useCallback(
+    //     (side: Side, size: number) => {
+    //         if (side === Side.LIGHT) {
+    //             if (!refHashMap.canvasBlack.current) {
+    //                 return;
+    //             }
+    //             gsap.to(refHashMap.canvasBlack.current.light, {
+    //                 duration: 1,
+    //                 width: size,
+    //                 ease: 'power3.easeOut',
+    //             });
+    //         } else {
+    //             if (!refHashMap.canvasWhite.current) {
+    //                 return;
+    //             }
+    //             gsap.to(refHashMap.canvasWhite.current.shadow, {
+    //                 duration: 1,
+    //                 width: size,
+    //                 ease: 'power3.easeOut',
+    //             });
+    //         }
+    //     },
+    //     [refHashMap.canvasWhite, refHashMap.canvasBlack],
+    // );
 
     return (
         <>
@@ -199,27 +156,6 @@ export function Menu({
                     menuScene === MenuScene.TEAM_LOBBY ||
                     nextMenuScene === MenuScene.TEAM_LOBBY
                 }
-                handleClickOnExit={exitLobby}
-                handleClickReadyToPlay={handleClickReadyToPlay}
-                handleSelectLevel={handleSelectLevelOnLobby}
-                handleSelectSide={handleSelectSideOnLobby}
-                you={state.you}
-                mate={state.mate}
-                teamLobbyRef={refHashMap.teamLobbyRef}
-                levels={levels}
-                setLightIsPulsingFast={setLightIsPulsingFast}
-                setShadowRotationSpeed={setShadowRotationSpeed}
-                inviteFriend={handleInviteFriend}
-                handleEnterTeamLobby={handleEnterTeamLobby}
-                setSideSize={setSideSize}
-                handleEnterRandomQueue={handleEnterRandomQueue}
-                handleExitRandomQueue={handleExitRandomQueue}
-                isInQueue={state.isInQueue}
-                fetchServerInfo={fetchServerInfo}
-                // handleClickOnQueueInfo={handleClickOnQueueInfo}
-                fetchTime={fetchTime}
-                serverCounts={serverCounts}
-                shouldDisplayQueueInfo={state.shouldDisplayQueueInfo}
             />
             <EndLevelScene
                 isMount={

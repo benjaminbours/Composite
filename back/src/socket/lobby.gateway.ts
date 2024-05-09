@@ -128,7 +128,7 @@ export class LobbyGateway {
   @SubscribeMessage(SocketEventLobby.SELECT_LEVEL)
   async handleSelectLevel(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() level: number,
+    @MessageBody() level: number | undefined,
   ) {
     const player = await this.temporaryStorage.getPlayer(socket.id);
 
@@ -148,7 +148,7 @@ export class LobbyGateway {
   @SubscribeMessage(SocketEventLobby.SELECT_SIDE)
   async handleSelectSide(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() side: Side,
+    @MessageBody() side: Side | undefined,
   ) {
     const player = await this.temporaryStorage.getPlayer(socket.id);
 

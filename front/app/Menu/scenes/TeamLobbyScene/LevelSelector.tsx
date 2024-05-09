@@ -1,54 +1,36 @@
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import Slider from '@mui/material/Slider';
-import IconButton from '@mui/material/IconButton';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+// import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 // import JoinLeftIcon from '@mui/icons-material/JoinLeft';
-import { LevelPortal } from '../LevelPortal';
-import { Level } from '@benjaminbours/composite-api-client';
-import Popper from '@mui/material/Popper';
+// import Popper from '@mui/material/Popper';
 import styles from './LevelSelector.module.scss';
-import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Link from 'next/link';
 import { Route } from '../../../types';
-import {
-    QUEUE_INFO_FETCH_INTERVAL,
-    ServerCounts,
-} from '../../../useMainController';
+import { MainControllerContext } from '../../../MainApp';
+import { Side } from '@benjaminbours/composite-core';
+import { LobbyMode } from '../../../useMainController';
+import classNames from 'classnames';
+import { LevelGridItem } from './LevelGridItem';
 
 interface Props {
-    levels: Level[];
     disabled?: boolean;
-    handleSelectLevel: (levelId: number) => void;
-    fetchServerInfo: () => Promise<void>;
-    // handleClickOnQueueInfo: () => void;
-    shouldDisplayQueueInfo: boolean;
-    serverCounts?: ServerCounts;
-    fetchTime: number;
-    levelSelectedByMate?: number;
-    selectedLevel?: number;
 }
 
-export const LevelSelector: React.FC<Props> = ({
-    levels,
-    disabled,
-    handleSelectLevel,
-    fetchServerInfo,
-    shouldDisplayQueueInfo,
-    fetchTime,
-    levelSelectedByMate,
-    // handleClickOnQueueInfo,
-    selectedLevel,
-    serverCounts,
-}) => {
+export const LevelSelector: React.FC<Props> = ({ disabled }) => {
+    const {
+        state,
+        levels,
+        lobbyMode,
+        serverCounts,
+        handleSelectLevelOnLobby,
+        handleClickBackSelectLevel,
+        handleMouseLeaveSideButton,
+        handleMouseEnterSideButton,
+        handleClickSide,
+    } = useContext(MainControllerContext);
+    // author
     const authorList = useMemo(() => {
         const list = levels.reduce((acc, level) => {
             acc.includes(level.author!.name) || acc.push(level.author!.name);
@@ -58,16 +40,6 @@ export const LevelSelector: React.FC<Props> = ({
         return list;
     }, [levels]);
     const [author, setAuthor] = useState<string>(authorList[0]);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [slideIndex, setSlideIndex] = useState(() => {
-        if (selectedLevel && levels.length > 0) {
-            const index = levels.findIndex(
-                (level) => level.id === selectedLevel,
-            );
-            return index !== -1 ? index + 1 : 1;
-        }
-        return 1;
-    });
 
     // effect to randomize portal animations
     useEffect(() => {
@@ -79,112 +51,68 @@ export const LevelSelector: React.FC<Props> = ({
             });
     }, []);
 
-    const progress = useMemo(() => {
-        return (fetchTime / QUEUE_INFO_FETCH_INTERVAL) * 100;
-    }, [fetchTime]);
-
-    const customCarouselList = useRef<HTMLUListElement>(null);
-    const childWidth = 400;
-    const [carouselTransform, setCarouselTransform] = useState(childWidth / 2);
+    // const progress = useMemo(() => {
+    //     return (fetchTime / QUEUE_INFO_FETCH_INTERVAL) * 100;
+    // }, [fetchTime]);
 
     const levelsToDisplay = useMemo(() => {
-        if (author === 'All') {
-            return levels;
-        }
-        return levels.filter((level) => level.author!.name === author);
+        // if (author === 'All') {
+        //     return levels;
+        // }
+        // return levels.filter((level) => level.author!.name === author);
+        return [
+            ...levels,
+            ...levels,
+            ...levels,
+            ...levels,
+            ...levels,
+            ...levels,
+        ];
     }, [levels, author]);
 
-    const next = useCallback(() => {
-        if (slideIndex === levelsToDisplay.length) {
-            return;
-        }
-        setCarouselTransform((prev) => prev + childWidth);
-        setSlideIndex((prev) => prev + 1);
-        const level = levelsToDisplay[slideIndex];
-        if (level) {
-            handleSelectLevel(level.id);
-        }
-    }, [slideIndex, levelsToDisplay, handleSelectLevel]);
-
-    const previous = useCallback(() => {
-        if (slideIndex === 1) {
-            return;
-        }
-        setCarouselTransform((prev) => prev - childWidth);
-        setSlideIndex((prev) => prev - 1);
-        const level = levelsToDisplay[slideIndex - 2];
-        if (level) {
-            handleSelectLevel(level.id);
-        }
-    }, [slideIndex, handleSelectLevel, levelsToDisplay]);
-
-    // effect responsible to update the carousel when selected level change
-    useEffect(() => {
-        if (!selectedLevel) {
-            return;
-        }
-        const index = levelsToDisplay.findIndex(
-            (level) => level.id === selectedLevel,
-        );
-        if (index === -1) {
-            return;
-        }
-
-        setCarouselTransform((index + 1) * childWidth - childWidth / 2);
-        setSlideIndex(index + 1);
-    }, [selectedLevel, levelsToDisplay]);
-
     // effect responsible to update selected level when author change
-    useEffect(() => {
-        if (author === 'All') {
-            return;
-        }
-        const level = levelsToDisplay[0];
-        handleSelectLevel(level.id);
-        setSlideIndex(1);
-    }, [author, levelsToDisplay, handleSelectLevel]);
+    // useEffect(() => {
+    //     if (author === 'All') {
+    //         return;
+    //     }
+    //     const level = levelsToDisplay[0];
+    //     handleSelectLevelOnLobby(level.id);
+    //     setSlideIndex(1);
+    // }, [author, levelsToDisplay, handleSelectLevelOnLobby]);
 
     return (
         <div className={styles.root}>
             <div className={styles.header}>
-                <h2 className="title-h3 title-h3--white">Select a level</h2>
-                <Autocomplete
-                    className={styles['author-selector']}
-                    disablePortal
-                    disabled={disabled}
-                    onChange={(_, value) => {
-                        setAuthor(value ? (value as string) : 'All');
-                    }}
-                    includeInputInList
-                    value={author}
-                    options={authorList}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            label="Author"
+                {state.you.side === undefined ? (
+                    <>
+                        <h2 className="title-h3 title-h3--white">
+                            Select a level
+                        </h2>
+                        <Autocomplete
+                            className={styles['author-selector']}
+                            disablePortal
+                            disabled={disabled}
+                            onChange={(_, value) => {
+                                setAuthor(value ? (value as string) : 'All');
+                            }}
+                            includeInputInList
+                            value={author}
+                            options={authorList}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    variant="standard"
+                                    label="Author"
+                                />
+                            )}
                         />
-                    )}
-                />
-                <Popper
-                    open={Boolean(anchorEl)}
-                    anchorEl={anchorEl}
-                    className={styles['queue-info-popper']}
-                    placement="right"
-                >
-                    <p>
-                        {shouldDisplayQueueInfo
-                            ? 'Hide matchmaking queue info'
-                            : 'Display matchmaking queue info'}
-                    </p>
-                </Popper>
-                <Link
+                        {/* <Link
                     href={Route.LEVEL_EDITOR_ROOT}
                     className={styles['header-creator-button']}
                 >
                     <button className="buttonRect">Become a creator</button>
-                </Link>
-                <div className={styles['queue-container']}>
+                </Link> */}
+                        {/* <div className={styles['queue-container']}>
                     {shouldDisplayQueueInfo && (
                         <IconButton
                             className={styles['queue-fetch-progress']}
@@ -198,19 +126,18 @@ export const LevelSelector: React.FC<Props> = ({
                             />
                         </IconButton>
                     )}
-                    {/* <button
-                        className={styles['queue-info-icon']}
-                        onMouseEnter={(event: React.MouseEvent<HTMLElement>) =>
-                            setAnchorEl(event.currentTarget)
-                        }
-                        onMouseLeave={() => setAnchorEl(null)}
-                        onClick={handleClickOnQueueInfo}
+                </div> */}
+                    </>
+                ) : (
+                    <button
+                        className="rect-button select-level-button"
+                        onClick={handleClickBackSelectLevel}
                     >
-                        <JoinLeftIcon />
-                    </button> */}
-                </div>
+                        <ArrowBackIcon />
+                        <span>Select another level</span>
+                    </button>
+                )}
             </div>
-
             {levelsToDisplay.length === 0 ? (
                 <div className={styles['no-level-container']}>
                     <p>There is no level available so far.</p>
@@ -222,32 +149,69 @@ export const LevelSelector: React.FC<Props> = ({
                 </div>
             ) : (
                 <div className="custom-carousel">
-                    <ul
-                        style={{ left: `calc(50% - ${carouselTransform}px)` }}
-                        ref={customCarouselList}
-                    >
-                        {levelsToDisplay.map(({ id, name }) => {
+                    <ul>
+                        {levelsToDisplay.map(({ id, name }, index) => {
+                            const isSelectedByTeamMate =
+                                state.mate?.level === id;
+                            const isSelectedLevel = id === state.you.level;
+                            let isLightWaiting = false;
+                            let isShadowWaiting = false;
+                            if (
+                                lobbyMode === LobbyMode.DUO_WITH_RANDOM &&
+                                serverCounts &&
+                                serverCounts.levels[id] &&
+                                serverCounts.levels[id].light_queue > 0
+                            ) {
+                                isLightWaiting = true;
+                            }
+
+                            if (
+                                lobbyMode === LobbyMode.DUO_WITH_RANDOM &&
+                                serverCounts &&
+                                serverCounts.levels[id] &&
+                                serverCounts.levels[id].shadow_queue > 0
+                            ) {
+                                isShadowWaiting = true;
+                            }
+
+                            const cssClass = classNames({
+                                selected: isSelectedLevel,
+                                'selected-light':
+                                    isSelectedLevel &&
+                                    state.you.side === Side.LIGHT,
+                                'selected-shadow':
+                                    isSelectedLevel &&
+                                    state.you.side === Side.SHADOW,
+                                'selected-team-mate-light':
+                                    isSelectedByTeamMate &&
+                                    state.mate?.side === Side.LIGHT,
+                                'selected-team-mate-shadow':
+                                    isSelectedByTeamMate &&
+                                    state.mate?.side === Side.SHADOW,
+                            });
+
                             return (
-                                <li key={id}>
-                                    <LevelPortal
+                                <li
+                                    data-id={id}
+                                    key={index}
+                                    className={cssClass}
+                                >
+                                    <LevelGridItem
+                                        className="team-lobby-scene__level-portal"
+                                        id={id}
                                         name={name}
-                                        isSelectedByYou={id === selectedLevel}
-                                        isSelectedByTeamMate={
-                                            id === levelSelectedByMate
-                                        }
                                         src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
-                                        serverCounts={
-                                            shouldDisplayQueueInfo
-                                                ? serverCounts?.levels[
-                                                      String(id) as any
-                                                  ] || {
-                                                      playing: 0,
-                                                      light_queue: 0,
-                                                      shadow_queue: 0,
-                                                  }
-                                                : undefined
+                                        you={state.you}
+                                        mate={state.mate}
+                                        handleClickSide={handleClickSide}
+                                        handleMouseEnterSide={
+                                            handleMouseEnterSideButton
                                         }
-                                        onClick={() => handleSelectLevel(id)}
+                                        handleMouseLeaveSide={
+                                            handleMouseLeaveSideButton
+                                        }
+                                        // isLightWaiting={isLightWaiting}
+                                        // isShadowWaiting={isShadowWaiting}
                                     />
                                 </li>
                             );
@@ -255,34 +219,6 @@ export const LevelSelector: React.FC<Props> = ({
                     </ul>
                 </div>
             )}
-            <div className={styles.controls}>
-                <IconButton disabled={disabled} onClick={previous}>
-                    <ArrowBackIosNewIcon />
-                </IconButton>
-                <Slider
-                    disabled={disabled}
-                    className={styles.slider}
-                    size="small"
-                    value={slideIndex}
-                    min={1}
-                    max={levelsToDisplay.length}
-                    onChange={(e, value) => {
-                        setSlideIndex(value as number);
-                    }}
-                    onChangeCommitted={(_, value) => {
-                        setCarouselTransform(
-                            (value as number) * childWidth - childWidth / 2,
-                        );
-                        const level = levelsToDisplay[(value as number) - 1];
-                        if (level) {
-                            handleSelectLevel(level.id);
-                        }
-                    }}
-                />
-                <IconButton disabled={disabled} onClick={next}>
-                    <ArrowForwardIosIcon />
-                </IconButton>
-            </div>
         </div>
     );
 };

@@ -11,6 +11,7 @@ import {
 } from './Menu/tweens';
 import Curve from './Menu/canvas/Curve';
 import { MenuScene } from './types';
+import { Side } from '@benjaminbours/composite-core';
 
 export interface RefHashMap {
     canvasBlack: React.MutableRefObject<CanvasBlack | undefined>;
@@ -48,60 +49,62 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
         [],
     );
 
-    const lightToStep = useCallback(
-        (options: TweenOptions, isMobileDevice: boolean) => {
-            if (refHashMap.canvasBlack.current === undefined) {
+    /**
+     * Move a graphic side element to coordinates
+     */
+    const moveSideElementToCoordinate = useCallback(
+        (side: Side, x: number, y: number) => {
+            if (
+                !refHashMap.canvasBlack.current ||
+                !refHashMap.canvasWhite.current
+            ) {
                 return;
             }
-            const { step, side } = options;
-            const { coordinates, width } =
-                refHashMap.canvasBlack.current.light.getParamsForScene({
-                    scene: step,
-                    canvasWidth:
-                        refHashMap.canvasBlack.current.ctx.canvas.width,
-                    canvasHeight:
-                        refHashMap.canvasBlack.current.ctx.canvas.height,
-                    isMobile: isMobileDevice,
-                    faction: side,
-                });
-
-            return gsap.to(refHashMap.canvasBlack.current.light, {
+            const element =
+                side === Side.LIGHT
+                    ? refHashMap.canvasBlack.current.light
+                    : refHashMap.canvasWhite.current.shadow;
+            return gsap.to(element, {
                 duration: 0.5,
                 delay: 0.1,
-                startX: coordinates.x,
-                startY: coordinates.y,
-                width,
+                startX: x,
+                startY: y,
             });
         },
         [refHashMap],
     );
 
-    const shadowToStep = useCallback(
-        (options: TweenOptions, isMobileDevice: boolean) => {
-            if (refHashMap.canvasWhite.current === undefined) {
+    /**
+     * Move a graphic side element to a specific step
+     */
+    const sideElementToStep = useCallback(
+        (element: Side, options: TweenOptions, isMobileDevice: boolean) => {
+            const canvasKey =
+                element === Side.LIGHT ? 'canvasBlack' : 'canvasWhite';
+            const canvas = refHashMap[canvasKey].current;
+            if (canvas === undefined) {
                 return;
             }
 
+            const elementKey = element === Side.LIGHT ? 'light' : 'shadow';
+
             const { step, side } = options;
-            const { coordinates, width } =
-                refHashMap.canvasWhite.current.shadow.getParamsForScene({
-                    scene: step,
-                    canvasWidth:
-                        refHashMap.canvasWhite.current.ctx.canvas.width,
-                    canvasHeight:
-                        refHashMap.canvasWhite.current.ctx.canvas.height,
-                    isMobile: isMobileDevice,
-                    faction: side,
-                });
-            return gsap.to(refHashMap.canvasWhite.current.shadow, {
-                duration: 0.5,
-                delay: 0.1,
-                startX: coordinates.x,
-                startY: coordinates.y,
-                width,
+            const { coordinates, width } = (canvas as any)[
+                elementKey
+            ].getParamsForScene({
+                scene: step,
+                canvasWidth: canvas.ctx.canvas.width,
+                canvasHeight: canvas.ctx.canvas.height,
+                isMobile: isMobileDevice,
+                faction: side,
             });
+            return moveSideElementToCoordinate(
+                element,
+                coordinates.x,
+                coordinates.y,
+            );
         },
-        [refHashMap],
+        [refHashMap, moveSideElementToCoordinate],
     );
 
     const goToStep = useCallback(
@@ -134,8 +137,16 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
 
             setNextMenuScene(tweenOptions.step);
             onTransition.current = true;
-            const lightAnim = lightToStep(tweenOptions, isMobileDevice);
-            const shadowAnim = shadowToStep(tweenOptions, isMobileDevice);
+            const lightAnim = sideElementToStep(
+                Side.LIGHT,
+                tweenOptions,
+                isMobileDevice,
+            );
+            const shadowAnim = sideElementToStep(
+                Side.SHADOW,
+                tweenOptions,
+                isMobileDevice,
+            );
 
             gsap.timeline({
                 onComplete: () => {
@@ -164,17 +175,42 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
                 )
                 .add(inAnimation());
         },
-        [refHashMap, lightToStep, shadowToStep],
+        [refHashMap, sideElementToStep],
     );
 
+    const setLightIsPulsingFast = useCallback(
+        (value: boolean) => {
+            if (!refHashMap.canvasBlack.current) {
+                return;
+            }
+            refHashMap.canvasBlack.current.light.isPulsingFast = value;
+        },
+        [refHashMap.canvasBlack],
+    );
+
+    const setShadowRotationSpeed = useCallback(
+        (rotationSpeed: number) => {
+            if (!refHashMap.canvasWhite.current) {
+                return;
+            }
+            gsap.to(refHashMap.canvasWhite.current.shadow, {
+                duration: 1,
+                rotationSpeed,
+                ease: 'power3.easeOut',
+            });
+        },
+        [refHashMap.canvasWhite],
+    );
     return {
         goToStep,
-        lightToStep,
-        shadowToStep,
+        sideElementToStep,
+        moveSideElementToCoordinate,
         refHashMap,
         onTransition,
         menuScene,
         setMenuScene,
         nextMenuScene,
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
     };
 }

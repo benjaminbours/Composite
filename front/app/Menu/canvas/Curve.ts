@@ -52,10 +52,7 @@ export default class Curve {
             return width * 0.5;
         },
         team_lobby(width: number, height: number, isOnMobile: boolean) {
-            // margin + column left
-            const marginLeft = width * 0.075 + 322;
-            let x =
-                ((width - marginLeft - width * 0.025) / 2 + marginLeft) / width;
+            let x = 0.5;
             if (isOnMobile) {
                 return height * 0.75;
             }

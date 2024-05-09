@@ -1,29 +1,5 @@
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import ModeNightIcon from '@mui/icons-material/ModeNight';
-import Badge from '@mui/material/Badge';
-import { ServerCounts } from '../../useMainController';
-
-const YingYang: React.FC = () => (
-    <svg className="ying-yang" viewBox="0 0 800 800">
-        <g transform="translate(-491 -193)">
-            <path
-                className="black"
-                d="M-466,32c0-220.8,179.2-400,400-400,110.4,0,200,89.6,200,200S44.4,32-66,32s-200,89.6-200,200,89.6,200,200,200C-286.8,432-466,252.8-466,32Z"
-                transform="translate(859 527) rotate(-90)"
-                fill="#000"
-            />
-            <path
-                className="white"
-                d="M-266,432c0-110.4,89.6-200,200-200S134,142.4,134,32,44.4-168-66-168c220.8,0,400,179.2,400,400S154.8,632-66,632C-176.4,632-266,542.4-266,432Z"
-                transform="translate(659 527) rotate(-90)"
-                fill="#fff"
-            />
-        </g>
-    </svg>
-);
 
 function loadImage(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -35,22 +11,18 @@ function loadImage(url: string): Promise<string> {
 }
 
 interface Props {
+    className?: string;
     name: string;
     src: string;
-    isSelectedByTeamMate?: boolean;
-    isSelectedByYou?: boolean;
-    serverCounts?: ServerCounts['levels'][number];
     onClick?: () => void;
 }
 
 const defaultImageUrl = '/images/crack_the_door.png';
 
 export const LevelPortal: React.FC<Props> = ({
+    className,
     name,
     src,
-    isSelectedByTeamMate,
-    isSelectedByYou,
-    serverCounts,
     onClick,
 }) => {
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
@@ -65,8 +37,7 @@ export const LevelPortal: React.FC<Props> = ({
 
     const cssClass = classNames({
         'level-portal': true,
-        'level-portal--selected-by-team-mate': isSelectedByTeamMate,
-        'level-portal--selected-by-you': isSelectedByYou,
+        ...(className ? { [className]: true } : {}),
     });
 
     return (
@@ -83,31 +54,8 @@ export const LevelPortal: React.FC<Props> = ({
                     <div />
                     <div />
                 </div>
-                <YingYang />
             </div>
             <p>{name}</p>
-            {serverCounts !== undefined && (
-                <div className="level-portal__queue-info">
-                    <Badge
-                        title="Players currently playing"
-                        badgeContent={String(serverCounts.playing)}
-                    >
-                        <PersonIcon />
-                    </Badge>
-                    <Badge
-                        title="Light in the queue"
-                        badgeContent={String(serverCounts.light_queue)}
-                    >
-                        <Brightness7Icon />
-                    </Badge>
-                    <Badge
-                        title="Shadow in the queue"
-                        badgeContent={String(serverCounts.shadow_queue)}
-                    >
-                        <ModeNightIcon />
-                    </Badge>
-                </div>
-            )}
         </div>
     );
 };

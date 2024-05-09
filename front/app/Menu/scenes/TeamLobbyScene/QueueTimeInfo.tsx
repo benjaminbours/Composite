@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import styles from './SideSelector.module.scss';
 
 dayjs.extend(duration);
 
@@ -27,7 +26,7 @@ export const QueueTimeInfo: React.FC<Props> = ({}) => {
 
     // TODO: Add estimated time in queue before match, but I need more data for this
     return (
-        <div className={styles['queue-time-info']}>
+        <div className="queue-time-info">
             <h3>
                 <span>Time in queue:</span> {formattedTime}
             </h3>

@@ -151,12 +151,12 @@ export type GameDeactivateElementEvent = [
 
 export type TeamSelectLevel = [
     type: SocketEventLobby.SELECT_LEVEL,
-    payload: number,
+    payload: number | undefined,
 ];
 
 export type TeamSelectSide = [
     type: SocketEventLobby.SELECT_SIDE,
-    payload: Side,
+    payload: Side | undefined,
 ];
 
 export type CreateLobbyEvent = [
