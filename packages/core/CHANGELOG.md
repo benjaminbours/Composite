@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.16
+
+### Patch Changes
+
+- Fix graphic bugs
+
 ## 1.0.0-next.15
 
 ### Patch Changes
