@@ -481,8 +481,8 @@ export function useMainController(initialScene: MenuScene | undefined) {
             return;
         }
         socketController.current?.destroy();
-        router.push(Route.HOME);
         goToStep({ step: MenuScene.HOME }, () => {
+            router.push(Route.HOME);
             setMenuScene(MenuScene.HOME);
             setState((prev) => ({
                 ...prev,
