@@ -233,7 +233,7 @@ function Game({
                             <p>
                                 {`It's funnier if you can speak by voice with your teammate.`}
                             </p>
-                            <DiscordButton />
+                            <DiscordButton className='buttonRect' />
                         </div>
                     </div>
                 </div>

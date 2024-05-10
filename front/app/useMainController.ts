@@ -170,56 +170,9 @@ export function useMainController(initialScene: MenuScene | undefined) {
         }));
     }, [router, setMenuScene, currentUser]);
 
-    const handleExitRandomQueue = useCallback(() => {
-        socketController.current?.destroy();
-        setState((prev) => ({
-            ...prev,
-            isInQueue: false,
-            isWaitingForFriend: false,
-        }));
-    }, []);
-
-    const handleSelectLevelOnLobby = useCallback(
-        (levelId: number) => {
-            setState((prev) => ({
-                ...prev,
-                you: {
-                    ...prev.you,
-                    level: levelId,
-                    isReady: false,
-                },
-            }));
-            if (state.isInQueue) {
-                // if change level while in queue, exit queue
-                handleExitRandomQueue();
-            } else {
-                socketController.current?.emit([
-                    SocketEventLobby.SELECT_LEVEL,
-                    levelId,
-                ]);
-            }
-        },
-        [state.isInQueue, handleExitRandomQueue],
-    );
-
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
         socketController.current = undefined;
-    }, []);
-
-    const handleSelectSideOnLobby = useCallback((side: Side | undefined) => {
-        setState((prev) => ({
-            ...prev,
-            you: {
-                ...prev.you,
-                side,
-                isReady: false,
-            },
-            isWaitingForFriend:
-                side === undefined ? false : prev.isWaitingForFriend,
-            isInQueue: side === undefined ? false : prev.isWaitingForFriend,
-        }));
-        socketController.current?.emit([SocketEventLobby.SELECT_SIDE, side]);
     }, []);
 
     const handleClickReadyToPlay = useCallback(() => {
@@ -262,6 +215,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 isInQueue: false,
                 isWaitingForFriend: false,
             }));
+            setLobbyMode(LobbyMode.DUO_WITH_FRIEND);
             enqueueSnackbar('Your friend successfully joined the lobby', {
                 variant: 'success',
             });
@@ -300,6 +254,10 @@ export function useMainController(initialScene: MenuScene | undefined) {
             const next = {
                 ...prev,
                 gameState: undefined,
+                you: {
+                    ...prev.you,
+                    isReady: false,
+                },
                 mate: {
                     ...prev.mate!,
                     side: undefined,
@@ -423,79 +381,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         });
     }, [establishConnection, currentUser, state]);
 
-    const handleEnterRandomQueue = useCallback(() => {
-        establishConnection().then(() => {
-            // if already in queue, do nothing
-            if (state.isInQueue) {
-                return;
-            }
-            socketController.current?.emit([
-                SocketEventLobby.JOIN_RANDOM_QUEUE,
-                {
-                    userId: currentUser?.id || undefined,
-                    side: state.you.side,
-                    level: state.you.level,
-                },
-            ]);
-            setState((prev) => ({ ...prev, isInQueue: true }));
-        });
-    }, [establishConnection, state, currentUser?.id]);
-
-    const exitLobby = useCallback(() => {
-        if (onTransition.current) {
-            return;
-        }
-        socketController.current?.destroy();
-        router.push(Route.HOME);
-        goToStep({ step: MenuScene.HOME }, () => {
-            setMenuScene(MenuScene.HOME);
-            setState((prev) => ({
-                ...prev,
-                mate: undefined,
-                mateDisconnected: false,
-                shouldDisplayQueueInfo: true,
-                you: {
-                    isReady: false,
-                    level: undefined,
-                    side: undefined,
-                    account: currentUser || undefined,
-                },
-            }));
-        });
-    }, [setMenuScene, onTransition, currentUser, goToStep, router]);
-
-    // use only on not found page so far
-    const handleClickHome = useCallback(() => {
-        if (onTransition.current) {
-            return;
-        }
-        router.push(Route.HOME);
-        goToStep({
-            step: MenuScene.HOME,
-            side: undefined,
-        });
-    }, [goToStep, router, onTransition]);
-
-    const handleClickPlayAgain = useCallback(() => {
-        if (onTransition.current) {
-            return;
-        }
-        goToStep({ step: MenuScene.TEAM_LOBBY, side: undefined }, () => {
-            setState((prev) => ({
-                ...prev,
-                you: {
-                    ...prev.you,
-                    side: undefined,
-                },
-                mate: prev.mate
-                    ? {
-                          ...prev.mate,
-                      }
-                    : undefined,
-            }));
-        });
-    }, [goToStep, onTransition, setState]);
-
     const queueInfoInterval = useRef<NodeJS.Timeout>();
     const fetchCompletionInterval = useRef<NodeJS.Timeout>();
     const [serverCounts, setServerCounts] = useState<ServerCounts>();
@@ -572,6 +457,80 @@ export function useMainController(initialScene: MenuScene | undefined) {
             });
     }, [setState]);
 
+    const handleEnterRandomQueue = useCallback(
+        (side: Side, level: number) => {
+            socketController.current?.destroy();
+            establishConnection().then(() => {
+                socketController.current?.emit([
+                    SocketEventLobby.JOIN_RANDOM_QUEUE,
+                    {
+                        userId: currentUser?.id || undefined,
+                        side,
+                        level,
+                    },
+                ]);
+                setState((prev) => ({ ...prev, isInQueue: true }));
+                fetchServerInfo();
+            });
+        },
+        [establishConnection, fetchServerInfo, currentUser?.id],
+    );
+
+    const exitLobby = useCallback(() => {
+        if (onTransition.current) {
+            return;
+        }
+        socketController.current?.destroy();
+        router.push(Route.HOME);
+        goToStep({ step: MenuScene.HOME }, () => {
+            setMenuScene(MenuScene.HOME);
+            setState((prev) => ({
+                ...prev,
+                mate: undefined,
+                mateDisconnected: false,
+                shouldDisplayQueueInfo: true,
+                you: {
+                    isReady: false,
+                    level: undefined,
+                    side: undefined,
+                    account: currentUser || undefined,
+                },
+            }));
+        });
+    }, [setMenuScene, onTransition, currentUser, goToStep, router]);
+
+    // use only on not found page so far
+    const handleClickHome = useCallback(() => {
+        if (onTransition.current) {
+            return;
+        }
+        router.push(Route.HOME);
+        goToStep({
+            step: MenuScene.HOME,
+            side: undefined,
+        });
+    }, [goToStep, router, onTransition]);
+
+    const handleClickPlayAgain = useCallback(() => {
+        if (onTransition.current) {
+            return;
+        }
+        goToStep({ step: MenuScene.TEAM_LOBBY, side: undefined }, () => {
+            setState((prev) => ({
+                ...prev,
+                you: {
+                    ...prev.you,
+                    side: undefined,
+                },
+                mate: prev.mate
+                    ? {
+                          ...prev.mate,
+                      }
+                    : undefined,
+            }));
+        });
+    }, [goToStep, onTransition, setState]);
+
     const handleClickPlay = useCallback(() => {
         if (onTransition.current) {
             return;
@@ -580,21 +539,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         router.push(Route.LOBBY);
         goToStep({ step: MenuScene.TEAM_LOBBY });
     }, [goToStep, fetchServerInfo, onTransition, router]);
-
-    const handleClickBackSelectLevel = useCallback(() => {
-        sideElementToStep(Side.SHADOW, { step: MenuScene.TEAM_LOBBY }, false);
-        sideElementToStep(Side.LIGHT, { step: MenuScene.TEAM_LOBBY }, false);
-        handleSelectSideOnLobby(undefined);
-        if (lobbyMode === LobbyMode.DUO_WITH_RANDOM && !state.mate) {
-            handleDestroyConnection();
-        }
-    }, [
-        sideElementToStep,
-        handleSelectSideOnLobby,
-        handleDestroyConnection,
-        lobbyMode,
-        state.mate,
-    ]);
 
     const handleMouseEnterSideButton = useCallback(
         (side: Side) => (e: React.MouseEvent) => {
@@ -653,7 +597,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                     Side.LIGHT,
                     {
                         step:
-                            state.you.side === side
+                            state.you.side === side || state.mate?.side === side
                                 ? MenuScene.TEAM_LOBBY_SELECTED
                                 : MenuScene.TEAM_LOBBY,
                     },
@@ -669,7 +613,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                     Side.SHADOW,
                     {
                         step:
-                            state.you.side === side
+                            state.you.side === side || state.mate?.side === side
                                 ? MenuScene.TEAM_LOBBY_SELECTED
                                 : MenuScene.TEAM_LOBBY,
                     },
@@ -680,10 +624,15 @@ export function useMainController(initialScene: MenuScene | undefined) {
         [
             sideElementToStep,
             state.you,
+            state.mate,
             setShadowRotationSpeed,
             setLightIsPulsingFast,
         ],
     );
+
+    // const handleSelectLevelOnLobby = useCallback((levelId: number) => {
+
+    // }, []);
 
     const handleClickSide = useCallback(
         (levelId: number, side: Side) => (e: React.MouseEvent) => {
@@ -702,41 +651,44 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 yang.classList.remove('visible');
             }
 
+            // graphic update
             if (side === Side.LIGHT) {
                 setLightIsPulsingFast(false);
-                sideElementToStep(
-                    Side.LIGHT,
-                    { step: MenuScene.TEAM_LOBBY_SELECTED },
-                    false,
-                );
-                sideElementToStep(
-                    Side.SHADOW,
-                    { step: MenuScene.TEAM_LOBBY },
-                    false,
-                );
-                handleSelectSideOnLobby(Side.LIGHT);
             } else {
                 setShadowRotationSpeed(0.005);
-                sideElementToStep(
-                    Side.SHADOW,
-                    { step: MenuScene.TEAM_LOBBY_SELECTED },
-                    false,
-                );
-                sideElementToStep(
-                    Side.LIGHT,
-                    { step: MenuScene.TEAM_LOBBY },
-                    false,
-                );
             }
-            handleSelectLevelOnLobby(levelId);
-            handleSelectSideOnLobby(side);
+
+            // state update
+            setState((prev) => ({
+                ...prev,
+                you: {
+                    ...prev.you,
+                    level: levelId,
+                    side,
+                    isReady: false,
+                },
+            }));
+
+            // network update
+            // TODO: Send in one batch
+            socketController.current?.emit([
+                SocketEventLobby.SELECT_LEVEL,
+                levelId,
+            ]);
+            socketController.current?.emit([
+                SocketEventLobby.SELECT_SIDE,
+                side,
+            ]);
+
+            if (lobbyMode === LobbyMode.DUO_WITH_RANDOM) {
+                handleEnterRandomQueue(side, levelId);
+            }
         },
         [
+            lobbyMode,
             setShadowRotationSpeed,
             setLightIsPulsingFast,
-            sideElementToStep,
-            handleSelectLevelOnLobby,
-            handleSelectSideOnLobby,
+            handleEnterRandomQueue,
         ],
     );
 
@@ -773,6 +725,44 @@ export function useMainController(initialScene: MenuScene | undefined) {
         ]);
     }, [state.mate]);
 
+    // effect to update shadow and light graphic accordingly with lobby state
+    useEffect(() => {
+        if (menuScene !== MenuScene.TEAM_LOBBY) {
+            return;
+        }
+
+        if (state.you.side === Side.LIGHT || state.mate?.side === Side.LIGHT) {
+            sideElementToStep(
+                Side.LIGHT,
+                { step: MenuScene.TEAM_LOBBY_SELECTED },
+                false,
+            );
+        } else {
+            sideElementToStep(
+                Side.LIGHT,
+                { step: MenuScene.TEAM_LOBBY },
+                false,
+            );
+        }
+
+        if (
+            state.you.side === Side.SHADOW ||
+            state.mate?.side === Side.SHADOW
+        ) {
+            sideElementToStep(
+                Side.SHADOW,
+                { step: MenuScene.TEAM_LOBBY_SELECTED },
+                false,
+            );
+        } else {
+            sideElementToStep(
+                Side.SHADOW,
+                { step: MenuScene.TEAM_LOBBY },
+                false,
+            );
+        }
+    }, [sideElementToStep, state.mate, state.you, menuScene]);
+
     const handleChangeLobbyMode = useCallback(
         (mode: LobbyMode) => {
             setLobbyMode(mode);
@@ -790,21 +780,40 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 isInQueue: false,
                 isWaitingForFriend: false,
             }));
+            if (mode === LobbyMode.DUO_WITH_RANDOM) {
+                fetchServerInfo();
+            }
         },
-        [handleDestroyConnection, currentUser],
+        [handleDestroyConnection, fetchServerInfo, currentUser],
     );
 
-    // useEffect(() => {
-    //     if (!gameIsPlaying) {
-    //         fetchServerInfo();
-    //     }
-    //     return () => {
-    //         clearInterval(queueInfoInterval.current);
-    //         clearInterval(fetchCompletionInterval.current);
-    //         queueInfoInterval.current = undefined;
-    //         fetchCompletionInterval.current = undefined;
-    //     };
-    // }, [gameIsPlaying, fetchServerInfo]);
+    useEffect(() => {
+        if (!gameIsPlaying) {
+            fetchServerInfo();
+        }
+        return () => {
+            clearInterval(queueInfoInterval.current);
+            clearInterval(fetchCompletionInterval.current);
+            queueInfoInterval.current = undefined;
+            fetchCompletionInterval.current = undefined;
+        };
+    }, [gameIsPlaying, fetchServerInfo]);
+
+    // TODO: add params side in the url as well or at a state level selected without any side yet
+    useEffect(() => {
+        const level = Number(queryParams.get('level'));
+        if (levels.length === 0 && !Number.isNaN(level)) {
+            return;
+        }
+        setState((prev) => ({
+            ...prev,
+            you: {
+                ...prev.you,
+                level,
+            },
+        }));
+        socketController.current?.emit([SocketEventLobby.SELECT_LEVEL, level]);
+    }, [levels, queryParams]);
 
     return {
         state,
@@ -828,12 +837,8 @@ export function useMainController(initialScene: MenuScene | undefined) {
         handleInviteFriend,
         handleEnterTeamLobby,
         handleClickPlay,
-        handleEnterRandomQueue,
-        handleExitRandomQueue,
-        handleSelectLevelOnLobby,
         handleClickHome,
         handleClickPlayAgain,
-        handleClickBackSelectLevel,
         fetchServerInfo,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,

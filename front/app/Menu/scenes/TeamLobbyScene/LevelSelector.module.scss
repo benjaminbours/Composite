@@ -1,6 +1,10 @@
 .root {
     width: 70%;
     margin: 0 auto;
+
+    a {
+        text-decoration: none;
+    }
 }
 
 .header {
@@ -93,7 +97,7 @@
 }
 
 .author-selector {
-    margin-left: 20px;
+    margin: 0 20px;
     mix-blend-mode: difference;
     width: 200px;
 

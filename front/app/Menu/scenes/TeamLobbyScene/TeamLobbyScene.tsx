@@ -14,12 +14,10 @@ import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { useStoreState } from '../../../hooks';
 import { AuthModal } from '../../../03_organisms/AuthModal';
-import LogoutIcon from '@mui/icons-material/Logout';
 import CircularProgress from '@mui/material/CircularProgress';
 import { LevelSelector } from './LevelSelector';
 import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 import { DiscordButton } from '../../../02_molecules/DiscordButton';
-import LoginIcon from '@mui/icons-material/Login';
 import { CopyToClipBoardButton } from '../../CopyToClipboardButton';
 import { QueueTimeInfo } from './QueueTimeInfo';
 import Tabs from '@mui/material/Tabs';
@@ -28,6 +26,8 @@ import { MainControllerContext } from '../../../MainApp';
 import { LobbyMode } from '../../../useMainController';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import PersonIcon from '@mui/icons-material/Person';
+import Badge from '@mui/material/Badge';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -38,15 +38,12 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
     ({ dictionary, isMount }) => {
         const {
             state,
-            levels,
+            serverCounts,
             refHashMap,
             lobbyMode,
             handleChangeLobbyMode,
-            handleSelectLevelOnLobby,
             handleInviteFriend,
             handleEnterTeamLobby,
-            handleEnterRandomQueue,
-            handleExitRandomQueue,
             handleClickReadyToPlay,
             handleAlignWithTeamMate,
             exitLobby,
@@ -124,20 +121,6 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
             isMount,
         ]);
 
-        // initial loading
-        useEffect(() => {
-            const level = Number(urlSearchParams.get('level'));
-            if (isMount) {
-                if (levels.length === 0) {
-                    return;
-                }
-                handleSelectLevelOnLobby(
-                    Number.isNaN(level) || level === 0 ? levels[0].id : level,
-                );
-            }
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [isMount, levels]);
-
         const handleTabChange = useCallback(
             (_e: any, value: LobbyMode) => {
                 handleChangeLobbyMode(value);
@@ -174,31 +157,6 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         onLoginClick={() => setIsAuthModalOpen(true)}
                     />
                 </div>
-                {/* <div className="team-lobby-scene__column-left">
-                        <PlayersState
-                            players={[you, mate]}
-                            onInviteFriend={inviteFriend}
-                            isInQueue={isInQueue}
-                            levels={levels}
-                        />
-                        <div className="team-lobby-scene__lobby-helper">
-                            <InfoIcon style={{ marginTop: 20 }} />
-                            <p>
-                                <b>Composite</b> is a{' '}
-                                <b>cooperative multiplayer</b> game. To start a
-                                game, <b>2 players are required</b>. Select a
-                                level, select a side, then{' '}
-                                <b>send an invite link to a friend</b> or match
-                                with a random player if there are some in the
-                                queue.
-                            </p>
-                            <p>
-                                {`It's funnier if you can speak by voice with your
-                            teammate. We have dedicated vocal rooms on Discord.`}
-                            </p>
-                            <DiscordButton />
-                        </div>
-                    </div> */}
                 <div className="team-lobby-scene__tabs-container">
                     <Tabs
                         className="team-lobby-scene__tabs"
@@ -207,121 +165,130 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         onChange={handleTabChange}
                     >
                         <Tab label="Solo (coming soon)" disabled />
+                        <Tab label="Duo with friend" />
                         <Tab
-                            label="Duo with friend"
-                            disabled={state.you.side !== undefined}
-                        />
-                        <Tab
-                            label="Duo with random"
-                            disabled={state.you.side !== undefined}
+                            label={
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    Duo with random
+                                    <Badge
+                                        badgeContent={
+                                            serverCounts?.matchmaking || 0
+                                        }
+                                        color="primary"
+                                        showZero
+                                    >
+                                        <PersonIcon />
+                                    </Badge>
+                                </div>
+                            }
                         />
                     </Tabs>
                 </div>
                 <LevelSelector disabled={state.isInQueue} />
-                {lobbyMode === LobbyMode.DUO_WITH_FRIEND && (
-                    <div className="buttons-container">
-                        {state.mate ? (
-                            <>
-                                <button
-                                    className="rect-button"
-                                    onClick={handleAlignWithTeamMate}
-                                >
-                                    {isAlignWithTeamMate ? (
-                                        <>
-                                            Aligned with team mate
-                                            <CheckBoxIcon color="success" />
-                                        </>
-                                    ) : (
-                                        <>
-                                            Align with team mate{' '}
-                                            <CheckBoxOutlineBlankIcon />
-                                        </>
-                                    )}
-                                </button>
-                                <p style={{ maxWidth: 400, textAlign: 'left' }}>
+                <div className="buttons-container">
+                    {state.mate && (
+                        <>
+                            <p
+                                className="teammate-joined-text"
+                                style={{
+                                    maxWidth: 344,
+                                    textAlign: 'left',
+                                }}
+                            >
+                                <PersonIcon />
+                                <span>
+                                    <b>{state.mate.account?.name || 'Guest'}</b>{' '}
+                                    joined the lobby
+                                </span>
+                            </p>
+                            <DiscordButton className='rect-button' />
+                        </>
+                    )}
+                    {lobbyMode === LobbyMode.DUO_WITH_FRIEND && (
+                        <>
+                            {state.mate ? (
+                                <>
+                                    <button
+                                        className="rect-button"
+                                        disabled={
+                                            state.mate.level === undefined ||
+                                            state.mate.level === null ||
+                                            state.mate.side === null ||
+                                            state.mate.side === undefined
+                                        }
+                                        onClick={handleAlignWithTeamMate}
+                                    >
+                                        {isAlignWithTeamMate ? (
+                                            <>
+                                                Aligned with team mate
+                                                <CheckBoxIcon color="success" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                Align with team mate{' '}
+                                                <CheckBoxOutlineBlankIcon />
+                                            </>
+                                        )}
+                                    </button>
+                                    {/* <p style={{ maxWidth: 344, textAlign: 'left' }}>
                                     {`It's funnier if you can speak by voice with your
                             teammate. We have dedicated vocal rooms on Discord.`}
-                                </p>
-                                {/* TODO: Add integration discord to create vocal room on demand */}
-                                <DiscordButton />
-                            </>
-                        ) : (
-                            <CopyToClipBoardButton
-                                className="rect-button"
-                                text="Copy invite link"
-                                asyncAction={handleInviteFriend}
-                            />
-                        )}
-                        {state.isWaitingForFriend && (
-                            <>
-                                <p>Waiting for friend...</p>
-                                <CircularProgress />
-                            </>
-                        )}
-                        {state.mate &&
-                            state.you.level !== undefined &&
-                            state.you.side !== undefined &&
-                            state.you.side !== null &&
-                            state.mate.side !== null &&
-                            state.you.level === state.mate.level &&
-                            state.mate.side !== state.you.side && (
-                                <button
-                                    className="rect-button ready-button"
-                                    onClick={handleClickReadyToPlay}
-                                >
-                                    <span>Ready:</span>
-                                    <div>
-                                        You
-                                        {state.you.isReady ? (
-                                            <CheckBoxIcon color="success" />
-                                        ) : (
-                                            <CheckBoxOutlineBlankIcon />
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        Mate
-                                        {/* TODO: Clear token in URL when starting a game in other timing as well */}
-                                        {state.mate.isReady ? (
-                                            <CheckBoxIcon color="success" />
-                                        ) : (
-                                            <CheckBoxOutlineBlankIcon />
-                                        )}
-                                    </div>
-                                </button>
+                                </p> */}
+                                    {/* TODO: Add integration discord to create vocal room on demand */}
+                                </>
+                            ) : (
+                                <CopyToClipBoardButton
+                                    className="rect-button"
+                                    text="Copy invite link"
+                                    asyncAction={handleInviteFriend}
+                                />
                             )}
-                    </div>
-                )}
-                {state.you.side !== undefined && (
-                    <div className="buttons-container">
-                        {lobbyMode === LobbyMode.DUO_WITH_RANDOM && (
-                            <>
-                                {state.isInQueue ? (
-                                    <button
-                                        className="rect-button"
-                                        onClick={handleExitRandomQueue}
-                                    >
-                                        <span>
-                                            <b>Exit</b> matchmaking queue
-                                        </span>
-                                        <LogoutIcon color="error" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        className="rect-button"
-                                        onClick={handleEnterRandomQueue}
-                                    >
-                                        <span>
-                                            <b>Enter</b> matchmaking queue
-                                        </span>
-                                        <LoginIcon color="success" />
-                                    </button>
-                                )}
-                            </>
+                            {state.isWaitingForFriend && (
+                                <>
+                                    <p>Waiting for friend...</p>
+                                    <CircularProgress />
+                                </>
+                            )}
+                        </>
+                    )}
+                    {state.isInQueue && <QueueTimeInfo />}
+                    {state.mate &&
+                        state.you.level !== undefined &&
+                        state.you.side !== undefined &&
+                        state.you.side !== null &&
+                        state.mate.side !== null &&
+                        state.you.level === state.mate.level &&
+                        state.mate.side !== state.you.side && (
+                            <button
+                                className="rect-button ready-button"
+                                onClick={handleClickReadyToPlay}
+                            >
+                                <span>Ready:</span>
+                                <div>
+                                    You
+                                    {state.you.isReady ? (
+                                        <CheckBoxIcon color="success" />
+                                    ) : (
+                                        <CheckBoxOutlineBlankIcon />
+                                    )}
+                                </div>
+
+                                <div>
+                                    Mate
+                                    {state.mate.isReady ? (
+                                        <CheckBoxIcon color="success" />
+                                    ) : (
+                                        <CheckBoxOutlineBlankIcon />
+                                    )}
+                                </div>
+                            </button>
                         )}
-                        {state.isInQueue && <QueueTimeInfo />}
-                    </div>
-                )}
+                </div>
             </div>
         );
     },

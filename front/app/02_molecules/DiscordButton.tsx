@@ -1,13 +1,20 @@
+import classNames from 'classnames';
 import React from 'react';
 
-interface Props {}
+interface Props {
+    className?: string;
+}
 
-export const DiscordButton: React.FC<Props> = ({}) => {
+export const DiscordButton: React.FC<Props> = ({ className }) => {
+    const cssClass = classNames({
+        'discord-button': true,
+        ...(className ? { [className]: true } : {}),
+    });
     return (
         <a
             href="https://discord.com/invite/pXPU8xeabp"
             target="_blank"
-            className="buttonRect discord-button"
+            className={cssClass}
         >
             Join our Discord&nbsp;
             <svg viewBox="0 -28.5 256 256">

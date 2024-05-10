@@ -39,7 +39,6 @@ function loadImage(url: string): Promise<string> {
 }
 
 interface Props {
-    className?: string;
     id: number;
     name: string;
     src: string;
@@ -48,14 +47,13 @@ interface Props {
     handleMouseEnterSide: (side: Side) => (e: React.MouseEvent) => void;
     handleMouseLeaveSide: (side: Side) => (e: React.MouseEvent) => void;
     handleClickSide: (id: number, side: Side) => (e: React.MouseEvent) => void;
-    // isLightWaiting: boolean;
-    // isShadowWaiting: boolean;
+    isLightWaiting: boolean;
+    isShadowWaiting: boolean;
 }
 
 const defaultImageUrl = '/images/crack_the_door.png';
 
 export const LevelGridItem: React.FC<Props> = ({
-    className,
     name,
     id,
     src,
@@ -64,6 +62,8 @@ export const LevelGridItem: React.FC<Props> = ({
     handleClickSide,
     handleMouseEnterSide,
     handleMouseLeaveSide,
+    isLightWaiting,
+    isShadowWaiting,
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
@@ -80,12 +80,15 @@ export const LevelGridItem: React.FC<Props> = ({
     const cssClass = classNames({
         'level-grid-item': true,
         'level-grid-item--hovered': isHovered,
+        'level-grid-item--selected': you.level === id,
         'level-grid-item--selected-shadow':
-            you.level === id && you.side === Side.SHADOW,
+            (you.level === id && you.side === Side.SHADOW) ||
+            (mate?.level === id && mate?.side === Side.SHADOW) ||
+            isShadowWaiting,
         'level-grid-item--selected-light':
-            you.level === id && you.side === Side.LIGHT,
-        // 'level-portal--side-is-selected': sideIsSelected,
-        // ...(className ? { [className]: true } : {}),
+            (you.level === id && you.side === Side.LIGHT) ||
+            (mate?.level === id && mate?.side === Side.LIGHT) ||
+            isLightWaiting,
     });
 
     const handleMouseEnter = useCallback(() => {
@@ -96,7 +99,12 @@ export const LevelGridItem: React.FC<Props> = ({
     }, []);
 
     const teamMateHelper = useMemo(() => {
-        if (!mate || mate?.level !== id) {
+        if (
+            !mate ||
+            mate?.level !== id ||
+            mate?.side === undefined ||
+            mate?.side === null
+        ) {
             return;
         }
 
@@ -110,6 +118,7 @@ export const LevelGridItem: React.FC<Props> = ({
             onMouseLeave={handleMouseLeave}
             className={cssClass}
         >
+            {teamMateHelper}
             <div
                 className="level-grid-item__image"
                 style={{
@@ -117,7 +126,7 @@ export const LevelGridItem: React.FC<Props> = ({
                 }}
             >
                 <div className="level-grid-item__side-buttons-container">
-                    <button
+                    <div
                         onMouseEnter={handleMouseEnterSide(Side.LIGHT)}
                         onMouseLeave={handleMouseLeaveSide(Side.LIGHT)}
                         onClick={handleClickSide(id, Side.LIGHT)}
@@ -127,8 +136,8 @@ export const LevelGridItem: React.FC<Props> = ({
                         <div>
                             <p>Light</p>
                         </div>
-                    </button>
-                    <button
+                    </div>
+                    <div
                         onMouseEnter={handleMouseEnterSide(Side.SHADOW)}
                         onMouseLeave={handleMouseLeaveSide(Side.SHADOW)}
                         onClick={handleClickSide(id, Side.SHADOW)}
@@ -138,7 +147,7 @@ export const LevelGridItem: React.FC<Props> = ({
                         <div>
                             <p>Shadow</p>
                         </div>
-                    </button>
+                    </div>
                     <YingYang />
                 </div>
                 <div className="level-grid-item__border-container">

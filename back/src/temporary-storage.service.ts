@@ -188,6 +188,9 @@ export class TemporaryStorageService {
     // TODO: Loop can be optimized
     for (const id of ids) {
       const player = await this.getPlayer(id);
+      if (!player) {
+        continue;
+      }
       console.log('id processing', id);
       console.log('data retrieved', player);
       console.log('data retrieved', player.selectedLevel);

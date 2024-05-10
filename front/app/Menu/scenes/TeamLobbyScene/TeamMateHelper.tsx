@@ -36,15 +36,15 @@ export const TeamMateHelper: React.FC<Props> = ({ levelName, you, mate }) => {
                     {mate.side === Side.LIGHT && <Brightness7Icon />}
                     {mate.side === Side.SHADOW && <ModeNightIcon />}
                 </div>
-                {mate.side !== undefined && you.side === undefined && (
+                {/* {mate.side !== undefined && you.side === undefined && (
                     <button className="rect-button align-button">Align</button>
-                )}
+                )} */}
             </div>
             <Popper
                 id="team-mate-helper"
                 open={open}
                 anchorEl={anchorEl}
-                placement="bottom"
+                placement="right"
                 disablePortal
             >
                 <p className="team-mate-help-text">

@@ -12,6 +12,10 @@
         width: 100%;
     }
 
+    .MuiBadge-badge {
+        background: white;
+    }
+
     .menu-actions {
         margin-top: 0px;
         margin-bottom: 0px;
@@ -25,6 +29,12 @@
         display: grid;
         gap: 10px;
         margin-top: 10px;
+
+        button,
+        a {
+            min-width: 300px;
+            max-width: 300px;
+        }
 
         p {
             mix-blend-mode: difference;
@@ -51,8 +61,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-width: 300px;
-        max-width: 300px;
 
         p {
             margin: 0;
@@ -60,6 +68,21 @@
 
         svg {
             margin-left: 20px;
+        }
+
+        &[disabled] {
+            opacity: 0.5;
+            cursor: default;
+
+            &:hover {
+                background: black;
+                color: white;
+                border-color: white;
+            }
+        }
+
+        &.small {
+            font-size: 12px;
         }
 
         &:hover {
@@ -96,8 +119,44 @@
         color: white;
     }
 
+    .refresh-queue-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+
+        svg {
+            color: white;
+            transition: 0.3s ease-out;
+            margin: 0 !important;
+            // margin-left: 10px !important;
+        }
+
+        span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+
+        &:hover {
+            svg {
+                color: black;
+            }
+        }
+    }
+
     // @media (min-width: 768px) {
     // }
+}
+
+.teammate-joined-text {
+    display: flex;
+    align-items: center;
+
+    svg {
+        margin-right: 10px;
+    }
 }
 
 .team-lobby-scene__header {
@@ -118,91 +177,62 @@
     margin-left: auto;
 }
 
-.team-lobby-scene__level-portal {
-    cursor: pointer;
-    transition: 0.3s ease-out;
+.team-mate-container {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    top: -25%;
+    display: flex;
+    align-items: center;
 
-    .team-mate-container {
-        position: absolute;
-        left: 50%;
-        transform: translate(-50%, 0);
-        top: -8%;
+    mix-blend-mode: difference;
+    color: white;
+
+    .team-mate {
         display: flex;
         align-items: center;
-
-        mix-blend-mode: difference;
-        color: white;
-
-        .team-mate {
-            display: flex;
-            align-items: center;
-            cursor: help;
-        }
-
-        p {
-            margin: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 150px;
-        }
-
-        .align-button {
-            // position: absolute;
-            // left: 50%;
-            // transform: translate(-50%, 0);
-            // bottom: -200%;
-            margin-left: 10px;
-            padding: 5px 10px;
-            font-size: 14px;
-            max-width: 50px;
-            min-width: auto;
-        }
+        cursor: help;
     }
 
-    .team-mate-help-text {
-        border: solid white 1px;
-        background: black;
-        color: white;
-        padding: 5px;
-        font-size: 12px;
-        text-align: left;
+    p {
+        margin: 0 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 150px;
     }
 
-    .level-portal__graphic-wrapper {
-        transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        width: 350px;
-        height: 350px;
-        transform: scale(0.8);
-    }
-
-    &:hover {
-        .level-portal__graphic-wrapper {
-            transform: scale(0.85);
-        }
+    .align-button {
+        // position: absolute;
+        // left: 50%;
+        // transform: translate(-50%, 0);
+        // bottom: -200%;
+        margin-left: 10px;
+        padding: 5px 10px;
+        font-size: 10px;
+        max-width: 50px;
+        min-width: auto;
     }
 }
 
-.custom-carousel li.selected {
-    .level-portal {
-        cursor: initial;
-
-        .level-portal__graphic-wrapper {
-            transform: scale(1) !important;
-        }
-    }
+#team-mate-helper {
+    z-index: 1000;
 }
 
-.custom-carousel li.selected-team-mate,
-.custom-carousel li.selected {
+.team-mate-help-text {
+    border: solid white 1px;
+    background: black;
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    text-align: left;
+}
+
+.level-grid li.selected-team-mate,
+.level-grid li.selected {
     &-shadow {
         .ying-yang .black {
             opacity: 1;
-        }
-
-        .half-circle--shadow {
-            opacity: 0;
-            pointer-events: none;
         }
     }
 
@@ -210,27 +240,19 @@
         .ying-yang .white {
             opacity: 1;
         }
-
-        .half-circle--light {
-            opacity: 0;
-            pointer-events: none;
-        }
     }
 }
 
-.custom-carousel {
-    // overflow: hidden;
-    padding-top: 40px;
+.level-grid {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
     > ul {
-        // width: 70%;
         list-style: none;
         padding: 0;
-        padding-top: 10px;
+        padding-top: 30px;
         margin: 0;
         position: relative;
         display: flex;
@@ -244,6 +266,7 @@
             height: 150px;
             box-sizing: border-box;
             padding: 10px;
+            margin: 20px 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -260,6 +283,86 @@
     // }
 }
 
+$size: 50px;
+.level-grid-item__side-buttons-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+
+    .half-circle {
+        all: unset;
+        width: $size;
+        height: $size * 2;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.3;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            transition: 0.3s ease-out;
+        }
+
+        p {
+            margin: 0;
+            mix-blend-mode: normal;
+            font-size: 10px;
+        }
+
+        &--shadow {
+            order: 2;
+
+            .background {
+                background: #fff;
+                border-bottom-right-radius: $size * 2;
+                border-top-right-radius: $size * 2;
+            }
+
+            p {
+                color: black;
+            }
+        }
+
+        &--light {
+            order: 1;
+
+            .background {
+                background: #000;
+                border-bottom-left-radius: $size * 2;
+                border-top-left-radius: $size * 2;
+            }
+
+            p {
+                color: white;
+            }
+        }
+
+        &:hover {
+            .background {
+                opacity: 1;
+            }
+        }
+    }
+}
+
 .level-grid-item {
     all: unset;
     height: 100%;
@@ -270,7 +373,38 @@
     position: relative;
     transition: 0.3s ease-out;
 
+    .ying-yang {
+        width: 35px;
+        height: 35px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        animation: rotate 5s infinite linear;
+
+        .black,
+        .white {
+            opacity: 0;
+            transition: 0.3s ease-out;
+
+            &.visible {
+                opacity: 1;
+            }
+        }
+    }
+
     &--hovered {
+        .level-grid-item__border-container {
+            opacity: 1;
+        }
+
+        .level-grid-item__side-buttons-container {
+            opacity: 1;
+            pointer-events: initial;
+        }
+    }
+
+    &--selected {
         .level-grid-item__border-container {
             opacity: 1;
         }
@@ -294,6 +428,11 @@
         .ying-yang .black {
             opacity: 1;
         }
+
+        .half-circle--shadow {
+            opacity: 0;
+            pointer-events: none;
+        }
     }
 
     &--selected-light {
@@ -308,6 +447,11 @@
 
         .ying-yang .white {
             opacity: 1;
+        }
+
+        .half-circle--light {
+            opacity: 0;
+            pointer-events: none;
         }
     }
 }
@@ -409,122 +553,6 @@
     to {
         transform: translate(-50%, -50%) rotate(360deg);
     }
-}
-
-$size: 50px;
-.level-grid-item__side-buttons-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    opacity: 0;
-    pointer-events: none;
-
-    .ying-yang {
-        width: 35px;
-        height: 35px;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        animation: rotate 5s infinite linear;
-
-        .black,
-        .white {
-            opacity: 0;
-            transition: 0.3s ease-out;
-
-            &.visible {
-                opacity: 1;
-            }
-        }
-    }
-
-    .half-circle {
-        all: unset;
-        width: $size;
-        height: $size * 2;
-        overflow: hidden;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-
-        .background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0.3;
-            height: 100%;
-            width: 100%;
-            z-index: -1;
-            transition: 0.3s ease-out;
-        }
-
-        p {
-            margin: 0;
-            mix-blend-mode: normal;
-            font-size: 10px;
-        }
-
-        &--shadow {
-            order: 2;
-
-            .background {
-                background: #fff;
-                border-bottom-right-radius: $size * 2;
-                border-top-right-radius: $size * 2;
-            }
-
-            p {
-                color: black;
-            }
-        }
-
-        &--light {
-            order: 1;
-
-            .background {
-                background: #000;
-                border-bottom-left-radius: $size * 2;
-                border-top-left-radius: $size * 2;
-            }
-
-            p {
-                color: white;
-            }
-        }
-
-        &:hover {
-            .background {
-                opacity: 1;
-            }
-        }
-    }
-
-    // &--light {
-    //     .ying-yang {
-    //         .white {
-    //             opacity: 1;
-    //         }
-    //     }
-    // }
-
-    // &--shadow {
-    //     .ying-yang {
-    //         .black {
-    //             opacity: 1;
-    //         }
-    //     }
-    // }
 }
 
 .team-lobby-scene__tabs-container {
