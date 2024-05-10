@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.15
+
+### Patch Changes
+
+- Refactor client lobby
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.15
+
 ## 1.0.0-next.14
 
 ### Patch Changes
