@@ -6,27 +6,27 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisStore } from 'cache-manager-redis-store';
 // our libs
 import {
-  AllQueueInfo,
   GamePlayerInputPayload,
   GameState,
-  Levels,
-  MatchMakingPayload,
-  QueueInfo,
+  JoinRandomQueuePayload,
   RedisGameState,
   Side,
 } from '@benjaminbours/composite-core';
 // local
 import { PlayerState, RedisPlayerState, PlayerStatus } from './PlayerState';
+import { PrismaService } from '@project-common/services';
 
 const REDIS_KEYS = {
   // List
   MATCH_MAKING_QUEUE: 'MATCH_MAKING_QUEUE',
+  // List
+  PLAYER_LIST: 'PLAYER_LIST',
   // Hash map
   INVITE_TOKEN_MAP: 'INVITE_TOKEN_MAP',
   // Hash map
   QUEUE_INFO: 'QUEUE_INFO',
   // Hash map
-  QUEUE_LEVEL_INFO: (level: Levels | string) => `QUEUE_LEVEL_${level}_INFO`,
+  QUEUE_LEVEL_INFO: (level: number | string) => `QUEUE_LEVEL_${level}_INFO`,
   // Hash map
   PLAYER: (socketId: string) => socketId,
   // Hash map
@@ -43,12 +43,17 @@ export interface PlayerFoundInQueue {
 
 @Injectable()
 export class TemporaryStorageService {
-  private redisClient: RedisClientType;
+  public redisClient: RedisClientType;
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
-    this.redisClient = (
-      this.cacheManager.store as unknown as RedisStore
-    ).getClient();
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private prismaService: PrismaService,
+  ) {
+    if ((this.cacheManager.store as unknown as RedisStore).getClient) {
+      this.redisClient = (
+        this.cacheManager.store as unknown as RedisStore
+      ).getClient();
+    }
   }
 
   // players
@@ -56,14 +61,31 @@ export class TemporaryStorageService {
     socketId: string,
     data: Partial<RedisPlayerState>,
     transaction?: any,
+    isCreate = false,
   ) {
-    const client = transaction ? transaction : this.redisClient;
-    return client.HSET(
-      REDIS_KEYS.PLAYER(socketId),
-      Object.entries(data)
-        .filter(([, value]) => value !== undefined)
-        .flat(),
-    );
+    if (transaction) {
+      if (isCreate) {
+        transaction.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      }
+      transaction.HSET(
+        REDIS_KEYS.PLAYER(socketId),
+        Object.entries(data)
+          .filter(([, value]) => value !== undefined)
+          .flat(),
+      );
+    } else {
+      const transac = this.redisClient.MULTI();
+      if (isCreate) {
+        transac.RPUSH(REDIS_KEYS.PLAYER_LIST, socketId);
+      }
+      transac.HSET(
+        REDIS_KEYS.PLAYER(socketId),
+        Object.entries(data)
+          .filter(([, value]) => value !== undefined)
+          .flat(),
+      );
+      return transac.exec();
+    }
   }
 
   async getPlayer(socketId: string): Promise<PlayerState | undefined> {
@@ -79,7 +101,8 @@ export class TemporaryStorageService {
   async removePlayer(socketId: string, player: PlayerState) {
     const transaction = this.redisClient.MULTI();
     transaction.DEL(REDIS_KEYS.PLAYER(socketId));
-    if (player.status === PlayerStatus.IS_IN_QUEUE) {
+    transaction.LREM(REDIS_KEYS.PLAYER_LIST, 1, socketId);
+    if (player.status === PlayerStatus.IS_IN_RANDOM_QUEUE) {
       this.removeFromQueue(socketId, 0, transaction);
       this.updateQueueInfo('subtract', player, transaction);
     }
@@ -103,37 +126,19 @@ export class TemporaryStorageService {
       socketId,
       RedisPlayerState.parsePlayerState(player),
       transaction,
+      true,
     );
     transaction.RPUSH(REDIS_KEYS.MATCH_MAKING_QUEUE, socketId);
     this.updateQueueInfo('add', player, transaction);
     return transaction.exec();
   }
 
-  async getQueueInfo(): Promise<AllQueueInfo> {
-    return Promise.all([
-      this.redisClient.HGETALL(REDIS_KEYS.QUEUE_INFO),
-      ...Object.values(Levels)
-        .filter((val) => typeof val === 'number')
-        .map((level) =>
-          this.redisClient.HGETALL(REDIS_KEYS.QUEUE_LEVEL_INFO(level)),
-        ),
-    ]).then(([allQueueInfo, ...levelsQueueInfo]) => {
-      const unwrapValue = (val: string | undefined): number =>
-        val ? Number(val) : 0;
-      return new AllQueueInfo(
-        levelsQueueInfo.map(
-          (data) =>
-            new QueueInfo(
-              unwrapValue(data.all),
-              unwrapValue(data.light),
-              unwrapValue(data.shadow),
-            ),
-        ),
-        unwrapValue(allQueueInfo.all),
-        unwrapValue(allQueueInfo.light),
-        unwrapValue(allQueueInfo.shadow),
-      );
-    });
+  async getServerInfo(): Promise<any> {
+    return this.redisClient
+      .LRANGE(REDIS_KEYS.PLAYER_LIST, 0, -1)
+      .then((playerList) => {
+        return Promise.all(playerList.map((id) => this.getPlayer(id)));
+      });
   }
 
   private updateQueueInfo(
@@ -168,7 +173,7 @@ export class TemporaryStorageService {
   }
 
   async findMatchInQueue(
-    data: MatchMakingPayload,
+    data: JoinRandomQueuePayload,
     index: number,
   ): Promise<PlayerFoundInQueue | undefined> {
     const increaseRangeFactor = 5;
@@ -183,11 +188,14 @@ export class TemporaryStorageService {
     // TODO: Loop can be optimized
     for (const id of ids) {
       const player = await this.getPlayer(id);
+      if (!player) {
+        continue;
+      }
       console.log('id processing', id);
       console.log('data retrieved', player);
       console.log('data retrieved', player.selectedLevel);
 
-      const isSameLevel = data.selectedLevel === Number(player.selectedLevel);
+      const isSameLevel = data.level === Number(player.selectedLevel);
       const isOppositeSide = data.side !== Number(player.side);
 
       if (isSameLevel && isOppositeSide) {
@@ -211,8 +219,31 @@ export class TemporaryStorageService {
     return this.redisClient.HSET(REDIS_KEYS.INVITE_TOKEN_MAP, token, socketId);
   }
 
-  async getInviteEmitter(token: string) {
+  async getInviteHost(token: string) {
     return this.redisClient.HGET(REDIS_KEYS.INVITE_TOKEN_MAP, token);
+  }
+
+  async deleteInviteToken(token: string) {
+    return this.redisClient.HDEL(REDIS_KEYS.INVITE_TOKEN_MAP, token);
+  }
+
+  async createLobbyFromRandomQueue(
+    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
+  ) {
+    const transaction = this.redisClient.MULTI();
+    players.forEach(({ socketId, player, indexToClear }) => {
+      if (indexToClear !== undefined) {
+        this.removeFromQueue(socketId, indexToClear, transaction);
+        this.updateQueueInfo('subtract', player, transaction);
+      }
+      this.setPlayer(
+        socketId,
+        RedisPlayerState.parsePlayerState(player),
+        transaction,
+        indexToClear === undefined,
+      );
+    });
+    return transaction.exec();
   }
 
   // games
@@ -273,7 +304,7 @@ export class TemporaryStorageService {
     return this.redisClient.ZADD(REDIS_KEYS.GAME_INPUTS_QUEUE(gameId), {
       score: data.sequence,
       // input pattern is left,right,jump
-      value: `${data.player}:${data.inputs.left},${data.inputs.right},${data.inputs.jump},${data.inputs.top},${data.inputs.bottom}:${data.sequence}:${data.time}`,
+      value: `${data.player}:${data.inputs.left},${data.inputs.right},${data.inputs.jump},${data.inputs.top},${data.inputs.bottom},${data.inputs.resetPosition}:${data.sequence}:${data.time}`,
     });
   }
 

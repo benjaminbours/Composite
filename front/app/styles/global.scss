@@ -1,6 +1,6 @@
-html {
-    overflow-y: scroll;
-}
+// html {
+//     overflow-y: scroll;
+// }
 
 body {
     padding: 0;
@@ -21,14 +21,14 @@ canvas,
 }
 
 // TODO: Check this on mobile
-.bottom-right-info {
+.bottom-left-info {
     position: fixed;
     z-index: 100;
     bottom: 15px;
-    right: 15px;
+    left: 15px;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
     mix-blend-mode: difference;
 
@@ -57,6 +57,25 @@ canvas,
     }
 
     .version {
+        font-size: 12px;
+        color: white;
+        margin: 5px 0;
+    }
+}
+
+.bottom-right-info {
+    position: fixed;
+    z-index: 100;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    mix-blend-mode: difference;
+
+    .version {
+        font-size: 12px;
         color: white;
     }
 }
@@ -66,7 +85,20 @@ canvas,
     width: 100%;
 }
 
+.title-h1 {
+    text-transform: uppercase;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: bold;
+    font-size: 48px;
+    letter-spacing: 10px;
+}
+
 .title-h2 {
+    font-family: 'Source Code Pro', monospace;
+    text-transform: uppercase;
+    font-size: 36px;
+    font-weight: 300;
+
     &--black {
         color: black;
     }
@@ -80,51 +112,50 @@ canvas,
     }
 }
 
+.title-h3 {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 24px;
+
+    &--white {
+        color: white;
+    }
+}
+
+.title-h4 {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 20px;
+
+    &--white {
+        color: white;
+    }
+}
+
+p {
+    font-family: 'Source Code Pro', monospace;
+}
+
 .menu-label {
     font-weight: 300;
 }
 
-button {
-    all: unset;
-}
-
 .buttonRect {
+    all: unset;
     width: auto;
     text-align: center;
-    border: solid white 1px;
-    padding: 20px;
+    padding: 8px;
     letter-spacing: 5px;
     text-transform: uppercase;
     transition: 0.7s;
     cursor: pointer;
+    font-size: 12px;
+    mix-blend-mode: difference;
+    color: white;
+    border: solid white 1px;
+    font-family: 'Source Code Pro', monospace;
 
-    &.white {
-        color: white;
-        border-color: white;
-        &:hover {
-            border-color: white;
-            background: white;
-            color: black;
-        }
-    }
-
-    &.black {
+    &:hover {
+        background: white;
         color: black;
-        border-color: black;
-        &:hover {
-            border-color: black;
-            background: black;
-            color: white;
-        }
-    }
-
-    // different border management for back button
-    &.back {
-        border-color: transparent;
-
-        &:hover {
-            border-color: white;
-        }
     }
 
     @media (max-width: 768px) {
@@ -137,35 +168,34 @@ $buttonSize: 90px;
 $buttonSizeSmall: 80px;
 $buttonSizeLarge: 120px;
 .buttonCircle {
+    all: unset;
+    mix-blend-mode: difference;
+    background: white;
+    color: black;
     text-align: center;
+    font-size: 14px;
+    font-weight: 100;
     width: $buttonSize;
     height: $buttonSize;
     border-radius: $buttonSize;
-    line-height: $buttonSize;
+    border: solid black 7px;
     text-transform: uppercase;
     letter-spacing: 5px;
-    font-weight: 900;
     cursor: pointer;
     z-index: 100;
-    border: none;
+    transition: 0.3s ease-out;
 
-    &:focus {
-        outline: none;
+    &.white,
+    &.black {
+        mix-blend-mode: initial;
     }
 
-    @media (max-height: 700px), (max-width: 768px) {
-        width: $buttonSizeSmall;
-        height: $buttonSizeSmall;
-        font-size: 18px;
-        line-height: $buttonSizeSmall;
-        font-weight: 500;
-    }
-
-    @media (min-width: 2000px) {
-        width: $buttonSizeLarge;
-        height: $buttonSizeLarge;
-        font-size: 30px;
-        line-height: $buttonSizeLarge;
+    @media (min-width: 768px) {
+        &:hover {
+            border-color: white;
+            color: black;
+            transition: 0.3s ease-out;
+        }
     }
 }
 
@@ -184,11 +214,91 @@ $buttonSizeLarge: 120px;
     background: black;
     background-color: rgba($color: #000000, $alpha: 0.5);
     color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    h3 {
+        width: 100%;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+    }
+
+    h4,
+    h3 {
+        text-transform: uppercase;
+    }
+
+    > div {
+        display: flex;
+
+        > div {
+            margin: 0 20px;
+        }
+    }
+}
+
+.game-sync-overlay__motions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+
+    span {
+        margin: 10px;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .rotate {
+        transform: rotate(180deg);
+    }
+
+    .space {
+        width: 100px;
+    }
+}
+
+.game-sync-overlay__progress {
+    color: white;
+}
+
+.game-sync-overlay__tips {
+    flex: 1;
+
+    p {
+        text-align: left;
+    }
+
+    a {
+        margin-top: 10px;
+    }
+}
+
+.discord-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+
+    svg {
+        margin-left: 10px;
+        display: block;
+        width: 30px;
+        height: 30px;
+
+        path {
+            transition: 0.7s;
+            fill: white;
+        }
+    }
+
+    &:hover {
+        svg path {
+            fill: black;
+        }
+    }
 }
 
 .content-container {
@@ -240,26 +350,46 @@ $buttonSizeLarge: 120px;
 .inline-link {
     color: white;
     position: relative;
+    text-decoration: none;
+    mix-blend-mode: difference;
 
     &::before {
         content: '';
-        display: block;
         position: absolute;
-        width: 70px;
-        height: 70px;
-        border-radius: 100px;
-        border: solid white 1px;
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 2px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        background-color: white;
+        mix-blend-mode: difference;
+        border: solid black 1px;
+        transition: 0.3s ease-in;
+    }
+
+    &::after {
+        content: '➤️';
+        position: absolute;
+        top: -19px;
+        right: -12px;
+        color: white;
+        mix-blend-mode: difference;
+        transform: rotate(-45deg);
         opacity: 0;
         transition: 0.3s ease-in;
     }
 
     @media (min-width: 769px) {
         &:hover {
-            &::before {
+            &::after {
                 opacity: 1;
+            }
+
+            &::before {
+                background-color: black;
+                border-color: white;
             }
         }
     }
@@ -300,10 +430,15 @@ $buttonSizeLarge: 120px;
     justify-content: center;
     font-size: 12px;
 
-    svg {
-        width: 35px;
-        margin-right: 10px;
-        transition: 0.7s;
+    // svg {
+    //     width: 35px;
+    //     // margin-left: 10px;
+    //     transition: 0.7s;
+    // }
+
+    &.disabled {
+        background: grey;
+        cursor: default;
     }
 
     &.black {
@@ -331,4 +466,294 @@ $buttonSizeLarge: 120px;
             }
         }
     }
+}
+
+.buttons-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.central-content-template {
+    width: 100%;
+    height: calc(100vh - 54px);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 100px;
+    box-sizing: border-box;
+    justify-content: center;
+    justify-items: center;
+    border-radius: 0;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+.small-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-padding {
+    padding: 30px;
+}
+
+.top-bar {
+    height: 54px;
+
+    h4 {
+        color: white;
+        margin: 0;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+}
+
+.top-bar__tool-bar {
+    min-height: initial;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    > * {
+        margin: 0 10px;
+    }
+}
+
+.top-bar__account-container {
+    margin-left: auto;
+    mix-blend-mode: difference;
+    color: white;
+}
+
+.top-bar__logo {
+    text-decoration: none;
+
+    h2 {
+        color: white;
+        margin: 0;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 10px;
+        text-transform: uppercase;
+    }
+}
+
+// .sign-up-email-activated-page {
+//     background: black;
+//     color: white;
+// }
+
+.side-menu {
+    width: 250px;
+}
+
+.slick-list,
+.slick-track {
+    transform: none !important;
+}
+
+.slick-list {
+    overflow: visible !important;
+}
+
+.level-portal {
+    --deg: 1;
+    --x: -50%;
+    --y: -50%;
+    --speed: 150ms;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    // cursor: pointer;
+    position: relative;
+
+    > p{
+        mix-blend-mode: difference;
+        color: white;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 0;
+        padding: 0 10px;
+    }
+
+    .MuiBadge-badge {
+        background: white;
+    }
+
+    &__queue-info {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        mix-blend-mode: difference;
+
+        svg {
+            fill: white;
+        }
+
+        > * {
+            margin: 5px 0;
+        }
+    }
+
+    &__graphic-wrapper {
+        width: 230px;
+        height: 230px;
+        position: relative;
+    }
+
+    &__image-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        background-image: url('/images/crack_the_door.png');
+        background-size: cover;
+        background-position: center center;
+        mask-image: radial-gradient(rgba(0, 0, 0, 1) 50%, transparent 65%);
+    }
+
+    &__border-container {
+        mix-blend-mode: difference;
+        width: 100%;
+        height: 100%;
+        position: relative;
+
+        & > div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(var(--x, -50%), var(--y, -50%)) rotate(0deg);
+            font-size: 5vmin;
+            width: 85%;
+            height: 85%;
+            border-radius: 90% 95% 85% 105%;
+            mix-blend-mode: screen;
+            animation: wobble calc(var(--speed) * var(--t)) linear infinite;
+            box-shadow:
+                0 0 0.5em 0.2em #000 inset,
+                0 0 0.15em 0 #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:nth-child(1) {
+                --x: -53%;
+                --y: -53%;
+                --t: 37;
+            }
+            &:nth-child(2) {
+                --x: -47%;
+                --y: -52%;
+                --t: 58;
+            }
+            &:nth-child(3) {
+                --x: -45%;
+                --y: -50%;
+                --t: 46;
+            }
+            &:nth-child(4) {
+                --x: -53%;
+                --y: -45%;
+                --t: 72;
+            }
+            &:nth-child(5) {
+                --x: -55%;
+                --y: -45%;
+                --t: 62;
+            }
+        }
+    }
+}
+
+@keyframes wobble {
+    to {
+        transform: translate(var(--x), var(--y)) rotate(360deg);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.composite-modal {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.composite-modal__container {
+    padding: 30px;
+    margin-top: 100px;
+    max-width: 400px;
+}
+
+.composite-modal__button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+
+    & > :last-child {
+        margin-top: 20px;
+    }
+}
+
+.composite-modal__guest-button {
+    margin: 10px 0;
+}
+
+#minimap {
+    position: fixed;
+    top: auto;
+    left: auto;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 167px;
+    border: solid 1px white;
+    background: grey;
+}
+
+.game-text-overlay {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translate(-50%);
+    color: white;
+    opacity: 0;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 2px 2px 3px black;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.keyboard-key {
+    background: lightgray;
+    border-radius: 5px;
+    padding: 0px 5px;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
+    color: black;
+    text-shadow: none;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: bold;
+    display: inline-block;
 }

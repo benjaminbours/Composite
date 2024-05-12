@@ -1,3 +1,4 @@
+import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
 import { Side } from '@benjaminbours/composite-core';
 
 export enum MenuScene {
@@ -8,16 +9,8 @@ export enum MenuScene {
     END_LEVEL = 'end_level',
     INVITE_FRIEND = 'invite_friend',
     TEAM_LOBBY = 'team_lobby',
+    TEAM_LOBBY_SELECTED = 'team_lobby_selected',
     NOT_FOUND = 'not_found',
-}
-
-export enum MenuMode {
-    // basically, when not in queue
-    DEFAULT = 'DEFAULT',
-    // when you are already connected by websocket, and with a team mate
-    // After you finished the first level and you want to play another one with your friend.
-    // or if you have invited a team mate by link (coming soon feature)
-    IN_TEAM = 'IN_TEAM',
 }
 
 export interface ICoordinate {
@@ -42,14 +35,31 @@ export interface IWaveOptions {
     speed: number;
 }
 
-export enum Route {
-    HOME = '/',
-    LOBBY = '/lobby',
-    INVITE = '/invite',
-}
+export const Route = {
+    HOME: '/',
+    LOBBY: '/lobby',
+    LOBBY_LEVEL: (levelId: number) => `/lobby?level=${levelId}`,
+    INVITE: '/invite',
 
-// route not game related, that should benefit from SSR
-export enum RouteStatic {
-    TIMELINE = '/timeline',
-    ROADMAP = '/timeline#roadmap',
+    TIMELINE: '/timeline',
+    ROADMAP: '/timeline#roadmap',
+    LEVEL_EDITOR_ROOT: '/level-editor',
+    LEVEL_EDITOR: (levelId: number | string) => `/level-editor/${levelId}`,
+    LOGIN: '/login',
+    REGISTER: '/register',
+    SIGN_UP_EMAIL_VALIDATION: '/sign-up-email-validation',
+    SIGN_UP_EMAIL_ACTIVATED: '/sign-up-email-activated',
+    FORGOT_PASSWORD: '/forgot-password',
+    NEW_PASSWORD: '/new-password',
+
+    NOT_FOUND: '/not-found',
+};
+
+export interface PartialLevel {
+    id: number;
+    name: string;
+    data: any;
+    status: LevelStatusEnum;
+    lightStartPosition: number[];
+    shadowStartPosition: number[];
 }

@@ -1,12 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SocketGateway } from './socket.gateway';
+import { CacheModule } from '@nestjs/cache-manager';
+import { SocketService } from './socket.service';
+import { LobbyGateway } from './lobby.gateway';
+import { PrismaService } from '@project-common/services';
+import { TemporaryStorageService } from '../temporary-storage.service';
 
 describe('SocketGateway', () => {
   let gateway: SocketGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SocketGateway],
+      imports: [
+        CacheModule.register({
+          store: 'memory',
+          max: 100,
+          ttl: 0,
+        }),
+      ],
+      providers: [
+        SocketService,
+        SocketGateway,
+        LobbyGateway,
+        PrismaService,
+        TemporaryStorageService,
+      ],
     }).compile();
 
     gateway = module.get<SocketGateway>(SocketGateway);

@@ -6,31 +6,24 @@ import {
     TweenOptions,
     allMenuScenesOut,
     curveToStep,
-    factionIn,
     homeIn,
-    inviteFriendIn,
-    levelIn,
-    queueIn,
     teamLobbyIn,
 } from './Menu/tweens';
 import Curve from './Menu/canvas/Curve';
 import { MenuScene } from './types';
+import { Side } from '@benjaminbours/composite-core';
 
 export interface RefHashMap {
     canvasBlack: React.MutableRefObject<CanvasBlack | undefined>;
     canvasWhite: React.MutableRefObject<CanvasWhite | undefined>;
     homeRef: React.RefObject<HTMLDivElement>;
-    levelRef: React.RefObject<HTMLDivElement>;
-    sideRef: React.RefObject<HTMLDivElement>;
-    queueRef: React.RefObject<HTMLDivElement>;
     endLevelRef: React.RefObject<HTMLDivElement>;
-    inviteFriendRef: React.RefObject<HTMLDivElement>;
     teamLobbyRef: React.RefObject<HTMLDivElement>;
     notFoundRef: React.RefObject<HTMLDivElement>;
 }
 
-export function useMenuTransition() {
-    const [menuScene, setMenuScene] = useState<MenuScene>(MenuScene.HOME);
+export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
+    const [menuScene, setMenuScene] = useState<MenuScene>(initialScene);
     const [nextMenuScene, setNextMenuScene] = useState<MenuScene | undefined>(
         undefined,
     );
@@ -39,11 +32,7 @@ export function useMenuTransition() {
     const whiteCanvas = useRef<CanvasWhite>();
     const onTransition = useRef(false);
     const homeRef = useRef<HTMLDivElement>(null);
-    const levelRef = useRef<HTMLDivElement>(null);
-    const sideRef = useRef<HTMLDivElement>(null);
-    const queueRef = useRef<HTMLDivElement>(null);
     const endLevelRef = useRef<HTMLDivElement>(null);
-    const inviteFriendRef = useRef<HTMLDivElement>(null);
     const teamLobbyRef = useRef<HTMLDivElement>(null);
     const notFoundRef = useRef<HTMLDivElement>(null);
 
@@ -52,57 +41,70 @@ export function useMenuTransition() {
             canvasBlack: blackCanvas,
             canvasWhite: whiteCanvas,
             homeRef,
-            levelRef,
-            sideRef,
-            queueRef,
+
             endLevelRef,
-            inviteFriendRef,
             teamLobbyRef,
             notFoundRef,
         }),
         [],
     );
 
-    const lightToStep = useCallback(
-        (options: TweenOptions, isMobileDevice: boolean) => {
-            const { step, side } = options;
-            const coordinate =
-                refHashMap.canvasBlack.current!.light.resizeOptions[step](
-                    refHashMap.canvasBlack.current!.ctx.canvas.width,
-                    refHashMap.canvasBlack.current!.ctx.canvas.height,
-                    isMobileDevice,
-                    side,
-                );
-
-            return gsap.to(refHashMap.canvasBlack.current!.light, {
+    /**
+     * Move a graphic side element to coordinates
+     */
+    const moveSideElementToCoordinate = useCallback(
+        (side: Side, x: number, y: number) => {
+            if (
+                !refHashMap.canvasBlack.current ||
+                !refHashMap.canvasWhite.current
+            ) {
+                return;
+            }
+            const element =
+                side === Side.LIGHT
+                    ? refHashMap.canvasBlack.current.light
+                    : refHashMap.canvasWhite.current.shadow;
+            return gsap.to(element, {
                 duration: 0.5,
                 delay: 0.1,
-                startX: coordinate.x,
-                startY: coordinate.y,
+                startX: x,
+                startY: y,
             });
         },
         [refHashMap],
     );
 
-    const shadowToStep = useCallback(
-        (options: TweenOptions, isMobileDevice: boolean) => {
-            const { step, side } = options;
-            const coordinate =
-                refHashMap.canvasWhite.current!.shadow.resizeOptions[step](
-                    refHashMap.canvasWhite.current!.ctx.canvas.width,
-                    refHashMap.canvasWhite.current!.ctx.canvas.height,
-                    isMobileDevice,
-                    side,
-                );
+    /**
+     * Move a graphic side element to a specific step
+     */
+    const sideElementToStep = useCallback(
+        (element: Side, options: TweenOptions, isMobileDevice: boolean) => {
+            const canvasKey =
+                element === Side.LIGHT ? 'canvasBlack' : 'canvasWhite';
+            const canvas = refHashMap[canvasKey].current;
+            if (canvas === undefined) {
+                return;
+            }
 
-            return gsap.to(refHashMap.canvasWhite.current!.shadow, {
-                duration: 0.5,
-                delay: 0.1,
-                startX: coordinate.x,
-                startY: coordinate.y,
+            const elementKey = element === Side.LIGHT ? 'light' : 'shadow';
+
+            const { step, side } = options;
+            const { coordinates, width } = (canvas as any)[
+                elementKey
+            ].getParamsForScene({
+                scene: step,
+                canvasWidth: canvas.ctx.canvas.width,
+                canvasHeight: canvas.ctx.canvas.height,
+                isMobile: isMobileDevice,
+                faction: side,
             });
+            return moveSideElementToCoordinate(
+                element,
+                coordinates.x,
+                coordinates.y,
+            );
         },
-        [refHashMap],
+        [refHashMap, moveSideElementToCoordinate],
     );
 
     const goToStep = useCallback(
@@ -120,21 +122,6 @@ export function useMenuTransition() {
                     case MenuScene.HOME:
                         refHashMap.homeRef.current!.style.display = 'none';
                         return homeIn(refHashMap.homeRef.current!);
-                    case MenuScene.LEVEL:
-                        refHashMap.levelRef.current!.style.display = 'none';
-                        return levelIn(refHashMap.levelRef.current!);
-                    case MenuScene.FACTION:
-                        refHashMap.sideRef.current!.style.display = 'none';
-                        return factionIn(refHashMap.sideRef.current!);
-                    case MenuScene.QUEUE:
-                        refHashMap.queueRef.current!.style.display = 'none';
-                        return queueIn(refHashMap.queueRef.current!);
-                    case MenuScene.INVITE_FRIEND:
-                        refHashMap.inviteFriendRef.current!.style.display =
-                            'none';
-                        return inviteFriendIn(
-                            refHashMap.inviteFriendRef.current!,
-                        );
                     case MenuScene.TEAM_LOBBY:
                         refHashMap.teamLobbyRef.current!.style.display = 'none';
                         return teamLobbyIn(refHashMap.teamLobbyRef.current!);
@@ -150,6 +137,17 @@ export function useMenuTransition() {
 
             setNextMenuScene(tweenOptions.step);
             onTransition.current = true;
+            const lightAnim = sideElementToStep(
+                Side.LIGHT,
+                tweenOptions,
+                isMobileDevice,
+            );
+            const shadowAnim = sideElementToStep(
+                Side.SHADOW,
+                tweenOptions,
+                isMobileDevice,
+            );
+
             gsap.timeline({
                 onComplete: () => {
                     onTransition.current = false;
@@ -169,25 +167,50 @@ export function useMenuTransition() {
                 )
                 .add(
                     [
-                        lightToStep(tweenOptions, isMobileDevice),
-                        shadowToStep(tweenOptions, isMobileDevice),
+                        ...(lightAnim ? [lightAnim] : []),
+                        ...(shadowAnim ? [shadowAnim] : []),
                         ...allMenuScenesOut(refHashMap),
                     ],
                     '-=0.5',
                 )
                 .add(inAnimation());
         },
-        [refHashMap, lightToStep, shadowToStep],
+        [refHashMap, sideElementToStep],
     );
 
+    const setLightIsPulsingFast = useCallback(
+        (value: boolean) => {
+            if (!refHashMap.canvasBlack.current) {
+                return;
+            }
+            refHashMap.canvasBlack.current.light.isPulsingFast = value;
+        },
+        [refHashMap.canvasBlack],
+    );
+
+    const setShadowRotationSpeed = useCallback(
+        (rotationSpeed: number) => {
+            if (!refHashMap.canvasWhite.current) {
+                return;
+            }
+            gsap.to(refHashMap.canvasWhite.current.shadow, {
+                duration: 1,
+                rotationSpeed,
+                ease: 'power3.easeOut',
+            });
+        },
+        [refHashMap.canvasWhite],
+    );
     return {
         goToStep,
-        lightToStep,
-        shadowToStep,
+        sideElementToStep,
+        moveSideElementToCoordinate,
         refHashMap,
         onTransition,
         menuScene,
         setMenuScene,
         nextMenuScene,
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
     };
 }

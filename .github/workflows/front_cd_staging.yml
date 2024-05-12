@@ -52,3 +52,4 @@ jobs:
             NEXT_PUBLIC_STAGE=staging
             NEXT_PUBLIC_BACKEND_URL=${{ vars.NEXT_PUBLIC_BACKEND_URL }}
             NEXT_PUBLIC_URL=${{ vars.NEXT_PUBLIC_URL}}
+            INTERNAL_BACKEND_URL=${{ vars.INTERNAL_BACKEND_URL }}

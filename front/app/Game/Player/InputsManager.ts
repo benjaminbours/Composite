@@ -1,18 +1,25 @@
 import {
-    Inputs,
+    InputsSync,
+    InputsClient,
     KeyBindings,
-    MOVEMENTS,
-    Movement,
+    ACTIONS,
+    Action,
     UIKeyBindings,
 } from '@benjaminbours/composite-core';
 
 export function parseToUIKeyBindings(keyBindings: KeyBindings) {
-    const uiKeyBindings = {} as { [key: string]: string[] };
-    MOVEMENTS.forEach((movement) => {
-        const keys = Object.keys(keyBindings).filter(
-            (key) => keyBindings[key] === movement,
+    const uiKeyBindings = {} as { [key: string]: (string | undefined)[] };
+    ACTIONS.forEach((action) => {
+        const keys: (string | undefined)[] = Object.keys(keyBindings).filter(
+            (key) => keyBindings[key] === action,
         );
-        uiKeyBindings[movement] = keys;
+        if (keys.length === 0) {
+            keys.push(undefined, undefined);
+        }
+        if (keys.length === 1) {
+            keys.push(undefined);
+        }
+        uiKeyBindings[action] = keys;
     });
     return Object.entries(uiKeyBindings) as UIKeyBindings;
 }
@@ -21,6 +28,9 @@ export function parseToKeyBindings(uiKeyBindings: UIKeyBindings) {
     const keyBindings: KeyBindings = {};
     uiKeyBindings.forEach(([movement, keys]) => {
         keys.forEach((key) => {
+            if (!key) {
+                return;
+            }
             keyBindings[key] = movement;
         });
     });
@@ -42,6 +52,8 @@ export default class InputsManager {
             ArrowRight: 'right',
             ArrowUp: 'top',
             ArrowDown: 'bottom',
+            KeyF: 'interact',
+            Backspace: 'resetPosition',
         },
     ) {
         if (typeof window === 'undefined') {
@@ -68,12 +80,14 @@ export default class InputsManager {
         }
     }
 
-    public inputsActive: Inputs = {
+    public inputsActive: InputsSync & InputsClient = {
         left: false,
         right: false,
         jump: false,
         top: false,
         bottom: false,
+        interact: false,
+        resetPosition: false,
     };
 
     public updateKeyBindings(keyBindings: KeyBindings) {
@@ -101,17 +115,18 @@ export default class InputsManager {
         this.inputsActive.left = false;
         this.inputsActive.right = false;
         this.inputsActive.jump = false;
+        this.inputsActive.interact = false;
     }
 
-    private updateMovement(movement: Movement, value: boolean) {
-        this.inputsActive[movement] = value;
+    private updateAction(action: Action, value: boolean) {
+        this.inputsActive[action] = value;
     }
 
     private handleKeydown(e: KeyboardEvent) {
         const { code } = e;
         if (this.keyBindings[code]) {
             const movement = this.keyBindings[code];
-            this.updateMovement(movement, true);
+            this.updateAction(movement, true);
         }
     }
 
@@ -119,7 +134,7 @@ export default class InputsManager {
         const { code } = e;
         if (this.keyBindings[code]) {
             const movement = this.keyBindings[code];
-            this.updateMovement(movement, false);
+            this.updateAction(movement, false);
         }
     }
 }

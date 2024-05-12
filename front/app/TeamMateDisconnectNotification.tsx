@@ -2,7 +2,7 @@ import React from 'react';
 
 interface Props {
     teamMateDisconnected: boolean;
-    handleClickFindAnotherTeamMate: () => void;
+    handleClickFindAnotherTeamMate?: () => void;
 }
 
 export const TeamMateDisconnectNotification: React.FC<Props> = ({

@@ -13,16 +13,12 @@ const float PI = 3.1415926535897932384626433832795;
 const float particlesNumber = 1000.;
 const float powerRotation = 10.;
 
-mat4 rotationMatrix(vec3 axis,float angle)
-{
-    axis=normalize(axis);
-    float s=sin(angle);
-    float c=cos(angle);
-    float oc=1.-c;
-    return mat4(oc*axis.x*axis.x+c,oc*axis.x*axis.y-axis.z*s,oc*axis.z*axis.x+axis.y*s,0.,
-        oc*axis.x*axis.y+axis.z*s,oc*axis.y*axis.y+c,oc*axis.y*axis.z-axis.x*s,0.,
-        oc*axis.z*axis.x-axis.y*s,oc*axis.y*axis.z+axis.x*s,oc*axis.z*axis.z+c,0.,
-    0.,0.,0.,1.);
+mat4 rotationMatrix(vec3 axis, float angle) {
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1. - c;
+    return mat4(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, 0., oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, 0., oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c, 0., 0., 0., 0., 1.);
 }
 
 vec2 getCircleCoordinates(float radius, float angle, vec2 origin) {
@@ -43,8 +39,8 @@ vec2 getShapeCoordinates(float indexNormalized, float time, float delay, float d
     float angle = mod(timeModifier * PI, maximum) * direction;
     vec2 coordinates = getCircleCoordinates(mainRadius, angle, mainOrigin);
 
-    if (indexNormalized < 0.1) {
-        if (direction > 0.) {
+    if(indexNormalized < 0.1) {
+        if(direction > 0.) {
             vec2 origin = vec2(0., -50.) + mainOrigin;
             coordinates = getCircleCoordinates(smallRadius, angle, origin);
         } else {
@@ -54,7 +50,7 @@ vec2 getShapeCoordinates(float indexNormalized, float time, float delay, float d
         }
     } else {
         // select the top left quadrant of the circle
-        if (direction > 0. && angle > PI / 2. && angle < PI) {
+        if(direction > 0. && angle > PI / 2. && angle < PI) {
             // add gap to flip by 180 degrees
             // multiply time modifier by 2 * PI to extend from quarter of circle to half circle
             // substract by PI / 2 to rotate
@@ -62,17 +58,17 @@ vec2 getShapeCoordinates(float indexNormalized, float time, float delay, float d
             vec2 origin = vec2(0., 50.) + mainOrigin;
             coordinates = getCircleCoordinates(halfRadius, angle, origin);
         // select the bottom left quadrant of the circle
-        } else if (direction > 0. && angle > PI && angle < 3. * PI / 2.) {
+        } else if(direction > 0. && angle > PI && angle < 3. * PI / 2.) {
             angle = gap + mod((timeModifier * 2. * PI - PI / 2.) * direction, maximum);
             vec2 origin = vec2(0., -50.) + mainOrigin;
             coordinates = getCircleCoordinates(halfRadius, angle, origin);
         // select the top right quadrant of the circle
-        } else if (direction < 0. && -angle < PI / 2. && -angle > 0.) {
+        } else if(direction < 0. && -angle < PI / 2. && -angle > 0.) {
             angle = mod((timeModifier * 2. * PI - PI / 2.) * direction, maximum);
             vec2 origin = vec2(0., 50.) + mainOrigin;
             coordinates = getCircleCoordinates(halfRadius, angle, origin);
         // select the bottom right quadrant of the circle
-        } else if (direction < 0. && -angle > 3. * PI / 2. && -angle < maximum) {
+        } else if(direction < 0. && -angle > 3. * PI / 2. && -angle < maximum) {
             angle = mod((timeModifier * 2. * PI - PI / 2.) * -direction, maximum);
             vec2 origin = vec2(0., -50.) + mainOrigin;
             coordinates = getCircleCoordinates(halfRadius, angle, origin);
@@ -123,7 +119,9 @@ void main() {
         color = vec4(1., 1., 1., 1.);
     }
 
-    // assign values that will be useful in fragment shader
-    gl_PointSize = size - abs(radius *  0.002);
-    gl_Position = projectionMatrix * modelViewMatrix * dPosition;
+    vec4 mvPosition = modelViewMatrix * dPosition;
+    gl_Position = projectionMatrix * mvPosition;
+
+    float depth = -mvPosition.z;
+    gl_PointSize = size / depth;
 }

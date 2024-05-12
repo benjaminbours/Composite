@@ -1,12 +1,15 @@
-import { Intersection, Matrix4, Vector3 } from 'three';
-import { Inputs, MovableComponentState, Side } from '../types';
+import {
+    Intersection,
+    Matrix4,
+    Object3D,
+    Object3DEventMap,
+    Vector3,
+} from 'three';
+import { InputsSync, MovableComponentState, Side } from '../types';
 import { LevelState, PlayerGameState } from '../GameState';
 import { ElementToBounce } from '../elements';
 import { INearestObjects } from './raycaster';
-import {
-    COLLISION_DETECTION_RANGE,
-    COLLISION_DETECTION_RANGE_INSIDE,
-} from './collision.system';
+import { COLLISION_DETECTION_RANGE } from './collision.system';
 import { degreesToRadians } from '../helpers/math';
 
 export const MAX_FALL_SPEED = 20;
@@ -21,28 +24,34 @@ function handleDefaultCollision(
     direction: 'left' | 'right' | 'top' | 'bottom',
     player: PlayerGameState,
     point: Vector3,
+    canGoThrough: boolean,
 ) {
-    const range =
-        player.state === MovableComponentState.inside
-            ? COLLISION_DETECTION_RANGE_INSIDE
-            : COLLISION_DETECTION_RANGE;
+    const range = COLLISION_DETECTION_RANGE;
     if (direction === 'left') {
-        player.velocity.x = 0;
-        player.position.x = point.x + range;
+        if (!canGoThrough) {
+            player.velocity.x = 0;
+            player.position.x = point.x + range;
+        }
     }
     if (direction === 'right') {
-        player.velocity.x = 0;
-        player.position.x = point.x - range;
+        if (!canGoThrough) {
+            player.velocity.x = 0;
+            player.position.x = point.x - range;
+        }
     }
 
     if (direction === 'top') {
-        player.velocity.y = 0;
-        player.position.y = point.y - range;
+        if (!canGoThrough) {
+            player.velocity.y = 0;
+            player.position.y = point.y - range;
+        }
     }
 
     if (direction === 'bottom') {
-        player.velocity.y = 0;
-        player.position.y = point.y + range;
+        if (!canGoThrough) {
+            player.velocity.y = 0;
+            player.position.y = point.y + range;
+        }
         if (player.state !== MovableComponentState.inside) {
             player.state = MovableComponentState.onFloor;
         }
@@ -81,7 +90,7 @@ function handleBounceAgainstElement(
     // change local normal into global normal
     global_normal.applyMatrix4(mat).normalize();
 
-    const bouncePower = normal.z === 0 ? BOUNCE_POWER / 2 : BOUNCE_POWER;
+    const bouncePower = normal.z === 0 ? BOUNCE_POWER / 3 : BOUNCE_POWER;
 
     // multiply by the bounce power
     const bounceVector = global_normal.multiplyScalar(bouncePower);
@@ -100,6 +109,7 @@ export function handleCollision(
     direction: 'left' | 'right' | 'top' | 'bottom',
     side: Side,
     player: PlayerGameState,
+    canGoThrough: boolean,
 ) {
     if (player.state === MovableComponentState.inside) {
         return;
@@ -138,21 +148,52 @@ export function handleCollision(
             );
         } else {
             // normal collision
-            handleDefaultCollision(direction, player, collision.point);
+            handleDefaultCollision(
+                direction,
+                player,
+                collision.point,
+                canGoThrough,
+            );
         }
+    } else if (
+        direction === 'bottom' &&
+        player.position.y <= 0 + COLLISION_DETECTION_RANGE
+    ) {
+        handleDefaultCollision(
+            direction,
+            player,
+            new Vector3(player.position.x, 0, 0),
+            false,
+        );
     }
 }
 
 export function handleJump(
-    input: Inputs,
+    input: InputsSync,
     player: PlayerGameState,
     levelState: LevelState,
+    side: Side,
+    collisionBottom: Intersection<Object3D<Object3DEventMap>> | undefined,
 ) {
-    if (!input.jump) {
+    const collisionBot = collisionBottom?.object as ElementToBounce;
+    if (
+        !input.jump ||
+        // disable jump if the player is touching a bounce element non interactive from his color
+        (collisionBot &&
+            collisionBot.bounce &&
+            side === collisionBot.side &&
+            !collisionBot.interactive)
+    ) {
         return;
     }
 
     if (player.state === MovableComponentState.onFloor) {
+        if (
+            !collisionBot &&
+            player.position.y > 0 + COLLISION_DETECTION_RANGE
+        ) {
+            return;
+        }
         player.velocity.y = JUMP_POWER;
     } else if (
         player.state === MovableComponentState.inside &&

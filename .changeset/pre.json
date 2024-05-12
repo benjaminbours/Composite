@@ -1,0 +1,38 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "composite-back": "0.4.0",
+    "composite-front": "0.4.0",
+    "@benjaminbours/composite-api-client": "0.0.1",
+    "@benjaminbours/composite-core": "0.3.0"
+  },
+  "changesets": [
+    "blue-books-draw",
+    "dry-pumpkins-act",
+    "dull-shrimps-allow",
+    "early-cups-join",
+    "empty-parrots-scream",
+    "few-eagles-smash",
+    "few-games-count",
+    "five-islands-rule",
+    "five-wasps-mix",
+    "forty-clocks-remain",
+    "forty-countries-repeat",
+    "green-cars-flash",
+    "healthy-eggs-lick",
+    "kind-suns-worry",
+    "loud-experts-float",
+    "nervous-apes-explain",
+    "olive-sheep-eat",
+    "pink-socks-hang",
+    "polite-melons-type",
+    "poor-cherries-burn",
+    "six-files-boil",
+    "slow-shirts-return",
+    "smooth-plants-scream",
+    "sour-files-hug",
+    "strange-knives-melt",
+    "thin-candles-notice"
+  ]
+}

@@ -13,6 +13,7 @@ interface IOptions {
 }
 
 export default class SkyShader extends ShaderMaterial {
+    name = 'shy-shader-material';
     public options: IOptions = {
         time: 0,
         sunPosition: new Vector3(-0.3, 0.4, -1),

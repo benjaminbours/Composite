@@ -51,7 +51,10 @@ void main() {
         color = vec3(1., 1., 1.);
     }
 
-    // assign values that will be useful in fragment shader
-    gl_PointSize = size - abs(dPosition.y *  0.06);
-    gl_Position = projectionMatrix * modelViewMatrix * dPosition;
+    vec4 mvPosition = modelViewMatrix * dPosition;
+    gl_Position = projectionMatrix * mvPosition;
+
+    float depth = -mvPosition.z;
+    float pointSize = size - abs(dPosition.y * 60.);
+    gl_PointSize = pointSize / depth;
 }

@@ -2,29 +2,35 @@
 import Script from 'next/script';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
 // local
 import { CopyToClipBoardButton } from '../CopyToClipboardButton';
-import { RouteStatic } from '../../types';
+import { Route } from '../../types';
+import { Level } from '@benjaminbours/composite-api-client';
+import { PlayerState } from '../../useMainController';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;
+    level?: Level;
     side?: Side;
-    levelName?: string;
+    mate?: PlayerState;
     handleClickOnPlay: () => void;
-    actions: React.ReactNode;
+    handleClickOnExit: () => void;
     isMount: boolean;
     setLightIsPulsingFast: (isPulsingFast: boolean) => void;
     setShadowRotationSpeed: (speed: number) => void;
 }
 
+// TODO: If this view have a scroll, the layout with the shadow / light center on the button is broken
 export const EndLevelScene: React.FC<Props> = ({
     endLevelRef,
     side,
-    levelName,
+    mate,
+    level,
     handleClickOnPlay,
-    actions,
+    handleClickOnExit,
     isMount,
     setLightIsPulsingFast,
     setShadowRotationSpeed,
@@ -63,62 +69,85 @@ export const EndLevelScene: React.FC<Props> = ({
 
     return (
         <div ref={endLevelRef} className={cssClass}>
-            {actions}
-            <h2>Well done!</h2>
-            <h3>
-                <span className="menu-label">You just finished the level:</span>{' '}
-                {levelName}
-            </h3>
-            <button
-                className={`buttonCircle ${color} end-level-container__play-button`}
-                onMouseEnter={() => {
-                    if (side === Side.LIGHT) {
-                        setLightIsPulsingFast(true);
-                    } else {
-                        setShadowRotationSpeed(0.02);
-                    }
-                }}
-                onMouseLeave={() => {
-                    if (side === Side.LIGHT) {
-                        setLightIsPulsingFast(false);
-                    } else {
-                        setShadowRotationSpeed(0.005);
-                    }
-                }}
-                onClick={() => {
-                    if (side === Side.LIGHT) {
-                        setLightIsPulsingFast(false);
-                    } else {
-                        setShadowRotationSpeed(0.005);
-                    }
-                    handleClickOnPlay();
-                }}
-            >
-                Play
-            </button>
-            {/* <p className=''>{`You team mate wants to continue the run!\nJoin him.`}</p> */}
+            <div className="end-level-container__header">
+                <button
+                    className="buttonRect white"
+                    onClick={handleClickOnExit}
+                >
+                    Exit
+                </button>
+                <h2 className="title-h2">Well done!</h2>
+                <div />
+            </div>
+            <div className="end-level-container__text-container">
+                <p>
+                    You just finished the level:{` `}
+                    <b>{level?.name}</b>, made by <b>{level?.author?.name}</b>
+                </p>
+                <p>
+                    You made it with your mate:{` `}
+                    <b>{mate?.account?.name || 'Guest'}</b>
+                </p>
+            </div>
+            <div className="end-level-container__like-container end-level-container__text-container">
+                <h3 className="title-h3">Did you like it?</h3>
+                <p>{`If you did, consider giving a like to this level.`}</p>
+                {/* Discover why it's important */}
+                {/* TODO: Add auth + request to like the level */}
+                <button className="buttonRect white">
+                    Give a like <ThumbUpIcon />
+                </button>
+            </div>
+            <div className="end-level-container__play-button-container">
+                <button
+                    className="buttonCircle end-level-container__play-button"
+                    onMouseEnter={() => {
+                        if (side === Side.LIGHT) {
+                            setLightIsPulsingFast(true);
+                        } else {
+                            setShadowRotationSpeed(0.02);
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        if (side === Side.LIGHT) {
+                            setLightIsPulsingFast(false);
+                        } else {
+                            setShadowRotationSpeed(0.005);
+                        }
+                    }}
+                    onClick={() => {
+                        if (side === Side.LIGHT) {
+                            setLightIsPulsingFast(false);
+                        } else {
+                            setShadowRotationSpeed(0.005);
+                        }
+                        handleClickOnPlay();
+                    }}
+                >
+                    Play again
+                </button>
+            </div>
+            <div className="end-level-container__text-container">
+                <p>
+                    If you liked the experience and you want it to reach its{' '}
+                    <a
+                        className="inline-link"
+                        href={Route.ROADMAP}
+                        target="_blank"
+                    >
+                        full&nbsp;potential
+                    </a>
+                    , the best thing you can do is to talk about it.
+                </p>
+            </div>
             <div className="end-level-container__share">
-                <div className="text-container">
-                    <p>
-                        If you liked the experience and you want it to reach its{' '}
-                        <a
-                            className="inline-link"
-                            href={RouteStatic.ROADMAP}
-                            target="_blank"
-                        >
-                            full potential
-                        </a>
-                        , the best thing you can do is to talk about it.
-                    </p>
-                    <h3>Thank you 🙏</h3>
-                </div>
                 <div>
                     <a
                         className="twitter-share-button"
                         target="_blank"
                         data-size="large"
                         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                            `I just finished the level ${levelName} playing ${
+                            `I just finished the level ${level?.name} playing ${
                                 side === Side.LIGHT ? 'Light' : 'Shadow'
                             } on Composite the game! Can you do it?`,
                         )}`}
@@ -146,8 +175,12 @@ export const EndLevelScene: React.FC<Props> = ({
                 </div>
                 <div>
                     <CopyToClipBoardButton
-                        color="black"
+                        // color="black"
                         text={
+                            process.env.NEXT_PUBLIC_URL ||
+                            'Missing env variable'
+                        }
+                        textToCopy={
                             process.env.NEXT_PUBLIC_URL ||
                             'Missing env variable'
                         }
@@ -161,6 +194,10 @@ export const EndLevelScene: React.FC<Props> = ({
                         Support me!
                     </a>
                 </div>
+            </div>
+            <div className="thank-you">
+                <h2 className="title-h2">Thank you</h2>
+                <span className="thank-emoji">🙏</span>
             </div>
         </div>
     );

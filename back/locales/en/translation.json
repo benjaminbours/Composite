@@ -1,0 +1,21 @@
+{
+    "play-button": "Play",
+    "account-verification-mail": {
+        "subject": "Composite - Verify your email address",
+        "title": "We are delighted to welcome you",
+        "paragraph": "Thank you for joining. To confirm the creation of your Composite account, please click on the link bellow.<br><br>For security reasons, this link is only valid for 24 hours.",
+        "buttonText": "Confirm your email"
+    },
+    "reset-password-mail": {
+        "subject": "Reset your password",
+        "title": "Forgot your password? No problem, let's create a new one!",
+        "paragraph": "If you need to reset your password, just click the button below to choose a new one!<br><br>For security reasons, this link is only valid for one hour. <br><br>If you didn’t request to change your password, you don’t have to do anything, your account stay secure, and your password remains unchanged.",
+        "buttonText": "Reset my password"
+    },
+    "sign-up-mail": {
+        "subject": "Discover Composite",
+        "title": "Discover Composite",
+        "paragraph": "Composite, is a cooperative and interactive experience where light and shadow try to find their way.",
+        "buttonText": "Discover"
+    }
+}

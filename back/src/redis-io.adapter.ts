@@ -3,7 +3,7 @@ import { ServerOptions } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-streams-adapter';
 // import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
-import { ENVIRONMENT } from './environment';
+import { ENVIRONMENT } from '@project-common/environment';
 
 export class RedisIoAdapter extends IoAdapter {
   private adapterConstructor: ReturnType<typeof createAdapter>;

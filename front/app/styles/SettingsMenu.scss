@@ -1,6 +1,6 @@
 .settings-menu {
     position: fixed;
-    right: 15px;
+    left: 15px;
     bottom: 15px;
     z-index: 101;
     padding: 20px;
@@ -56,7 +56,6 @@
 }
 
 .key-bindings-list__movement {
-    text-transform: uppercase;
     margin-right: 15px;
     flex: 1;
 }
@@ -64,6 +63,7 @@
 .key-bindings-list__key {
     margin: 0 10px;
     padding: 10px;
+    background: white;
     border: solid white 1px;
     width: 100px;
     text-align: center;
@@ -71,7 +71,7 @@
     transition: 0.3s ease-in;
 
     &:hover {
-        background: white;
-        color: black;
+        background: black;
+        color: white;
     }
 }

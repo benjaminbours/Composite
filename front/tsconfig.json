@@ -18,7 +18,8 @@
             {
                 "name": "next"
             }
-        ]
+        ],
+        "experimentalDecorators": true
         // "sourceMap": true /* Generates corresponding '.map' file. */,
         // // "outFile": "./",                       /* Concatenate and emit output to single file. */
         // "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */

@@ -1,8 +1,8 @@
 'use client';
 // vendors
 import React, {
-    createContext,
     useCallback,
+    useContext,
     useEffect,
     useRef,
     useState,
@@ -13,15 +13,12 @@ import * as STATS from 'stats.js';
 import { MenuScene } from './types';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
-import { BottomRightInfo } from './BottomRightInfo';
+import { BottomLeftInfo } from './BottomLeftInfo';
 import { useMainController } from './useMainController';
-import { useMenuTransition } from './useMenuTransition';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
-
-export const AppContext = createContext({
-    setMenuScene: (_scene: MenuScene) => {},
-    enterTeamLobby: (_token: string) => {},
-});
+import { AppContext } from './WithMainApp';
+import { getDictionary } from '../getDictionary';
+import { BottomRightInfo } from './BottomRightInfo';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -33,65 +30,27 @@ const Game = dynamic(() => import('./Game'), {
     ssr: false,
 });
 
-// almost the same state in Menu
+export const MainControllerContext = React.createContext<
+    ReturnType<typeof useMainController>
+>({} as any);
 
 interface Props {
-    children: React.ReactNode;
+    initialScene?: MenuScene;
+    dictionary: Awaited<ReturnType<typeof getDictionary>>;
 }
 
 /**
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
-function MainApp({ children }: Props) {
+function MainApp({ initialScene, dictionary }: Props) {
+    const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const statsRef = useRef<Stats>();
 
-    const {
-        menuScene,
-        nextMenuScene,
-        refHashMap,
-        goToStep,
-        onTransition,
-        setMenuScene,
-        lightToStep,
-        shadowToStep,
-    } = useMenuTransition();
-
-    const {
-        state,
-        socketController,
-        inviteFriendToken,
-        teamMateInfo,
-        gameIsPlaying,
-        menuMode,
-        teamMateDisconnected,
-        handleGameStart,
-        establishConnection,
-        sendMatchMakingInfo,
-        handleClickOnJoinTeamMate,
-        handleClickFindAnotherTeamMate,
-        handleEnterTeamLobby,
-        handleClickPlayWithFriend,
-        handleClickPlayWithRandom,
-        handleEnterRandomQueue,
-        handleSelectLevelOnLobby,
-        handleSelectSideOnLobby,
-        handleSelectLevel,
-        handleClickOnBack,
-        handleClickOnQuitTeam,
-        handleClickHome,
-        handleClickPlayAgain,
-    } = useMainController(
-        menuScene,
-        setMenuScene,
-        goToStep,
-        lightToStep,
-        shadowToStep,
-        onTransition,
-    );
+    const mainController = useMainController(initialScene);
 
     const handleClickOnSettings = useCallback(() => {
         setIsSettingsOpen(true);
@@ -103,7 +62,14 @@ function MainApp({ children }: Props) {
 
     // effect dedicated to tab switching
     useEffect(() => {
-        if (process.env.NEXT_PUBLIC_STAGE === 'development') {
+        setMainAppContext({
+            setMenuScene: mainController.setMenuScene,
+            // enterTeamLobby: handleEnterTeamLobby,
+        });
+        if (
+            process.env.NEXT_PUBLIC_STAGE === 'local' ||
+            process.env.NEXT_PUBLIC_STAGE === 'development'
+        ) {
             const stats = new STATS.default();
             stats.showPanel(1);
             document.body.appendChild(stats.dom);
@@ -128,45 +94,27 @@ function MainApp({ children }: Props) {
         };
     }, []);
 
+    const { state, gameIsPlaying, socketController } = mainController;
+
     return (
-        <AppContext.Provider
-            value={{
-                setMenuScene,
-                enterTeamLobby: handleEnterTeamLobby,
-            }}
-        >
+        <MainControllerContext.Provider value={mainController}>
             <TeamMateDisconnectNotification
-                teamMateDisconnected={teamMateDisconnected}
-                handleClickFindAnotherTeamMate={handleClickFindAnotherTeamMate}
+                teamMateDisconnected={state.mateDisconnected}
+                handleClickFindAnotherTeamMate={
+                    mainController.handleClickFindAnotherTeamMate
+                }
             />
             {!gameIsPlaying && (
-                <Menu
-                    mainState={state}
-                    menuScene={menuScene}
-                    nextMenuScene={nextMenuScene}
-                    mode={menuMode}
-                    teamMateInfo={teamMateInfo}
-                    stats={statsRef}
-                    inviteFriendToken={inviteFriendToken}
-                    refHashMap={refHashMap}
-                    handleEnterRandomQueue={handleEnterRandomQueue}
-                    handleClickPlayWithFriend={handleClickPlayWithFriend}
-                    handleClickPlayWithRandom={handleClickPlayWithRandom}
-                    handleSelectLevelOnLobby={handleSelectLevelOnLobby}
-                    handleSelectSideOnLobby={handleSelectSideOnLobby}
-                    handleSelectLevel={handleSelectLevel}
-                    handleClickOnBack={handleClickOnBack}
-                    handleClickOnQuitTeam={handleClickOnQuitTeam}
-                    handleClickHome={handleClickHome}
-                    handleClickOnJoinTeamMate={handleClickOnJoinTeamMate}
-                    handleClickPlayAgain={handleClickPlayAgain}
-                />
+                <Menu dictionary={dictionary} stats={statsRef} />
             )}
-            {state.gameState && gameIsPlaying && (
+            {state.gameState && state.loadedLevel && gameIsPlaying && (
                 <Game
-                    side={state.side!}
-                    initialGameState={state.gameState}
-                    socketController={socketController.current}
+                    side={state.you.side!}
+                    multiplayerGameProps={{
+                        socketController: socketController.current,
+                        initialGameState: state.gameState,
+                        level: state.loadedLevel,
+                    }}
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
                     inputsManager={inputsManager.current}
@@ -178,9 +126,17 @@ function MainApp({ children }: Props) {
                     onClose={handleClickOnCloseSettings}
                 />
             )}
-            <BottomRightInfo onSettingsClick={handleClickOnSettings} />
-            {children}
-        </AppContext.Provider>
+            <BottomLeftInfo
+                gameIsPlaying={gameIsPlaying}
+                onSettingsClick={handleClickOnSettings}
+            />
+            {!gameIsPlaying && (
+                <BottomRightInfo
+                    playing={mainController.serverCounts?.playing || 0}
+                    matchmaking={mainController.serverCounts?.matchmaking || 0}
+                />
+            )}
+        </MainControllerContext.Provider>
     );
 }
 

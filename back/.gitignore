@@ -36,3 +36,9 @@ lerna-debug.log*
 
 cache
 data
+
+swagger.json
+uploads
+
+.env
+.env.local

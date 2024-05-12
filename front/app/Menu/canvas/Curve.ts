@@ -20,7 +20,7 @@ export const defaultWaveOptions: IWaveOptions = {
 // TODO: Avoid static method, don't think it's needed in that case.
 export default class Curve {
     public static vTotalPoints = 15;
-    public static hTotalPoints = 8;
+    public static hTotalPoints = 15;
     public static vGap = 0;
     public static hGap = 0;
 
@@ -52,10 +52,31 @@ export default class Curve {
             return width * 0.5;
         },
         team_lobby(width: number, height: number, isOnMobile: boolean) {
+            let x = 0.5;
             if (isOnMobile) {
                 return height * 0.75;
             }
-            return width * 0.5;
+            return width * x;
+        },
+        team_lobby_selected(
+            width: number,
+            height: number,
+            isOnMobile: boolean,
+        ) {
+            const levelContainer = document.querySelector(
+                '.team-lobby-scene__level-container',
+            );
+            let x = 0.5;
+            if (levelContainer) {
+                const bbox = levelContainer.getBoundingClientRect();
+                const percent =
+                    (bbox.left + bbox.width / 2) / window.innerWidth;
+                x = percent;
+            }
+            if (isOnMobile) {
+                return height * 0.75;
+            }
+            return width * x;
         },
         invite_friend(width: number, height: number, isOnMobile: boolean) {
             if (isOnMobile) {

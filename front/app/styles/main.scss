@@ -1,13 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 @import 'mixins';
 @import 'global';
 @import 'homeScene';
-@import 'levelScene';
-@import 'factionScene';
-@import 'queueScene';
 @import 'endLevelScene';
-@import 'inviteFriendScene';
 @import 'teamLobbyScene';
 @import 'SettingsMenu';
 @import 'timeline';
 @import 'notFound';
+@import 'LevelEditor';

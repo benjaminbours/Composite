@@ -1,6 +1,6 @@
 {
   "name": "@benjaminbours/composite-core",
-  "version": "0.3.0",
+  "version": "1.0.0-next.16",
   "description": "What is shared between front and back",
   "type": "module",
   "main": "cjs/index.js",
@@ -19,7 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/three": "^0.160.0",
+    "@types/three": "^0.161.2",
     "typescript": "^5.3.3"
   },
   "publishConfig": {
@@ -28,7 +28,9 @@
   "repository": "https://github.com/benjaminbours/Composite.git",
   "peerDependencies": {
     "gsap": "^3.12.2",
-    "three": "^0.160.0",
-    "three-mesh-bvh": "^0.6.8"
+    "three": "^0.161.0"
+  },
+  "dependencies": {
+    "short-unique-id": "^5.2.0"
   }
 }

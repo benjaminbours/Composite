@@ -18,3 +18,4 @@
 - Reddit forum gave me?
 - Write medium article
 - activate github sponsor (donation)
+- kickstarter

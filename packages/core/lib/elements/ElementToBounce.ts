@@ -1,6 +1,5 @@
 import { Camera, Mesh, Vector3 } from 'three';
 import { Side } from '../types';
-import { degreesToRadians } from '../helpers/math';
 
 export class ElementToBounce extends Mesh {
     public bounce = true;
@@ -11,7 +10,7 @@ export class ElementToBounce extends Mesh {
         geometry: any,
         material: any,
         public side: Side,
-        public bounceID: number,
+        public bounceID: string,
         public interactive: boolean,
     ) {
         super(geometry, material);
@@ -24,9 +23,5 @@ export class ElementToBounce extends Mesh {
         const x = (vector.x + 1) / 2;
         const y = (vector.y + 1) / 2;
         return new Vector3(x, y);
-    };
-
-    public update = (rotationY: number) => {
-        this.rotation.y = degreesToRadians(rotationY);
     };
 }

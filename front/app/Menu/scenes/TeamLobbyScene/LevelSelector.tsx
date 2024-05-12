@@ -1,0 +1,167 @@
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import styles from './LevelSelector.module.scss';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Link from 'next/link';
+import { Route } from '../../../types';
+import { MainControllerContext } from '../../../MainApp';
+import {
+    LobbyMode,
+    QUEUE_INFO_FETCH_INTERVAL,
+} from '../../../useMainController';
+import { LevelGridItem } from './LevelGridItem';
+import CircularProgress from '@mui/material/CircularProgress';
+
+interface Props {
+    disabled?: boolean;
+}
+
+export const LevelSelector: React.FC<Props> = ({ disabled }) => {
+    const {
+        state,
+        levels,
+        lobbyMode,
+        serverCounts,
+        fetchTime,
+        handleMouseLeaveSideButton,
+        handleMouseEnterSideButton,
+        handleClickSide,
+        fetchServerInfo,
+    } = useContext(MainControllerContext);
+    // author
+    const authorList = useMemo(() => {
+        const list = levels.reduce((acc, level) => {
+            acc.includes(level.author!.name) || acc.push(level.author!.name);
+            return acc;
+        }, [] as string[]);
+        list.unshift('All');
+        return list;
+    }, [levels]);
+    const [author, setAuthor] = useState<string>(authorList[0]);
+
+    // effect to randomize portal animations
+    useEffect(() => {
+        document
+            .querySelectorAll<HTMLElement>('.level-portal')
+            .forEach((portal) => {
+                portal.style.setProperty('--x', `${Math.random() * 100 - 50}%`); // Random x between -50% and 50%
+                portal.style.setProperty('--y', `${Math.random() * 100 - 50}%`); // Random y between -50% and 50%
+            });
+    }, []);
+
+    const progress = useMemo(() => {
+        return (fetchTime / QUEUE_INFO_FETCH_INTERVAL) * 100;
+    }, [fetchTime]);
+
+    const levelsToDisplay = useMemo(() => {
+        if (author === 'All') {
+            return levels;
+        }
+        return levels.filter((level) => level.author!.name === author);
+    }, [levels, author]);
+
+    return (
+        <div className={styles.root}>
+            <div className={styles.header}>
+                <>
+                    <h2 className="title-h3 title-h3--white">Select a level</h2>
+                    <Autocomplete
+                        className={styles['author-selector']}
+                        disablePortal
+                        disabled={disabled}
+                        onChange={(_, value) => {
+                            setAuthor(value ? (value as string) : 'All');
+                        }}
+                        includeInputInList
+                        value={author}
+                        options={authorList}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="standard"
+                                label="Author"
+                            />
+                        )}
+                    />
+                    <Link href={Route.LEVEL_EDITOR_ROOT}>
+                        <button className="rect-button small">
+                            Become a creator
+                        </button>
+                    </Link>
+                    {lobbyMode === LobbyMode.DUO_WITH_RANDOM && (
+                        <div className={styles['queue-container']}>
+                            <button
+                                className="rect-button refresh-queue-button"
+                                onClick={fetchServerInfo}
+                            >
+                                Refresh queue info
+                                <CircularProgress
+                                    variant="determinate"
+                                    size={20}
+                                    value={progress}
+                                />
+                            </button>
+                        </div>
+                    )}
+                </>
+            </div>
+            {levelsToDisplay.length === 0 ? (
+                <div className={styles['no-level-container']}>
+                    <p>There is no level available so far.</p>
+                    <Link href={Route.LEVEL_EDITOR_ROOT}>
+                        <button className="buttonRect">
+                            Be the first creator!
+                        </button>
+                    </Link>
+                </div>
+            ) : (
+                <div className="level-grid">
+                    <ul>
+                        {levelsToDisplay.map(({ id, name }, index) => {
+                            let isLightWaiting = false;
+                            let isShadowWaiting = false;
+                            if (
+                                lobbyMode === LobbyMode.DUO_WITH_RANDOM &&
+                                serverCounts &&
+                                serverCounts.levels[id] &&
+                                serverCounts.levels[id].light_queue > 0
+                            ) {
+                                isLightWaiting = true;
+                            }
+
+                            if (
+                                lobbyMode === LobbyMode.DUO_WITH_RANDOM &&
+                                serverCounts &&
+                                serverCounts.levels[id] &&
+                                serverCounts.levels[id].shadow_queue > 0
+                            ) {
+                                isShadowWaiting = true;
+                            }
+
+                            return (
+                                <li data-id={id} key={index}>
+                                    <LevelGridItem
+                                        id={id}
+                                        name={name}
+                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
+                                        you={state.you}
+                                        mate={state.mate}
+                                        handleClickSide={handleClickSide}
+                                        handleMouseEnterSide={
+                                            handleMouseEnterSideButton
+                                        }
+                                        handleMouseLeaveSide={
+                                            handleMouseLeaveSideButton
+                                        }
+                                        isLightWaiting={isLightWaiting}
+                                        isShadowWaiting={isShadowWaiting}
+                                    />
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};

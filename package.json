@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Contain the entire codebase of the different pieces and applications constituting the project Composite",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-api-client:local": "npm run generate-swagger:local -w back && npx @openapitools/openapi-generator-cli generate -i ./back/swagger.json -g typescript-fetch -o ./packages/api-client/src && npm run build -w @benjaminbours/composite-api-client"
   },
   "keywords": [],
   "author": "Benjamin Bours",
@@ -15,5 +16,8 @@
   ],
   "dependencies": {
     "@changesets/cli": "^2.26.0"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.1"
   }
 }

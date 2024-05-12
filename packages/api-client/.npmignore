@@ -1,0 +1,5 @@
+# empty npmignore to ensure all required files (e.g., in the dist folder) are published by npm
+src
+release.sh
+test.json
+tsconfig.json

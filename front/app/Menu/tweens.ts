@@ -5,7 +5,6 @@ import { Side } from '@benjaminbours/composite-core';
 // project
 import { MenuScene } from '../types';
 import CanvasBlack from './canvas/CanvasBlack';
-import CanvasWhite from './canvas/CanvasWhite';
 import Curve, { defaultWaveOptions } from './canvas/Curve';
 import { RefHashMap } from '../useMenuTransition';
 
@@ -68,125 +67,6 @@ export function homeIn(homeInterface: HTMLDivElement) {
     );
 }
 
-/**
- * Invite friend
- */
-
-function inviteFriendOut(inviteFriendInterface: HTMLDivElement) {
-    return gsap.to(inviteFriendInterface, {
-        duration: 0.5,
-        opacity: 0,
-        onComplete: () => {
-            inviteFriendInterface.style.display = 'none';
-        },
-    });
-}
-
-export function inviteFriendIn(inviteFriendInterface: HTMLDivElement) {
-    return gsap.fromTo(
-        inviteFriendInterface,
-        {
-            opacity: 0,
-        },
-        {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                inviteFriendInterface.style.display = 'flex';
-            },
-        },
-    );
-}
-
-/**
- * Level
- */
-function levelOut(levelInterface: HTMLDivElement) {
-    return gsap.to(levelInterface, {
-        duration: 0.5,
-        opacity: 0,
-        onComplete: () => {
-            levelInterface.style.display = 'none';
-        },
-    });
-}
-
-export function levelIn(levelInterface: HTMLDivElement) {
-    return gsap.fromTo(
-        levelInterface,
-        {
-            opacity: 0,
-        },
-        {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                levelInterface.style.display = 'block';
-            },
-        },
-    );
-}
-
-/**
- * Faction
- */
-function factionOut(factionInterface: HTMLDivElement) {
-    return gsap.to(factionInterface, {
-        duration: 0.5,
-        opacity: 0,
-        onComplete: () => {
-            factionInterface.style.display = 'none';
-        },
-    });
-}
-
-export function factionIn(factionInterface: HTMLDivElement) {
-    return [
-        gsap.fromTo(
-            factionInterface,
-            {
-                opacity: 0,
-            },
-            {
-                duration: 0.5,
-                opacity: 1,
-                onStart: () => {
-                    factionInterface.style.display = 'block';
-                },
-            },
-        ),
-    ];
-}
-
-/**
- * Queue
- */
-export function queueIn(queueInterface: HTMLDivElement) {
-    return gsap.fromTo(
-        queueInterface,
-        {
-            opacity: 0,
-        },
-        {
-            duration: 0.5,
-            opacity: 1,
-            onStart: () => {
-                queueInterface.style.display = 'block';
-            },
-        },
-    );
-}
-
-function queueOut(queueInterface: HTMLDivElement) {
-    return gsap.to(queueInterface, {
-        duration: 0.5,
-        opacity: 0,
-        onComplete: () => {
-            queueInterface.style.display = 'none';
-        },
-    });
-}
-
 function endLevelOut(endLevelInterface: HTMLDivElement) {
     return gsap.to(endLevelInterface, {
         duration: 0.5,
@@ -206,7 +86,7 @@ export function teamLobbyIn(teamLobbyInterface: HTMLDivElement) {
         {
             duration: 0.5,
             opacity: 1,
-            onComplete: () => {
+            onStart: () => {
                 teamLobbyInterface.style.display = 'flex';
             },
         },
@@ -242,11 +122,7 @@ function notFoundOut(notFoundInterface: HTMLDivElement) {
 export function allMenuScenesOut(refHashMap: RefHashMap) {
     return [
         homeOut(refHashMap.homeRef.current!),
-        levelOut(refHashMap.levelRef.current!),
-        factionOut(refHashMap.sideRef.current!),
-        queueOut(refHashMap.queueRef.current!),
         endLevelOut(refHashMap.endLevelRef.current!),
-        inviteFriendOut(refHashMap.inviteFriendRef.current!),
         notFoundOut(refHashMap.notFoundRef.current!),
         teamLobbyOut(refHashMap.teamLobbyRef.current!),
     ];

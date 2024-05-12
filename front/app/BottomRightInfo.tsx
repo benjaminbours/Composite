@@ -1,22 +1,19 @@
 import React from 'react';
-import Link from 'next/link';
-import { CogWheel } from './Game/icons/CogWheel';
-import { RouteStatic } from './types';
 
 interface Props {
-    onSettingsClick: () => void;
+    playing: number;
+    matchmaking: number;
 }
 
-export const BottomRightInfo: React.FC<Props> = ({ onSettingsClick }) => {
+export const BottomRightInfo: React.FC<Props> = ({ matchmaking, playing }) => {
     return (
         <div className="bottom-right-info">
-            <button className="settings" onClick={onSettingsClick}>
-                <CogWheel />
-            </button>
-            <Link href={RouteStatic.ROADMAP} className="inline-link">
-                Roadmap
-            </Link>
-            <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
+            <p className="version">
+                <b>{playing}</b>
+                {` players in games - `}
+                <b>{matchmaking}</b>
+                {` in matchmaking`}
+            </p>
         </div>
     );
 };

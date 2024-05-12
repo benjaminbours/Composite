@@ -1,18 +1,100 @@
 'use client';
-import React from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { SnackbarProvider } from 'notistack';
+import { StoreProvider } from 'easy-peasy';
 import MainApp from './MainApp';
+import { configureStore } from './core/frameworks';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { MenuScene, Route } from './types';
+import { useStoreActions } from './hooks';
+import { setupProjectEnv } from './utils/setup';
+import { getDictionary } from '../getDictionary';
+
+setupProjectEnv('client');
+
+const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+});
+
+const store = configureStore({});
 
 interface Props {
     children: React.ReactNode;
+    lng: string;
+    dictionary: Awaited<ReturnType<typeof getDictionary>>;
 }
 
-export const WithMainApp: React.FC<Props> = ({ children }) => {
+const WithRetrieveSession: React.FC<Props> = ({ children }) => {
+    const retrieveSession = useStoreActions(
+        (actions) => actions.user.retrieveSession,
+    );
+
+    useEffect(() => {
+        retrieveSession();
+    }, [retrieveSession]);
+
+    return children;
+};
+
+export const AppContext = createContext({
+    mainAppContext: {} as Record<string, any>,
+    setMainAppContext: (ctx: Record<string, any>) => {},
+});
+
+export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
+    const [mainAppContext, setMainAppContext] = useState<Record<string, any>>(
+        {},
+    );
     const path = usePathname();
+    const mainApp = useMemo(() => {
+        const pathWithoutLng = path.replace(`/${lng}`, '');
+        if (
+            pathWithoutLng === '' ||
+            path.includes(Route.INVITE) ||
+            path.includes(Route.LOBBY) ||
+            (children as any).props.notFound
+        ) {
+            console.log('render main app');
+            const initialScene = (() => {
+                switch (true) {
+                    // case Boolean((children as any).props.notFound):
+                    //     return MenuScene.NOT_FOUND;
+                    case pathWithoutLng === '':
+                        return MenuScene.HOME;
+                    case path.includes(Route.INVITE):
+                        return MenuScene.INVITE_FRIEND;
+                    case path.includes(Route.LOBBY):
+                        return MenuScene.TEAM_LOBBY;
+                }
+            })();
 
-    if (path.includes('/timeline')) {
-        return children;
-    }
+            return (
+                <MainApp dictionary={dictionary} initialScene={initialScene} />
+            );
+        }
+        return null;
+    }, [children, path, lng, dictionary]);
 
-    return <MainApp>{children}</MainApp>;
+    return (
+        <ThemeProvider theme={darkTheme}>
+            <SnackbarProvider>
+                <StoreProvider store={store}>
+                    <WithRetrieveSession dictionary={dictionary} lng={lng}>
+                        <AppContext.Provider
+                            value={{
+                                mainAppContext,
+                                setMainAppContext,
+                            }}
+                        >
+                            {mainApp}
+                            {children}
+                        </AppContext.Provider>
+                    </WithRetrieveSession>
+                </StoreProvider>
+            </SnackbarProvider>
+        </ThemeProvider>
+    );
 };

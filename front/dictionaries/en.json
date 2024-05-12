@@ -1,0 +1,112 @@
+{
+    "common": {
+        "cancel-text": "Cancel",
+        "confirm-text": "Confirm",
+        "nav": {
+            "logout": "Logout",
+            "profile": "My profile (coming soon)",
+            "my-levels": "My levels",
+            "close": "Close",
+            "play": "Play",
+            "editor": "Editor",
+            "community": "Community",
+            "create-level": "Create new level"
+        },
+        "form": {
+            "label": {
+                "email": "Email",
+                "password": "Password",
+                "confirm-password": "Confirm password",
+                "name": "Username"
+            },
+            "description": {
+                "name": "Will be visible to other users"
+            },
+            "validation": {
+                "required": "This field is required",
+                "email": "Invalid email address",
+                "password-min-length": "Password must be at least 8 characters",
+                "password-miss-match": "Passwords don't match"
+            },
+            "button": {
+                "login": "Login",
+                "create-account": "Create Account",
+                "sign-in": "Already an account? Sign in",
+                "forgot-password": "Forgot your password?",
+                "no-received-email": "Didn't receive the validation email?",
+                "resend-confirmation-email": "Re send confirmation email",
+                "reset-password": "Reset my password",
+                "update-password": "Update my password"
+            }
+        },
+        "notification": {
+            "success-login": "Successfully login!",
+            "success-logout": "Successfully logout",
+            "success-sign-up": "I just sent an email to {{email}}. Please click on the link in the mail to confirm your account.",
+            "success-resend-validation-email": "A new email has been send to {{email}}",
+            "success-reset-password-sent-email": "An email as successfully been sent to reset your password",
+            "success-new-password": "Your password has been successfully updated",
+            "success-level-saved": "Your level has been successfully saved",
+            "success-level-published": "Your level has been successfully published",
+            "success-level-unpublished": "Your level has been successfully unpublished",
+            "success-level-deleted": "Your level has been successfully deleted",
+            "success-level-thumbnail-uploaded": "Your level thumbnail has been successfully uploaded",
+            "error-user-name-taken": "This username already exists. Please choose another name",
+            "error-level-name-taken": "This level name already exists. Please choose another name",
+            "error-level-name-too-long": "This level name is too long",
+            "error-login": "Invalid email or password!",
+            "error-logout": "Unknown error, couldn't logout",
+            "error-forbidden": "Access denied",
+            "error-unknown": "An unknown error occurred, please try again later",
+            "error-bad-request": {
+                "email": "Email must be a valid email"
+            },
+            "error-missing-level-name": "Please enter a name for your level",
+            "error-level-thumbnail-upload": "Your thumbnail has not been uploaded"
+        }
+    },
+    "register": {
+        "title": "Create an account",
+        "form": {
+            "label": {
+                "confirm-password": "Confirm password"
+            }
+        }
+    },
+    "before-publish-confirmation": {
+        "title": "Level validation process",
+        "description": "In order to publish your level, you need to proof that the level is finishable. Please play it from start to finish and make sure it's possible to complete it.",
+        "confirm": "Start validation run"
+    },
+    "after-publish-confirmation": {
+        "title": "Level validation process successful",
+        "subtitle": "Congratulations, you fulfilled the validation process for your level!",
+        "description": "Are you sure you want to publish the level \"{{levelName}}\"? Once published, the level will be visible to everyone and you won't be able to edit it anymore.",
+        "confirm": "Publish"
+    },
+    "forgot-password": {
+        "title": "Forgot password",
+        "description": "Give me your email address and I will send you a link to reset your password.",
+        "notification": {}
+    },
+    "new-password": {
+        "title": "New password",
+        "description": "Please enter your new password."
+    },
+    "sign-up-email-validation": {
+        "title": "Account validation required",
+        "description": "I need you to validate your email address. Please click on the link in the mail I just sent you.",
+        "no-received-email": "Didn't receive the email we previously sent you?",
+        "notification": {}
+    },
+    "sign-up-email-activated": {
+        "title": "Email activated!",
+        "description": "Congratulations, your email has been activated. You can now login."
+    },
+    "level-editor-dashboard": {
+        "delete-confirmation": {
+            "title": "Delete level",
+            "description": "Are you sure you want to delete the level \"{{levelName}}\"? This operation cannot be undone."
+        }
+    }
+}

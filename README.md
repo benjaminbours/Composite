@@ -21,3 +21,11 @@ The development of this project is streamed on this [Twitch channel](https://www
 If you'd like to help build Composite, check out the [Contributor's Guide](https://github.com/benjaminbours/Composite/blob/master/CONTRIBUTING.md). For simple problems, feel free to open an issue or PR and tackle it yourself!
 
 <!-- For more complex architecture decisions and experimental mad science, please open an RFC (Request For Comments) so we can brainstorm together effectively! -->
+
+## Development
+
+Example of command to create new backend migration
+
+`npx env-cmd -f .env.local npx prisma migrate dev --name init`
+
+TODO: In dev mode, you have to go inside the container to regenerate the prisma client inside as well. It's not a good workflow

@@ -1,0 +1,356 @@
+.panel {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    max-height: 300px;
+    width: 250px;
+
+    h2,
+    h3 {
+        margin: 0;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        // padding-right: 10px;
+        overflow-y: auto;
+        scrollbar-width: thin; /* For Firefox */
+        scrollbar-gutter: stable;
+    }
+
+    $imgSize: 50px;
+    .img-placeholder {
+        width: $imgSize;
+        min-width: $imgSize;
+        height: $imgSize;
+        background: white;
+    }
+
+    .item-name {
+        margin: 0;
+        margin-left: 10px;
+        white-space: nowrap;
+    }
+}
+
+.elements-panel {
+    position: fixed;
+    top: 1%;
+    right: 1%;
+}
+
+.level-editor__top-left-container {
+    position: fixed;
+    top: 6%;
+    left: 1%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.level-editor__top-right-container {
+    position: fixed;
+    top: 6%;
+    right: 1%;
+    display: flex;
+    align-items: flex-start;
+
+    > :nth-child(1) {
+        order: 1;
+        margin-right: 10px;
+    }
+
+    > :nth-child(2) {
+        order: 2;
+    }
+}
+
+.properties-panel {
+    padding-right: 0;
+
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0;
+    }
+
+    li {
+        margin: 5px 0;
+    }
+
+    .property {
+        width: 100%;
+
+        &.door_id,
+        &.id {
+            order: 0;
+        }
+
+        &.size {
+            order: 1;
+        }
+
+        &.side,
+        &.interactive {
+            width: 50%;
+            order: 2;
+        }
+
+        &.doorPosition {
+            order: 3;
+        }
+
+        &.position {
+            order: 4;
+        }
+
+        &.rotation {
+            order: 5;
+        }
+    }
+}
+
+.properties-panel__inputs-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+
+    .base-NumberInput-input {
+        width: 100%;
+        font-size: 12px;
+        padding: 5px;
+        padding-right: 14px;
+    }
+
+    > * {
+        margin: 10px 0;
+    }
+}
+
+.player-start-panel {
+    padding: 0;
+}
+
+.scene-content-panel {
+    padding: 0;
+    max-height: none;
+
+    .MuiAccordionDetails-root {
+        padding: 8px 0;
+    }
+}
+
+.scene-content-panel__add-button {
+    margin-right: auto;
+}
+
+.scene-content-panel__content-header {
+    display: flex;
+    padding: 0 10px;
+}
+
+.level-editor__accordion {
+    .MuiAccordionSummary-root.Mui-expanded {
+        min-height: 48px;
+        height: 48px;
+    }
+
+    .MuiAccordionSummary-content {
+        margin: 5px 0 !important;
+    }
+}
+
+.scene-content-panel__header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.scene-content-panel__content {
+    ul {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+}
+
+.scene-content-panel__item {
+    padding: 0;
+    margin: 5px 0;
+
+    input {
+        font-size: 12px !important;
+    }
+}
+
+.scene-content-panel__item-icon {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.scene-content-panel__bounce-icon {
+    width: 30px;
+    margin-right: 10px;
+}
+
+.bounce-icon-add-menu {
+    width: 20px;
+}
+
+.scene-content-panel__item-action {
+    svg {
+        width: 0.6em;
+        height: 0.6em;
+    }
+}
+
+.MuiButtonBase-root {
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        'Open Sans',
+        'Helvetica Neue',
+        sans-serif;
+}
+
+#camera-button {
+    margin-left: auto;
+}
+
+.my-num-input {
+    border-color: rgb(67, 77, 91) !important;
+    box-shadow: none !important;
+
+    &.focused {
+        border-color: #3399ff !important;
+        box-shadow: 0 0 0 3px #0059b2 !important;
+    }
+}
+
+.thumbnail-modal {
+    .composite-modal__button-container {
+        flex-direction: row;
+
+        & > :last-child {
+            margin-top: 0px;
+            margin-left: 20px;
+        }
+    }
+}
+
+.level-editor-dashboard {
+    background-color: #121212;
+    color: white;
+    padding: 20px 0;
+    min-height: calc(100vh - 54px);
+    box-sizing: border-box;
+}
+
+.level-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+        box-sizing: border-box;
+        padding: 10px;
+        width: 350px;
+    }
+}
+
+.level-list-item__actions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.level-list-item__title {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 18px;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
+}
+
+.level-list-item__image-container {
+    display: flex;
+
+    .level-portal {
+        flex: 1;
+    }
+}
+
+.level-list-item__image {
+    background-color: rgba(255, 255, 255, 0.13);
+    border-radius: 15px;
+    width: 300px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.level-list__not-logged {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.shortcut-panel {
+    margin-top: 10px;
+    width: 500px;
+
+    ul {
+        padding-right: 0;
+    }
+}
+
+.shortcut-panel__item {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.shortcut-panel__item-shortcut-text {
+    margin-left: auto;
+    font-weight: bold;
+}
+
+.shortcut-panel__item-action-text {
+    margin-left: 10px;
+}
+
+.level-editor__validation-chip {
+    margin-top: 10px;
+}
+
+.level-editor__mouse-helper {
+    display: flex;
+    align-items: center;
+    mix-blend-mode: difference;
+    position: fixed;
+    top: 10%;
+    left: 1%;
+
+    svg {
+        width: 30px;
+        fill: white;
+        margin-right: 10px;
+    }
+
+    p {
+        color: white;
+        font-size: 12px;
+    }
+}

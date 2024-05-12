@@ -1,5 +1,5 @@
 import type { Group, Mesh, Object3D, Vec2 } from 'three';
-import { GameState, Levels } from './GameState';
+import { GameState } from './GameState';
 
 export enum Side {
     SHADOW,
@@ -8,9 +8,10 @@ export enum Side {
 
 export enum Layer {
     DEFAULT,
-    OCCLUSION, // platforms, elements
+    BLOOM, // platforms, elements
     OCCLUSION_PLAYER, // only the player
     PLAYER_INSIDE,
+    MINI_MAP,
 }
 
 export enum SocketEventType {
@@ -22,16 +23,6 @@ export enum SocketEventType {
     CONNECTION = 'connection',
     // receive automatically by the server when losing connection with a client
     DISCONNECT = 'disconnect',
-    // send only by the client after connect in random queue
-    MATCHMAKING_INFO = 'MATCHMAKING_INFO',
-    // send only by the client after arriving invite friend scene
-    REQUEST_INVITE_FRIEND_TOKEN = 'REQUEST_INVITE_FRIEND_TOKEN',
-    // send only by the server after receiving request from client
-    INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
-    // send by the client just after joining lobby and connecting
-    FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
-    // send by the server to the invite emitter after the friend joined the lobby
-    JOIN_LOBBY = 'JOIN_LOBBY',
     // send by the server when 2 players connects and a game start
     GAME_START = 'GAME_START',
     // send by the 2 clients to the server and to each others during the game is on going
@@ -42,43 +33,63 @@ export enum SocketEventType {
     GAME_STATE_UPDATE = 'GAME_STATE_UPDATE',
     // send by the server when the players reach the end level
     GAME_FINISHED = 'GAME_FINISHED',
-    // send by the server to inform a team mate made a choice
-    TEAMMATE_INFO = 'TEAMMATE_INFO',
     // send by the server to inform a team mate disconnected
     TEAMMATE_DISCONNECT = 'TEAMMATE_DISCONNECT',
 }
 
-export enum SocketEventTeamLobby {
+export enum SocketEventLobby {
     SELECT_LEVEL = 'SELECT_LEVEL',
     SELECT_SIDE = 'SELECT_SIDE',
+    /**
+     * Create a lobby with a friend a not a random player would be more exact
+     */
+    CREATE_LOBBY = 'CREATE_LOBBY',
+    FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
+    INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
+    READY_TO_PLAY = 'READY_TO_PLAY',
+    JOIN_RANDOM_QUEUE = 'JOIN_RANDOM_QUEUE',
 }
 
-export interface Inputs {
+export interface InputsSync {
     left: boolean;
     right: boolean;
     jump: boolean;
     top: boolean;
     bottom: boolean;
+    resetPosition: boolean;
+}
+
+export interface InputsClient {
+    interact: boolean;
 }
 
 // payloads
-export interface MatchMakingPayload {
-    side: Side;
-    selectedLevel: Levels;
-}
-
 export interface InviteFriendTokenPayload {
     token: string;
 }
 
-export interface TeammateInfoPayload {
-    side: Side;
-    selectedLevel: Levels;
+export interface JoinRandomQueuePayload {
+    userId?: number;
+    side?: Side;
+    level?: number;
+}
+
+export interface FriendJoinLobbyPayload {
+    token?: string;
+    user?: any; // User type from database, not accessible here but should be casted to this type on the front
+    side?: Side;
+    level?: number;
+}
+
+export interface CreateLobbyPayload {
+    userId?: number;
+    side?: Side;
+    level?: number;
 }
 
 export interface GamePlayerInputPayload {
     player: Side;
-    inputs: Inputs;
+    inputs: InputsSync;
     // TODO: Implement protection against position hacking
     sequence: number;
     time: number;
@@ -109,32 +120,6 @@ export type PingEvent = [
     payload: TimeSyncPayload,
 ];
 
-export type MatchMakingEvent = [
-    type: SocketEventType.MATCHMAKING_INFO,
-    payload: MatchMakingPayload,
-];
-
-export type RequestInviteFriendTokenEvent = [
-    type: SocketEventType.REQUEST_INVITE_FRIEND_TOKEN,
-];
-
-export type FriendJoinLobbyEvent = [
-    type: SocketEventType.FRIEND_JOIN_LOBBY,
-    payload: string,
-];
-
-export type JoinLobbyEvent = [type: SocketEventType.JOIN_LOBBY];
-
-export type InviteFriendTokenEvent = [
-    type: SocketEventType.INVITE_FRIEND_TOKEN,
-    payload: InviteFriendTokenPayload,
-];
-
-export type TeammateInfoEvent = [
-    type: SocketEventType.TEAMMATE_INFO,
-    payload: TeammateInfoPayload,
-];
-
 export type GameStartEvent = [
     type: SocketEventType.GAME_START,
     payload: GameStateUpdatePayload,
@@ -162,19 +147,44 @@ export type GameDeactivateElementEvent = [
     payload: GameActivateElementPayload,
 ];
 
+///////////////// LOBBY EVENTS
+
 export type TeamSelectLevel = [
-    type: SocketEventTeamLobby.SELECT_LEVEL,
-    payload: Levels,
+    type: SocketEventLobby.SELECT_LEVEL,
+    payload: number | undefined,
 ];
 
 export type TeamSelectSide = [
-    type: SocketEventTeamLobby.SELECT_SIDE,
-    payload: Side,
+    type: SocketEventLobby.SELECT_SIDE,
+    payload: Side | undefined,
+];
+
+export type CreateLobbyEvent = [
+    type: SocketEventLobby.CREATE_LOBBY,
+    payload: CreateLobbyPayload,
+];
+
+export type FriendJoinLobbyEvent = [
+    type: SocketEventLobby.FRIEND_JOIN_LOBBY,
+    payload: FriendJoinLobbyPayload,
+];
+
+export type InviteFriendTokenEvent = [
+    type: SocketEventLobby.INVITE_FRIEND_TOKEN,
+    payload: InviteFriendTokenPayload,
+];
+
+export type ReadyToStartEvent = [
+    type: SocketEventLobby.READY_TO_PLAY,
+    payload: boolean,
+];
+
+export type JoinRandomQueueEvent = [
+    type: SocketEventLobby.JOIN_RANDOM_QUEUE,
+    payload: JoinRandomQueuePayload,
 ];
 
 export type SocketEvent =
-    | MatchMakingEvent
-    | TeammateInfoEvent
     | GameStartEvent
     | GameFinishedEvent
     | GameStateUpdateEvent
@@ -182,27 +192,13 @@ export type SocketEvent =
     | GameActivateElementEvent
     | GameDeactivateElementEvent
     | PingEvent
-    | RequestInviteFriendTokenEvent
+    | CreateLobbyEvent
     | InviteFriendTokenEvent
     | FriendJoinLobbyEvent
-    | JoinLobbyEvent
     | TeamSelectLevel
-    | TeamSelectSide;
-
-export class QueueInfo {
-    constructor(public all = 0, public light = 0, public shadow = 0) {}
-}
-
-export class AllQueueInfo extends QueueInfo {
-    constructor(
-        public levels: QueueInfo[],
-        public all = 0,
-        public light = 0,
-        public shadow = 0,
-    ) {
-        super(all, light, shadow);
-    }
-}
+    | TeamSelectSide
+    | ReadyToStartEvent
+    | JoinRandomQueueEvent;
 
 export enum MovableComponentState {
     onFloor,
@@ -224,12 +220,23 @@ export interface InteractiveComponent {
     isActive: boolean;
 }
 
-export const MOVEMENTS = ['left', 'right', 'top', 'bottom', 'jump'] as const;
-type MovementTuple = typeof MOVEMENTS; // readonly ['hearts', 'diamonds', 'spades', 'clubs']
-export type Movement = MovementTuple[number];
+export const ACTIONS = [
+    'left',
+    'right',
+    'top',
+    'bottom',
+    'jump',
+    'interact',
+    'resetPosition',
+] as const;
+type ActionTuple = typeof ACTIONS;
+export type Action = ActionTuple[number];
 
 export class KeyBindings {
-    [key: string]: Movement;
+    [key: string]: Action;
 }
 
-export type UIKeyBindings = [Movement, string[]][];
+export type UIKeyBindings = [
+    Action,
+    [string | undefined, string | undefined],
+][];

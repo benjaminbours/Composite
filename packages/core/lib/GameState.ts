@@ -1,23 +1,23 @@
 import type { Vec2 } from 'three';
 import { MovableComponentState } from './types';
 
-export enum Levels {
-    CRACK_THE_DOOR,
-    LEARN_TO_FLY,
-    THE_HIGH_SPHERES,
-}
-
 export interface LevelState {
-    id: Levels;
-    doors: {
-        [key: string]: number[];
-    };
+    id: number;
+    doors: DoorState;
     bounces: BounceState;
     end_level: number[];
 }
 
+export interface DoorState {
+    // key = doorId
+    [key: string]: {
+        // key = openerId
+        [key: string]: number[];
+    };
+}
+
 export interface BounceState {
-    [key: number]: {
+    [key: string]: {
         rotationY: number;
     };
 }
@@ -26,7 +26,7 @@ export interface PlayerGameState {
     position: Vec2;
     velocity: Vec2;
     state: MovableComponentState;
-    insideElementID: number | undefined;
+    insideElementID: string | undefined;
 }
 
 interface RedisStaticGameState {
@@ -55,7 +55,8 @@ interface RedisDynamicGameState {
 export type RedisGameState = RedisStaticGameState & RedisDynamicGameState;
 
 const REDIS_DYNAMIC_FIELDS = {
-    DOOR: (doorId: string) => `door_${doorId}`,
+    DOOR: (doorId: string, openerId: string) =>
+        `door_${doorId}_opener_${openerId}`,
     BOUNCE: (bounceId: string) => `bounce_${bounceId}`,
 };
 
@@ -79,7 +80,7 @@ export class GameState {
 
     // parse from the one level object allowed by redis
     static parseFromRedisGameState(state: RedisGameState) {
-        const level: Levels = Number(state.level);
+        const level = Number(state.level);
         const levelState: LevelState = {
             id: level,
             end_level: parseActivators(state.end_level),
@@ -88,16 +89,21 @@ export class GameState {
         };
         Object.entries(state).forEach(([key, value]) => {
             if (key.includes('door') && value !== undefined) {
-                levelState.doors[key.replace('door_', '')] =
-                    parseActivators(value);
+                const parts = key.split('_');
+                const doorId = parts[1];
+                const openerId = parts[3];
+                if (levelState.doors[doorId] === undefined) {
+                    levelState.doors[doorId] = {};
+                }
+                levelState.doors[doorId][openerId] = parseActivators(value);
             }
             if (key.includes('bounce') && value) {
-                levelState.bounces[Number(key.replace('bounce_', ''))] = {
+                levelState.bounces[key.replace('bounce_', '')] = {
                     rotationY: Number(value),
                 };
             }
         });
-        return new GameState(
+        const gameState = new GameState(
             [
                 {
                     position: {
@@ -111,7 +117,7 @@ export class GameState {
                     state: Number(state.shadow_state) as MovableComponentState,
                     insideElementID:
                         state.shadow_inside_element_id !== undefined
-                            ? Number(state.shadow_inside_element_id)
+                            ? state.shadow_inside_element_id
                             : undefined,
                 },
                 {
@@ -126,7 +132,7 @@ export class GameState {
                     state: Number(state.light_state) as MovableComponentState,
                     insideElementID:
                         state.light_inside_element_id !== undefined
-                            ? Number(state.light_inside_element_id)
+                            ? state.light_inside_element_id
                             : undefined,
                 },
             ],
@@ -134,6 +140,7 @@ export class GameState {
             Number(state.lastValidatedInput),
             Number(state.game_time),
         );
+        return gameState;
     }
 
     static parseToRedisGameState(state: GameState) {
@@ -161,8 +168,11 @@ export class GameState {
             game_time: String(state.game_time),
             end_level: state.level.end_level.join(),
         };
-        Object.entries(state.level.doors).forEach(([key, value]) => {
-            redisGameState[REDIS_DYNAMIC_FIELDS.DOOR(key)] = value.join();
+        Object.entries(state.level.doors).forEach(([doorId, openers]) => {
+            Object.entries(openers).forEach(([openerId, value]) => {
+                redisGameState[REDIS_DYNAMIC_FIELDS.DOOR(doorId, openerId)] =
+                    value.join();
+            });
         });
         Object.entries(state.level.bounces).forEach(([key, value]) => {
             redisGameState[REDIS_DYNAMIC_FIELDS.BOUNCE(key)] = String(
