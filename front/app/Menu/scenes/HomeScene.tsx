@@ -26,9 +26,10 @@ export const HomeScene: React.FC<Props> = ({
     setLightIsPulsingFast,
     setShadowRotationSpeed,
 }) => {
+    const isMobile = window.innerWidth <= 768;
     const playButtonRef = useRef<HTMLButtonElement>(null);
     const cssClass = classNames({
-        'home-container': true,
+        'home-scene': true,
         unmount: !isMount,
     });
 
@@ -129,46 +130,47 @@ export const HomeScene: React.FC<Props> = ({
         <div ref={homeRef} className={cssClass}>
             <h1 className="title-h1">Composite</h1>
             <h2 className="main-subtitle">Think both ways</h2>
-            <button
-                ref={playButtonRef}
-                className="buttonCircle home-container__button"
-                id="buttonPlay"
-                onMouseEnter={handleMouseEnterPlay}
-                onMouseLeave={handleMouseLeavePlay}
-                onClick={handleClickPlay}
-            >
-                Play
-            </button>
-            <Link href={Route.ROADMAP}>
+            <div className="home-scene__buttons-container">
+                <Link href={Route.ROADMAP}>
+                    <button
+                        className="buttonCircle"
+                        id="buttonPath"
+                        onMouseEnter={
+                            isMobile ? undefined : handleMouseEnterButton
+                        }
+                        onMouseLeave={
+                            isMobile ? undefined : handleMouseLeaveButton
+                        }
+                    >
+                        The path
+                    </button>
+                </Link>
                 <button
-                    className="buttonCircle home-container__button"
-                    id="buttonPath"
-                    onMouseEnter={handleMouseEnterButton}
-                    onMouseLeave={handleMouseLeaveButton}
+                    ref={playButtonRef}
+                    className="buttonCircle"
+                    id="buttonPlay"
+                    onMouseEnter={isMobile ? undefined : handleMouseEnterPlay}
+                    onMouseLeave={isMobile ? undefined : handleMouseLeavePlay}
+                    onClick={handleClickPlay}
                 >
-                    The path
+                    Play
                 </button>
-            </Link>
-
-            <Link href={Route.LEVEL_EDITOR_ROOT}>
-                <button
-                    className="buttonCircle home-container__button"
-                    id="buttonBuild"
-                    onMouseEnter={handleMouseEnterButton}
-                    onMouseLeave={handleMouseLeaveButton}
-                >
-                    Build
-                </button>
-            </Link>
-            {/* 
-            <button
-                className="buttonCircle home-container__button"
-                id="buttonJoin"
-            >
-                Join
-                <br />
-                us
-            </button> */}
+                <Link href={Route.LEVEL_EDITOR_ROOT}>
+                    <button
+                        className="buttonCircle"
+                        id="buttonBuild"
+                        onMouseEnter={
+                            isMobile ? undefined : handleMouseEnterButton
+                        }
+                        onMouseLeave={
+                            isMobile ? undefined : handleMouseLeaveButton
+                        }
+                    >
+                        Build
+                    </button>
+                </Link>
+            </div>
+            {/* TODO: Add socials at the bottom of the page */}
         </div>
     );
 };

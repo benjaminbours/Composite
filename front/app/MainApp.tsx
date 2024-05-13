@@ -19,6 +19,7 @@ import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification
 import { AppContext } from './WithMainApp';
 import { getDictionary } from '../getDictionary';
 import { BottomRightInfo } from './BottomRightInfo';
+import { useWindowSize } from './hooks/useWindowSize';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -45,6 +46,8 @@ interface Props {
 function MainApp({ initialScene, dictionary }: Props) {
     const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
+    const { width } = useWindowSize();
+    const isMobile = width !== undefined && width <= 768;
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);
@@ -126,10 +129,12 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onClose={handleClickOnCloseSettings}
                 />
             )}
-            <BottomLeftInfo
-                gameIsPlaying={gameIsPlaying}
-                onSettingsClick={handleClickOnSettings}
-            />
+            {!isMobile && (
+                <BottomLeftInfo
+                    gameIsPlaying={gameIsPlaying}
+                    onSettingsClick={handleClickOnSettings}
+                />
+            )}
             {!gameIsPlaying && (
                 <BottomRightInfo
                     playing={mainController.serverCounts?.playing || 0}

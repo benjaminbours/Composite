@@ -1,7 +1,3 @@
-// html {
-//     overflow-y: scroll;
-// }
-
 body {
     padding: 0;
     margin: 0;
@@ -78,6 +74,16 @@ canvas,
         font-size: 12px;
         color: white;
     }
+
+    @media (max-width: 768px) {
+        bottom: 0px;
+        right: 5px;
+
+        .version {
+            font-size: 10px;
+            margin: 0;
+        }
+    }
 }
 
 .home-page {
@@ -108,7 +114,7 @@ canvas,
     }
 
     @media (max-width: 768px) {
-        font-size: 20px;
+        font-size: 28px;
     }
 }
 
@@ -118,6 +124,10 @@ canvas,
 
     &--white {
         color: white;
+    }
+
+    @media (max-width: 768px) {
+        font-size: 20px;
     }
 }
 
@@ -132,6 +142,10 @@ canvas,
 
 p {
     font-family: 'Source Code Pro', monospace;
+
+    @media (max-width: 768px) {
+        font-size: 14px;
+    }
 }
 
 .menu-label {
@@ -197,6 +211,12 @@ $buttonSizeLarge: 120px;
             transition: 0.3s ease-out;
         }
     }
+
+    @media (max-width: 768px) {
+        width: $buttonSizeSmall;
+        height: $buttonSizeSmall;
+        border-radius: $buttonSizeSmall;
+    }
 }
 
 .unmount {
@@ -236,6 +256,16 @@ $buttonSizeLarge: 120px;
 
         > div {
             margin: 0 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        > div {
+            display: block;
+
+            // > div {
+            //     margin: 0 20px;
+            // }
         }
     }
 }
@@ -334,17 +364,34 @@ $buttonSizeLarge: 120px;
     left: 0;
     right: 0;
     z-index: 10;
+}
+
+.mobile-hud__row {
     display: flex;
     justify-content: space-between;
+}
 
-    button {
-        padding: 10px;
-    }
+.mobile-hud__button {
+    border-radius: 10px;
+    margin: 0 10px;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
+    background: rgba(211, 211, 211, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    svg {
-        width: 50px;
-        fill: white;
-    }
+.mobile-hud__interact {
+    margin-left: auto;
+    margin-bottom: 10px;
+}
+
+.mobile-hud__arrow-left {
+    transform: rotate(180deg);
+}
+
+.mobile-hud__jump {
+    flex: 1 !important;
 }
 
 .inline-link {
@@ -501,6 +548,10 @@ $buttonSizeLarge: 120px;
     padding: 30px;
 }
 
+.hamburger-button {
+    margin-left: auto !important;
+}
+
 .top-bar {
     height: 54px;
 
@@ -521,6 +572,11 @@ $buttonSizeLarge: 120px;
 
     > * {
         margin: 0 10px;
+    }
+
+    @media (max-width: 768px) {
+        padding-left: 0;
+        padding-right: 0;
     }
 }
 
@@ -549,7 +605,7 @@ $buttonSizeLarge: 120px;
 // }
 
 .side-menu {
-    width: 250px;
+    width: 200px;
 }
 
 .slick-list,
@@ -573,7 +629,7 @@ $buttonSizeLarge: 120px;
     // cursor: pointer;
     position: relative;
 
-    > p{
+    > p {
         mix-blend-mode: difference;
         color: white;
         font-weight: 700;
@@ -731,6 +787,11 @@ $buttonSizeLarge: 120px;
     height: 167px;
     border: solid 1px white;
     background: grey;
+
+    @media (max-width: 768px) {
+        top: 10px;
+        bottom: auto;
+    }
 }
 
 .game-text-overlay {

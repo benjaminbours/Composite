@@ -5,6 +5,10 @@
     a {
         text-decoration: none;
     }
+
+    @media (max-width: 768px) {
+        width: 90%;
+    }
 }
 
 .header {
@@ -14,6 +18,15 @@
 
     h2 {
         margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        flex-wrap: wrap;
+
+        h2 {
+            width: 100%;
+            margin-bottom: 5px;
+        }
     }
 }
 
@@ -107,5 +120,15 @@
 
     :after {
         border-color: white !important;
+    }
+
+    @media (max-width: 768px) {
+        width: 150px;
+        margin-left: 0;
+
+        input,
+        label {
+            font-size: 12px;
+        }
     }
 }

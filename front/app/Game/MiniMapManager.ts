@@ -26,7 +26,11 @@ export class MiniMapManager {
             alpha: true,
         });
         this.renderer.setPixelRatio(0.5);
-        this.renderer.setSize(300, 167);
+        if (window.innerWidth <= 768) {
+            this.renderer.setSize(300 / 2, 167 / 2);
+        } else {
+            this.renderer.setSize(300, 167);
+        }
 
         this.camera.position.set(0, 563, 3000);
         this.camera.lookAt(0, 563, 0);
