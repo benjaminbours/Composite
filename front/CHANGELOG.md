@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.22
+
+### Patch Changes
+
+- Try other solution to prevent edge-swipe default behavior on mobile
+
 ## 1.0.0-next.21
 
 ### Patch Changes
