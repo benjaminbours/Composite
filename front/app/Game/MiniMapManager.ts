@@ -26,7 +26,8 @@ export class MiniMapManager {
             alpha: true,
         });
         this.renderer.setPixelRatio(0.5);
-        if (window.innerWidth <= 768) {
+        const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
+        if (isMobile) {
             this.renderer.setSize(300 / 2, 167 / 2);
         } else {
             this.renderer.setSize(300, 167);

@@ -75,7 +75,7 @@ canvas,
         color: white;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         bottom: auto;
         top: 2px;
         right: 5px;
@@ -114,7 +114,7 @@ canvas,
         color: white;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         font-size: 28px;
     }
 }
@@ -127,7 +127,7 @@ canvas,
         color: white;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         font-size: 20px;
     }
 }
@@ -144,7 +144,7 @@ canvas,
 p {
     font-family: 'Source Code Pro', monospace;
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         font-size: 14px;
     }
 }
@@ -173,7 +173,7 @@ p {
         color: black;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         padding: 10px;
         font-size: 12px;
     }
@@ -213,7 +213,7 @@ $buttonSizeLarge: 120px;
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         width: $buttonSizeSmall;
         height: $buttonSizeSmall;
         border-radius: $buttonSizeSmall;
@@ -260,7 +260,7 @@ $buttonSizeLarge: 120px;
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         > div {
             display: block;
 
@@ -336,26 +336,8 @@ $buttonSizeLarge: 120px;
     width: 80%;
     margin: 0 auto;
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         width: 90%;
-    }
-}
-
-.menu-state-info {
-    color: white;
-
-    &--black {
-        color: black;
-    }
-
-    > * {
-        display: flex;
-        justify-content: space-between;
-        width: 300px;
-
-        @media (max-width: 768px) {
-            width: 100%;
-        }
     }
 }
 
@@ -367,32 +349,49 @@ $buttonSizeLarge: 120px;
     z-index: 10;
 }
 
-.mobile-hud__row {
-    display: flex;
-    justify-content: space-between;
-}
-
 .mobile-hud__button {
-    border-radius: 10px;
-    margin: 0 10px;
-    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
-    background: rgba(211, 211, 211, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
+    position: fixed;
 }
 
 .mobile-hud__interact {
     margin-left: auto;
     margin-bottom: 10px;
+    right: 5%;
+    bottom: 5%;
+    z-index: 1000;
+    border-radius: 10px;
+    margin: 0 10px;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
+    background: rgba(211, 211, 211, 0.5);
 }
 
 .mobile-hud__arrow-left {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 25%;
     transform: rotate(180deg);
+    justify-content: end;
+}
+
+.mobile-hud__arrow-right {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+    justify-content: end;
 }
 
 .mobile-hud__jump {
-    flex: 1 !important;
+    bottom: 0;
+    height: 25%;
+    left: 25%;
+    right: 25%;
+    width: 50%;
+    align-items: flex-end;
 }
 
 .inline-link {
@@ -575,7 +574,7 @@ $buttonSizeLarge: 120px;
         margin: 0 10px;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         padding-left: 0;
         padding-right: 0;
     }
@@ -789,7 +788,7 @@ $buttonSizeLarge: 120px;
     border: solid 1px white;
     background: grey;
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         top: 10px;
         bottom: auto;
     }

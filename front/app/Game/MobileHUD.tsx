@@ -30,39 +30,35 @@ export const MobileHUD: React.FC<Props> = ({
     return (
         <div className="mobile-hud">
             {isMobileInteractButtonAdded && (
-                <div className="mobile-hud__row">
-                    <IconButton
-                        className="mobile-hud__button mobile-hud__interact"
-                        onTouchStart={handleTouchStart('interact')}
-                        onTouchEnd={handleTouchEnd('interact')}
-                    >
-                        Interact
-                    </IconButton>
-                </div>
+                <IconButton
+                    className="mobile-hud__button mobile-hud__interact"
+                    onTouchStart={handleTouchStart('interact')}
+                    onTouchEnd={handleTouchEnd('interact')}
+                >
+                    Interact
+                </IconButton>
             )}
-            <div className="mobile-hud__row">
-                <IconButton
-                    className="mobile-hud__button mobile-hud__arrow-left"
-                    onTouchStart={handleTouchStart('left')}
-                    onTouchEnd={handleTouchEnd('left')}
-                >
-                    <ArrowForwardIosIcon />
-                </IconButton>
-                <IconButton
-                    className="mobile-hud__button mobile-hud__jump"
-                    onTouchStart={handleTouchStart('jump')}
-                    onTouchEnd={handleTouchEnd('jump')}
-                >
-                    <SpaceBarIcon />
-                </IconButton>
-                <IconButton
-                    className="mobile-hud__button"
-                    onTouchStart={handleTouchStart('right')}
-                    onTouchEnd={handleTouchEnd('right')}
-                >
-                    <ArrowForwardIosIcon />
-                </IconButton>
-            </div>
+            <IconButton
+                className="mobile-hud__button mobile-hud__arrow-left"
+                onTouchStart={handleTouchStart('left')}
+                onTouchEnd={handleTouchEnd('left')}
+            >
+                <ArrowForwardIosIcon />
+            </IconButton>
+            <IconButton
+                className="mobile-hud__button mobile-hud__jump"
+                onTouchStart={handleTouchStart('jump')}
+                onTouchEnd={handleTouchEnd('jump')}
+            >
+                <SpaceBarIcon />
+            </IconButton>
+            <IconButton
+                className="mobile-hud__button mobile-hud__arrow-right"
+                onTouchStart={handleTouchStart('right')}
+                onTouchEnd={handleTouchEnd('right')}
+            >
+                <ArrowForwardIosIcon />
+            </IconButton>
         </div>
     );
 };

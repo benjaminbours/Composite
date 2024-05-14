@@ -26,7 +26,7 @@ export const HomeScene: React.FC<Props> = ({
     setLightIsPulsingFast,
     setShadowRotationSpeed,
 }) => {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
     const playButtonRef = useRef<HTMLButtonElement>(null);
     const cssClass = classNames({
         'home-scene': true,

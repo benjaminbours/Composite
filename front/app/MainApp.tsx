@@ -46,8 +46,11 @@ interface Props {
 function MainApp({ initialScene, dictionary }: Props) {
     const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
-    const { width } = useWindowSize();
-    const isMobile = width !== undefined && width <= 768;
+    const { width, height } = useWindowSize();
+    const isMobile =
+        width !== undefined &&
+        height !== undefined &&
+        (width <= 768 || height <= 500);
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [tabIsHidden, setTabIsHidden] = useState(false);

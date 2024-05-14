@@ -641,7 +641,11 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 side = Side.SHADOW;
             }
 
-            if (side === undefined && window.innerWidth > 768) {
+            if (
+                side === undefined &&
+                window.innerWidth > 768 &&
+                window.innerHeight > 500
+            ) {
                 return;
             }
 

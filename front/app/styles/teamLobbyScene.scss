@@ -3,10 +3,6 @@
     flex-direction: column;
     width: 100%;
 
-    @media (min-width: 768px) {
-        height: 100vh;
-    }
-
     h1 {
         text-transform: uppercase;
     }
@@ -192,7 +188,7 @@
         margin-left: 15px;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         margin-top: 20px;
     }
 }
@@ -297,7 +293,7 @@
         justify-content: center;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         ul {
             box-sizing: border-box;
         }

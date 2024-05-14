@@ -70,8 +70,11 @@ export const LevelGridItem: React.FC<Props> = ({
     isLightWaiting,
     isShadowWaiting,
 }) => {
-    const { width } = useWindowSize();
-    const isMobile = width !== undefined && width <= 768;
+    const { width, height } = useWindowSize();
+    const isMobile =
+        width !== undefined &&
+        height !== undefined &&
+        (width <= 768 || height <= 500);
     const ref = useRef<HTMLButtonElement>(null);
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
 

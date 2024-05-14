@@ -20,8 +20,11 @@ interface Props {
 }
 
 export const TopBar: React.FC<Props> = ({ dictionary }) => {
-    const { width } = useWindowSize();
-    const isMobile = width !== undefined && width <= 768;
+    const { width, height } = useWindowSize();
+    const isMobile =
+        width !== undefined &&
+        height !== undefined &&
+        (width <= 768 || height <= 500);
 
     return (
         <AppBar

@@ -6,7 +6,7 @@
         text-decoration: none;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         width: 90%;
     }
 }
@@ -20,7 +20,7 @@
         margin: 0;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         flex-wrap: wrap;
 
         h2 {
@@ -122,7 +122,7 @@
         border-color: white !important;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         width: 150px;
         margin-left: 0;
 

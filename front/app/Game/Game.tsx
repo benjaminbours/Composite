@@ -63,7 +63,7 @@ function Game({
     const [isMobileInteractButtonAdded, setIsMobileInteractButtonAdded] =
         useState(false);
 
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
 
     useEffect(() => {
         const onResize = () => {
