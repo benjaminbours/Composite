@@ -28,18 +28,27 @@ export const MobileHUD: React.FC<Props> = ({
     );
 
     useEffect(() => {
-        const onTouchStart = (e: any) => {
+        const onTouch = (e: any) => {
             // is not near edge of view, exit
-            if (e.pageX > 10 && e.pageX < window.innerWidth - 10) {
+            if (
+                e.touches[0].clientX > 10 &&
+                e.touches[0].clientX < window.innerWidth - 10
+            ) {
                 return;
             }
             // prevent swipe to navigate gesture
             e.preventDefault();
         };
 
-        document.addEventListener('touchstart', onTouchStart);
+        document.addEventListener('touchstart', onTouch, {
+            passive: false,
+        });
+        document.addEventListener('touchmove', onTouch, {
+            passive: false,
+        });
         return () => {
-            document.removeEventListener('touchstart', onTouchStart);
+            document.removeEventListener('touchstart', onTouch);
+            document.removeEventListener('touchmove', onTouch);
         };
     }, []);
 
