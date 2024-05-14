@@ -1,7 +1,7 @@
 // vendors
 import Script from 'next/script';
 import classNames from 'classnames';
-import React, { useEffect } from 'react';
+import React from 'react';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
@@ -9,7 +9,9 @@ import { Side } from '@benjaminbours/composite-core';
 import { CopyToClipBoardButton } from '../CopyToClipboardButton';
 import { Route } from '../../types';
 import { Level } from '@benjaminbours/composite-api-client';
+import GamesIcon from '@mui/icons-material/Games';
 import { PlayerState } from '../../useMainController';
+import { DiscordButton } from '../../02_molecules/DiscordButton';
 
 interface Props {
     endLevelRef: React.RefObject<HTMLDivElement>;
@@ -37,49 +39,23 @@ export const EndLevelScene: React.FC<Props> = ({
 }) => {
     const color = side === Side.SHADOW ? 'black' : 'white';
     const cssClass = classNames({
-        'content-container': true,
-        'end-level-container': true,
-        [`end-level-container--${color}`]: side !== undefined ? true : false,
+        'end-level-scene': true,
+        [`end-level-scene--${color}`]: side !== undefined ? true : false,
         unmount: !isMount,
     });
 
-    // effect to trigger script coming with buttons
-    useEffect(() => {
-        if ((window as any).twttr?.widgets) {
-            (window as any).twttr.widgets.load();
-        }
-        let scriptElement: HTMLElement | undefined;
-        fetch('https://c6.patreon.com/becomePatronButton.bundle.js').then(
-            async (res) => {
-                const b = await res.blob();
-                let ou = URL.createObjectURL(b),
-                    scriptElement = document.createElement('script');
-                scriptElement.setAttribute('src', ou);
-                scriptElement.setAttribute('type', 'text/javascript');
-                document.body.appendChild(scriptElement);
-            },
-        );
-
-        return () => {
-            if (scriptElement) {
-                document.body.removeChild(scriptElement);
-            }
-        };
-    }, []);
-
     return (
         <div ref={endLevelRef} className={cssClass}>
-            <div className="end-level-container__header">
+            <div className="end-level-scene__header">
                 <button
                     className="buttonRect white"
                     onClick={handleClickOnExit}
                 >
                     Exit
                 </button>
-                <h2 className="title-h2">Well done!</h2>
-                <div />
             </div>
-            <div className="end-level-container__text-container">
+            <h2 className="title-h2">Well done!</h2>
+            <div className="end-level-scene__text-container">
                 <p>
                     You just finished the level:{` `}
                     <b>{level?.name}</b>, made by <b>{level?.author?.name}</b>
@@ -89,18 +65,19 @@ export const EndLevelScene: React.FC<Props> = ({
                     <b>{mate?.account?.name || 'Guest'}</b>
                 </p>
             </div>
-            <div className="end-level-container__like-container end-level-container__text-container">
+            <div className="end-level-scene__like-container end-level-scene__text-container">
                 <h3 className="title-h3">Did you like it?</h3>
                 <p>{`If you did, consider giving a like to this level.`}</p>
-                {/* Discover why it's important */}
+                {/* Add helper such as: Discover why it's important */}
                 {/* TODO: Add auth + request to like the level */}
+                <br />
                 <button className="buttonRect white">
                     Give a like <ThumbUpIcon />
                 </button>
             </div>
-            <div className="end-level-container__play-button-container">
+            <div className="end-level-scene__play-button-container">
                 <button
-                    className="buttonCircle end-level-container__play-button"
+                    className="buttonRect end-level-scene__play-button"
                     onMouseEnter={() => {
                         if (side === Side.LIGHT) {
                             setLightIsPulsingFast(true);
@@ -124,10 +101,10 @@ export const EndLevelScene: React.FC<Props> = ({
                         handleClickOnPlay();
                     }}
                 >
-                    Play again
+                    Play again <GamesIcon />
                 </button>
             </div>
-            <div className="end-level-container__text-container">
+            <div className="end-level-scene__text-container">
                 <p>
                     If you liked the experience and you want it to reach its{' '}
                     <a
@@ -140,7 +117,7 @@ export const EndLevelScene: React.FC<Props> = ({
                     , the best thing you can do is to talk about it.
                 </p>
             </div>
-            <div className="end-level-container__share">
+            <div className="end-level-scene__share">
                 <div>
                     <a
                         className="twitter-share-button"
@@ -149,7 +126,7 @@ export const EndLevelScene: React.FC<Props> = ({
                         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                             `I just finished the level ${level?.name} playing ${
                                 side === Side.LIGHT ? 'Light' : 'Shadow'
-                            } on Composite the game! Can you do it?`,
+                            } on Composite the game! Did you try it?`,
                         )}`}
                     >
                         Tweet
@@ -175,7 +152,6 @@ export const EndLevelScene: React.FC<Props> = ({
                 </div>
                 <div>
                     <CopyToClipBoardButton
-                        // color="black"
                         text={
                             process.env.NEXT_PUBLIC_URL ||
                             'Missing env variable'
@@ -186,13 +162,24 @@ export const EndLevelScene: React.FC<Props> = ({
                         }
                     />
                 </div>
-                <div className="patreon-container">
+                <div>
                     <a
-                        href="https://www.patreon.com/bePatron?u=62398377"
-                        data-patreon-widget-type="become-patron-button"
+                        className="buttonRect end-level-scene__patreon-button"
+                        href="https://patreon.com/benjaminbours"
+                        target="_blank"
                     >
-                        Support me!
+                        Support me
+                        <svg viewBox="0 0 1080 1080">
+                            <path
+                                d="M1033.05,324.45c-0.19-137.9-107.59-250.92-233.6-291.7c-156.48-50.64-362.86-43.3-512.28,27.2
+	C106.07,145.41,49.18,332.61,47.06,519.31c-1.74,153.5,13.58,557.79,241.62,560.67c169.44,2.15,194.67-216.18,273.07-321.33
+	c55.78-74.81,127.6-95.94,216.01-117.82C929.71,603.22,1033.27,483.3,1033.05,324.45z"
+                            />
+                        </svg>
                     </a>
+                </div>
+                <div>
+                    <DiscordButton className="buttonRect" />
                 </div>
             </div>
             <div className="thank-you">

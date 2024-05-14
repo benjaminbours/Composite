@@ -3,11 +3,7 @@ import { Side } from '@benjaminbours/composite-core';
 
 export enum MenuScene {
     HOME = 'home',
-    LEVEL = 'level',
-    FACTION = 'faction',
-    QUEUE = 'queue',
     END_LEVEL = 'end_level',
-    INVITE_FRIEND = 'invite_friend',
     TEAM_LOBBY = 'team_lobby',
     TEAM_LOBBY_SELECTED = 'team_lobby_selected',
     NOT_FOUND = 'not_found',
@@ -39,8 +35,6 @@ export const Route = {
     HOME: '/',
     LOBBY: '/lobby',
     LOBBY_LEVEL: (levelId: number) => `/lobby?level=${levelId}`,
-    INVITE: '/invite',
-
     TIMELINE: '/timeline',
     ROADMAP: '/timeline#roadmap',
     LEVEL_EDITOR_ROOT: '/level-editor',

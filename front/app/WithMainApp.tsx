@@ -53,7 +53,6 @@ export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
         const pathWithoutLng = path.replace(`/${lng}`, '');
         if (
             pathWithoutLng === '' ||
-            path.includes(Route.INVITE) ||
             path.includes(Route.LOBBY) ||
             (children as any).props.notFound
         ) {
@@ -64,8 +63,6 @@ export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
                     //     return MenuScene.NOT_FOUND;
                     case pathWithoutLng === '':
                         return MenuScene.HOME;
-                    case path.includes(Route.INVITE):
-                        return MenuScene.INVITE_FRIEND;
                     case path.includes(Route.LOBBY):
                         return MenuScene.TEAM_LOBBY;
                 }

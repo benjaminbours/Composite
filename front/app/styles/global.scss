@@ -76,7 +76,8 @@ canvas,
     }
 
     @media (max-width: 768px) {
-        bottom: 0px;
+        bottom: auto;
+        top: 2px;
         right: 5px;
 
         .version {
