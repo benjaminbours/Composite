@@ -9,6 +9,7 @@ import React, {
 import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
+import { useWindowSize } from '../../../hooks/useWindowSize';
 
 const YingYang: React.FC = () => (
     <svg className="ying-yang" viewBox="0 0 800 800">
@@ -41,12 +42,14 @@ function loadImage(url: string): Promise<string> {
 interface Props {
     id: number;
     name: string;
+    isHovered: boolean;
     src: string;
     you: PlayerState;
     mate?: PlayerState;
     handleMouseEnterSide: (side: Side) => (e: React.MouseEvent) => void;
     handleMouseLeaveSide: (side: Side) => (e: React.MouseEvent) => void;
-    handleClickSide: (id: number, side: Side) => (e: React.MouseEvent) => void;
+    handleClick: (id: number) => (e: React.MouseEvent) => void;
+    setHoveredLevel: React.Dispatch<React.SetStateAction<number | undefined>>;
     isLightWaiting: boolean;
     isShadowWaiting: boolean;
 }
@@ -59,15 +62,18 @@ export const LevelGridItem: React.FC<Props> = ({
     src,
     you,
     mate,
-    handleClickSide,
+    handleClick,
     handleMouseEnterSide,
     handleMouseLeaveSide,
+    setHoveredLevel,
+    isHovered,
     isLightWaiting,
     isShadowWaiting,
 }) => {
+    const { width } = useWindowSize();
+    const isMobile = width !== undefined && width <= 768;
     const ref = useRef<HTMLButtonElement>(null);
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
-    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         loadImage(src)
@@ -92,11 +98,12 @@ export const LevelGridItem: React.FC<Props> = ({
     });
 
     const handleMouseEnter = useCallback(() => {
-        setIsHovered(true);
-    }, []);
+        setHoveredLevel(id);
+    }, [id, setHoveredLevel]);
+
     const handleMouseLeave = useCallback(() => {
-        setIsHovered(false);
-    }, []);
+        setHoveredLevel(undefined);
+    }, [setHoveredLevel]);
 
     const teamMateHelper = useMemo(() => {
         if (
@@ -114,8 +121,9 @@ export const LevelGridItem: React.FC<Props> = ({
     return (
         <button
             ref={ref}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={isMobile ? undefined : handleMouseEnter}
+            onMouseLeave={isMobile ? undefined : handleMouseLeave}
+            onClick={handleClick(id)}
             className={cssClass}
         >
             {teamMateHelper}
@@ -127,26 +135,36 @@ export const LevelGridItem: React.FC<Props> = ({
             >
                 <div className="level-grid-item__side-buttons-container">
                     <div
-                        onMouseEnter={handleMouseEnterSide(Side.LIGHT)}
-                        onMouseLeave={handleMouseLeaveSide(Side.LIGHT)}
-                        onClick={handleClickSide(id, Side.LIGHT)}
+                        onMouseEnter={
+                            isMobile
+                                ? undefined
+                                : handleMouseEnterSide(Side.LIGHT)
+                        }
+                        onMouseLeave={
+                            isMobile
+                                ? undefined
+                                : handleMouseLeaveSide(Side.LIGHT)
+                        }
                         className="half-circle half-circle--light"
                     >
                         <div className="background" />
-                        <div>
-                            <p>Light</p>
-                        </div>
+                        <p>Light</p>
                     </div>
                     <div
-                        onMouseEnter={handleMouseEnterSide(Side.SHADOW)}
-                        onMouseLeave={handleMouseLeaveSide(Side.SHADOW)}
-                        onClick={handleClickSide(id, Side.SHADOW)}
+                        onMouseEnter={
+                            isMobile
+                                ? undefined
+                                : handleMouseEnterSide(Side.SHADOW)
+                        }
+                        onMouseLeave={
+                            isMobile
+                                ? undefined
+                                : handleMouseLeaveSide(Side.SHADOW)
+                        }
                         className="half-circle half-circle--shadow"
                     >
                         <div className="background" />
-                        <div>
-                            <p>Shadow</p>
-                        </div>
+                        <p>Shadow</p>
                     </div>
                     <YingYang />
                 </div>

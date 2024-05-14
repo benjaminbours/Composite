@@ -140,6 +140,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
     });
     const [levels, setLevels] = useState<Level[]>([]);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
+    const [hoveredLevel, setHoveredLevel] = useState<number | undefined>();
 
     // responsible to fetch the levels
     useEffect(() => {
@@ -630,12 +631,20 @@ export function useMainController(initialScene: MenuScene | undefined) {
         ],
     );
 
-    // const handleSelectLevelOnLobby = useCallback((levelId: number) => {
+    const handleClickLevelItem = useCallback(
+        (levelId: number) => (e: React.MouseEvent) => {
+            const targetClassList = (e.target as HTMLElement).classList;
+            let side: Side | undefined = undefined;
+            if (targetClassList.contains('half-circle--light')) {
+                side = Side.LIGHT;
+            } else if (targetClassList.contains('half-circle--shadow')) {
+                side = Side.SHADOW;
+            }
 
-    // }, []);
+            if (side === undefined && window.innerWidth > 768) {
+                return;
+            }
 
-    const handleClickSide = useCallback(
-        (levelId: number, side: Side) => (e: React.MouseEvent) => {
             const yingYang =
                 e.currentTarget.parentElement?.querySelector('.ying-yang');
             if (!yingYang) {
@@ -664,7 +673,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 you: {
                     ...prev.you,
                     level: levelId,
-                    side,
+                    side: side,
                     isReady: false,
                 },
             }));
@@ -680,7 +689,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 side,
             ]);
 
-            if (lobbyMode === LobbyMode.DUO_WITH_RANDOM) {
+            if (lobbyMode === LobbyMode.DUO_WITH_RANDOM && side !== undefined) {
                 handleEnterRandomQueue(side, levelId);
             }
         },
@@ -826,9 +835,11 @@ export function useMainController(initialScene: MenuScene | undefined) {
         menuScene,
         refHashMap,
         lobbyMode,
+        hoveredLevel,
         handleChangeLobbyMode,
         exitLobby,
         setMenuScene,
+        setHoveredLevel,
         setState,
         handleClickReadyToPlay,
         handleGameStart,
@@ -842,7 +853,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
         fetchServerInfo,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
-        handleClickSide,
+        handleClickLevelItem,
         setLightIsPulsingFast,
         setShadowRotationSpeed,
         handleAlignWithTeamMate,

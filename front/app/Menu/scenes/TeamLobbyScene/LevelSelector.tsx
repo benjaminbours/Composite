@@ -23,9 +23,11 @@ export const LevelSelector: React.FC<Props> = ({ disabled }) => {
         lobbyMode,
         serverCounts,
         fetchTime,
+        hoveredLevel,
+        setHoveredLevel,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
-        handleClickSide,
+        handleClickLevelItem,
         fetchServerInfo,
     } = useContext(MainControllerContext);
     // author
@@ -146,7 +148,9 @@ export const LevelSelector: React.FC<Props> = ({ disabled }) => {
                                         src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
                                         you={state.you}
                                         mate={state.mate}
-                                        handleClickSide={handleClickSide}
+                                        isHovered={id === hoveredLevel}
+                                        setHoveredLevel={setHoveredLevel}
+                                        handleClick={handleClickLevelItem}
                                         handleMouseEnterSide={
                                             handleMouseEnterSideButton
                                         }

@@ -78,36 +78,6 @@ export default class Curve {
             }
             return width * x;
         },
-        invite_friend(width: number, height: number, isOnMobile: boolean) {
-            if (isOnMobile) {
-                return height * 0.5;
-            }
-            return width * 0.15;
-        },
-        level(width: number, height: number, isOnMobile: boolean) {
-            if (isOnMobile) {
-                return height * 0.5;
-            }
-            return width * 0.85;
-        },
-        faction(width: number, height: number, isOnMobile: boolean) {
-            if (isOnMobile) {
-                return height * 0.5;
-            }
-            return width * 0.5;
-        },
-        queue(
-            width: number,
-            height: number,
-            isOnMobile: boolean,
-            faction?: Side,
-        ) {
-            const position = faction === Side.LIGHT ? 1.2 : -0.2;
-            if (isOnMobile) {
-                return height * position;
-            }
-            return width * position;
-        },
         end_level(
             width: number,
             height: number,

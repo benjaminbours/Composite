@@ -46,10 +46,11 @@ export const SideMenu: React.FC<Props> = ({ dictionary }) => {
                 icon: <HandymanIcon />,
                 href: Route.LEVEL_EDITOR_ROOT,
             },
-            {
-                text: dictionary.nav.community,
-                icon: <PeopleIcon />,
-            },
+            // TODO: Add button login / account
+            // {
+            //     text: dictionary.nav.community,
+            //     icon: <PeopleIcon />,
+            // },
         ],
         [dictionary],
     );
@@ -57,10 +58,7 @@ export const SideMenu: React.FC<Props> = ({ dictionary }) => {
     return (
         <>
             <IconButton
-                // size="small"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
+                className="hamburger-button"
                 onClick={() => setIsOpen(true)}
                 color="inherit"
             >

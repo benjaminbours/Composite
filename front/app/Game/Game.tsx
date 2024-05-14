@@ -1,7 +1,7 @@
 'use client';
 // vendors
 import { gsap } from 'gsap';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     computeBoundsTree,
     disposeBoundsTree,
@@ -60,6 +60,8 @@ function Game({
     const canvasMiniMapRef = useRef<HTMLCanvasElement>(null);
     const appRef = useRef<App>();
     const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
+    const [isMobileInteractButtonAdded, setIsMobileInteractButtonAdded] =
+        useState(false);
 
     const isMobile = window.innerWidth <= 768;
 
@@ -74,6 +76,14 @@ function Game({
         return () => {
             window.removeEventListener('resize', onResize);
         };
+    }, []);
+
+    const handleAddMobileInteractButton = useCallback(() => {
+        setIsMobileInteractButtonAdded(true);
+    }, []);
+
+    const handleRemoveMobileInteractButton = useCallback(() => {
+        setIsMobileInteractButtonAdded(false);
     }, []);
 
     useEffect(() => {
@@ -115,6 +125,12 @@ function Game({
                 multiplayerGameProps.level,
                 multiplayerGameProps.socketController,
             );
+            if (isMobile) {
+                appRef.current.onAddMobileInteractButton =
+                    handleAddMobileInteractButton;
+                appRef.current.onRemoveMobileInteractButton =
+                    handleRemoveMobileInteractButton;
+            }
             setIsSynchronizingTime(true);
         } else if (levelEditorProps) {
             const initialGameState = new GameState(
@@ -206,21 +222,27 @@ function Game({
         <>
             {isSynchronizingTime && (
                 <div className="game-sync-overlay">
-                    <h3 className="title-h3">is Synchronizing</h3>
+                    <h3 className="title-h3">Synchronizing</h3>
                     <CircularProgress className="game-sync-overlay__progress" />
                     <div>
-                        <div className="game-sync-overlay__motions">
-                            <h4 className="title-h4">Default motions</h4>
-                            <div>
-                                <span className="keyboard-key">A</span>
-                                <span className="keyboard-key">D</span>
+                        {!isMobile && (
+                            <div className="game-sync-overlay__motions">
+                                <h4 className="title-h4">Default motions</h4>
+                                <div>
+                                    <span className="keyboard-key">A</span>
+                                    <span className="keyboard-key">D</span>
+                                </div>
+                                <div>
+                                    <span className="keyboard-key rotate">
+                                        ⮕
+                                    </span>
+                                    <span className="keyboard-key">⮕</span>
+                                </div>
+                                <span className="keyboard-key space">
+                                    Space
+                                </span>
                             </div>
-                            <div>
-                                <span className="keyboard-key rotate">⮕</span>
-                                <span className="keyboard-key">⮕</span>
-                            </div>
-                            <span className="keyboard-key space">Space</span>
-                        </div>
+                        )}
                         <div className="game-sync-overlay__tips">
                             <h4 className="title-h4">Tips</h4>
                             <p>
@@ -230,16 +252,23 @@ function Game({
                             <Divider />
                             <p>{`Any door can be open.`}</p>
                             <Divider />
-                            <p>
-                                {`It's funnier if you can speak by voice with your teammate.`}
-                            </p>
-                            <DiscordButton className='buttonRect' />
+                            {!isMobile && (
+                                <>
+                                    <p>
+                                        {`It's funnier if you can speak by voice with your teammate.`}
+                                    </p>
+                                    <DiscordButton className="buttonRect" />
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
             {isMobile && appRef.current && (
-                <MobileHUD inputsManager={appRef.current.inputsManager} />
+                <MobileHUD
+                    isMobileInteractButtonAdded={isMobileInteractButtonAdded}
+                    inputsManager={appRef.current.inputsManager}
+                />
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }} />
             <canvas

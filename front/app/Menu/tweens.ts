@@ -42,7 +42,7 @@ export function curveToStep(
  * Home
  */
 function homeOut(homeInterface: HTMLDivElement) {
-    return gsap.to('.home-container > *', {
+    return gsap.to('.home-scene > *', {
         duration: 0.5,
         opacity: 0,
         onComplete: () => {
@@ -53,7 +53,7 @@ function homeOut(homeInterface: HTMLDivElement) {
 
 export function homeIn(homeInterface: HTMLDivElement) {
     return gsap.fromTo(
-        '.home-container > *',
+        '.home-scene > *',
         {
             opacity: 0,
         },

@@ -2,7 +2,10 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100vh;
+
+    @media (min-width: 768px) {
+        height: 100vh;
+    }
 
     h1 {
         text-transform: uppercase;
@@ -23,28 +26,6 @@
 
     .title-h3 {
         mix-blend-mode: difference;
-    }
-
-    .buttons-container {
-        display: grid;
-        gap: 10px;
-        margin-top: 10px;
-
-        button,
-        a {
-            min-width: 300px;
-            max-width: 300px;
-        }
-
-        p {
-            mix-blend-mode: difference;
-            color: white;
-        }
-
-        .MuiCircularProgress-root {
-            mix-blend-mode: difference;
-            color: white;
-        }
     }
 
     .rect-button {
@@ -96,6 +77,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: 10px 20px !important;
 
         > div {
             display: flex;
@@ -145,14 +127,52 @@
             }
         }
     }
+}
 
-    // @media (min-width: 768px) {
-    // }
+.team-lobby-scene__waiting-friend-container {
+    background: black;
+    border: solid white 2px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    width: 100%;
+    color: white;
+}
+
+.team-lobby-scene__buttons-container {
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+    gap: 10px;
+    margin: 10px auto;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+
+    button,
+    a {
+        width: 100% !important;
+        padding: 10px 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .MuiCircularProgress-root {
+        mix-blend-mode: difference;
+        color: white;
+        margin: 0 auto;
+    }
 }
 
 .teammate-joined-text {
     display: flex;
     align-items: center;
+    width: 100%;
+    text-align: center;
+    background: black;
+    border: solid white 2px;
+    color: white;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 0;
 
     svg {
         margin-right: 10px;
@@ -170,6 +190,10 @@
     h1 {
         margin: 0;
         margin-left: 15px;
+    }
+
+    @media (max-width: 768px) {
+        margin-top: 20px;
     }
 }
 
@@ -260,27 +284,29 @@
         transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         overflow-y: auto;
         max-height: 400px;
-
-        > li {
-            width: 200px;
-            height: 150px;
-            box-sizing: border-box;
-            padding: 10px;
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     }
 
-    // @media (max-height: 920px) {
-    //     min-height: 350px;
+    li {
+        width: 200px;
+        height: 150px;
+        box-sizing: border-box;
+        padding: 10px;
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-    //     .level-portal {
-    //         cursor: pointer;
-    //         transition: 0.3s ease-out;
-    //     }
-    // }
+    @media (max-width: 768px) {
+        ul {
+            box-sizing: border-box;
+        }
+
+        li {
+            width: 50%;
+            margin: 10px 0;
+        }
+    }
 }
 
 $size: 50px;
@@ -307,6 +333,7 @@ $size: 50px;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        pointer-events: none;
 
         .background {
             position: absolute;
@@ -319,12 +346,14 @@ $size: 50px;
             width: 100%;
             z-index: -1;
             transition: 0.3s ease-out;
+            pointer-events: none;
         }
 
         p {
             margin: 0;
             mix-blend-mode: normal;
             font-size: 10px;
+            pointer-events: none;
         }
 
         &--shadow {
@@ -400,7 +429,10 @@ $size: 50px;
 
         .level-grid-item__side-buttons-container {
             opacity: 1;
-            pointer-events: initial;
+
+            .half-circle {
+                pointer-events: initial;
+            }
         }
     }
 
@@ -411,7 +443,10 @@ $size: 50px;
 
         .level-grid-item__side-buttons-container {
             opacity: 1;
-            pointer-events: initial;
+
+            .half-circle {
+                pointer-events: initial;
+            }
         }
     }
 
@@ -431,7 +466,10 @@ $size: 50px;
 
         .half-circle--shadow {
             opacity: 0;
-            pointer-events: none;
+
+            .half-circle {
+                pointer-events: none;
+            }
         }
     }
 
@@ -451,7 +489,10 @@ $size: 50px;
 
         .half-circle--light {
             opacity: 0;
-            pointer-events: none;
+
+            .half-circle {
+                pointer-events: none;
+            }
         }
     }
 }

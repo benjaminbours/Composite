@@ -1,3 +1,4 @@
+'use client';
 // vendors
 import React from 'react';
 import Link from 'next/link';
@@ -11,13 +12,17 @@ import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { Route } from '../../types';
 import { UserMenu } from './UserMenu';
 import { getDictionary } from '../../../getDictionary';
-// import { SideMenu } from '../../03_organisms/SideMenu';
+import { SideMenu } from '../../03_organisms/SideMenu';
+import { useWindowSize } from '../../hooks/useWindowSize';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
 }
 
 export const TopBar: React.FC<Props> = ({ dictionary }) => {
+    const { width } = useWindowSize();
+    const isMobile = width !== undefined && width <= 768;
+
     return (
         <AppBar
             elevation={10}
@@ -29,50 +34,41 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
                     <h2>Composite</h2>
                 </Link>
                 <Divider orientation="vertical" flexItem />
-                <Link
-                    href={Route.HOME}
-                    legacyBehavior
-                    passHref
-                    className="top-bar__logo"
-                >
-                    <Button
-                        size="small"
-                        variant="contained"
-                        startIcon={<SportsEsportsIcon />}
-                    >
-                        {dictionary.nav.play}
-                    </Button>
-                </Link>
-                <Link
-                    href={Route.LEVEL_EDITOR_ROOT}
-                    legacyBehavior
-                    passHref
-                    className="top-bar__logo"
-                >
-                    <Button
-                        size="small"
-                        variant="contained"
-                        startIcon={<HandymanIcon />}
-                    >
-                        {dictionary.nav.editor}
-                    </Button>
-                </Link>
-                {/* <Link
-                    href={Route.LEVEL_EDITOR_ROOT}
-                    legacyBehavior
-                    passHref
-                    className="top-bar__logo"
-                >
-                    <Button
-                        size="small"
-                        variant="contained"
-                        startIcon={<PeopleIcon />}
-                    >
-                        {dictionary.nav.community}
-                    </Button>
-                </Link> */}
-                <UserMenu dictionary={dictionary} />
-                {/* <SideMenu dictionary={dictionary} /> */}
+                {isMobile ? (
+                    <SideMenu dictionary={dictionary} />
+                ) : (
+                    <>
+                        <Link
+                            href={Route.HOME}
+                            legacyBehavior
+                            passHref
+                            className="top-bar__logo"
+                        >
+                            <Button
+                                size="small"
+                                variant="contained"
+                                startIcon={<SportsEsportsIcon />}
+                            >
+                                {dictionary.nav.play}
+                            </Button>
+                        </Link>
+                        <Link
+                            href={Route.LEVEL_EDITOR_ROOT}
+                            legacyBehavior
+                            passHref
+                            className="top-bar__logo"
+                        >
+                            <Button
+                                size="small"
+                                variant="contained"
+                                startIcon={<HandymanIcon />}
+                            >
+                                {dictionary.nav.editor}
+                            </Button>
+                        </Link>
+                        <UserMenu dictionary={dictionary} />
+                    </>
+                )}
             </Toolbar>
         </AppBar>
     );

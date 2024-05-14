@@ -28,6 +28,7 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import PersonIcon from '@mui/icons-material/Person';
 import Badge from '@mui/material/Badge';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -162,6 +163,8 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         className="team-lobby-scene__tabs"
                         value={lobbyMode}
                         textColor="inherit"
+                        variant="scrollable"
+                        scrollButtons="auto"
                         onChange={handleTabChange}
                     >
                         <Tab label="Solo (coming soon)" disabled />
@@ -190,23 +193,27 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                     </Tabs>
                 </div>
                 <LevelSelector disabled={state.isInQueue} />
-                <div className="buttons-container">
+                <div className="team-lobby-scene__buttons-container">
                     {state.mate && (
                         <>
                             <p
                                 className="teammate-joined-text"
                                 style={{
-                                    maxWidth: 344,
                                     textAlign: 'left',
                                 }}
                             >
+                                <InfoIcon
+                                    style={{
+                                        color: 'white',
+                                    }}
+                                />
                                 <PersonIcon />
                                 <span>
                                     <b>{state.mate.account?.name || 'Guest'}</b>{' '}
                                     joined the lobby
                                 </span>
                             </p>
-                            <DiscordButton className='rect-button' />
+                            <DiscordButton className="rect-button" />
                         </>
                     )}
                     {lobbyMode === LobbyMode.DUO_WITH_FRIEND && (
@@ -249,10 +256,20 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                                 />
                             )}
                             {state.isWaitingForFriend && (
-                                <>
+                                <div className="team-lobby-scene__waiting-friend-container">
+                                    <InfoIcon
+                                        style={{
+                                            color: 'white',
+                                            marginTop: 10,
+                                        }}
+                                    />
+                                    <p>
+                                        Send the link to your friend so he can
+                                        join you!
+                                    </p>
                                     <p>Waiting for friend...</p>
                                     <CircularProgress />
-                                </>
+                                </div>
                             )}
                         </>
                     )}

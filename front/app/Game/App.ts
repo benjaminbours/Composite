@@ -109,6 +109,8 @@ export default class App {
 
     public mode: AppMode;
     public onLevelEditorValidation: (() => void) | undefined = undefined;
+    public onAddMobileInteractButton: (() => void) | undefined = undefined;
+    public onRemoveMobileInteractButton: (() => void) | undefined = undefined;
     public mouseSelectableObjects: Object3D[] = [];
     public mousePosition = new Vector2();
     private mouseRaycaster = new Raycaster();
@@ -691,7 +693,7 @@ export default class App {
                         this.mode === AppMode.GAME &&
                         this.inputsManager.inputsActive.interact;
 
-                    if (shouldFocus) {
+                    if (shouldFocus && window.innerWidth > 768) {
                         shouldDisplayInteractHelper = false;
                     }
                     doorOpener.focusCamera(this.camera, shouldFocus);
@@ -708,14 +710,24 @@ export default class App {
         }
 
         if (shouldDisplayInteractHelper && !this.isTextOverlayDisplayed) {
-            this.addTextOverlay(
-                'Press <span class="keyboard-key">F</span> to interact',
-            );
+            if (window.innerWidth <= 768 && this.onAddMobileInteractButton) {
+                this.isTextOverlayDisplayed = true;
+                this.onAddMobileInteractButton();
+            } else {
+                this.addTextOverlay(
+                    'Press <span class="keyboard-key">F</span> to interact',
+                );
+            }
         } else if (
             !shouldDisplayInteractHelper &&
             this.isTextOverlayDisplayed
         ) {
-            this.removeTextOverlay();
+            if (window.innerWidth <= 768 && this.onRemoveMobileInteractButton) {
+                this.onRemoveMobileInteractButton();
+                this.isTextOverlayDisplayed = false;
+            } else {
+                this.removeTextOverlay();
+            }
         }
 
         for (let i = 0; i < this.level.bounces.length; i++) {

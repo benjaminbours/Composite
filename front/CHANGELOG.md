@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.19
+
+### Patch Changes
+
+- Add mobile support for the game. Not the editor.
+
 ## 1.0.0-next.18
 
 ### Patch Changes

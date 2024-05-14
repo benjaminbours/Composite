@@ -164,7 +164,7 @@ const pastEvents: TimelineEvent[] = [
                                 href="https://www.gabrielgambetta.com/client-server-game-architecture.html"
                                 target="_blank"
                             >
-                                series&nbsp;of&nbsp;article&nbsp;from&nbsp;Gabriel&nbsp;Gambetta
+                                series of article from Gabriel Gambetta
                             </a>{' '}
                             to name only one, I moved from my initial proof of
                             concept, which was very naive and not scalable at
@@ -645,7 +645,7 @@ export default async function Timeline({ params: { lng } }: Props) {
             <TopBar dictionary={dictionary.common} />
             <main className="timeline-page">
                 <div className="main-container">
-                    <h1>Composite - Timeline</h1>
+                    <h1 className="title-h2">Timeline</h1>
                     <ul className="timeline">
                         {pastEvents.map((event, index) => (
                             <li key={index} className="timeline-event">
