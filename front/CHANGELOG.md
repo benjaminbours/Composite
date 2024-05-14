@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.21
+
+### Patch Changes
+
+- Improve mobile support
+
 ## 1.0.0-next.20
 
 ### Patch Changes

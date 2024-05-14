@@ -29,6 +29,7 @@
 
 ### High priority
 
+- Add rating system for level, we can imagine multiple rating, one for fun and enjoyment, another one for the difficulty, and maybe more, etc.
 - While in queue, propose an alternative than waiting infinitely
 - Add button to reset bounces in level editor
 - Add issues on github with tag "good first contribution"
@@ -42,7 +43,7 @@
 - Update the timeline. Talk in the timeline about brilliant and how it help me achieve what I needed in terms of math.
 - Improve navigation in timeline, use button to go to anchor
 - Add appropriate license for the project, VERY IMPORTANT
-- While the project is not responsive, display a message to invite people to comeback with a laptop
+- Display a message to invite people to comeback with a laptop if they use the level editor
 - Vue niveau creer par la communaute
   - call to action pour creer tes propres niveaux
   - Obviously, good UX / tuto / tips pour creer tes niveaux
@@ -55,6 +56,7 @@
 
 ### Medium priority
 
+- When you wait for a player on lobby, have a playground with the solo mode to make the wait more enjoyable.
 - Ability to add doors open by default
 - Add possibility to load custom geometry in the scene, would be awesome to avoid too geometric level
 - When elements are locked, we have not visual indication about what is each element, just name
@@ -80,7 +82,6 @@
 - Add session recover with websocket => https://socket.io/docs/v4/connection-state-recovery
 - Use the already stored "entryNormal" inside the element to bounce to make coherent the entry and exit normal of the player.
 - charger la rotation du bounce pour propulser plus loin son team mate, type gros coup de bate de baseball
-- Make the project responsive
 - L3Gl0N__: Moi ce que je kifferai avoir à la place du synchronize .... Ce serais une grande vue comme ça et cela zoom sur le perso et seulement après tu peux jouer, le delai d'animation sert de synchro
 - S4oul => https://roadmap.sh/cpp first, the connections and styles are interesting, then it can be nice to link roadmap points with github ticket. The goal is to reduce friction and ease a maximum the eventual collaboration experience.
 - Timeline management while testing the level, to easily come back at any moment in the level. Multiple timeline, test different things in the same time, or timeline respective for shadow and light.
