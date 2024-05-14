@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { SnackbarProvider } from 'notistack';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 import { StoreProvider } from 'easy-peasy';
 import MainApp from './MainApp';
 import { configureStore } from './core/frameworks';
@@ -10,6 +10,8 @@ import { MenuScene, Route } from './types';
 import { useStoreActions } from './hooks';
 import { setupProjectEnv } from './utils/setup';
 import { getDictionary } from '../getDictionary';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 setupProjectEnv('client');
 
@@ -44,6 +46,16 @@ export const AppContext = createContext({
     setMainAppContext: (ctx: Record<string, any>) => {},
 });
 
+function SnackbarCloseButton({ snackbarKey }: any) {
+    const { closeSnackbar } = useSnackbar();
+
+    return (
+        <IconButton onClick={() => closeSnackbar(snackbarKey)}>
+            <CloseIcon />
+        </IconButton>
+    );
+}
+
 export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
     const [mainAppContext, setMainAppContext] = useState<Record<string, any>>(
         {},
@@ -77,7 +89,11 @@ export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
 
     return (
         <ThemeProvider theme={darkTheme}>
-            <SnackbarProvider>
+            <SnackbarProvider
+                action={(snackbarKey) => (
+                    <SnackbarCloseButton snackbarKey={snackbarKey} />
+                )}
+            >
                 <StoreProvider store={store}>
                     <WithRetrieveSession dictionary={dictionary} lng={lng}>
                         <AppContext.Provider
