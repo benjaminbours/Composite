@@ -53,7 +53,7 @@ services:
       - /home/bbo/composite/api-uploads:/app/uploads
 
   front:
-    image: boursbenjamin/composite-front:1.0.0-next.19
+    image: boursbenjamin/composite-front:1.0.0-next.20
     depends_on:
       - db
     env_file:

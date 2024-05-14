@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.20
+
+### Patch Changes
+
+- Improve mobile HUD and fix medie queries
+
 ## 1.0.0-next.19
 
 ### Patch Changes

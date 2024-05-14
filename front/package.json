@@ -1,7 +1,7 @@
 {
   "name": "composite-front",
   "description": "",
-  "version": "1.0.0-next.19",
+  "version": "1.0.0-next.20",
   "private": true,
   "scripts": {
     "dev": "next dev",
