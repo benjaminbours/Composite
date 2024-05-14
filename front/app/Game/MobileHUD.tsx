@@ -50,6 +50,7 @@ export const MobileHUD: React.FC<Props> = ({
                     className="mobile-hud__button mobile-hud__interact"
                     onTouchStart={handleTouchStart('interact')}
                     onTouchEnd={handleTouchEnd('interact')}
+                    disableTouchRipple
                 >
                     Interact
                 </IconButton>
@@ -58,6 +59,7 @@ export const MobileHUD: React.FC<Props> = ({
                 className="mobile-hud__button mobile-hud__arrow-left"
                 onTouchStart={handleTouchStart('left')}
                 onTouchEnd={handleTouchEnd('left')}
+                disableTouchRipple
             >
                 <ArrowForwardIosIcon />
             </IconButton>
@@ -65,6 +67,7 @@ export const MobileHUD: React.FC<Props> = ({
                 className="mobile-hud__button mobile-hud__jump"
                 onTouchStart={handleTouchStart('jump')}
                 onTouchEnd={handleTouchEnd('jump')}
+                disableTouchRipple
             >
                 <SpaceBarIcon />
             </IconButton>
@@ -72,6 +75,7 @@ export const MobileHUD: React.FC<Props> = ({
                 className="mobile-hud__button mobile-hud__arrow-right"
                 onTouchStart={handleTouchStart('right')}
                 onTouchEnd={handleTouchEnd('right')}
+                disableTouchRipple
             >
                 <ArrowForwardIosIcon />
             </IconButton>
