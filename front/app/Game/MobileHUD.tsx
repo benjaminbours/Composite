@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import InputsManager from './Player/InputsManager';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SpaceBarIcon from '@mui/icons-material/SpaceBar';
@@ -26,6 +26,22 @@ export const MobileHUD: React.FC<Props> = ({
         },
         [],
     );
+
+    useEffect(() => {
+        const onTouchStart = (e: any) => {
+            // is not near edge of view, exit
+            if (e.pageX > 10 && e.pageX < window.innerWidth - 10) {
+                return;
+            }
+            // prevent swipe to navigate gesture
+            e.preventDefault();
+        };
+
+        document.addEventListener('touchstart', onTouchStart);
+        return () => {
+            document.removeEventListener('touchstart', onTouchStart);
+        };
+    }, []);
 
     return (
         <div className="mobile-hud">
