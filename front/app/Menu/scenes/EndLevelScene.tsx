@@ -1,7 +1,6 @@
 // vendors
-import Script from 'next/script';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 // our libs
 import { Side } from '@benjaminbours/composite-core';
@@ -43,6 +42,30 @@ export const EndLevelScene: React.FC<Props> = ({
         [`end-level-scene--${color}`]: side !== undefined ? true : false,
         unmount: !isMount,
     });
+
+    useEffect(() => {
+        if (!isMount) {
+            return;
+        }
+
+        (window as any).twttr = (function (d, s, id) {
+            var js: any,
+                fjs: any = d.getElementsByTagName(s)[0],
+                t = (window as any).twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = 'https://platform.twitter.com/widgets.js';
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function (f: any) {
+                t._e.push(f);
+            };
+
+            return t;
+        })(document, 'script', 'twitter-wjs');
+    }, [isMount]);
 
     return (
         <div ref={endLevelRef} className={cssClass}>
@@ -131,24 +154,6 @@ export const EndLevelScene: React.FC<Props> = ({
                     >
                         Tweet
                     </a>
-                    <Script id="twitter-post-button-script">{`
-    window.twttr = (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0],
-          t = window.twttr || {};
-        if (d.getElementById(id)) return t;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "https://platform.twitter.com/widgets.js";
-        fjs.parentNode.insertBefore(js, fjs);
-      
-        t._e = [];
-        t.ready = function(f) {
-          t._e.push(f);
-        };
-      
-        return t;
-      }(document, "script", "twitter-wjs"));
-    `}</Script>
                 </div>
                 <div>
                     <CopyToClipBoardButton
