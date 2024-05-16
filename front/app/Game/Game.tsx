@@ -33,6 +33,11 @@ interface LevelEditorProps {
     onTransformControlsObjectChange: (object: THREE.Object3D) => void;
 }
 
+interface SoloGameProps {
+    initialGameState: GameState;
+    level: Level;
+}
+
 interface MultiplayerGameProps {
     initialGameState: GameState;
     socketController?: SocketController;
@@ -44,6 +49,7 @@ interface Props {
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
+    soloGameProps?: SoloGameProps;
     multiplayerGameProps?: MultiplayerGameProps;
     levelEditorProps?: LevelEditorProps;
 }
@@ -55,6 +61,7 @@ function Game({
     inputsManager,
     multiplayerGameProps,
     levelEditorProps,
+    soloGameProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasMiniMapRef = useRef<HTMLCanvasElement>(null);
@@ -177,6 +184,23 @@ function Game({
                 levelEditorProps.onTransformControlsObjectChange,
             );
             levelEditorProps.onAppLoaded(appRef.current);
+        } else if (soloGameProps) {
+            appRef.current = new App(
+                canvasRef.current,
+                canvasMiniMapRef.current,
+                soloGameProps.initialGameState,
+                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                inputsManager,
+                AppMode.GAME,
+                soloGameProps.level,
+                undefined,
+            );
+            if (isMobile) {
+                appRef.current.onAddMobileInteractButton =
+                    handleAddMobileInteractButton;
+                appRef.current.onRemoveMobileInteractButton =
+                    handleRemoveMobileInteractButton;
+            }
         }
         // https://greensock.com/docs/v3/GSAP/gsap.ticker
 

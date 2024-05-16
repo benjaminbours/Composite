@@ -411,6 +411,20 @@ $size: 50px;
         }
     }
 
+    &--hovered-solo {
+        .level-grid-item__border-container {
+            opacity: 1;
+        }
+
+        .level-grid-item__side-buttons-container {
+            opacity: 0;
+
+            .half-circle {
+                pointer-events: none;
+            }
+        }
+    }
+
     &--selected {
         .level-grid-item__border-container {
             opacity: 1;
@@ -421,6 +435,32 @@ $size: 50px;
 
             .half-circle {
                 pointer-events: initial;
+            }
+        }
+    }
+
+    &--selected-solo {
+        .level-grid-item__border-container {
+            opacity: 1;
+        }
+
+        .level-grid-item__side-buttons-container {
+            opacity: 1;
+
+            .half-circle {
+                pointer-events: none;
+            }
+
+            .half-circle--light,
+            .half-circle--shadow {
+                opacity: 0;
+            }
+
+            .ying-yang {
+                .black,
+                .white {
+                    opacity: 1;
+                }
             }
         }
     }

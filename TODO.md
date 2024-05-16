@@ -24,6 +24,7 @@
 ## Ideas
 
 - Add arrow on the HUD to indicate direction of your team mate when he is far
+- Players leave a trail behind them and it can impact the world
 
 ## Features
 

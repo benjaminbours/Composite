@@ -159,7 +159,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         scrollButtons="auto"
                         onChange={handleTabChange}
                     >
-                        <Tab label="Solo (coming soon)" disabled />
+                        <Tab label="Solo" />
                         <Tab label="Duo with friend" />
                         <Tab
                             label={

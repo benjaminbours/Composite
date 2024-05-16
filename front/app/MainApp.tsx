@@ -20,6 +20,7 @@ import { AppContext } from './WithMainApp';
 import { getDictionary } from '../getDictionary';
 import { BottomRightInfo } from './BottomRightInfo';
 import { useWindowSize } from './hooks/useWindowSize';
+import { Side } from '@benjaminbours/composite-core';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -115,12 +116,28 @@ function MainApp({ initialScene, dictionary }: Props) {
             )}
             {state.gameState && state.loadedLevel && gameIsPlaying && (
                 <Game
-                    side={state.you.side!}
-                    multiplayerGameProps={{
-                        socketController: socketController.current,
-                        initialGameState: state.gameState,
-                        level: state.loadedLevel,
-                    }}
+                    side={
+                        state.you.side === undefined
+                            ? Side.SHADOW
+                            : state.you.side
+                    }
+                    multiplayerGameProps={
+                        socketController.current
+                            ? {
+                                  socketController: socketController.current,
+                                  initialGameState: state.gameState,
+                                  level: state.loadedLevel,
+                              }
+                            : undefined
+                    }
+                    soloGameProps={
+                        socketController.current
+                            ? undefined
+                            : {
+                                  initialGameState: state.gameState,
+                                  level: state.loadedLevel,
+                              }
+                    }
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
                     inputsManager={inputsManager.current}

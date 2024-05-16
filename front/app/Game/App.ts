@@ -182,16 +182,12 @@ export default class App {
             {
                 light: new Vector3(
                     level?.lightStartPosition[0],
-                    level?.lightStartPosition[1] === 0
-                        ? 0.08
-                        : level?.lightStartPosition[1],
+                    level?.lightStartPosition[1],
                     0,
                 ).multiplyScalar(gridSize),
                 shadow: new Vector3(
                     level?.shadowStartPosition[0],
-                    level?.shadowStartPosition[1] === 0
-                        ? 0.08
-                        : level?.shadowStartPosition[1],
+                    level?.shadowStartPosition[1],
                     0,
                 ).multiplyScalar(gridSize),
             },
