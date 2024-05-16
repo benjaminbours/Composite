@@ -209,7 +209,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                     account: data.user,
                     isReady: false,
                     side: data.side,
-                    level: data.level || levels[0].id,
+                    level: data.level,
                 },
                 mateDisconnected: false,
                 shouldDisplayQueueInfo: false,
@@ -221,7 +221,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 variant: 'success',
             });
         },
-        [enqueueSnackbar, levels],
+        [enqueueSnackbar],
     );
 
     const handleTeamMateDisconnect = useCallback(() => {

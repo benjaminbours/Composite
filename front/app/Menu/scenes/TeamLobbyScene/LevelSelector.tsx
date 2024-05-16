@@ -42,16 +42,6 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
     }, [levels]);
     const [author, setAuthor] = useState<string>(authorList[0]);
 
-    // effect to randomize portal animations
-    useEffect(() => {
-        document
-            .querySelectorAll<HTMLElement>('.level-portal')
-            .forEach((portal) => {
-                portal.style.setProperty('--x', `${Math.random() * 100 - 50}%`); // Random x between -50% and 50%
-                portal.style.setProperty('--y', `${Math.random() * 100 - 50}%`); // Random y between -50% and 50%
-            });
-    }, []);
-
     const progress = useMemo(() => {
         return (fetchTime / QUEUE_INFO_FETCH_INTERVAL) * 100;
     }, [fetchTime]);
