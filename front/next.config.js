@@ -15,6 +15,7 @@ const nextConfig = {
         return config;
     },
     reactStrictMode: true,
+    productionBrowserSourceMaps: true,
     env: {
         APP_VERSION: version,
     },
