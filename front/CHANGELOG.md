@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.24
+
+### Patch Changes
+
+- Fix crash when inviting a friend
+
 ## 1.0.0-next.23
 
 ### Patch Changes
