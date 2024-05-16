@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.23
+
+### Patch Changes
+
+- Add UI improvement for mobile, make it more clear what is the main call to action to start game
+
 ## 1.0.0-next.22
 
 ### Patch Changes
