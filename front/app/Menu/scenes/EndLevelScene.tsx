@@ -100,7 +100,7 @@ export const EndLevelScene: React.FC<Props> = ({
             </div>
             <div className="end-level-scene__play-button-container">
                 <button
-                    className="buttonRect end-level-scene__play-button"
+                    className="buttonRect end-level-scene__play-button main-action"
                     onMouseEnter={() => {
                         if (side === Side.LIGHT) {
                             setLightIsPulsingFast(true);
@@ -157,10 +157,7 @@ export const EndLevelScene: React.FC<Props> = ({
                 </div>
                 <div>
                     <CopyToClipBoardButton
-                        text={
-                            process.env.NEXT_PUBLIC_URL ||
-                            'Missing env variable'
-                        }
+                        text={'Share the project'}
                         textToCopy={
                             process.env.NEXT_PUBLIC_URL ||
                             'Missing env variable'

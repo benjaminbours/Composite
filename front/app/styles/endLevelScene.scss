@@ -50,6 +50,15 @@
     margin: 0 auto;
     max-width: 500px;
 
+    button {
+        min-width: 300px;
+        max-width: 300px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     @media (max-width: 768px), (max-height: 500px) {
         max-width: auto;
         width: 90%;
@@ -94,6 +103,10 @@
     .copy-to-clipboard {
         p {
             margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 300px;
         }
 
         svg {
@@ -152,10 +165,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    mix-blend-mode: normal;
+    font-weight: bold;
+    min-width: 300px;
+    max-width: 300px;
 
     svg {
         width: 30px;
         height: 30px;
         margin-left: 10px;
+        transition: 0.3s ease-out;
+    }
+
+    @media (min-width: 768px), (min-height: 500px) {
+        &:hover {
+            color: black;
+            background: $mainActionColor;
+
+            svg {
+                transform: rotate(90deg);
+            }
+        }
     }
 }

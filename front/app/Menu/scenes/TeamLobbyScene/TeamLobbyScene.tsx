@@ -14,21 +14,16 @@ import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { useStoreState } from '../../../hooks';
 import { AuthModal } from '../../../03_organisms/AuthModal';
-import CircularProgress from '@mui/material/CircularProgress';
 import { LevelSelector } from './LevelSelector';
 import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
-import { DiscordButton } from '../../../02_molecules/DiscordButton';
-import { CopyToClipBoardButton } from '../../CopyToClipboardButton';
-import { QueueTimeInfo } from './QueueTimeInfo';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { MainControllerContext } from '../../../MainApp';
 import { LobbyMode } from '../../../useMainController';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import PersonIcon from '@mui/icons-material/Person';
 import Badge from '@mui/material/Badge';
-import InfoIcon from '@mui/icons-material/Info';
+import { Actions } from './Actions';
+import { useWindowSize } from '../../../hooks/useWindowSize';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -129,14 +124,11 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
             [handleChangeLobbyMode],
         );
 
-        const isAlignWithTeamMate =
-            state.mate &&
-            state.you.level === state.mate.level &&
-            state.you.side !== undefined &&
-            state.mate.side !== undefined &&
-            state.you.side !== null &&
-            state.mate.side !== null &&
-            state.you.side !== state.mate.side;
+        const { width, height } = useWindowSize();
+        const isMobile =
+            width !== undefined &&
+            height !== undefined &&
+            (width <= 768 || height <= 500);
 
         return (
             <div ref={refHashMap.teamLobbyRef} className={cssClass}>
@@ -192,120 +184,8 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         />
                     </Tabs>
                 </div>
-                <LevelSelector disabled={state.isInQueue} />
-                <div className="team-lobby-scene__buttons-container">
-                    {state.mate && (
-                        <>
-                            <p
-                                className="teammate-joined-text"
-                                style={{
-                                    textAlign: 'left',
-                                }}
-                            >
-                                <InfoIcon
-                                    style={{
-                                        color: 'white',
-                                    }}
-                                />
-                                <PersonIcon />
-                                <span>
-                                    <b>{state.mate.account?.name || 'Guest'}</b>{' '}
-                                    joined the lobby
-                                </span>
-                            </p>
-                            <DiscordButton className="rect-button" />
-                        </>
-                    )}
-                    {lobbyMode === LobbyMode.DUO_WITH_FRIEND && (
-                        <>
-                            {state.mate ? (
-                                <>
-                                    <button
-                                        className="rect-button"
-                                        disabled={
-                                            state.mate.level === undefined ||
-                                            state.mate.level === null ||
-                                            state.mate.side === null ||
-                                            state.mate.side === undefined
-                                        }
-                                        onClick={handleAlignWithTeamMate}
-                                    >
-                                        {isAlignWithTeamMate ? (
-                                            <>
-                                                Aligned with team mate
-                                                <CheckBoxIcon color="success" />
-                                            </>
-                                        ) : (
-                                            <>
-                                                Align with team mate{' '}
-                                                <CheckBoxOutlineBlankIcon />
-                                            </>
-                                        )}
-                                    </button>
-                                    {/* <p style={{ maxWidth: 344, textAlign: 'left' }}>
-                                    {`It's funnier if you can speak by voice with your
-                            teammate. We have dedicated vocal rooms on Discord.`}
-                                </p> */}
-                                    {/* TODO: Add integration discord to create vocal room on demand */}
-                                </>
-                            ) : (
-                                <CopyToClipBoardButton
-                                    className="rect-button"
-                                    text="Copy invite link"
-                                    asyncAction={handleInviteFriend}
-                                />
-                            )}
-                            {state.isWaitingForFriend && (
-                                <div className="team-lobby-scene__waiting-friend-container">
-                                    <InfoIcon
-                                        style={{
-                                            color: 'white',
-                                            marginTop: 10,
-                                        }}
-                                    />
-                                    <p>
-                                        Send the link to your friend so he can
-                                        join you!
-                                    </p>
-                                    <p>Waiting for friend...</p>
-                                    <CircularProgress />
-                                </div>
-                            )}
-                        </>
-                    )}
-                    {state.isInQueue && <QueueTimeInfo />}
-                    {state.mate &&
-                        state.you.level !== undefined &&
-                        state.you.side !== undefined &&
-                        state.you.side !== null &&
-                        state.mate.side !== null &&
-                        state.you.level === state.mate.level &&
-                        state.mate.side !== state.you.side && (
-                            <button
-                                className="rect-button ready-button"
-                                onClick={handleClickReadyToPlay}
-                            >
-                                <span>Ready:</span>
-                                <div>
-                                    You
-                                    {state.you.isReady ? (
-                                        <CheckBoxIcon color="success" />
-                                    ) : (
-                                        <CheckBoxOutlineBlankIcon />
-                                    )}
-                                </div>
-
-                                <div>
-                                    Mate
-                                    {state.mate.isReady ? (
-                                        <CheckBoxIcon color="success" />
-                                    ) : (
-                                        <CheckBoxOutlineBlankIcon />
-                                    )}
-                                </div>
-                            </button>
-                        )}
-                </div>
+                <LevelSelector isMobile={isMobile} disabled={state.isInQueue} />
+                <Actions />
             </div>
         );
     },

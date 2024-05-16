@@ -1,3 +1,6 @@
+// variables
+$mainActionColor: #fff200;
+
 body {
     padding: 0;
     margin: 0;
@@ -174,7 +177,9 @@ p {
     }
 
     @media (max-width: 768px), (max-height: 500px) {
-        padding: 10px;
+        text-transform: none;
+        letter-spacing: 2px;
+        padding: 5px;
         font-size: 12px;
     }
 }
@@ -817,4 +822,19 @@ $buttonSizeLarge: 120px;
     font-family: 'Source Code Pro', monospace;
     font-weight: bold;
     display: inline-block;
+}
+
+// TODO: It is in fact a state of rect-button and it should be encapsulated in the style
+// of the former one, to avoid these disgusting !important
+.main-action {
+    background: $mainActionColor !important;
+    color: black !important;
+    border: solid 1px black !important;
+
+    @media (min-width: 768px), (min-height: 500px) {
+        &:hover {
+            background: white !important;
+            color: black !important;
+        }
+    }
 }

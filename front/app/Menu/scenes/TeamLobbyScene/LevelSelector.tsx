@@ -14,9 +14,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 interface Props {
     disabled?: boolean;
+    isMobile: boolean;
 }
 
-export const LevelSelector: React.FC<Props> = ({ disabled }) => {
+export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
     const {
         state,
         levels,
@@ -85,18 +86,21 @@ export const LevelSelector: React.FC<Props> = ({ disabled }) => {
                             />
                         )}
                     />
-                    <Link href={Route.LEVEL_EDITOR_ROOT}>
-                        <button className="rect-button small">
-                            Become a creator
-                        </button>
-                    </Link>
+                    {!isMobile && (
+                        <Link href={Route.LEVEL_EDITOR_ROOT}>
+                            <button className="team-lobby-scene__rect-button small">
+                                Become a creator
+                            </button>
+                        </Link>
+                    )}
                     {lobbyMode === LobbyMode.DUO_WITH_RANDOM && (
                         <div className={styles['queue-container']}>
+                            {/* TODO: Fix position on mobile */}
                             <button
-                                className="rect-button refresh-queue-button"
+                                className="team-lobby-scene__rect-button refresh-queue-button"
                                 onClick={fetchServerInfo}
                             >
-                                Refresh queue info
+                                {!isMobile && 'Refresh queue info'}
                                 <CircularProgress
                                     variant="determinate"
                                     size={20}
@@ -159,6 +163,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled }) => {
                                         }
                                         isLightWaiting={isLightWaiting}
                                         isShadowWaiting={isShadowWaiting}
+                                        isMobile={isMobile}
                                     />
                                 </li>
                             );

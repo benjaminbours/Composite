@@ -24,67 +24,6 @@
         mix-blend-mode: difference;
     }
 
-    .rect-button {
-        all: unset;
-        padding: 10px 20px;
-        background: black;
-        color: white;
-        text-align: center;
-        cursor: pointer;
-        text-align: center;
-        border: solid white 2px;
-        font-family: 'Source Code Pro', monospace;
-        transition: 0.3s ease-out;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        p {
-            margin: 0;
-        }
-
-        svg {
-            margin-left: 20px;
-        }
-
-        &[disabled] {
-            opacity: 0.5;
-            cursor: default;
-
-            &:hover {
-                background: black;
-                color: white;
-                border-color: white;
-            }
-        }
-
-        &.small {
-            font-size: 12px;
-        }
-
-        &:hover {
-            background: white;
-            color: black;
-            border-color: black;
-        }
-    }
-
-    .ready-button {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px !important;
-
-        > div {
-            display: flex;
-            align-items: center;
-        }
-
-        svg {
-            margin-left: 10px;
-        }
-    }
-
     .select-level-button {
         svg {
             margin-right: 20px;
@@ -107,7 +46,6 @@
             color: white;
             transition: 0.3s ease-out;
             margin: 0 !important;
-            // margin-left: 10px !important;
         }
 
         span {
@@ -125,13 +63,56 @@
     }
 }
 
-.team-lobby-scene__waiting-friend-container {
+.team-lobby-scene__rect-button {
+    all: unset;
+    padding: 10px 20px;
     background: black;
-    border: solid white 2px;
-    padding: 0 10px;
-    box-sizing: border-box;
-    width: 100%;
     color: white;
+    text-align: center;
+    cursor: pointer;
+    text-align: center;
+    border: solid white 2px;
+    font-family: 'Source Code Pro', monospace;
+    transition: 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    p {
+        margin: 0;
+    }
+
+    svg {
+        margin-left: 20px;
+    }
+
+    &[disabled] {
+        opacity: 0.5;
+        cursor: default;
+
+        &:hover {
+            background: black;
+            color: white;
+            border-color: white;
+        }
+    }
+
+    &.small {
+        font-size: 12px;
+    }
+
+    &:hover {
+        background: white;
+        color: black;
+        border-color: black;
+    }
+}
+
+.team-lobby-scene__waiting-friend-container {
+    .MuiCircularProgress-root {
+        color: white;
+        margin: 0 auto;
+    }
 }
 
 .team-lobby-scene__buttons-container {
@@ -143,6 +124,7 @@
     text-align: center;
     justify-content: center;
     align-items: center;
+    margin-bottom: 50px;
 
     button,
     a {
@@ -150,24 +132,20 @@
         padding: 10px 0 !important;
         box-sizing: border-box !important;
     }
+}
 
-    .MuiCircularProgress-root {
-        mix-blend-mode: difference;
-        color: white;
-        margin: 0 auto;
-    }
+.team-lobby-scene__info-text {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .teammate-joined-text {
     display: flex;
     align-items: center;
-    width: 100%;
     text-align: center;
-    background: black;
-    border: solid white 2px;
-    color: white;
-    padding: 10px;
-    box-sizing: border-box;
     margin: 0;
 
     svg {
@@ -296,6 +274,7 @@
     @media (max-width: 768px), (max-height: 500px) {
         ul {
             box-sizing: border-box;
+            max-height: 365px;
         }
 
         li {
@@ -613,5 +592,49 @@ $size: 50px;
 
     .MuiTabs-indicator {
         background-color: white;
+    }
+}
+
+.team-lobby-scene__align-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .ying-yang {
+        width: 30px;
+        animation: rotate2 5s infinite linear;
+    }
+}
+
+// TODO: duplicate from rotate but without transform. Ugly.
+@keyframes rotate2 {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.team-lobby-scene__ready-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .team-lobby-scene__info-text {
+        order: 1;
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+
+        span {
+            margin: 0 10px;
+        }
+    }
+
+    button {
+        order: 2;
     }
 }
