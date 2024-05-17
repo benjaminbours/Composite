@@ -842,6 +842,11 @@ export function useMainController(initialScene: MenuScene | undefined) {
         });
     }, [state.you]);
 
+    const handleExitGame = useCallback(() => {
+        handleDestroyConnection();
+        handleClickFindAnotherTeamMate();
+    }, [handleDestroyConnection, handleClickFindAnotherTeamMate]);
+
     // effect to update shadow and light graphic accordingly with lobby state
     useEffect(() => {
         if (menuScene !== MenuScene.TEAM_LOBBY) {
@@ -947,5 +952,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         handleAlignWithTeamMate,
         handleStartSolo,
         handleGameFinished,
+        handleExitGame,
     };
 }

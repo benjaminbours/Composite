@@ -143,6 +143,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
                     inputsManager={inputsManager.current}
+                    onExitGame={mainController.handleExitGame}
                 />
             )}
             {isSettingsOpen && (

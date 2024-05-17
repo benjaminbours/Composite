@@ -399,6 +399,19 @@ export default class App {
         this.destroySoloModeListeners();
     };
 
+    public resetSinglePlayerPosition = () => {
+        const nextPositions = JSON.parse(
+            JSON.stringify(this.gameStateManager.predictionState.players),
+        );
+        const playerKey =
+            this.mainPlayerSide === Side.LIGHT ? 'light' : 'shadow';
+        nextPositions[this.mainPlayerSide].position = {
+            x: this.level.startPosition[playerKey].x,
+            y: this.level.startPosition[playerKey].y,
+        };
+        this.setPlayersPosition(this.level.startPosition);
+    };
+
     public setPlayersPosition = (position: {
         light: Vector3;
         shadow: Vector3;

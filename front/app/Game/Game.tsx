@@ -25,6 +25,7 @@ import InputsManager from './Player/InputsManager';
 import { Level } from '@benjaminbours/composite-api-client';
 import { CircularProgress, Divider } from '@mui/material';
 import { DiscordButton } from '../02_molecules/DiscordButton';
+import { DesktopHUD } from './DesktopHUD';
 
 interface LevelEditorProps {
     // use do save the app instance somewhere else
@@ -47,6 +48,7 @@ interface MultiplayerGameProps {
 
 interface Props {
     side: Side;
+    onExitGame?: () => void;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
@@ -56,6 +58,7 @@ interface Props {
 }
 
 function Game({
+    onExitGame,
     side,
     tabIsHidden,
     stats,
@@ -292,10 +295,17 @@ function Game({
                     </div>
                 </div>
             )}
-            {isMobile && appRef.current && (
+            {isMobile && !levelEditorProps && (
                 <MobileHUD
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
-                    inputsManager={appRef.current.inputsManager}
+                    inputsManager={inputsManager}
+                />
+            )}
+            {!isMobile && !levelEditorProps && onExitGame && (
+                <DesktopHUD
+                    appRef={appRef}
+                    onExitGame={onExitGame}
+                    withActionsContainer={Boolean(soloGameProps)}
                 />
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }} />

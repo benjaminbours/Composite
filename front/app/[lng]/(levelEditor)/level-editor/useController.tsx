@@ -358,15 +358,6 @@ export function useController(
         [],
     );
 
-    const wrapperBlurEvent = useCallback(
-        (callback: () => void) =>
-            (event: React.MouseEvent<HTMLButtonElement>) => {
-                event.currentTarget.blur();
-                callback();
-            },
-        [],
-    );
-
     const resetPlayersPosition = useCallback(() => {
         if (state.app) {
             const players = [
@@ -786,7 +777,6 @@ export function useController(
         captureSnapshot,
         handleClickOnPublish,
         resetPlayersPosition,
-        wrapperBlurEvent,
         switchPlayer,
         toggleCollisionArea,
         resetCamera,
