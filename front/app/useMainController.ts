@@ -263,11 +263,13 @@ export function useMainController(initialScene: MenuScene | undefined) {
                     ...prev.you,
                     isReady: false,
                 },
-                mate: {
-                    ...prev.mate!,
-                    side: undefined,
-                    isReady: false,
-                },
+                mate: prev.mate
+                    ? {
+                          ...prev.mate!,
+                          side: undefined,
+                          isReady: false,
+                      }
+                    : undefined,
                 isInQueue: false,
                 isWaitingForFriend: false,
                 shouldDisplayQueueInfo: false,
@@ -944,5 +946,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         setShadowRotationSpeed,
         handleAlignWithTeamMate,
         handleStartSolo,
+        handleGameFinished,
     };
 }

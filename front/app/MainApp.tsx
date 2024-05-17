@@ -136,6 +136,8 @@ function MainApp({ initialScene, dictionary }: Props) {
                             : {
                                   initialGameState: state.gameState,
                                   level: state.loadedLevel,
+                                  onGameFinished:
+                                      mainController.handleGameFinished,
                               }
                     }
                     tabIsHidden={tabIsHidden}

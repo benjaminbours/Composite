@@ -36,6 +36,7 @@ interface LevelEditorProps {
 interface SoloGameProps {
     initialGameState: GameState;
     level: Level;
+    onGameFinished: () => void;
 }
 
 interface MultiplayerGameProps {
@@ -194,7 +195,10 @@ function Game({
                 AppMode.GAME,
                 soloGameProps.level,
                 undefined,
+                undefined,
+                soloGameProps.onGameFinished,
             );
+            appRef.current.registerSoloModeListeners();
             if (isMobile) {
                 appRef.current.onAddMobileInteractButton =
                     handleAddMobileInteractButton;

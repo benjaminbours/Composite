@@ -83,10 +83,12 @@ export const EndLevelScene: React.FC<Props> = ({
                     You just finished the level:{` `}
                     <b>{level?.name}</b>, made by <b>{level?.author?.name}</b>
                 </p>
-                <p>
-                    You made it with your mate:{` `}
-                    <b>{mate?.account?.name || 'Guest'}</b>
-                </p>
+                {mate && (
+                    <p>
+                        You made it with your mate:{` `}
+                        <b>{mate.account?.name || 'Guest'}</b>
+                    </p>
+                )}
             </div>
             <div className="end-level-scene__like-container end-level-scene__text-container">
                 <h3 className="title-h3">Did you like it?</h3>

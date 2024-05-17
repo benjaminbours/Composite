@@ -128,6 +128,7 @@ export default class App {
         level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
+        private onGameFinished?: () => void,
     ) {
         // canvasDom.oncontextmenu = function (e) {
         //     e.preventDefault();
@@ -346,6 +347,32 @@ export default class App {
         }
     };
 
+    public switchPlayer = () => {
+        const nextSide =
+            this.mainPlayerSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
+        this.mainPlayerSide = nextSide;
+        this.gameStateManager.mainPlayerSide = nextSide;
+        this.camera.unfocus();
+        this.secondPlayerSide =
+            nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
+        this.setGameCamera();
+    };
+
+    public handleKeyDownSoloMode = (event: KeyboardEvent) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
+            event.preventDefault();
+            this.switchPlayer();
+        }
+    };
+
+    public registerSoloModeListeners = () => {
+        window.addEventListener('keydown', this.handleKeyDownSoloMode);
+    };
+
+    public destroySoloModeListeners = () => {
+        window.removeEventListener('keydown', this.handleKeyDownSoloMode);
+    };
+
     private collisionAreaMesh?: Mesh;
     private isCollisionAreaVisible = false;
     public toggleCollisionArea = () => {
@@ -369,6 +396,7 @@ export default class App {
         this.gameStateManager.destroy();
         this.socketController?.unregisterGameStateUpdateListener();
         this.removeTextOverlay();
+        this.destroySoloModeListeners();
     };
 
     public setPlayersPosition = (position: {
@@ -590,6 +618,15 @@ export default class App {
                         this.players[0].position,
                         new Vector3(40, 40),
                     );
+                }
+
+                // only in solo mode
+                if (
+                    this.onGameFinished &&
+                    this.gameStateManager.displayState.level.end_level
+                        .length === 2
+                ) {
+                    this.onGameFinished();
                 }
             });
         }
