@@ -3,8 +3,11 @@ import CustomCamera from './CustomCamera';
 import { Layer } from '@benjaminbours/composite-core';
 import { LightPlayer } from './Player';
 
-export const miniMapWidth = 1000;
-export const miniMapHeight = 563;
+// the more the scale is high, the more the miniMap is unzoomed
+const SCALE = 1.5;
+
+export const miniMapWidth = 1000 * SCALE;
+export const miniMapHeight = 563 * SCALE;
 
 export class MiniMapManager {
     public camera = new OrthographicCamera(
@@ -33,14 +36,14 @@ export class MiniMapManager {
             this.renderer.setSize(300, 167);
         }
 
-        this.camera.position.set(0, 563, 3000);
-        this.camera.lookAt(0, 563, 0);
+        this.camera.position.set(0, 563 * SCALE, 3000);
+        this.camera.lookAt(0, 563 * SCALE, 0);
     }
 
     public updateCamera = (position: Vector3) => {
         this.camera.position.set(
-            position.x,
-            position.y <= 563 ? 563 : position.y,
+            position.x * SCALE,
+            (position.y <= 563 ? 563 : position.y) * SCALE,
             3000,
         );
     };
