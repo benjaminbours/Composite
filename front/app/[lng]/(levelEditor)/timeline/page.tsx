@@ -305,18 +305,11 @@ const pastEvents: TimelineEvent[] = [
         description: (
             <>
                 <h3>Achievements</h3>
-                <h4>Week 1</h4>
                 <ul>
                     <li>
                         <p>
                             Add key bindings panel to support multiple keyboard
                             layouts.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Update bounce mechanic based on feedback from game
-                            with viewers.
                         </p>
                     </li>
                     <li>
@@ -329,23 +322,6 @@ const pastEvents: TimelineEvent[] = [
                             Tested with viewers on multiple OS.
                         </p>
                     </li>
-                    <li>
-                        <p>
-                            Various other improvements and bugs fixing, check
-                            the {` `}
-                            <a
-                                href="https://github.com/benjaminbours/Composite"
-                                target="_blank"
-                                className="inline-link"
-                            >
-                                repository
-                            </a>{' '}
-                            for more details.
-                        </p>
-                    </li>
-                </ul>
-                <h4>Week 2</h4>
-                <ul>
                     <li>
                         <p>Add google analytics.</p>
                     </li>
@@ -363,27 +339,7 @@ const pastEvents: TimelineEvent[] = [
                         <p>Manage disconnect event while in game.</p>
                     </li>
                     <li>
-                        <p>
-                            Start posting consistently on twitter about the
-                            project.
-                        </p>
-                    </li>
-                </ul>
-                <h4 id="january-week-3">
-                    <a
-                        href="https://github.com/benjaminbours/Composite/pull/64"
-                        target="_blank"
-                        className="inline-link"
-                    >
-                        Week 3
-                    </a>
-                </h4>
-                <ul>
-                    <li>
-                        <p>
-                            Update menu home scene accordingly with the feature
-                            invite a friend.
-                        </p>
+                        <p>Invite a friend feature.</p>
                     </li>
                     <li>
                         <p>
@@ -424,62 +380,196 @@ const pastEvents: TimelineEvent[] = [
                         </p>
                     </li>
                     <li>
-                        <p>
-                            {`Tremendous refactor of the "MainApp" orchestration
-                            in order to welcome more easily the invite a friend
-                            flow, but also to improve the separation of concerns
-                            of the menu.`}
-                        </p>
-                    </li>
-                    <li>
-                        <p>Add menu scene invite a friend and team lobby.</p>
-                    </li>
-                    <li>
-                        <p>Add missing router management.</p>
-                    </li>
-                    <li>
-                        <p>Add page 404.</p>
+                        <p>Add https support.</p>
                     </li>
                 </ul>
-                <h4 id="january-week-4">
-                    <a
-                        href="https://github.com/benjaminbours/Composite/pull/64"
-                        target="_blank"
-                        className="inline-link"
-                    >
-                        Week 4
-                    </a>
-                </h4>
+            </>
+        ),
+    },
+    {
+        date: '2024 - February',
+        description: (
+            <>
+                <h3>Achievements</h3>
                 <ul>
                     <li>
                         <p>
-                            Use team lobby at the end of any game, even ones
-                            from the matchmaking queue.
+                            Add graphic part of next element type: Black hole.
                         </p>
                     </li>
                     <li>
-                        <p>Add https support.</p>
+                        <p>Start implementation of level editor</p>
+
+                        <ul>
+                            <li>
+                                <p>
+                                    Refactor client game code to reach the
+                                    modularity required.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    Add base features such as add element in the
+                                    scene, display the list of element in the
+                                    scene.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    Add properties panel to edit selected
+                                    element.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    Different camera management in level editor.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    Add action to reset players position, to
+                                    toggle between play / edit mode.
+                                </p>
+                            </li>
+                            <li>
+                                <p>
+                                    Add level table in DB. Add proper API
+                                    controller and service associated. Add basic
+                                    save feature.
+                                </p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </>
+        ),
+    },
+    {
+        date: '2024 - March',
+        description: (
+            <>
+                <h3>Achievements</h3>
+                <ul>
+                    <li>
+                        <p>
+                            Add translation support for the app.{' '}
+                            {`(Even if not used everywhere atm.)`}
+                        </p>
                     </li>
                     <li>
                         <p>
-                            Add{' '}
-                            <a
-                                href="https://dev.compositethegame.com"
-                                target="_blank"
-                                className="inline-link"
-                            >
-                                dev environment
-                            </a>{' '}
-                            in order to deploy and test safely updates while
-                            keeping a stable version to demonstrate any time.
-                            Update deployments procedure accordingly.
+                            Add role based authentication front and back. Add
+                            restore session. Generate swagger spec based on API
+                            codebase.
                         </p>
                     </li>
                     <li>
                         <p>
-                            Deploy all changes from week 3 and 4 on dev
-                            environment for testing.
+                            Generate api-client package based on swagger spec.
                         </p>
+                    </li>
+                    <li>
+                        <p>
+                            Add pages forgot-password, sign-up-email-retry,
+                            new-password, login, register, and
+                            sign-up-email-activated + backend logic related.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Connected level created by author and stored in DB
+                            with game launcher (lobby), previously using hard
+                            coded level.
+                        </p>
+                    </li>
+                    <li>
+                        <p>Add more improvement to level editor editor.</p>
+                    </li>
+                </ul>
+            </>
+        ),
+    },
+    {
+        date: '2024 - April',
+        description: (
+            <>
+                <h3>Achievements</h3>
+                <ul>
+                    <li>
+                        <p>Improve data structure in DB.</p>
+                    </li>
+                    <li>
+                        <p>
+                            Various improvement and bug fixes to level editor.
+                        </p>
+                        <ul>
+                            <li>
+                                <p>Add feature lock element.</p>
+                            </li>
+                            <li>
+                                <p>Add feature undo / redo.</p>
+                            </li>
+                            <li>
+                                <p>
+                                    Add feature drag and drop element in scene
+                                    list.
+                                </p>
+                            </li>
+                            <li>
+                                <p>Add keyboard shortcut</p>
+                            </li>
+                            <li>
+                                <p>Login modal from level editor</p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>Improve design of emails sent by the API.</p>
+                    </li>
+                    <li>
+                        <p>
+                            Performance improvements in game and in level
+                            editor.
+                        </p>
+                    </li>
+                    <li>
+                        <p>Various UX improvements.</p>
+                    </li>
+                    <li>
+                        <p>
+                            {/* TODO: add link to Legion the OG user */}
+                            Add Precision Level, first level ever made by a user
+                            with the level editor. Some say he was known as
+                            Legion.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Add new level the high sphere: part 1, first level
+                            ever made by the author with the level editor.
+                        </p>
+                    </li>
+                </ul>
+            </>
+        ),
+    },
+    {
+        date: '2024 - May',
+        description: (
+            <>
+                <h3>Achievements</h3>
+                <ul>
+                    <li>
+                        <p>New game launcher / lobby.</p>
+                    </li>
+                    <li>
+                        <p>Add mobile support.</p>
+                    </li>
+                    <li>
+                        <p>Add solo game mode.</p>
+                    </li>
+                    <li>
+                        <p>On going...</p>
                     </li>
                 </ul>
             </>
@@ -489,102 +579,19 @@ const pastEvents: TimelineEvent[] = [
 
 const futureEvents: TimelineEvent[] = [
     {
-        date: '2024 - Quarter 1',
-        description: (
-            <>
-                <h3>Objectives</h3>
-                <ul>
-                    <li>
-                        <p>
-                            {`Add menu mode, invite a friend, so you don't have to
-                            match with random person, you can just send a link
-                            to your friend, and play the game with him.`}
-                        </p>
-                    </li>
-                    <li>
-                        <p>Add certificate for https support.</p>
-                    </li>
-                    <li>
-                        <p>
-                            Collision between players. Should they just be
-                            ejected into opposite directions or can you kind of
-                            push your team mate in a direction? To be
-                            investigated.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Improve level visual design with more variety of
-                            geometry.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            {` Level 3, "The High Spheres", combining the mechanics
-                            of the two first levels, in a more complex way.`}
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Add black hole element, that will impact the gravity
-                            of players around, creating new interactions /
-                            paths.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Add unique ability for each player. Light could dash
-                            quickly in a direction for example, while shadow
-                            could go through wall for a small duration. To
-                            investigate.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Add level maker mode, to give the possibility to the
-                            community to create their own levels. This will lead
-                            me to clean up a lot the level creation code and
-                            make it very rigorous for any body to create super
-                            easily a new level.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Add some kind of communication between the players
-                            during the game, for example a system similar as the
-                            emotes on top of your player in LOL.
-                        </p>
-                    </li>
-                    <li>
-                        <p>
-                            Investigate and decide best hosting / setup option
-                            for the production environment.
-                        </p>
-                    </li>
-                </ul>
-            </>
-        ),
-    },
-    {
         date: '2024 - Quarter 2',
         description: (
             <>
                 <h3>Objectives</h3>
                 <ul>
                     <li>
-                        <p>
-                            Electron app installable on desktop, with auto
-                            update, and register it on steam.
-                        </p>
+                        <p>Add landing page explaining the project.</p>
                     </li>
                     <li>
-                        <p>Many more levels</p>
+                        <p>{`Add view "Levels created by the community".`}</p>
                     </li>
                     <li>
-                        <p>Many more languages / translations</p>
-                    </li>
-                    <li>
-                        <p>Rethink the look and feels of levels</p>
+                        <p>{`Add like feature for level.`}</p>
                     </li>
                     <li>
                         <p>
@@ -597,33 +604,77 @@ const futureEvents: TimelineEvent[] = [
                     </li>
                     <li>
                         <p>
-                            Indicate total number of player playing the game on
-                            the home page (
-                            <a
-                                href="https://curvefever.pro/"
-                                target="_blank"
-                                className="inline-link"
-                            >
-                                curve&nbsp;fever&nbsp;style
-                            </a>
-                            ).
+                            Add some kind of level difficulty management with
+                            ranking from user and author.
                         </p>
                     </li>
                     <li>
                         <p>
+                            Add black hole element physics and connect it with
+                            the already made graphic part.
+                        </p>
+                    </li>
+
+                    <li>
+                        <p>
+                            Investigate and decide best hosting / setup option
+                            for the production environment.
+                        </p>
+                    </li>
+                </ul>
+            </>
+        ),
+    },
+    {
+        date: '2024 - Quarter 3',
+        description: (
+            <>
+                <h3>Objectives</h3>
+                <ul>
+                    <li>
+                        <p>
+                            Add scale management for all elements. So you can
+                            have super big door, or you can have small door like
+                            Evry lucarne.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Add unique ability for each player. Light could dash
+                            quickly in a direction for example, while shadow
+                            could go through wall for a small duration. To
+                            investigate.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Add some kind of communication between the players
+                            during the game, for example a system similar as the
+                            emotes on top of your player in LOL.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Electron app installable on desktop, with auto
+                            update, and register it on steam.
+                        </p>
+                    </li>
+                    <li>
+                        <p>Many more levels</p>
+                    </li>
+                    <li>
+                        <p>Many more languages / translations</p>
+                    </li>
+                    {/* <li>
+                        <p>Rethink the look and feels of levels</p>
+                    </li> */}
+                    <li>
+                        <p>
                             Add incentive system to reward users for playing the
                             game. I am very interested into Dapp, and connect
-                            the project to a blockchain, with smart contract
-                            rewarding the users directly when they play the game
-                            would be awesome for me.
-                        </p>
-                        <p>
-                            {` We could also imagine events, where NFTs would be
-                            hidden in some levels of the game, and the first
-                            player to find it wins it. I have no idea yet about
-                            any kind of valorization in terms of tokens or NFTs,
-                            it's just the incentive and reward ideas that I love
-                            very much, and blockchain seems a good fit for it.`}
+                            the project to Solana, with smart contract rewarding
+                            the users directly when they play the game would be
+                            awesome for me.
                         </p>
                     </li>
                 </ul>

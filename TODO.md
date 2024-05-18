@@ -41,7 +41,7 @@
 - In level editor root, add an author selector to be able to watch the levels made by others, to open them, play them, and fork them.
 - Add request to add a like to a level
 - Write medium article about the current state of the project, and about the vision and where I want to go
-- Update the timeline. Talk in the timeline about brilliant and how it help me achieve what I needed in terms of math.
+- Talk in the timeline about brilliant and how it help me achieve what I needed in terms of math.
 - Improve navigation in timeline, use button to go to anchor
 - Add appropriate license for the project, VERY IMPORTANT
 - Display a message to invite people to comeback with a laptop if they use the level editor
