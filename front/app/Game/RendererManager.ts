@@ -293,9 +293,19 @@ export class RendererManager {
     };
 
     public resize = () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
+
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setSize(width, height);
+
+        // Update the composers
+        this.playerOcclusionComposer.setSize(width, height);
+        this.playerInsideComposer?.setSize(width, height);
+        this.bloomComposer.setSize(width, height);
+        this.mainComposer.setSize(width, height);
     };
 }
