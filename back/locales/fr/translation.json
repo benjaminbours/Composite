@@ -1,0 +1,73 @@
+{
+    "total-amount": "Montant total",
+    "amount": "Montant",
+    "quantity": "Quantité",
+    "total-quantity": "Total quantité",
+    "paymentType": {
+        "label": "Type de paiement",
+        "creditCard": "Carte de crédit"
+    },
+    "wire-transfer": "Informations de virement bancaire",
+    "wallet-transfer": "Informations de paiement crypto",
+    "iban": "IBAN",
+    "swift-code": " Code Swift",
+    "bank-code": "Code banque",
+    "branch-code": "Code guichet",
+    "account-number": "Numéro de compte",
+    "erc20-method": "Méthode ERC20",
+    "trc20-method": "Méthode TRC20",
+    "rib": "Clé RIB",
+    "memo-wire": "Communication",
+    "memo-warning": "Afin de pouvoir traiter votre commande, merci de bien vouloir insérer ce mémo dans le motif de votre virement.",
+    "memo-wallet": "Communication",
+    "visit-store-button": "Visiter le store",
+    "account-verification-mail": {
+        "subject": "Confirmation de votre adresse email",
+        "title": "Vous y êtes presque !",
+        "paragraph": "Pour confirmer la création de votre compte sur le BeQuest Store, merci de cliquer sur le lien suivant. <br/><br />Pour des raisons de sécurité, ce lien n'est valable que 24 heures.",
+        "buttonText": "Validez votre email"
+    },
+    "sign-up-mail": {
+        "subject": "Rejoignez l'aventure BeQuest !",
+        "title": "Rejoignez l'aventure BeQuest !",
+        "paragraph": "Qu’il soit financier, culturel, artistique, ou sous toutes autres formes, l’héritage que nous laissons à nos enfants est essentiel !",
+        "buttonText": "Créer mon compte"
+    },
+    "reset-password-mail": {
+        "subject": "Réinitialisation de votre mot de passe",
+        "title": "Un petit oubli, pas grave, on vous aide !",
+        "paragraph": "Besoin de changer votre mot de passe ? Pas de problème ! Cliquez sur le bouton ci-dessous pour commencer ! <br/><br />Pour des raisons de sécurité, ce lien n'est valable qu'une heure. <br/><br />Vous n’avez pas demandé de changement de mot de passe ? Alors vous n’avez rien à faire, ignorez simplement ce mail, votre compte reste sécurisé et votre mot de passe inchangé.",
+        "buttonText": "Changer mon mot de passe"
+    },
+    "purchase-success-mail": {
+        "subject": "Confirmation de votre commande",
+        "title": "La commande est passée !",
+        "paragraph": "Tout s'est passé comme prévu, merci de votre confiance. <br />Voici le détail de votre commande :",
+        "total-quantity": "Quantité commandée",
+        "total-amount": "Montant de la commande",
+        "order-details": "Détails de la commande",
+        "by-author": "par"
+    },
+    "buy-bqg-success-mail": {
+        "subject": "Recharge de BQG en cours !",
+        "title": "Commande passée ! Merci de votre confiance.",
+        "paragraph": "Votre recharge sera effective dès réception des fonds. <br />Voici le détail de votre commande de BQG et les informations de transaction :",
+        "call-to-action": "consulter votre solde de BQG"
+    },
+    "sell-bqg-success-mail": {
+        "subject": "Récupération de vos BQG en cours !",
+        "title": "Votre demande de vente de BQG vient d’être effectuée. Vous recevrez votre virement dans les jours à venir.",
+        "paragraph": "Voici le détail de votre vente de BQG et vos informations de transaction :",
+        "call-to-action": "Continuez votre aventure"
+    },
+    "reception-bank-info-mail": {
+        "subject": "RIB en cours de vérification",
+        "title": "Votre RIB est en cours de vérification. Votre demande sera en attente avant d’être validée. Vous recevrez un mail à la fin du processus.",
+        "call-to-action": "Continuez votre aventure"
+    },
+    "bank-info-validated-mail": {
+        "subject": "RIB vérifié !",
+        "title": "Votre RIB a été vérifié. Nous allons procéder au virement, vous le recevrez dans les jours à venir.",
+        "call-to-action": "Continuez votre aventure"
+    }
+}

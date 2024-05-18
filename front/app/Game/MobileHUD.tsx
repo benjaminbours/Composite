@@ -17,6 +17,7 @@ interface Props {
     inputsManager: InputsManager;
     isMobileInteractButtonAdded: boolean;
     withSwitchPlayer: boolean;
+    onExitGame?: () => void;
 }
 
 export const MobileHUD: React.FC<Props> = ({
@@ -24,6 +25,7 @@ export const MobileHUD: React.FC<Props> = ({
     inputsManager,
     isMobileInteractButtonAdded,
     withSwitchPlayer,
+    onExitGame,
 }) => {
     const handleTouchStart = useCallback(
         (input: 'left' | 'right' | 'jump' | 'interact') => () => {
@@ -80,6 +82,11 @@ export const MobileHUD: React.FC<Props> = ({
 
     return (
         <div className="mobile-hud">
+            <div className="desktop-hud__top-left-container">
+                <button className="composite-button white" onClick={onExitGame}>
+                    Exit
+                </button>
+            </div>
             <IconButton
                 className="mobile-hud__button mobile-hud__arrow-left"
                 onTouchStart={handleTouchStart('left')}

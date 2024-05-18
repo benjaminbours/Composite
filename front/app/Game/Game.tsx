@@ -301,6 +301,7 @@ function Game({
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
                     inputsManager={inputsManager}
                     withSwitchPlayer={Boolean(soloGameProps)}
+                    onExitGame={onExitGame}
                 />
             )}
             {!isMobile && !levelEditorProps && onExitGame && (
