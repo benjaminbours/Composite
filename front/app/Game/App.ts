@@ -697,6 +697,7 @@ export default class App {
     private updateWorldPhysic = (state: GameState) => {
         // doors
         let shouldDisplayInteractHelper = false;
+        const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
         for (const key in state.level.doors) {
             const openers = state.level.doors[key];
             let shouldOpenTheDoor = false;
@@ -739,7 +740,7 @@ export default class App {
                         this.mode === AppMode.GAME &&
                         this.inputsManager.inputsActive.interact;
 
-                    if (shouldFocus && window.innerWidth > 768) {
+                    if (shouldFocus && !isMobile) {
                         shouldDisplayInteractHelper = false;
                     }
                     doorOpener.focusCamera(this.camera, shouldFocus);
@@ -756,7 +757,7 @@ export default class App {
         }
 
         if (shouldDisplayInteractHelper && !this.isTextOverlayDisplayed) {
-            if (window.innerWidth <= 768 && this.onAddMobileInteractButton) {
+            if (isMobile && this.onAddMobileInteractButton) {
                 this.isTextOverlayDisplayed = true;
                 this.onAddMobileInteractButton();
             } else {
@@ -768,7 +769,7 @@ export default class App {
             !shouldDisplayInteractHelper &&
             this.isTextOverlayDisplayed
         ) {
-            if (window.innerWidth <= 768 && this.onRemoveMobileInteractButton) {
+            if (isMobile && this.onRemoveMobileInteractButton) {
                 this.onRemoveMobileInteractButton();
                 this.isTextOverlayDisplayed = false;
             } else {

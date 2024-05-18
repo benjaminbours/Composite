@@ -365,59 +365,6 @@ $buttonSizeLarge: 120px;
     }
 }
 
-.mobile-hud {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-}
-
-.mobile-hud__button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-}
-
-.mobile-hud__interact {
-    margin-left: auto;
-    margin-bottom: 10px;
-    right: 5%;
-    bottom: 5%;
-    z-index: 1000;
-    border-radius: 10px;
-    margin: 0 10px;
-    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
-    background: rgba(211, 211, 211, 0.5);
-}
-
-.mobile-hud__arrow-left {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 25%;
-    transform: rotate(180deg);
-    justify-content: end;
-}
-
-.mobile-hud__arrow-right {
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: 25%;
-    justify-content: end;
-}
-
-.mobile-hud__jump {
-    bottom: 0;
-    height: 25%;
-    left: 25%;
-    right: 25%;
-    width: 50%;
-    align-items: flex-end;
-}
-
 .inline-link {
     color: white;
     position: relative;

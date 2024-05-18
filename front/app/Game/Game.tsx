@@ -297,8 +297,10 @@ function Game({
             )}
             {isMobile && !levelEditorProps && (
                 <MobileHUD
+                    appRef={appRef}
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
                     inputsManager={inputsManager}
+                    withSwitchPlayer={Boolean(soloGameProps)}
                 />
             )}
             {!isMobile && !levelEditorProps && onExitGame && (

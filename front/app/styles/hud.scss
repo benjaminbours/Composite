@@ -1,3 +1,5 @@
+// DESKTOP
+
 .desktop-hud__top-left-container {
     position: fixed;
     top: 1%;
@@ -13,4 +15,56 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+// MOBILE
+
+.mobile-hud {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.mobile-hud__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+}
+
+.mobile-hud__arrow-left {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 25%;
+    transform: rotate(180deg);
+    justify-content: end;
+}
+
+.mobile-hud__arrow-right {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+    justify-content: end;
+}
+
+.mobile-hud__jump {
+    bottom: 0;
+    height: 25%;
+    left: 25%;
+    right: 25%;
+    width: 50%;
+    align-items: flex-end;
+}
+
+.mobile-hud__actions-container {
+    position: fixed;
+    bottom: 3%;
+    right: 3%;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
 }
