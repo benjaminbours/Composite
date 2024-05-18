@@ -3,15 +3,27 @@ import InputsManager from './Player/InputsManager';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SpaceBarIcon from '@mui/icons-material/SpaceBar';
 import IconButton from '@mui/material/IconButton';
+import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
+import App from './App';
+import { wrapperBlurEvent } from '../[lng]/(levelEditor)/level-editor/utils';
+import Paper from '@mui/material/Paper';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Button from '@mui/material/Button';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface Props {
+    appRef: React.MutableRefObject<App | undefined>;
     inputsManager: InputsManager;
     isMobileInteractButtonAdded: boolean;
+    withSwitchPlayer: boolean;
 }
 
 export const MobileHUD: React.FC<Props> = ({
+    appRef,
     inputsManager,
     isMobileInteractButtonAdded,
+    withSwitchPlayer,
 }) => {
     const handleTouchStart = useCallback(
         (input: 'left' | 'right' | 'jump' | 'interact') => () => {
@@ -26,6 +38,20 @@ export const MobileHUD: React.FC<Props> = ({
         },
         [],
     );
+
+    const handleClickSwitchPlayer = useCallback(() => {
+        if (!appRef.current) {
+            return;
+        }
+        appRef.current.switchPlayer();
+    }, [appRef]);
+
+    const handleClickResetPosition = useCallback(() => {
+        if (!appRef.current) {
+            return;
+        }
+        appRef.current.resetSinglePlayerPosition();
+    }, [appRef]);
 
     useEffect(() => {
         const onTouch = (e: any) => {
@@ -54,16 +80,6 @@ export const MobileHUD: React.FC<Props> = ({
 
     return (
         <div className="mobile-hud">
-            {isMobileInteractButtonAdded && (
-                <IconButton
-                    className="mobile-hud__button mobile-hud__interact"
-                    onTouchStart={handleTouchStart('interact')}
-                    onTouchEnd={handleTouchEnd('interact')}
-                    disableTouchRipple
-                >
-                    Interact
-                </IconButton>
-            )}
             <IconButton
                 className="mobile-hud__button mobile-hud__arrow-left"
                 onTouchStart={handleTouchStart('left')}
@@ -88,6 +104,32 @@ export const MobileHUD: React.FC<Props> = ({
             >
                 <ArrowForwardIosIcon />
             </IconButton>
+            <Paper className="mobile-hud__actions-container">
+                <ButtonGroup orientation="vertical">
+                    {isMobileInteractButtonAdded && (
+                        <Button
+                            onTouchStart={handleTouchStart('interact')}
+                            onTouchEnd={handleTouchEnd('interact')}
+                            color="success"
+                        >
+                            <VisibilityIcon fontSize="small" />
+                        </Button>
+                    )}
+                    {withSwitchPlayer && (
+                        <Button
+                            onClick={wrapperBlurEvent(handleClickSwitchPlayer)}
+                        >
+                            <SwitchAccountIcon fontSize="small" />
+                        </Button>
+                    )}
+                    <Button
+                        onClick={wrapperBlurEvent(handleClickResetPosition)}
+                        title="Reset players position (BACKSPACE)"
+                    >
+                        <RestartAltIcon fontSize="small" />
+                    </Button>
+                </ButtonGroup>
+            </Paper>
         </div>
     );
 };

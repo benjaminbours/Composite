@@ -35,6 +35,7 @@ import { PlayersPanel } from './PlayersPanel';
 import { BottomLeftInfo } from '../../../BottomLeftInfo';
 import { SettingsMenu } from '../../../SettingsMenu';
 import { MouseRightIcon } from './icons/MouseRightIcon';
+import { wrapperBlurEvent } from './utils';
 
 const Game = dynamic(() => import('../../../Game'), {
     loading: () => <p>Loading...</p>,
@@ -87,7 +88,6 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
             captureSnapshot,
             handleClickOnPublish,
             resetPlayersPosition,
-            wrapperBlurEvent,
             switchPlayer,
             resetCamera,
             toggleCollisionArea,

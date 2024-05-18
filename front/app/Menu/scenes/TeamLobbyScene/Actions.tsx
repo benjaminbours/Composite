@@ -18,7 +18,31 @@ export const Actions: React.FC = () => {
         handleInviteFriend,
         handleClickReadyToPlay,
         handleAlignWithTeamMate,
+        handleStartSolo,
     } = useContext(MainControllerContext);
+
+    if (lobbyMode === LobbyMode.SOLO) {
+        return (
+            <div className="team-lobby-scene__buttons-container">
+                {state.you.level !== undefined && (
+                    <button
+                        className="team-lobby-scene__rect-button main-action team-lobby-scene__align-button"
+                        onClick={handleStartSolo}
+                    >
+                        Start <YingYang />
+                    </button>
+                )}
+            </div>
+        );
+    }
+
+    if (lobbyMode === LobbyMode.DUO_WITH_RANDOM) {
+        return (
+            <div className="team-lobby-scene__buttons-container">
+                {state.isInQueue && <QueueTimeInfo />}
+            </div>
+        );
+    }
 
     const noMateChoice =
         state.mate &&
@@ -35,14 +59,6 @@ export const Actions: React.FC = () => {
         state.mate.side !== null &&
         state.you.level === state.mate.level &&
         state.mate.side !== state.you.side;
-
-    if (lobbyMode === LobbyMode.DUO_WITH_RANDOM) {
-        return (
-            <div className="team-lobby-scene__buttons-container">
-                {state.isInQueue && <QueueTimeInfo />}
-            </div>
-        );
-    }
 
     // this return is for LobbyMode.DUO_WITH_FRIEND mode
     return (

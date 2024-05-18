@@ -358,15 +358,6 @@ export function useController(
         [],
     );
 
-    const wrapperBlurEvent = useCallback(
-        (callback: () => void) =>
-            (event: React.MouseEvent<HTMLButtonElement>) => {
-                event.currentTarget.blur();
-                callback();
-            },
-        [],
-    );
-
     const resetPlayersPosition = useCallback(() => {
         if (state.app) {
             const players = [
@@ -480,16 +471,7 @@ export function useController(
 
     const switchPlayer = useCallback(() => {
         if (state.app) {
-            const nextSide =
-                state.app.mainPlayerSide === Side.SHADOW
-                    ? Side.LIGHT
-                    : Side.SHADOW;
-            state.app.mainPlayerSide = nextSide;
-            state.app.gameStateManager.mainPlayerSide = nextSide;
-            state.app.camera.unfocus();
-            state.app.secondPlayerSide =
-                nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
-            state.app.setGameCamera();
+            state.app.switchPlayer();
         }
     }, [state.app]);
 
@@ -795,7 +777,6 @@ export function useController(
         captureSnapshot,
         handleClickOnPublish,
         resetPlayersPosition,
-        wrapperBlurEvent,
         switchPlayer,
         toggleCollisionArea,
         resetCamera,

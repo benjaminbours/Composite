@@ -25,12 +25,19 @@ import InputsManager from './Player/InputsManager';
 import { Level } from '@benjaminbours/composite-api-client';
 import { CircularProgress, Divider } from '@mui/material';
 import { DiscordButton } from '../02_molecules/DiscordButton';
+import { DesktopHUD } from './DesktopHUD';
 
 interface LevelEditorProps {
     // use do save the app instance somewhere else
     onAppLoaded: (app: App) => void;
     // TODO: Don't like so much the management of this callback
     onTransformControlsObjectChange: (object: THREE.Object3D) => void;
+}
+
+interface SoloGameProps {
+    initialGameState: GameState;
+    level: Level;
+    onGameFinished: () => void;
 }
 
 interface MultiplayerGameProps {
@@ -41,20 +48,24 @@ interface MultiplayerGameProps {
 
 interface Props {
     side: Side;
+    onExitGame?: () => void;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
+    soloGameProps?: SoloGameProps;
     multiplayerGameProps?: MultiplayerGameProps;
     levelEditorProps?: LevelEditorProps;
 }
 
 function Game({
+    onExitGame,
     side,
     tabIsHidden,
     stats,
     inputsManager,
     multiplayerGameProps,
     levelEditorProps,
+    soloGameProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasMiniMapRef = useRef<HTMLCanvasElement>(null);
@@ -177,6 +188,26 @@ function Game({
                 levelEditorProps.onTransformControlsObjectChange,
             );
             levelEditorProps.onAppLoaded(appRef.current);
+        } else if (soloGameProps) {
+            appRef.current = new App(
+                canvasRef.current,
+                canvasMiniMapRef.current,
+                soloGameProps.initialGameState,
+                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                inputsManager,
+                AppMode.GAME,
+                soloGameProps.level,
+                undefined,
+                undefined,
+                soloGameProps.onGameFinished,
+            );
+            appRef.current.registerSoloModeListeners();
+            if (isMobile) {
+                appRef.current.onAddMobileInteractButton =
+                    handleAddMobileInteractButton;
+                appRef.current.onRemoveMobileInteractButton =
+                    handleRemoveMobileInteractButton;
+            }
         }
         // https://greensock.com/docs/v3/GSAP/gsap.ticker
 
@@ -257,17 +288,26 @@ function Game({
                                     <p>
                                         {`It's funnier if you can speak by voice with your teammate.`}
                                     </p>
-                                    <DiscordButton className="buttonRect" />
+                                    <DiscordButton className="composite-button" />
                                 </>
                             )}
                         </div>
                     </div>
                 </div>
             )}
-            {isMobile && appRef.current && (
+            {isMobile && !levelEditorProps && (
                 <MobileHUD
+                    appRef={appRef}
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
-                    inputsManager={appRef.current.inputsManager}
+                    inputsManager={inputsManager}
+                    withSwitchPlayer={Boolean(soloGameProps)}
+                />
+            )}
+            {!isMobile && !levelEditorProps && onExitGame && (
+                <DesktopHUD
+                    appRef={appRef}
+                    onExitGame={onExitGame}
+                    withActionsContainer={Boolean(soloGameProps)}
                 />
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }} />

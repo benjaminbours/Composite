@@ -9,7 +9,6 @@ import React, {
 import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
-import { useWindowSize } from '../../../hooks/useWindowSize';
 import { YingYang } from './YingYang';
 
 function loadImage(url: string): Promise<string> {
@@ -35,6 +34,7 @@ interface Props {
     isLightWaiting: boolean;
     isShadowWaiting: boolean;
     isMobile: boolean;
+    isSoloMode: boolean;
 }
 
 const defaultImageUrl = '/images/crack_the_door.png';
@@ -53,6 +53,7 @@ export const LevelGridItem: React.FC<Props> = ({
     isLightWaiting,
     isShadowWaiting,
     isMobile,
+    isSoloMode,
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
     const [imageUrl, setImageUrl] = useState(defaultImageUrl);
@@ -68,7 +69,9 @@ export const LevelGridItem: React.FC<Props> = ({
     const cssClass = classNames({
         'level-grid-item': true,
         'level-grid-item--hovered': isHovered,
+        'level-grid-item--hovered-solo': isHovered && isSoloMode,
         'level-grid-item--selected': you.level === id,
+        'level-grid-item--selected-solo': you.level === id && isSoloMode,
         'level-grid-item--selected-shadow':
             (you.level === id && you.side === Side.SHADOW) ||
             (mate?.level === id && mate?.side === Side.SHADOW) ||

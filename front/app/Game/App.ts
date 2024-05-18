@@ -128,6 +128,7 @@ export default class App {
         level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
+        private onGameFinished?: () => void,
     ) {
         // canvasDom.oncontextmenu = function (e) {
         //     e.preventDefault();
@@ -182,16 +183,12 @@ export default class App {
             {
                 light: new Vector3(
                     level?.lightStartPosition[0],
-                    level?.lightStartPosition[1] === 0
-                        ? 0.08
-                        : level?.lightStartPosition[1],
+                    level?.lightStartPosition[1],
                     0,
                 ).multiplyScalar(gridSize),
                 shadow: new Vector3(
                     level?.shadowStartPosition[0],
-                    level?.shadowStartPosition[1] === 0
-                        ? 0.08
-                        : level?.shadowStartPosition[1],
+                    level?.shadowStartPosition[1],
                     0,
                 ).multiplyScalar(gridSize),
             },
@@ -350,6 +347,32 @@ export default class App {
         }
     };
 
+    public switchPlayer = () => {
+        const nextSide =
+            this.mainPlayerSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
+        this.mainPlayerSide = nextSide;
+        this.gameStateManager.mainPlayerSide = nextSide;
+        this.camera.unfocus();
+        this.secondPlayerSide =
+            nextSide === Side.SHADOW ? Side.LIGHT : Side.SHADOW;
+        this.setGameCamera();
+    };
+
+    public handleKeyDownSoloMode = (event: KeyboardEvent) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
+            event.preventDefault();
+            this.switchPlayer();
+        }
+    };
+
+    public registerSoloModeListeners = () => {
+        window.addEventListener('keydown', this.handleKeyDownSoloMode);
+    };
+
+    public destroySoloModeListeners = () => {
+        window.removeEventListener('keydown', this.handleKeyDownSoloMode);
+    };
+
     private collisionAreaMesh?: Mesh;
     private isCollisionAreaVisible = false;
     public toggleCollisionArea = () => {
@@ -373,6 +396,20 @@ export default class App {
         this.gameStateManager.destroy();
         this.socketController?.unregisterGameStateUpdateListener();
         this.removeTextOverlay();
+        this.destroySoloModeListeners();
+    };
+
+    public resetSinglePlayerPosition = () => {
+        const nextPositions = JSON.parse(
+            JSON.stringify(this.gameStateManager.predictionState.players),
+        );
+        const playerKey =
+            this.mainPlayerSide === Side.LIGHT ? 'light' : 'shadow';
+        nextPositions[this.mainPlayerSide].position = {
+            x: this.level.startPosition[playerKey].x,
+            y: this.level.startPosition[playerKey].y,
+        };
+        this.setPlayersPosition(this.level.startPosition);
     };
 
     public setPlayersPosition = (position: {
@@ -595,6 +632,15 @@ export default class App {
                         new Vector3(40, 40),
                     );
                 }
+
+                // only in solo mode
+                if (
+                    this.onGameFinished &&
+                    this.gameStateManager.displayState.level.end_level
+                        .length === 2
+                ) {
+                    this.onGameFinished();
+                }
             });
         }
         // TODO: fix player graphic at 60 fps whatever the main render fps is
@@ -651,6 +697,7 @@ export default class App {
     private updateWorldPhysic = (state: GameState) => {
         // doors
         let shouldDisplayInteractHelper = false;
+        const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
         for (const key in state.level.doors) {
             const openers = state.level.doors[key];
             let shouldOpenTheDoor = false;
@@ -693,7 +740,7 @@ export default class App {
                         this.mode === AppMode.GAME &&
                         this.inputsManager.inputsActive.interact;
 
-                    if (shouldFocus && window.innerWidth > 768) {
+                    if (shouldFocus && !isMobile) {
                         shouldDisplayInteractHelper = false;
                     }
                     doorOpener.focusCamera(this.camera, shouldFocus);
@@ -710,7 +757,7 @@ export default class App {
         }
 
         if (shouldDisplayInteractHelper && !this.isTextOverlayDisplayed) {
-            if (window.innerWidth <= 768 && this.onAddMobileInteractButton) {
+            if (isMobile && this.onAddMobileInteractButton) {
                 this.isTextOverlayDisplayed = true;
                 this.onAddMobileInteractButton();
             } else {
@@ -722,7 +769,7 @@ export default class App {
             !shouldDisplayInteractHelper &&
             this.isTextOverlayDisplayed
         ) {
-            if (window.innerWidth <= 768 && this.onRemoveMobileInteractButton) {
+            if (isMobile && this.onRemoveMobileInteractButton) {
                 this.onRemoveMobileInteractButton();
                 this.isTextOverlayDisplayed = false;
             } else {

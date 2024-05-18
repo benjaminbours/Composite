@@ -144,3 +144,9 @@ export function applyTransformToMesh(
     mesh.position.copy(transform.position.clone().multiplyScalar(gridSize));
     mesh.rotation.set(rotationX, rotationY, rotationZ);
 }
+
+export const wrapperBlurEvent =
+    (callback: () => void) => (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.currentTarget.blur();
+        callback();
+    };
