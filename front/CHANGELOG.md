@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.26
+
+### Patch Changes
+
+- Add missing exit button on mobile. Update timeline.
+
 ## 1.0.0-next.25
 
 ### Patch Changes
