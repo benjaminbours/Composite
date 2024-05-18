@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.25
+
+### Patch Changes
+
+- 0ef049e: Add solo game mode
+
 ## 1.0.0-next.24
 
 ### Patch Changes
