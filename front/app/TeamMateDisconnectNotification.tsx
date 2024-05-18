@@ -18,7 +18,7 @@ export const TeamMateDisconnectNotification: React.FC<Props> = ({
         <div className="team-mate-disconnect">
             <p>Your team mate disconnected or has quit the room</p>
             <button
-                className="buttonRect white"
+                className="composite-button white"
                 onClick={handleClickFindAnotherTeamMate}
             >
                 Find another team mate

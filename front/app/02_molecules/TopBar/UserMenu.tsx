@@ -56,7 +56,7 @@ export const UserMenu: React.FC<Props> = ({
         const button = (
             <button
                 disabled={disabled}
-                className="buttonRect"
+                className="composite-button"
                 onClick={onLoginClick}
             >
                 {dictionary.form.button.login}

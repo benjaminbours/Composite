@@ -71,7 +71,7 @@ export const EndLevelScene: React.FC<Props> = ({
         <div ref={endLevelRef} className={cssClass}>
             <div className="end-level-scene__header">
                 <button
-                    className="buttonRect white"
+                    className="composite-button white"
                     onClick={handleClickOnExit}
                 >
                     Exit
@@ -96,13 +96,13 @@ export const EndLevelScene: React.FC<Props> = ({
                 {/* Add helper such as: Discover why it's important */}
                 {/* TODO: Add auth + request to like the level */}
                 <br />
-                <button className="buttonRect white">
+                <button className="composite-button white">
                     Give a like <ThumbUpIcon />
                 </button>
             </div>
             <div className="end-level-scene__play-button-container">
                 <button
-                    className="buttonRect end-level-scene__play-button main-action"
+                    className="composite-button end-level-scene__play-button main-action"
                     onMouseEnter={() => {
                         if (side === Side.LIGHT) {
                             setLightIsPulsingFast(true);
@@ -168,7 +168,7 @@ export const EndLevelScene: React.FC<Props> = ({
                 </div>
                 <div>
                     <a
-                        className="buttonRect end-level-scene__patreon-button"
+                        className="composite-button end-level-scene__patreon-button"
                         href="https://patreon.com/benjaminbours"
                         target="_blank"
                     >
@@ -183,7 +183,7 @@ export const EndLevelScene: React.FC<Props> = ({
                     </a>
                 </div>
                 <div>
-                    <DiscordButton className="buttonRect" />
+                    <DiscordButton className="composite-button" />
                 </div>
             </div>
             <div className="thank-you">

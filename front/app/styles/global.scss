@@ -156,7 +156,7 @@ p {
     font-weight: 300;
 }
 
-.buttonRect {
+.composite-button {
     all: unset;
     width: auto;
     text-align: center;
@@ -170,6 +170,21 @@ p {
     color: white;
     border: solid white 1px;
     font-family: 'Source Code Pro', monospace;
+    display: flex;
+    align-items: center;
+
+    &--small {
+        text-transform: none;
+        letter-spacing: 0;
+
+        .composite-button__end-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    // &--large {
+    // }
 
     &:hover {
         background: white;
@@ -182,6 +197,10 @@ p {
         padding: 5px;
         font-size: 12px;
     }
+}
+
+.composite-button__end-icon {
+    margin-left: 10px;
 }
 
 $buttonSize: 90px;

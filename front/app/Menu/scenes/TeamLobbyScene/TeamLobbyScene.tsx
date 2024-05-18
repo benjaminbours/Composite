@@ -140,7 +140,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                     withGuest
                 />
                 <div className="team-lobby-scene__header">
-                    <button className="buttonRect white" onClick={exitLobby}>
+                    <button className="composite-button white" onClick={exitLobby}>
                         Exit
                     </button>
                     <h1 className="title-h3 title-h3--white">Lobby</h1>

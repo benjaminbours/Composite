@@ -288,7 +288,7 @@ function Game({
                                     <p>
                                         {`It's funnier if you can speak by voice with your teammate.`}
                                     </p>
-                                    <DiscordButton className="buttonRect" />
+                                    <DiscordButton className="composite-button" />
                                 </>
                             )}
                         </div>

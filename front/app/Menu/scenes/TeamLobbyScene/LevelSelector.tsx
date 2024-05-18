@@ -105,7 +105,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                 <div className={styles['no-level-container']}>
                     <p>There is no level available so far.</p>
                     <Link href={Route.LEVEL_EDITOR_ROOT}>
-                        <button className="buttonRect">
+                        <button className="composite-button">
                             Be the first creator!
                         </button>
                     </Link>
