@@ -16,6 +16,7 @@ import {
   SocketEventLobby,
   JoinRandomQueuePayload,
   SocketEventType,
+  StartSoloGamePayload,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -23,7 +24,13 @@ import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
 import { SocketGateway } from './socket.gateway';
 import ShortUniqueId from 'short-unique-id';
 import { PrismaService } from '@project-common/services';
-import { GameStatus, PlayerSide, User } from '@prisma/client';
+import {
+  GameDevice,
+  GameMode,
+  GameStatus,
+  PlayerSide,
+  User,
+} from '@prisma/client';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
@@ -311,6 +318,65 @@ export class LobbyGateway {
     ]);
   }
 
+  @SubscribeMessage(SocketEventLobby.START_SOLO_GAME)
+  async handleStartSoloGame(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: StartSoloGamePayload,
+  ) {
+    const player = new PlayerState(
+      PlayerStatus.IS_PLAYING,
+      undefined,
+      data.level,
+      undefined,
+      data.userId,
+      undefined,
+      undefined,
+      true,
+    );
+    Logger.log('create solo game');
+    const dbGame = await this.prismaService.game.create({
+      data: {
+        levelId: data.level,
+        status: GameStatus.STARTED,
+        mode: GameMode.SINGLE_PLAYER,
+        // TODO: add device type
+        device:
+          data.device === 'desktop' ? GameDevice.DESKTOP : GameDevice.MOBILE,
+        duration: 0,
+        startTime: 0,
+        ...(data.userId
+          ? {
+              players: {
+                create: [
+                  { userId: data.userId, side: PlayerSide.LIGHT },
+                  { userId: data.userId, side: PlayerSide.SHADOW },
+                ],
+              },
+            }
+          : {}),
+      },
+    });
+    Logger.log(`GAME ID: ${dbGame.id}`);
+    const gameRoomName = String(dbGame.id);
+    player.gameId = dbGame.id;
+    this.addSocketToRoom(socket.id, gameRoomName);
+    this.temporaryStorage.setPlayer(
+      socket.id,
+      RedisPlayerState.parsePlayerState(player),
+    );
+    const initialGameState = await this.mainGateway.createGame(
+      [{ socketId: socket.id, player }],
+      dbGame.id,
+    );
+    this.mainGateway.emit(gameRoomName, [
+      SocketEventType.GAME_START,
+      {
+        gameState: initialGameState,
+        lastInputs: [undefined, undefined],
+      },
+    ]);
+  }
+
   handlePlayerMatch = async (
     players: { socketId: string; player: PlayerState; indexToClear?: number }[],
   ) => {
@@ -319,7 +385,11 @@ export class LobbyGateway {
       data: {
         levelId: players[0].player.selectedLevel,
         status: GameStatus.STARTED,
-        startTime: new Date(),
+        mode: GameMode.MULTI_PLAYER,
+        startTime: 0,
+        // TODO: detect device for multiplayer game
+        device: GameDevice.DESKTOP,
+        duration: 0,
         players: {
           create: players
             .filter((p) => p.player.userId !== undefined)
@@ -347,7 +417,10 @@ export class LobbyGateway {
     );
     this.mainGateway.emit(gameRoomName, [
       SocketEventType.GAME_START,
-      { gameState: initialGameState, lastInputs: [undefined, undefined] },
+      {
+        gameState: initialGameState,
+        lastInputs: [undefined, undefined],
+      },
     ]);
   };
 

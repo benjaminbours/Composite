@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 // our libs
 import {
   SocketEventType,
@@ -24,6 +24,7 @@ import {
   AbstractLevel,
   LevelMapping,
   gridSize,
+  TimeInfoPayload,
 } from '@benjaminbours/composite-core';
 // local
 import { TemporaryStorageService } from '../temporary-storage.service';
@@ -32,6 +33,7 @@ import { SocketService } from './socket.service';
 import { PrismaService } from '@project-common/services';
 import { handlePrismaError } from '@project-common/utils/handlePrismaError';
 import { Vector3 } from 'three';
+import { GameStatus } from '@prisma/client';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -112,6 +114,75 @@ export class SocketGateway {
         serverGameTime: gameState.game_time,
       },
     ]);
+  }
+
+  @SubscribeMessage(SocketEventType.TIME_INFO)
+  async handleTimeInfo(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: TimeInfoPayload,
+  ) {
+    console.log('received time info event', data.averageRtt);
+    const player = await this.temporaryStorage.getPlayer(socket.id);
+    if (!player) {
+      return;
+    }
+
+    const startTimer = () => {
+      const startTime = Number(process.hrtime.bigint());
+      const gameRoomName = String(player.gameId);
+      this.emit(gameRoomName, [
+        SocketEventType.START_TIMER,
+        {
+          startTime,
+        },
+      ]);
+      this.prismaService.game
+        .update({
+          where: { id: player.gameId },
+          data: {
+            startTime,
+          },
+        })
+        .then((game) => {
+          Logger.log('Game timer started', game);
+        });
+    };
+
+    if (player.isSolo) {
+      player.averageRtt = data.averageRtt;
+      this.temporaryStorage.setPlayer(
+        socket.id,
+        RedisPlayerState.parsePlayerState(player),
+      );
+      startTimer();
+    } else {
+      player.averageRtt = data.averageRtt;
+      this.temporaryStorage.setPlayer(
+        socket.id,
+        RedisPlayerState.parsePlayerState(player),
+      );
+
+      // find team mate socket id
+      const teamMateSocketId = await this.server
+        .in(String(player.roomName))
+        .fetchSockets()
+        .then((sockets) => {
+          const teamMate = sockets.find(({ id }) => id !== socket.id);
+          return teamMate?.id || undefined;
+        });
+
+      if (!teamMateSocketId) {
+        return false;
+      }
+
+      // find team mate player state
+      const teamMatePlayer =
+        await this.temporaryStorage.getPlayer(teamMateSocketId);
+
+      if (teamMatePlayer.averageRtt) {
+        startTimer();
+      }
+    }
   }
 
   @SubscribeMessage(SocketEventType.DISCONNECT)
@@ -381,7 +452,28 @@ export class SocketGateway {
     const gameRoomName = String(gameId);
     clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
     delete this.gameLoopsRegistry[`game:${gameId}`];
-    console.log('game finished on the server');
+    console.log('detect game finished on the server');
+
+    this.prismaService.game
+      .findUnique({ where: { id: gameId } })
+      .then((game) => {
+        if (game) {
+          const duration =
+            (Number(process.hrtime.bigint()) - game.startTime) / 1_000_000_000;
+          this.prismaService.game
+            .update({
+              where: { id: gameId },
+              data: {
+                status: GameStatus.FINISHED,
+                duration,
+              },
+            })
+            .then((updatedGame) => {
+              Logger.log('Game finished', updatedGame);
+            });
+        }
+      });
+
     this.emit(gameRoomName, [SocketEventType.GAME_FINISHED]);
     this.server
       .in(gameRoomName)
@@ -391,7 +483,6 @@ export class SocketGateway {
           const state = RedisPlayerState.parsePlayerState(
             new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
           );
-          // console.log('parsed state', parsedState);
           this.temporaryStorage.setPlayer(id, state);
         });
       });

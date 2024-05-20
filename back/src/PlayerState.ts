@@ -22,6 +22,8 @@ export class RedisPlayerState {
      * Team room name
      */
     public roomName?: string,
+    public isSolo?: string,
+    public averageRTT?: string,
   ) {}
 
   static parsePlayerState(state: PlayerState) {
@@ -33,6 +35,8 @@ export class RedisPlayerState {
       state.userId ? String(state.userId) : undefined,
       state.gameId ? String(state.gameId) : undefined,
       state.roomName,
+      state.isSolo ? String(state.isSolo) : undefined,
+      state.averageRtt ? String(state.averageRtt) : undefined,
     );
   }
 }
@@ -49,6 +53,8 @@ export class PlayerState {
      */
     public gameId?: number,
     public roomName?: string,
+    public isSolo?: boolean,
+    public averageRtt?: number,
   ) {}
 
   static parseRedisPlayerState(state: RedisPlayerState) {
@@ -60,6 +66,8 @@ export class PlayerState {
       state.userId ? Number(state.userId) : undefined,
       state.gameId ? Number(state.gameId) : undefined,
       state.roomName,
+      state.isSolo ? true : undefined,
+      state.averageRTT ? Number(state.averageRTT) : undefined,
     );
   }
 }

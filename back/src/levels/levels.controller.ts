@@ -79,7 +79,7 @@ export class LevelsController {
   }
 
   @ApiCreatedResponse({
-    description: 'The purchase has been successfully created.',
+    description: 'The level has been successfully created.',
     type: Level,
   })
   @Roles(Role.USER)

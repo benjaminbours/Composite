@@ -69,7 +69,16 @@ model Level {
 enum GameStatus {
   STARTED
   FINISHED
-  NOT_FINISHED
+}
+
+enum GameMode {
+  SINGLE_PLAYER
+  MULTI_PLAYER
+}
+
+enum GameDevice {
+  DESKTOP
+  MOBILE
 }
 
 model Game {
@@ -77,15 +86,17 @@ model Game {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  status    GameStatus
-  startTime DateTime
-  endTime   DateTime?
+  status   GameStatus
+  duration Float
+  mode     GameMode
+  device   GameDevice
 
-  players Player[]
+  startTime Float
 
   // relations
+  players Player[]
   levelId Int
-  level   Level @relation(fields: [levelId], references: [id])
+  level   Level    @relation(fields: [levelId], references: [id])
 }
 
 enum PlayerSide {
