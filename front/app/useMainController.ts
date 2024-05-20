@@ -3,11 +3,11 @@ import {
     FriendJoinLobbyPayload,
     GameState,
     InviteFriendTokenPayload,
-    LevelMapping,
-    MovableComponentState,
+    // LevelMapping,
+    // MovableComponentState,
     Side,
     SocketEventLobby,
-    gridSize,
+    // gridSize,
 } from '@benjaminbours/composite-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MenuScene, Route } from './types';
@@ -24,7 +24,7 @@ import { useSnackbar } from 'notistack';
 import { useStoreState } from './hooks';
 import { startLoadingAssets } from './Game/assetsLoader';
 import { useMenuTransition } from './useMenuTransition';
-import { Vector3 } from 'three';
+// import { Vector3 } from 'three';
 
 export interface PlayerState {
     side: Side | undefined;
@@ -93,14 +93,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         if (process.env.NEXT_PUBLIC_STAGE === 'local') {
             let side = undefined;
             let selectedLevel = undefined;
-
-            if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-                const parts = process.env.NEXT_PUBLIC_SOLO_MODE.split(',').map(
-                    (str) => Number(str),
-                );
-                side = parts[0] as Side;
-                selectedLevel = parts[1];
-            }
 
             const param = queryParams.get('dev_state');
             if (param) {
@@ -775,72 +767,102 @@ export function useMainController(initialScene: MenuScene | undefined) {
         if (!levelId) {
             return;
         }
-        const apiClient = servicesContainer.get(ApiClient);
-        Promise.all([
-            apiClient.defaultApi.levelsControllerFindOne({
-                id: String(levelId),
-            }),
-            startLoadingAssets(),
-        ]).then(([level]) => {
-            const levelMapping = new LevelMapping(
-                level.id,
-                level.data as any[],
+
+        establishConnection().then(() => {
+            const isDesktop =
+                window.innerWidth > 768 && window.innerHeight > 500;
+            socketController.current?.emit([
+                SocketEventLobby.START_SOLO_GAME,
                 {
-                    light: new Vector3(
-                        level.lightStartPosition[0],
-                        level.lightStartPosition[1] === 0
-                            ? 0.08
-                            : level.lightStartPosition[1],
-                        level.lightStartPosition[2],
-                    ).multiplyScalar(gridSize),
-                    shadow: new Vector3(
-                        level.shadowStartPosition[0],
-                        level.shadowStartPosition[1] === 0
-                            ? 0.08
-                            : level.shadowStartPosition[1],
-                        level.shadowStartPosition[2],
-                    ).multiplyScalar(gridSize),
+                    userId: currentUser?.id,
+                    level: levelId,
+                    device: isDesktop ? 'desktop' : 'mobile',
                 },
-            );
-            const initialGameState = new GameState(
-                [
-                    {
-                        position: {
-                            x: levelMapping.startPosition.shadow.x,
-                            y: levelMapping.startPosition.shadow.y,
-                        },
-                        velocity: {
-                            x: 0,
-                            y: 0,
-                        },
-                        state: MovableComponentState.inAir,
-                        insideElementID: undefined,
-                    },
-                    {
-                        position: {
-                            x: levelMapping.startPosition.light.x,
-                            y: levelMapping.startPosition.light.y,
-                        },
-                        velocity: {
-                            x: 0,
-                            y: 0,
-                        },
-                        state: MovableComponentState.inAir,
-                        insideElementID: undefined,
-                    },
-                ],
-                levelMapping.state,
-                0,
-                0,
-            );
-            setState((prev) => ({
-                ...prev,
-                gameState: initialGameState,
-                loadedLevel: level,
-            }));
-            setGameIsPlaying(true);
+            ]);
         });
-    }, [state.you]);
+        // const apiClient = servicesContainer.get(ApiClient);
+        // Promise.all([
+        //     apiClient.defaultApi.levelsControllerFindOne({
+        //         id: String(levelId),
+        //     }),
+        //     startLoadingAssets(),
+        // ]).then(([level]) => {
+        //     const levelMapping = new LevelMapping(
+        //         level.id,
+        //         level.data as any[],
+        //         {
+        //             light: new Vector3(
+        //                 level.lightStartPosition[0],
+        //                 level.lightStartPosition[1] === 0
+        //                     ? 0.08
+        //                     : level.lightStartPosition[1],
+        //                 level.lightStartPosition[2],
+        //             ).multiplyScalar(gridSize),
+        //             shadow: new Vector3(
+        //                 level.shadowStartPosition[0],
+        //                 level.shadowStartPosition[1] === 0
+        //                     ? 0.08
+        //                     : level.shadowStartPosition[1],
+        //                 level.shadowStartPosition[2],
+        //             ).multiplyScalar(gridSize),
+        //         },
+        //     );
+        //     const initialGameState = new GameState(
+        //         [
+        //             {
+        //                 position: {
+        //                     x: levelMapping.startPosition.shadow.x,
+        //                     y: levelMapping.startPosition.shadow.y,
+        //                 },
+        //                 velocity: {
+        //                     x: 0,
+        //                     y: 0,
+        //                 },
+        //                 state: MovableComponentState.inAir,
+        //                 insideElementID: undefined,
+        //             },
+        //             {
+        //                 position: {
+        //                     x: levelMapping.startPosition.light.x,
+        //                     y: levelMapping.startPosition.light.y,
+        //                 },
+        //                 velocity: {
+        //                     x: 0,
+        //                     y: 0,
+        //                 },
+        //                 state: MovableComponentState.inAir,
+        //                 insideElementID: undefined,
+        //             },
+        //         ],
+        //         levelMapping.state,
+        //         0,
+        //         0,
+        //     );
+        //     setState((prev) => ({
+        //         ...prev,
+        //         gameState: initialGameState,
+        //         loadedLevel: level,
+        //     }));
+        //     setGameIsPlaying(true);
+        //     // const isDesktop =
+        //     //     window.innerWidth > 768 && window.innerHeight > 500;
+        //     // apiClient.defaultApi
+        //     //     .gamesControllerStartGame({
+        //     //         createGameDto: {
+        //     //             mode: CreateGameDtoModeEnum.SinglePlayer,
+        //     //             levelId,
+        //     //             userId: currentUser?.id,
+        //     //             deviceType: isDesktop
+        //     //                 ? GameDeviceEnum.Desktop
+        //     //                 : GameDeviceEnum.Mobile,
+        //     //         },
+        //     //     })
+        //     //     .then((game) => {
+        //     //         setEndGameToken(game.endLevelToken);
+        //     //     });
+        // });
+        // }, [state.you]);
+    }, [state.you, currentUser, establishConnection]);
 
     const handleExitGame = useCallback(() => {
         handleDestroyConnection();

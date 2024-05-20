@@ -121,25 +121,12 @@ function MainApp({ initialScene, dictionary }: Props) {
                             ? Side.SHADOW
                             : state.you.side
                     }
-                    multiplayerGameProps={
-                        socketController.current
-                            ? {
-                                  socketController: socketController.current,
-                                  initialGameState: state.gameState,
-                                  level: state.loadedLevel,
-                              }
-                            : undefined
-                    }
-                    soloGameProps={
-                        socketController.current
-                            ? undefined
-                            : {
-                                  initialGameState: state.gameState,
-                                  level: state.loadedLevel,
-                                  onGameFinished:
-                                      mainController.handleGameFinished,
-                              }
-                    }
+                    gameProps={{
+                        socketController: socketController.current,
+                        initialGameState: state.gameState,
+                        level: state.loadedLevel,
+                        mode: mainController.lobbyMode,
+                    }}
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
                     inputsManager={inputsManager.current}

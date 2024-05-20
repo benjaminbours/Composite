@@ -104,10 +104,13 @@ export class SocketController {
                 let averageRtt = Math.floor(totalRtt / TIME_SAMPLE_COUNT);
                 this.isTimeSynced = true;
 
-                // unregister all listener for time sync
-                // TODO: investigate to use remove listeners for other events as well
-                this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
-                resolve([data.serverGameTime!, averageRtt]);
+                this.socket.on(SocketEventType.START_TIMER, () => {
+                    console.log('Receive start timer');
+                    this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
+                    this.socket.removeAllListeners(SocketEventType.START_TIMER);
+                    resolve([data.serverGameTime!, averageRtt]);
+                });
+                this.emit([SocketEventType.TIME_INFO, { averageRtt }]);
             }
         };
 

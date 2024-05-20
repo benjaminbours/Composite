@@ -17,6 +17,17 @@
     align-items: flex-start;
 }
 
+.desktop-hud__run-timer {
+    position: fixed;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
 // MOBILE
 
 .mobile-hud {
@@ -25,6 +36,17 @@
     left: 0;
     right: 0;
     z-index: 10;
+}
+
+.mobile-hud__run-timer {
+    position: fixed;
+    top: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
 }
 
 .mobile-hud__button {

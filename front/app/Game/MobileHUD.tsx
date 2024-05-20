@@ -82,6 +82,9 @@ export const MobileHUD: React.FC<Props> = ({
 
     return (
         <div className="mobile-hud">
+            <Paper className="mobile-hud__run-timer">
+                <div id="runTimer">0.00 sec</div>
+            </Paper>
             <div className="desktop-hud__top-left-container">
                 <button className="composite-button white" onClick={onExitGame}>
                     Exit

@@ -80,6 +80,7 @@ export default class App {
     private players: Player[] = [];
     private skyMesh!: Mesh;
 
+    public runClock = new Clock(false);
     public clock = new Clock();
     public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
@@ -128,7 +129,6 @@ export default class App {
         level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
-        private onGameFinished?: () => void,
     ) {
         // canvasDom.oncontextmenu = function (e) {
         //     e.preventDefault();
@@ -229,6 +229,23 @@ export default class App {
             );
         }
     }
+
+    public startRun = () => {
+        this.runClock.start();
+    };
+
+    public stopRun = () => {
+        this.runClock.stop();
+    };
+
+    private runTimerDomElement = document.querySelector('#runTimer');
+    public updateRunDurationCounter = () => {
+        if (!this.runTimerDomElement) {
+            return;
+        }
+        const elapsedTime = this.runClock.getElapsedTime();
+        this.runTimerDomElement.innerHTML = `${elapsedTime.toFixed(2)} sec`;
+    };
 
     public shouldCaptureSnapshot = false;
     public onCaptureSnapshot = (_image: string) => {};
@@ -569,6 +586,7 @@ export default class App {
     };
 
     public run = () => {
+        this.updateRunDurationCounter();
         if (this.mode === AppMode.EDITOR) {
             this.updateMouseIntersection();
         }
@@ -631,15 +649,6 @@ export default class App {
                         this.players[0].position,
                         new Vector3(40, 40),
                     );
-                }
-
-                // only in solo mode
-                if (
-                    this.onGameFinished &&
-                    this.gameStateManager.displayState.level.end_level
-                        .length === 2
-                ) {
-                    this.onGameFinished();
                 }
             });
         }
