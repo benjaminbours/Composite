@@ -414,16 +414,33 @@ export default class App {
     };
 
     public resetSinglePlayerPosition = () => {
-        const nextPositions = JSON.parse(
-            JSON.stringify(this.gameStateManager.predictionState.players),
-        );
         const playerKey =
             this.mainPlayerSide === Side.LIGHT ? 'light' : 'shadow';
-        nextPositions[this.mainPlayerSide].position = {
+        this.gameStateManager.predictionState.players[
+            this.mainPlayerSide
+        ].position = {
             x: this.level.startPosition[playerKey].x,
             y: this.level.startPosition[playerKey].y,
         };
-        this.setPlayersPosition(this.level.startPosition);
+        this.gameStateManager.predictionState.players[
+            this.mainPlayerSide
+        ].velocity = {
+            x: 0,
+            y: 0,
+        };
+        const payload = this.createPlayerInputPayload(this.mainPlayerSide, {
+            left: false,
+            right: false,
+            jump: false,
+            resetPosition: true,
+            top: false,
+            bottom: false,
+        });
+        this.lastInput = payload;
+        // then collect it
+        if (this.gameStateManager.gameTimeIsSynchronized) {
+            this.gameStateManager.collectInput(payload);
+        }
     };
 
     public setPlayersPosition = (position: {
