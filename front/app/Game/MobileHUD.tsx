@@ -114,25 +114,35 @@ export const MobileHUD: React.FC<Props> = ({
             >
                 <ArrowForwardIosIcon />
             </IconButton>
-            <Paper className="mobile-hud__actions-container">
-                <ButtonGroup orientation="vertical">
-                    {isMobileInteractButtonAdded && (
+            {isMobileInteractButtonAdded && (
+                <Paper className="mobile-hud__interact-button">
+                    <ButtonGroup>
                         <Button
+                            size="large"
                             onTouchStart={handleTouchStart('interact')}
                             onTouchEnd={handleTouchEnd('interact')}
-                            color="success"
                         >
                             <VisibilityIcon fontSize="small" />
                         </Button>
-                    )}
-                    {withSwitchPlayer && (
+                    </ButtonGroup>
+                </Paper>
+            )}
+            {withSwitchPlayer && (
+                <Paper className="mobile-hud__switch-player">
+                    <ButtonGroup>
                         <Button
+                            size="large"
                             onClick={wrapperBlurEvent(handleClickSwitchPlayer)}
                         >
                             <SwitchAccountIcon fontSize="small" />
                         </Button>
-                    )}
+                    </ButtonGroup>
+                </Paper>
+            )}
+            <Paper className="mobile-hud__reset-position">
+                <ButtonGroup>
                     <Button
+                        size="large"
                         onClick={wrapperBlurEvent(handleClickResetPosition)}
                         title="Reset players position (BACKSPACE)"
                     >

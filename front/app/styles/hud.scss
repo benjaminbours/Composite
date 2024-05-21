@@ -82,11 +82,42 @@
     align-items: flex-end;
 }
 
-.mobile-hud__actions-container {
+.mobile-hud__switch-player {
     position: fixed;
     bottom: 3%;
     right: 3%;
     z-index: 1000;
     display: flex;
     flex-direction: column;
+
+    button {
+        padding: 20px;
+    }
+}
+
+.mobile-hud__reset-position {
+    position: fixed;
+    bottom: 3%;
+    left: 3%;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+
+    button {
+        padding: 20px;
+    }
+}
+
+.mobile-hud__interact-button {
+    position: fixed;
+    top: 13%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+
+    button {
+        padding: 20px;
+    }
 }
