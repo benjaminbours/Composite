@@ -42,7 +42,7 @@ export class MiniMapManager {
 
     public updateCamera = (position: Vector3) => {
         this.camera.position.set(
-            position.x * SCALE,
+            position.x,
             (position.y <= 563 ? 563 : position.y) * SCALE,
             3000,
         );
