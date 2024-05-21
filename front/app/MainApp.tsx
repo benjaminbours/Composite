@@ -126,6 +126,8 @@ function MainApp({ initialScene, dictionary }: Props) {
                         initialGameState: state.gameState,
                         level: state.loadedLevel,
                         mode: mainController.lobbyMode,
+                        onPracticeGameFinished:
+                            mainController.handleGameFinished,
                     }}
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}

@@ -39,7 +39,7 @@ export const Actions: React.FC = () => {
         }
     }, [state.you.level, state.you.side, state.isInQueue, lobbyMode]);
 
-    if (lobbyMode === LobbyMode.SOLO) {
+    if (lobbyMode === LobbyMode.SOLO || lobbyMode === LobbyMode.PRACTICE) {
         return (
             <div className="team-lobby-scene__buttons-container">
                 {state.you.level !== undefined && (

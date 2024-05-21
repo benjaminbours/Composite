@@ -40,6 +40,7 @@ interface GameProps {
     level: Level;
     socketController?: SocketController;
     mode: LobbyMode;
+    onPracticeGameFinished?: () => void;
 }
 
 interface Props {
@@ -129,8 +130,13 @@ function Game({
                 AppMode.GAME,
                 gameProps.level,
                 gameProps.socketController,
+                undefined,
+                gameProps.onPracticeGameFinished,
             );
-            if (gameProps.mode === LobbyMode.SOLO) {
+            if (
+                gameProps.mode === LobbyMode.SOLO ||
+                gameProps.mode === LobbyMode.PRACTICE
+            ) {
                 appRef.current.registerSoloModeListeners();
             }
             if (isMobile) {
@@ -139,7 +145,11 @@ function Game({
                 appRef.current.onRemoveMobileInteractButton =
                     handleRemoveMobileInteractButton;
             }
-            setIsSynchronizingTime(true);
+            if (gameProps.mode !== LobbyMode.PRACTICE) {
+                setIsSynchronizingTime(true);
+            } else {
+                appRef.current?.startRun();
+            }
         } else if (levelEditorProps) {
             const initialGameState = new GameState(
                 [
@@ -273,7 +283,10 @@ function Game({
                     appRef={appRef}
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
                     inputsManager={inputsManager}
-                    withSwitchPlayer={gameProps.mode === LobbyMode.SOLO}
+                    withSwitchPlayer={
+                        gameProps.mode === LobbyMode.SOLO ||
+                        gameProps.mode === LobbyMode.PRACTICE
+                    }
                     onExitGame={onExitGame}
                 />
             )}
@@ -281,7 +294,10 @@ function Game({
                 <DesktopHUD
                     appRef={appRef}
                     onExitGame={onExitGame}
-                    withActionsContainer={gameProps.mode === LobbyMode.SOLO}
+                    withActionsContainer={
+                        gameProps.mode === LobbyMode.SOLO ||
+                        gameProps.mode === LobbyMode.PRACTICE
+                    }
                 />
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }} />

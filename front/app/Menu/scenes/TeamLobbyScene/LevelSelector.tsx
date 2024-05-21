@@ -155,7 +155,8 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                                         isShadowWaiting={isShadowWaiting}
                                         isMobile={isMobile}
                                         isSoloMode={
-                                            lobbyMode === LobbyMode.SOLO
+                                            lobbyMode === LobbyMode.SOLO ||
+                                            lobbyMode === LobbyMode.PRACTICE
                                         }
                                     />
                                 </li>

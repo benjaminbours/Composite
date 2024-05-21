@@ -126,6 +126,7 @@ export default class App {
         level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
+        private onPracticeGameFinished?: () => void,
     ) {
         // canvasDom.oncontextmenu = function (e) {
         //     e.preventDefault();
@@ -846,6 +847,14 @@ export default class App {
             }
 
             endLevelElement.update(this.delta);
+
+            // only in practice mode
+            if (
+                this.onPracticeGameFinished &&
+                this.gameStateManager.displayState.level.end_level.length === 2
+            ) {
+                this.onPracticeGameFinished();
+            }
 
             if (
                 this.onLevelEditorValidation &&
