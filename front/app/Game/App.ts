@@ -800,6 +800,7 @@ export default class App {
             }
         }
 
+        // bounces
         for (let i = 0; i < this.level.bounces.length; i++) {
             const bounce = this.level.bounces[i];
             const id = bounce.name.split('_')[0];

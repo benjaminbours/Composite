@@ -357,10 +357,10 @@ export class SocketGateway {
 
   handleEndLevelTimeOut = (gameState: GameState, gameId: number) => {
     if (gameState.level.end_level.length === 2) {
-      if (process.env.STAGE === 'local') {
-        this.finishGame(gameId);
-        return;
-      }
+      // if (process.env.STAGE === 'local') {
+      //   this.finishGame(gameId);
+      //   return;
+      // }
 
       // if there is already an ongoing timeout, do not create another one
       if (this.gameLoopsRegistry[`game:${gameId}:endGame`]) {
@@ -370,7 +370,7 @@ export class SocketGateway {
       // if there is not, create one
       this.gameLoopsRegistry[`game:${gameId}:endGame`] = setTimeout(() => {
         this.finishGame(gameId);
-      }, 5000);
+      }, 2000);
     } else {
       clearTimeout(this.gameLoopsRegistry[`game:${gameId}:endGame`]);
       delete this.gameLoopsRegistry[`game:${gameId}:endGame`];
