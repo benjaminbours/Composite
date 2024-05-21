@@ -4,6 +4,7 @@ import { CircularProgress } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 interface Props {
+    buttonRef?: React.RefObject<HTMLButtonElement>;
     className?: string;
     asyncAction?: () => Promise<any>;
     textToCopy?: string;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const CopyToClipBoardButton: React.FC<Props> = ({
+    buttonRef,
     className,
     text,
     textToCopy,
@@ -51,6 +53,7 @@ export const CopyToClipBoardButton: React.FC<Props> = ({
 
     return (
         <button
+            ref={buttonRef}
             disabled={disabled}
             className={cssClass}
             onClick={handleClickCopyToClipBoard}

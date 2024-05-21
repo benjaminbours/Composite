@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { MainControllerContext } from '../../../MainApp';
 import { LobbyMode } from '../../../useMainController';
 import { QueueTimeInfo } from './QueueTimeInfo';
@@ -21,11 +21,30 @@ export const Actions: React.FC = () => {
         handleStartSolo,
     } = useContext(MainControllerContext);
 
+    const startSoloRef = useRef<HTMLButtonElement>(null);
+    const inviteFriendRef = useRef<HTMLButtonElement>(null);
+    const queueTimeRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (startSoloRef.current) {
+            startSoloRef.current.scrollIntoView();
+        } else if (
+            inviteFriendRef.current &&
+            state.you.level !== undefined &&
+            state.you.side !== undefined
+        ) {
+            inviteFriendRef.current.scrollIntoView();
+        } else if (queueTimeRef.current && state.isInQueue) {
+            queueTimeRef.current.scrollIntoView();
+        }
+    }, [state.you.level, state.you.side, state.isInQueue, lobbyMode]);
+
     if (lobbyMode === LobbyMode.SOLO) {
         return (
             <div className="team-lobby-scene__buttons-container">
                 {state.you.level !== undefined && (
                     <button
+                        ref={startSoloRef}
                         className="team-lobby-scene__rect-button main-action team-lobby-scene__align-button"
                         onClick={handleStartSolo}
                     >
@@ -39,7 +58,9 @@ export const Actions: React.FC = () => {
     if (lobbyMode === LobbyMode.DUO_WITH_RANDOM) {
         return (
             <div className="team-lobby-scene__buttons-container">
-                {state.isInQueue && <QueueTimeInfo />}
+                {state.isInQueue && (
+                    <QueueTimeInfo queueTimeRef={queueTimeRef} />
+                )}
             </div>
         );
     }
@@ -147,6 +168,7 @@ export const Actions: React.FC = () => {
             ) : (
                 <>
                     <CopyToClipBoardButton
+                        buttonRef={inviteFriendRef}
                         className="team-lobby-scene__rect-button main-action"
                         text="Copy invite link"
                         asyncAction={handleInviteFriend}
