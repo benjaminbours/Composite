@@ -92,9 +92,6 @@ export default class App {
 
     private playerHelper?: Box3;
 
-    // bounce helper
-    private currentBounceName?: string;
-
     private floor = FLOOR;
 
     public rendererManager: RendererManager;
@@ -926,9 +923,9 @@ export default class App {
             const skinBounce = bounceGroup?.children[1] as
                 | SkinBounce
                 | undefined;
-            if (skinBounce && !this.currentBounceName) {
+            if (skinBounce && !skinBounce.isPlayerInside) {
+                skinBounce.isPlayerInside = true;
                 skinBounce.add(skinBounce.directionHelper);
-                this.currentBounceName = skinBounce.name;
             }
         } else {
             const bounceGroup = this.level.children.find(
@@ -945,8 +942,8 @@ export default class App {
 
             // if there is a currentBounceName, clean it
             if (skinBounce) {
+                skinBounce.isPlayerInside = false;
                 skinBounce.remove(skinBounce.directionHelper);
-                this.currentBounceName = undefined;
             }
         }
     };
