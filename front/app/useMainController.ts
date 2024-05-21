@@ -244,6 +244,9 @@ export function useMainController(initialScene: MenuScene | undefined) {
             }));
             setGameIsPlaying(true);
         });
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        }
     }, []);
 
     const handleGameFinished = useCallback(() => {
@@ -271,6 +274,9 @@ export function useMainController(initialScene: MenuScene | undefined) {
         });
         setGameIsPlaying(false);
         setMenuScene(MenuScene.END_LEVEL);
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
     }, [setMenuScene]);
 
     const handleReceiveLevelOnLobby = useCallback((levelId: number) => {
