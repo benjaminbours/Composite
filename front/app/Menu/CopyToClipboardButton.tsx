@@ -58,14 +58,14 @@ export const CopyToClipBoardButton: React.FC<Props> = ({
             className={cssClass}
             onClick={handleClickCopyToClipBoard}
         >
-            <p>{shouldDisplayIsCopied ? 'Copied to clipboard' : text}</p>
+            <span>{shouldDisplayIsCopied ? 'Copied to clipboard' : text}</span>
             {isLoading ? (
                 <CircularProgress
                     className="copy-to-clipboard__icon"
                     size={20}
                 />
             ) : (
-                <ContentCopyIcon className="copy-to-clipboard__icon" />
+                <ContentCopyIcon className="composite-button__end-icon" />
             )}
         </button>
     );

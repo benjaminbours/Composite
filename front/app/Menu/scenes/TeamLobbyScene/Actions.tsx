@@ -45,10 +45,11 @@ export const Actions: React.FC = () => {
                 {state.you.level !== undefined && (
                     <button
                         ref={startSoloRef}
-                        className="team-lobby-scene__rect-button main-action team-lobby-scene__align-button"
+                        className="composite-button main-action team-lobby-scene__align-button"
                         onClick={handleStartSolo}
                     >
-                        Start <YingYang />
+                        Start{' '}
+                        <YingYang className="composite-button__end-icon" />
                     </button>
                 )}
             </div>
@@ -103,7 +104,7 @@ export const Actions: React.FC = () => {
                             the lobby
                         </span>
                     </p>
-                    <DiscordButton className="team-lobby-scene__rect-button" />
+                    <DiscordButton className="composite-button" />
                     {noMateChoice && (
                         <p
                             className="team-lobby-scene__info-text teammate-joined-text"
@@ -123,7 +124,7 @@ export const Actions: React.FC = () => {
                     )}
                     {!noMateChoice && !isAlignWithTeamMate && (
                         <button
-                            className="team-lobby-scene__rect-button main-action team-lobby-scene__align-button"
+                            className="composite-button main-action team-lobby-scene__align-button"
                             onClick={handleAlignWithTeamMate}
                         >
                             Align with team mate <YingYang />
@@ -137,7 +138,7 @@ export const Actions: React.FC = () => {
                     {isAlignWithTeamMate && (
                         <div className="team-lobby-scene__ready-container">
                             <button
-                                className="team-lobby-scene__rect-button main-action"
+                                className="composite-button main-action"
                                 onClick={handleClickReadyToPlay}
                             >
                                 <span>Ready:</span>
@@ -169,7 +170,7 @@ export const Actions: React.FC = () => {
                 <>
                     <CopyToClipBoardButton
                         buttonRef={inviteFriendRef}
-                        className="team-lobby-scene__rect-button main-action"
+                        className="composite-button main-action"
                         text="Copy invite link"
                         asyncAction={handleInviteFriend}
                     />

@@ -133,7 +133,7 @@ export const HomeScene: React.FC<Props> = ({
             <div className="home-scene__buttons-container">
                 <Link href={Route.ROADMAP}>
                     <button
-                        className="buttonCircle"
+                        className="composite-button home-scene__timeline-button"
                         id="buttonPath"
                         onMouseEnter={
                             isMobile ? undefined : handleMouseEnterButton
@@ -142,7 +142,7 @@ export const HomeScene: React.FC<Props> = ({
                             isMobile ? undefined : handleMouseLeaveButton
                         }
                     >
-                        The path
+                        The timeline
                     </button>
                 </Link>
                 <button
@@ -157,7 +157,7 @@ export const HomeScene: React.FC<Props> = ({
                 </button>
                 <Link href={Route.LEVEL_EDITOR_ROOT}>
                     <button
-                        className="buttonCircle"
+                        className="composite-button home-scene__community-button"
                         id="buttonBuild"
                         onMouseEnter={
                             isMobile ? undefined : handleMouseEnterButton
@@ -166,7 +166,7 @@ export const HomeScene: React.FC<Props> = ({
                             isMobile ? undefined : handleMouseLeaveButton
                         }
                     >
-                        Build
+                        The community
                     </button>
                 </Link>
             </div>

@@ -97,21 +97,49 @@
 #buttonPlay {
     font-size: 16px;
     overflow: hidden;
-}
-
-.home-scene__buttons-container {
     mix-blend-mode: difference;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     position: fixed;
     left: 50%;
     transform: translate(-50%, 0%);
     top: calc(75% - 52px);
-    width: 75%;
 
     @media (max-width: 768px) {
-        width: 100%;
         top: calc(75% - 47px);
+    }
+}
+
+.home-scene__buttons-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.home-scene__timeline-button {
+    position: fixed;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    top: 75%;
+
+    @media (max-width: 768px) {
+        position: static;
+        left: auto;
+        transform: none;
+        top: auto;
+    }
+}
+
+.home-scene__community-button {
+    position: fixed;
+    left: 75%;
+    transform: translate(-50%, -50%);
+    top: 75%;
+
+    @media (max-width: 768px) {
+        position: static;
+        left: auto;
+        transform: none;
+        top: auto;
     }
 }

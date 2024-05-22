@@ -1,5 +1,8 @@
-export const YingYang: React.FC = () => (
-    <svg className="ying-yang" viewBox="0 0 800 800">
+export const YingYang: React.FC<{ className?: string }> = ({ className }) => (
+    <svg
+        className={`ying-yang ${className ? className : ''}`}
+        viewBox="0 0 800 800"
+    >
         <g transform="translate(-491 -193)">
             <path
                 className="black"

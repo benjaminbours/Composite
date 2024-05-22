@@ -78,7 +78,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                     />
                     {!isMobile && (
                         <Link href={Route.LEVEL_EDITOR_ROOT}>
-                            <button className="team-lobby-scene__rect-button small">
+                            <button className="composite-button composite-button--small">
                                 Become a creator
                             </button>
                         </Link>
@@ -87,7 +87,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                         <div className={styles['queue-container']}>
                             {/* TODO: Fix position on mobile */}
                             <button
-                                className="team-lobby-scene__rect-button refresh-queue-button"
+                                className="composite-button composite-button--small refresh-queue-button"
                                 onClick={fetchServerInfo}
                             >
                                 {!isMobile && 'Refresh queue info'}

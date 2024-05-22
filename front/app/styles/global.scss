@@ -161,21 +161,25 @@ p {
     width: auto;
     text-align: center;
     padding: 8px;
-    letter-spacing: 5px;
-    text-transform: uppercase;
     transition: 0.7s;
     cursor: pointer;
-    font-size: 12px;
-    mix-blend-mode: difference;
     color: white;
     border: solid white 1px;
     font-family: 'Source Code Pro', monospace;
     display: flex;
     align-items: center;
+    justify-content: center;
+    background: black;
+    color: white;
+
+    &:hover {
+        background: white;
+        color: black;
+        border-color: black;
+    }
 
     &--small {
-        text-transform: none;
-        letter-spacing: 0;
+        font-size: 12px;
 
         .composite-button__end-icon {
             width: 20px;
@@ -183,12 +187,13 @@ p {
         }
     }
 
-    // &--large {
-    // }
+    &--large {
+        letter-spacing: 5px;
+        text-transform: uppercase;
+    }
 
-    &:hover {
-        background: white;
-        color: black;
+    &--mix-blend {
+        mix-blend-mode: difference;
     }
 
     @media (max-width: 768px), (max-height: 500px) {
@@ -435,55 +440,6 @@ $buttonSizeLarge: 120px;
     top: 2.5%;
     right: 2.5%;
     padding: 20px;
-
-    button {
-        font-size: 10px;
-    }
-}
-
-.copy-to-clipboard {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-
-    // svg {
-    //     width: 35px;
-    //     // margin-left: 10px;
-    //     transition: 0.7s;
-    // }
-
-    &.disabled {
-        background: grey;
-        cursor: default;
-    }
-
-    &.black {
-        svg {
-            fill: black;
-        }
-    }
-
-    &.white {
-        svg {
-            fill: white;
-        }
-    }
-
-    &:hover {
-        &.black {
-            svg {
-                fill: white;
-            }
-        }
-
-        &.white {
-            svg {
-                fill: black;
-            }
-        }
-    }
 }
 
 .buttons-container {

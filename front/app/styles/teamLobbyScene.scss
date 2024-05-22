@@ -63,51 +63,6 @@
     }
 }
 
-.team-lobby-scene__rect-button {
-    all: unset;
-    padding: 10px 20px;
-    background: black;
-    color: white;
-    text-align: center;
-    cursor: pointer;
-    text-align: center;
-    border: solid white 2px;
-    font-family: 'Source Code Pro', monospace;
-    transition: 0.3s ease-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    p {
-        margin: 0;
-    }
-
-    svg {
-        margin-left: 20px;
-    }
-
-    &[disabled] {
-        opacity: 0.5;
-        cursor: default;
-
-        &:hover {
-            background: black;
-            color: white;
-            border-color: white;
-        }
-    }
-
-    &.small {
-        font-size: 12px;
-    }
-
-    &:hover {
-        background: white;
-        color: black;
-        border-color: black;
-    }
-}
-
 .team-lobby-scene__waiting-friend-container {
     .MuiCircularProgress-root {
         color: white;
