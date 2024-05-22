@@ -35,6 +35,7 @@ export const Route = {
     HOME: '/',
     LOBBY: '/lobby',
     LOBBY_LEVEL: (levelId: number) => `/lobby?level=${levelId}`,
+    SHARE: (levelId?: number) => `/share/${levelId}`,
     TIMELINE: '/timeline',
     ROADMAP: '/timeline#roadmap',
     LEVEL_EDITOR_ROOT: '/level-editor',

@@ -151,7 +151,7 @@ export const EndLevelScene: React.FC<Props> = ({
                         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                             `I just finished the level ${level?.name} playing ${
                                 side === Side.LIGHT ? 'Light' : 'Shadow'
-                            } on Composite the game! Did you try it?`,
+                            } on Composite the game! Did you try it? ${process.env.NEXT_PUBLIC_URL}${Route.SHARE(level?.id)}`,
                         )}`}
                     >
                         Tweet
