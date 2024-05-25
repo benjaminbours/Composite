@@ -22,7 +22,6 @@ canvas,
     margin: 5px 0;
 }
 
-// TODO: Check this on mobile
 .bottom-left-info {
     position: fixed;
     z-index: 100;
@@ -31,7 +30,7 @@ canvas,
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
+    gap: 10px;
     mix-blend-mode: difference;
 
     .settings {
@@ -58,11 +57,18 @@ canvas,
         color: white;
     }
 
-    .version {
-        font-size: 12px;
-        color: white;
-        margin: 5px 0;
+    footer {
+        display: flex;
+        align-items: flex-end;
+        gap: 40px;
     }
+}
+
+.bottom-left-info__socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .bottom-right-info {
@@ -128,8 +134,8 @@ canvas,
     text-transform: uppercase;
     font-family: 'Source Code Pro', monospace;
     font-weight: bold;
-    font-size: 48px;
-    letter-spacing: 10px;
+    font-size: 44px;
+    letter-spacing: 5px;
 }
 
 .title-h2 {
