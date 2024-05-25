@@ -16,6 +16,12 @@ canvas,
     width: 100%;
 }
 
+.version {
+    font-size: 12px;
+    color: white;
+    margin: 5px 0;
+}
+
 // TODO: Check this on mobile
 .bottom-left-info {
     position: fixed;
@@ -466,7 +472,43 @@ p {
 // }
 
 .side-menu {
-    width: 200px;
+    min-width: 250px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .top-bar__logo {
+        margin-top: auto;
+    }
+
+    .version,
+    h2 {
+        text-align: center;
+    }
+
+    h2 {
+        color: white;
+        margin: 0;
+        margin-top: auto;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 10px;
+        text-transform: uppercase;
+    }
+}
+
+.side-menu__socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+
+    svg {
+        height: 20px;
+        width: 20px;
+    }
 }
 
 .slick-list,
