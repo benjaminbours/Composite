@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { TopBar } from '../../../02_molecules/TopBar';
 import { Locale } from '../../../../i18n-config';
 import { getDictionary } from '../../../../getDictionary';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Timeline',
@@ -730,6 +731,7 @@ export default async function Timeline({ params: { lng } }: Props) {
                     </div>
                 </div>
             </main>
+            <Footer lng={lng} />
         </>
     );
 }
