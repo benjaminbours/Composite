@@ -100,8 +100,10 @@ export const LevelGridItem: React.FC<Props> = ({
             return;
         }
 
-        return <TeamMateHelper levelName={name} you={you} mate={mate} />;
-    }, [mate, you, name, id]);
+        return (
+            <TeamMateHelper levelName={name} mate={mate} isMobile={isMobile} />
+        );
+    }, [mate, name, id, isMobile]);
 
     return (
         <button

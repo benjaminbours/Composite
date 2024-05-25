@@ -153,6 +153,10 @@ canvas,
         color: white;
     }
 
+    &--important {
+        color: $mainActionColor;
+    }
+
     @media (max-width: 768px), (max-height: 500px) {
         font-size: 20px;
     }

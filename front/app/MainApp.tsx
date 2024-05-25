@@ -21,6 +21,7 @@ import { getDictionary } from '../getDictionary';
 import { BottomRightInfo } from './BottomRightInfo';
 import { useWindowSize } from './hooks/useWindowSize';
 import { Side } from '@benjaminbours/composite-core';
+import { SideMenu } from './03_organisms/SideMenu';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -147,6 +148,10 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onSettingsClick={handleClickOnSettings}
                 />
             )}
+            <SideMenu
+                buttonClassName="main-app__hamburger-button"
+                dictionary={dictionary.common}
+            />
             {!gameIsPlaying && (
                 <BottomRightInfo
                     playing={mainController.serverCounts?.playing || 0}

@@ -57,7 +57,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
         <div className={styles.root}>
             <div className={styles.header}>
                 <>
-                    <h2 className="title-h3 title-h3--white">Select a level</h2>
+                    <h2 className="title-h3 title-h3--important">Select a level</h2>
                     <Autocomplete
                         className={styles['author-selector']}
                         disablePortal
@@ -111,7 +111,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                     </Link>
                 </div>
             ) : (
-                <div className="level-grid">
+                <div className={`level-grid ${styles['level-grid']}`}>
                     <ul>
                         {levelsToDisplay.map(({ id, name }, index) => {
                             let isLightWaiting = false;

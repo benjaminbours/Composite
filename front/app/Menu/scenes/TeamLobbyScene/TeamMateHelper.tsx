@@ -8,11 +8,15 @@ import { PlayerState } from '../../../useMainController';
 
 interface Props {
     levelName: string;
-    you: PlayerState;
     mate: PlayerState;
+    isMobile: boolean;
 }
 
-export const TeamMateHelper: React.FC<Props> = ({ levelName, you, mate }) => {
+export const TeamMateHelper: React.FC<Props> = ({
+    levelName,
+    mate,
+    isMobile,
+}) => {
     const [open, setOpen] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -22,14 +26,32 @@ export const TeamMateHelper: React.FC<Props> = ({ levelName, you, mate }) => {
             <div className="team-mate-container">
                 <div
                     className="team-mate"
-                    onMouseEnter={(e) => {
-                        setAnchorEl(e.currentTarget);
-                        setOpen((previousOpen) => !previousOpen);
-                    }}
-                    onMouseLeave={() => {
-                        setAnchorEl(null);
-                        setOpen((previousOpen) => !previousOpen);
-                    }}
+                    onMouseEnter={
+                        isMobile
+                            ? undefined
+                            : (e) => {
+                                  setAnchorEl(e.currentTarget);
+                                  setOpen((previousOpen) => !previousOpen);
+                              }
+                    }
+                    onMouseLeave={
+                        isMobile
+                            ? undefined
+                            : () => {
+                                  setAnchorEl(null);
+                                  setOpen((previousOpen) => !previousOpen);
+                              }
+                    }
+                    onClick={
+                        isMobile
+                            ? (e) => {
+                                  setAnchorEl((prev) =>
+                                      prev ? null : e.currentTarget,
+                                  );
+                                  setOpen((previousOpen) => !previousOpen);
+                              }
+                            : undefined
+                    }
                 >
                     <PersonIcon className="team-mate-icon" />
                     <p>{mateName}</p>
