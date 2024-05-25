@@ -436,16 +436,16 @@ p {
     background: black;
     border-bottom: solid $mainActionColor 1px;
     z-index: 100;
+
+    h4 {
+        margin: 0;
+    }
 }
 
 .top-bar__tool-bar {
     width: 100%;
     min-height: initial;
-    padding: 10px 0;
-
-    > * {
-        margin: 0 10px;
-    }
+    gap: 0 10px;
 
     @media (max-width: 768px), (max-height: 500px) {
         padding: 0;
