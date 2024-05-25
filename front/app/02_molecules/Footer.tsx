@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import React, { useMemo } from 'react';
 import { Route } from '../types';
-import Divider from '@mui/material/Divider';
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
 import { Locale } from '../../i18n-config';
@@ -42,7 +41,6 @@ export const Footer: React.FC<Props> = ({ lng }) => {
     );
     return (
         <footer className="footer">
-            <Divider />
             <div className="main-container">
                 <ul className="footer__site-map">
                     {siteMapItems.map(({ url, text }) => {
@@ -59,9 +57,7 @@ export const Footer: React.FC<Props> = ({ lng }) => {
                 </ul>
 
                 <Socials className="footer__socials" />
-                <div className="top-bar__logo">
-                    <h2>Composite</h2>
-                </div>
+                <h2>Composite</h2>
                 <small>© Composite 2024</small>
             </div>
         </footer>

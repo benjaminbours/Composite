@@ -714,9 +714,9 @@ export default async function Timeline({ params: { lng } }: Props) {
                     <ul className="timeline">
                         {futureEvents.map((event, index) => (
                             <li key={index} className="timeline-event">
-                                <div className="timeline-event-date">
+                                <h2 className="timeline-event-date">
                                     {event.date}
-                                </div>
+                                </h2>
                                 <div className="timeline-event-description">
                                     {event.description}
                                 </div>
@@ -725,7 +725,10 @@ export default async function Timeline({ params: { lng } }: Props) {
                     </ul>
 
                     <div className="button-container">
-                        <Link href="/" className="button-play timeline-page__button-play">
+                        <Link
+                            href="/"
+                            className="button-play timeline-page__button-play"
+                        >
                             Play
                         </Link>
                     </div>
