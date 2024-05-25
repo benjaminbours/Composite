@@ -725,7 +725,7 @@ export default async function Timeline({ params: { lng } }: Props) {
                     </ul>
 
                     <div className="button-container">
-                        <Link href="/" className="buttonCircle" id="buttonPlay">
+                        <Link href="/" className="button-play timeline-page__button-play">
                             Play
                         </Link>
                     </div>

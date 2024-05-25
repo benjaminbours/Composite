@@ -340,7 +340,7 @@ $size: 50px;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        animation: rotate 5s infinite linear;
+        animation: rotateCentered 5s infinite linear;
 
         .black,
         .white {
@@ -551,22 +551,6 @@ $size: 50px;
     }
 }
 
-@keyframes wobble {
-    to {
-        transform: translate(var(--x), var(--y)) rotate(360deg);
-    }
-}
-
-@keyframes rotate {
-    from {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-
 .team-lobby-scene__tabs-container {
     display: flex;
     justify-content: center;
@@ -598,18 +582,7 @@ $size: 50px;
 
     .ying-yang {
         width: 30px;
-        animation: rotate2 5s infinite linear;
-    }
-}
-
-// TODO: duplicate from rotate but without transform. Ugly.
-@keyframes rotate2 {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
+        animation: rotate 5s infinite linear;
     }
 }
 

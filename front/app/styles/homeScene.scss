@@ -94,16 +94,13 @@
     }
 }
 
-#buttonPlay {
-    font-size: 16px;
-    overflow: hidden;
-    mix-blend-mode: difference;
+.home-scene__button-play {
     position: fixed;
     left: 50%;
     transform: translate(-50%, 0%);
     top: calc(75% - 52px);
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 500px) {
         top: calc(75% - 47px);
     }
 }

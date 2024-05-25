@@ -1,6 +1,3 @@
-// variables
-$mainActionColor: #fff200;
-
 body {
     padding: 0;
     margin: 0;
@@ -208,47 +205,6 @@ p {
     margin-left: 10px;
 }
 
-$buttonSize: 90px;
-$buttonSizeSmall: 80px;
-$buttonSizeLarge: 120px;
-.buttonCircle {
-    all: unset;
-    mix-blend-mode: difference;
-    background: white;
-    color: black;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 100;
-    width: $buttonSize;
-    height: $buttonSize;
-    border-radius: $buttonSize;
-    border: solid black 7px;
-    text-transform: uppercase;
-    letter-spacing: 5px;
-    cursor: pointer;
-    z-index: 100;
-    transition: 0.3s ease-out;
-
-    &.white,
-    &.black {
-        mix-blend-mode: initial;
-    }
-
-    @media (min-width: 768px) {
-        &:hover {
-            border-color: white;
-            color: black;
-            transition: 0.3s ease-out;
-        }
-    }
-
-    @media (max-width: 768px), (max-height: 500px) {
-        width: $buttonSizeSmall;
-        height: $buttonSizeSmall;
-        border-radius: $buttonSizeSmall;
-    }
-}
-
 .unmount {
     opacity: 0;
     display: none !important;
@@ -370,54 +326,6 @@ $buttonSizeLarge: 120px;
     }
 }
 
-.inline-link {
-    color: white;
-    position: relative;
-    text-decoration: none;
-    mix-blend-mode: difference;
-
-    &::before {
-        content: '';
-        position: absolute;
-        display: block;
-        width: 100%;
-        height: 100%;
-        padding: 2px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        mix-blend-mode: difference;
-        border: solid black 1px;
-        transition: 0.3s ease-in;
-    }
-
-    &::after {
-        content: '➤️';
-        position: absolute;
-        top: -19px;
-        right: -12px;
-        color: white;
-        mix-blend-mode: difference;
-        transform: rotate(-45deg);
-        opacity: 0;
-        transition: 0.3s ease-in;
-    }
-
-    @media (min-width: 769px) {
-        &:hover {
-            &::after {
-                opacity: 1;
-            }
-
-            &::before {
-                background-color: black;
-                border-color: white;
-            }
-        }
-    }
-}
-
 .menu-actions {
     margin-top: 25px;
     font-size: 12px;
@@ -473,10 +381,6 @@ $buttonSizeLarge: 120px;
 
 .form-padding {
     padding: 30px;
-}
-
-.hamburger-button {
-    margin-left: auto !important;
 }
 
 .top-bar {
@@ -660,22 +564,6 @@ $buttonSizeLarge: 120px;
     }
 }
 
-@keyframes wobble {
-    to {
-        transform: translate(var(--x), var(--y)) rotate(360deg);
-    }
-}
-
-@keyframes rotate {
-    from {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-
 .composite-modal {
     display: flex;
     align-items: flex-start;
@@ -821,4 +709,3 @@ $buttonSizeLarge: 120px;
         opacity: 1;
     }
 }
-
