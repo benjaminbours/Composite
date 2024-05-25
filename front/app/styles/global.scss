@@ -420,43 +420,49 @@ p {
 }
 
 .top-bar {
-    height: 54px;
-
-    h4 {
-        color: white;
-        margin: 0;
-        font-family: 'Source Code Pro', monospace;
-        font-weight: 900;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-    }
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background: black;
+    border-bottom: solid $mainActionColor 1px;
+    z-index: 100;
 }
 
 .top-bar__tool-bar {
+    width: 100%;
     min-height: initial;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px 0;
 
     > * {
         margin: 0 10px;
     }
 
     @media (max-width: 768px), (max-height: 500px) {
-        padding-left: 0;
-        padding-right: 0;
+        padding: 0;
     }
-}
-
-.top-bar__account-container {
-    margin-left: auto;
-    mix-blend-mode: difference;
-    color: white;
 }
 
 .top-bar__logo {
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 2px;
+    transition: 0.3s ease-out;
 
-    h2 {
+    svg {
+        width: 30px;
+        height: 30px;
+        margin-right: 20px;
+        animation: rotate 5s infinite linear;
+    }
+
+    h3 {
+        transition: 0.3s ease-out;
         color: white;
         margin: 0;
         font-family: 'Source Code Pro', monospace;
@@ -464,12 +470,22 @@ p {
         letter-spacing: 10px;
         text-transform: uppercase;
     }
-}
 
-// .sign-up-email-activated-page {
-//     background: black;
-//     color: white;
-// }
+    &:hover {
+        background: $mainActionColor;
+        h3 {
+            color: black;
+        }
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        h2 {
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 5px;
+        }
+    }
+}
 
 .side-menu {
     min-width: 250px;
