@@ -150,23 +150,29 @@ export function useMainController(initialScene: MenuScene | undefined) {
     }, []);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {
-        router.push(Route.LOBBY);
+        if (onTransition.current) {
+            return;
+        }
+        socketController.current?.destroy();
         setGameIsPlaying(false);
-        setMenuScene(MenuScene.TEAM_LOBBY);
-        setState((prev) => ({
-            ...prev,
-            loadedLevel: undefined,
-            mateDisconnected: false,
-            you: {
-                isReady: false,
-                side: undefined,
-                level: undefined,
-                account: currentUser || undefined,
-            },
-            isInQueue: false,
-            isWaitingForFriend: false,
-        }));
-    }, [router, setMenuScene, currentUser]);
+        goToStep({ step: MenuScene.TEAM_LOBBY }, () => {
+            router.push(Route.LOBBY);
+            setMenuScene(MenuScene.TEAM_LOBBY);
+            setState((prev) => ({
+                ...prev,
+                loadedLevel: undefined,
+                mateDisconnected: false,
+                you: {
+                    isReady: false,
+                    side: undefined,
+                    level: undefined,
+                    account: currentUser || undefined,
+                },
+                isInQueue: false,
+                isWaitingForFriend: false,
+            }));
+        });
+    }, [router, setMenuScene, currentUser, goToStep, onTransition]);
 
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
