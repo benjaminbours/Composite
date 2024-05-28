@@ -179,6 +179,7 @@ export class SocketGateway {
       const teamMatePlayer =
         await this.temporaryStorage.getPlayer(teamMateSocketId);
 
+      // if teammate has average RTT it means he is ready
       if (teamMatePlayer.averageRtt) {
         startTimer();
       }

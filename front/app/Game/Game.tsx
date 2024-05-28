@@ -216,6 +216,9 @@ function Game({
                     serverTime,
                     rtt,
                 );
+            };
+
+            const onStartTimer = () => {
                 appRef.current?.inputsManager.registerEventListeners();
                 setIsSynchronizingTime(false);
                 appRef.current?.startRun();
@@ -223,7 +226,7 @@ function Game({
 
             setIsSynchronizingTime(true);
             gameProps.socketController
-                ?.synchronizeTime()
+                ?.synchronizeTime(onStartTimer)
                 .then(onTimeSynchronized);
         }
 

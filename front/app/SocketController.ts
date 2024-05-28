@@ -86,7 +86,10 @@ export class SocketController {
     };
 
     public onTimeSyncReceived =
-        (resolve: (value: [serverTime: number, rtt: number]) => void) =>
+        (
+            onStartTimer: () => void,
+            resolve: (value: [serverTime: number, rtt: number]) => void,
+        ) =>
         (data: TimeSyncPayload) => {
             console.log('received time sync event', data);
             const sample = this.timeSamplesSent.find(
@@ -108,13 +111,16 @@ export class SocketController {
                     console.log('Receive start timer');
                     this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
                     this.socket.removeAllListeners(SocketEventType.START_TIMER);
-                    resolve([data.serverGameTime!, averageRtt]);
+                    onStartTimer();
                 });
+                resolve([data.serverGameTime!, averageRtt]);
                 this.emit([SocketEventType.TIME_INFO, { averageRtt }]);
             }
         };
 
-    public synchronizeTime = (): Promise<[serverTime: number, rtt: number]> => {
+    public synchronizeTime = (
+        onStartTimer: () => void,
+    ): Promise<[serverTime: number, rtt: number]> => {
         return new Promise((resolve) => {
             this.isTimeSynced = false;
             // remove previous time samples in case of resynchronization
@@ -123,7 +129,7 @@ export class SocketController {
             // register listener for time sync event
             this.socket.on(
                 SocketEventType.TIME_SYNC,
-                this.onTimeSyncReceived(resolve),
+                this.onTimeSyncReceived(onStartTimer, resolve),
             );
             // send time samples
             for (let i = 0; i < TIME_SAMPLE_COUNT; i++) {
