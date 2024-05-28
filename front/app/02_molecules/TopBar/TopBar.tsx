@@ -37,7 +37,7 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
 
     return (
         <HideOnScroll>
-            <div className="top-bar">
+            <header className="top-bar">
                 <Link href="/" className="top-bar__logo">
                     <YingYang />
                     <h3>Composite</h3>
@@ -46,7 +46,7 @@ export const TopBar: React.FC<Props> = ({ dictionary }) => {
                     buttonClassName="top-bar__hamburger-button"
                     dictionary={dictionary}
                 />
-            </div>
+            </header>
         </HideOnScroll>
     );
 };

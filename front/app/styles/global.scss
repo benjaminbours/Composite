@@ -176,6 +176,7 @@ canvas,
 
 .title-h4 {
     font-family: 'Source Code Pro', monospace;
+    font-weight: 500;
     font-size: 20px;
 
     &--white {
@@ -220,7 +221,8 @@ p {
     &--small {
         font-size: 12px;
 
-        .composite-button__end-icon {
+        .composite-button__end-icon,
+        .composite-button__start-icon {
             width: 20px;
             height: 20px;
         }
@@ -241,6 +243,10 @@ p {
         padding: 5px;
         font-size: 12px;
     }
+}
+
+.composite-button__start-icon {
+    margin-right: 10px;
 }
 
 .composite-button__end-icon {

@@ -158,6 +158,7 @@ export function Menu({ dictionary, stats }: Props) {
                 }
             />
             <EndLevelScene
+                dictionary={dictionary}
                 isMount={
                     menuScene === MenuScene.END_LEVEL ||
                     nextMenuScene === MenuScene.END_LEVEL

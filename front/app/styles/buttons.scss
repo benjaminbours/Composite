@@ -61,7 +61,6 @@ $buttonSizeLarge: 120px;
     color: white;
     position: relative;
     text-decoration: none;
-    mix-blend-mode: difference;
     background: $mainActionColor;
     color: black;
 
@@ -71,7 +70,6 @@ $buttonSizeLarge: 120px;
         top: -13px;
         right: -12px;
         color: $mainActionColor;
-        mix-blend-mode: difference;
         transform: rotate(-45deg);
         opacity: 0;
         transition: 0.3s ease-in;

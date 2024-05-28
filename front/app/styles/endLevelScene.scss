@@ -8,15 +8,29 @@
     }
 
     h2,
-    h3 {
-        text-align: center;
+    h3,
+    h4 {
+        mix-blend-mode: difference;
     }
 
     h2,
     h3,
+    h4,
     p {
-        mix-blend-mode: difference;
+        margin: 0;
         color: white;
+    }
+
+    span {
+        mix-blend-mode: difference;
+    }
+
+    .MuiRating-root {
+        mix-blend-mode: initial;
+
+        span {
+            mix-blend-mode: initial;
+        }
     }
 
     .thank-emoji {
@@ -27,13 +41,35 @@
     .thank-you {
         display: flex;
         align-items: center;
-        justify-content: center;
         font-size: 36px;
 
         h2 {
             margin: 0;
         }
     }
+
+    .copy-to-clipboard span {
+        mix-blend-mode: initial;
+    }
+
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.end-level-scene .main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    flex: 1;
+
+    @media (max-width: 768px) {
+        margin-bottom: 30px;
+    }
+}
+
+.end-level-scene__main-title {
+    text-align: center;
 }
 
 .end-level-scene__header {
@@ -41,98 +77,45 @@
     align-items: center;
     justify-content: space-between;
     margin: 0 auto;
-    margin-top: 25px;
+    padding-top: 25px;
     width: 95%;
 }
 
-.end-level-scene__text-container {
-    text-align: center;
-    margin: 0 auto;
-    max-width: 500px;
+.end-level-scene__debrief-section,
+.end-level-scene__socials-section {
+    display: flex;
+    gap: 30px;
 
-    button {
+    > * {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    button.composite-button,
+    a.composite-button,
+    .twitter-share-button {
         min-width: 300px;
         max-width: 300px;
         box-sizing: border-box;
         display: flex;
         justify-content: center;
         align-items: center;
+
+        @media (max-width: 768px) {
+            align-self: center;
+        }
     }
 
-    @media (max-width: 768px), (max-height: 500px) {
-        max-width: auto;
-        width: 90%;
+    @media (max-width: 768px) {
+        flex-direction: column;
     }
 }
 
-.end-level-scene__like-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-
-    h3 {
-        width: 100%;
-    }
-
-    button {
-        display: flex;
-        align-items: center;
-
-        svg {
-            margin-left: 10px;
-        }
-    }
-}
-
-.end-level-scene__share {
-    width: 80%;
-    margin: 25px auto;
-    text-align: center;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    text-wrap: nowrap;
-
-    > div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .copy-to-clipboard {
-        p {
-            margin: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 300px;
-        }
-
-        svg {
-            width: 30px;
-            height: 30px;
-        }
-    }
-
-    @media (max-width: 1300px) {
-        grid-template-columns: repeat(2, 1fr);
-
-        > div button,
-        > div a {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 768px), (max-height: 500px) {
-        grid-template-columns: 1fr;
-
-        .copy-to-clipboard {
-            p {
-                font-size: 12px;
-            }
-        }
-    }
+.end-level-scene__debrief-section {
+    border-bottom: solid $mainActionColor 1px;
+    padding-bottom: 30px;
 }
 
 .end-level-scene__patreon-button {
@@ -153,12 +136,6 @@
             fill: black;
         }
     }
-}
-
-.end-level-scene__play-button-container {
-    display: flex;
-    justify-content: center;
-    margin: 25px 0;
 }
 
 .end-level-scene__play-button {
@@ -187,4 +164,54 @@
             }
         }
     }
+}
+
+.end-level-scene__rating-container {
+    display: flex;
+    gap: 15px;
+}
+
+.end-level-scene__rating {
+    .MuiRating-icon {
+        color: darkgray;
+
+        svg {
+            fill: darkgray;
+        }
+    }
+
+    .MuiRating-iconFilled {
+        color: #faaf00;
+
+        svg {
+            fill: #faaf00;
+        }
+    }
+
+    .MuiRating-decimal {
+        label:first-child {
+            z-index: 10;
+        }
+    }
+}
+
+.end-level-scene__difficulty-rating {
+    .MuiRating-iconFilled {
+        color: red;
+
+        svg {
+            fill: red;
+        }
+    }
+
+    svg {
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+    }
+}
+
+.end-level-scene__rating-loader {
+    mix-blend-mode: initial;
+    color: $mainActionColor;
 }
