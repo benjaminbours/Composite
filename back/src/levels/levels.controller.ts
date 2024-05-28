@@ -30,6 +30,8 @@ import {
 } from '@nestjs/swagger';
 import { Level } from './entities/level.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpsertRatingDto } from './dto/upsert-rating.dto';
+import { Rating } from './entities/rating.entity';
 
 @ApiBearerAuth()
 @Controller('levels')
@@ -76,6 +78,30 @@ export class LevelsController {
     const uploadsDir = path.join(process.cwd(), 'uploads');
     const fileName = `level_${id}_thumbnail.png`;
     fs.createWriteStream(path.join(uploadsDir, fileName)).write(file.buffer);
+  }
+
+  @ApiOkResponse({
+    description: 'The rating has been successfully upserted.',
+    type: Rating,
+  })
+  @Roles(Role.USER)
+  @Post(':id/rating')
+  upsertRating(
+    @Param('id') id: string,
+    @GetUser() user: JWTUserPayload,
+    @Body() upsertRatingDto: UpsertRatingDto,
+  ) {
+    return this.levelsService.upsertRating(+id, user, upsertRatingDto);
+  }
+
+  @ApiOkResponse({
+    description: 'Get the ratings for this level.',
+    type: [Rating],
+  })
+  @Roles(Role.USER)
+  @Get(':id/rating')
+  getRatings(@Param('id') id: string, @GetUser() user: JWTUserPayload) {
+    return this.levelsService.findRatings(+id, user);
   }
 
   @ApiCreatedResponse({

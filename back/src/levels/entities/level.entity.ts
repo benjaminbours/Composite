@@ -9,6 +9,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Game } from 'src/games/entities/game.entity';
+import { Rating } from './rating.entity';
 
 export class Element implements Omit<LevelElement, 'mesh' | 'id'> {
   @ApiProperty({ type: String })
@@ -55,4 +57,8 @@ export class Level implements PrismaLevel {
   updatedAt: Date;
   @ApiProperty({ type: Author, required: false })
   author?: Author;
+  @ApiProperty({ type: [Game], required: false })
+  games?: Game[];
+  @ApiProperty({ type: [Rating], required: false })
+  ratings?: Rating[];
 }
