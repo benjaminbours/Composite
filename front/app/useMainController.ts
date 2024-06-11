@@ -21,7 +21,7 @@ import {
     User,
 } from '@benjaminbours/composite-api-client';
 import { useSnackbar } from 'notistack';
-import { useStoreState } from './hooks';
+import { useStoreActions, useStoreState } from './hooks';
 import { startLoadingAssets } from './Game/assetsLoader';
 import { useMenuTransition } from './useMenuTransition';
 import { Vector3 } from 'three';
@@ -75,6 +75,13 @@ export function useMainController(initialScene: MenuScene | undefined) {
         menuScene,
         refHashMap,
     } = useMenuTransition(initialScene);
+
+    const fetchServerInfo = useStoreActions(
+        (actions) => actions.serverInfo.fetchServerInfo,
+    );
+    const clearFetchServerInfo = useStoreActions(
+        (actions) => actions.serverInfo.clearFetchServerInfo,
+    );
 
     const { enqueueSnackbar } = useSnackbar();
     const currentUser = useStoreState((state) => state.user.currentUser);
@@ -392,82 +399,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
             });
         });
     }, [establishConnection, currentUser, state]);
-
-    const queueInfoInterval = useRef<NodeJS.Timeout>();
-    const fetchCompletionInterval = useRef<NodeJS.Timeout>();
-    const [serverCounts, setServerCounts] = useState<ServerCounts>();
-    const [fetchTime, setFetchTime] = useState(0);
-
-    const fetchServerInfo = useCallback(async () => {
-        const apiClient = servicesContainer.get(ApiClient);
-        return apiClient.defaultApi
-            .appControllerGetServerInfo()
-            .then((data) => {
-                // clear previous interval
-                clearInterval(queueInfoInterval.current);
-                clearInterval(fetchCompletionInterval.current);
-                const intervalId = setInterval(() => {
-                    // console.log('fetch');
-                    fetchServerInfo();
-                }, QUEUE_INFO_FETCH_INTERVAL);
-
-                const completionIntervalId = setInterval(() => {
-                    // console.log('time update');
-                    setFetchTime((prev) => prev + 1000);
-                }, 1000);
-
-                setFetchTime(0);
-                fetchCompletionInterval.current = completionIntervalId;
-                queueInfoInterval.current = intervalId;
-
-                // update states
-                const serverCounts = data.reduce(
-                    (acc, player) => {
-                        if (
-                            player &&
-                            player.selectedLevel !== undefined &&
-                            player.side !== undefined
-                        ) {
-                            if (!acc.levels[player.selectedLevel]) {
-                                acc.levels[player.selectedLevel] = {
-                                    playing: 0,
-                                    light_queue: 0,
-                                    shadow_queue: 0,
-                                };
-                            }
-
-                            if (player.status === 0) {
-                                acc.playing++;
-                                acc.levels[player.selectedLevel].playing++;
-                            } else if (player.status === 1) {
-                                acc.matchmaking++;
-
-                                if (player.side === 0) {
-                                    acc.levels[player.selectedLevel]
-                                        .shadow_queue++;
-                                } else {
-                                    acc.levels[player.selectedLevel]
-                                        .light_queue++;
-                                }
-                            }
-                        }
-                        return acc;
-                    },
-                    {
-                        playing: 0,
-                        matchmaking: 0,
-                        levels: {},
-                    } as ServerCounts,
-                );
-
-                setServerCounts(serverCounts);
-                setState((prev) => ({
-                    ...prev,
-                    // TODO: Investigate if this boolean is still needed
-                    shouldDisplayQueueInfo: true,
-                }));
-            });
-    }, [setState]);
 
     const handleEnterRandomQueue = useCallback(
         (side: Side, level: number) => {
@@ -918,12 +849,9 @@ export function useMainController(initialScene: MenuScene | undefined) {
             fetchServerInfo();
         }
         return () => {
-            clearInterval(queueInfoInterval.current);
-            clearInterval(fetchCompletionInterval.current);
-            queueInfoInterval.current = undefined;
-            fetchCompletionInterval.current = undefined;
+            clearFetchServerInfo();
         };
-    }, [gameIsPlaying, fetchServerInfo]);
+    }, [gameIsPlaying, fetchServerInfo, clearFetchServerInfo]);
 
     // TODO: add params side in the url as well or at a state level selected without any side yet
     useEffect(() => {
@@ -950,8 +878,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         socketController,
         gameIsPlaying,
         levels,
-        serverCounts,
-        fetchTime,
         nextMenuScene,
         menuScene,
         refHashMap,
@@ -971,7 +897,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         handleClickPlay,
         handleClickHome,
         handleClickPlayAgain,
-        fetchServerInfo,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
         handleClickLevelItem,

@@ -163,14 +163,6 @@ export function Menu({ dictionary, stats }: Props) {
                     menuScene === MenuScene.END_LEVEL ||
                     nextMenuScene === MenuScene.END_LEVEL
                 }
-                endLevelRef={refHashMap.endLevelRef}
-                side={state.you.side}
-                level={state.loadedLevel}
-                mate={state.mate}
-                handleClickOnPlay={handleClickPlayAgain}
-                handleClickOnExit={exitLobby}
-                setLightIsPulsingFast={setLightIsPulsingFast}
-                setShadowRotationSpeed={setShadowRotationSpeed}
             />
         </>
     );

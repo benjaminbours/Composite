@@ -152,12 +152,7 @@ function MainApp({ initialScene, dictionary }: Props) {
                 buttonClassName="main-app__hamburger-button"
                 dictionary={dictionary.common}
             />
-            {!gameIsPlaying && (
-                <BottomRightInfo
-                    playing={mainController.serverCounts?.playing || 0}
-                    matchmaking={mainController.serverCounts?.matchmaking || 0}
-                />
-            )}
+            {!gameIsPlaying && <BottomRightInfo />}
         </MainControllerContext.Provider>
     );
 }

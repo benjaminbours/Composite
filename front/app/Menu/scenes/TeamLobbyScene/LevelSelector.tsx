@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import styles from './LevelSelector.module.scss';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
@@ -11,6 +11,7 @@ import {
 } from '../../../useMainController';
 import { LevelGridItem } from './LevelGridItem';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useStoreActions, useStoreState } from '../../../hooks/store';
 
 interface Props {
     disabled?: boolean;
@@ -22,15 +23,21 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
         state,
         levels,
         lobbyMode,
-        serverCounts,
-        fetchTime,
         hoveredLevel,
         setHoveredLevel,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
         handleClickLevelItem,
-        fetchServerInfo,
     } = useContext(MainControllerContext);
+
+    const serverCounts = useStoreState(
+        (state) => state.serverInfo.serverCounts,
+    );
+    const fetchTime = useStoreState((state) => state.serverInfo.timeUntilNextFetch);
+    const fetchServerInfo = useStoreActions(
+        (actions) => actions.serverInfo.fetchServerInfo,
+    );
+
     // author
     const authorList = useMemo(() => {
         const list = levels.reduce((acc, level) => {
@@ -57,7 +64,9 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
         <div className={styles.root}>
             <div className={styles.header}>
                 <>
-                    <h2 className="title-h3 title-h3--important">Select a level</h2>
+                    <h2 className="title-h3 title-h3--important">
+                        Select a level
+                    </h2>
                     <Autocomplete
                         className={styles['author-selector']}
                         disablePortal
@@ -88,7 +97,9 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                             {/* TODO: Fix position on mobile */}
                             <button
                                 className="composite-button composite-button--small refresh-queue-button"
-                                onClick={fetchServerInfo}
+                                onClick={() => {
+                                    fetchServerInfo();
+                                }}
                             >
                                 {!isMobile && 'Refresh queue info'}
                                 <CircularProgress

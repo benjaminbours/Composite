@@ -33,16 +33,16 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
     ({ dictionary, isMount }) => {
         const {
             state,
-            serverCounts,
             refHashMap,
             lobbyMode,
             handleChangeLobbyMode,
-            handleInviteFriend,
             handleEnterTeamLobby,
-            handleClickReadyToPlay,
-            handleAlignWithTeamMate,
             exitLobby,
         } = useContext(MainControllerContext);
+
+        const serverCounts = useStoreState(
+            (state) => state.serverInfo.serverCounts,
+        );
 
         const { enqueueSnackbar } = useSnackbar();
         const urlSearchParams = useSearchParams();
