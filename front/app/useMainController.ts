@@ -1,6 +1,7 @@
 import {
     CreateLobbyPayload,
     FriendJoinLobbyPayload,
+    GameFinishedPayload,
     GameState,
     InviteFriendTokenPayload,
     LevelMapping,
@@ -36,7 +37,7 @@ export interface PlayerState {
 export interface MainState {
     isWaitingForFriend: boolean;
     isInQueue: boolean;
-    shouldDisplayQueueInfo: boolean;
+    lastGameDuration: number;
     gameState: GameState | undefined;
     loadedLevel: Level | undefined;
     you: PlayerState;
@@ -113,6 +114,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 isWaitingForFriend: false,
                 gameState: undefined,
                 loadedLevel: undefined,
+                lastGameDuration: 0,
                 you: {
                     side,
                     level: selectedLevel,
@@ -122,7 +124,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 mate: undefined,
                 mateDisconnected: false,
                 isInQueue: false,
-                shouldDisplayQueueInfo: true,
             };
         }
 
@@ -130,6 +131,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
             isWaitingForFriend: false,
             gameState: undefined,
             loadedLevel: undefined,
+            lastGameDuration: 0,
             you: {
                 side: undefined,
                 level: undefined,
@@ -139,9 +141,11 @@ export function useMainController(initialScene: MenuScene | undefined) {
             mate: undefined,
             mateDisconnected: false,
             isInQueue: false,
-            shouldDisplayQueueInfo: true,
         };
     });
+
+    // TODO: These local states trigger refresh on component that are not related at all.
+    // Fix this, try to extract it to a separate state / component
     const [levels, setLevels] = useState<Level[]>([]);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [hoveredLevel, setHoveredLevel] = useState<number | undefined>();
@@ -222,7 +226,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                     level: data.level,
                 },
                 mateDisconnected: false,
-                shouldDisplayQueueInfo: false,
                 isInQueue: false,
                 isWaitingForFriend: false,
             }));
@@ -263,35 +266,38 @@ export function useMainController(initialScene: MenuScene | undefined) {
         }
     }, []);
 
-    const handleGameFinished = useCallback(() => {
-        setState((prev) => {
-            const next = {
-                ...prev,
-                gameState: undefined,
-                you: {
-                    ...prev.you,
-                    isReady: false,
-                },
-                mate: prev.mate
-                    ? {
-                          ...prev.mate!,
-                          side: undefined,
-                          isReady: false,
-                      }
-                    : undefined,
-                isInQueue: false,
-                isWaitingForFriend: false,
-                shouldDisplayQueueInfo: false,
-            };
+    const handleGameFinished = useCallback(
+        (data: GameFinishedPayload) => {
+            setState((prev) => {
+                const next = {
+                    ...prev,
+                    gameState: undefined,
+                    lastGameDuration: data.duration,
+                    you: {
+                        ...prev.you,
+                        isReady: false,
+                    },
+                    mate: prev.mate
+                        ? {
+                              ...prev.mate!,
+                              side: undefined,
+                              isReady: false,
+                          }
+                        : undefined,
+                    isInQueue: false,
+                    isWaitingForFriend: false,
+                };
 
-            return next;
-        });
-        setGameIsPlaying(false);
-        setMenuScene(MenuScene.END_LEVEL);
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }, [setMenuScene]);
+                return next;
+            });
+            setGameIsPlaying(false);
+            setMenuScene(MenuScene.END_LEVEL);
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        },
+        [setMenuScene],
+    );
 
     const handleReceiveLevelOnLobby = useCallback((levelId: number) => {
         setState((prev) => ({
@@ -431,7 +437,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 ...prev,
                 mate: undefined,
                 mateDisconnected: false,
-                shouldDisplayQueueInfo: true,
                 you: {
                     isReady: false,
                     level: undefined,

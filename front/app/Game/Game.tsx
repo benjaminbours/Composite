@@ -14,6 +14,7 @@ import { BufferGeometry, Mesh } from 'three';
 Mesh.prototype.raycast = acceleratedRaycast;
 // our libs
 import {
+    GameFinishedPayload,
     GameState,
     MovableComponentState,
     Side,
@@ -40,7 +41,7 @@ interface GameProps {
     level: Level;
     socketController?: SocketController;
     mode: LobbyMode;
-    onPracticeGameFinished?: () => void;
+    onPracticeGameFinished?: (data: GameFinishedPayload) => void;
 }
 
 interface Props {

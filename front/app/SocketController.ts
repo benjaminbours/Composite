@@ -11,6 +11,7 @@ import {
     SocketEventLobby,
     Side,
     FriendJoinLobbyPayload,
+    GameFinishedPayload,
 } from '@benjaminbours/composite-core';
 
 const TIME_SAMPLE_COUNT = 20;
@@ -26,7 +27,7 @@ export class SocketController {
 
     constructor(
         onGameStart: (initialGameState: GameState) => void,
-        onGameFinish: () => void,
+        onGameFinish: (data: GameFinishedPayload) => void,
         onTeamMateDisconnect: () => void,
         onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
         handleReceiveLevelOnLobby: (levelId: number) => void,

@@ -131,6 +131,10 @@ export interface TimeInfoPayload {
     averageRtt: number;
 }
 
+export interface GameFinishedPayload {
+    duration: number;
+}
+
 // events
 
 export type PingEvent = [
@@ -148,7 +152,10 @@ export type GameStartEvent = [
     payload: GameStateUpdatePayload,
 ];
 
-export type GameFinishedEvent = [type: SocketEventType.GAME_FINISHED];
+export type GameFinishedEvent = [
+    type: SocketEventType.GAME_FINISHED,
+    payload: GameFinishedPayload,
+];
 
 export type GameStateUpdateEvent = [
     type: SocketEventType.GAME_STATE_UPDATE,

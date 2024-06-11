@@ -470,22 +470,26 @@ export class SocketGateway {
               },
             })
             .then((updatedGame) => {
-              Logger.log('Game finished', updatedGame);
+              Logger.log('Game finished and updated', updatedGame);
+            });
+
+          this.emit(gameRoomName, [
+            SocketEventType.GAME_FINISHED,
+            { duration },
+          ]);
+
+          this.server
+            .in(gameRoomName)
+            .fetchSockets()
+            .then((sockets) => {
+              sockets.forEach(({ id }) => {
+                const state = RedisPlayerState.parsePlayerState(
+                  new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
+                );
+                this.temporaryStorage.setPlayer(id, state);
+              });
             });
         }
-      });
-
-    this.emit(gameRoomName, [SocketEventType.GAME_FINISHED]);
-    this.server
-      .in(gameRoomName)
-      .fetchSockets()
-      .then((sockets) => {
-        sockets.forEach(({ id }) => {
-          const state = RedisPlayerState.parsePlayerState(
-            new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
-          );
-          this.temporaryStorage.setPlayer(id, state);
-        });
       });
   };
 }

@@ -41,6 +41,7 @@ import {
     ClientGraphicHelpers,
     addToCollidingElements,
     gridSize,
+    GameFinishedPayload,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -126,7 +127,7 @@ export default class App {
         level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
-        private onPracticeGameFinished?: () => void,
+        private onPracticeGameFinished?: (data: GameFinishedPayload) => void,
     ) {
         // canvasDom.oncontextmenu = function (e) {
         //     e.preventDefault();
@@ -853,7 +854,9 @@ export default class App {
                 this.onPracticeGameFinished &&
                 this.gameStateManager.displayState.level.end_level.length === 2
             ) {
-                this.onPracticeGameFinished();
+                this.onPracticeGameFinished({
+                    duration: this.runClock.getElapsedTime(),
+                });
             }
 
             if (
