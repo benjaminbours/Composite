@@ -88,3 +88,66 @@ $buttonSizeLarge: 120px;
         }
     }
 }
+
+.composite-button {
+    all: unset;
+    width: auto;
+    text-align: center;
+    padding: 8px;
+    transition: 0.7s;
+    cursor: pointer;
+    color: white;
+    border: solid white 1px;
+    font-family: 'Source Code Pro', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: black;
+    color: white;
+
+    &:hover {
+        background: white;
+        color: black;
+        border-color: black;
+    }
+
+    &--small {
+        font-size: 12px;
+
+        .composite-button__end-icon,
+        .composite-button__start-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &--large {
+        letter-spacing: 5px;
+        text-transform: uppercase;
+    }
+
+    &--mix-blend {
+        mix-blend-mode: difference;
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        text-transform: none;
+        letter-spacing: 2px;
+        padding: 5px;
+        font-size: 12px;
+
+        &--large {
+            padding: 8px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+    }
+}
+
+.composite-button__start-icon {
+    margin-right: 10px;
+}
+
+.composite-button__end-icon {
+    margin-left: 10px;
+}

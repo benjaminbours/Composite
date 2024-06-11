@@ -10,15 +10,8 @@ import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
 import { YingYang } from './YingYang';
-
-function loadImage(url: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(url);
-        img.onerror = () => reject();
-        img.src = url;
-    });
-}
+import { loadImage } from '../../../utils';
+import { defaultLevelImageUrl } from '../../../constants';
 
 interface Props {
     id: number;
@@ -37,8 +30,6 @@ interface Props {
     isSoloMode: boolean;
 }
 
-const defaultImageUrl = '/images/crack_the_door.png';
-
 export const LevelGridItem: React.FC<Props> = ({
     name,
     id,
@@ -56,11 +47,11 @@ export const LevelGridItem: React.FC<Props> = ({
     isSoloMode,
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
-    const [imageUrl, setImageUrl] = useState(defaultImageUrl);
+    const [imageUrl, setImageUrl] = useState(defaultLevelImageUrl);
 
     useEffect(() => {
         loadImage(src)
-            .catch(() => defaultImageUrl)
+            .catch(() => defaultLevelImageUrl)
             .then((url) => {
                 setImageUrl(url);
             });

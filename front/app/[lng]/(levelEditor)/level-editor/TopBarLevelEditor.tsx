@@ -120,11 +120,6 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                         label="Published level"
                     />
                 )}
-                {/* <UserMenu
-                    dictionary={dictionary}
-                    disabled={isSaving}
-                    onLoginClick={() => setIsModalOpen(true)}
-                /> */}
                 <SideMenu
                     buttonClassName="top-bar__hamburger-button"
                     dictionary={dictionary}

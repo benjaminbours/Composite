@@ -1,24 +1,22 @@
 import React from 'react';
-import { getDictionary } from '../../../getDictionary';
 import Rating from '@mui/material/Rating';
 import CircularProgress from '@mui/material/CircularProgress';
 import classNames from 'classnames';
 
 interface Props {
     className?: string;
-    dictionary: Awaited<ReturnType<typeof getDictionary>>;
     labels: { [index: string]: string };
     icon?: React.ReactNode;
     hover: number;
     rating: number | null;
-    onHover: (value: number) => void;
-    onChange: (value: number) => void;
-    isUpdating: boolean;
+    onHover?: (value: number) => void;
+    onChange?: (value: number) => void;
+    isUpdating?: boolean;
+    readOnly?: boolean;
 }
 
 export const LevelRating: React.FC<Props> = ({
     className,
-    dictionary,
     labels,
     icon,
     hover,
@@ -26,6 +24,7 @@ export const LevelRating: React.FC<Props> = ({
     onHover,
     onChange,
     isUpdating,
+    readOnly,
 }) => {
     const cssClass = classNames({
         'end-level-scene__rating': true,
@@ -39,7 +38,7 @@ export const LevelRating: React.FC<Props> = ({
                 value={rating}
                 precision={0.5}
                 onChange={(_event, newValue) => {
-                    if (newValue) {
+                    if (newValue && onChange) {
                         onChange(newValue);
                     }
                 }}
@@ -47,10 +46,13 @@ export const LevelRating: React.FC<Props> = ({
                     return `${value} Star${value !== 1 ? 's' : ''}, ${labels[value]}`;
                 }}
                 onChangeActive={(_event, newHover) => {
-                    onHover(newHover);
+                    if (onHover) {
+                        onHover(newHover);
+                    }
                 }}
                 emptyIcon={icon}
                 icon={icon}
+                readOnly={readOnly}
             />
             {rating !== null && (
                 <div style={{ mixBlendMode: 'difference', color: 'white' }}>
