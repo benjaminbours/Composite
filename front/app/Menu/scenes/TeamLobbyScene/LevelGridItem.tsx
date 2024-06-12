@@ -16,14 +16,12 @@ import { defaultLevelImageUrl } from '../../../constants';
 interface Props {
     id: number;
     name: string;
-    isHovered: boolean;
     src: string;
     you: PlayerState;
     mate?: PlayerState;
     handleMouseEnterSide: (side: Side) => (e: React.MouseEvent) => void;
     handleMouseLeaveSide: (side: Side) => (e: React.MouseEvent) => void;
     handleClick: (id: number) => (e: React.MouseEvent) => void;
-    setHoveredLevel: React.Dispatch<React.SetStateAction<number | undefined>>;
     isLightWaiting: boolean;
     isShadowWaiting: boolean;
     isMobile: boolean;
@@ -39,8 +37,6 @@ export const LevelGridItem: React.FC<Props> = ({
     handleClick,
     handleMouseEnterSide,
     handleMouseLeaveSide,
-    setHoveredLevel,
-    isHovered,
     isLightWaiting,
     isShadowWaiting,
     isMobile,
@@ -59,8 +55,7 @@ export const LevelGridItem: React.FC<Props> = ({
 
     const cssClass = classNames({
         'level-grid-item': true,
-        'level-grid-item--hovered': isHovered,
-        'level-grid-item--hovered-solo': isHovered && isSoloMode,
+        'level-grid-item--solo': isSoloMode,
         'level-grid-item--selected': you.level === id,
         'level-grid-item--selected-solo': you.level === id && isSoloMode,
         'level-grid-item--selected-shadow':
@@ -72,14 +67,6 @@ export const LevelGridItem: React.FC<Props> = ({
             (mate?.level === id && mate?.side === Side.LIGHT) ||
             isLightWaiting,
     });
-
-    const handleMouseEnter = useCallback(() => {
-        setHoveredLevel(id);
-    }, [id, setHoveredLevel]);
-
-    const handleMouseLeave = useCallback(() => {
-        setHoveredLevel(undefined);
-    }, [setHoveredLevel]);
 
     const teamMateHelper = useMemo(() => {
         if (
@@ -97,13 +84,7 @@ export const LevelGridItem: React.FC<Props> = ({
     }, [mate, name, id, isMobile]);
 
     return (
-        <button
-            ref={ref}
-            onMouseEnter={isMobile ? undefined : handleMouseEnter}
-            onMouseLeave={isMobile ? undefined : handleMouseLeave}
-            onClick={handleClick(id)}
-            className={cssClass}
-        >
+        <button ref={ref} onClick={handleClick(id)} className={cssClass}>
             {teamMateHelper}
             <div
                 className="level-grid-item__image"

@@ -148,7 +148,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
     // Fix this, try to extract it to a separate state / component
     const [levels, setLevels] = useState<Level[]>([]);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
-    const [hoveredLevel, setHoveredLevel] = useState<number | undefined>();
 
     // responsible to fetch the levels
     useEffect(() => {
@@ -887,11 +886,9 @@ export function useMainController(initialScene: MenuScene | undefined) {
         menuScene,
         refHashMap,
         lobbyMode,
-        hoveredLevel,
         handleChangeLobbyMode,
         exitLobby,
         setMenuScene,
-        setHoveredLevel,
         setState,
         handleClickReadyToPlay,
         handleGameStart,

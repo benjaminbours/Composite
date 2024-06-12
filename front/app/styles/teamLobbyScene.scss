@@ -357,7 +357,7 @@ $size: 50px;
         }
     }
 
-    &--hovered {
+    &:hover {
         .level-grid-item__border-container {
             opacity: 1;
         }
@@ -371,7 +371,7 @@ $size: 50px;
         }
     }
 
-    &--hovered-solo {
+    &--solo:hover {
         .level-grid-item__border-container {
             opacity: 1;
         }

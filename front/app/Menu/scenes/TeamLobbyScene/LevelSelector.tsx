@@ -23,8 +23,6 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
         state,
         levels,
         lobbyMode,
-        hoveredLevel,
-        setHoveredLevel,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
         handleClickLevelItem,
@@ -33,7 +31,9 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
     const serverCounts = useStoreState(
         (state) => state.serverInfo.serverCounts,
     );
-    const fetchTime = useStoreState((state) => state.serverInfo.timeUntilNextFetch);
+    const fetchTime = useStoreState(
+        (state) => state.serverInfo.timeUntilNextFetch,
+    );
     const fetchServerInfo = useStoreActions(
         (actions) => actions.serverInfo.fetchServerInfo,
     );
@@ -153,8 +153,6 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                                         src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
                                         you={state.you}
                                         mate={state.mate}
-                                        isHovered={id === hoveredLevel}
-                                        setHoveredLevel={setHoveredLevel}
                                         handleClick={handleClickLevelItem}
                                         handleMouseEnterSide={
                                             handleMouseEnterSideButton
