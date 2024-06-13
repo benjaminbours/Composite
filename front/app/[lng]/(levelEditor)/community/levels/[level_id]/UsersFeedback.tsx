@@ -5,62 +5,15 @@ import {
 } from '@benjaminbours/composite-api-client';
 import React, { useMemo } from 'react';
 import { LevelRating } from '../../../../../Menu/scenes/LevelRating';
-import { labelsDifficulty, labelsOverall } from '../../../../../constants';
 import { DifficultyIcon } from '../../../../../01_atoms/DifficultyIcon';
+import { computeRatings } from '../../../../../utils';
 
 interface Props {
     level: Level;
 }
 
 export const UsersFeedback: React.FC<Props> = ({ level }) => {
-    const ratings = useMemo(() => {
-        const { ratings } = level;
-        if (!ratings) {
-            return [];
-        }
-
-        const { quality, qualityLength, difficulty, difficultyLength } =
-            ratings.reduce(
-                (acc, item) => {
-                    if (item.type === UpsertRatingDtoTypeEnum.Difficulty) {
-                        acc.difficulty += item.value;
-                        acc.difficultyLength += 1;
-                    }
-
-                    if (item.type === UpsertRatingDtoTypeEnum.Quality) {
-                        acc.quality += item.value;
-                        acc.qualityLength += 1;
-                    }
-                    return acc;
-                },
-                {
-                    quality: 0,
-                    difficulty: 0,
-                    qualityLength: 0,
-                    difficultyLength: 0,
-                },
-            );
-
-        const qualityRating = quality / qualityLength;
-        const difficultyRating = difficulty / difficultyLength;
-
-        return [
-            {
-                title: 'Quality',
-                value: qualityRating,
-                type: UpsertRatingDtoTypeEnum.Quality,
-                labels: labelsOverall,
-                votes: qualityLength,
-            },
-            {
-                title: 'Difficulty',
-                value: difficultyRating,
-                type: UpsertRatingDtoTypeEnum.Difficulty,
-                labels: labelsDifficulty,
-                votes: difficultyLength,
-            },
-        ];
-    }, [level]);
+    const ratings = useMemo(() => computeRatings(level), [level]);
 
     return (
         <div className="level-details-page__user-feedback">
@@ -82,7 +35,7 @@ export const UsersFeedback: React.FC<Props> = ({ level }) => {
                             labels={rating.labels}
                             hover={-1}
                             readOnly
-                            rating={rating.value}
+                            rating={rating.total / rating.length}
                             icon={
                                 rating.type ===
                                 UpsertRatingDtoTypeEnum.Difficulty ? (
@@ -91,7 +44,7 @@ export const UsersFeedback: React.FC<Props> = ({ level }) => {
                             }
                         />
                         <p>
-                            {rating.votes} vote{rating.votes > 1 ? 's' : ''}
+                            {rating.length} vote{rating.length > 1 ? 's' : ''}
                         </p>
                     </div>
                 );

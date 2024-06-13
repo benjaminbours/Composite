@@ -56,6 +56,7 @@ export default async function LevelEditorPage({
     }
 
     // TODO: highlight your own score
+    // TODO: Add number of times the level has been played
     return (
         <>
             <TopBar dictionary={dictionary.common} />
