@@ -323,6 +323,11 @@ $size: 50px;
     svg {
         width: 20px;
     }
+
+    span {
+        mix-blend-mode: difference;
+        color: white;
+    }
 }
 
 .level-grid-item__border-container {
@@ -398,6 +403,13 @@ $size: 50px;
         .ying-yang .white {
             opacity: 1;
         }
+    }
+}
+
+.level-grid-item__played-icon {
+    svg {
+        mix-blend-mode: difference;
+        fill: white;
     }
 }
 

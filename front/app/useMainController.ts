@@ -153,7 +153,10 @@ export function useMainController(initialScene: MenuScene | undefined) {
     useEffect(() => {
         const apiClient = servicesContainer.get(ApiClient);
         apiClient.defaultApi
-            .levelsControllerFindAll({ status: LevelStatusEnum.Published })
+            .levelsControllerFindAll({
+                status: LevelStatusEnum.Published,
+                stats: 'true',
+            })
             .then((levels) => {
                 setLevels(levels);
             });

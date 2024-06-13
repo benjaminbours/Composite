@@ -124,9 +124,11 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
             ) : (
                 <div className={`level-grid ${styles['level-grid']}`}>
                     <ul>
-                        {levelsToDisplay.map(({ id, name }, index) => {
+                        {levelsToDisplay.map((level, index) => {
+                            const { id, name } = level;
                             let isLightWaiting = false;
                             let isShadowWaiting = false;
+
                             if (
                                 lobbyMode === LobbyMode.DUO_WITH_RANDOM &&
                                 serverCounts &&
@@ -148,9 +150,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                             return (
                                 <li data-id={id} key={index}>
                                     <LevelGridItem
-                                        id={id}
-                                        name={name}
-                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
+                                        level={level}
                                         you={state.you}
                                         mate={state.mate}
                                         handleClick={handleClickLevelItem}

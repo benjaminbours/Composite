@@ -1,22 +1,21 @@
 import classNames from 'classnames';
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
 import { YingYang } from './YingYang';
-import { loadImage } from '../../../utils';
+import { computeRatings, loadImage } from '../../../utils';
 import { defaultLevelImageUrl } from '../../../constants';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import StarIcon from '@mui/icons-material/Star';
+import { DifficultyIcon } from '../../../01_atoms/DifficultyIcon';
+import {
+    Level,
+    UpsertRatingDtoTypeEnum,
+} from '@benjaminbours/composite-api-client';
 
 interface Props {
-    id: number;
-    name: string;
-    src: string;
+    level: Level;
     you: PlayerState;
     mate?: PlayerState;
     handleMouseEnterSide: (side: Side) => (e: React.MouseEvent) => void;
@@ -29,9 +28,7 @@ interface Props {
 }
 
 export const LevelGridItem: React.FC<Props> = ({
-    name,
-    id,
-    src,
+    level,
     you,
     mate,
     handleClick,
@@ -44,6 +41,15 @@ export const LevelGridItem: React.FC<Props> = ({
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
     const [imageUrl, setImageUrl] = useState(defaultLevelImageUrl);
+    const { name, id } = level;
+    const src = `${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`;
+    const ratings = computeRatings(level);
+    const qualityRating = ratings.find(
+        (rating) => rating.type === UpsertRatingDtoTypeEnum.Quality,
+    );
+    const difficultyRating = ratings.find(
+        (rating) => rating.type === UpsertRatingDtoTypeEnum.Difficulty,
+    );
 
     useEffect(() => {
         loadImage(src)
@@ -136,6 +142,37 @@ export const LevelGridItem: React.FC<Props> = ({
                 </div>
             </div>
             <p className="level-grid-item__name">{name}</p>
+            <div className="level-grid-item__counts">
+                <div
+                    title="Number of time the level has been played"
+                    className="level-grid-item__played-icon"
+                >
+                    <SportsEsportsIcon />{' '}
+                    <span>{(level.count as any).games}</span>
+                </div>
+                <div
+                    title="Quality rating"
+                    className="level-grid-item__quality-icon"
+                >
+                    <StarIcon />{' '}
+                    <span>
+                        {qualityRating
+                            ? qualityRating.total / qualityRating.length
+                            : 0}
+                    </span>
+                </div>
+                <div
+                    title="Difficulty rating"
+                    className="level-grid-item__difficulty-icon"
+                >
+                    <DifficultyIcon />{' '}
+                    <span>
+                        {difficultyRating
+                            ? difficultyRating.total / difficultyRating.length
+                            : 0}
+                    </span>
+                </div>
+            </div>
         </button>
     );
 };
