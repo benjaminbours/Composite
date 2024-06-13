@@ -7,6 +7,7 @@ import { Locale } from '../../../../i18n-config';
 import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
 import { EmailValidationForm } from '../../../03_organisms/EmailValidationForm';
 import Paper from '@mui/material/Paper';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',
@@ -24,7 +25,7 @@ export default async function SignUpEmailActivated({ params: { lng } }: Props) {
     const dictionary = await getDictionary(lng);
 
     return (
-        <>
+        <div className="layout-root">
             <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate className="sign-up-email-validation-page">
                 <Paper className="form-padding" elevation={10}>
@@ -40,6 +41,7 @@ export default async function SignUpEmailActivated({ params: { lng } }: Props) {
                     <EmailValidationForm dictionary={dictionary.common} />
                 </Paper>
             </CentralContentTemplate>
-        </>
+            <Footer lng={lng} />
+        </div>
     );
 }

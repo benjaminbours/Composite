@@ -248,9 +248,15 @@
 .level-editor-dashboard {
     background-color: #121212;
     color: white;
-    padding: 20px 0;
-    min-height: calc(100vh - 54px);
+    padding-top: 54px;
+    min-height: 100vh;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    .content-container {
+        flex: 1;
+    }
 }
 
 .level-list {

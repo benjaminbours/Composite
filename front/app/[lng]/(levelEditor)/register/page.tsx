@@ -6,6 +6,7 @@ import { getDictionary } from '../../../../getDictionary';
 import { Locale } from '../../../../i18n-config';
 import { TopBar } from '../../../02_molecules/TopBar/TopBar';
 import { SignUpForm, WrapperReCaptcha } from '../../../03_organisms/SignUpForm';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Register',
@@ -22,7 +23,7 @@ interface Props {
 export default async function Register({ params: { lng } }: Props) {
     const dictionary = await getDictionary(lng);
     return (
-        <>
+        <div className="layout-root">
             <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate className="register-page">
                 <Paper className="form-padding" elevation={10}>
@@ -38,6 +39,7 @@ export default async function Register({ params: { lng } }: Props) {
                     </Suspense>
                 </Paper>
             </CentralContentTemplate>
-        </>
+            <Footer lng={lng} />
+        </div>
     );
 }

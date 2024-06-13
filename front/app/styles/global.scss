@@ -361,7 +361,6 @@ p {
 
 .central-content-template {
     width: 100%;
-    height: calc(100vh - 54px);
     display: flex;
     align-items: flex-start;
     padding-top: 100px;
@@ -369,6 +368,7 @@ p {
     justify-content: center;
     justify-items: center;
     border-radius: 0;
+    flex: 1;
 
     h1 {
         margin: 0;
@@ -700,6 +700,12 @@ p {
             color: black !important;
         }
     }
+}
+
+.layout-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .main-container {

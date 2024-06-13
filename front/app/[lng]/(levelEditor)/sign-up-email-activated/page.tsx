@@ -9,6 +9,7 @@ import { getDictionary } from '../../../../getDictionary';
 import { Locale } from '../../../../i18n-config';
 import { CentralContentTemplate } from '../../../04_templates/CentralContentTemplate';
 import { Route } from '../../../types';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',
@@ -26,7 +27,7 @@ export default async function SignUpEmailActivated({ params: { lng } }: Props) {
     const dictionary = await getDictionary(lng);
 
     return (
-        <>
+        <div className="layout-root">
             <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate className="sign-up-email-activated-page">
                 <Paper className="form-padding" elevation={10}>
@@ -44,6 +45,7 @@ export default async function SignUpEmailActivated({ params: { lng } }: Props) {
                     </Link>
                 </Paper>
             </CentralContentTemplate>
-        </>
+            <Footer lng={lng} />
+        </div>
     );
 }

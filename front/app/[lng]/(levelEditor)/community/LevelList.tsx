@@ -120,18 +120,24 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
                                             by <b>{level.author?.name}</b>
                                         </p>
                                         <div className="level-grid-item__counts">
-                                            <div>
+                                            <div title="Number of time the level has been played">
                                                 <SportsEsportsIcon />{' '}
                                                 {(level.count as any).games}
                                             </div>
-                                            <div className="level-grid-item__quality-icon">
+                                            <div
+                                                title="Quality rating"
+                                                className="level-grid-item__quality-icon"
+                                            >
                                                 <StarIcon />{' '}
                                                 {qualityRating
                                                     ? qualityRating.total /
                                                       qualityRating.length
                                                     : 0}
                                             </div>
-                                            <div className="level-grid-item__difficulty-icon">
+                                            <div
+                                                title="Difficulty rating"
+                                                className="level-grid-item__difficulty-icon"
+                                            >
                                                 <DifficultyIcon />{' '}
                                                 {difficultyRating
                                                     ? difficultyRating.total /
