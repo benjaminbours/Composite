@@ -61,4 +61,6 @@ export class Level implements PrismaLevel {
   games?: Game[];
   @ApiProperty({ type: [Rating], required: false })
   ratings?: Rating[];
+  @ApiProperty({ type: 'object', required: false })
+  _count?: any;
 }

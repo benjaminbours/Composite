@@ -68,7 +68,11 @@ export class LevelsService {
       });
   }
 
-  async findAll(authorId?: number | undefined, status?: string) {
+  async findAll(
+    authorId?: number | undefined,
+    status?: string,
+    stats?: boolean,
+  ) {
     return this.prisma.level
       .findMany({
         where: {
@@ -81,6 +85,9 @@ export class LevelsService {
               name: true,
             },
           },
+          ...(stats
+            ? { _count: { select: { games: true } }, ratings: true }
+            : {}),
         },
       })
       .catch((err) => {
@@ -88,7 +95,7 @@ export class LevelsService {
       });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, stats?: boolean) {
     return this.prisma.level
       .findUnique({
         where: { id },
@@ -98,6 +105,24 @@ export class LevelsService {
               name: true,
             },
           },
+          ...(stats
+            ? {
+                games: {
+                  include: {
+                    players: {
+                      include: {
+                        user: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                ratings: true,
+              }
+            : {}),
         },
       })
       .catch((err) => {

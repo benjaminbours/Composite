@@ -134,15 +134,23 @@ export class LevelsController {
     type: 'string',
     required: false,
   })
+  @ApiQuery({
+    name: 'stats',
+    description: 'Include level stats',
+    type: 'string',
+    required: false,
+  })
   @Public()
   @Get()
   findAll(
-    @Query('author') author: string | undefined, // boolean
+    @Query('author') author: string | undefined,
     @Query('status') status: string | undefined,
+    @Query('stats') stats: string | undefined, // boolean
   ) {
     return this.levelsService.findAll(
       author ? Number(author) : undefined,
       status,
+      Boolean(stats),
     );
   }
 
@@ -150,10 +158,20 @@ export class LevelsController {
     description: 'Receive level',
     type: Level,
   })
+  @ApiQuery({
+    name: 'stats',
+    description: 'Include level stats',
+    type: 'string',
+    required: false,
+  })
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.levelsService.findOne(+id);
+  findOne(
+    @Param('id') id: string,
+    @Query('stats') stats: string | undefined, // boolean
+  ) {
+    console.log('find one dude');
+    return this.levelsService.findOne(+id, Boolean(stats));
   }
 
   @ApiOkResponse({
