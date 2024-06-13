@@ -1,0 +1,153 @@
+$buttonSize: 90px;
+$buttonSizeSmall: 80px;
+$buttonSizeLarge: 120px;
+.button-play {
+    all: unset;
+    background: white;
+    font-size: 16px;
+    overflow: hidden;
+    mix-blend-mode: difference;
+    color: black;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 100;
+    width: $buttonSize;
+    height: $buttonSize;
+    border-radius: $buttonSize;
+    border: solid black 7px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    cursor: pointer;
+    z-index: 100;
+    transition: 0.3s ease-out;
+
+    @media (min-width: 768px) and (min-height: 500px) {
+        &:hover {
+            mix-blend-mode: difference;
+            background: white;
+            border-color: white;
+            color: black;
+            transition: 0.3s ease-out;
+        }
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        width: $buttonSizeSmall;
+        height: $buttonSizeSmall;
+        border-radius: $buttonSizeSmall;
+    }
+}
+
+// HAMBURGER
+
+.hamburger-button {
+    background: black;
+    color: $mainActionColor;
+}
+
+.main-app__hamburger-button {
+    position: fixed;
+    top: 2%;
+    right: 2%;
+}
+
+.top-bar__hamburger-button {
+    margin-left: auto !important;
+}
+
+// INLINE LINK
+
+.inline-link {
+    color: white;
+    position: relative;
+    text-decoration: none;
+    background: $mainActionColor;
+    color: black;
+
+    &::after {
+        content: '➤️';
+        position: absolute;
+        top: -13px;
+        right: -12px;
+        color: $mainActionColor;
+        transform: rotate(-45deg);
+        opacity: 0;
+        transition: 0.3s ease-in;
+    }
+
+    @media (min-width: 769px) {
+        &:hover {
+            &::after {
+                opacity: 1;
+            }
+
+            &::before {
+                background-color: black;
+                border-color: white;
+            }
+        }
+    }
+}
+
+.composite-button {
+    all: unset;
+    width: auto;
+    text-align: center;
+    padding: 8px;
+    transition: 0.7s;
+    cursor: pointer;
+    color: white;
+    border: solid white 1px;
+    font-family: 'Source Code Pro', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: black;
+    color: white;
+
+    &:hover {
+        background: white;
+        color: black;
+        border-color: black;
+    }
+
+    &--small {
+        font-size: 12px;
+
+        .composite-button__end-icon,
+        .composite-button__start-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &--large {
+        letter-spacing: 5px;
+        text-transform: uppercase;
+    }
+
+    &--mix-blend {
+        mix-blend-mode: difference;
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        text-transform: none;
+        letter-spacing: 2px;
+        padding: 5px;
+        font-size: 12px;
+
+        &--large {
+            padding: 8px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+    }
+}
+
+.composite-button__start-icon {
+    margin-right: 10px;
+}
+
+.composite-button__end-icon {
+    margin-left: 10px;
+}

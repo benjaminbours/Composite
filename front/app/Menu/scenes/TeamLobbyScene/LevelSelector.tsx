@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import styles from './LevelSelector.module.scss';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
@@ -11,6 +11,7 @@ import {
 } from '../../../useMainController';
 import { LevelGridItem } from './LevelGridItem';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useStoreActions, useStoreState } from '../../../hooks/store';
 
 interface Props {
     disabled?: boolean;
@@ -22,15 +23,21 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
         state,
         levels,
         lobbyMode,
-        serverCounts,
-        fetchTime,
-        hoveredLevel,
-        setHoveredLevel,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
         handleClickLevelItem,
-        fetchServerInfo,
     } = useContext(MainControllerContext);
+
+    const serverCounts = useStoreState(
+        (state) => state.serverInfo.serverCounts,
+    );
+    const fetchTime = useStoreState(
+        (state) => state.serverInfo.timeUntilNextFetch,
+    );
+    const fetchServerInfo = useStoreActions(
+        (actions) => actions.serverInfo.fetchServerInfo,
+    );
+
     // author
     const authorList = useMemo(() => {
         const list = levels.reduce((acc, level) => {
@@ -57,7 +64,9 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
         <div className={styles.root}>
             <div className={styles.header}>
                 <>
-                    <h2 className="title-h3 title-h3--white">Select a level</h2>
+                    <h2 className="title-h3 title-h3--important">
+                        Select a level
+                    </h2>
                     <Autocomplete
                         className={styles['author-selector']}
                         disablePortal
@@ -78,7 +87,7 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                     />
                     {!isMobile && (
                         <Link href={Route.LEVEL_EDITOR_ROOT}>
-                            <button className="team-lobby-scene__rect-button small">
+                            <button className="composite-button composite-button--small">
                                 Become a creator
                             </button>
                         </Link>
@@ -87,8 +96,10 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                         <div className={styles['queue-container']}>
                             {/* TODO: Fix position on mobile */}
                             <button
-                                className="team-lobby-scene__rect-button refresh-queue-button"
-                                onClick={fetchServerInfo}
+                                className="composite-button composite-button--small refresh-queue-button"
+                                onClick={() => {
+                                    fetchServerInfo();
+                                }}
                             >
                                 {!isMobile && 'Refresh queue info'}
                                 <CircularProgress
@@ -111,11 +122,13 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                     </Link>
                 </div>
             ) : (
-                <div className="level-grid">
+                <div className={`level-grid ${styles['level-grid']}`}>
                     <ul>
-                        {levelsToDisplay.map(({ id, name }, index) => {
+                        {levelsToDisplay.map((level, index) => {
+                            const { id, name } = level;
                             let isLightWaiting = false;
                             let isShadowWaiting = false;
+
                             if (
                                 lobbyMode === LobbyMode.DUO_WITH_RANDOM &&
                                 serverCounts &&
@@ -137,13 +150,9 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                             return (
                                 <li data-id={id} key={index}>
                                     <LevelGridItem
-                                        id={id}
-                                        name={name}
-                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`}
+                                        level={level}
                                         you={state.you}
                                         mate={state.mate}
-                                        isHovered={id === hoveredLevel}
-                                        setHoveredLevel={setHoveredLevel}
                                         handleClick={handleClickLevelItem}
                                         handleMouseEnterSide={
                                             handleMouseEnterSideButton
@@ -155,7 +164,8 @@ export const LevelSelector: React.FC<Props> = ({ disabled, isMobile }) => {
                                         isShadowWaiting={isShadowWaiting}
                                         isMobile={isMobile}
                                         isSoloMode={
-                                            lobbyMode === LobbyMode.SOLO
+                                            lobbyMode === LobbyMode.SOLO ||
+                                            lobbyMode === LobbyMode.PRACTICE
                                         }
                                     />
                                 </li>

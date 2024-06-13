@@ -1,17 +1,17 @@
 import React from 'react';
+import { useStoreState } from './hooks/store';
 
-interface Props {
-    playing: number;
-    matchmaking: number;
-}
+export const BottomRightInfo: React.FC = () => {
+    const serverCounts = useStoreState(
+        (state) => state.serverInfo.serverCounts,
+    );
 
-export const BottomRightInfo: React.FC<Props> = ({ matchmaking, playing }) => {
     return (
         <div className="bottom-right-info">
             <p className="version">
-                <b>{playing}</b>
+                <b>{serverCounts?.playing || 0}</b>
                 {` players in games - `}
-                <b>{matchmaking}</b>
+                <b>{serverCounts?.matchmaking || 0}</b>
                 {` in matchmaking`}
             </p>
         </div>

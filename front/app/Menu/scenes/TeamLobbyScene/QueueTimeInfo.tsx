@@ -4,9 +4,11 @@ import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(duration);
 
-interface Props {}
+interface Props {
+    queueTimeRef: React.RefObject<HTMLDivElement>;
+}
 
-export const QueueTimeInfo: React.FC<Props> = ({}) => {
+export const QueueTimeInfo: React.FC<Props> = ({ queueTimeRef }) => {
     const [queueTime, setQueueTime] = useState(0);
 
     useEffect(() => {
@@ -26,7 +28,7 @@ export const QueueTimeInfo: React.FC<Props> = ({}) => {
 
     // TODO: Add estimated time in queue before match, but I need more data for this
     return (
-        <div className="queue-time-info">
+        <div ref={queueTimeRef} className="queue-time-info">
             <h3>
                 <span>Time in queue:</span> {formattedTime}
             </h3>

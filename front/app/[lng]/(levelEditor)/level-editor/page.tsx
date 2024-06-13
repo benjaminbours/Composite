@@ -3,6 +3,7 @@ import { getDictionary } from '../../../../getDictionary';
 import { Locale } from '../../../../i18n-config';
 import { TopBar } from '../../../02_molecules/TopBar/TopBar';
 import { LevelList } from './LevelList';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',
@@ -27,6 +28,7 @@ export default async function LevelEditorDashboard({ params: { lng } }: Props) {
                     <h2 className="title-h2">{`My levels`}</h2>
                     <LevelList isCurrentUserList dictionary={dictionary} />
                 </div>
+                <Footer lng={lng} />
             </main>
         </>
     );

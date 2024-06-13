@@ -14,6 +14,7 @@ import { BufferGeometry, Mesh } from 'three';
 Mesh.prototype.raycast = acceleratedRaycast;
 // our libs
 import {
+    GameFinishedPayload,
     GameState,
     MovableComponentState,
     Side,
@@ -26,6 +27,7 @@ import { Level } from '@benjaminbours/composite-api-client';
 import { CircularProgress, Divider } from '@mui/material';
 import { DiscordButton } from '../02_molecules/DiscordButton';
 import { DesktopHUD } from './DesktopHUD';
+import { LobbyMode } from '../useMainController';
 
 interface LevelEditorProps {
     // use do save the app instance somewhere else
@@ -34,16 +36,12 @@ interface LevelEditorProps {
     onTransformControlsObjectChange: (object: THREE.Object3D) => void;
 }
 
-interface SoloGameProps {
+interface GameProps {
     initialGameState: GameState;
     level: Level;
-    onGameFinished: () => void;
-}
-
-interface MultiplayerGameProps {
-    initialGameState: GameState;
     socketController?: SocketController;
-    level: Level;
+    mode: LobbyMode;
+    onPracticeGameFinished?: (data: GameFinishedPayload) => void;
 }
 
 interface Props {
@@ -52,8 +50,7 @@ interface Props {
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
-    soloGameProps?: SoloGameProps;
-    multiplayerGameProps?: MultiplayerGameProps;
+    gameProps?: GameProps;
     levelEditorProps?: LevelEditorProps;
 }
 
@@ -63,9 +60,8 @@ function Game({
     tabIsHidden,
     stats,
     inputsManager,
-    multiplayerGameProps,
+    gameProps,
     levelEditorProps,
-    soloGameProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasMiniMapRef = useRef<HTMLCanvasElement>(null);
@@ -75,6 +71,14 @@ function Game({
         useState(false);
 
     const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
+
+    const handleAddMobileInteractButton = useCallback(() => {
+        setIsMobileInteractButtonAdded(true);
+    }, []);
+
+    const handleRemoveMobileInteractButton = useCallback(() => {
+        setIsMobileInteractButtonAdded(false);
+    }, []);
 
     useEffect(() => {
         const onResize = () => {
@@ -87,14 +91,6 @@ function Game({
         return () => {
             window.removeEventListener('resize', onResize);
         };
-    }, []);
-
-    const handleAddMobileInteractButton = useCallback(() => {
-        setIsMobileInteractButtonAdded(true);
-    }, []);
-
-    const handleRemoveMobileInteractButton = useCallback(() => {
-        setIsMobileInteractButtonAdded(false);
     }, []);
 
     useEffect(() => {
@@ -125,24 +121,36 @@ function Game({
             return;
         }
 
-        if (multiplayerGameProps) {
+        if (gameProps) {
             appRef.current = new App(
                 canvasRef.current,
                 canvasMiniMapRef.current,
-                multiplayerGameProps.initialGameState,
+                gameProps.initialGameState,
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 inputsManager,
                 AppMode.GAME,
-                multiplayerGameProps.level,
-                multiplayerGameProps.socketController,
+                gameProps.level,
+                gameProps.socketController,
+                undefined,
+                gameProps.onPracticeGameFinished,
             );
+            if (
+                gameProps.mode === LobbyMode.SOLO ||
+                gameProps.mode === LobbyMode.PRACTICE
+            ) {
+                appRef.current.registerSoloModeListeners();
+            }
             if (isMobile) {
                 appRef.current.onAddMobileInteractButton =
                     handleAddMobileInteractButton;
                 appRef.current.onRemoveMobileInteractButton =
                     handleRemoveMobileInteractButton;
             }
-            setIsSynchronizingTime(true);
+            if (gameProps.mode !== LobbyMode.PRACTICE) {
+                setIsSynchronizingTime(true);
+            } else {
+                appRef.current?.startRun();
+            }
         } else if (levelEditorProps) {
             const initialGameState = new GameState(
                 [
@@ -188,26 +196,6 @@ function Game({
                 levelEditorProps.onTransformControlsObjectChange,
             );
             levelEditorProps.onAppLoaded(appRef.current);
-        } else if (soloGameProps) {
-            appRef.current = new App(
-                canvasRef.current,
-                canvasMiniMapRef.current,
-                soloGameProps.initialGameState,
-                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                inputsManager,
-                AppMode.GAME,
-                soloGameProps.level,
-                undefined,
-                undefined,
-                soloGameProps.onGameFinished,
-            );
-            appRef.current.registerSoloModeListeners();
-            if (isMobile) {
-                appRef.current.onAddMobileInteractButton =
-                    handleAddMobileInteractButton;
-                appRef.current.onRemoveMobileInteractButton =
-                    handleRemoveMobileInteractButton;
-            }
         }
         // https://greensock.com/docs/v3/GSAP/gsap.ticker
 
@@ -220,7 +208,7 @@ function Game({
     }, []);
 
     useEffect(() => {
-        if (!tabIsHidden && isSynchronizingTime && multiplayerGameProps) {
+        if (!tabIsHidden && isSynchronizingTime && gameProps) {
             const onTimeSynchronized = ([serverTime, rtt]: [
                 serverTime: number,
                 rtt: number,
@@ -229,25 +217,24 @@ function Game({
                     serverTime,
                     rtt,
                 );
-                appRef.current?.inputsManager.registerEventListeners();
-                setIsSynchronizingTime(false);
             };
 
-            if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-                // TODO: Fix solo mode
-                // onTimeSynchronized();
-            } else {
-                setIsSynchronizingTime(true);
-                multiplayerGameProps.socketController
-                    ?.synchronizeTime()
-                    .then(onTimeSynchronized);
-            }
+            const onStartTimer = () => {
+                appRef.current?.inputsManager.registerEventListeners();
+                setIsSynchronizingTime(false);
+                appRef.current?.startRun();
+            };
+
+            setIsSynchronizingTime(true);
+            gameProps.socketController
+                ?.synchronizeTime(onStartTimer)
+                .then(onTimeSynchronized);
         }
 
         return () => {
             appRef.current?.inputsManager.destroyEventListeners();
         };
-    }, [tabIsHidden, multiplayerGameProps, isSynchronizingTime]);
+    }, [tabIsHidden, gameProps, isSynchronizingTime]);
 
     return (
         <>
@@ -295,20 +282,26 @@ function Game({
                     </div>
                 </div>
             )}
-            {isMobile && !levelEditorProps && (
+            {isMobile && gameProps && (
                 <MobileHUD
                     appRef={appRef}
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
                     inputsManager={inputsManager}
-                    withSwitchPlayer={Boolean(soloGameProps)}
+                    withSwitchPlayer={
+                        gameProps.mode === LobbyMode.SOLO ||
+                        gameProps.mode === LobbyMode.PRACTICE
+                    }
                     onExitGame={onExitGame}
                 />
             )}
-            {!isMobile && !levelEditorProps && onExitGame && (
+            {!isMobile && gameProps && onExitGame && (
                 <DesktopHUD
                     appRef={appRef}
                     onExitGame={onExitGame}
-                    withActionsContainer={Boolean(soloGameProps)}
+                    withActionsContainer={
+                        gameProps.mode === LobbyMode.SOLO ||
+                        gameProps.mode === LobbyMode.PRACTICE
+                    }
                 />
             )}
             <canvas ref={canvasRef} id="game" style={{ zIndex: -4 }} />

@@ -17,6 +17,7 @@ interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     withGuest?: boolean;
+    onClose?: () => void;
 }
 
 export const AuthModal: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const AuthModal: React.FC<Props> = ({
     dictionary,
     setIsModalOpen,
     withGuest,
+    onClose,
 }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const setIsGuest = useStoreActions((store) => store.user.setIsGuest);
@@ -42,6 +44,9 @@ export const AuthModal: React.FC<Props> = ({
             open={isModalOpen}
             onClose={() => {
                 setIsModalOpen(false);
+                if (onClose) {
+                    onClose();
+                }
             }}
         >
             <Paper className="composite-modal__container">

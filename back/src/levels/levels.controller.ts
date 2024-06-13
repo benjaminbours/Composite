@@ -30,6 +30,8 @@ import {
 } from '@nestjs/swagger';
 import { Level } from './entities/level.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpsertRatingDto } from './dto/upsert-rating.dto';
+import { Rating } from './entities/rating.entity';
 
 @ApiBearerAuth()
 @Controller('levels')
@@ -78,8 +80,32 @@ export class LevelsController {
     fs.createWriteStream(path.join(uploadsDir, fileName)).write(file.buffer);
   }
 
+  @ApiOkResponse({
+    description: 'The rating has been successfully upserted.',
+    type: Rating,
+  })
+  @Roles(Role.USER)
+  @Post(':id/rating')
+  upsertRating(
+    @Param('id') id: string,
+    @GetUser() user: JWTUserPayload,
+    @Body() upsertRatingDto: UpsertRatingDto,
+  ) {
+    return this.levelsService.upsertRating(+id, user, upsertRatingDto);
+  }
+
+  @ApiOkResponse({
+    description: 'Get the ratings for this level.',
+    type: [Rating],
+  })
+  @Roles(Role.USER)
+  @Get(':id/rating')
+  getRatings(@Param('id') id: string, @GetUser() user: JWTUserPayload) {
+    return this.levelsService.findRatings(+id, user);
+  }
+
   @ApiCreatedResponse({
-    description: 'The purchase has been successfully created.',
+    description: 'The level has been successfully created.',
     type: Level,
   })
   @Roles(Role.USER)
@@ -108,15 +134,23 @@ export class LevelsController {
     type: 'string',
     required: false,
   })
+  @ApiQuery({
+    name: 'stats',
+    description: 'Include level stats',
+    type: 'string',
+    required: false,
+  })
   @Public()
   @Get()
   findAll(
-    @Query('author') author: string | undefined, // boolean
+    @Query('author') author: string | undefined,
     @Query('status') status: string | undefined,
+    @Query('stats') stats: string | undefined, // boolean
   ) {
     return this.levelsService.findAll(
       author ? Number(author) : undefined,
       status,
+      Boolean(stats),
     );
   }
 
@@ -124,10 +158,20 @@ export class LevelsController {
     description: 'Receive level',
     type: Level,
   })
+  @ApiQuery({
+    name: 'stats',
+    description: 'Include level stats',
+    type: 'string',
+    required: false,
+  })
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.levelsService.findOne(+id);
+  findOne(
+    @Param('id') id: string,
+    @Query('stats') stats: string | undefined, // boolean
+  ) {
+    console.log('find one dude');
+    return this.levelsService.findOne(+id, Boolean(stats));
   }
 
   @ApiOkResponse({

@@ -15,10 +15,11 @@ import { DropDownMenu } from './DropDownMenu';
 import Divider from '@mui/material/Divider';
 import Link from 'next/link';
 import { getDictionary } from '../../../../getDictionary';
-import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 import { CircularProgress } from '@mui/material';
 import { Route } from '../../../types';
 import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
+import { YingYang } from '../../../Menu/scenes/TeamLobbyScene/YingYang';
+import { SideMenu } from '../../../03_organisms/SideMenu';
 
 interface Props {
     level_id: string;
@@ -76,7 +77,8 @@ export const TopBarLevelEditor: React.FC<Props> = ({
         <AppBar className="level-editor__app-bar top-bar" position="static">
             <Toolbar className="top-bar__tool-bar">
                 <Link href="/" className="top-bar__logo">
-                    <h2>Composite</h2>
+                    <YingYang />
+                    <h3>Composite</h3>
                 </Link>
                 <Divider orientation="vertical" flexItem />
                 <HandymanIcon />
@@ -118,10 +120,9 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                         label="Published level"
                     />
                 )}
-                <UserMenu
+                <SideMenu
+                    buttonClassName="top-bar__hamburger-button"
                     dictionary={dictionary}
-                    disabled={isSaving}
-                    onLoginClick={() => setIsModalOpen(true)}
                 />
             </Toolbar>
         </AppBar>

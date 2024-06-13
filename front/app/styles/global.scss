@@ -1,6 +1,3 @@
-// variables
-$mainActionColor: #fff200;
-
 body {
     padding: 0;
     margin: 0;
@@ -19,7 +16,12 @@ canvas,
     width: 100%;
 }
 
-// TODO: Check this on mobile
+.version {
+    font-size: 12px;
+    color: white;
+    margin: 5px 0;
+}
+
 .bottom-left-info {
     position: fixed;
     z-index: 100;
@@ -28,7 +30,7 @@ canvas,
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
+    gap: 10px;
     mix-blend-mode: difference;
 
     .settings {
@@ -55,11 +57,18 @@ canvas,
         color: white;
     }
 
-    .version {
-        font-size: 12px;
-        color: white;
-        margin: 5px 0;
+    footer {
+        display: flex;
+        align-items: flex-end;
+        gap: 40px;
     }
+}
+
+.bottom-left-info__socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .bottom-right-info {
@@ -90,6 +99,32 @@ canvas,
     }
 }
 
+.socials {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+
+        &:hover {
+            svg {
+                fill: $mainActionColor;
+            }
+        }
+    }
+
+    svg {
+        transition: 0.3s ease-out;
+        width: 24px;
+        height: 24px;
+        fill: white;
+    }
+}
+
 .home-page {
     position: relative;
     width: 100%;
@@ -99,8 +134,12 @@ canvas,
     text-transform: uppercase;
     font-family: 'Source Code Pro', monospace;
     font-weight: bold;
-    font-size: 48px;
-    letter-spacing: 10px;
+    font-size: 44px;
+    letter-spacing: 5px;
+
+    &--important {
+        color: $mainActionColor;
+    }
 }
 
 .title-h2 {
@@ -130,6 +169,10 @@ canvas,
         color: white;
     }
 
+    &--important {
+        color: $mainActionColor;
+    }
+
     @media (max-width: 768px), (max-height: 500px) {
         font-size: 20px;
     }
@@ -137,11 +180,18 @@ canvas,
 
 .title-h4 {
     font-family: 'Source Code Pro', monospace;
+    font-weight: 500;
     font-size: 20px;
 
     &--white {
         color: white;
     }
+}
+
+.title-h5 {
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 200;
+    font-size: 18px;
 }
 
 p {
@@ -154,94 +204,6 @@ p {
 
 .menu-label {
     font-weight: 300;
-}
-
-.composite-button {
-    all: unset;
-    width: auto;
-    text-align: center;
-    padding: 8px;
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    transition: 0.7s;
-    cursor: pointer;
-    font-size: 12px;
-    mix-blend-mode: difference;
-    color: white;
-    border: solid white 1px;
-    font-family: 'Source Code Pro', monospace;
-    display: flex;
-    align-items: center;
-
-    &--small {
-        text-transform: none;
-        letter-spacing: 0;
-
-        .composite-button__end-icon {
-            width: 20px;
-            height: 20px;
-        }
-    }
-
-    // &--large {
-    // }
-
-    &:hover {
-        background: white;
-        color: black;
-    }
-
-    @media (max-width: 768px), (max-height: 500px) {
-        text-transform: none;
-        letter-spacing: 2px;
-        padding: 5px;
-        font-size: 12px;
-    }
-}
-
-.composite-button__end-icon {
-    margin-left: 10px;
-}
-
-$buttonSize: 90px;
-$buttonSizeSmall: 80px;
-$buttonSizeLarge: 120px;
-.buttonCircle {
-    all: unset;
-    mix-blend-mode: difference;
-    background: white;
-    color: black;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 100;
-    width: $buttonSize;
-    height: $buttonSize;
-    border-radius: $buttonSize;
-    border: solid black 7px;
-    text-transform: uppercase;
-    letter-spacing: 5px;
-    cursor: pointer;
-    z-index: 100;
-    transition: 0.3s ease-out;
-
-    &.white,
-    &.black {
-        mix-blend-mode: initial;
-    }
-
-    @media (min-width: 768px) {
-        &:hover {
-            border-color: white;
-            color: black;
-            transition: 0.3s ease-out;
-        }
-    }
-
-    @media (max-width: 768px), (max-height: 500px) {
-        width: $buttonSizeSmall;
-        height: $buttonSizeSmall;
-        border-radius: $buttonSizeSmall;
-    }
 }
 
 .unmount {
@@ -365,54 +327,6 @@ $buttonSizeLarge: 120px;
     }
 }
 
-.inline-link {
-    color: white;
-    position: relative;
-    text-decoration: none;
-    mix-blend-mode: difference;
-
-    &::before {
-        content: '';
-        position: absolute;
-        display: block;
-        width: 100%;
-        height: 100%;
-        padding: 2px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        mix-blend-mode: difference;
-        border: solid black 1px;
-        transition: 0.3s ease-in;
-    }
-
-    &::after {
-        content: '➤️';
-        position: absolute;
-        top: -19px;
-        right: -12px;
-        color: white;
-        mix-blend-mode: difference;
-        transform: rotate(-45deg);
-        opacity: 0;
-        transition: 0.3s ease-in;
-    }
-
-    @media (min-width: 769px) {
-        &:hover {
-            &::after {
-                opacity: 1;
-            }
-
-            &::before {
-                background-color: black;
-                border-color: white;
-            }
-        }
-    }
-}
-
 .menu-actions {
     margin-top: 25px;
     font-size: 12px;
@@ -435,55 +349,6 @@ $buttonSizeLarge: 120px;
     top: 2.5%;
     right: 2.5%;
     padding: 20px;
-
-    button {
-        font-size: 10px;
-    }
-}
-
-.copy-to-clipboard {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-
-    // svg {
-    //     width: 35px;
-    //     // margin-left: 10px;
-    //     transition: 0.7s;
-    // }
-
-    &.disabled {
-        background: grey;
-        cursor: default;
-    }
-
-    &.black {
-        svg {
-            fill: black;
-        }
-    }
-
-    &.white {
-        svg {
-            fill: white;
-        }
-    }
-
-    &:hover {
-        &.black {
-            svg {
-                fill: white;
-            }
-        }
-
-        &.white {
-            svg {
-                fill: black;
-            }
-        }
-    }
 }
 
 .buttons-container {
@@ -496,7 +361,6 @@ $buttonSizeLarge: 120px;
 
 .central-content-template {
     width: 100%;
-    height: calc(100vh - 54px);
     display: flex;
     align-items: flex-start;
     padding-top: 100px;
@@ -504,6 +368,7 @@ $buttonSizeLarge: 120px;
     justify-content: center;
     justify-items: center;
     border-radius: 0;
+    flex: 1;
 
     h1 {
         margin: 0;
@@ -519,48 +384,50 @@ $buttonSizeLarge: 120px;
     padding: 30px;
 }
 
-.hamburger-button {
-    margin-left: auto !important;
-}
-
 .top-bar {
-    height: 54px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background: black;
+    border-bottom: solid $mainActionColor 1px;
+    z-index: 100;
 
     h4 {
-        color: white;
         margin: 0;
-        font-family: 'Source Code Pro', monospace;
-        font-weight: 900;
-        letter-spacing: 1px;
-        text-transform: uppercase;
     }
 }
 
 .top-bar__tool-bar {
+    width: 100%;
     min-height: initial;
-    padding-top: 10px;
-    padding-bottom: 10px;
-
-    > * {
-        margin: 0 10px;
-    }
+    gap: 0 10px;
 
     @media (max-width: 768px), (max-height: 500px) {
-        padding-left: 0;
-        padding-right: 0;
+        padding: 0;
     }
-}
-
-.top-bar__account-container {
-    margin-left: auto;
-    mix-blend-mode: difference;
-    color: white;
 }
 
 .top-bar__logo {
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 2px;
+    transition: 0.3s ease-out;
 
-    h2 {
+    svg {
+        width: 30px;
+        height: 30px;
+        margin-right: 20px;
+        animation: rotate 5s infinite linear;
+    }
+
+    h3 {
+        transition: 0.3s ease-out;
         color: white;
         margin: 0;
         font-family: 'Source Code Pro', monospace;
@@ -568,15 +435,61 @@ $buttonSizeLarge: 120px;
         letter-spacing: 10px;
         text-transform: uppercase;
     }
+
+    &:hover {
+        background: $mainActionColor;
+        h3 {
+            color: black;
+        }
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        h2 {
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 5px;
+        }
+    }
 }
 
-// .sign-up-email-activated-page {
-//     background: black;
-//     color: white;
-// }
-
 .side-menu {
-    width: 200px;
+    min-width: 250px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .top-bar__logo {
+        margin-top: auto;
+    }
+
+    .version,
+    h2 {
+        text-align: center;
+    }
+
+    h2 {
+        color: white;
+        margin: 0;
+        margin-top: auto;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 10px;
+        text-transform: uppercase;
+    }
+}
+
+.side-menu__socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+
+    svg {
+        height: 20px;
+        width: 20px;
+    }
 }
 
 .slick-list,
@@ -704,22 +617,6 @@ $buttonSizeLarge: 120px;
     }
 }
 
-@keyframes wobble {
-    to {
-        transform: translate(var(--x), var(--y)) rotate(360deg);
-    }
-}
-
-@keyframes rotate {
-    from {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-
 .composite-modal {
     display: flex;
     align-items: flex-start;
@@ -802,5 +699,100 @@ $buttonSizeLarge: 120px;
             background: white !important;
             color: black !important;
         }
+    }
+}
+
+.layout-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-container {
+    width: 80%;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        width: 90%;
+    }
+}
+
+.footer {
+    background: black;
+    font-family: 'Source Code Pro', monospace;
+    border-top: solid $mainActionColor 1px;
+
+    .main-container {
+        padding: 30px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    small {
+        color: white;
+    }
+
+    h2 {
+        transition: 0.3s ease-out;
+        color: white;
+        margin: 0;
+        font-family: 'Source Code Pro', monospace;
+        font-weight: 900;
+        letter-spacing: 10px;
+        text-transform: uppercase;
+    }
+}
+
+.footer__site-map {
+    a {
+        color: white;
+        text-decoration: none;
+        position: relative;
+        padding: 5px;
+        transition: 0.3s ease-out;
+
+        &::before {
+            content: '';
+            width: 100%;
+            height: 1px;
+            position: absolute;
+            bottom: -30%;
+            left: 0;
+            right: 0;
+            background: white;
+            opacity: 0;
+            transition: 0.3s ease-out;
+        }
+
+        &:hover {
+            color: $mainActionColor;
+        }
+
+        @media (max-width: 768px), (max-height: 500px) {
+            font-size: 14px;
+        }
+    }
+}
+
+.footer__site-map-item--active {
+    a {
+        color: $mainActionColor;
+    }
+
+    a::before {
+        background: $mainActionColor;
+        opacity: 1;
     }
 }

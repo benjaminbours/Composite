@@ -15,7 +15,6 @@ import { getDictionary } from '../../../../getDictionary';
 import { useStoreState } from '../../../hooks';
 import { AuthModal } from '../../../03_organisms/AuthModal';
 import { LevelSelector } from './LevelSelector';
-import { UserMenu } from '../../../02_molecules/TopBar/UserMenu';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { MainControllerContext } from '../../../MainApp';
@@ -34,16 +33,16 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
     ({ dictionary, isMount }) => {
         const {
             state,
-            serverCounts,
             refHashMap,
             lobbyMode,
             handleChangeLobbyMode,
-            handleInviteFriend,
             handleEnterTeamLobby,
-            handleClickReadyToPlay,
-            handleAlignWithTeamMate,
             exitLobby,
         } = useContext(MainControllerContext);
+
+        const serverCounts = useStoreState(
+            (state) => state.serverInfo.serverCounts,
+        );
 
         const { enqueueSnackbar } = useSnackbar();
         const urlSearchParams = useSearchParams();
@@ -140,15 +139,13 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                     withGuest
                 />
                 <div className="team-lobby-scene__header">
-                    <button className="composite-button white" onClick={exitLobby}>
+                    <button
+                        className="composite-button white"
+                        onClick={exitLobby}
+                    >
                         Exit
                     </button>
                     <h1 className="title-h3 title-h3--white">Lobby</h1>
-                    <UserMenu
-                        dictionary={dictionary.common}
-                        disabled={state.isInQueue}
-                        onLoginClick={() => setIsAuthModalOpen(true)}
-                    />
                 </div>
                 <div className="team-lobby-scene__tabs-container">
                     <Tabs
@@ -159,6 +156,7 @@ export const TeamLobbyScene: React.FC<Props> = React.memo(
                         scrollButtons="auto"
                         onChange={handleTabChange}
                     >
+                        <Tab label="Practice" />
                         <Tab label="Solo" />
                         <Tab label="Duo with friend" />
                         <Tab

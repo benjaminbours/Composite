@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { TopBar } from '../../../02_molecules/TopBar';
 import { Locale } from '../../../../i18n-config';
 import { getDictionary } from '../../../../getDictionary';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Timeline',
@@ -713,9 +714,9 @@ export default async function Timeline({ params: { lng } }: Props) {
                     <ul className="timeline">
                         {futureEvents.map((event, index) => (
                             <li key={index} className="timeline-event">
-                                <div className="timeline-event-date">
+                                <h2 className="timeline-event-date">
                                     {event.date}
-                                </div>
+                                </h2>
                                 <div className="timeline-event-description">
                                     {event.description}
                                 </div>
@@ -724,12 +725,16 @@ export default async function Timeline({ params: { lng } }: Props) {
                     </ul>
 
                     <div className="button-container">
-                        <Link href="/" className="buttonCircle" id="buttonPlay">
+                        <Link
+                            href="/"
+                            className="button-play timeline-page__button-play"
+                        >
                             Play
                         </Link>
                     </div>
                 </div>
             </main>
+            <Footer lng={lng} />
         </>
     );
 }

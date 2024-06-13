@@ -17,8 +17,11 @@ export enum Layer {
 export enum SocketEventType {
     // send automatically by socket io after successful connection with server
     CONNECT = 'connect',
-    // send by client after receiving connect event
+    // send by client after receiving game start event
     TIME_SYNC = 'TIME_SYNC',
+    // send by client after receiving all the time sync events back
+    TIME_INFO = 'TIME_INFO',
+    START_TIMER = 'START_TIMER',
     // receive automatically by the server after successful connection with a client
     CONNECTION = 'connection',
     // receive automatically by the server when losing connection with a client
@@ -48,6 +51,7 @@ export enum SocketEventLobby {
     INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
     READY_TO_PLAY = 'READY_TO_PLAY',
     JOIN_RANDOM_QUEUE = 'JOIN_RANDOM_QUEUE',
+    START_SOLO_GAME = 'START_SOLO_GAME',
 }
 
 export interface InputsSync {
@@ -72,6 +76,16 @@ export interface JoinRandomQueuePayload {
     userId?: number;
     side?: Side;
     level?: number;
+}
+
+export interface StartSoloGamePayload {
+    userId?: number;
+    level: number;
+    device: 'desktop' | 'mobile';
+}
+
+export interface StartTimerPayload {
+    startTime: number;
 }
 
 export interface FriendJoinLobbyPayload {
@@ -113,6 +127,14 @@ export interface TimeSyncPayload {
     serverGameTime?: number;
 }
 
+export interface TimeInfoPayload {
+    averageRtt: number;
+}
+
+export interface GameFinishedPayload {
+    duration: number;
+}
+
 // events
 
 export type PingEvent = [
@@ -120,12 +142,20 @@ export type PingEvent = [
     payload: TimeSyncPayload,
 ];
 
+export type TimeInfoEvent = [
+    type: SocketEventType.TIME_INFO,
+    payload: TimeInfoPayload,
+];
+
 export type GameStartEvent = [
     type: SocketEventType.GAME_START,
     payload: GameStateUpdatePayload,
 ];
 
-export type GameFinishedEvent = [type: SocketEventType.GAME_FINISHED];
+export type GameFinishedEvent = [
+    type: SocketEventType.GAME_FINISHED,
+    payload: GameFinishedPayload,
+];
 
 export type GameStateUpdateEvent = [
     type: SocketEventType.GAME_STATE_UPDATE,
@@ -145,6 +175,11 @@ export type GameActivateElementEvent = [
 export type GameDeactivateElementEvent = [
     type: SocketEventType.GAME_DEACTIVATE_ELEMENT,
     payload: GameActivateElementPayload,
+];
+
+export type StartTimerEvent = [
+    type: SocketEventType.START_TIMER,
+    payload: StartTimerPayload,
 ];
 
 ///////////////// LOBBY EVENTS
@@ -184,6 +219,11 @@ export type JoinRandomQueueEvent = [
     payload: JoinRandomQueuePayload,
 ];
 
+export type StartSoloGameEvent = [
+    type: SocketEventLobby.START_SOLO_GAME,
+    payload: StartSoloGamePayload,
+];
+
 export type SocketEvent =
     | GameStartEvent
     | GameFinishedEvent
@@ -192,13 +232,16 @@ export type SocketEvent =
     | GameActivateElementEvent
     | GameDeactivateElementEvent
     | PingEvent
+    | TimeInfoEvent
+    | StartTimerEvent
     | CreateLobbyEvent
     | InviteFriendTokenEvent
     | FriendJoinLobbyEvent
     | TeamSelectLevel
     | TeamSelectSide
     | ReadyToStartEvent
-    | JoinRandomQueueEvent;
+    | JoinRandomQueueEvent
+    | StartSoloGameEvent;
 
 export enum MovableComponentState {
     onFloor,

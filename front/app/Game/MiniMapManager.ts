@@ -5,6 +5,7 @@ import { LightPlayer } from './Player';
 
 // the more the scale is high, the more the miniMap is unzoomed
 const SCALE = 1.5;
+const playerLightScale = 7;
 
 export const miniMapWidth = 1000 * SCALE;
 export const miniMapHeight = 563 * SCALE;
@@ -28,7 +29,7 @@ export class MiniMapManager {
             precision: 'lowp',
             alpha: true,
         });
-        this.renderer.setPixelRatio(0.5);
+        this.renderer.setPixelRatio(1);
         const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
         if (isMobile) {
             this.renderer.setSize(300 / 2, 167 / 2);
@@ -42,7 +43,7 @@ export class MiniMapManager {
 
     public updateCamera = (position: Vector3) => {
         this.camera.position.set(
-            position.x * SCALE,
+            position.x,
             (position.y <= 563 ? 563 : position.y) * SCALE,
             3000,
         );
@@ -55,7 +56,11 @@ export class MiniMapManager {
     ) => {
         this.updateCamera(camera.position);
         this.camera.layers.enable(Layer.MINI_MAP);
-        playerLight.mesh.scale.set(5, 5, 5);
+        playerLight.mesh.scale.set(
+            playerLightScale,
+            playerLightScale,
+            playerLightScale,
+        );
         this.renderer.render(scene, this.camera);
         playerLight.mesh.scale.set(1, 1, 1);
     };

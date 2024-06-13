@@ -82,6 +82,9 @@ export const MobileHUD: React.FC<Props> = ({
 
     return (
         <div className="mobile-hud">
+            <Paper className="mobile-hud__run-timer">
+                <div id="runTimer">0.00 sec</div>
+            </Paper>
             <div className="desktop-hud__top-left-container">
                 <button className="composite-button white" onClick={onExitGame}>
                     Exit
@@ -111,25 +114,35 @@ export const MobileHUD: React.FC<Props> = ({
             >
                 <ArrowForwardIosIcon />
             </IconButton>
-            <Paper className="mobile-hud__actions-container">
-                <ButtonGroup orientation="vertical">
-                    {isMobileInteractButtonAdded && (
+            {isMobileInteractButtonAdded && (
+                <Paper className="mobile-hud__interact-button">
+                    <ButtonGroup>
                         <Button
+                            size="large"
                             onTouchStart={handleTouchStart('interact')}
                             onTouchEnd={handleTouchEnd('interact')}
-                            color="success"
                         >
                             <VisibilityIcon fontSize="small" />
                         </Button>
-                    )}
-                    {withSwitchPlayer && (
+                    </ButtonGroup>
+                </Paper>
+            )}
+            {withSwitchPlayer && (
+                <Paper className="mobile-hud__switch-player">
+                    <ButtonGroup>
                         <Button
+                            size="large"
                             onClick={wrapperBlurEvent(handleClickSwitchPlayer)}
                         >
                             <SwitchAccountIcon fontSize="small" />
                         </Button>
-                    )}
+                    </ButtonGroup>
+                </Paper>
+            )}
+            <Paper className="mobile-hud__reset-position">
+                <ButtonGroup>
                     <Button
+                        size="large"
                         onClick={wrapperBlurEvent(handleClickResetPosition)}
                         title="Reset players position (BACKSPACE)"
                     >

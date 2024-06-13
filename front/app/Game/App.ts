@@ -41,6 +41,7 @@ import {
     ClientGraphicHelpers,
     addToCollidingElements,
     gridSize,
+    GameFinishedPayload,
 } from '@benjaminbours/composite-core';
 // local
 import InputsManager from './Player/InputsManager';
@@ -80,6 +81,7 @@ export default class App {
     private players: Player[] = [];
     private skyMesh!: Mesh;
 
+    public runClock = new Clock(false);
     public clock = new Clock();
     public delta = this.clock.getDelta();
     private dirLight = new DirectionalLight(0xffffee, 1);
@@ -90,9 +92,6 @@ export default class App {
     public collidingElements: Object3D<Object3DEventMap>[] = [];
 
     private playerHelper?: Box3;
-
-    // bounce helper
-    private currentBounceName?: string;
 
     private floor = FLOOR;
 
@@ -128,7 +127,7 @@ export default class App {
         level?: PartialLevel,
         public socketController?: SocketController,
         onTransformControlsObjectChange?: (e: any) => void,
-        private onGameFinished?: () => void,
+        private onPracticeGameFinished?: (data: GameFinishedPayload) => void,
     ) {
         // canvasDom.oncontextmenu = function (e) {
         //     e.preventDefault();
@@ -229,6 +228,23 @@ export default class App {
             );
         }
     }
+
+    public startRun = () => {
+        this.runClock.start();
+    };
+
+    public stopRun = () => {
+        this.runClock.stop();
+    };
+
+    private runTimerDomElement = document.querySelector('#runTimer');
+    public updateRunDurationCounter = () => {
+        if (!this.runTimerDomElement) {
+            return;
+        }
+        const elapsedTime = this.runClock.getElapsedTime();
+        this.runTimerDomElement.innerHTML = `${elapsedTime.toFixed(2)} sec`;
+    };
 
     public shouldCaptureSnapshot = false;
     public onCaptureSnapshot = (_image: string) => {};
@@ -400,16 +416,33 @@ export default class App {
     };
 
     public resetSinglePlayerPosition = () => {
-        const nextPositions = JSON.parse(
-            JSON.stringify(this.gameStateManager.predictionState.players),
-        );
         const playerKey =
             this.mainPlayerSide === Side.LIGHT ? 'light' : 'shadow';
-        nextPositions[this.mainPlayerSide].position = {
+        this.gameStateManager.predictionState.players[
+            this.mainPlayerSide
+        ].position = {
             x: this.level.startPosition[playerKey].x,
             y: this.level.startPosition[playerKey].y,
         };
-        this.setPlayersPosition(this.level.startPosition);
+        this.gameStateManager.predictionState.players[
+            this.mainPlayerSide
+        ].velocity = {
+            x: 0,
+            y: 0,
+        };
+        const payload = this.createPlayerInputPayload(this.mainPlayerSide, {
+            left: false,
+            right: false,
+            jump: false,
+            resetPosition: true,
+            top: false,
+            bottom: false,
+        });
+        this.lastInput = payload;
+        // then collect it
+        if (this.gameStateManager.gameTimeIsSynchronized) {
+            this.gameStateManager.collectInput(payload);
+        }
     };
 
     public setPlayersPosition = (position: {
@@ -569,6 +602,7 @@ export default class App {
     };
 
     public run = () => {
+        this.updateRunDurationCounter();
         if (this.mode === AppMode.EDITOR) {
             this.updateMouseIntersection();
         }
@@ -631,15 +665,6 @@ export default class App {
                         this.players[0].position,
                         new Vector3(40, 40),
                     );
-                }
-
-                // only in solo mode
-                if (
-                    this.onGameFinished &&
-                    this.gameStateManager.displayState.level.end_level
-                        .length === 2
-                ) {
-                    this.onGameFinished();
                 }
             });
         }
@@ -777,6 +802,7 @@ export default class App {
             }
         }
 
+        // bounces
         for (let i = 0; i < this.level.bounces.length; i++) {
             const bounce = this.level.bounces[i];
             const id = bounce.name.split('_')[0];
@@ -822,6 +848,16 @@ export default class App {
             }
 
             endLevelElement.update(this.delta);
+
+            // only in practice mode
+            if (
+                this.onPracticeGameFinished &&
+                this.gameStateManager.displayState.level.end_level.length === 2
+            ) {
+                this.onPracticeGameFinished({
+                    duration: this.runClock.getElapsedTime(),
+                });
+            }
 
             if (
                 this.onLevelEditorValidation &&
@@ -917,9 +953,9 @@ export default class App {
             const skinBounce = bounceGroup?.children[1] as
                 | SkinBounce
                 | undefined;
-            if (skinBounce && !this.currentBounceName) {
+            if (skinBounce && !skinBounce.isPlayerInside) {
+                skinBounce.isPlayerInside = true;
                 skinBounce.add(skinBounce.directionHelper);
-                this.currentBounceName = skinBounce.name;
             }
         } else {
             const bounceGroup = this.level.children.find(
@@ -936,8 +972,8 @@ export default class App {
 
             // if there is a currentBounceName, clean it
             if (skinBounce) {
+                skinBounce.isPlayerInside = false;
                 skinBounce.remove(skinBounce.directionHelper);
-                this.currentBounceName = undefined;
             }
         }
     };

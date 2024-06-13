@@ -5,10 +5,51 @@ import { PrismaService } from '@project-common/services';
 import { LevelStatus } from '@prisma/client';
 import { JWTUserPayload } from '@project-common/types';
 import { handlePrismaError } from '@project-common/utils/handlePrismaError';
+import { UpsertRatingDto } from './dto/upsert-rating.dto';
 
 @Injectable()
 export class LevelsService {
   constructor(private prisma: PrismaService) {}
+
+  async upsertRating(
+    levelId: number,
+    user: JWTUserPayload,
+    { rating, type }: UpsertRatingDto,
+  ) {
+    const userLevelId = `${user.sub}-${levelId}-${type}`;
+    return this.prisma.rating
+      .upsert({
+        where: {
+          userLevelId,
+        },
+        create: {
+          userLevelId,
+          levelId: levelId,
+          userId: user.sub,
+          value: rating,
+          type,
+        },
+        update: {
+          value: rating,
+        },
+      })
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
+  }
+
+  async findRatings(levelId: number, user: JWTUserPayload) {
+    return this.prisma.rating
+      .findMany({
+        where: {
+          userId: user.sub,
+          levelId: levelId,
+        },
+      })
+      .catch((err) => {
+        throw handlePrismaError(err);
+      });
+  }
 
   async create(user: JWTUserPayload, createLevelDto: CreateLevelDto) {
     return this.prisma.level
@@ -27,7 +68,11 @@ export class LevelsService {
       });
   }
 
-  async findAll(authorId?: number | undefined, status?: string) {
+  async findAll(
+    authorId?: number | undefined,
+    status?: string,
+    stats?: boolean,
+  ) {
     return this.prisma.level
       .findMany({
         where: {
@@ -40,6 +85,9 @@ export class LevelsService {
               name: true,
             },
           },
+          ...(stats
+            ? { _count: { select: { games: true } }, ratings: true }
+            : {}),
         },
       })
       .catch((err) => {
@@ -47,7 +95,7 @@ export class LevelsService {
       });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, stats?: boolean) {
     return this.prisma.level
       .findUnique({
         where: { id },
@@ -57,6 +105,24 @@ export class LevelsService {
               name: true,
             },
           },
+          ...(stats
+            ? {
+                games: {
+                  include: {
+                    players: {
+                      include: {
+                        user: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                ratings: true,
+              }
+            : {}),
         },
       })
       .catch((err) => {

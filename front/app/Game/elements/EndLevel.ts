@@ -181,37 +181,29 @@ export class EndLevel extends Object3D {
 
     protected activateShadow = () => {
         gsap.to(this, {
-            delay: 1,
-            duration: 3,
+            duration: 2,
             organicRatioShadow: FAST_ORGANIC_RATIO,
-            overwrite: true,
         });
     };
 
     protected activateLight = () => {
         gsap.to(this, {
-            delay: 1,
-            duration: 3,
+            duration: 2,
             organicRatioLight: FAST_ORGANIC_RATIO,
-            overwrite: true,
         });
     };
 
     protected deactivateShadow = () => {
         gsap.to(this, {
             duration: 2,
-            delay: 1,
             organicRatioShadow: DEFAULT_ORGANIC_RATIO,
-            overwrite: true,
         });
     };
 
     protected deactivateLight = () => {
         gsap.to(this, {
             duration: 2,
-            delay: 1,
             organicRatioLight: DEFAULT_ORGANIC_RATIO,
-            overwrite: true,
         });
     };
 

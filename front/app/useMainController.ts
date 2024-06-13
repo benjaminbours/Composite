@@ -1,6 +1,7 @@
 import {
     CreateLobbyPayload,
     FriendJoinLobbyPayload,
+    GameFinishedPayload,
     GameState,
     InviteFriendTokenPayload,
     LevelMapping,
@@ -21,7 +22,7 @@ import {
     User,
 } from '@benjaminbours/composite-api-client';
 import { useSnackbar } from 'notistack';
-import { useStoreState } from './hooks';
+import { useStoreActions, useStoreState } from './hooks';
 import { startLoadingAssets } from './Game/assetsLoader';
 import { useMenuTransition } from './useMenuTransition';
 import { Vector3 } from 'three';
@@ -36,7 +37,7 @@ export interface PlayerState {
 export interface MainState {
     isWaitingForFriend: boolean;
     isInQueue: boolean;
-    shouldDisplayQueueInfo: boolean;
+    lastGameDuration: number;
     gameState: GameState | undefined;
     loadedLevel: Level | undefined;
     you: PlayerState;
@@ -56,9 +57,10 @@ export interface ServerCounts {
 export const QUEUE_INFO_FETCH_INTERVAL = 20000;
 
 export enum LobbyMode {
-    SOLO = 0,
-    DUO_WITH_FRIEND = 1,
-    DUO_WITH_RANDOM = 2,
+    PRACTICE,
+    SOLO,
+    DUO_WITH_FRIEND,
+    DUO_WITH_RANDOM,
 }
 
 export function useMainController(initialScene: MenuScene | undefined) {
@@ -75,12 +77,19 @@ export function useMainController(initialScene: MenuScene | undefined) {
         refHashMap,
     } = useMenuTransition(initialScene);
 
+    const fetchServerInfo = useStoreActions(
+        (actions) => actions.serverInfo.fetchServerInfo,
+    );
+    const clearFetchServerInfo = useStoreActions(
+        (actions) => actions.serverInfo.clearFetchServerInfo,
+    );
+
     const { enqueueSnackbar } = useSnackbar();
     const currentUser = useStoreState((state) => state.user.currentUser);
     const queryParams = useSearchParams();
     const router = useRouter();
     const socketController = useRef<SocketController>();
-    const [lobbyMode, setLobbyMode] = useState(LobbyMode.SOLO);
+    const [lobbyMode, setLobbyMode] = useState(LobbyMode.PRACTICE);
 
     useEffect(() => {
         setState((prev) => ({
@@ -94,14 +103,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
             let side = undefined;
             let selectedLevel = undefined;
 
-            if (process.env.NEXT_PUBLIC_SOLO_MODE) {
-                const parts = process.env.NEXT_PUBLIC_SOLO_MODE.split(',').map(
-                    (str) => Number(str),
-                );
-                side = parts[0] as Side;
-                selectedLevel = parts[1];
-            }
-
             const param = queryParams.get('dev_state');
             if (param) {
                 const parts = param.split(',').map((str) => Number(str));
@@ -113,6 +114,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 isWaitingForFriend: false,
                 gameState: undefined,
                 loadedLevel: undefined,
+                lastGameDuration: 0,
                 you: {
                     side,
                     level: selectedLevel,
@@ -122,7 +124,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 mate: undefined,
                 mateDisconnected: false,
                 isInQueue: false,
-                shouldDisplayQueueInfo: true,
             };
         }
 
@@ -130,6 +131,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
             isWaitingForFriend: false,
             gameState: undefined,
             loadedLevel: undefined,
+            lastGameDuration: 0,
             you: {
                 side: undefined,
                 level: undefined,
@@ -139,41 +141,51 @@ export function useMainController(initialScene: MenuScene | undefined) {
             mate: undefined,
             mateDisconnected: false,
             isInQueue: false,
-            shouldDisplayQueueInfo: true,
         };
     });
+
+    // TODO: These local states trigger refresh on component that are not related at all.
+    // Fix this, try to extract it to a separate state / component
     const [levels, setLevels] = useState<Level[]>([]);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
-    const [hoveredLevel, setHoveredLevel] = useState<number | undefined>();
 
     // responsible to fetch the levels
     useEffect(() => {
         const apiClient = servicesContainer.get(ApiClient);
         apiClient.defaultApi
-            .levelsControllerFindAll({ status: LevelStatusEnum.Published })
+            .levelsControllerFindAll({
+                status: LevelStatusEnum.Published,
+                stats: 'true',
+            })
             .then((levels) => {
                 setLevels(levels);
             });
     }, []);
 
     const handleClickFindAnotherTeamMate = useCallback(() => {
-        router.push(Route.LOBBY);
+        if (onTransition.current) {
+            return;
+        }
+        socketController.current?.destroy();
         setGameIsPlaying(false);
-        setMenuScene(MenuScene.TEAM_LOBBY);
-        setState((prev) => ({
-            ...prev,
-            loadedLevel: undefined,
-            mateDisconnected: false,
-            you: {
-                isReady: false,
-                side: undefined,
-                level: undefined,
-                account: currentUser || undefined,
-            },
-            isInQueue: false,
-            isWaitingForFriend: false,
-        }));
-    }, [router, setMenuScene, currentUser]);
+        goToStep({ step: MenuScene.TEAM_LOBBY }, () => {
+            router.push(Route.LOBBY);
+            setMenuScene(MenuScene.TEAM_LOBBY);
+            setState((prev) => ({
+                ...prev,
+                loadedLevel: undefined,
+                mateDisconnected: false,
+                you: {
+                    isReady: false,
+                    side: undefined,
+                    level: undefined,
+                    account: currentUser || undefined,
+                },
+                isInQueue: false,
+                isWaitingForFriend: false,
+            }));
+        });
+    }, [router, setMenuScene, currentUser, goToStep, onTransition]);
 
     const handleDestroyConnection = useCallback(() => {
         socketController.current?.destroy();
@@ -216,7 +228,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                     level: data.level,
                 },
                 mateDisconnected: false,
-                shouldDisplayQueueInfo: false,
                 isInQueue: false,
                 isWaitingForFriend: false,
             }));
@@ -252,34 +263,43 @@ export function useMainController(initialScene: MenuScene | undefined) {
             }));
             setGameIsPlaying(true);
         });
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        }
     }, []);
 
-    const handleGameFinished = useCallback(() => {
-        setState((prev) => {
-            const next = {
-                ...prev,
-                gameState: undefined,
-                you: {
-                    ...prev.you,
-                    isReady: false,
-                },
-                mate: prev.mate
-                    ? {
-                          ...prev.mate!,
-                          side: undefined,
-                          isReady: false,
-                      }
-                    : undefined,
-                isInQueue: false,
-                isWaitingForFriend: false,
-                shouldDisplayQueueInfo: false,
-            };
+    const handleGameFinished = useCallback(
+        (data: GameFinishedPayload) => {
+            setState((prev) => {
+                const next = {
+                    ...prev,
+                    gameState: undefined,
+                    lastGameDuration: data.duration,
+                    you: {
+                        ...prev.you,
+                        isReady: false,
+                    },
+                    mate: prev.mate
+                        ? {
+                              ...prev.mate!,
+                              side: undefined,
+                              isReady: false,
+                          }
+                        : undefined,
+                    isInQueue: false,
+                    isWaitingForFriend: false,
+                };
 
-            return next;
-        });
-        setGameIsPlaying(false);
-        setMenuScene(MenuScene.END_LEVEL);
-    }, [setMenuScene]);
+                return next;
+            });
+            setGameIsPlaying(false);
+            setMenuScene(MenuScene.END_LEVEL);
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        },
+        [setMenuScene],
+    );
 
     const handleReceiveLevelOnLobby = useCallback((levelId: number) => {
         setState((prev) => ({
@@ -388,82 +408,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         });
     }, [establishConnection, currentUser, state]);
 
-    const queueInfoInterval = useRef<NodeJS.Timeout>();
-    const fetchCompletionInterval = useRef<NodeJS.Timeout>();
-    const [serverCounts, setServerCounts] = useState<ServerCounts>();
-    const [fetchTime, setFetchTime] = useState(0);
-
-    const fetchServerInfo = useCallback(async () => {
-        const apiClient = servicesContainer.get(ApiClient);
-        return apiClient.defaultApi
-            .appControllerGetServerInfo()
-            .then((data) => {
-                // clear previous interval
-                clearInterval(queueInfoInterval.current);
-                clearInterval(fetchCompletionInterval.current);
-                const intervalId = setInterval(() => {
-                    // console.log('fetch');
-                    fetchServerInfo();
-                }, QUEUE_INFO_FETCH_INTERVAL);
-
-                const completionIntervalId = setInterval(() => {
-                    // console.log('time update');
-                    setFetchTime((prev) => prev + 1000);
-                }, 1000);
-
-                setFetchTime(0);
-                fetchCompletionInterval.current = completionIntervalId;
-                queueInfoInterval.current = intervalId;
-
-                // update states
-                const serverCounts = data.reduce(
-                    (acc, player) => {
-                        if (
-                            player &&
-                            player.selectedLevel !== undefined &&
-                            player.side !== undefined
-                        ) {
-                            if (!acc.levels[player.selectedLevel]) {
-                                acc.levels[player.selectedLevel] = {
-                                    playing: 0,
-                                    light_queue: 0,
-                                    shadow_queue: 0,
-                                };
-                            }
-
-                            if (player.status === 0) {
-                                acc.playing++;
-                                acc.levels[player.selectedLevel].playing++;
-                            } else if (player.status === 1) {
-                                acc.matchmaking++;
-
-                                if (player.side === 0) {
-                                    acc.levels[player.selectedLevel]
-                                        .shadow_queue++;
-                                } else {
-                                    acc.levels[player.selectedLevel]
-                                        .light_queue++;
-                                }
-                            }
-                        }
-                        return acc;
-                    },
-                    {
-                        playing: 0,
-                        matchmaking: 0,
-                        levels: {},
-                    } as ServerCounts,
-                );
-
-                setServerCounts(serverCounts);
-                setState((prev) => ({
-                    ...prev,
-                    // TODO: Investigate if this boolean is still needed
-                    shouldDisplayQueueInfo: true,
-                }));
-            });
-    }, [setState]);
-
     const handleEnterRandomQueue = useCallback(
         (side: Side, level: number) => {
             socketController.current?.destroy();
@@ -495,7 +439,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 ...prev,
                 mate: undefined,
                 mateDisconnected: false,
-                shouldDisplayQueueInfo: true,
                 you: {
                     isReady: false,
                     level: undefined,
@@ -651,6 +594,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 window.innerWidth > 768 && window.innerHeight > 500;
             if (
                 lobbyMode !== LobbyMode.SOLO &&
+                lobbyMode !== LobbyMode.PRACTICE &&
                 side === undefined &&
                 isDesktop
             ) {
@@ -775,76 +719,98 @@ export function useMainController(initialScene: MenuScene | undefined) {
         if (!levelId) {
             return;
         }
-        const apiClient = servicesContainer.get(ApiClient);
-        Promise.all([
-            apiClient.defaultApi.levelsControllerFindOne({
-                id: String(levelId),
-            }),
-            startLoadingAssets(),
-        ]).then(([level]) => {
-            const levelMapping = new LevelMapping(
-                level.id,
-                level.data as any[],
-                {
-                    light: new Vector3(
-                        level.lightStartPosition[0],
-                        level.lightStartPosition[1] === 0
-                            ? 0.08
-                            : level.lightStartPosition[1],
-                        level.lightStartPosition[2],
-                    ).multiplyScalar(gridSize),
-                    shadow: new Vector3(
-                        level.shadowStartPosition[0],
-                        level.shadowStartPosition[1] === 0
-                            ? 0.08
-                            : level.shadowStartPosition[1],
-                        level.shadowStartPosition[2],
-                    ).multiplyScalar(gridSize),
-                },
-            );
-            const initialGameState = new GameState(
-                [
+
+        if (lobbyMode === LobbyMode.SOLO) {
+            establishConnection().then(() => {
+                const isDesktop =
+                    window.innerWidth > 768 && window.innerHeight > 500;
+                socketController.current?.emit([
+                    SocketEventLobby.START_SOLO_GAME,
                     {
-                        position: {
-                            x: levelMapping.startPosition.shadow.x,
-                            y: levelMapping.startPosition.shadow.y,
-                        },
-                        velocity: {
-                            x: 0,
-                            y: 0,
-                        },
-                        state: MovableComponentState.inAir,
-                        insideElementID: undefined,
+                        userId: currentUser?.id,
+                        level: levelId,
+                        device: isDesktop ? 'desktop' : 'mobile',
                     },
+                ]);
+            });
+        } else if (lobbyMode === LobbyMode.PRACTICE) {
+            const apiClient = servicesContainer.get(ApiClient);
+            Promise.all([
+                apiClient.defaultApi.levelsControllerFindOne({
+                    id: String(levelId),
+                }),
+                startLoadingAssets(),
+            ]).then(([level]) => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                }
+                const levelMapping = new LevelMapping(
+                    level.id,
+                    level.data as any[],
                     {
-                        position: {
-                            x: levelMapping.startPosition.light.x,
-                            y: levelMapping.startPosition.light.y,
-                        },
-                        velocity: {
-                            x: 0,
-                            y: 0,
-                        },
-                        state: MovableComponentState.inAir,
-                        insideElementID: undefined,
+                        light: new Vector3(
+                            level.lightStartPosition[0],
+                            level.lightStartPosition[1] === 0
+                                ? 0.08
+                                : level.lightStartPosition[1],
+                            level.lightStartPosition[2],
+                        ).multiplyScalar(gridSize),
+                        shadow: new Vector3(
+                            level.shadowStartPosition[0],
+                            level.shadowStartPosition[1] === 0
+                                ? 0.08
+                                : level.shadowStartPosition[1],
+                            level.shadowStartPosition[2],
+                        ).multiplyScalar(gridSize),
                     },
-                ],
-                levelMapping.state,
-                0,
-                0,
-            );
-            setState((prev) => ({
-                ...prev,
-                gameState: initialGameState,
-                loadedLevel: level,
-            }));
-            setGameIsPlaying(true);
-        });
-    }, [state.you]);
+                );
+                const initialGameState = new GameState(
+                    [
+                        {
+                            position: {
+                                x: levelMapping.startPosition.shadow.x,
+                                y: levelMapping.startPosition.shadow.y,
+                            },
+                            velocity: {
+                                x: 0,
+                                y: 0,
+                            },
+                            state: MovableComponentState.inAir,
+                            insideElementID: undefined,
+                        },
+                        {
+                            position: {
+                                x: levelMapping.startPosition.light.x,
+                                y: levelMapping.startPosition.light.y,
+                            },
+                            velocity: {
+                                x: 0,
+                                y: 0,
+                            },
+                            state: MovableComponentState.inAir,
+                            insideElementID: undefined,
+                        },
+                    ],
+                    levelMapping.state,
+                    0,
+                    0,
+                );
+                setState((prev) => ({
+                    ...prev,
+                    gameState: initialGameState,
+                    loadedLevel: level,
+                }));
+                setGameIsPlaying(true);
+            });
+        }
+    }, [state.you, currentUser, lobbyMode, establishConnection]);
 
     const handleExitGame = useCallback(() => {
         handleDestroyConnection();
         handleClickFindAnotherTeamMate();
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
     }, [handleDestroyConnection, handleClickFindAnotherTeamMate]);
 
     // effect to update shadow and light graphic accordingly with lobby state
@@ -890,12 +856,9 @@ export function useMainController(initialScene: MenuScene | undefined) {
             fetchServerInfo();
         }
         return () => {
-            clearInterval(queueInfoInterval.current);
-            clearInterval(fetchCompletionInterval.current);
-            queueInfoInterval.current = undefined;
-            fetchCompletionInterval.current = undefined;
+            clearFetchServerInfo();
         };
-    }, [gameIsPlaying, fetchServerInfo]);
+    }, [gameIsPlaying, fetchServerInfo, clearFetchServerInfo]);
 
     // TODO: add params side in the url as well or at a state level selected without any side yet
     useEffect(() => {
@@ -922,17 +885,13 @@ export function useMainController(initialScene: MenuScene | undefined) {
         socketController,
         gameIsPlaying,
         levels,
-        serverCounts,
-        fetchTime,
         nextMenuScene,
         menuScene,
         refHashMap,
         lobbyMode,
-        hoveredLevel,
         handleChangeLobbyMode,
         exitLobby,
         setMenuScene,
-        setHoveredLevel,
         setState,
         handleClickReadyToPlay,
         handleGameStart,
@@ -943,7 +902,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
         handleClickPlay,
         handleClickHome,
         handleClickPlayAgain,
-        fetchServerInfo,
         handleMouseLeaveSideButton,
         handleMouseEnterSideButton,
         handleClickLevelItem,

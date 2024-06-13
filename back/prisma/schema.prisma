@@ -34,8 +34,9 @@ model User {
   role               Role
 
   // relations
-  levels Level[]
-  Player Player[]
+  levels  Level[]
+  Player  Player[]
+  ratings Rating[]
 }
 
 enum Role {
@@ -54,22 +55,54 @@ model Level {
   updatedAt DateTime @updatedAt
 
   name                String      @unique @db.VarChar(50)
-  likes               Int         @default(0)
   status              LevelStatus
   data                Json
+  // TODO: Could be just one array of start position and using index to manage shadow and light
   lightStartPosition  Float[]
   shadowStartPosition Float[]
 
   // relations
   games    Game[]
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User     @relation(fields: [authorId], references: [id])
   authorId Int
+  ratings  Rating[]
+}
+
+enum RatingType {
+  QUALITY
+  DIFFICULTY
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type        RatingType
+  value       Float
+  // a unique string which is concatenation of userId and levelId + type
+  userLevelId String     @unique
+
+  // relations
+  user    User  @relation(fields: [userId], references: [id])
+  userId  Int
+  level   Level @relation(fields: [levelId], references: [id])
+  levelId Int
 }
 
 enum GameStatus {
   STARTED
   FINISHED
-  NOT_FINISHED
+}
+
+enum GameMode {
+  SINGLE_PLAYER
+  MULTI_PLAYER
+}
+
+enum GameDevice {
+  DESKTOP
+  MOBILE
 }
 
 model Game {
@@ -77,15 +110,17 @@ model Game {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  status    GameStatus
-  startTime DateTime
-  endTime   DateTime?
+  status   GameStatus
+  duration Float
+  mode     GameMode
+  device   GameDevice
 
-  players Player[]
+  startTime Float
 
   // relations
+  players Player[]
   levelId Int
-  level   Level @relation(fields: [levelId], references: [id])
+  level   Level    @relation(fields: [levelId], references: [id])
 }
 
 enum PlayerSide {

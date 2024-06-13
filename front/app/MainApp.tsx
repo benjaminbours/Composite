@@ -21,6 +21,7 @@ import { getDictionary } from '../getDictionary';
 import { BottomRightInfo } from './BottomRightInfo';
 import { useWindowSize } from './hooks/useWindowSize';
 import { Side } from '@benjaminbours/composite-core';
+import { SideMenu } from './03_organisms/SideMenu';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -121,25 +122,14 @@ function MainApp({ initialScene, dictionary }: Props) {
                             ? Side.SHADOW
                             : state.you.side
                     }
-                    multiplayerGameProps={
-                        socketController.current
-                            ? {
-                                  socketController: socketController.current,
-                                  initialGameState: state.gameState,
-                                  level: state.loadedLevel,
-                              }
-                            : undefined
-                    }
-                    soloGameProps={
-                        socketController.current
-                            ? undefined
-                            : {
-                                  initialGameState: state.gameState,
-                                  level: state.loadedLevel,
-                                  onGameFinished:
-                                      mainController.handleGameFinished,
-                              }
-                    }
+                    gameProps={{
+                        socketController: socketController.current,
+                        initialGameState: state.gameState,
+                        level: state.loadedLevel,
+                        mode: mainController.lobbyMode,
+                        onPracticeGameFinished:
+                            mainController.handleGameFinished,
+                    }}
                     tabIsHidden={tabIsHidden}
                     stats={statsRef}
                     inputsManager={inputsManager.current}
@@ -158,12 +148,11 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onSettingsClick={handleClickOnSettings}
                 />
             )}
-            {!gameIsPlaying && (
-                <BottomRightInfo
-                    playing={mainController.serverCounts?.playing || 0}
-                    matchmaking={mainController.serverCounts?.matchmaking || 0}
-                />
-            )}
+            <SideMenu
+                buttonClassName="main-app__hamburger-button"
+                dictionary={dictionary.common}
+            />
+            {!gameIsPlaying && <BottomRightInfo />}
         </MainControllerContext.Provider>
     );
 }

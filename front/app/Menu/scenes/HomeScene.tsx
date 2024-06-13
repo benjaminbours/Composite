@@ -128,12 +128,12 @@ export const HomeScene: React.FC<Props> = ({
 
     return (
         <div ref={homeRef} className={cssClass}>
-            <h1 className="title-h1">Composite</h1>
+            <h1 className="main-title-intro">Composite</h1>
             <h2 className="main-subtitle">Think both ways</h2>
             <div className="home-scene__buttons-container">
                 <Link href={Route.ROADMAP}>
                     <button
-                        className="buttonCircle"
+                        className="composite-button home-scene__timeline-button"
                         id="buttonPath"
                         onMouseEnter={
                             isMobile ? undefined : handleMouseEnterButton
@@ -142,22 +142,21 @@ export const HomeScene: React.FC<Props> = ({
                             isMobile ? undefined : handleMouseLeaveButton
                         }
                     >
-                        The path
+                        The timeline
                     </button>
                 </Link>
                 <button
                     ref={playButtonRef}
-                    className="buttonCircle"
-                    id="buttonPlay"
+                    className="button-play home-scene__button-play"
                     onMouseEnter={isMobile ? undefined : handleMouseEnterPlay}
                     onMouseLeave={isMobile ? undefined : handleMouseLeavePlay}
                     onClick={handleClickPlay}
                 >
                     Play
                 </button>
-                <Link href={Route.LEVEL_EDITOR_ROOT}>
+                <Link href={Route.COMMUNITY}>
                     <button
-                        className="buttonCircle"
+                        className="composite-button home-scene__community-button"
                         id="buttonBuild"
                         onMouseEnter={
                             isMobile ? undefined : handleMouseEnterButton
@@ -166,7 +165,7 @@ export const HomeScene: React.FC<Props> = ({
                             isMobile ? undefined : handleMouseLeaveButton
                         }
                     >
-                        Build
+                        The community
                     </button>
                 </Link>
             </div>

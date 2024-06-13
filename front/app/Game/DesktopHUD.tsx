@@ -75,6 +75,9 @@ export const DesktopHUD: React.FC<Props> = ({
                     </ButtonGroup>
                 </Paper>
             )}
+            <Paper className="desktop-hud__run-timer">
+                <div id="runTimer">0.00 sec</div>
+            </Paper>
         </div>
     );
 };

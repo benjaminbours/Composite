@@ -11,6 +11,7 @@ import {
     SocketEventLobby,
     Side,
     FriendJoinLobbyPayload,
+    GameFinishedPayload,
 } from '@benjaminbours/composite-core';
 
 const TIME_SAMPLE_COUNT = 20;
@@ -26,7 +27,7 @@ export class SocketController {
 
     constructor(
         onGameStart: (initialGameState: GameState) => void,
-        onGameFinish: () => void,
+        onGameFinish: (data: GameFinishedPayload) => void,
         onTeamMateDisconnect: () => void,
         onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
         handleReceiveLevelOnLobby: (levelId: number) => void,
@@ -86,7 +87,10 @@ export class SocketController {
     };
 
     public onTimeSyncReceived =
-        (resolve: (value: [serverTime: number, rtt: number]) => void) =>
+        (
+            onStartTimer: () => void,
+            resolve: (value: [serverTime: number, rtt: number]) => void,
+        ) =>
         (data: TimeSyncPayload) => {
             console.log('received time sync event', data);
             const sample = this.timeSamplesSent.find(
@@ -104,14 +108,20 @@ export class SocketController {
                 let averageRtt = Math.floor(totalRtt / TIME_SAMPLE_COUNT);
                 this.isTimeSynced = true;
 
-                // unregister all listener for time sync
-                // TODO: investigate to use remove listeners for other events as well
-                this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
+                this.socket.on(SocketEventType.START_TIMER, () => {
+                    console.log('Receive start timer');
+                    this.socket.removeAllListeners(SocketEventType.TIME_SYNC);
+                    this.socket.removeAllListeners(SocketEventType.START_TIMER);
+                    onStartTimer();
+                });
                 resolve([data.serverGameTime!, averageRtt]);
+                this.emit([SocketEventType.TIME_INFO, { averageRtt }]);
             }
         };
 
-    public synchronizeTime = (): Promise<[serverTime: number, rtt: number]> => {
+    public synchronizeTime = (
+        onStartTimer: () => void,
+    ): Promise<[serverTime: number, rtt: number]> => {
         return new Promise((resolve) => {
             this.isTimeSynced = false;
             // remove previous time samples in case of resynchronization
@@ -120,7 +130,7 @@ export class SocketController {
             // register listener for time sync event
             this.socket.on(
                 SocketEventType.TIME_SYNC,
-                this.onTimeSyncReceived(resolve),
+                this.onTimeSyncReceived(onStartTimer, resolve),
             );
             // send time samples
             for (let i = 0; i < TIME_SAMPLE_COUNT; i++) {

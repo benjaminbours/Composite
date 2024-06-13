@@ -6,6 +6,7 @@ import { getDictionary } from '../../../../getDictionary';
 import { LoginForm } from '../../../03_organisms/LoginForm';
 import { Locale } from '../../../../i18n-config';
 import { TopBar } from '../../../02_molecules/TopBar/TopBar';
+import { Footer } from '../../../02_molecules/Footer';
 
 export const metadata: Metadata = {
     title: 'Composite - The game - Login',
@@ -22,7 +23,7 @@ interface Props {
 export default async function Login({ params: { lng } }: Props) {
     const dictionary = await getDictionary(lng);
     return (
-        <>
+        <div className="layout-root">
             <TopBar dictionary={dictionary.common} />
             <CentralContentTemplate className="login-page">
                 <Paper className="form-padding" elevation={10}>
@@ -36,6 +37,7 @@ export default async function Login({ params: { lng } }: Props) {
                     </Suspense>
                 </Paper>
             </CentralContentTemplate>
-        </>
+            <Footer lng={lng} />
+        </div>
     );
 }

@@ -1,66 +1,59 @@
 import classNames from 'classnames';
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
 import { YingYang } from './YingYang';
-
-function loadImage(url: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(url);
-        img.onerror = () => reject();
-        img.src = url;
-    });
-}
+import { computeRatings, loadImage } from '../../../utils';
+import { defaultLevelImageUrl } from '../../../constants';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import StarIcon from '@mui/icons-material/Star';
+import { DifficultyIcon } from '../../../01_atoms/DifficultyIcon';
+import {
+    Level,
+    UpsertRatingDtoTypeEnum,
+} from '@benjaminbours/composite-api-client';
 
 interface Props {
-    id: number;
-    name: string;
-    isHovered: boolean;
-    src: string;
+    level: Level;
     you: PlayerState;
     mate?: PlayerState;
     handleMouseEnterSide: (side: Side) => (e: React.MouseEvent) => void;
     handleMouseLeaveSide: (side: Side) => (e: React.MouseEvent) => void;
     handleClick: (id: number) => (e: React.MouseEvent) => void;
-    setHoveredLevel: React.Dispatch<React.SetStateAction<number | undefined>>;
     isLightWaiting: boolean;
     isShadowWaiting: boolean;
     isMobile: boolean;
     isSoloMode: boolean;
 }
 
-const defaultImageUrl = '/images/crack_the_door.png';
-
 export const LevelGridItem: React.FC<Props> = ({
-    name,
-    id,
-    src,
+    level,
     you,
     mate,
     handleClick,
     handleMouseEnterSide,
     handleMouseLeaveSide,
-    setHoveredLevel,
-    isHovered,
     isLightWaiting,
     isShadowWaiting,
     isMobile,
     isSoloMode,
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
-    const [imageUrl, setImageUrl] = useState(defaultImageUrl);
+    const [imageUrl, setImageUrl] = useState(defaultLevelImageUrl);
+    const { name, id } = level;
+    const src = `${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`;
+    const ratings = computeRatings(level);
+    const qualityRating = ratings.find(
+        (rating) => rating.type === UpsertRatingDtoTypeEnum.Quality,
+    );
+    const difficultyRating = ratings.find(
+        (rating) => rating.type === UpsertRatingDtoTypeEnum.Difficulty,
+    );
 
     useEffect(() => {
         loadImage(src)
-            .catch(() => defaultImageUrl)
+            .catch(() => defaultLevelImageUrl)
             .then((url) => {
                 setImageUrl(url);
             });
@@ -68,8 +61,7 @@ export const LevelGridItem: React.FC<Props> = ({
 
     const cssClass = classNames({
         'level-grid-item': true,
-        'level-grid-item--hovered': isHovered,
-        'level-grid-item--hovered-solo': isHovered && isSoloMode,
+        'level-grid-item--solo': isSoloMode,
         'level-grid-item--selected': you.level === id,
         'level-grid-item--selected-solo': you.level === id && isSoloMode,
         'level-grid-item--selected-shadow':
@@ -82,14 +74,6 @@ export const LevelGridItem: React.FC<Props> = ({
             isLightWaiting,
     });
 
-    const handleMouseEnter = useCallback(() => {
-        setHoveredLevel(id);
-    }, [id, setHoveredLevel]);
-
-    const handleMouseLeave = useCallback(() => {
-        setHoveredLevel(undefined);
-    }, [setHoveredLevel]);
-
     const teamMateHelper = useMemo(() => {
         if (
             !mate ||
@@ -100,17 +84,13 @@ export const LevelGridItem: React.FC<Props> = ({
             return;
         }
 
-        return <TeamMateHelper levelName={name} you={you} mate={mate} />;
-    }, [mate, you, name, id]);
+        return (
+            <TeamMateHelper levelName={name} mate={mate} isMobile={isMobile} />
+        );
+    }, [mate, name, id, isMobile]);
 
     return (
-        <button
-            ref={ref}
-            onMouseEnter={isMobile ? undefined : handleMouseEnter}
-            onMouseLeave={isMobile ? undefined : handleMouseLeave}
-            onClick={handleClick(id)}
-            className={cssClass}
-        >
+        <button ref={ref} onClick={handleClick(id)} className={cssClass}>
             {teamMateHelper}
             <div
                 className="level-grid-item__image"
@@ -162,6 +142,37 @@ export const LevelGridItem: React.FC<Props> = ({
                 </div>
             </div>
             <p className="level-grid-item__name">{name}</p>
+            <div className="level-grid-item__counts">
+                <div
+                    title="Number of time the level has been played"
+                    className="level-grid-item__played-icon"
+                >
+                    <SportsEsportsIcon />{' '}
+                    <span>{(level.count as any).games}</span>
+                </div>
+                <div
+                    title="Quality rating"
+                    className="level-grid-item__quality-icon"
+                >
+                    <StarIcon />{' '}
+                    <span>
+                        {qualityRating
+                            ? qualityRating.total / qualityRating.length
+                            : 0}
+                    </span>
+                </div>
+                <div
+                    title="Difficulty rating"
+                    className="level-grid-item__difficulty-icon"
+                >
+                    <DifficultyIcon />{' '}
+                    <span>
+                        {difficultyRating
+                            ? difficultyRating.total / difficultyRating.length
+                            : 0}
+                    </span>
+                </div>
+            </div>
         </button>
     );
 };

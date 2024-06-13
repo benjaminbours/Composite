@@ -1,6 +1,6 @@
 'use client';
 // vendors
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,22 +9,48 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import GroupsIcon from '@mui/icons-material/Groups';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { getDictionary } from '../../getDictionary';
 import { Divider } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
 import { Route } from '../types';
 import Link from 'next/link';
+import classNames from 'classnames';
+import { useStoreActions, useStoreState } from '../hooks/store';
+import { Socials } from '../02_molecules/Socials';
+import { useSnackbar } from 'notistack';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>['common'];
+    buttonClassName?: string;
 }
 
-export const SideMenu: React.FC<Props> = ({ dictionary }) => {
+export const SideMenu: React.FC<Props> = ({ dictionary, buttonClassName }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
+    const isAuthenticated = useStoreState(
+        (state) => state.user.isAuthenticated,
+    );
+    const signOut = useStoreActions((store) => store.user.signOut);
+    const handleLogout = useCallback(() => {
+        signOut()
+            .then(() => {
+                enqueueSnackbar(dictionary.notification['success-logout'], {
+                    variant: 'success',
+                });
+            })
+            .catch((error: any) => {
+                console.error(error);
+                enqueueSnackbar(dictionary.notification['error-logout'], {
+                    variant: 'error',
+                });
+            });
+    }, [signOut, enqueueSnackbar, dictionary.notification]);
 
     const items = useMemo(
         () => [
@@ -33,6 +59,25 @@ export const SideMenu: React.FC<Props> = ({ dictionary }) => {
                 icon: <CloseIcon />,
                 onClick: () => setIsOpen(false),
             },
+            {
+                isDivider: true,
+            },
+            {
+                text: isAuthenticated
+                    ? dictionary.nav.account
+                    : dictionary.form.button.login,
+                icon: <AccountCircle />,
+                href: isAuthenticated ? undefined : Route.LOGIN,
+            },
+            ...(isAuthenticated
+                ? [
+                      {
+                          text: dictionary.nav.logout,
+                          icon: <LogoutIcon />,
+                          onClick: handleLogout,
+                      },
+                  ]
+                : []),
             {
                 isDivider: true,
             },
@@ -46,21 +91,33 @@ export const SideMenu: React.FC<Props> = ({ dictionary }) => {
                 icon: <HandymanIcon />,
                 href: Route.LEVEL_EDITOR_ROOT,
             },
-            // TODO: Add button login / account
-            // {
-            //     text: dictionary.nav.community,
-            //     icon: <PeopleIcon />,
-            // },
+            {
+                text: dictionary.nav.community,
+                icon: <GroupsIcon />,
+                href: Route.COMMUNITY,
+            },
+            {
+                text: dictionary.nav.timeline,
+                icon: <TimelineIcon />,
+                href: Route.TIMELINE,
+            },
+            {
+                isDivider: true,
+            },
         ],
-        [dictionary],
+        [dictionary, isAuthenticated, handleLogout],
     );
+
+    const buttonCssClass = classNames({
+        'hamburger-button': true,
+        ...(buttonClassName ? { [buttonClassName]: true } : {}),
+    });
 
     return (
         <>
             <IconButton
-                className="hamburger-button"
+                className={buttonCssClass}
                 onClick={() => setIsOpen(true)}
-                color="inherit"
             >
                 <MenuIcon />
             </IconButton>
@@ -70,7 +127,7 @@ export const SideMenu: React.FC<Props> = ({ dictionary }) => {
                 onClose={() => setIsOpen(false)}
             >
                 <div className="side-menu">
-                    <List>
+                    <List style={{ padding: 0 }}>
                         {items.map(
                             (
                                 { text, icon, onClick, isDivider, href },
@@ -113,6 +170,10 @@ export const SideMenu: React.FC<Props> = ({ dictionary }) => {
                             },
                         )}
                     </List>
+                    <Socials className="side-menu__socials" />
+                    <Divider />
+                    <h2>Composite</h2>
+                    <p className="version">{`Version ${process.env.APP_VERSION}`}</p>
                 </div>
             </Drawer>
         </>
