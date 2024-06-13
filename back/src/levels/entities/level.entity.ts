@@ -9,7 +9,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Game } from 'src/games/entities/game.entity';
+import { Game } from '../../games/entities/game.entity';
 import { Rating } from './rating.entity';
 
 export class Element implements Omit<LevelElement, 'mesh' | 'id'> {

@@ -10,7 +10,9 @@
             "play": "Play",
             "editor": "Editor",
             "community": "Community",
-            "create-level": "Create new level"
+            "create-level": "Create new level",
+            "timeline": "Timeline",
+            "account": "Account (coming soon)"
         },
         "form": {
             "label": {
