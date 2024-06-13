@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.17
+
+### Patch Changes
+
+- Add game duration tracking + community views with stats, ranking, ratings, etc
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.17
+
 ## 1.0.0-next.16
 
 ### Patch Changes
