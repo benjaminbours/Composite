@@ -370,7 +370,7 @@ export class SocketGateway {
 
       // if there is not, create one
       this.gameLoopsRegistry[`game:${gameId}:endGame`] = setTimeout(() => {
-        this.finishGame(gameId);
+        this.finishGame(gameId, gameState.level.id);
       }, 2000);
     } else {
       clearTimeout(this.gameLoopsRegistry[`game:${gameId}:endGame`]);
@@ -449,7 +449,7 @@ export class SocketGateway {
     return initialGameState;
   }
 
-  finishGame = (gameId: number) => {
+  finishGame = (gameId: number, levelId: number) => {
     const gameRoomName = String(gameId);
     clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
     delete this.gameLoopsRegistry[`game:${gameId}`];
@@ -458,10 +458,10 @@ export class SocketGateway {
     const endTime = Number(process.hrtime.bigint());
     this.prismaService.game
       .findUnique({ where: { id: gameId } })
-      .then((game) => {
+      .then(async (game) => {
         if (game) {
           const duration = (endTime - game.startTime) / 1_000_000_000;
-          this.prismaService.game
+          await this.prismaService.game
             .update({
               where: { id: gameId },
               data: {
@@ -473,9 +473,20 @@ export class SocketGateway {
               Logger.log('Game finished and updated', updatedGame);
             });
 
+          const rank = await this.prismaService.game
+            .findMany({
+              where: { levelId },
+              select: { id: true, duration: true },
+            })
+            .then((games) => {
+              const sortedGames = games.sort((a, b) => a.duration - b.duration);
+              const index = sortedGames.findIndex((g) => g.id === gameId);
+              return index + 1;
+            });
+
           this.emit(gameRoomName, [
             SocketEventType.GAME_FINISHED,
-            { duration },
+            { duration, rank },
           ]);
 
           this.server

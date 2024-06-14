@@ -39,7 +39,7 @@ export interface PlayerState {
 export interface MainState {
     isWaitingForFriend: boolean;
     isInQueue: boolean;
-    lastGameDuration: number;
+    lastGame: { duration: number; rank: number };
     gameState: GameState | undefined;
     loadedLevel: Level | undefined;
     you: PlayerState;
@@ -116,7 +116,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 isWaitingForFriend: false,
                 gameState: undefined,
                 loadedLevel: undefined,
-                lastGameDuration: 0,
+                lastGame: { duration: 0, rank: 0 },
                 you: {
                     side,
                     level: selectedLevel,
@@ -133,7 +133,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
             isWaitingForFriend: false,
             gameState: undefined,
             loadedLevel: undefined,
-            lastGameDuration: 0,
+            lastGame: { duration: 0, rank: 0 },
             you: {
                 side: undefined,
                 level: undefined,
@@ -304,7 +304,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 const next = {
                     ...prev,
                     gameState: undefined,
-                    lastGameDuration: data.duration,
+                    lastGame: data,
                     you: {
                         ...prev.you,
                         isReady: false,

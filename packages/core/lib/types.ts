@@ -133,6 +133,7 @@ export interface TimeInfoPayload {
 
 export interface GameFinishedPayload {
     duration: number;
+    rank: number;
 }
 
 // events

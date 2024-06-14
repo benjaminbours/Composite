@@ -272,12 +272,12 @@ export const EndLevelScene: React.FC<Props> = React.memo(
                                     </b>
                                     <br />
                                     You did it in:{' '}
-                                    <b>{state.lastGameDuration.toFixed(3)}</b>
+                                    <b>{state.lastGame.duration.toFixed(3)}</b>
                                     {lobbyMode !== LobbyMode.PRACTICE && (
                                         <>
                                             <br />
                                             This time ranks you at the position:{' '}
-                                            <b>0</b>
+                                            <b>{state.lastGame.rank}</b>
                                         </>
                                     )}
                                 </span>
