@@ -19,6 +19,7 @@ import { ApiClient } from './core/services';
 import {
     Level,
     LevelStatusEnum,
+    UpsertRatingDtoTypeEnum,
     User,
 } from '@benjaminbours/composite-api-client';
 import { useSnackbar } from 'notistack';
@@ -26,6 +27,7 @@ import { useStoreActions, useStoreState } from './hooks';
 import { startLoadingAssets } from './Game/assetsLoader';
 import { useMenuTransition } from './useMenuTransition';
 import { Vector3 } from 'three';
+import { computeRatings } from './utils';
 
 export interface PlayerState {
     side: Side | undefined;
@@ -158,7 +160,35 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 stats: 'true',
             })
             .then((levels) => {
-                setLevels(levels);
+                setLevels(
+                    levels
+                        .map((level) => {
+                            const ratings = computeRatings(level);
+                            const qualityRating = ratings.find(
+                                (rating) =>
+                                    rating.type ===
+                                    UpsertRatingDtoTypeEnum.Quality,
+                            );
+                            const difficultyRating = ratings.find(
+                                (rating) =>
+                                    rating.type ===
+                                    UpsertRatingDtoTypeEnum.Difficulty,
+                            );
+                            return {
+                                ...level,
+                                qualityRating: qualityRating
+                                    ? qualityRating.total / qualityRating.length
+                                    : 0,
+                                difficultyRating: difficultyRating
+                                    ? difficultyRating.total /
+                                      difficultyRating.length
+                                    : 0,
+                            };
+                        })
+                        .sort((a, b) => {
+                            return a.difficultyRating - b.difficultyRating;
+                        }),
+                );
             });
     }, []);
 

@@ -4,15 +4,12 @@ import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
 import { YingYang } from './YingYang';
-import { computeRatings, loadImage } from '../../../utils';
+import { loadImage } from '../../../utils';
 import { defaultLevelImageUrl } from '../../../constants';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import StarIcon from '@mui/icons-material/Star';
 import { DifficultyIcon } from '../../../01_atoms/DifficultyIcon';
-import {
-    Level,
-    UpsertRatingDtoTypeEnum,
-} from '@benjaminbours/composite-api-client';
+import { Level } from '@benjaminbours/composite-api-client';
 
 interface Props {
     level: Level;
@@ -43,13 +40,6 @@ export const LevelGridItem: React.FC<Props> = ({
     const [imageUrl, setImageUrl] = useState(defaultLevelImageUrl);
     const { name, id } = level;
     const src = `${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`;
-    const ratings = computeRatings(level);
-    const qualityRating = ratings.find(
-        (rating) => rating.type === UpsertRatingDtoTypeEnum.Quality,
-    );
-    const difficultyRating = ratings.find(
-        (rating) => rating.type === UpsertRatingDtoTypeEnum.Difficulty,
-    );
 
     useEffect(() => {
         loadImage(src)
@@ -154,23 +144,14 @@ export const LevelGridItem: React.FC<Props> = ({
                     title="Quality rating"
                     className="level-grid-item__quality-icon"
                 >
-                    <StarIcon />{' '}
-                    <span>
-                        {qualityRating
-                            ? qualityRating.total / qualityRating.length
-                            : 0}
-                    </span>
+                    <StarIcon /> <span>{(level as any).qualityRating}</span>
                 </div>
                 <div
                     title="Difficulty rating"
                     className="level-grid-item__difficulty-icon"
                 >
                     <DifficultyIcon />{' '}
-                    <span>
-                        {difficultyRating
-                            ? difficultyRating.total / difficultyRating.length
-                            : 0}
-                    </span>
+                    <span>{(level as any).difficultyRating}</span>
                 </div>
             </div>
         </button>
