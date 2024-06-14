@@ -8,6 +8,13 @@ import Link from 'next/link';
 import { Route } from '../../../types';
 import { LevelList } from './LevelList';
 import { Footer } from '../../../02_molecules/Footer';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Composite - Community',
+    description:
+        'The portal to access any level created by the community, and to create your own.',
+};
 
 interface Props {
     params: {

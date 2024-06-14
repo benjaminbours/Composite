@@ -15,8 +15,9 @@ import Link from 'next/link';
 import { Route } from '../../../../../types';
 
 export const metadata: Metadata = {
-    title: 'Composite - Level editor',
-    description: 'Create your own level',
+    title: 'Composite - Level details',
+    description:
+        'All the information about a level. Author, quality rating, difficulty rating, leaderboard, etc.',
 };
 
 export const revalidate = 1; // revalidate the data at most every hour
@@ -48,7 +49,7 @@ interface Props {
     };
 }
 
-export default async function LevelEditorPage({
+export default async function LevelDetailsPage({
     params: { lng, level_id },
 }: Props) {
     const level = await getData(level_id);

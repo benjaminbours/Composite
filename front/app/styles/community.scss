@@ -29,6 +29,10 @@
 .community-page__level-list {
     display: grid;
     gap: 30px;
+
+    .level-grid > {
+        max-height: auto;
+    }
 }
 
 .text-image-section {
