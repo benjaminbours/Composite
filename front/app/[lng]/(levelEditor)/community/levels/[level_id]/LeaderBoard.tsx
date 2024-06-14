@@ -79,12 +79,26 @@ export const LeaderBoard: React.FC<Props> = ({ level }) => {
                                     <span>sec</span>
                                 </td>
                                 {row.mode === GameModeEnum.SinglePlayer && (
-                                    <td>{row.players![0].user?.name}</td>
+                                    <td>
+                                        {(row as any).players[0]
+                                            ? (row as any).players[0].user?.name
+                                            : 'Guest'}
+                                    </td>
                                 )}
                                 {row.mode === GameModeEnum.MultiPlayer && (
                                     <>
-                                        <td>{row.players![1].user?.name}</td>
-                                        <td>{row.players![0].user?.name}</td>
+                                        <td>
+                                            {(row as any).players[1]
+                                                ? (row as any).players[1].user
+                                                      ?.name
+                                                : 'Guest'}
+                                        </td>
+                                        <td>
+                                            {(row as any).players[0]
+                                                ? (row as any).players[0].user
+                                                      ?.name
+                                                : 'Guest'}
+                                        </td>
                                     </>
                                 )}
                                 <td>{date}</td>

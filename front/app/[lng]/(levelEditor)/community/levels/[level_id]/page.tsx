@@ -27,10 +27,13 @@ async function getData(level_id: string) {
     const apiClient = servicesContainer.get(ApiClient);
     // load level
     const level = await apiClient.defaultApi
-        .levelsControllerFindOne({
-            id: level_id,
-            stats: 'true',
-        })
+        .levelsControllerFindOne(
+            {
+                id: level_id,
+                stats: 'true',
+            },
+            { cache: 'no-store', revalidate: 0 } as any,
+        )
         .catch((error) => {
             console.error(error);
             return undefined;
