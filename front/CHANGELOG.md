@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.29
+
+### Patch Changes
+
+- Fix bug starting multiple games in the same time while spaming start button in solo mode
+
 ## 1.0.0-next.28
 
 ### Patch Changes
