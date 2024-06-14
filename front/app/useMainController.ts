@@ -79,6 +79,8 @@ export function useMainController(initialScene: MenuScene | undefined) {
         refHashMap,
     } = useMenuTransition(initialScene);
 
+    const isEstablishingConnection = useRef(false);
+
     const fetchServerInfo = useStoreActions(
         (actions) => actions.serverInfo.fetchServerInfo,
     );
@@ -750,7 +752,12 @@ export function useMainController(initialScene: MenuScene | undefined) {
             return;
         }
 
+        if (isEstablishingConnection.current) {
+            return;
+        }
+
         if (lobbyMode === LobbyMode.SOLO) {
+            isEstablishingConnection.current = true;
             establishConnection().then(() => {
                 const isDesktop =
                     window.innerWidth > 768 && window.innerHeight > 500;
@@ -762,6 +769,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                         device: isDesktop ? 'desktop' : 'mobile',
                     },
                 ]);
+                isEstablishingConnection.current = false;
             });
         } else if (lobbyMode === LobbyMode.PRACTICE) {
             const apiClient = servicesContainer.get(ApiClient);
