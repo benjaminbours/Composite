@@ -856,6 +856,7 @@ export default class App {
             ) {
                 this.onPracticeGameFinished({
                     duration: this.runClock.getElapsedTime(),
+                    rank: 0,
                 });
             }
 
