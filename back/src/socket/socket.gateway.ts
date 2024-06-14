@@ -455,12 +455,12 @@ export class SocketGateway {
     delete this.gameLoopsRegistry[`game:${gameId}`];
     console.log('detect game finished on the server');
 
+    const endTime = Number(process.hrtime.bigint());
     this.prismaService.game
       .findUnique({ where: { id: gameId } })
       .then((game) => {
         if (game) {
-          const duration =
-            (Number(process.hrtime.bigint()) - game.startTime) / 1_000_000_000;
+          const duration = (endTime - game.startTime) / 1_000_000_000;
           this.prismaService.game
             .update({
               where: { id: gameId },

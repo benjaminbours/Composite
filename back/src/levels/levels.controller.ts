@@ -170,7 +170,6 @@ export class LevelsController {
     @Param('id') id: string,
     @Query('stats') stats: string | undefined, // boolean
   ) {
-    console.log('find one dude');
     return this.levelsService.findOne(+id, Boolean(stats));
   }
 
