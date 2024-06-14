@@ -4,13 +4,16 @@
 
 ### High priority
 
+- on end level screen, the shadow and light graphic are limiting the reading, mainly on mobile
+- There is still synchronization issue when starting a multiplayer game.
+- Ensure secrets are safe in my docker images
 - Bug when adding a door and a door opener, if I don't save or reload, I can't interact with the door
-- Fix roadmap / timeline content
 - crash if try to delete the bounce we are currently inside
 - While switching play / editor, the camera come back to the start it's annoying
 
 ### Medium priority
 
+- Inline-link should have arrow on hover when it's an external link of the website only.
 - When updating size and rotation of element. At some point the rotation is not considered anymore
 
 ### Low priority
@@ -30,16 +33,14 @@
 
 ### High priority
 
-- Add rating system for level, we can imagine multiple rating, one for fun and enjoyment, another one for the difficulty, and maybe more, etc.
+- Mobile experience can be improved. When level is selected, buttons can appear in an overlay on top to avoid scrolling to find the main action.
 - While in queue, propose an alternative than waiting infinitely
 - Add button to reset bounces in level editor
 - Add issues on github with tag "good first contribution"
 - Add button to hide elements in level editor
-- Add link to socials on the website, in the bottom close the version for example
 - Add scale management for all elements. So you can have super big door, or you can have small door like evry lucarne
 - Add landing page and reorganize routing
 - In level editor root, add an author selector to be able to watch the levels made by others, to open them, play them, and fork them.
-- Add request to add a like to a level
 - Write medium article about the current state of the project, and about the vision and where I want to go
 - Talk in the timeline about brilliant and how it help me achieve what I needed in terms of math.
 - Improve navigation in timeline, use button to go to anchor

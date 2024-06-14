@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.28
+
+### Patch Changes
+
+- Display leaderboard rank on end level view. Sort level by difficulty on lobby.
+- Updated dependencies
+  - @benjaminbours/composite-api-client@1.0.0-next.18
+  - @benjaminbours/composite-core@1.0.0-next.18
+
 ## 1.0.0-next.27
 
 ### Patch Changes

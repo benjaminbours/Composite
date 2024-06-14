@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.18
+
+### Patch Changes
+
+- Display leaderboard rank on end level view. Sort level by difficulty on lobby.
+
 ## 1.0.0-next.17
 
 ### Patch Changes
