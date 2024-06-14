@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.30
+
+### Patch Changes
+
+- Trying to fix the same bug again.
+
 ## 1.0.0-next.29
 
 ### Patch Changes

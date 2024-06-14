@@ -79,7 +79,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
         refHashMap,
     } = useMenuTransition(initialScene);
 
-    const isEstablishingConnection = useRef(false);
+    const isStartingSoloGame = useRef(false);
 
     const fetchServerInfo = useStoreActions(
         (actions) => actions.serverInfo.fetchServerInfo,
@@ -281,6 +281,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
     }, [handleDestroyConnection]);
 
     const handleGameStart = useCallback((initialGameState: GameState) => {
+        isStartingSoloGame.current = false;
         const apiClient = servicesContainer.get(ApiClient);
         Promise.all([
             apiClient.defaultApi.levelsControllerFindOne({
@@ -752,12 +753,12 @@ export function useMainController(initialScene: MenuScene | undefined) {
             return;
         }
 
-        if (isEstablishingConnection.current) {
+        if (isStartingSoloGame.current) {
             return;
         }
 
         if (lobbyMode === LobbyMode.SOLO) {
-            isEstablishingConnection.current = true;
+            isStartingSoloGame.current = true;
             establishConnection().then(() => {
                 const isDesktop =
                     window.innerWidth > 768 && window.innerHeight > 500;
@@ -769,7 +770,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
                         device: isDesktop ? 'desktop' : 'mobile',
                     },
                 ]);
-                isEstablishingConnection.current = false;
             });
         } else if (lobbyMode === LobbyMode.PRACTICE) {
             const apiClient = servicesContainer.get(ApiClient);
