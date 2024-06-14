@@ -479,7 +479,9 @@ export class SocketGateway {
               select: { id: true, duration: true },
             })
             .then((games) => {
-              const sortedGames = games.sort((a, b) => a.duration - b.duration);
+              const sortedGames = games
+                .filter((game) => game.duration !== 0)
+                .sort((a, b) => a.duration - b.duration);
               const index = sortedGames.findIndex((g) => g.id === gameId);
               return index + 1;
             });
