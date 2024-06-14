@@ -132,7 +132,9 @@ function Game({
                 gameProps.level,
                 gameProps.socketController,
                 undefined,
-                gameProps.onPracticeGameFinished,
+                gameProps.mode === LobbyMode.PRACTICE
+                    ? gameProps.onPracticeGameFinished
+                    : undefined,
             );
             if (
                 gameProps.mode === LobbyMode.SOLO ||
