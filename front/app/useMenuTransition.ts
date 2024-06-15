@@ -53,7 +53,7 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
      * Move a graphic side element to coordinates
      */
     const moveSideElementToCoordinate = useCallback(
-        (side: Side, x: number, y: number) => {
+        (side: Side, x: number, y: number, width?: number) => {
             if (
                 !refHashMap.canvasBlack.current ||
                 !refHashMap.canvasWhite.current
@@ -69,6 +69,7 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
                 delay: 0.1,
                 startX: x,
                 startY: y,
+                ...(width ? { width } : {}),
             });
         },
         [refHashMap],
@@ -102,6 +103,7 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
                 element,
                 coordinates.x,
                 coordinates.y,
+                width,
             );
         },
         [refHashMap, moveSideElementToCoordinate],

@@ -66,13 +66,11 @@ export default class Light {
         canvasHeight,
         canvasWidth,
         isMobile,
-        faction,
     }: {
         scene: MenuScene;
         canvasWidth: number;
         canvasHeight: number;
         isMobile: boolean;
-        faction?: Side;
     }) => {
         let width = DEFAULT_WIDTH;
         if (window.innerHeight < 700 || window.innerWidth <= 768) {
@@ -163,7 +161,6 @@ export default class Light {
             canvasWidth: this.ctx.canvas.width,
             canvasHeight: this.ctx.canvas.height,
             isMobile: options.isMobileDevice,
-            faction: options.side,
         });
         this.startX = coordinates.x;
         this.startY = coordinates.y;

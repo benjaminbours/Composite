@@ -17,13 +17,11 @@ export default class Shadow {
         canvasHeight,
         canvasWidth,
         isMobile,
-        faction,
     }: {
         scene: MenuScene;
         canvasWidth: number;
         canvasHeight: number;
         isMobile: boolean;
-        faction?: Side;
     }) => {
         let width = DEFAULT_WIDTH;
         if (window.innerHeight < 700 || window.innerWidth <= 768) {
@@ -32,8 +30,6 @@ export default class Shadow {
         if (window.innerWidth > 2000) {
             width = 800;
         }
-
-        const marginLeft = canvasWidth * 0.075 + 322;
         switch (scene) {
             case MenuScene.NOT_FOUND:
                 return {
@@ -117,7 +113,6 @@ export default class Shadow {
             canvasWidth: this.ctx.canvas.width,
             canvasHeight: this.ctx.canvas.height,
             isMobile: options.isMobileDevice,
-            faction: options.side,
         });
         this.startX = coordinates.x;
         this.startY = coordinates.y;

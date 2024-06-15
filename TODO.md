@@ -5,7 +5,6 @@
 ### High priority
 
 - on end level screen, the shadow and light graphic are limiting the reading, mainly on mobile
-- There is still synchronization issue when starting a multiplayer game.
 - Ensure secrets are safe in my docker images
 - Bug when adding a door and a door opener, if I don't save or reload, I can't interact with the door
 - crash if try to delete the bounce we are currently inside
@@ -33,6 +32,7 @@
 
 ### High priority
 
+- Display ping indication for you and your team mate
 - Mobile experience can be improved. When level is selected, buttons can appear in an overlay on top to avoid scrolling to find the main action.
 - While in queue, propose an alternative than waiting infinitely
 - Add button to reset bounces in level editor
