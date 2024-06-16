@@ -1,9 +1,8 @@
 // vendors
 import { NestFactory } from '@nestjs/core';
 // eslint-disable-next-line
-const NodeThreeExporter = require('@injectit/threejs-nodejs-exporters');
 import * as fs from 'fs';
-import { BufferGeometry, Mesh } from 'three';
+import { BufferGeometry, Mesh, ObjectLoader, Scene } from 'three';
 import { SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import {
@@ -29,16 +28,17 @@ import {
 
 async function bootstrap() {
   // load 3d assets for physics calculation server side
-  const assetsFile = fs.readFileSync(`${process.cwd()}/assets.glb`);
-  const onParse = (object) => {
-    object.scene.children.forEach((mesh: Mesh) => {
-      (mesh.geometry as any).computeBoundsTree = computeBoundsTree;
-      (mesh.geometry as any).disposeBoundsTree = disposeBoundsTree;
-      geometries[mesh.name] = mesh.geometry;
-    });
-  };
-  const exporter = new NodeThreeExporter();
-  exporter.parse('glb', assetsFile, onParse);
+  const assets = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/assets.json`).toString(),
+  );
+  const scene = new ObjectLoader().parse(assets) as Scene;
+  scene.children.forEach((mesh: Mesh) => {
+    console.log(mesh);
+
+    mesh.geometry.computeBoundsTree = computeBoundsTree;
+    mesh.geometry.disposeBoundsTree = disposeBoundsTree;
+    geometries[mesh.name] = mesh.geometry;
+  });
 
   const app = await NestFactory.create(AppModule);
   // disable while cors is managed in load balancer
