@@ -1,28 +1,32 @@
 # Dev
 FROM node:18-alpine AS dev
-
 WORKDIR /app
-RUN apk add --update --no-cache openssl
-RUN apk add --update --no-cache \
-    make \
-    g++ \
-    jpeg-dev \
-    cairo-dev \
-    giflib-dev \
-    pango-dev \
-    libtool \
-    autoconf \
-    automake
-
 COPY . .
 
-RUN npm i
-RUN npm run build -w packages
-RUN cd back && npx prisma generate
+RUN apk add --update --no-cache \
+    make && \
+    npm i && \
+    npm run build -w packages && \
+    cd back && npx prisma generate && \
+    npm cache clean --force && \
+    rm -rf /var/cache/apk/*
+
+RUN npm run build -w back
+
 ENTRYPOINT ["npm", "run", "start:dev", "-w", "back"]
 
-# Staging
-FROM dev as build-staging
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY . .
+
+RUN apk add --update --no-cache \
+    make && \
+    npm i && \
+    npm run build -w packages && \
+    cd back && npx prisma generate && \
+    npm cache clean --force && \
+    rm -rf /var/cache/apk/*
+
 ENV NODE_ENV production
 ARG POSTGRES_USER
 ENV POSTGRES_USER ${POSTGRES_USER}
@@ -38,33 +42,21 @@ ENV NPM_TOKEN ${NPM_TOKEN}
 
 RUN npm run build -w back
 
-FROM node:18-alpine AS base
+FROM node:18-alpine AS final
 WORKDIR /app
-RUN apk add --update --no-cache openssl
-RUN apk add --update --no-cache \
-    make \
-    g++ \
-    jpeg-dev \
-    cairo-dev \
-    giflib-dev \
-    pango-dev \
-    libtool \
-    autoconf \
-    automake
 
-FROM base AS staging
-ENV NODE_ENV production
 ARG NPM_TOKEN
 ENV NPM_TOKEN ${NPM_TOKEN}
-ENV STAGE staging
-WORKDIR /app
-COPY --from=build-staging /app/back/dist ./dist
-COPY --from=build-staging /app/back/prisma ./prisma
-COPY --from=build-staging /app/back/locales ./locales
-COPY --from=build-staging /app/back/package*.json ./
-COPY --from=build-staging /app/back/assets.glb ./
-COPY --from=build-staging /app/.npmrc ./
-RUN npm i --omit=dev
-RUN npx prisma generate
+
+COPY --from=build /app/back/dist ./dist
+COPY --from=build /app/back/prisma ./prisma
+COPY --from=build /app/back/locales ./locales
+COPY --from=build /app/back/package*.json ./
+COPY --from=build /app/back/assets.json ./
+COPY --from=build /app/.npmrc ./
+
+RUN npm i --omit=dev && \
+    npx prisma generate && \
+    npm cache clean --force
 
 ENTRYPOINT ["npm", "run", "start:prod"]

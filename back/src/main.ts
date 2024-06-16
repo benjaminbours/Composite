@@ -33,8 +33,6 @@ async function bootstrap() {
   );
   const scene = new ObjectLoader().parse(assets) as Scene;
   scene.children.forEach((mesh: Mesh) => {
-    console.log(mesh);
-
     mesh.geometry.computeBoundsTree = computeBoundsTree;
     mesh.geometry.disposeBoundsTree = disposeBoundsTree;
     geometries[mesh.name] = mesh.geometry;
