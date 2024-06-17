@@ -4,7 +4,7 @@ import { getDictionary } from '../../../../../getDictionary';
 import { Locale } from '../../../../../i18n-config';
 
 export const metadata: Metadata = {
-    title: 'Composite - Level editor',
+    title: 'Composite - Level editor - Details',
     description: 'Create your own level',
 };
 

@@ -713,7 +713,7 @@ export default class App {
 
     private closeTheDoor = (doorRight: Object3D, doorLeft: Object3D) => {
         gsap.to([doorLeft.position, doorRight.position], {
-            duration: 0.5,
+            duration: 0.3,
             x: 0,
             overwrite: true,
         });

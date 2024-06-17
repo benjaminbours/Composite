@@ -79,7 +79,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
         refHashMap,
     } = useMenuTransition(initialScene);
 
-    const isStartingSoloGame = useRef(false);
+    const isEstablishingConnection = useRef(false);
 
     const fetchServerInfo = useStoreActions(
         (actions) => actions.serverInfo.fetchServerInfo,
@@ -267,8 +267,14 @@ export function useMainController(initialScene: MenuScene | undefined) {
             enqueueSnackbar('Your friend successfully joined the lobby', {
                 variant: 'success',
             });
+            if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
+                (window as any).gtag('event', 'friend_join', {
+                    env: process.env.NEXT_PUBLIC_STAGE,
+                    userId: currentUser?.id,
+                });
+            }
         },
-        [enqueueSnackbar],
+        [enqueueSnackbar, currentUser],
     );
 
     const handleTeamMateDisconnect = useCallback(() => {
@@ -280,26 +286,36 @@ export function useMainController(initialScene: MenuScene | undefined) {
         handleDestroyConnection();
     }, [handleDestroyConnection]);
 
-    const handleGameStart = useCallback((initialGameState: GameState) => {
-        isStartingSoloGame.current = false;
-        const apiClient = servicesContainer.get(ApiClient);
-        Promise.all([
-            apiClient.defaultApi.levelsControllerFindOne({
-                id: String(initialGameState.level.id),
-            }),
-            startLoadingAssets(),
-        ]).then(([level]) => {
-            setState((prev) => ({
-                ...prev,
-                gameState: initialGameState,
-                loadedLevel: level,
-            }));
-            setGameIsPlaying(true);
-        });
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        }
-    }, []);
+    const handleGameStart = useCallback(
+        (initialGameState: GameState) => {
+            if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
+                (window as any).gtag('event', 'start_game', {
+                    env: process.env.NEXT_PUBLIC_STAGE,
+                    gameMode: lobbyMode,
+                    userId: currentUser?.id,
+                });
+            }
+            isEstablishingConnection.current = false;
+            const apiClient = servicesContainer.get(ApiClient);
+            Promise.all([
+                apiClient.defaultApi.levelsControllerFindOne({
+                    id: String(initialGameState.level.id),
+                }),
+                startLoadingAssets(),
+            ]).then(([level]) => {
+                setState((prev) => ({
+                    ...prev,
+                    gameState: initialGameState,
+                    loadedLevel: level,
+                }));
+                setGameIsPlaying(true);
+            });
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            }
+        },
+        [lobbyMode, currentUser],
+    );
 
     const handleGameFinished = useCallback(
         (data: GameFinishedPayload) => {
@@ -411,6 +427,16 @@ export function useMainController(initialScene: MenuScene | undefined) {
     );
 
     const handleInviteFriend = useCallback(async (): Promise<string> => {
+        if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
+            (window as any).gtag('event', 'invite_friend', {
+                env: process.env.NEXT_PUBLIC_STAGE,
+                userId: currentUser?.id,
+            });
+        }
+        if (isEstablishingConnection.current) {
+            return '';
+        }
+        isEstablishingConnection.current = true;
         return establishConnection().then(() => {
             return new Promise((resolve) => {
                 // register listener before emitting
@@ -437,6 +463,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 ]);
 
                 setState((prev) => ({ ...prev, isWaitingForFriend: true }));
+                isEstablishingConnection.current = false;
             });
         });
     }, [establishConnection, currentUser, state]);
@@ -753,12 +780,19 @@ export function useMainController(initialScene: MenuScene | undefined) {
             return;
         }
 
-        if (isStartingSoloGame.current) {
+        if (isEstablishingConnection.current) {
             return;
         }
 
+        if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
+            (window as any).gtag('event', 'start_game', {
+                env: process.env.NEXT_PUBLIC_STAGE,
+                gameMode: lobbyMode,
+                userId: currentUser?.id,
+            });
+        }
         if (lobbyMode === LobbyMode.SOLO) {
-            isStartingSoloGame.current = true;
+            isEstablishingConnection.current = true;
             establishConnection().then(() => {
                 const isDesktop =
                     window.innerWidth > 768 && window.innerHeight > 500;
