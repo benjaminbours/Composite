@@ -1,5 +1,11 @@
 # composite-front
 
+## 1.0.0-next.31
+
+### Patch Changes
+
+- 296385f: Optimize docker image. Add google analytics event.
+
 ## 1.0.0-next.30
 
 ### Patch Changes

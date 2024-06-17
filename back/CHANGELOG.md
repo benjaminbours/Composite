@@ -1,5 +1,11 @@
 # composite-back
 
+## 1.0.0-next.19
+
+### Patch Changes
+
+- 296385f: Optimize docker image. Add google analytics event.
+
 ## 1.0.0-next.18
 
 ### Patch Changes
