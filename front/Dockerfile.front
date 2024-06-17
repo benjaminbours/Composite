@@ -1,33 +1,34 @@
 # Dev
 FROM node:18-alpine AS dev
-
 WORKDIR /app
-RUN apk add --update --no-cache openssl
+COPY . .
+
 RUN apk add --update --no-cache \
     make \
     g++ \
-    jpeg-dev \
-    cairo-dev \
-    giflib-dev \
-    pango-dev \
-    libtool \
-    autoconf \
-    automake
+    py3-pip \
+    libc6-compat && \
+    npm i && \
+    npm run build -w packages && \
+    npm cache clean --force && \
+    rm -rf /var/cache/apk/*
 
-ARG NPM_TOKEN
-ENV NPM_TOKEN ${NPM_TOKEN}
-
-COPY . .
-
-RUN npm i
-RUN npm run build -w packages
 ENTRYPOINT ["npm", "run", "dev", "-w", "front"]
 
-# Staging
-
-FROM dev as build-staging
-
+FROM node:18-alpine AS build
 WORKDIR /app
+COPY . .
+
+RUN apk add --update --no-cache \
+    make \
+    g++ \
+    py3-pip \
+    libc6-compat && \
+    npm i && \
+    npm run build -w packages && \
+    npm cache clean --force && \
+    rm -rf /var/cache/apk/*
+
 ENV NODE_ENV production
 ARG NEXT_PUBLIC_STAGE
 ENV NEXT_PUBLIC_STAGE ${NEXT_PUBLIC_STAGE}
@@ -35,44 +36,27 @@ ARG NEXT_PUBLIC_BACKEND_URL
 ENV NEXT_PUBLIC_BACKEND_URL ${NEXT_PUBLIC_BACKEND_URL}
 ARG NEXT_PUBLIC_URL
 ENV NEXT_PUBLIC_URL ${NEXT_PUBLIC_URL}
-RUN npm run build -w front
-
-FROM node:18-alpine AS base
-WORKDIR /app
-RUN apk add --update --no-cache \
-    make \
-    g++ \
-    jpeg-dev \
-    cairo-dev \
-    giflib-dev \
-    pango-dev \
-    libtool \
-    autoconf \
-    automake
-
-FROM base as staging
-
-WORKDIR /app
-ENV NODE_ENV production
 ARG NPM_TOKEN
 ENV NPM_TOKEN ${NPM_TOKEN}
+
+RUN npm run build -w front
+
+FROM node:18-alpine AS final
+WORKDIR /app
+
+ARG NPM_TOKEN
+ENV NPM_TOKEN ${NPM_TOKEN}
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build-staging /app/front/public ./public
-COPY --from=build-staging /app/front/package*.json ./
-COPY --from=build-staging /app/.npmrc ./
-COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next ./.next
-COPY --from=build-staging --chown=nextjs:nodejs /app/front/next.config.js ./
-
-RUN npm i --omit=dev
+COPY --from=build --chown=nextjs:nodejs /app/front/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/front/.next/static ./front/.next/static
+COPY --from=build /app/front/public ./front/public
 
 USER nextjs
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-# COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next/standalone ./
-# COPY --from=build-staging --chown=nextjs:nodejs /app/front/.next/static ./.next/static
 
-# ENTRYPOINT ["node", "server.js"]
+EXPOSE 3000
+ENV PORT 3000
 
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["node", "./front/server.js"]

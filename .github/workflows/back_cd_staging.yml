@@ -46,7 +46,7 @@ jobs:
         with:
           context: .
           file: ./back/Dockerfile.back
-          target: staging
+          target: final
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/composite-back:${{ steps.package.outputs.version }},

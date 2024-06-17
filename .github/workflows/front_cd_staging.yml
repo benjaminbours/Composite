@@ -42,7 +42,7 @@ jobs:
         with:
           context: .
           file: ./front/Dockerfile.front
-          target: staging
+          target: final
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/composite-front:${{ steps.package.outputs.version }},
