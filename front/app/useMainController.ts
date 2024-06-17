@@ -784,13 +784,6 @@ export function useMainController(initialScene: MenuScene | undefined) {
             return;
         }
 
-        if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
-            (window as any).gtag('event', 'start_game', {
-                env: process.env.NEXT_PUBLIC_STAGE,
-                gameMode: lobbyMode,
-                userId: currentUser?.id,
-            });
-        }
         if (lobbyMode === LobbyMode.SOLO) {
             isEstablishingConnection.current = true;
             establishConnection().then(() => {
@@ -806,6 +799,13 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 ]);
             });
         } else if (lobbyMode === LobbyMode.PRACTICE) {
+            if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
+                (window as any).gtag('event', 'start_game', {
+                    env: process.env.NEXT_PUBLIC_STAGE,
+                    gameMode: lobbyMode,
+                    userId: currentUser?.id,
+                });
+            }
             const apiClient = servicesContainer.get(ApiClient);
             Promise.all([
                 apiClient.defaultApi.levelsControllerFindOne({
