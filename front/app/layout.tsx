@@ -8,7 +8,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            {process.env.NEXT_PUBLIC_STAGE !== 'development' && (
+            {process.env.NEXT_PUBLIC_STAGE !== 'local' && (
                 <>
                     {/* <!-- Google tag (gtag.js) --> */}
                     <Script

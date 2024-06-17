@@ -19,6 +19,8 @@ const nextConfig = {
     env: {
         APP_VERSION: version,
     },
+    output:
+        process.env.NEXT_PUBLIC_STAGE !== 'local' ? 'standalone' : undefined,
     // productionBrowserSourceMaps: true,
 };
 
@@ -48,8 +50,8 @@ if (process.env.NEXT_PUBLIC_STAGE !== 'development') {
             // Transpiles SDK to be compatible with IE11 (increases bundle size)
             transpileClientSDK: true,
 
-            // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
-            tunnelRoute: '/monitoring',
+            // // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
+            // tunnelRoute: '/monitoring',
 
             // Hides source maps from generated client bundles
             hideSourceMaps: true,

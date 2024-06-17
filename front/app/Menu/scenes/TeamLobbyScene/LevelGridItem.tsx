@@ -134,7 +134,7 @@ export const LevelGridItem: React.FC<Props> = ({
             <p className="level-grid-item__name">{name}</p>
             <div className="level-grid-item__counts">
                 <div
-                    title="Number of time the level has been played"
+                    title="Number of time the level has been played in ranked. (Excluding practice mode)"
                     className="level-grid-item__played-icon"
                 >
                     <SportsEsportsIcon />{' '}
