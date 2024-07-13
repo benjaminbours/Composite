@@ -7,7 +7,7 @@ import {
     disposeBoundsTree,
     acceleratedRaycast,
 } from 'three-mesh-bvh/build/index.module.js';
-import { BufferGeometry, Mesh } from 'three';
+import { BufferGeometry, Mesh, Object3D } from 'three';
 // addExtensionFunctions
 (BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
 (BufferGeometry.prototype as any).disposeBoundsTree = disposeBoundsTree;
@@ -33,7 +33,7 @@ interface LevelEditorProps {
     // use do save the app instance somewhere else
     onAppLoaded: (app: App) => void;
     // TODO: Don't like so much the management of this callback
-    onTransformControlsObjectChange: (object: THREE.Object3D) => void;
+    onTransformControlsObjectChange: (object: Object3D) => void;
 }
 
 interface GameProps {
