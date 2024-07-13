@@ -1,10 +1,5 @@
-// our libs
-import { Side } from '@benjaminbours/composite-core';
 // local
 import { MenuScene, ResizeOptions } from '../../types';
-
-const shadow = new Image();
-shadow.src = '/images/shadow.png';
 
 const DEFAULT_WIDTH = 600;
 
@@ -80,7 +75,7 @@ export default class Shadow {
     private rotation: number = 0;
     private width: number = DEFAULT_WIDTH;
 
-    private img: HTMLImageElement;
+    private img: HTMLImageElement | undefined;
     private rotationSpeed: number = 0.005;
 
     private readonly ctx: CanvasRenderingContext2D;
@@ -89,10 +84,17 @@ export default class Shadow {
         this.ctx = ctx;
         this.startX = this.ctx.canvas.width * 0.5;
         this.startY = this.ctx.canvas.height * 0.75;
-        this.img = shadow;
+        const img = new Image();
+        img.src = '/images/shadow.png';
+        img.onload = () => {
+            this.img = img;
+        };
     }
 
     public render = () => {
+        if (!this.img) {
+            return;
+        }
         this.ctx.save();
         this.ctx.translate(this.startX, this.startY);
         this.ctx.rotate(this.rotation);
