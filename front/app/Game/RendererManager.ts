@@ -258,10 +258,8 @@ export class RendererManager {
         this.scene.traverse((obj: any) => {
             if (
                 obj.isMesh &&
-                ((bloomLayer.test(obj.layers) === true &&
-                    obj.side !== Side.LIGHT) ||
-                    (bloomLayer.test(obj.layers) === true &&
-                        obj.side !== Side.LIGHT))
+                bloomLayer.test(obj.layers) === true &&
+                obj.side !== Side.LIGHT
             ) {
                 tempMaterials[obj.uuid] = obj.material;
                 obj.material = materials.occlusion;

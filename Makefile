@@ -21,13 +21,13 @@ endif
 # 	@echo $(DOCKER_FILE_ENVIRONMENT)
 
 start:
-	docker-compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) up
+	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) up
 
 stop:
-	docker-compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) down
+	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) down
 
 build_containers:
-	docker-compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) build
+	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) build
 
 build_packages:
 	npm run build -w packages
@@ -36,7 +36,8 @@ build_database:
 	docker-compose -f ./docker-compose.yml -f ./docker-compose-development.yml up -d db api
 	$(SLEEP)
 	docker exec composite_api /bin/sh -c "cd ./back; npx prisma migrate dev" 
-	docker-compose -f ./docker-compose.yml -f ./docker-compose-development.yml stop
+	docker compose -f ./docker-compose.yml -f ./docker-compose-development.yml stop
+
 
 deploy:
 	docker --context staging compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) up -d

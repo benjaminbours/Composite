@@ -15,7 +15,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@changesets/cli": "^2.26.0"
+    "@changesets/cli": "^2.27.7"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.13.1"

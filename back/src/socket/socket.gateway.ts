@@ -92,7 +92,9 @@ export class SocketGateway {
       data.map((input) =>
         this.temporaryStorage.addToGameInputsQueue(player.gameId, input),
       ),
-    );
+    ).catch((err) => {
+      console.error('Error while adding input to queue', err);
+    });
   }
 
   @SubscribeMessage(SocketEventType.TIME_SYNC)

@@ -47,6 +47,7 @@ export const Route = {
     SIGN_UP_EMAIL_VALIDATION: '/sign-up-email-validation',
     SIGN_UP_EMAIL_ACTIVATED: '/sign-up-email-activated',
     FORGOT_PASSWORD: '/forgot-password',
+    // deepcode ignore NoHardcodedPasswords: It's a route, not a password
     NEW_PASSWORD: '/new-password',
 
     NOT_FOUND: '/not-found',

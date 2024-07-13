@@ -426,6 +426,7 @@ export class LobbyGateway {
 
   addSocketToRoom(socketId: string, room: string) {
     const socket = this.mainGateway.server.sockets.sockets.get(socketId);
+    // deepcode ignore PureMethodReturnValueIgnored: it's not join from array, it's join from socket
     socket.join(room);
   }
 }
