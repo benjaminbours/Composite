@@ -17,9 +17,14 @@ import {
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    isSoloMode: boolean;
 }
 
-export const InGameHelpModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const InGameHelpModal: React.FC<Props> = ({
+    isOpen,
+    isSoloMode,
+    onClose,
+}) => {
     const [currentTab, setCurrentTab] = useState(0);
 
     const handleChangeTab = useCallback(
@@ -36,7 +41,10 @@ export const InGameHelpModal: React.FC<Props> = ({ isOpen, onClose }) => {
             onClose={onClose}
         >
             <Paper className="composite-modal__container">
-                <IconButton className="in-game-help" onClick={onClose}>
+                <IconButton
+                    className="close-button in-game-help"
+                    onClick={onClose}
+                >
                     <CloseIcon />
                 </IconButton>
                 <h2 className="title-h2">Help</h2>
@@ -46,10 +54,10 @@ export const InGameHelpModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     textColor="primary"
                     onChange={handleChangeTab}
                 >
-                    <Tab label="Motions" />
+                    <Tab label="Actions" />
                     <Tab label="Mechanics" />
                 </Tabs>
-                {currentTab === 0 && <DesktopMotions />}
+                {currentTab === 0 && <DesktopMotions isSoloMode={isSoloMode} />}
                 {currentTab === 1 && <Mechanics />}
                 <FormControlLabel
                     control={
@@ -57,7 +65,7 @@ export const InGameHelpModal: React.FC<Props> = ({ isOpen, onClose }) => {
                             defaultChecked={!getShouldDisplayHelpOnLoad()}
                         />
                     }
-                    label="Don't show this again"
+                    label={<p>{"Don't show this again"}</p>}
                     onChange={(_, checked) => {
                         console.log("Don't show this again", checked);
                         if (checked) {

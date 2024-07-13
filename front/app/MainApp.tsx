@@ -14,7 +14,7 @@ import { MenuScene } from './types';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
 import { BottomLeftInfo } from './BottomLeftInfo';
-import { useMainController } from './useMainController';
+import { LobbyMode, useMainController } from './useMainController';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
 import { AppContext } from './WithMainApp';
 import { getDictionary } from '../getDictionary';
@@ -177,6 +177,10 @@ function MainApp({ initialScene, dictionary }: Props) {
                             onClose={() => {
                                 setIsHelpVisible(false);
                             }}
+                            isSoloMode={
+                                mainController.lobbyMode === LobbyMode.SOLO ||
+                                mainController.lobbyMode === LobbyMode.PRACTICE
+                            }
                         />
                     </>
                 )}

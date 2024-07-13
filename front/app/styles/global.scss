@@ -257,11 +257,11 @@ p {
     }
 }
 
-.game-sync-overlay__motions {
+.desktop-motions {
     display: flex;
     flex-direction: column;
-    align-items: center;
     flex: 1;
+    min-width: 400px;
 
     span {
         margin: 10px;
@@ -275,6 +275,22 @@ p {
 
     .space {
         width: 100px;
+        text-align: center;
+    }
+}
+
+.desktop-motions__key-text {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    p {
+        margin-left: auto;
+        text-align: right;
+    }
+
+    svg {
+        margin-left: 10px;
     }
 }
 
@@ -809,4 +825,24 @@ p {
 .in-game-help {
     background: black;
     color: $mainActionColor;
+}
+
+.in-game-help-modal {
+    h2 {
+        margin: 0;
+    }
+
+    .composite-modal__container {
+        position: relative;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .desktop-motions {
+        margin-top: 10px;
+    }
 }
