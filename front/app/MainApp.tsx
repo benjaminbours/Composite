@@ -22,6 +22,9 @@ import { BottomRightInfo } from './BottomRightInfo';
 import { useWindowSize } from './hooks/useWindowSize';
 import { Side } from '@benjaminbours/composite-core';
 import { SideMenu } from './03_organisms/SideMenu';
+import IconButton from '@mui/material/IconButton';
+import HelpIcon from '@mui/icons-material/Help';
+import { InGameHelpModal } from './InGameHelpModal';
 
 const Menu = dynamic(() => import('./Menu'), {
     loading: () => <p>Loading...</p>,
@@ -104,6 +107,8 @@ function MainApp({ initialScene, dictionary }: Props) {
 
     const { state, gameIsPlaying, socketController } = mainController;
 
+    const [isHelpVisible, setIsHelpVisible] = useState(false);
+
     return (
         <MainControllerContext.Provider value={mainController}>
             <TeamMateDisconnectNotification
@@ -148,10 +153,23 @@ function MainApp({ initialScene, dictionary }: Props) {
                     onSettingsClick={handleClickOnSettings}
                 />
             )}
-            <SideMenu
-                buttonClassName="main-app__hamburger-button"
-                dictionary={dictionary.common}
-            />
+            <div className="top-right-container">
+                {gameIsPlaying && (
+                    <>
+                        <IconButton
+                            className="in-game-help"
+                            onClick={() => setIsHelpVisible(true)}
+                        >
+                            <HelpIcon />
+                        </IconButton>
+                        <InGameHelpModal
+                            isOpen={isHelpVisible}
+                            onClose={() => setIsHelpVisible(false)}
+                        />
+                    </>
+                )}
+                <SideMenu dictionary={dictionary.common} />
+            </div>
             {!gameIsPlaying && <BottomRightInfo />}
         </MainControllerContext.Provider>
     );

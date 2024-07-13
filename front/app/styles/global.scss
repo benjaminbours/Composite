@@ -796,3 +796,17 @@ p {
         opacity: 1;
     }
 }
+
+.top-right-container {
+    position: fixed;
+    top: 2%;
+    right: 2%;
+    z-index: 100;
+    display: flex;
+    gap: 15px;
+}
+
+.in-game-help {
+    background: black;
+    color: $mainActionColor;
+}
