@@ -6,6 +6,7 @@ const persistentUsers = [
   {
     name: 'elboursico',
     email: 'boursbenjamin@gmail.com',
+    // deepcode ignore NoHardcodedPasswords: it's test credentials, so it's fine
     password: 'testpassword',
     role: Role.USER,
   },

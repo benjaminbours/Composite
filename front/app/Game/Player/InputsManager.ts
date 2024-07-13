@@ -37,6 +37,7 @@ export function parseToKeyBindings(uiKeyBindings: UIKeyBindings) {
     return keyBindings;
 }
 
+// deepcode ignore HardcodedNonCryptoSecret: this is not a secret, it's a storage key for local storage
 export const KEY_BINDINGS_LOCAL_STORAGE_KEY = 'composite-key-bindings';
 
 export default class InputsManager {

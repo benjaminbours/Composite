@@ -59,6 +59,7 @@ export interface UserModel {
 
 let refreshSessionTimeOutId: any;
 
+// deepcode ignore HardcodedNonCryptoSecret: this is not a secret, it's a storage key for local storage
 const SESSION_KEY = 'composite-session';
 
 function setupSession(session: TokensDto) {
