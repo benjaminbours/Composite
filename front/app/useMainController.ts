@@ -343,7 +343,7 @@ export function useMainController(initialScene: MenuScene | undefined) {
             });
             setGameIsPlaying(false);
             setMenuScene(MenuScene.END_LEVEL);
-            if (document.exitFullscreen) {
+            if (document.exitFullscreen && document.fullscreenElement) {
                 document.exitFullscreen();
             }
         },
@@ -880,7 +880,8 @@ export function useMainController(initialScene: MenuScene | undefined) {
     const handleExitGame = useCallback(() => {
         handleDestroyConnection();
         handleClickFindAnotherTeamMate();
-        if (document.exitFullscreen) {
+
+        if (document.exitFullscreen && document.fullscreenElement) {
             document.exitFullscreen();
         }
     }, [handleDestroyConnection, handleClickFindAnotherTeamMate]);
