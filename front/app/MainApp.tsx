@@ -24,6 +24,7 @@ import { Side } from '@benjaminbours/composite-core';
 import { SideMenu } from './03_organisms/SideMenu';
 import IconButton from '@mui/material/IconButton';
 import HelpIcon from '@mui/icons-material/Help';
+import { getShouldDisplayHelpOnLoad } from './constants';
 import { InGameHelpModal } from './InGameHelpModal';
 
 const Menu = dynamic(() => import('./Menu'), {
@@ -107,7 +108,16 @@ function MainApp({ initialScene, dictionary }: Props) {
 
     const { state, gameIsPlaying, socketController } = mainController;
 
-    const [isHelpVisible, setIsHelpVisible] = useState(false);
+    const [isHelpVisible, setIsHelpVisible] = useState(
+        getShouldDisplayHelpOnLoad(),
+    );
+
+    // when game is closed, we reset the state of the help modal
+    useEffect(() => {
+        if (gameIsPlaying === false) {
+            setIsHelpVisible(getShouldDisplayHelpOnLoad());
+        }
+    }, [gameIsPlaying]);
 
     return (
         <MainControllerContext.Provider value={mainController}>
@@ -164,7 +174,9 @@ function MainApp({ initialScene, dictionary }: Props) {
                         </IconButton>
                         <InGameHelpModal
                             isOpen={isHelpVisible}
-                            onClose={() => setIsHelpVisible(false)}
+                            onClose={() => {
+                                setIsHelpVisible(false);
+                            }}
                         />
                     </>
                 )}

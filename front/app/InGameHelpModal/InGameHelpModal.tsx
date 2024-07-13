@@ -9,6 +9,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import {
+    getShouldDisplayHelpOnLoad,
+    hideInGameHelpModalKey,
+} from '../constants';
 
 interface Props {
     isOpen: boolean;
@@ -48,9 +52,25 @@ export const InGameHelpModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {currentTab === 0 && <DesktopMotions />}
                 {currentTab === 1 && <Mechanics />}
                 <FormControlLabel
-                    required
-                    control={<Checkbox />}
+                    control={
+                        <Checkbox
+                            defaultChecked={!getShouldDisplayHelpOnLoad()}
+                        />
+                    }
                     label="Don't show this again"
+                    onChange={(_, checked) => {
+                        console.log("Don't show this again", checked);
+                        if (checked) {
+                            window.localStorage.setItem(
+                                hideInGameHelpModalKey,
+                                '1',
+                            );
+                        } else {
+                            window.localStorage.removeItem(
+                                hideInGameHelpModalKey,
+                            );
+                        }
+                    }}
                 />
             </Paper>
         </Modal>
