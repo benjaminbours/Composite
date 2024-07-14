@@ -28,7 +28,7 @@ const nextConfig = {
 
 let config = withBundleAnalyzer(nextConfig);
 
-if (process.env.NEXT_PUBLIC_STAGE !== 'development') {
+if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
     config = withSentryConfig(
         config,
         {

@@ -7,7 +7,7 @@ import {
     disposeBoundsTree,
     acceleratedRaycast,
 } from 'three-mesh-bvh/build/index.module.js';
-import { BufferGeometry, Mesh } from 'three';
+import { BufferGeometry, Mesh, Object3D } from 'three';
 // addExtensionFunctions
 (BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
 (BufferGeometry.prototype as any).disposeBoundsTree = disposeBoundsTree;
@@ -33,7 +33,7 @@ interface LevelEditorProps {
     // use do save the app instance somewhere else
     onAppLoaded: (app: App) => void;
     // TODO: Don't like so much the management of this callback
-    onTransformControlsObjectChange: (object: THREE.Object3D) => void;
+    onTransformControlsObjectChange: (object: Object3D) => void;
 }
 
 interface GameProps {
@@ -245,24 +245,6 @@ function Game({
                     <h3 className="title-h3">Synchronizing</h3>
                     <CircularProgress className="game-sync-overlay__progress" />
                     <div>
-                        {!isMobile && (
-                            <div className="game-sync-overlay__motions">
-                                <h4 className="title-h4">Default motions</h4>
-                                <div>
-                                    <span className="keyboard-key">A</span>
-                                    <span className="keyboard-key">D</span>
-                                </div>
-                                <div>
-                                    <span className="keyboard-key rotate">
-                                        ⮕
-                                    </span>
-                                    <span className="keyboard-key">⮕</span>
-                                </div>
-                                <span className="keyboard-key space">
-                                    Space
-                                </span>
-                            </div>
-                        )}
                         <div className="game-sync-overlay__tips">
                             <h4 className="title-h4">Tips</h4>
                             <p>

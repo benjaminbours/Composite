@@ -28,3 +28,13 @@ export const labelsDifficulty: { [index: string]: string } = {
 };
 
 export const defaultLevelImageUrl = '/images/crack_the_door.png';
+
+export const hideInGameHelpModalKey = 'hide-game-help-modal';
+export function getShouldDisplayHelpOnLoad(): boolean {
+    if (global.window) {
+        if (window.localStorage.getItem(hideInGameHelpModalKey) === '1') {
+            return false;
+        }
+    }
+    return true;
+}

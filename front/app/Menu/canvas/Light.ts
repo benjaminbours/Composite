@@ -1,14 +1,7 @@
 // vendors
 import { gsap } from 'gsap';
-// our libs
-import { Side } from '@benjaminbours/composite-core';
 // local
 import { MenuScene, ResizeOptions } from '../../types';
-
-const light = new Image();
-light.src = `/images/light.png`;
-const lightHalo = new Image();
-lightHalo.src = '/images/light_halo.png';
 
 export interface IPulseOptions {
     startScale: number;
@@ -127,7 +120,8 @@ export default class Light {
     };
 
     private width: number = 450;
-    private img: HTMLImageElement;
+    private img: HTMLImageElement | undefined;
+    private imgHalo: HTMLImageElement | undefined;
 
     private readonly ctx: CanvasRenderingContext2D;
 
@@ -135,13 +129,30 @@ export default class Light {
         this.ctx = ctx;
         this.startX = this.ctx.canvas.width * 0.5;
         this.startY = this.ctx.canvas.height * 0.75;
-        this.img = light;
+
+        // main light image
+        const img = new Image();
+        img.src = `/images/light.png`;
+        img.onload = () => {
+            this.img = img;
+        };
+
+        // halo
+        const halo = new Image();
+        halo.src = '/images/light_halo.png';
+        halo.onload = () => {
+            this.imgHalo = halo;
+        };
+
         this.pulsesOptions.forEach((pulse) => {
             this.createAnimation(pulse);
         });
     }
 
     public render = () => {
+        if (!this.img) {
+            return;
+        }
         this.ctx.save();
         this.ctx.translate(this.startX, this.startY);
         this.ctx.drawImage(
@@ -168,13 +179,16 @@ export default class Light {
     };
 
     private renderLightHalo = () => {
+        if (!this.imgHalo) {
+            return;
+        }
         for (let i = 0; i < this.pulsesOptions.length; i++) {
             const pulse = this.pulsesOptions[i];
             this.ctx.save();
             this.ctx.scale(pulse.scale, pulse.scale);
             this.ctx.globalAlpha = pulse.opacity;
             this.ctx.drawImage(
-                lightHalo,
+                this.imgHalo,
                 -this.width / 2,
                 -this.width / 2,
                 this.width,

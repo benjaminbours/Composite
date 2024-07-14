@@ -156,6 +156,10 @@ canvas,
         color: white;
     }
 
+    &--important {
+        color: $mainActionColor;
+    }
+
     @media (max-width: 768px), (max-height: 500px) {
         font-size: 28px;
     }
@@ -192,6 +196,10 @@ canvas,
     font-family: 'Source Code Pro', monospace;
     font-weight: 200;
     font-size: 18px;
+
+    @media (max-width: 768px), (max-height: 500px) {
+        font-size: 14px;
+    }
 }
 
 p {
@@ -257,16 +265,19 @@ p {
     }
 }
 
-.game-sync-overlay__motions {
+.desktop-motions {
     display: flex;
     flex-direction: column;
-    align-items: center;
     flex: 1;
 
     span {
         margin: 10px;
         font-size: 20px;
         font-weight: 600;
+
+        @media (max-width: 768px), (max-height: 500px) {
+            font-size: 16px;
+        }
     }
 
     .rotate {
@@ -275,6 +286,22 @@ p {
 
     .space {
         width: 100px;
+        text-align: center;
+    }
+}
+
+.desktop-motions__key-text {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    p {
+        margin-left: auto;
+        text-align: right;
+    }
+
+    svg {
+        margin-left: 10px;
     }
 }
 
@@ -794,5 +821,141 @@ p {
     a::before {
         background: $mainActionColor;
         opacity: 1;
+    }
+}
+
+.top-right-container {
+    position: fixed;
+    top: 2%;
+    right: 2%;
+    z-index: 100;
+    display: flex;
+    gap: 15px;
+}
+
+.in-game-help {
+    background: black;
+    color: $mainActionColor;
+}
+
+.in-game-help-modal {
+    h2 {
+        margin: 0;
+    }
+
+    .composite-modal__container {
+        position: relative;
+        max-width: 600px;
+        width: 600px;
+        margin: auto 0;
+        max-height: 95vh;
+        max-width: 95%;
+        box-sizing: border-box;
+        padding: 10px 30px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .desktop-motions {
+        margin-top: 10px;
+    }
+}
+
+.game-mechanics {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    max-height: 50vh;
+    overflow-y: auto;
+
+    video {
+        width: 100%;
+        border: solid white 1px;
+        box-sizing: border-box;
+    }
+}
+
+.in-game-help-modal__tabs {
+    flex: 2;
+
+    .Mui-selected {
+        color: $mainActionColor;
+    }
+
+    .MuiTabs-indicator {
+        background-color: $mainActionColor;
+    }
+}
+
+.game-mechanics__selector {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-top: 20px;
+
+    li {
+        width: 33.3333%;
+    }
+}
+
+.game-mechanics__selector-item {
+    all: unset;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    h5 {
+        transition: 0.3s ease-out;
+        margin: 0;
+        margin-top: 10px;
+    }
+
+    &--active {
+        svg {
+            fill: $mainActionColor;
+        }
+
+        h5 {
+            color: $mainActionColor;
+        }
+    }
+
+    &:hover {
+        h5 {
+            color: $mainActionColor;
+        }
+    }
+}
+
+.game-mechanics__icon {
+    padding: 5px;
+    width: 40px;
+    height: 40px;
+    fill: white;
+
+    @media (max-width: 768px), (max-height: 500px) {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+.game-mechanics__content {
+    width: 100%;
+
+    h3 {
+        margin: 0;
     }
 }
