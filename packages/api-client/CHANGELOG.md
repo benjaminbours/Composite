@@ -1,5 +1,11 @@
 # @benjaminbours/composite-api-client
 
+## 1.0.0-next.19
+
+### Patch Changes
+
+- 9c60841: Add various code security and quality improvement
+
 ## 1.0.0-next.18
 
 ### Patch Changes

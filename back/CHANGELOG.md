@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.20
+
+### Patch Changes
+
+- 9c60841: Add various code security and quality improvement
+- Updated dependencies [9c60841]
+  - @benjaminbours/composite-core@1.0.0-next.19
+
 ## 1.0.0-next.19
 
 ### Patch Changes
