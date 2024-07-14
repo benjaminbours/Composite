@@ -47,11 +47,10 @@ export const InGameHelpModal: React.FC<Props> = ({
                 >
                     <CloseIcon />
                 </IconButton>
-                <h2 className="title-h2">Help</h2>
+                <h2 className="title-h2 title-h2--important">Help</h2>
                 <Tabs
                     value={currentTab}
-                    indicatorColor="primary"
-                    textColor="primary"
+                    className="in-game-help-modal__tabs"
                     onChange={handleChangeTab}
                 >
                     <Tab label="Actions" />
