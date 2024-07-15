@@ -121,12 +121,10 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
             const isMobileDevice = window.innerWidth <= 768;
             const inAnimation = () => {
                 switch (tweenOptions.step) {
-                    case MenuScene.HOME:
-                        refHashMap.homeRef.current!.style.display = 'none';
-                        return homeIn(refHashMap.homeRef.current!);
                     case MenuScene.TEAM_LOBBY:
                         refHashMap.teamLobbyRef.current!.style.display = 'none';
                         return teamLobbyIn(refHashMap.teamLobbyRef.current!);
+                    case MenuScene.HOME:
                     default:
                         refHashMap.homeRef.current!.style.display = 'none';
                         return homeIn(refHashMap.homeRef.current!);
