@@ -55,7 +55,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "passport-jwt": "^4.0.1",
     "redis": "^4.6.13",
-    "reflect-metadata": "^0.1.13",
+    "reflect-metadata": "^0.2.2",
     "rxjs": "^7.2.0",
     "short-unique-id": "^5.0.3",
     "socket.io": "^4.7.5",
