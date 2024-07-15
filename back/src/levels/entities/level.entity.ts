@@ -63,4 +63,6 @@ export class Level implements PrismaLevel {
   ratings?: Rating[];
   @ApiProperty({ type: 'object', required: false })
   _count?: any;
+  @ApiProperty({ type: String, required: false })
+  thumbnail: string | null;
 }

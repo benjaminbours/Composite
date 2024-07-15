@@ -17,8 +17,6 @@ import { CreateLevelDto } from './dto/create-level.dto';
 import { UpdateLevelDto } from './dto/update-level.dto';
 import { GetUser, Public, Roles } from '@project-common/decorators';
 import { Role } from '@prisma/client';
-import * as path from 'path';
-import * as fs from 'fs';
 import { JWTUserPayload } from '@project-common/types';
 import {
   ApiBearerAuth,
@@ -74,21 +72,7 @@ export class LevelsController {
     )
     file: Express.Multer.File,
   ) {
-    await this.levelsService.checkUserHasAccessToLevel(+id, user);
-    const uploadsDir = path.join(process.cwd(), 'uploads');
-    const fileName = `level_${id}_thumbnail.png`;
-    const writeStream = fs.createWriteStream(path.join(uploadsDir, fileName));
-
-    writeStream.on('finish', () => {
-      console.log(`File write completed for level ${id}.`);
-    });
-
-    writeStream.on('error', (err) => {
-      console.error('Error writing file:', err);
-    });
-
-    writeStream.write(file.buffer);
-    writeStream.end();
+    return this.levelsService.uploadThumbnail(+id, user, file);
   }
 
   @ApiOkResponse({

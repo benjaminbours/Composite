@@ -6,10 +6,44 @@ import { LevelStatus } from '@prisma/client';
 import { JWTUserPayload } from '@project-common/types';
 import { handlePrismaError } from '@project-common/utils/handlePrismaError';
 import { UpsertRatingDto } from './dto/upsert-rating.dto';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class LevelsService {
   constructor(private prisma: PrismaService) {}
+
+  async uploadThumbnail(
+    id: number,
+    user: JWTUserPayload,
+    file: Express.Multer.File,
+  ) {
+    await this.checkUserHasAccessToLevel(+id, user);
+    const thumbnailsDir = path.join(
+      process.cwd(),
+      'uploads',
+      'level_thumbnails',
+    );
+    const fileName = `${id}.png`;
+    const filePath = path.join(thumbnailsDir, fileName);
+    const writeStream = fs.createWriteStream(filePath);
+
+    writeStream.on('finish', () => {
+      console.log(`File write completed for level ${id}.`);
+    });
+
+    writeStream.on('error', (err) => {
+      console.error('Error writing file:', err);
+    });
+
+    writeStream.write(file.buffer);
+    writeStream.end();
+
+    return this.prisma.level.update({
+      where: { id },
+      data: { thumbnail: fileName.toString() },
+    });
+  }
 
   async upsertRating(
     levelId: number,

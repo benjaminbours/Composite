@@ -14,12 +14,13 @@ import { LevelsModule } from './levels/levels.module';
 import { PrismaService } from '@project-common/services';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+// import { GamesModule } from './games/games.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'), // provide path to the folder with images
-      serveRoot: '/thumbnails', // provide route to access images
+      serveRoot: '/images', // provide route to access images
       serveStaticOptions: {
         index: false,
         redirect: false,
@@ -41,6 +42,7 @@ import { join } from 'path';
     AuthModule,
     UsersModule,
     LevelsModule,
+    // GamesModule,
   ],
   controllers: [AppController],
   providers: [
