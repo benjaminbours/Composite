@@ -311,7 +311,11 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 setGameIsPlaying(true);
             });
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+                document.documentElement.requestFullscreen().catch((err) => {
+                    console.error(
+                        `Error attempting to enable full-screen mode: ${err.message} (${err.name})`,
+                    );
+                });
             }
         },
         [lobbyMode, currentUser],
@@ -814,7 +818,13 @@ export function useMainController(initialScene: MenuScene | undefined) {
                 startLoadingAssets(),
             ]).then(([level]) => {
                 if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
+                    document.documentElement
+                        .requestFullscreen()
+                        .catch((err) => {
+                            console.error(
+                                `Error attempting to enable full-screen mode: ${err.message} (${err.name})`,
+                            );
+                        });
                 }
                 const levelMapping = new LevelMapping(
                     level.id,
