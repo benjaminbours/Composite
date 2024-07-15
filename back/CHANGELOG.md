@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.21
+
+### Patch Changes
+
+- Improve level thumbnail management
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.20
+
 ## 1.0.0-next.20
 
 ### Patch Changes

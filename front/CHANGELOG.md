@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.33
+
+### Patch Changes
+
+-   Improve level thumbnail management
+-   Updated dependencies
+    -   @benjaminbours/composite-api-client@1.0.0-next.20
+    -   @benjaminbours/composite-core@1.0.0-next.20
+
 ## 1.0.0-next.32
 
 ### Patch Changes
