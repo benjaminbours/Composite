@@ -77,7 +77,18 @@ export class LevelsController {
     await this.levelsService.checkUserHasAccessToLevel(+id, user);
     const uploadsDir = path.join(process.cwd(), 'uploads');
     const fileName = `level_${id}_thumbnail.png`;
-    fs.createWriteStream(path.join(uploadsDir, fileName)).write(file.buffer);
+    const writeStream = fs.createWriteStream(path.join(uploadsDir, fileName));
+
+    writeStream.on('finish', () => {
+      console.log(`File write completed for level ${id}.`);
+    });
+
+    writeStream.on('error', (err) => {
+      console.error('Error writing file:', err);
+    });
+
+    writeStream.write(file.buffer);
+    writeStream.end();
   }
 
   @ApiOkResponse({
