@@ -22,10 +22,7 @@ export const LevelListItem: React.FC<Props> = ({
     return (
         <li className="level-list-item">
             <div className="level-list-item__image-container">
-                <LevelPortal
-                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${level.id}_thumbnail.png`}
-                    name={level.name}
-                />
+                <LevelPortal name={level.name} thumbnail={level.thumbnail} />
                 <ul className="level-list-item__actions">
                     <li>
                         <Link

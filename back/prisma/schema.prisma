@@ -60,6 +60,7 @@ model Level {
   // TODO: Could be just one array of start position and using index to manage shadow and light
   lightStartPosition  Float[]
   shadowStartPosition Float[]
+  thumbnail           String?
 
   // relations
   games    Game[]

@@ -1,39 +1,31 @@
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-
-function loadImage(url: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(url);
-        img.onerror = () => reject();
-        img.src = url;
-    });
-}
+import React, { useMemo } from 'react';
+import { defaultLevelImageUrl } from '../../constants';
 
 interface Props {
     className?: string;
+    thumbnail?: string;
     name: string;
-    src: string;
+    src?: string;
     onClick?: () => void;
 }
-
-const defaultImageUrl = '/images/crack_the_door.png';
 
 export const LevelPortal: React.FC<Props> = ({
     className,
     name,
+    thumbnail,
     src,
     onClick,
 }) => {
-    const [imageUrl, setImageUrl] = useState(defaultImageUrl);
-
-    useEffect(() => {
-        loadImage(src)
-            .catch(() => defaultImageUrl)
-            .then((url) => {
-                setImageUrl(url);
-            });
-    }, [src]);
+    const imageUrl = useMemo(() => {
+        if (src) {
+            return src;
+        }
+        if (thumbnail) {
+            return `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/level_thumbnails/${thumbnail}`;
+        }
+        return defaultLevelImageUrl;
+    }, [thumbnail, src]);
 
     const cssClass = classNames({
         'level-portal': true,

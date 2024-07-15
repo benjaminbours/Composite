@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 export function handlePrismaError(e: any): Promise<any> {
@@ -15,8 +11,6 @@ export function handlePrismaError(e: any): Promise<any> {
 
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     switch (e.code) {
-      case 'P2025':
-        throw new NotFoundException();
       case 'P2000':
         throw new BadRequestException(
           `Value is too long for the field: ${e.meta?.field_name}`,
