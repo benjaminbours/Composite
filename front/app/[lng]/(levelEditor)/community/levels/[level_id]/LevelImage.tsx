@@ -1,24 +1,19 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { loadImage } from '../../../../../utils';
+import React, { useMemo } from 'react';
 import { defaultLevelImageUrl } from '../../../../../constants';
 
 interface Props {
     levelId: number;
+    thumbnail?: string;
 }
 
-export const LevelImage: React.FC<Props> = ({ levelId }) => {
-    const [imageUrl, setImageUrl] = useState(defaultLevelImageUrl);
-
-    useEffect(() => {
-        loadImage(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${levelId}_thumbnail.png`,
-        )
-            .catch(() => defaultLevelImageUrl)
-            .then((url) => {
-                setImageUrl(url);
-            });
-    }, [levelId]);
+export const LevelImage: React.FC<Props> = ({ thumbnail }) => {
+    const imageUrl = useMemo(() => {
+        if (thumbnail) {
+            return `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/level_thumbnails/${thumbnail}`;
+        }
+        return defaultLevelImageUrl;
+    }, [thumbnail]);
 
     return (
         <div

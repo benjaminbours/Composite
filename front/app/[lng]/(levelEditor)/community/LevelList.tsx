@@ -71,12 +71,8 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
                         )
                         .map((level) => {
                             const imageUrl = (() => {
-                                if (
-                                    level.status ===
-                                        LevelStatusEnum.Published &&
-                                    process.env.NEXT_PUBLIC_STAGE !== 'local'
-                                ) {
-                                    return `${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${level.id}_thumbnail.png`;
+                                if (level.thumbnail) {
+                                    return `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/level_thumbnails/${level.thumbnail}`;
                                 }
                                 return defaultImageUrl;
                             })();

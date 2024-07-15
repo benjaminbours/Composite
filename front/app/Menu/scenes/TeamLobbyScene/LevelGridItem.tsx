@@ -1,10 +1,9 @@
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { TeamMateHelper } from './TeamMateHelper';
 import { Side } from '@benjaminbours/composite-core';
 import { PlayerState } from '../../../useMainController';
 import { YingYang } from './YingYang';
-import { loadImage } from '../../../utils';
 import { defaultLevelImageUrl } from '../../../constants';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import StarIcon from '@mui/icons-material/Star';
@@ -37,17 +36,14 @@ export const LevelGridItem: React.FC<Props> = ({
     isSoloMode,
 }) => {
     const ref = useRef<HTMLButtonElement>(null);
-    const [imageUrl, setImageUrl] = useState(defaultLevelImageUrl);
     const { name, id } = level;
-    const src = `${process.env.NEXT_PUBLIC_BACKEND_URL}/thumbnails/level_${id}_thumbnail.png`;
 
-    useEffect(() => {
-        loadImage(src)
-            .catch(() => defaultLevelImageUrl)
-            .then((url) => {
-                setImageUrl(url);
-            });
-    }, [src]);
+    const imageUrl = useMemo(() => {
+        if (level.thumbnail) {
+            return `${process.env.NEXT_PUBLIC_BACKEND_URL}/images/level_thumbnails/${level.thumbnail}`;
+        }
+        return defaultLevelImageUrl;
+    }, [level.thumbnail]);
 
     const cssClass = classNames({
         'level-grid-item': true,
