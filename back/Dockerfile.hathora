@@ -1,0 +1,37 @@
+FROM node:18-alpine AS build
+WORKDIR /app
+
+COPY . .
+COPY .env.hathora .env
+COPY start_hathora.sh start.sh
+
+RUN export $(cat .env | grep -v '#' | awk '/=/ {print $1}') && \
+    npm i && \
+    npm run build && \
+    npx prisma generate && \
+    npm cache clean --force
+
+FROM node:18-alpine AS final
+WORKDIR /app
+
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/locales ./locales
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/assets.json ./
+COPY --from=build /app/.npmrc ./
+COPY --from=build /app/.env ./
+COPY --from=build /app/start.sh ./
+
+# Make the script executable
+RUN chmod +x ./start.sh
+
+RUN export $(cat .env | grep -v '#' | awk '/=/ {print $1}') && \
+    npm i --omit=dev && \
+    npx prisma generate && \
+    npm cache clean --force
+
+RUN apk add --update --no-cache redis && \
+    rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["./start.sh"]

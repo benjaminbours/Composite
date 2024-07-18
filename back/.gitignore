@@ -41,4 +41,7 @@ swagger.json
 uploads
 
 .env
+.env.hathora
 .env.local
+.env.staging
+.env.production

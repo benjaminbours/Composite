@@ -5,14 +5,13 @@ services:
     image: postgres:latest
     restart: always
     networks:
-      - database
+      - main
     volumes:
       - ./data:/var/lib/postgresql/data
 
   adminer:
     networks:
       - main
-      - database
     image: adminer
     ports:
       - 8080:8080
@@ -32,7 +31,6 @@ services:
     # Traefik has to be in all networks in order to resolve properly the containers it is trying to contact
     networks:
       - main
-      - database
 
   api:
     restart: always
@@ -78,7 +76,6 @@ services:
       - main
     labels:
       - traefik.enable=true
-      - traefik.docker.network=main
       - traefik.http.services.front.loadbalancer.server.port=3000
       - traefik.http.routers.front.rule=Host(`front.localhost`)
 
