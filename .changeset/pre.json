@@ -4,7 +4,7 @@
   "initialVersions": {
     "composite-back": "0.4.0",
     "composite-front": "0.4.0",
-    "@benjaminbours/composite-api-client": "0.0.1",
+    "@benjaminbours/composite-core-api-client": "0.0.1",
     "@benjaminbours/composite-core": "0.3.0"
   },
   "changesets": [

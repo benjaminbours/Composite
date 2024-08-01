@@ -4,14 +4,14 @@
   "description": "Contain the entire codebase of the different pieces and applications constituting the project Composite",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-api-client:local": "npm run generate-swagger:local -w back && npx @openapitools/openapi-generator-cli generate -i ./back/swagger.json -g typescript-fetch -o ./packages/api-client/src && npm run build -w @benjaminbours/composite-api-client"
+    "generate-core-api-client:local": "npm run generate-swagger:local -w core_api && npx @openapitools/openapi-generator-cli generate -i ./core_api/swagger.json -g typescript-fetch -o ./packages/core-api-client/src && npm run build -w @benjaminbours/composite-core-api-client"
   },
   "keywords": [],
   "author": "Benjamin Bours",
   "license": "ISC",
   "workspaces": [
     "front",
-    "back",
+    "core_api",
     "packages/*"
   ],
   "dependencies": {

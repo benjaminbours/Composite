@@ -32,14 +32,14 @@ services:
     networks:
       - main
 
-  api:
+  core_api:
     restart: always
     # deploy:
     #   mode: replicated
     #   replicas: 2
     build:
       context: .
-      dockerfile: ./back/Dockerfile.back
+      dockerfile: ./core_api/Dockerfile.back
       args:
         NPM_TOKEN: ${NPM_TOKEN}
     networks:
@@ -53,15 +53,15 @@ services:
       # https://community.traefik.io/t/solved-strange-504-gateway-timeout-behaviour/10573
       # TODO: Verify if its efficient...
       - traefik.docker.network=composite_main
-      - traefik.http.services.api.loadbalancer.server.port=3002
-      - traefik.http.services.api.loadBalancer.sticky.cookie.name=server_id
-      - traefik.http.services.api.loadBalancer.sticky.cookie.httpOnly=true
-      - traefik.http.middlewares.api_middleware.headers.accessControlAllowCredentials=true
-      - traefik.http.middlewares.api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization,baggage,sentry-trace
-      - traefik.http.middlewares.api_middleware.headers.accessControlAllowMethods=GET,POST,DELETE,PATCH
-      - traefik.http.routers.api.rule=Host(`api.localhost`)
-      - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost
-      - traefik.http.routers.api.middlewares=api_middleware
+      - traefik.http.services.core_api.loadbalancer.server.port=3002
+      - traefik.http.services.core_api.loadBalancer.sticky.cookie.name=server_id
+      - traefik.http.services.core_api.loadBalancer.sticky.cookie.httpOnly=true
+      - traefik.http.middlewares.core_api_middleware.headers.accessControlAllowCredentials=true
+      - traefik.http.middlewares.core_api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization,baggage,sentry-trace
+      - traefik.http.middlewares.core_api_middleware.headers.accessControlAllowMethods=GET,POST,DELETE,PATCH
+      - traefik.http.routers.core_api.rule=Host(`api.localhost`)
+      - traefik.http.middlewares.core_api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost
+      - traefik.http.routers.core_api.middlewares=core_api_middleware
 
   front:
     restart: always
