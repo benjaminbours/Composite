@@ -117,6 +117,7 @@ model Game {
   device   GameDevice
 
   startTime Float
+  region    String @default("STRASBOURG")
 
   // relations
   players Player[]

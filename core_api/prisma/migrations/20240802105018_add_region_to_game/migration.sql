@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Game" ADD COLUMN     "region" TEXT NOT NULL DEFAULT 'STRASBOURG';
