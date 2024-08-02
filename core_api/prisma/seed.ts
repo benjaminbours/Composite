@@ -10,6 +10,13 @@ const persistentUsers = [
     password: 'testpassword',
     role: Role.USER,
   },
+  {
+    name: 'hathora_server_user',
+    email: 'hathora_server@compositethegame.com',
+    // deepcode ignore NoHardcodedPasswords: it's test credentials, so it's fine
+    password: 'testpassword',
+    role: Role.ADMIN,
+  },
 ];
 
 const persistentLevels = [
