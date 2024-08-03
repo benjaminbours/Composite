@@ -16,7 +16,7 @@
   "author": "Benjamin Bours",
   "license": "ISC",
   "dependencies": {
-    "@benjaminbours/composite-core": "^1.0.0-next.20",
+    "@benjaminbours/composite-core": "^1.0.0-next.21",
     "@benjaminbours/composite-core-api-client": "^1.0.0-next.20",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.4",

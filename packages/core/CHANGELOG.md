@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.21
+
+### Patch Changes
+
+-   Add fix when wrong three.js instance where patched for three-mesh-bvh
+
 ## 1.0.0-next.20
 
 ### Patch Changes
