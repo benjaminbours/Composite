@@ -1,5 +1,11 @@
 # composite-back
 
+## 1.0.0-next.22
+
+### Patch Changes
+
+- Regenerate prisma client
+
 ## 1.0.0-next.21
 
 ### Patch Changes
