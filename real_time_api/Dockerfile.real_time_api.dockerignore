@@ -1,0 +1,11 @@
+*
+!.npmrc
+
+!real_time_api
+real_time_api/node_modules
+real_time_api/dist
+
+!packages
+packages/core/node_modules
+packages/core-api-client/node_modules
+!./package.json

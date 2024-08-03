@@ -1,0 +1,10 @@
+*
+!.npmrc
+
+!core_api
+core_api/node_modules
+core_api/dist
+
+!packages/core
+packages/core/node_modules
+!./package.json

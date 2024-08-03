@@ -5,6 +5,7 @@
 ### High priority
 
 - on end level screen, the shadow and light graphic are limiting the reading, mainly on mobile
+- add cookie-consent
 - Ensure secrets are safe in my docker images
 - Bug when adding a door and a door opener, if I don't save or reload, I can't interact with the door
 - crash if try to delete the bounce we are currently inside
@@ -12,6 +13,7 @@
 
 ### Medium priority
 
+- Previous and Next from the browser is not updating properly the menu scene (SPA / routing issue)
 - Inline-link should have arrow on hover when it's an external link of the website only.
 - When updating size and rotation of element. At some point the rotation is not considered anymore
 

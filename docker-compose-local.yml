@@ -5,7 +5,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - ./back/.env
+      - ./core_api/.env
 
   traefik:
     command:
@@ -26,19 +26,19 @@ services:
     volumes:
       - ./cache:/data
 
-  api:
+  core_api:
     build:
       target: dev
     env_file:
-      - ./back/.env
+      - ./core_api/.env
     volumes:
-      - ./back/.env:/app/back/.env
-      - ./back/locales:/app/back/locales
-      - ./back/src:/app/back/src
-      - ./back/test:/app/back/test
-      - ./back/prisma:/app/back/prisma
+      - ./core_api/.env:/app/core_api/.env
+      - ./core_api/locales:/app/core_api/locales
+      - ./core_api/src:/app/core_api/src
+      - ./core_api/test:/app/core_api/test
+      - ./core_api/prisma:/app/core_api/prisma
       - ./packages/core:/app/packages/core
-      - ./back/uploads:/app/back/uploads
+      - ./core_api/uploads:/app/core_api/uploads
 
   front:
     build:

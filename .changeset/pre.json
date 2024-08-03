@@ -4,8 +4,9 @@
   "initialVersions": {
     "composite-back": "0.4.0",
     "composite-front": "0.4.0",
-    "@benjaminbours/composite-api-client": "0.0.1",
-    "@benjaminbours/composite-core": "0.3.0"
+    "@benjaminbours/composite-core-api-client": "0.0.1",
+    "@benjaminbours/composite-core": "0.3.0",
+    "real_time_api": "0.0.1"
   },
   "changesets": [
     "blue-books-draw",
@@ -24,6 +25,7 @@
     "five-wasps-mix",
     "forty-clocks-remain",
     "forty-countries-repeat",
+    "fresh-teachers-tan",
     "green-cars-flash",
     "healthy-ants-visit",
     "healthy-eggs-lick",
@@ -35,6 +37,7 @@
     "pink-socks-hang",
     "polite-melons-type",
     "poor-cherries-burn",
+    "sharp-tables-hope",
     "short-rules-sort",
     "six-files-boil",
     "sixty-ducks-bow",

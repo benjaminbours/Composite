@@ -1,0 +1,8 @@
+node_modules
+dist
+uploads
+.env
+.env.dev
+.env.local
+.env.staging
+.env.production

@@ -1,9 +1,9 @@
 import {
     Vector3,
+    Vector2,
     Raycaster,
     Intersection,
     Object3D,
-    Vec2,
     Box3,
     type Object3DEventMap,
 } from 'three';
@@ -39,7 +39,7 @@ let obstaclesToConsider: Object3D[] = [];
 let intersectObjects: Intersection<Object3D<Object3DEventMap>>[] = [];
 
 export function getNearestObjects(
-    position: Vec2,
+    position: Vector2,
     obstacles: Object3D[],
 ): INearestObjects {
     const nearestObjects: INearestObjects = {};

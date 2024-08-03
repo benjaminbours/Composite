@@ -1,0 +1,12 @@
+*
+!.npmrc
+
+!front
+front/node_modules
+front/.next
+
+!packages/core
+packages/core/node_modules
+!packages/core-api-client
+packages/core-api-client/node_modules
+!./package.json

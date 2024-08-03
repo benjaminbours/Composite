@@ -1,4 +1,11 @@
-import { Group, Object3D, Object3DEventMap, Vector3 } from 'three';
+import {
+    BufferGeometry,
+    Group,
+    Mesh,
+    Object3D,
+    Object3DEventMap,
+    Vector3,
+} from 'three';
 import { LevelState } from '../GameState';
 import {
     AbstractLevel,
@@ -32,6 +39,7 @@ export class LevelMapping extends Group implements AbstractLevel {
         data: any[],
         public startPosition: LevelStartPosition,
         clientGraphicHelpers?: ClientGraphicHelpers,
+        patch?: (bufferGeo: BufferGeometry, mesh: Mesh) => void,
     ) {
         super();
         this.name = `level_${id}`;
@@ -48,6 +56,9 @@ export class LevelMapping extends Group implements AbstractLevel {
             bounceList: this.bounces,
             clientGraphicHelpers,
         };
+        if (patch) {
+            patch(BufferGeometry.prototype, Mesh.prototype);
+        }
         const elements = parseLevelElements(worldContext, data);
 
         for (let i = 0; i < elements.length; i++) {
