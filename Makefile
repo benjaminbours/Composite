@@ -33,7 +33,10 @@ start:
 stop:
 	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) down
 
-build_containers:
+build_repo_image:
+	docker build -t composite-repo-image:latest -f Dockerfile.base .
+
+build_services_image:
 	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) build
 
 build_packages:
@@ -65,7 +68,7 @@ undeploy:
 remove_staging:
 	docker --context staging stack rm composite
 
-deploy_hathora_server:
+deploy_real_time_api:
 	cp ./back/Dockerfile.hathora ./back/Dockerfile && \
 	cp ./back/Dockerfile.hathora.dockerignore ./back/.dockerignore && \
 	tar -czf back.tar.gz --exclude='node_modules' --exclude='dist' --exclude='uploads' -C ./back . && \
@@ -79,5 +82,5 @@ deploy_hathora_server:
 	--token $(HATHORA_TOKEN) && \
 	rm ./back.tar.gz && rm ./back/Dockerfile && rm ./back/.dockerignore
 
-build_hathora_image:
+build_real_time_api_image:
 	docker build -f ./back/Dockerfile.hathora ./back

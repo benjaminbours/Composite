@@ -1,17 +1,8 @@
 # Dev
-FROM node:18-alpine AS dev
+FROM composite-repo-image:latest AS dev
 WORKDIR /app
-COPY . .
 
-RUN apk add --update --no-cache \
-    make && \
-    npm i && \
-    npm run build -w packages && \
-    cd core_api && npx prisma generate && \
-    npm cache clean --force && \
-    rm -rf /var/cache/apk/*
-
-RUN npm run build -w core_api
+RUN cd core_api && npx prisma generate
 
 ENTRYPOINT ["npm", "run", "start:dev", "-w", "core_api"]
 

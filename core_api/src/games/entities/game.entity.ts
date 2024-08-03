@@ -7,6 +7,7 @@ import {
   Game as PrismaGame,
 } from '@prisma/client';
 import { User } from '../../users/entity';
+import { Level } from '../../levels/entities/level.entity';
 
 export class Player {
   @ApiProperty()
@@ -38,6 +39,9 @@ export class Game implements PrismaGame {
   @ApiProperty()
   duration: number;
 
+  @ApiProperty({ type: String })
+  region: string;
+
   @ApiProperty()
   startTime: number;
 
@@ -61,6 +65,9 @@ export class Game implements PrismaGame {
 
   @ApiProperty({ type: [Player], required: false })
   players?: any[];
+
+  @ApiProperty({ type: () => Level, required: false })
+  level?: Level;
 }
 
 export class CreateGameResponse {
@@ -75,4 +82,12 @@ export class CreateGameResponse {
 
   @ApiProperty({ type: String })
   processId: string;
+}
+
+export class FinishGameResponse {
+  @ApiProperty({ type: Game })
+  updatedGame: Game;
+
+  @ApiProperty({ type: Number })
+  rank: number;
 }

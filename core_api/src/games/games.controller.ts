@@ -1,23 +1,41 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param } from '@nestjs/common';
 import { GamesService } from './games.service';
-import { Public } from '@project-common/decorators';
-import { CreateSoloGameDto } from './dto/create-game.dto';
-import { ApiOkResponse } from '@nestjs/swagger';
-import { CreateGameResponse } from './entities/game.entity';
+import { Roles } from '@project-common/decorators';
+import { CreateGameDto } from './dto/create-game.dto';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { FinishGameResponse, Game } from './entities/game.entity';
+import { Role } from '@prisma/client';
+import { UpdateGameDto } from './dto/update-game.dto';
+import { FinishGameDto } from './dto/finish-game.dto';
 
+@ApiBearerAuth()
 @Controller('games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
 
-  // TODO: Add throttling to prevent spamming or I will pay a lot
-  @ApiOkResponse({
-    description: 'Create game room and return room connection data.',
-    type: CreateGameResponse,
+  // // TODO: Add throttling to prevent spamming or I will pay a lot
+  // @ApiOkResponse({
+  //   description: 'Create game room and return room connection data.',
+  //   type: CreateGameResponse,
+  // })
+  // @Public()
+  // @Post('start')
+  // async createSoloGame(@Body() dto: CreateSoloGameDto) {
+  //   return this.gamesService.createSoloGame(dto.region);
+  // }
+
+  @ApiCreatedResponse({
+    description: 'The game has been successfully created.',
+    type: Game,
   })
-  @Public()
-  @Post('start')
-  async createSoloGame(@Body() dto: CreateSoloGameDto) {
-    return this.gamesService.createSoloGame(dto.region);
+  @Roles(Role.ADMIN)
+  @Post()
+  create(@Body() createGameDto: CreateGameDto) {
+    return this.gamesService.create(createGameDto);
   }
 
   // @ApiCreatedResponse({
@@ -49,6 +67,26 @@ export class GamesController {
   // findOne(@Param('id') id: string) {
   //   return this.gamesService.findOne(+id);
   // }
+
+  @ApiOkResponse({
+    description: 'The game has been successfully updated.',
+    type: Game,
+  })
+  @Roles(Role.ADMIN)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
+    return this.gamesService.update(+id, updateGameDto);
+  }
+
+  @ApiOkResponse({
+    description: 'The game has been successfully finished.',
+    type: FinishGameResponse,
+  })
+  @Roles(Role.ADMIN)
+  @Post(':id/finish')
+  finishGame(@Param('id') id: string, @Body() finishGameDto: FinishGameDto) {
+    return this.gamesService.finishGame(+id, finishGameDto.endTime);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

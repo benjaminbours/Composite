@@ -10,12 +10,8 @@ const REQUIRED_ENV_VARS = [
   'STAGE',
   'CLIENT_URL',
   'SERVER_URL',
-  // MAIL
-  'SENDER_EMAIL',
-  'SENDER_EMAIL_KEY',
-  // HATHORA
-  'HATHORA_TOKEN',
-  'HATHORA_APP_ID',
+  'CORE_API_URL',
+  'CORE_API_ADMIN_TOKEN',
 ] as const;
 
 const OPTIONAL_ENV_VARS = [''] as const;

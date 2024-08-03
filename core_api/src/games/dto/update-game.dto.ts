@@ -1,13 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GameStatus } from '@prisma/client';
-import { IsEnum, IsNumber } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateGameDto {
-  @ApiProperty({ type: Number })
+  @ApiProperty({ enum: Number, required: false })
   @IsNumber()
-  duration: number;
+  @IsOptional()
+  startTime?: number;
 
-  @ApiProperty({ enum: GameStatus })
+  @ApiProperty({ type: Number, required: false })
+  @IsNumber()
+  @IsOptional()
+  duration?: number;
+
+  @ApiProperty({ enum: GameStatus, required: false })
   @IsEnum(GameStatus)
-  status: GameStatus;
+  @IsOptional()
+  status?: GameStatus;
 }

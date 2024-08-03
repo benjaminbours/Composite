@@ -3,8 +3,7 @@ import { SocketGateway } from './socket.gateway';
 import { CacheModule } from '@nestjs/cache-manager';
 import { SocketService } from './socket.service';
 import { LobbyGateway } from './lobby.gateway';
-import { PrismaService } from '@project-common/services';
-import { TemporaryStorageService } from '../temporary-storage.service';
+import { TemporaryStorageService } from './temporary-storage.service';
 
 describe('SocketGateway', () => {
   let gateway: SocketGateway;
@@ -22,7 +21,6 @@ describe('SocketGateway', () => {
         SocketService,
         SocketGateway,
         LobbyGateway,
-        PrismaService,
         TemporaryStorageService,
       ],
     }).compile();

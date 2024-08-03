@@ -12,6 +12,7 @@
   "workspaces": [
     "front",
     "core_api",
+    "real_time_api",
     "packages/*"
   ],
   "dependencies": {

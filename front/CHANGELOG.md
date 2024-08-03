@@ -6,7 +6,7 @@
 
 -   Improve level thumbnail management
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.20
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.20
     -   @benjaminbours/composite-core@1.0.0-next.20
 
 ## 1.0.0-next.32
@@ -16,7 +16,7 @@
 -   9c60841: Add in game help modal
 -   9c60841: Add various code security and quality improvement
 -   Updated dependencies [9c60841]
-    -   @benjaminbours/composite-api-client@1.0.0-next.19
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.19
     -   @benjaminbours/composite-core@1.0.0-next.19
 
 ## 1.0.0-next.31
@@ -43,7 +43,7 @@
 
 -   Display leaderboard rank on end level view. Sort level by difficulty on lobby.
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.18
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.18
     -   @benjaminbours/composite-core@1.0.0-next.18
 
 ## 1.0.0-next.27
@@ -52,7 +52,7 @@
 
 -   Add game duration tracking + community views with stats, ranking, ratings, etc
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.17
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.17
     -   @benjaminbours/composite-core@1.0.0-next.17
 
 ## 1.0.0-next.26
@@ -109,7 +109,7 @@
 
 -   Fix graphic bugs
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.16
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.16
     -   @benjaminbours/composite-core@1.0.0-next.16
 
 ## 1.0.0-next.17
@@ -118,7 +118,7 @@
 
 -   Refactor client lobby
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.15
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.15
     -   @benjaminbours/composite-core@1.0.0-next.15
 
 ## 1.0.0-next.16
@@ -127,7 +127,7 @@
 
 -   Hot fixes from last released
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.14
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.14
     -   @benjaminbours/composite-core@1.0.0-next.14
 
 ## 1.0.0-next.15
@@ -146,7 +146,7 @@
 -   Updated dependencies
 -   Updated dependencies
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.13
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.13
     -   @benjaminbours/composite-core@1.0.0-next.13
 
 ## 1.0.0-next.14
@@ -155,7 +155,7 @@
 
 -   Various bug fix and improvement
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.12
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.12
     -   @benjaminbours/composite-core@1.0.0-next.12
 
 ## 1.0.0-next.13
@@ -164,7 +164,7 @@
 
 -   Various bug fixes and UX improvements
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.11
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.11
     -   @benjaminbours/composite-core@1.0.0-next.11
 
 ## 1.0.0-next.12
@@ -173,7 +173,7 @@
 
 -   Various improvements
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.10
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.10
     -   @benjaminbours/composite-core@1.0.0-next.10
 
 ## 1.0.0-next.11
@@ -184,7 +184,7 @@
 -   Add key to reset player position
 -   Updated dependencies
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.9
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.9
     -   @benjaminbours/composite-core@1.0.0-next.9
 
 ## 1.0.0-next.10
@@ -199,7 +199,7 @@
 
 -   Refactor implementatin of client prediction / reconciliation
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.8
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.8
     -   @benjaminbours/composite-core@1.0.0-next.8
 
 ## 1.0.0-next.8
@@ -208,7 +208,7 @@
 
 -   More performance optimization
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.7
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.7
     -   @benjaminbours/composite-core@1.0.0-next.7
 
 ## 1.0.0-next.7
@@ -217,7 +217,7 @@
 
 -   Performance improvements
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.6
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.6
     -   @benjaminbours/composite-core@1.0.0-next.6
 
 ## 1.0.0-next.6
@@ -226,7 +226,7 @@
 
 -   Some performance optimization. Fix issue with camera focus and door opener.
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.5
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.5
     -   @benjaminbours/composite-core@1.0.0-next.5
 
 ## 1.0.0-next.5
@@ -235,7 +235,7 @@
 
 -   Add interact touch to focus camera on door opener. Add start position as editable in level editor.
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.4
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.4
     -   @benjaminbours/composite-core@1.0.0-next.4
 
 ## 1.0.0-next.4
@@ -244,7 +244,7 @@
 
 -   Fix and improve various things
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.3
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.3
     -   @benjaminbours/composite-core@1.0.0-next.3
 
 ## 1.0.0-next.3
@@ -259,7 +259,7 @@
 
 -   Major refactor of level editor app. UI improvement, bux fixes, overal improvement of the stability
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.2
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.2
     -   @benjaminbours/composite-core@1.0.0-next.2
 
 ## 1.0.0-next.1
@@ -268,7 +268,7 @@
 
 -   Fix various deployment bug. Fix crash when level table was empty. Display only published level on lobby. Fix issue with account creation and recaptcha.
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.1
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.1
     -   @benjaminbours/composite-core@1.0.0-next.1
 
 ## 1.0.0-next.0
@@ -281,7 +281,7 @@
 
 -   e18bae8: Display bounce arrow helper only when player is inside
 -   Updated dependencies
-    -   @benjaminbours/composite-api-client@1.0.0-next.0
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.0
     -   @benjaminbours/composite-core@1.0.0-next.0
 
 ## 0.4.0

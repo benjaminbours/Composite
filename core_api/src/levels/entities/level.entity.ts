@@ -57,7 +57,7 @@ export class Level implements PrismaLevel {
   updatedAt: Date;
   @ApiProperty({ type: Author, required: false })
   author?: Author;
-  @ApiProperty({ type: [Game], required: false })
+  @ApiProperty({ type: () => [Game], required: false })
   games?: Game[];
   @ApiProperty({ type: [Rating], required: false })
   ratings?: Rating[];

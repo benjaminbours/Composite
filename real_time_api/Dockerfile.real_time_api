@@ -1,0 +1,5 @@
+# Dev
+FROM composite-repo-image:latest AS dev
+WORKDIR /app
+
+ENTRYPOINT ["npm", "run", "start:dev", "-w", "real_time_api"]
