@@ -174,7 +174,7 @@ export class AuthService {
       this.jwtService.verify(resetPasswordToken, {
         secret: jwtConstants.secret,
       });
-    } catch (error) {
+    } catch (_error) {
       Logger.error(
         'resetPasswordToken received has not been generated with our JWT secret or is out dated',
       );
@@ -245,7 +245,7 @@ export class AuthService {
       this.jwtService.verify(confirmationToken, {
         secret: jwtConstants.secret,
       });
-    } catch (error) {
+    } catch (_error) {
       // TODO: redirect to a specific page on the website to regenerate a new token in case of outdated for example
       Logger.error(
         'confirmationToken received has not been generated with our JWT secret or is out dated',
