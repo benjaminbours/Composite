@@ -2,10 +2,10 @@
   "mode": "pre",
   "tag": "next",
   "initialVersions": {
-    "composite-back": "0.4.0",
-    "composite-front": "0.4.0",
-    "@benjaminbours/composite-core-api-client": "0.0.1",
-    "@benjaminbours/composite-core": "0.3.0",
+    "composite-core-api": "1.0.0-next.21",
+    "composite-front": "1.0.0-next.33",
+    "@benjaminbours/composite-core": "1.0.0-next.22",
+    "@benjaminbours/composite-core-api-client": "1.0.0-next.20",
     "real_time_api": "0.0.1"
   },
   "changesets": [
@@ -51,6 +51,7 @@
     "ten-buttons-rhyme",
     "thin-candles-notice",
     "tidy-kiwis-wink",
+    "two-pans-punch",
     "unlucky-owls-work",
     "young-suits-turn"
   ]

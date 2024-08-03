@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.23
+
+### Patch Changes
+
+-   Update payload for start solo game
+
 ## 1.0.0-next.22
 
 ### Patch Changes
