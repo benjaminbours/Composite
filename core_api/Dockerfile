@@ -43,7 +43,6 @@ COPY --from=build /app/core_api/dist ./dist
 COPY --from=build /app/core_api/prisma ./prisma
 COPY --from=build /app/core_api/locales ./locales
 COPY --from=build /app/core_api/package*.json ./
-COPY --from=build /app/core_api/assets.json ./
 COPY --from=build /app/.npmrc ./
 
 RUN npm i --omit=dev && \
