@@ -3,13 +3,9 @@ import { Logger } from '@nestjs/common';
 const REQUIRED_ENV_VARS = [
   // API variables
   'PORT',
-  'DATABASE_URL',
   'REDIS_URL',
-  'JWT_SECRET',
-  'JWT_REFRESH_SECRET',
   'STAGE',
-  'CLIENT_URL',
-  'SERVER_URL',
+  // 'CLIENT_URL',
   'CORE_API_URL',
   'CORE_API_ADMIN_TOKEN',
 ] as const;
