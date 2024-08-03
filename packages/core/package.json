@@ -28,10 +28,10 @@
   "repository": "https://github.com/benjaminbours/Composite.git",
   "peerDependencies": {
     "gsap": "^3.12.2",
-    "three": "^0.165.0"
+    "three": "^0.165.0",
+    "three-mesh-bvh": "^0.7.6"
   },
   "dependencies": {
-    "short-unique-id": "^5.2.0",
-    "three-mesh-bvh": "^0.7.5"
+    "short-unique-id": "^5.2.0"
   }
 }
