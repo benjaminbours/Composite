@@ -16,12 +16,6 @@ services:
     ports:
       - 8080:8080
 
-  cache:
-    image: redis:latest
-    restart: always
-    networks:
-      - database
-
   traefik:
     image: traefik:latest
     volumes:
@@ -39,7 +33,7 @@ services:
     #   replicas: 2
     build:
       context: .
-      dockerfile: ./core_api/Dockerfile.back
+      dockerfile: ./core_api/Dockerfile
       args:
         NPM_TOKEN: ${NPM_TOKEN}
     networks:
@@ -47,7 +41,6 @@ services:
       - database
     depends_on:
       - db
-      - cache
     labels:
       - traefik.enable=true
       # https://community.traefik.io/t/solved-strange-504-gateway-timeout-behaviour/10573
@@ -59,15 +52,15 @@ services:
       - traefik.http.middlewares.core_api_middleware.headers.accessControlAllowCredentials=true
       - traefik.http.middlewares.core_api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization,baggage,sentry-trace
       - traefik.http.middlewares.core_api_middleware.headers.accessControlAllowMethods=GET,POST,DELETE,PATCH
-      - traefik.http.routers.core_api.rule=Host(`api.localhost`)
-      - traefik.http.middlewares.core_api_middleware.headers.accesscontrolalloworiginlist=http://front.localhost
+      - traefik.http.routers.core_api.rule=Host(`core-api.composite`)
+      - traefik.http.middlewares.core_api_middleware.headers.accesscontrolalloworiginlist=http://front.composite
       - traefik.http.routers.core_api.middlewares=core_api_middleware
 
   front:
     restart: always
     build:
       context: .
-      dockerfile: ./front/Dockerfile.front
+      dockerfile: ./front/Dockerfile
       args:
         NPM_TOKEN: ${NPM_TOKEN}
     env_file:
@@ -77,7 +70,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.services.front.loadbalancer.server.port=3000
-      - traefik.http.routers.front.rule=Host(`front.localhost`)
+      - traefik.http.routers.front.rule=Host(`front.composite`)
 
 networks:
   main:

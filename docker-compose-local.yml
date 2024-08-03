@@ -21,6 +21,10 @@ services:
     # Traefik has to be in all networks in order to resolve propery the containers it is trying to contact
 
   cache:
+    image: redis:latest
+    restart: always
+    networks:
+      - database
     ports:
       - 6379:6379
     volumes:
@@ -39,6 +43,38 @@ services:
       - ./core_api/prisma:/app/core_api/prisma
       - ./packages/core:/app/packages/core
       - ./core_api/uploads:/app/core_api/uploads
+
+  real_time_api:
+    restart: always
+    # TODO: Should move to one dockerfile with target
+    build:
+      context: .
+      dockerfile: ./real_time_api/Dockerfile.real_time_api
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    networks:
+      - main
+      - database
+    depends_on:
+      - db
+      - cache
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=composite_main
+      - traefik.http.services.real_time_api.loadbalancer.server.port=3001
+      - traefik.http.middlewares.real_time_api_middleware.headers.accessControlAllowCredentials=true
+      - traefik.http.middlewares.real_time_api_middleware.headers.accessControlAllowHeaders=Content-Type,Authorization,baggage,sentry-trace
+      - traefik.http.middlewares.real_time_api_middleware.headers.accessControlAllowMethods=GET,POST,DELETE,PATCH
+      - traefik.http.routers.real_time_api.rule=Host(`real-time-api.composite`)
+      - traefik.http.middlewares.real_time_api_middleware.headers.accesscontrolalloworiginlist=http://front.composite
+      - traefik.http.routers.real_time_api.middlewares=real_time_api_middleware
+    volumes:
+      - ./real_time_api/.env:/app/real_time_api/.env
+      - ./real_time_api/assets.json:/app/real_time_api/assets.json
+      - ./real_time_api/src:/app/real_time_api/src
+      - ./real_time_api/test:/app/real_time_api/test
+      - ./packages/core:/app/packages/core
+      - ./packages/core-api-client:/app/packages/core-api-client
 
   front:
     build:
