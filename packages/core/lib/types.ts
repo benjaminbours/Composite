@@ -82,6 +82,8 @@ export interface StartSoloGamePayload {
     userId?: number;
     level: number;
     device: 'desktop' | 'mobile';
+    region: string;
+    roomId: string;
 }
 
 export interface StartTimerPayload {
