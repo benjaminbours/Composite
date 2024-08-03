@@ -33,7 +33,10 @@ start:
 stop:
 	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) down
 
-build_containers:
+build_repo_image:
+	docker build -t composite-repo-image:latest -f Dockerfile.base .
+
+build_services_image:
 	docker compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) build
 
 build_packages:

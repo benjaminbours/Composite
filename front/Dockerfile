@@ -1,19 +1,10 @@
-# Dev
-FROM node:18-alpine AS dev
+# Dev env
+FROM composite-repo-image:latest AS dev
 WORKDIR /app
-COPY . .
-
-RUN apk add --update --no-cache \
-    make \
-    g++ \
-    py3-pip \
-    libc6-compat && \
-    npm i && \
-    npm run build -w packages && \
-    npm cache clean --force && \
-    rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["npm", "run", "dev", "-w", "front"]
+
+# Prod env
 
 FROM node:18-alpine AS build
 WORKDIR /app
