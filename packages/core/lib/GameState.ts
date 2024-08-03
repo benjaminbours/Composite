@@ -1,4 +1,4 @@
-import type { Vec2 } from 'three';
+import { Vector2 } from 'three';
 import { MovableComponentState } from './types';
 
 export interface LevelState {
@@ -23,8 +23,8 @@ export interface BounceState {
 }
 
 export interface PlayerGameState {
-    position: Vec2;
-    velocity: Vec2;
+    position: Vector2;
+    velocity: Vector2;
     state: MovableComponentState;
     insideElementID: string | undefined;
 }
@@ -106,14 +106,14 @@ export class GameState {
         const gameState = new GameState(
             [
                 {
-                    position: {
-                        x: Number(state.shadow_x),
-                        y: Number(state.shadow_y),
-                    },
-                    velocity: {
-                        x: Number(state.shadow_velocity_x),
-                        y: Number(state.shadow_velocity_y),
-                    },
+                    position: new Vector2(
+                        Number(state.shadow_x),
+                        Number(state.shadow_y),
+                    ),
+                    velocity: new Vector2(
+                        Number(state.shadow_velocity_x),
+                        Number(state.shadow_velocity_y),
+                    ),
                     state: Number(state.shadow_state) as MovableComponentState,
                     insideElementID:
                         state.shadow_inside_element_id !== undefined
@@ -121,14 +121,14 @@ export class GameState {
                             : undefined,
                 },
                 {
-                    position: {
-                        x: Number(state.light_x),
-                        y: Number(state.light_y),
-                    },
-                    velocity: {
-                        x: Number(state.light_velocity_x),
-                        y: Number(state.light_velocity_y),
-                    },
+                    position: new Vector2(
+                        Number(state.light_x),
+                        Number(state.light_y),
+                    ),
+                    velocity: new Vector2(
+                        Number(state.light_velocity_x),
+                        Number(state.light_velocity_y),
+                    ),
                     state: Number(state.light_state) as MovableComponentState,
                     insideElementID:
                         state.light_inside_element_id !== undefined

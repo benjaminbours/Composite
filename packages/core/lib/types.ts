@@ -1,4 +1,4 @@
-import type { Group, Mesh, Object3D, Vec2 } from 'three';
+import type { Group, Mesh, Object3D, Vector2 } from 'three';
 import { GameState } from './GameState';
 
 export enum Side {
@@ -253,8 +253,8 @@ export enum MovableComponentState {
 }
 
 export interface MovableComponent {
-    position: Vec2;
-    velocity: Vec2;
+    position: Vector2;
+    velocity: Vector2;
 }
 
 export type CollidingElem = Mesh | Group | Object3D;

@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.22
+
+### Patch Changes
+
+-   Update three.js version
+
 ## 1.0.0-next.21
 
 ### Patch Changes
