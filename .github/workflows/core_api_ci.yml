@@ -1,11 +1,11 @@
-name: Install, test and build API
+name: Install, test and build core_api
 
 # on: [pull_request, workflow_dispatch]
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'back/**'
+      - 'core_api/**'
 
 jobs:
   build:
@@ -44,16 +44,16 @@ jobs:
     - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
       name: List the state of node modules
       continue-on-error: true
-      run: npm list -w back
+      run: npm list -w core_api
 
     - name: Install dependencies
-      run: npm install -w packages -w back && cd back && npx prisma generate
+      run: npm install -w packages -w core_api && cd core_api && npx prisma generate
 
     - name: Build packages
       run: npm run build -w packages
 
     - name: Lint
-      run: npm run lint -w back
+      run: npm run lint -w core_api
 
     - name: Build the project
-      run: npm run build -w back
+      run: npm run build -w core_api

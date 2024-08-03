@@ -1,4 +1,4 @@
-name: Push backend image
+name: Push core_api image
 
 on:
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Get version
         id: package
-        run: echo "::set-output name=version::$(node -p "require('./back/package.json').version")"
+        run: echo "::set-output name=version::$(node -p "require('./core_api/package.json').version")"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -45,12 +45,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./back/Dockerfile.back
+          file: ./core_api/Dockerfile
           target: final
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/composite-back:${{ steps.package.outputs.version }},
-            ${{ secrets.DOCKERHUB_USERNAME }}/composite-back:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/composite-core_api:${{ steps.package.outputs.version }},
+            ${{ secrets.DOCKERHUB_USERNAME }}/composite-core_api:latest
           build-args: |
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
