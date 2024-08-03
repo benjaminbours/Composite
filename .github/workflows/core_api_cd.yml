@@ -19,7 +19,6 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}?schema=public
-      REDIS_URL: redis://cache:6379
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       STAGE: staging
 

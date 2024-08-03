@@ -4,7 +4,6 @@ const REQUIRED_ENV_VARS = [
   // API variables
   'PORT',
   'DATABASE_URL',
-  'REDIS_URL',
   'JWT_SECRET',
   'JWT_REFRESH_SECRET',
   'STAGE',
