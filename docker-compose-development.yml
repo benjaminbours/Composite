@@ -3,7 +3,7 @@ version: "3.8"
 services:
   db:
     env_file:
-      - ./back/.env.dev
+      - ./core_api/.env.dev
     volumes:
       - /home/bbo/composite/postgres-data-dev:/var/lib/postgresql/data
 
@@ -14,10 +14,6 @@ services:
       - traefik.http.services.adminer.loadbalancer.server.port=8080
       - traefik.http.routers.adminer.entrypoints=websecure
       - traefik.http.routers.adminer.tls.certresolver=myresolver
-
-  cache:
-    volumes:
-      - /home/bbo/composite/cache-dev:/data
 
   traefik:
     image: traefik:latest
@@ -37,13 +33,12 @@ services:
       # The HTTPS port
       - "443:443"
 
-  api:
-    image: boursbenjamin/composite-back:1.0.0-next.21
+  core_api:
+    image: boursbenjamin/composite-core_api:1.0.0-next.21
     depends_on:
       - db
-      - cache
     env_file:
-      - ./back/.env.dev
+      - ./core_api/.env.dev
     labels:
       - "traefik.http.routers.api.rule=Host(`dev.api.compositethegame.com`)"
       - traefik.http.middlewares.api_middleware.headers.accesscontrolalloworiginlist=https://dev.compositethegame.com
