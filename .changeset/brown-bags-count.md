@@ -1,6 +1,6 @@
 ---
 "composite-front": patch
-"composite-back": patch
+"composite-core-api": patch
 ---
 
 Optimize docker image. Add google analytics event.

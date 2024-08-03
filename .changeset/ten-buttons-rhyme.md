@@ -1,6 +1,6 @@
 ---
 "composite-front": patch
-"composite-back": patch
+"composite-core-api": patch
 "@benjaminbours/composite-core-api-client": patch
 "@benjaminbours/composite-core": patch
 ---
