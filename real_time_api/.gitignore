@@ -55,3 +55,11 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+cache
+data
+
+.env
+.env.hathora
+.env.local
+.env.staging
+.env.production
