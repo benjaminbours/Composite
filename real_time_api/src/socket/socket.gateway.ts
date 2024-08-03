@@ -35,7 +35,7 @@ import {
   DefaultApi,
   Level,
 } from '@benjaminbours/composite-core-api-client';
-import { Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 import { ENVIRONMENT } from 'src/environment';
 import {
   acceleratedRaycast,
@@ -437,26 +437,20 @@ export class SocketGateway {
     const initialGameState = new GameState(
       [
         {
-          position: {
-            x: levelMapping.startPosition.shadow.x,
-            y: levelMapping.startPosition.shadow.y,
-          },
-          velocity: {
-            x: 0,
-            y: 0,
-          },
+          position: new Vector2(
+            levelMapping.startPosition.shadow.x,
+            levelMapping.startPosition.shadow.y,
+          ),
+          velocity: new Vector2(0, 0),
           state: MovableComponentState.inAir,
           insideElementID: undefined,
         },
         {
-          position: {
-            x: levelMapping.startPosition.light.x,
-            y: levelMapping.startPosition.light.y,
-          },
-          velocity: {
-            x: 0,
-            y: 0,
-          },
+          position: new Vector2(
+            levelMapping.startPosition.light.x,
+            levelMapping.startPosition.light.y,
+          ),
+          velocity: new Vector2(0, 0),
           state: MovableComponentState.inAir,
           insideElementID: undefined,
         },
