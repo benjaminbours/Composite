@@ -14,7 +14,6 @@ import {
 } from '@benjaminbours/composite-core';
 // local
 import { PlayerState, RedisPlayerState, PlayerStatus } from './PlayerState';
-import { PrismaService } from '@project-common/services';
 
 const REDIS_KEYS = {
   // List
@@ -45,10 +44,7 @@ export interface PlayerFoundInQueue {
 export class TemporaryStorageService {
   public redisClient: RedisClientType;
 
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private prismaService: PrismaService,
-  ) {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
     if ((this.cacheManager.store as unknown as RedisStore).getClient) {
       this.redisClient = (
         this.cacheManager.store as unknown as RedisStore

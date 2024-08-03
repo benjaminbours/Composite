@@ -416,7 +416,7 @@ export class AuthService {
         },
         {
           secret: jwtConstants.secret,
-          expiresIn: 60 * 15, // 15 mins
+          // expiresIn: 60 * 15, // 15 mins
         },
       ),
       this.jwtService.signAsync(

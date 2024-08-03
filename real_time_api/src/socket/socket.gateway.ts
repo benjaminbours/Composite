@@ -27,13 +27,21 @@ import {
   TimeInfoPayload,
 } from '@benjaminbours/composite-core';
 // local
-import { TemporaryStorageService } from '../temporary-storage.service';
-import { PlayerState, PlayerStatus, RedisPlayerState } from '../PlayerState';
+import { TemporaryStorageService } from './temporary-storage.service';
+import { PlayerState, PlayerStatus, RedisPlayerState } from './PlayerState';
 import { SocketService } from './socket.service';
-import { PrismaService } from '@project-common/services';
-import { handlePrismaError } from '@project-common/utils/handlePrismaError';
+import {
+  Configuration,
+  DefaultApi,
+  Level,
+} from '@benjaminbours/composite-core-api-client';
 import { Vector3 } from 'three';
-import { GameStatus } from '@prisma/client';
+import { ENVIRONMENT } from 'src/environment';
+import {
+  acceleratedRaycast,
+  computeBoundsTree,
+  disposeBoundsTree,
+} from 'three-mesh-bvh';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -54,12 +62,9 @@ export class SocketGateway {
   @WebSocketServer() server: Server;
 
   constructor(
-    private prismaService: PrismaService,
     private temporaryStorage: TemporaryStorageService,
     private socketService: SocketService,
-  ) {
-    console.log('HERE CORS *');
-  }
+  ) {}
 
   afterInit(server: Server) {
     this.socketService.socket = server;
@@ -140,16 +145,22 @@ export class SocketGateway {
           startTime,
         },
       ]);
-      this.prismaService.game
-        .update({
-          where: { id: player.gameId },
-          data: {
+      const configuration = new Configuration({
+        basePath: ENVIRONMENT.CORE_API_URL,
+        accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
+      });
+      const coreApiClient = new DefaultApi(configuration);
+      coreApiClient
+        .gamesControllerUpdate({
+          updateGameDto: {
             startTime,
           },
+          id: String(player.gameId),
         })
         .then((game) => {
-          Logger.log('Game timer started', game);
+          Logger.log('Game start time saved in DB', game);
         });
+      // TODO: Add error handler
     };
 
     if (player.isSolo) {
@@ -374,7 +385,7 @@ export class SocketGateway {
 
       // if there is not, create one
       this.gameLoopsRegistry[`game:${gameId}:endGame`] = setTimeout(() => {
-        this.finishGame(gameId, gameState.level.id);
+        this.finishGame(gameId);
       }, 2000);
     } else {
       clearTimeout(this.gameLoopsRegistry[`game:${gameId}:endGame`]);
@@ -385,31 +396,38 @@ export class SocketGateway {
   async createGame(
     players: { socketId: string; player: PlayerState; indexToClear?: number }[],
     gameId: number,
+    dbLevel: Level,
   ) {
-    const level = await this.prismaService.level
-      .findUnique({
-        where: { id: players[0].player.selectedLevel },
-      })
-      .then(
-        (l) =>
-          new LevelMapping(l.id, l.data as any[], {
-            light: new Vector3(
-              l.lightStartPosition[0],
-              l.lightStartPosition[1] === 0 ? 0.08 : l.lightStartPosition[1],
-              l.lightStartPosition[2],
-            ).multiplyScalar(gridSize),
-            shadow: new Vector3(
-              l.shadowStartPosition[0],
-              l.shadowStartPosition[1] === 0 ? 0.08 : l.shadowStartPosition[1],
-              l.shadowStartPosition[2],
-            ).multiplyScalar(gridSize),
-          }),
-      )
-      .catch((err) => {
-        throw handlePrismaError(err);
-      });
+    const levelMapping = new LevelMapping(
+      dbLevel.id,
+      dbLevel.data as any[],
+      {
+        light: new Vector3(
+          dbLevel.lightStartPosition[0],
+          dbLevel.lightStartPosition[1] === 0
+            ? 0.08
+            : dbLevel.lightStartPosition[1],
+          dbLevel.lightStartPosition[2],
+        ).multiplyScalar(gridSize),
+        shadow: new Vector3(
+          dbLevel.shadowStartPosition[0],
+          dbLevel.shadowStartPosition[1] === 0
+            ? 0.08
+            : dbLevel.shadowStartPosition[1],
+          dbLevel.shadowStartPosition[2],
+        ).multiplyScalar(gridSize),
+      },
+      undefined,
+      (bufferGeo, mesh) => {
+        bufferGeo.computeBoundsTree = computeBoundsTree;
+        bufferGeo.disposeBoundsTree = disposeBoundsTree;
+        mesh.raycast = acceleratedRaycast;
+      },
+    );
 
-    if (!level) {
+    // TODO: Check if it can happen. I think it's not possible anymore because of previous
+    // validation
+    if (!levelMapping) {
       throw new Error(
         `Level doesn't exist or is not ready yet: ${players[0].player.selectedLevel}`,
       );
@@ -420,8 +438,8 @@ export class SocketGateway {
       [
         {
           position: {
-            x: level.startPosition.shadow.x,
-            y: level.startPosition.shadow.y,
+            x: levelMapping.startPosition.shadow.x,
+            y: levelMapping.startPosition.shadow.y,
           },
           velocity: {
             x: 0,
@@ -432,8 +450,8 @@ export class SocketGateway {
         },
         {
           position: {
-            x: level.startPosition.light.x,
-            y: level.startPosition.light.y,
+            x: levelMapping.startPosition.light.x,
+            y: levelMapping.startPosition.light.y,
           },
           velocity: {
             x: 0,
@@ -443,70 +461,51 @@ export class SocketGateway {
           insideElementID: undefined,
         },
       ],
-      level.state,
+      levelMapping.state,
       0,
       0,
     );
     // store game state and update queue in temporary storage
     await this.temporaryStorage.createGame(players, gameId, initialGameState);
-    this.registerGameLoop(gameId, level);
+    this.registerGameLoop(gameId, levelMapping);
     return initialGameState;
   }
 
-  finishGame = (gameId: number, levelId: number) => {
+  finishGame = (gameId: number) => {
     const gameRoomName = String(gameId);
     clearTimeout(this.gameLoopsRegistry[`game:${gameId}`]);
     delete this.gameLoopsRegistry[`game:${gameId}`];
     console.log('detect game finished on the server');
-
     const endTime = Number(process.hrtime.bigint());
-    this.prismaService.game
-      .findUnique({ where: { id: gameId } })
-      .then(async (game) => {
-        if (game) {
-          const duration = (endTime - game.startTime) / 1_000_000_000;
-          await this.prismaService.game
-            .update({
-              where: { id: gameId },
-              data: {
-                status: GameStatus.FINISHED,
-                duration,
-              },
-            })
-            .then((updatedGame) => {
-              Logger.log('Game finished and updated', updatedGame);
-            });
 
-          const rank = await this.prismaService.game
-            .findMany({
-              where: { levelId },
-              select: { id: true, duration: true },
-            })
-            .then((games) => {
-              const sortedGames = games
-                .filter((game) => game.duration !== 0)
-                .sort((a, b) => a.duration - b.duration);
-              const index = sortedGames.findIndex((g) => g.id === gameId);
-              return index + 1;
+    const configuration = new Configuration({
+      basePath: ENVIRONMENT.CORE_API_URL,
+      accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
+    });
+    const coreApiClient = new DefaultApi(configuration);
+    coreApiClient
+      .gamesControllerFinishGame({
+        finishGameDto: {
+          endTime,
+        },
+        id: String(gameId),
+      })
+      .then(({ updatedGame, rank }) => {
+        this.emit(gameRoomName, [
+          SocketEventType.GAME_FINISHED,
+          { duration: updatedGame.duration, rank },
+        ]);
+        this.server
+          .in(gameRoomName)
+          .fetchSockets()
+          .then((sockets) => {
+            sockets.forEach(({ id }) => {
+              const state = RedisPlayerState.parsePlayerState(
+                new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
+              );
+              this.temporaryStorage.setPlayer(id, state);
             });
-
-          this.emit(gameRoomName, [
-            SocketEventType.GAME_FINISHED,
-            { duration, rank },
-          ]);
-
-          this.server
-            .in(gameRoomName)
-            .fetchSockets()
-            .then((sockets) => {
-              sockets.forEach(({ id }) => {
-                const state = RedisPlayerState.parsePlayerState(
-                  new PlayerState(PlayerStatus.IS_WAITING_TEAMMATE),
-                );
-                this.temporaryStorage.setPlayer(id, state);
-              });
-            });
-        }
+          });
       });
   };
 }

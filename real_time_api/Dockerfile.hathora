@@ -7,7 +7,6 @@ COPY start_hathora.sh start.sh
 
 RUN export $(cat .env | grep -v '#' | awk '/=/ {print $1}') && \
     npm i && \
-    npx prisma generate && \
     npm run build && \
     npm cache clean --force
 
@@ -15,8 +14,6 @@ FROM node:18-alpine AS final
 WORKDIR /app
 
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/locales ./locales
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/assets.json ./
 COPY --from=build /app/.npmrc ./
@@ -28,7 +25,6 @@ RUN chmod +x ./start.sh
 
 RUN export $(cat .env | grep -v '#' | awk '/=/ {print $1}') && \
     npm i --omit=dev && \
-    npx prisma generate && \
     npm cache clean --force
 
 RUN apk add --update --no-cache redis && \
