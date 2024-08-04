@@ -13,7 +13,6 @@ import {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // disable while cors is managed in load balancer
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

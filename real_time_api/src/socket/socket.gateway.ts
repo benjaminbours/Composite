@@ -42,6 +42,7 @@ import {
   computeBoundsTree,
   disposeBoundsTree,
 } from 'three-mesh-bvh';
+import { HathoraCloud } from '@hathora/cloud-sdk-typescript';
 
 @WebSocketGateway({
   connectionStateRecovery: {
@@ -159,8 +160,11 @@ export class SocketGateway {
         })
         .then((game) => {
           Logger.log('Game start time saved in DB', game);
+        })
+        .catch((error) => {
+          Logger.error('Error while saving game start time in DB');
+          Logger.error(error);
         });
-      // TODO: Add error handler
     };
 
     if (player.isSolo) {
@@ -217,7 +221,8 @@ export class SocketGateway {
 
     // room name is equivalent to team name
     // if the player disconnected were in a room, notify the room
-    if (player.roomName) {
+    // nobody to notify if the player is solo
+    if (player.roomName && !player.isSolo) {
       this.server
         .to(String(player.roomName))
         .emit(SocketEventType.TEAMMATE_DISCONNECT);
@@ -226,6 +231,19 @@ export class SocketGateway {
     // if the player were playing, stop the game loop on the server
     if (player.gameId) {
       clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
+    }
+
+    if (player.isSolo && ENVIRONMENT.STAGE !== 'local') {
+      const hathoraCloud = new HathoraCloud({
+        appId: ENVIRONMENT.HATHORA_APP_ID,
+        hathoraDevToken: ENVIRONMENT.HATHORA_TOKEN,
+      });
+
+      hathoraCloud.roomsV2
+        .destroyRoom(player.roomName, ENVIRONMENT.HATHORA_APP_ID)
+        .then(() => {
+          Logger.log('Hathora room destroyed');
+        });
     }
 
     this.temporaryStorage.removePlayer(socket.id, player);

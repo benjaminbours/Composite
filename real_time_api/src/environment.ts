@@ -8,6 +8,9 @@ const REQUIRED_ENV_VARS = [
   // 'CLIENT_URL',
   'CORE_API_URL',
   'CORE_API_ADMIN_TOKEN',
+  // HATHORA
+  'HATHORA_TOKEN',
+  'HATHORA_APP_ID',
 ] as const;
 
 const OPTIONAL_ENV_VARS = [''] as const;

@@ -9,7 +9,7 @@ async function main() {
   const authService = application.get(AuthService);
 
   const tokens = await authService.getTokens(
-    2,
+    17,
     'hathora_server@compositethegame.com',
     'ADMIN',
   );

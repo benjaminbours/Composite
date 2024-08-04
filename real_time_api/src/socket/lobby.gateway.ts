@@ -327,38 +327,39 @@ export class LobbyGateway {
     @MessageBody() data: StartSoloGamePayload,
     @ConnectedSocket() socket: Socket,
   ) {
+    Logger.log('create solo game');
+    const configuration = new Configuration({
+      basePath: ENVIRONMENT.CORE_API_URL,
+      accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
+    });
+    const coreApiClient = new DefaultApi(configuration);
+    const dbGame = await coreApiClient
+      .gamesControllerCreate({
+        createGameDto: {
+          userId: data.userId,
+          region: data.region,
+          levelId: data.level,
+          mode: GameModeEnum.SinglePlayer,
+          deviceType: data.device === 'desktop' ? 'DESKTOP' : 'MOBILE',
+        },
+      })
+      .catch((error) => {
+        Logger.error(error);
+        throw Error("Couldn't create game");
+      });
+
+    Logger.log(`GAME ID: ${dbGame.id}`);
+    const gameRoomName = String(dbGame.id);
     const player = new PlayerState(
       PlayerStatus.IS_PLAYING,
       undefined,
       data.level,
       undefined,
       data.userId,
-      undefined,
-      undefined,
+      dbGame.id,
+      data.roomId,
       true,
     );
-    Logger.log('create solo game');
-    Logger.log('CORE API URL');
-    Logger.log(ENVIRONMENT.CORE_API_URL);
-    const configuration = new Configuration({
-      basePath: ENVIRONMENT.CORE_API_URL,
-      accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
-    });
-    const coreApiClient = new DefaultApi(configuration);
-    const dbGame = await coreApiClient.gamesControllerCreate({
-      createGameDto: {
-        userId: data.userId,
-        region: 'LOCAL', // TODO: Get dynamic value
-        levelId: data.level,
-        mode: GameModeEnum.SinglePlayer,
-        deviceType: 'DESKTOP', // TODO: Get dynamic value
-      },
-    });
-    // TODO: Add error handler
-
-    Logger.log(`GAME ID: ${dbGame.id}`);
-    const gameRoomName = String(dbGame.id);
-    player.gameId = dbGame.id;
     this.addSocketToRoom(socket.id, gameRoomName);
     this.temporaryStorage.setPlayer(
       socket.id,
