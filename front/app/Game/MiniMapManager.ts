@@ -37,14 +37,14 @@ export class MiniMapManager {
             this.renderer.setSize(300, 167);
         }
 
-        this.camera.position.set(0, 563 * SCALE, 3000);
-        this.camera.lookAt(0, 563 * SCALE, 0);
+        this.camera.position.set(0, 800, 3000);
+        this.camera.lookAt(0, 800, 0);
     }
 
     public updateCamera = (position: Vector3) => {
         this.camera.position.set(
             position.x,
-            (position.y <= 563 ? 563 : position.y) * SCALE,
+            position.y <= 800 ? 800 : position.y,
             3000,
         );
     };
