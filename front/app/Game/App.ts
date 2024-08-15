@@ -243,7 +243,11 @@ export default class App {
             return;
         }
         const elapsedTime = this.runClock.getElapsedTime();
-        this.runTimerDomElement.innerHTML = `${elapsedTime.toFixed(2)} sec`;
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = Math.floor(elapsedTime % 60);
+        const hundredthsOfSecond = Math.floor((elapsedTime % 1) * 100);
+        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${hundredthsOfSecond.toString().padStart(2, '0')}`;
+        this.runTimerDomElement.innerHTML = timeString;
     };
 
     public shouldCaptureSnapshot = false;
@@ -420,16 +424,13 @@ export default class App {
             this.mainPlayerSide === Side.LIGHT ? 'light' : 'shadow';
         this.gameStateManager.predictionState.players[
             this.mainPlayerSide
-        ].position = {
-            x: this.level.startPosition[playerKey].x,
-            y: this.level.startPosition[playerKey].y,
-        };
+        ].position = new Vector2(
+            this.level.startPosition[playerKey].x,
+            this.level.startPosition[playerKey].y,
+        );
         this.gameStateManager.predictionState.players[
             this.mainPlayerSide
-        ].velocity = {
-            x: 0,
-            y: 0,
-        };
+        ].velocity = new Vector2(0, 0);
         const payload = this.createPlayerInputPayload(this.mainPlayerSide, {
             left: false,
             right: false,
@@ -452,14 +453,10 @@ export default class App {
         for (let i = 0; i < this.players.length; i++) {
             const vec = i === 0 ? position.shadow : position.light;
             this.players[i].position.set(vec.x, vec.y, 0);
-            this.gameStateManager.predictionState.players[i].position = {
-                x: vec.x,
-                y: vec.y,
-            };
-            this.gameStateManager.predictionState.players[i].velocity = {
-                x: 0,
-                y: 0,
-            };
+            this.gameStateManager.predictionState.players[i].position =
+                new Vector2(vec.x, vec.y);
+            this.gameStateManager.predictionState.players[i].velocity =
+                new Vector2(0, 0);
         }
     };
 

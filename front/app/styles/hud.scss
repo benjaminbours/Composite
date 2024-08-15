@@ -1,10 +1,18 @@
 // DESKTOP
 
+.desktop-hud #runTimer {
+    color: $mainActionColor;
+    font-family: 'Orbitron';
+    font-size: 40px;
+}
+
 .desktop-hud__top-left-container {
     position: fixed;
     top: 1%;
     left: 2%;
     display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .desktop-hud__actions-container {
@@ -17,17 +25,6 @@
     align-items: flex-start;
 }
 
-.desktop-hud__run-timer {
-    position: fixed;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-}
-
 // MOBILE
 
 .mobile-hud {
@@ -36,17 +33,12 @@
     left: 0;
     right: 0;
     z-index: 10;
-}
 
-.mobile-hud__run-timer {
-    position: fixed;
-    top: 2%;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
+    #runTimer {
+        color: $mainActionColor;
+        font-family: 'Orbitron';
+        font-size: 20px;
+    }
 }
 
 .mobile-hud__button {

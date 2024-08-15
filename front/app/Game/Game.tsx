@@ -281,6 +281,7 @@ function Game({
             {!isMobile && gameProps && onExitGame && (
                 <DesktopHUD
                     appRef={appRef}
+                    level={gameProps.level}
                     onExitGame={onExitGame}
                     withActionsContainer={
                         gameProps.mode === LobbyMode.SOLO ||

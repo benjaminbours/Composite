@@ -6,8 +6,7 @@ import useScrollTrigger from '@mui/material/useScrollTrigger';
 import Slide from '@mui/material/Slide';
 import { getDictionary } from '../../../getDictionary';
 import { SideMenu } from '../../03_organisms/SideMenu';
-import { useWindowSize } from '../../hooks/useWindowSize';
-import { YingYang } from '../../Menu/scenes/TeamLobbyScene/YingYang';
+import { YingYang } from '../../Menu/scenes/LobbyScene/YingYang';
 
 interface HideOnScrollProps {
     children: React.ReactElement;
@@ -29,12 +28,6 @@ interface Props {
 }
 
 export const TopBar: React.FC<Props> = ({ dictionary }) => {
-    const { width, height } = useWindowSize();
-    const isMobile =
-        width !== undefined &&
-        height !== undefined &&
-        (width <= 768 || height <= 500);
-
     return (
         <HideOnScroll>
             <header className="top-bar">

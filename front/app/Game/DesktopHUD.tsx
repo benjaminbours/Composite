@@ -6,16 +6,19 @@ import SwitchAccountIcon from '@mui/icons-material/SwitchAccount';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import App from './App';
 import { wrapperBlurEvent } from '../[lng]/(levelEditor)/level-editor/utils';
+import { Level } from '@benjaminbours/composite-core-api-client';
 
 interface Props {
     appRef: React.MutableRefObject<App | undefined>;
     onExitGame: () => void;
+    level: Level;
     withActionsContainer: boolean;
 }
 
 export const DesktopHUD: React.FC<Props> = ({
     appRef,
     withActionsContainer,
+    level,
     onExitGame,
 }) => {
     const handleClickSwitchPlayer = useCallback(() => {
@@ -38,6 +41,8 @@ export const DesktopHUD: React.FC<Props> = ({
                 <button className="composite-button white" onClick={onExitGame}>
                     Exit
                 </button>
+                <h2 className="title-h4 text-important">{level.name}</h2>
+                <div id="runTimer">0.00 sec</div>
             </div>
             {withActionsContainer && (
                 <Paper className="desktop-hud__actions-container">
@@ -57,9 +62,6 @@ export const DesktopHUD: React.FC<Props> = ({
                     </ButtonGroup>
                 </Paper>
             )}
-            <Paper className="desktop-hud__run-timer">
-                <div id="runTimer">0.00 sec</div>
-            </Paper>
         </div>
     );
 };
