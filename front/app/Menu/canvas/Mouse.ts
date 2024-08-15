@@ -16,8 +16,8 @@ export default class Mouse {
 
     public static destroy() {
         document.removeEventListener('mousemove', Mouse.handleMouseMove);
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId);
+        if (Mouse.timeoutId) {
+            clearTimeout(Mouse.timeoutId);
         }
     }
 
@@ -30,7 +30,7 @@ export default class Mouse {
         Mouse.speedY = Mouse.y - Mouse.lastY;
         Mouse.lastX = Mouse.x;
         Mouse.lastY = Mouse.y;
-        this.timeoutId = setTimeout(
+        Mouse.timeoutId = setTimeout(
             Mouse.detectMouseSpeed,
             50,
         ) as unknown as number;

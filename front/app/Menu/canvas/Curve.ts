@@ -64,7 +64,7 @@ export default class Curve {
             isOnMobile: boolean,
         ) {
             const levelContainer = document.querySelector(
-                '.team-lobby-scene__level-container',
+                '.lobby__level-container',
             );
             let x = 0.5;
             if (levelContainer) {
