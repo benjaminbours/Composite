@@ -850,14 +850,31 @@ export default class App {
             endLevelElement.update(this.delta);
 
             // only in practice mode
+            let timeoutId: NodeJS.Timeout | undefined;
             if (
                 this.onPracticeGameFinished &&
                 this.gameStateManager.displayState.level.end_level.length === 2
             ) {
-                this.onPracticeGameFinished({
-                    duration: this.runClock.getElapsedTime(),
-                    rank: 0,
-                });
+                if (process.env.NEXT_PUBLIC_STAGE === 'local') {
+                    this.onPracticeGameFinished({
+                        duration: this.runClock.getElapsedTime(),
+                        rank: 0,
+                    });
+                    return;
+                }
+
+                timeoutId = setTimeout(() => {
+                    if (this.onPracticeGameFinished) {
+                        this.onPracticeGameFinished({
+                            duration: this.runClock.getElapsedTime(),
+                            rank: 0,
+                        });
+                    }
+                }, 2000);
+            } else {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
             }
 
             if (
