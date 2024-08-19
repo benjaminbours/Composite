@@ -12,6 +12,10 @@ import { setupProjectEnv } from './utils/setup';
 import { getDictionary } from '../getDictionary';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import {
+    GlobalContextProvider,
+    MenuTransitionContextProvider,
+} from './contexts';
 
 setupProjectEnv('client');
 
@@ -81,7 +85,11 @@ export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
             })();
 
             return (
-                <MainApp dictionary={dictionary} initialScene={initialScene} />
+                <MenuTransitionContextProvider initialScene={initialScene}>
+                    <GlobalContextProvider>
+                        <MainApp dictionary={dictionary} />
+                    </GlobalContextProvider>
+                </MenuTransitionContextProvider>
             );
         }
         return null;

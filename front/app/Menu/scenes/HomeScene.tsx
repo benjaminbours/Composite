@@ -1,121 +1,61 @@
 // vendors
 import classNames from 'classnames';
-import { gsap } from 'gsap';
-import React, { useCallback, useRef } from 'react';
-// our libs
+import React, { useCallback, useMemo, useRef } from 'react';
 // project
-import Curve, { defaultWaveOptions } from '../canvas/Curve';
-import { RefHashMap } from '../../useMenuTransition';
 import Link from 'next/link';
-import { Route } from '../../types';
+import { MenuScene, Route } from '../../types';
+import { useMenuTransitionContext } from '../../contexts/menuTransitionContext';
 
-interface Props {
-    refHashMap: RefHashMap;
-    homeRef: React.RefObject<HTMLDivElement>;
-    handleClickPlay: () => void;
-    isMount: boolean;
-    setLightIsPulsingFast: (isPulsingFast: boolean) => void;
-    setShadowRotationSpeed: (speed: number) => void;
-}
+export const HomeScene: React.FC = () => {
+    // contexts
+    const {
+        menuScene,
+        nextMenuScene,
+        homeRef,
+        setLightIsPulsingFast,
+        setShadowRotationSpeed,
+        setCurveIsFast,
+        goToLobby,
+        moveAllGraphicsToElement,
+    } = useMenuTransitionContext();
 
-export const HomeScene: React.FC<Props> = ({
-    homeRef,
-    refHashMap,
-    handleClickPlay,
-    isMount,
-    setLightIsPulsingFast,
-    setShadowRotationSpeed,
-}) => {
     const isMobile = window.innerWidth <= 768 || window.innerHeight <= 500;
     const playButtonRef = useRef<HTMLButtonElement>(null);
-    const cssClass = classNames({
-        'home-scene': true,
-        unmount: !isMount,
-    });
+
+    const cssClass = useMemo(() => {
+        const isMount =
+            menuScene === MenuScene.HOME || nextMenuScene === MenuScene.HOME;
+
+        return classNames({
+            'home-scene': true,
+            unmount: !isMount,
+        });
+    }, [menuScene, nextMenuScene]);
 
     const handleMouseLeavePlay = useCallback(() => {
-        if (
-            !refHashMap.canvasBlack.current ||
-            !refHashMap.canvasWhite.current
-        ) {
-            return;
-        }
-        // curve
-        refHashMap.canvasBlack.current.curve.mouseIsHoverButton = false;
-        Curve.setWaveOptions({
-            ...defaultWaveOptions,
-        });
-        // light
+        setCurveIsFast(false);
         setLightIsPulsingFast(false);
-        // shadow
         setShadowRotationSpeed(0.005);
-    }, [setLightIsPulsingFast, setShadowRotationSpeed, refHashMap]);
+        // disable on purpose, I want this not to change after mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleMouseEnterPlay = useCallback(() => {
-        if (
-            !refHashMap.canvasBlack.current ||
-            !refHashMap.canvasWhite.current
-        ) {
-            return;
-        }
-        // curve
-        refHashMap.canvasBlack.current.curve.mouseIsHoverButton = true;
-        // TODO: refactor to avoid this kind of static method
-        Curve.setWaveOptions({
-            randomRange: 300,
-            amplitudeRange: 50,
-            speed: 0.1,
-        });
-        // light
+        setCurveIsFast(true);
         setLightIsPulsingFast(true);
-        // shadow
         setShadowRotationSpeed(0.02);
-    }, [setLightIsPulsingFast, setShadowRotationSpeed, refHashMap]);
-
-    const moveGraphicToElement = useCallback(
-        (bbox: DOMRect) => {
-            if (
-                !refHashMap.canvasBlack.current ||
-                !refHashMap.canvasWhite.current
-            ) {
-                return;
-            }
-            Curve.setWaveOptions({
-                viscosity: 40,
-                damping: 0.2,
-            });
-            gsap.to(refHashMap.canvasBlack.current.curve, {
-                duration: 0.5,
-                delay: 0.1,
-                origin: bbox.x + bbox.width / 2,
-                onComplete: () => {
-                    Curve.setWaveOptions({
-                        ...defaultWaveOptions,
-                    });
-                },
-            });
-            gsap.to(refHashMap.canvasBlack.current.light, {
-                duration: 0.5,
-                delay: 0.1,
-                startX: bbox.x + bbox.width / 2,
-                startY: bbox.y + bbox.height / 2,
-            });
-            gsap.to(refHashMap.canvasWhite.current.shadow, {
-                duration: 0.5,
-                delay: 0.1,
-                startX: bbox.x + bbox.width / 2,
-                startY: bbox.y + bbox.height / 2,
-            });
-        },
-        [refHashMap],
-    );
+        // disable on purpose, I want this not to change after mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleMouseEnterButton = useCallback(
         (e: React.MouseEvent) => {
             const bbox = e.currentTarget.getBoundingClientRect();
-            moveGraphicToElement(bbox);
+            moveAllGraphicsToElement(bbox);
         },
-        [moveGraphicToElement],
+        // disable on purpose, I want this not to change after mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
     );
 
     const handleMouseLeaveButton = useCallback(() => {
@@ -123,8 +63,10 @@ export const HomeScene: React.FC<Props> = ({
             return;
         }
         const bbox = playButtonRef.current.getBoundingClientRect();
-        moveGraphicToElement(bbox);
-    }, [moveGraphicToElement]);
+        moveAllGraphicsToElement(bbox);
+        // disable on purpose, I want this not to change after mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div ref={homeRef} className={cssClass}>
@@ -150,7 +92,7 @@ export const HomeScene: React.FC<Props> = ({
                     className="button-play home-scene__button-play"
                     onMouseEnter={isMobile ? undefined : handleMouseEnterPlay}
                     onMouseLeave={isMobile ? undefined : handleMouseLeavePlay}
-                    onClick={handleClickPlay}
+                    onClick={goToLobby}
                 >
                     Play
                 </button>

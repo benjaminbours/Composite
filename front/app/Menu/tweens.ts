@@ -6,7 +6,7 @@ import { Side } from '@benjaminbours/composite-core';
 import { MenuScene } from '../types';
 import CanvasBlack from './canvas/CanvasBlack';
 import Curve, { defaultWaveOptions } from './canvas/Curve';
-import { RefHashMap } from '../useMenuTransition';
+import { RefHashMap } from '../contexts/menuTransitionContext';
 
 export interface TweenOptions {
     step: MenuScene;
@@ -120,10 +120,22 @@ function notFoundOut(notFoundInterface: HTMLDivElement) {
 }
 
 export function allMenuScenesOut(refHashMap: RefHashMap) {
-    return [
-        homeOut(refHashMap.homeRef.current!),
-        endLevelOut(refHashMap.endLevelRef.current!),
-        notFoundOut(refHashMap.notFoundRef.current!),
-        teamLobbyOut(refHashMap.teamLobbyRef.current!),
-    ];
+    const outAnimations = [];
+    if (refHashMap.homeRef.current) {
+        outAnimations.push(homeOut(refHashMap.homeRef.current));
+    }
+
+    if (refHashMap.endLevelRef.current) {
+        outAnimations.push(endLevelOut(refHashMap.endLevelRef.current));
+    }
+
+    if (refHashMap.notFoundRef.current) {
+        outAnimations.push(notFoundOut(refHashMap.notFoundRef.current));
+    }
+
+    if (refHashMap.lobbyRef.current) {
+        outAnimations.push(teamLobbyOut(refHashMap.lobbyRef.current));
+    }
+
+    return outAnimations;
 }
