@@ -7,7 +7,7 @@ import {
     Side,
     applyInputListToSimulation,
 } from '@benjaminbours/composite-core';
-import { Object3D, Object3DEventMap, Vec2, Vector2 } from 'three';
+import { Object3D, Object3DEventMap } from 'three';
 
 // TODO: Keep refactoring the game state manager. So far, a lot of thing in app has
 // just been prefixed by "".

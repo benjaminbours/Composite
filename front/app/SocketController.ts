@@ -26,7 +26,11 @@ export class SocketController {
     public isConnected = false;
 
     constructor(
-        onGameStart: (initialGameState: GameState) => void,
+        uri: string,
+        onGameStart: (
+            socketController: SocketController,
+            initialGameState: GameState,
+        ) => void,
         onGameFinish: (data: GameFinishedPayload) => void,
         onTeamMateDisconnect: () => void,
         onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
@@ -34,9 +38,7 @@ export class SocketController {
         handleReceiveSideOnLobby: (side: Side) => void,
         handleReceiveReadyToPlay: (isReady: boolean) => void,
     ) {
-        this.socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
-            withCredentials: true,
-        });
+        this.socket = io(uri, { transports: ['websocket'] });
 
         // menu listeners
         this.socket.on(SocketEventType.CONNECT, () => {
@@ -47,7 +49,7 @@ export class SocketController {
             SocketEventType.GAME_START,
             (data: GameStateUpdatePayload) => {
                 console.log('received game start event', data.gameState);
-                onGameStart(data.gameState);
+                onGameStart(this, data.gameState);
             },
         );
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);

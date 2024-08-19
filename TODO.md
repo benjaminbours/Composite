@@ -1,11 +1,18 @@
 # TODO
 
+## Hathora story
+
+- Validate full support for solo game
+- Add support for multiplayer game
+- What about queue now? Rethink it
+
 ## Bugs to fix
 
 ### High priority
 
 - on end level screen, the shadow and light graphic are limiting the reading, mainly on mobile
 - add cookie-consent
+- On some level (Precision level mainly), it's too punitive. Checkpoints feature should be considered. The question is: how to encourage or force author to do it?
 - Ensure secrets are safe in my docker images
 - Bug when adding a door and a door opener, if I don't save or reload, I can't interact with the door
 - crash if try to delete the bounce we are currently inside
@@ -20,13 +27,13 @@
 ### Low priority
 
 - The player in light composer change slightly the whole brightness of the screen when going in and out
-- Bug with the wave when the menu is remounted after entering the game, the wave is not reacting with the mouse anymore.
 - On loading of any page of the website, there is blank screen with loading written for a moment before disappearing.
 - Address lint warnings
 - Take care of google captcha on staging and prod
 
 ## Ideas
 
+- In practice mode, allow player to put a mark to teleport back to it anytime. It would give more sens to the practice mode. If it's practice, let's give people the right tools to do it.
 - Add arrow on the HUD to indicate direction of your team mate when he is far
 - Players leave a trail behind them and it can impact the world
 

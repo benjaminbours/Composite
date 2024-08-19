@@ -1,0 +1,526 @@
+$gap: 15px;
+
+.lobby {
+    display: flex;
+    flex-direction: column;
+    gap: $gap;
+
+    .MuiBadge-badge {
+        background: white;
+    }
+
+    .menu-actions {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    .select-level-button {
+        svg {
+            margin-right: 20px;
+            margin-left: 0;
+        }
+    }
+
+    .queue-time-info {
+        mix-blend-mode: difference;
+        color: white;
+    }
+
+    .refresh-queue-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+
+        svg {
+            color: white;
+            transition: 0.3s ease-out;
+            margin: 0 !important;
+        }
+
+        span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+
+        &:hover {
+            svg {
+                color: black;
+            }
+        }
+    }
+}
+
+.lobby__waiting-friend-container {
+    .MuiCircularProgress-root {
+        color: white;
+        margin: 0 auto;
+    }
+}
+
+.lobby__buttons-container {
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+    gap: 10px;
+    margin: 10px auto;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 50px;
+
+    button,
+    a {
+        width: 100% !important;
+        padding: 10px 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+.lobby__info-text {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.teammate-joined-text {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 0;
+
+    svg {
+        margin-right: 10px;
+    }
+}
+
+.lobby__header {
+    margin-top: 25px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: $gap;
+
+    // rows
+    > div {
+        display: flex;
+        align-items: center;
+    }
+
+    .lobby__mode-selector {
+        margin-left: 20px;
+    }
+
+    // exit button
+    // button {
+    // width: 100%;
+    //     position: fixed;
+    //     left: 2%;
+    //     top: 2%;
+    // }
+
+    h1 {
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        margin-top: 20px;
+
+        .lobby__mode-selector {
+            margin-left: auto;
+        }
+    }
+}
+
+.lobby__login-button {
+    margin-left: auto;
+}
+
+.team-mate-container {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    top: -25%;
+    display: flex;
+    align-items: center;
+
+    mix-blend-mode: difference;
+    color: white;
+
+    .team-mate {
+        display: flex;
+        align-items: center;
+        cursor: help;
+    }
+
+    p {
+        margin: 0 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 150px;
+    }
+
+    .align-button {
+        // position: absolute;
+        // left: 50%;
+        // transform: translate(-50%, 0);
+        // bottom: -200%;
+        margin-left: 10px;
+        padding: 5px 10px;
+        font-size: 10px;
+        max-width: 50px;
+        min-width: auto;
+    }
+}
+
+#team-mate-helper {
+    z-index: 1000;
+}
+
+.team-mate-help-text {
+    border: solid white 1px;
+    background: black;
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    text-align: left;
+}
+
+.lobby__tabs-container {
+    display: flex;
+    justify-content: center;
+    mix-blend-mode: difference;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.lobby__tabs {
+    color: white;
+
+    .MuiTab-root {
+        opacity: 1;
+    }
+
+    .Mui-disabled {
+        opacity: 0.5;
+    }
+
+    .MuiTabs-indicator {
+        background-color: white;
+    }
+}
+
+.lobby__align-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .ying-yang {
+        width: 30px;
+        animation: rotate 5s infinite linear;
+    }
+}
+
+.lobby__ready-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .lobby__info-text {
+        order: 1;
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+
+        span {
+            margin: 0 10px;
+        }
+    }
+
+    button {
+        order: 2;
+    }
+}
+
+.lobby__main {
+    display: flex;
+    flex-direction: column;
+    gap: $gap;
+}
+
+.custom-switch {
+    display: flex;
+}
+
+.custom-switch__button {
+    all: unset;
+    cursor: pointer;
+    color: white;
+    padding: 10px;
+    font-family: 'Source Code Pro', monospace;
+    border: solid white 1px;
+    transition: 0.3s ease-out;
+
+    &:hover {
+        background: white;
+        color: black;
+    }
+
+    &--disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover {
+            background: transparent;
+            color: white;
+        }
+    }
+
+    &--active {
+        background: $mainActionColor;
+        border-color: $mainActionColor;
+        color: black;
+
+        &:hover {
+            background: $mainActionColor;
+        }
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        // width: 90%;
+        font-size: 12px;
+        // margin-left: auto;
+        // padding: 5px;
+    }
+}
+/////////////////////
+
+.create-game {
+    display: flex;
+    flex-direction: column;
+    gap: $gap;
+
+    h2 {
+        margin: 0;
+    }
+}
+
+.create-game__row {
+    display: flex;
+    gap: $gap;
+    align-items: center;
+
+    @media (max-width: 768px), (max-height: 500px) {
+        justify-content: flex-end;
+    }
+}
+
+.create-game__submit-button {
+    background-color: $mainActionColor;
+    color: black;
+    border-color: black;
+    align-self: flex-end;
+    text-transform: uppercase;
+    padding: 12px;
+
+    svg {
+        transition: 0.3s ease-out;
+    }
+
+    @media (min-width: 768px), (min-height: 500px) {
+        &:hover {
+            svg {
+                transform: rotate(90deg);
+            }
+        }
+    }
+}
+
+.join-game {
+    table {
+        width: 100%;
+        mix-blend-mode: difference;
+        color: white;
+        text-align: center;
+        border: solid 1px white;
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    th,
+    td {
+        border: solid 1px white;
+        // padding: 0;
+    }
+}
+
+.region-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 250px;
+
+    .MuiSelect-select {
+        display: flex;
+        gap: 10px;
+    }
+
+    .MuiOutlinedInput-notchedOutline {
+        border-color: white;
+    }
+
+    .MuiFormLabel-root {
+        color: white;
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        > div {
+            order: 2;
+        }
+
+        button {
+            order: 1;
+        }
+
+        .MuiSelect-select {
+            padding: 10px;
+            padding-right: 34px;
+        }
+    }
+}
+
+.region-selector__item {
+    display: flex;
+    gap: 10px;
+}
+
+.region-selector__ping {
+    margin-left: auto;
+}
+
+.level-selector {
+    a {
+        text-decoration: none;
+    }
+
+    // @media (max-width: 768px), (max-height: 500px) {
+    //     width: 95%;
+    // }
+
+    .level-grid {
+        ul {
+            padding: 20px 0;
+            // padding-top: 50px;
+        }
+    }
+}
+
+.level-selector__header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    h2 {
+        margin: 0;
+    }
+}
+
+.level-selector__no-level {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 270px;
+    width: 100%;
+    mix-blend-mode: difference;
+    color: white;
+    text-align: center;
+
+    a {
+        text-decoration: none;
+    }
+}
+
+.level-selector__author {
+    margin: 0 20px;
+    mix-blend-mode: difference;
+    width: 200px;
+
+    * {
+        color: white !important;
+    }
+
+    :after {
+        border-color: white !important;
+    }
+
+    @media (max-width: 768px), (max-height: 500px) {
+        width: 120px;
+
+        input,
+        label {
+            font-size: 12px;
+        }
+    }
+}
+
+.game-loader {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+
+    // .title-h3,
+    p {
+        mix-blend-mode: difference;
+        //     padding: 5px;
+        // color: white;
+        // color: $mainActionColor;
+        // background: $mainActionColor;
+    }
+
+    p {
+        color: white;
+    }
+}
+
+.game-loader__image {
+    border-radius: 6px;
+}
+
+.game-loader__row-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+}
+
+.game-loader__progress {
+    // mix-blend-mode: difference;
+    color: $mainActionColor;
+
+    // svg {
+    //     width: 100%;
+    //     height: 100%;
+    // }
+}
+
+.game-loader__row {
+    width: 300px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+
+    p {
+        margin: 0;
+        font-size: 12px;
+    }
+}

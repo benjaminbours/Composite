@@ -7,7 +7,7 @@ import {
     disposeBoundsTree,
     acceleratedRaycast,
 } from 'three-mesh-bvh/build/index.module.js';
-import { BufferGeometry, Mesh, Object3D } from 'three';
+import { BufferGeometry, Mesh, Object3D, Vector2 } from 'three';
 // addExtensionFunctions
 (BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
 (BufferGeometry.prototype as any).disposeBoundsTree = disposeBoundsTree;
@@ -20,14 +20,13 @@ import {
     Side,
 } from '@benjaminbours/composite-core';
 import App, { AppMode } from './App';
-import { SocketController } from '../SocketController';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
-import { Level } from '@benjaminbours/composite-api-client';
 import { CircularProgress, Divider } from '@mui/material';
 import { DiscordButton } from '../02_molecules/DiscordButton';
 import { DesktopHUD } from './DesktopHUD';
-import { LobbyMode } from '../useMainController';
+import { GameMode, GamePlayerNumber } from '../core/entities/LobbyParameters';
+import { GameData } from '../contexts';
 
 interface LevelEditorProps {
     // use do save the app instance somewhere else
@@ -36,21 +35,13 @@ interface LevelEditorProps {
     onTransformControlsObjectChange: (object: Object3D) => void;
 }
 
-interface GameProps {
-    initialGameState: GameState;
-    level: Level;
-    socketController?: SocketController;
-    mode: LobbyMode;
-    onPracticeGameFinished?: (data: GameFinishedPayload) => void;
-}
-
-interface Props {
+export interface Props {
     side: Side;
     onExitGame?: () => void;
     inputsManager: InputsManager;
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
-    gameProps?: GameProps;
+    gameData?: GameData;
     levelEditorProps?: LevelEditorProps;
 }
 
@@ -60,7 +51,7 @@ function Game({
     tabIsHidden,
     stats,
     inputsManager,
-    gameProps,
+    gameData,
     levelEditorProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,24 +112,25 @@ function Game({
             return;
         }
 
-        if (gameProps) {
+        if (gameData) {
             appRef.current = new App(
                 canvasRef.current,
                 canvasMiniMapRef.current,
-                gameProps.initialGameState,
+                gameData.initialGameState,
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 inputsManager,
                 AppMode.GAME,
-                gameProps.level,
-                gameProps.socketController,
+                gameData.level,
+                gameData.lobbyParameters.mode === GameMode.PRACTICE
+                    ? undefined
+                    : gameData.socketController,
                 undefined,
-                gameProps.mode === LobbyMode.PRACTICE
-                    ? gameProps.onPracticeGameFinished
+                gameData.lobbyParameters.mode === GameMode.PRACTICE
+                    ? gameData.onPracticeGameFinished
                     : undefined,
             );
             if (
-                gameProps.mode === LobbyMode.SOLO ||
-                gameProps.mode === LobbyMode.PRACTICE
+                gameData.lobbyParameters.playerNumber === GamePlayerNumber.SOLO
             ) {
                 appRef.current.registerSoloModeListeners();
             }
@@ -148,36 +140,28 @@ function Game({
                 appRef.current.onRemoveMobileInteractButton =
                     handleRemoveMobileInteractButton;
             }
-            if (gameProps.mode !== LobbyMode.PRACTICE) {
+            if (gameData.lobbyParameters.mode === GameMode.RANKED) {
                 setIsSynchronizingTime(true);
             } else {
                 appRef.current?.startRun();
             }
+            gameData.onGameRendered();
         } else if (levelEditorProps) {
             const initialGameState = new GameState(
                 [
                     {
-                        position: {
-                            x: 200,
+                        position: new Vector2(
+                            200,
                             // TODO: Try better solution than putting the player position below the ground
-                            y: 20,
-                        },
-                        velocity: {
-                            x: 0,
-                            y: 0,
-                        },
+                            20,
+                        ),
+                        velocity: new Vector2(0, 0),
                         state: MovableComponentState.inAir,
                         insideElementID: undefined,
                     },
                     {
-                        position: {
-                            x: 10,
-                            y: 20,
-                        },
-                        velocity: {
-                            x: 0,
-                            y: 0,
-                        },
+                        position: new Vector2(10, 20),
+                        velocity: new Vector2(0, 0),
                         state: MovableComponentState.inAir,
                         insideElementID: undefined,
                     },
@@ -210,7 +194,7 @@ function Game({
     }, []);
 
     useEffect(() => {
-        if (!tabIsHidden && isSynchronizingTime && gameProps) {
+        if (!tabIsHidden && isSynchronizingTime && gameData) {
             const onTimeSynchronized = ([serverTime, rtt]: [
                 serverTime: number,
                 rtt: number,
@@ -228,7 +212,7 @@ function Game({
             };
 
             setIsSynchronizingTime(true);
-            gameProps.socketController
+            gameData.socketController
                 ?.synchronizeTime(onStartTimer)
                 .then(onTimeSynchronized);
         }
@@ -236,10 +220,10 @@ function Game({
         return () => {
             appRef.current?.inputsManager.destroyEventListeners();
         };
-    }, [tabIsHidden, gameProps, isSynchronizingTime]);
+    }, [tabIsHidden, gameData, isSynchronizingTime]);
 
     return (
-        <>
+        <div className="game">
             {isSynchronizingTime && (
                 <div className="game-sync-overlay">
                     <h3 className="title-h3">Synchronizing</h3>
@@ -266,26 +250,26 @@ function Game({
                     </div>
                 </div>
             )}
-            {isMobile && gameProps && (
+            {isMobile && gameData && (
                 <MobileHUD
                     appRef={appRef}
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
                     inputsManager={inputsManager}
                     withSwitchPlayer={
-                        gameProps.mode === LobbyMode.SOLO ||
-                        gameProps.mode === LobbyMode.PRACTICE
+                        gameData.lobbyParameters.playerNumber ===
+                        GamePlayerNumber.SOLO
                     }
                     onExitGame={onExitGame}
                 />
             )}
-            {!isMobile && gameProps && onExitGame && (
+            {!isMobile && gameData && onExitGame && (
                 <DesktopHUD
                     appRef={appRef}
-                    level={gameProps.level}
+                    level={gameData.level}
                     onExitGame={onExitGame}
                     withActionsContainer={
-                        gameProps.mode === LobbyMode.SOLO ||
-                        gameProps.mode === LobbyMode.PRACTICE
+                        gameData.lobbyParameters.playerNumber ===
+                        GamePlayerNumber.SOLO
                     }
                 />
             )}
@@ -295,7 +279,7 @@ function Game({
                 id="minimap"
                 style={{ zIndex: -3 }}
             />
-        </>
+        </div>
     );
 }
 

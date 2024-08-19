@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
-import { ApiClient } from '../services';
+import { CoreApiClient } from '../services';
 
 const servicesContainer = new Container();
 servicesContainer
-    .bind<ApiClient>(ApiClient)
+    .bind<CoreApiClient>(CoreApiClient)
     .toSelf()
     .inSingletonScope();
 
@@ -16,7 +16,7 @@ interface AllServicesConfiguration {
 
 export function configureServices(config: AllServicesConfiguration) {
     // inject services
-    const apiClient = servicesContainer.get(ApiClient);
+    const apiClient = servicesContainer.get(CoreApiClient);
     // assign config
     apiClient.origin = config.api.origin;
 }

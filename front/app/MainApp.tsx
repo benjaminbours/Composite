@@ -1,6 +1,7 @@
 'use client';
 // vendors
 import React, {
+    Suspense,
     useCallback,
     useContext,
     useEffect,
@@ -9,30 +10,25 @@ import React, {
 } from 'react';
 import dynamic from 'next/dynamic';
 import * as STATS from 'stats.js';
+import IconButton from '@mui/material/IconButton';
+import HelpIcon from '@mui/icons-material/Help';
+// our libs
+import { Side } from '@benjaminbours/composite-core';
 // local
-import { MenuScene } from './types';
 import { SettingsMenu } from './SettingsMenu';
 import InputsManager from './Game/Player/InputsManager';
 import { BottomLeftInfo } from './BottomLeftInfo';
-import { LobbyMode, useMainController } from './useMainController';
+import { useMainController } from './useMainController';
 import { TeamMateDisconnectNotification } from './TeamMateDisconnectNotification';
 import { AppContext } from './WithMainApp';
 import { getDictionary } from '../getDictionary';
-import { BottomRightInfo } from './BottomRightInfo';
 import { useWindowSize } from './hooks/useWindowSize';
-import { Side } from '@benjaminbours/composite-core';
 import { SideMenu } from './03_organisms/SideMenu';
-import IconButton from '@mui/material/IconButton';
-import HelpIcon from '@mui/icons-material/Help';
 import { getShouldDisplayHelpOnLoad } from './constants';
 import { InGameHelpModal } from './InGameHelpModal';
+import { useGlobalContext } from './contexts';
 
 const Menu = dynamic(() => import('./Menu'), {
-    loading: () => <p>Loading...</p>,
-    ssr: false,
-});
-
-const Game = dynamic(() => import('./Game'), {
     loading: () => <p>Loading...</p>,
     ssr: false,
 });
@@ -42,14 +38,16 @@ export const MainControllerContext = React.createContext<
 >({} as any);
 
 interface Props {
-    initialScene?: MenuScene;
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
 }
 
 /**
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
-function MainApp({ initialScene, dictionary }: Props) {
+function MainApp({ dictionary }: Props) {
+    const { isMenuVisible, isGameVisible, gameData, exitGame, GameComponent } =
+        useGlobalContext();
+
     const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
     const { width, height } = useWindowSize();
@@ -62,7 +60,9 @@ function MainApp({ initialScene, dictionary }: Props) {
     const [tabIsHidden, setTabIsHidden] = useState(false);
     const statsRef = useRef<Stats>();
 
-    const mainController = useMainController(initialScene);
+    // const mateDisconnected = useStoreState(
+    //     (state) => state.lobby.mateDisconnected,
+    // );
 
     const handleClickOnSettings = useCallback(() => {
         setIsSettingsOpen(true);
@@ -75,7 +75,7 @@ function MainApp({ initialScene, dictionary }: Props) {
     // effect dedicated to tab switching
     useEffect(() => {
         setMainAppContext({
-            setMenuScene: mainController.setMenuScene,
+            // setMenuScene: mainController.setMenuScene,
             // enterTeamLobby: handleEnterTeamLobby,
         });
         if (
@@ -106,51 +106,54 @@ function MainApp({ initialScene, dictionary }: Props) {
         };
     }, []);
 
-    const { state, gameIsPlaying, socketController } = mainController;
-
     const [isHelpVisible, setIsHelpVisible] = useState(
         getShouldDisplayHelpOnLoad(),
     );
 
     // when game is closed, we reset the state of the help modal
     useEffect(() => {
-        if (gameIsPlaying === false) {
+        if (!isGameVisible) {
             setIsHelpVisible(getShouldDisplayHelpOnLoad());
         }
-    }, [gameIsPlaying]);
+    }, [isGameVisible]);
 
     return (
-        <MainControllerContext.Provider value={mainController}>
+        <>
             <TeamMateDisconnectNotification
-                teamMateDisconnected={state.mateDisconnected}
+                teamMateDisconnected={false}
+                // teamMateDisconnected={mateDisconnected}
                 handleClickFindAnotherTeamMate={
-                    mainController.handleClickFindAnotherTeamMate
+                    () => {}
+                    // mainController.handleClickFindAnotherTeamMate
                 }
             />
-            {!gameIsPlaying && (
-                <Menu dictionary={dictionary} stats={statsRef} />
-            )}
-            {state.gameState && state.loadedLevel && gameIsPlaying && (
-                <Game
-                    side={
-                        state.you.side === undefined
-                            ? Side.SHADOW
-                            : state.you.side
-                    }
-                    gameProps={{
-                        socketController: socketController.current,
-                        initialGameState: state.gameState,
-                        level: state.loadedLevel,
-                        mode: mainController.lobbyMode,
-                        onPracticeGameFinished:
-                            mainController.handleGameFinished,
-                    }}
-                    tabIsHidden={tabIsHidden}
-                    stats={statsRef}
-                    inputsManager={inputsManager.current}
-                    onExitGame={mainController.handleExitGame}
-                />
-            )}
+            {isMenuVisible && <Menu dictionary={dictionary} stats={statsRef} />}
+            <Suspense>
+                {isGameVisible && GameComponent !== undefined && (
+                    <GameComponent
+                        // side={
+                        //     state.you.side === undefined
+                        //         ? Side.SHADOW
+                        //         : state.you.side
+                        // }
+                        side={Side.SHADOW}
+                        gameData={gameData!}
+                        // gameProps={{
+                        //     socketController:
+                        //         servicesContainer.get(SocketController),
+                        //     initialGameState,
+                        //     lobbyParameters,
+                        //     level,
+                        //     onPracticeGameFinished:
+                        //         mainController.handleGameFinished,
+                        // }}
+                        tabIsHidden={tabIsHidden}
+                        stats={statsRef}
+                        inputsManager={inputsManager.current}
+                        onExitGame={exitGame}
+                    />
+                )}
+            </Suspense>
             {isSettingsOpen && (
                 <SettingsMenu
                     inputsManager={inputsManager.current}
@@ -159,12 +162,12 @@ function MainApp({ initialScene, dictionary }: Props) {
             )}
             {!isMobile && (
                 <BottomLeftInfo
-                    gameIsPlaying={gameIsPlaying}
+                    gameIsPlaying={isGameVisible}
                     onSettingsClick={handleClickOnSettings}
                 />
             )}
             <div className="top-right-container">
-                {gameIsPlaying && (
+                {isGameVisible && (
                     <>
                         <IconButton
                             className="in-game-help"
@@ -177,17 +180,13 @@ function MainApp({ initialScene, dictionary }: Props) {
                             onClose={() => {
                                 setIsHelpVisible(false);
                             }}
-                            isSoloMode={
-                                mainController.lobbyMode === LobbyMode.SOLO ||
-                                mainController.lobbyMode === LobbyMode.PRACTICE
-                            }
+                            isSoloMode={true}
                         />
                     </>
                 )}
                 <SideMenu dictionary={dictionary.common} />
             </div>
-            {!gameIsPlaying && <BottomRightInfo />}
-        </MainControllerContext.Provider>
+        </>
     );
 }
 

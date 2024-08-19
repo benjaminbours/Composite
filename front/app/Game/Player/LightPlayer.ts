@@ -1,4 +1,4 @@
-import { Camera, Mesh, PointLight, SphereGeometry, Vec2, Vector3 } from 'three';
+import { Camera, Mesh, PointLight, SphereGeometry, Vector2, Vector3 } from 'three';
 import { Player } from './Player';
 import { playerMeshMaterial } from '../materials';
 
@@ -11,7 +11,7 @@ export class LightPlayer extends Player {
 
         const geometry = new SphereGeometry(5, 32, 32);
         this.mesh = new Mesh(geometry, playerMeshMaterial);
-        this.mesh.name = "light-player-mesh"
+        this.mesh.name = 'light-player-mesh';
         this.mesh.castShadow = false;
         this.mesh.receiveShadow = false;
         this.add(this.mesh);
@@ -25,7 +25,7 @@ export class LightPlayer extends Player {
 
     // TODO: Rename this function, its unclear
     // TODO: Duplicate function with element to bounce
-    public get2dLightPosition = (camera: Camera, velocity: Vec2) => {
+    public get2dLightPosition = (camera: Camera, velocity: Vector2) => {
         const p = this.position.clone();
         p.sub(new Vector3(velocity.x / 2, velocity.y / 2, 0));
         const vector = p.project(camera);

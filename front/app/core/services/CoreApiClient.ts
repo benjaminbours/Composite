@@ -1,8 +1,12 @@
 import { injectable } from 'inversify';
-import { Configuration, DefaultApi } from '@benjaminbours/composite-api-client';
+import {
+    Configuration,
+    DefaultApi,
+    LevelStatusEnum,
+} from '@benjaminbours/composite-core-api-client';
 
 @injectable()
-export class ApiClient {
+export class CoreApiClient {
     configuration = new Configuration();
     defaultApi = new DefaultApi(this.configuration);
 
@@ -27,5 +31,12 @@ export class ApiClient {
             accessToken: token,
         });
         this.defaultApi = new DefaultApi(this.configuration);
+    }
+
+    fetchPublishedLevels() {
+        return this.defaultApi.levelsControllerFindAll({
+            status: LevelStatusEnum.Published,
+            stats: 'true',
+        });
     }
 }

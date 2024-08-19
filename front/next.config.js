@@ -16,6 +16,16 @@ const nextConfig = {
     },
     reactStrictMode: true,
     productionBrowserSourceMaps: true,
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'dev.api.compositethegame.com',
+                // port: '',
+                pathname: '/images/**',
+            },
+        ],
+    },
     env: {
         APP_VERSION: version,
     },

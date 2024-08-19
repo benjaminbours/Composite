@@ -7,9 +7,9 @@ import type {
     User,
     RegisterDto,
     AuthControllerUpdatePasswordRequest,
-} from '@benjaminbours/composite-api-client';
+} from '@benjaminbours/composite-core-api-client';
 import { servicesContainer } from '../../frameworks';
-import { ApiClient } from '../../services';
+import { CoreApiClient } from '../../services';
 
 import type { StoreModel } from '../../frameworks/easy-peasy';
 // import { Role } from '../../entities';
@@ -63,7 +63,7 @@ let refreshSessionTimeOutId: any;
 const SESSION_KEY = 'composite-session';
 
 function setupSession(session: TokensDto) {
-    const apiClient = servicesContainer.get(ApiClient);
+    const apiClient = servicesContainer.get(CoreApiClient);
 
     // save token into service
     apiClient.token = session.accessToken;
@@ -91,7 +91,7 @@ function setupSession(session: TokensDto) {
 }
 
 function clearSession() {
-    const apiClient = servicesContainer.get(ApiClient);
+    const apiClient = servicesContainer.get(CoreApiClient);
 
     // clear client token
     apiClient.token = undefined;
@@ -124,7 +124,7 @@ export const userModel: UserModel = {
     retrieveSession: thunk(async (actions) => {
         actions.setIsRetrievingSession(true);
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
 
         // 1. Retrieve an eventual previous token in session
         console.debug('retrieve session');
@@ -178,7 +178,7 @@ export const userModel: UserModel = {
 
     signIn: thunk(async (actions, loginDto) => {
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
 
         // authenticate
         const session = await apiClient.defaultApi.authControllerLogin({
@@ -199,7 +199,7 @@ export const userModel: UserModel = {
 
     signOut: thunk(async (actions, _) => {
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
 
         const response = await apiClient.defaultApi.authControllerLogout();
 
@@ -212,7 +212,7 @@ export const userModel: UserModel = {
 
     resetPassword: thunk(async (_actions, userEmail) => {
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
 
         const response = await apiClient.defaultApi.authControllerResetPassword(
             {
@@ -228,7 +228,7 @@ export const userModel: UserModel = {
     updatePassword: thunk(
         async (_actions, { resetPasswordToken, updatePasswordDto }) => {
             // inject services
-            const apiClient = servicesContainer.get(ApiClient);
+            const apiClient = servicesContainer.get(CoreApiClient);
 
             const response =
                 await apiClient.defaultApi.authControllerUpdatePassword({
@@ -242,7 +242,7 @@ export const userModel: UserModel = {
 
     resendEmailValidation: thunk(async (_actions, userEmail) => {
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
 
         const response = await apiClient.defaultApi.authControllerConfirmResend(
             {
@@ -257,7 +257,7 @@ export const userModel: UserModel = {
 
     signUp: thunk(async (_actions, payload) => {
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
 
         console.log(apiClient);
 
@@ -274,7 +274,7 @@ export const userModel: UserModel = {
 
     getProfile: thunk(async (actions) => {
         // inject services
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
         const profile = await apiClient.defaultApi.usersControllerGetProfile();
         // save user
         actions.setCurrentUser(profile);

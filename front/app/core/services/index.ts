@@ -1,1 +1,1 @@
-export * from './ApiClient';
+export * from './CoreApiClient';

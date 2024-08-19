@@ -16,6 +16,10 @@
         max-height: 400px;
         width: 100%;
         gap: 50px;
+
+        /* Firefox scrollbar styling */
+        scrollbar-width: thin;
+        scrollbar-color: black rgba(225, 225, 225, 0.25);
     }
 
     li {
@@ -187,13 +191,6 @@ $size: 50px;
             .half-circle--light,
             .half-circle--shadow {
                 opacity: 0;
-            }
-
-            .ying-yang {
-                .black,
-                .white {
-                    opacity: 1;
-                }
             }
         }
     }

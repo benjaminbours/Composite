@@ -4,7 +4,7 @@ import Popper from '@mui/material/Popper';
 import { Side } from '@benjaminbours/composite-core';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ModeNightIcon from '@mui/icons-material/ModeNight';
-import { PlayerState } from '../../../useMainController';
+import { PlayerState } from '../../../core/adapters/easy-peasy/game';
 
 interface Props {
     levelName: string;

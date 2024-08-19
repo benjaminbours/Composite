@@ -11,9 +11,14 @@ import CircularProgress from '@mui/material/CircularProgress';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
-export const Actions: React.FC = () => {
+interface Props {
+    selectedRegion: string | null;
+}
+
+export const Actions: React.FC<Props> = ({ selectedRegion }) => {
     const {
         state,
+        isLoadingSoloGame,
         lobbyMode,
         handleInviteFriend,
         handleClickReadyToPlay,
@@ -39,14 +44,17 @@ export const Actions: React.FC = () => {
         }
     }, [state.you.level, state.you.side, state.isInQueue, lobbyMode]);
 
-    if (lobbyMode === LobbyMode.SOLO || lobbyMode === LobbyMode.PRACTICE) {
+    if (lobbyMode === LobbyMode.PRACTICE) {
         return (
-            <div className="team-lobby-scene__buttons-container">
+            <div className="lobby__buttons-container">
                 {state.you.level !== undefined && (
                     <button
                         ref={startSoloRef}
-                        className="composite-button main-action team-lobby-scene__align-button"
-                        onClick={handleStartSolo}
+                        className="composite-button main-action lobby__align-button"
+                        onClick={() => {
+                            handleStartSolo(selectedRegion);
+                        }}
+                        disabled={isLoadingSoloGame}
                     >
                         Start{' '}
                         <YingYang className="composite-button__end-icon" />
@@ -56,9 +64,32 @@ export const Actions: React.FC = () => {
         );
     }
 
+    if (lobbyMode === LobbyMode.SOLO) {
+        return (
+            <div className="lobby__buttons-container">
+                {state.you.level !== undefined && selectedRegion !== null && (
+                    <button
+                        ref={startSoloRef}
+                        className="composite-button main-action lobby__align-button"
+                        onClick={() => {
+                            if (!isLoadingSoloGame) {
+                                console.log('HERE CALL');
+                                handleStartSolo(selectedRegion);
+                            }
+                        }}
+                        disabled={isLoadingSoloGame}
+                    >
+                        {!isLoadingSoloGame && <>Start </>}
+                        <YingYang className="composite-button__end-icon" />
+                    </button>
+                )}
+            </div>
+        );
+    }
+
     if (lobbyMode === LobbyMode.DUO_WITH_RANDOM) {
         return (
-            <div className="team-lobby-scene__buttons-container">
+            <div className="lobby__buttons-container">
                 {state.isInQueue && (
                     <QueueTimeInfo queueTimeRef={queueTimeRef} />
                 )}
@@ -84,11 +115,11 @@ export const Actions: React.FC = () => {
 
     // this return is for LobbyMode.DUO_WITH_FRIEND mode
     return (
-        <div className="team-lobby-scene__buttons-container">
+        <div className="lobby__buttons-container">
             {state.mate ? (
                 <>
                     <p
-                        className="team-lobby-scene__info-text teammate-joined-text"
+                        className="lobby__info-text teammate-joined-text"
                         style={{
                             textAlign: 'left',
                         }}
@@ -107,7 +138,7 @@ export const Actions: React.FC = () => {
                     <DiscordButton className="composite-button" />
                     {noMateChoice && (
                         <p
-                            className="team-lobby-scene__info-text teammate-joined-text"
+                            className="lobby__info-text teammate-joined-text"
                             style={{
                                 textAlign: 'left',
                             }}
@@ -124,7 +155,7 @@ export const Actions: React.FC = () => {
                     )}
                     {!noMateChoice && !isAlignWithTeamMate && (
                         <button
-                            className="composite-button main-action team-lobby-scene__align-button"
+                            className="composite-button main-action lobby__align-button"
                             onClick={handleAlignWithTeamMate}
                         >
                             Align with team mate <YingYang />
@@ -136,7 +167,7 @@ export const Actions: React.FC = () => {
                                 </p> */}
                     {/* TODO: Add integration discord to create vocal room on demand */}
                     {isAlignWithTeamMate && (
-                        <div className="team-lobby-scene__ready-container">
+                        <div className="lobby__ready-container">
                             <button
                                 className="composite-button main-action"
                                 onClick={handleClickReadyToPlay}
@@ -150,7 +181,7 @@ export const Actions: React.FC = () => {
                                 )}
                                 {/* </div> */}
                             </button>
-                            <div className="team-lobby-scene__info-text">
+                            <div className="lobby__info-text">
                                 <InfoIcon
                                     style={{
                                         color: 'white',
@@ -175,7 +206,7 @@ export const Actions: React.FC = () => {
                         asyncAction={handleInviteFriend}
                     />
                     {state.isWaitingForFriend && (
-                        <div className="team-lobby-scene__waiting-friend-container team-lobby-scene__info-text">
+                        <div className="lobby__waiting-friend-container lobby__info-text">
                             <InfoIcon
                                 style={{
                                     color: 'white',
