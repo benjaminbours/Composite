@@ -3,7 +3,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 // TODO: don't like that much the fact this function set a object inside a lib, we never use
 import { geometries } from '@benjaminbours/composite-core';
 
-export async function startLoadingAssets() {
+let assetsAreLoaded = false;
+export async function startLoadingAssets(): Promise<boolean> {
+    if (assetsAreLoaded) {
+        return true;
+    }
     return new Promise((resolve) => {
         const manager = new LoadingManager();
 
@@ -22,6 +26,7 @@ export async function startLoadingAssets() {
         // when all assets are load callback
         manager.onLoad = () => {
             console.log('Loading complete!');
+            assetsAreLoaded = true;
             resolve(true);
         };
 
