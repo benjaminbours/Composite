@@ -1,4 +1,4 @@
-import { Level } from '@benjaminbours/composite-api-client';
+import { Level } from '@benjaminbours/composite-core-api-client';
 import IconButton from '@mui/material/IconButton';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import DeleteIcon from '@mui/icons-material/Delete';

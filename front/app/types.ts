@@ -1,4 +1,4 @@
-import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
+import { LevelStatusEnum } from '@benjaminbours/composite-core-api-client';
 import { Side } from '@benjaminbours/composite-core';
 
 export enum MenuScene {

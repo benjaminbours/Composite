@@ -1,10 +1,10 @@
 import {
     Level,
     UpsertRatingDtoTypeEnum,
-} from '@benjaminbours/composite-api-client';
-import { labelsDifficulty, labelsOverall } from './constants';
+} from '@benjaminbours/composite-core-api-client';
+import { labelsDifficulty, labelsOverall } from '../constants';
 
-export function computeRatings(level: Level) {
+export function computeLevelRatings(level: Level) {
     const { ratings } = level;
     if (!ratings) {
         return [];
@@ -50,4 +50,20 @@ export function computeRatings(level: Level) {
             length: number;
         }[],
     );
+}
+
+export function requestFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => {
+            console.error(
+                `Error attempting to enable full-screen mode: ${err.message} (${err.name})`,
+            );
+        });
+    }
+}
+
+export function exitFullScreen() {
+    if (document.exitFullscreen && document.fullscreenElement) {
+        document.exitFullscreen();
+    }
 }

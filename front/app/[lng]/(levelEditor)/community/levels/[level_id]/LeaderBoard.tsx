@@ -7,7 +7,7 @@ import {
     GameModeEnum,
     GameStatusEnum,
     Level,
-} from '@benjaminbours/composite-api-client';
+} from '@benjaminbours/composite-core-api-client';
 
 interface Props {
     level: Level;
@@ -38,7 +38,7 @@ export const LeaderBoard: React.FC<Props> = ({ level }) => {
             <div className="leaderboard__header">
                 <h2 className="title-h2">Ranking table</h2>
                 <Tabs
-                    className="team-lobby-scene__tabs"
+                    className="lobby__tabs"
                     value={selectedGameMode}
                     textColor="inherit"
                     variant="scrollable"

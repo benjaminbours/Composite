@@ -84,7 +84,7 @@ export const Mechanics: React.FC<Props> = ({}) => {
                 })}
             </ul>
             <div className="game-mechanics__content">
-                <h3 className="title-h3 title-h3--important">
+                <h3 className="title-h3 text-important">
                     {currentMechanic.title}
                 </h3>
                 {currentMechanic.description}

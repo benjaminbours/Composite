@@ -16,6 +16,20 @@ canvas,
     width: 100%;
 }
 
+.menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    height: 100vh;
+}
+
+.game {
+    position: relative;
+    z-index: 9;
+}
+
 .version {
     font-size: 12px;
     color: white;
@@ -136,10 +150,6 @@ canvas,
     font-weight: bold;
     font-size: 44px;
     letter-spacing: 5px;
-
-    &--important {
-        color: $mainActionColor;
-    }
 }
 
 .title-h2 {
@@ -156,10 +166,6 @@ canvas,
         color: white;
     }
 
-    &--important {
-        color: $mainActionColor;
-    }
-
     @media (max-width: 768px), (max-height: 500px) {
         font-size: 28px;
     }
@@ -171,10 +177,6 @@ canvas,
 
     &--white {
         color: white;
-    }
-
-    &--important {
-        color: $mainActionColor;
     }
 
     @media (max-width: 768px), (max-height: 500px) {
@@ -200,6 +202,10 @@ canvas,
     @media (max-width: 768px), (max-height: 500px) {
         font-size: 14px;
     }
+}
+
+.text-important {
+    color: $mainActionColor;
 }
 
 p {
@@ -959,3 +965,8 @@ p {
         margin: 0;
     }
 }
+
+// .region-selector {
+//     width: 70%;
+//     margin: 0 auto;
+// }

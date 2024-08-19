@@ -1,21 +1,21 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { servicesContainer } from '../../../core/frameworks';
-import { ApiClient } from '../../../core/services';
+import { CoreApiClient } from '../../../core/services';
 import Link from 'next/link';
 import { getDictionary } from '../../../../getDictionary';
 import {
     Level,
     LevelStatusEnum,
     UpsertRatingDtoTypeEnum,
-} from '@benjaminbours/composite-api-client';
+} from '@benjaminbours/composite-core-api-client';
 import CircularProgress from '@mui/material/CircularProgress';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import StarIcon from '@mui/icons-material/Star';
 import { ConfirmDialogContextProvider } from '../../../contexts';
 import { Route } from '../../../types';
 import { DifficultyIcon } from '../../../01_atoms/DifficultyIcon';
-import { computeRatings } from '../../../utils';
+import { computeLevelRatings } from '../../../utils/game';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -40,7 +40,7 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
         const [isLoading, setIsLoading] = useState(false);
 
         useEffect(() => {
-            const apiClient = servicesContainer.get(ApiClient);
+            const apiClient = servicesContainer.get(CoreApiClient);
 
             apiClient.defaultApi
                 .levelsControllerFindAll({ stats: 'true' })
@@ -77,7 +77,7 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
                                 return defaultImageUrl;
                             })();
 
-                            const ratings = computeRatings(level);
+                            const ratings = computeLevelRatings(level);
                             const qualityRating = ratings.find(
                                 (rating) =>
                                     rating.type ===

@@ -12,10 +12,10 @@ import {
 import {
     LevelStatusEnum,
     type Level,
-} from '@benjaminbours/composite-api-client';
+} from '@benjaminbours/composite-core-api-client';
 import App, { AppMode } from '../../../Game/App';
 import { servicesContainer } from '../../../core/frameworks';
-import { ApiClient } from '../../../core/services';
+import { CoreApiClient } from '../../../core/services';
 import { notFound, useRouter } from 'next/navigation';
 import { Route } from '../../../types';
 import { useStoreState } from '../../../hooks';
@@ -78,7 +78,7 @@ export function useController(
                 return;
             }
 
-            const apiClient = servicesContainer.get(ApiClient);
+            const apiClient = servicesContainer.get(CoreApiClient);
             const onSuccess = (level: Level) => {
                 if (level_id === 'new' || isFork) {
                     router.push(Route.LEVEL_EDITOR(level.id));
@@ -226,7 +226,7 @@ export function useController(
             return blob;
         }
 
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
         const base64Data = thumbnailSrc.replace(
             /^data:image\/(png|jpg|jpeg);base64,/,
             '',
@@ -707,7 +707,7 @@ export function useController(
 
     // effect responsible to load the level data from the api
     useEffect(() => {
-        const apiClient = servicesContainer.get(ApiClient);
+        const apiClient = servicesContainer.get(CoreApiClient);
         // load level
         Promise.all([
             startLoadingAssets(),

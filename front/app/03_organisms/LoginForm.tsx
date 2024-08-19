@@ -15,7 +15,7 @@ import type { JSONSchema7 } from 'json-schema';
 import { useStoreActions } from '../hooks';
 import { generateErrorForm } from '../utils/errors';
 import { MAIL_REGEXP } from '../constants';
-import { LoginDto } from '@benjaminbours/composite-api-client';
+import { LoginDto } from '@benjaminbours/composite-core-api-client';
 import type { getDictionary } from '../../getDictionary';
 import { Route } from '../types';
 

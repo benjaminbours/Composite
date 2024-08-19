@@ -2,18 +2,18 @@
 import {
     Level,
     UpsertRatingDtoTypeEnum,
-} from '@benjaminbours/composite-api-client';
+} from '@benjaminbours/composite-core-api-client';
 import React, { useMemo } from 'react';
 import { LevelRating } from '../../../../../Menu/scenes/LevelRating';
 import { DifficultyIcon } from '../../../../../01_atoms/DifficultyIcon';
-import { computeRatings } from '../../../../../utils';
+import { computeLevelRatings } from '../../../../../utils/game';
 
 interface Props {
     level: Level;
 }
 
 export const UsersFeedback: React.FC<Props> = ({ level }) => {
-    const ratings = useMemo(() => computeRatings(level), [level]);
+    const ratings = useMemo(() => computeLevelRatings(level), [level]);
 
     return (
         <div className="level-details-page__user-feedback">

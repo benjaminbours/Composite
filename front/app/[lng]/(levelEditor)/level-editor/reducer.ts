@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
+import { LevelStatusEnum } from '@benjaminbours/composite-core-api-client';
 import {
     ElementType,
     EndLevelProperties,

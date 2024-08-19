@@ -17,8 +17,8 @@ import Link from 'next/link';
 import { getDictionary } from '../../../../getDictionary';
 import { CircularProgress } from '@mui/material';
 import { Route } from '../../../types';
-import { LevelStatusEnum } from '@benjaminbours/composite-api-client';
-import { YingYang } from '../../../Menu/scenes/TeamLobbyScene/YingYang';
+import { LevelStatusEnum } from '@benjaminbours/composite-core-api-client';
+import { YingYang } from '../../../Menu/scenes/LobbyScene/YingYang';
 import { SideMenu } from '../../../03_organisms/SideMenu';
 
 interface Props {

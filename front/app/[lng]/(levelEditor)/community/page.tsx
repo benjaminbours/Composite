@@ -30,7 +30,7 @@ export default async function Community({ params: { lng } }: Props) {
             <TopBar dictionary={dictionary.common} />
             <main className="community-page">
                 <div className="main-container">
-                    <h1 className="title-h1 title-h1--important">Community</h1>
+                    <h1 className="title-h1 text-important">Community</h1>
                     <section className="text-image-section">
                         <div className="text-image-section__text-container">
                             <h2 className="title-h2">

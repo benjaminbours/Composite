@@ -466,7 +466,7 @@ const pastEvents: TimelineEvent[] = [
                     </li>
                     <li>
                         <p>
-                            Generate api-client package based on swagger spec.
+                            Generate core-api-client package based on swagger spec.
                         </p>
                     </li>
                     <li>

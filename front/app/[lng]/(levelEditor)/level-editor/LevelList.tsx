@@ -1,14 +1,14 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { servicesContainer } from '../../../core/frameworks';
-import { ApiClient } from '../../../core/services';
+import { CoreApiClient } from '../../../core/services';
 import { useStoreState } from '../../../hooks';
 import Link from 'next/link';
 import { Route } from '../../../types';
 import Button from '@mui/material/Button';
 import { getDictionary } from '../../../../getDictionary';
 import { usePathname } from 'next/navigation';
-import { Level } from '@benjaminbours/composite-api-client';
+import { Level } from '@benjaminbours/composite-core-api-client';
 import { LevelListItem } from './LevelListItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
@@ -49,7 +49,7 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
         const path = usePathname();
 
         useEffect(() => {
-            const apiClient = servicesContainer.get(ApiClient);
+            const apiClient = servicesContainer.get(CoreApiClient);
 
             if (isCurrentUserList && currentUser) {
                 apiClient.defaultApi
@@ -93,7 +93,7 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
                             return;
                         }
                         setIsDeleting(true);
-                        const apiClient = servicesContainer.get(ApiClient);
+                        const apiClient = servicesContainer.get(CoreApiClient);
                         apiClient.defaultApi
                             .levelsControllerRemove({ id: String(levelId) })
                             .then((_level) => {

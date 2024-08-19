@@ -4,7 +4,7 @@ import { getDictionary } from '../../../../../../getDictionary';
 import { TopBar } from '../../../../../02_molecules/TopBar';
 import { setupProjectEnv } from '../../../../../utils/setup';
 import { servicesContainer } from '../../../../../core/frameworks/inversify.config';
-import { ApiClient } from '../../../../../core/services';
+import { CoreApiClient } from '../../../../../core/services';
 import { notFound } from 'next/navigation';
 import { UsersFeedback } from './UsersFeedback';
 import { LeaderBoard } from './LeaderBoard';
@@ -25,7 +25,7 @@ export const revalidate = 1; // revalidate the data at most every hour
 async function getData(level_id: string) {
     setupProjectEnv('server');
     // inject services
-    const apiClient = servicesContainer.get(ApiClient);
+    const apiClient = servicesContainer.get(CoreApiClient);
     // load level
     const level = await apiClient.defaultApi
         .levelsControllerFindOne(
@@ -74,7 +74,7 @@ export default async function LevelDetailsPage({
                             <KeyboardArrowLeftIcon className="composite-button__start-icon" />
                             Back to community
                         </Link>
-                        <h1 className="title-h1 title-h1--important">
+                        <h1 className="title-h1 text-important">
                             {level.name}
                         </h1>
                         <h4 className="title-h5 level-details-page__author">
