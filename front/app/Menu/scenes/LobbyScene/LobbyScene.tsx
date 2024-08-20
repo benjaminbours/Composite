@@ -28,7 +28,7 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
     // contexts
     const { menuScene, nextMenuScene, lobbyRef } = useMenuTransitionContext();
 
-    const { exitLobby } = useGlobalContext();
+    const { exitLobby, loadingFlow } = useGlobalContext();
 
     // const { enqueueSnackbar } = useSnackbar();
 
@@ -135,7 +135,12 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
                     <CustomSwitch
                         className="lobby__mode-selector"
                         selectedValue={lobbyMode}
-                        onChange={(value) => setLobbyMode(value as LobbyMode)}
+                        onChange={(value) => {
+                            if (loadingFlow.length > 0) {
+                                return;
+                            }
+                            setLobbyMode(value as LobbyMode);
+                        }}
                         items={[
                             { text: 'Create', value: LobbyMode.CREATE },
                             { text: 'Join', value: LobbyMode.JOIN },

@@ -28,7 +28,7 @@ const generateInitialState = () => {
     }, {} as RegionState);
 };
 
-export function useCalculatePing(setRegion: any) {
+export function useCalculatePing() {
     const [regions, setRegions] = useState<RegionState>(generateInitialState());
 
     const isCalculatingPing = useMemo(() => {
@@ -89,13 +89,6 @@ export function useCalculatePing(setRegion: any) {
                 );
             });
     }, []);
-
-    useEffect(() => {
-        calculatePing().then((regions) => {
-            const sortedRegions = regions.sort((a, b) => a.ping - b.ping);
-            setRegion(sortedRegions[0].region);
-        });
-    }, [calculatePing, setRegion]);
 
     return {
         regions,

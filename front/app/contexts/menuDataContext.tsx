@@ -1,32 +1,33 @@
 'use client';
 // vendors
 import {
-    useCallback,
     useContext,
     useState,
     createContext,
+    useCallback,
     useEffect,
 } from 'react';
-import { Region } from '@hathora/cloud-sdk-typescript/models/components';
 // ours libs
-import {
-    Level,
-    LevelStatusEnum,
-    UpsertRatingDtoTypeEnum,
-} from '@benjaminbours/composite-core-api-client';
+import { Level } from '@benjaminbours/composite-core-api-client';
 // local
 import {
     PingEndpointsWithPing,
     RegionState,
     useCalculatePing,
 } from './useCalculatePing';
-import { servicesContainer } from '../core/frameworks';
-import { CoreApiClient } from '../core/services';
-import { computeLevelRatings } from '../utils/game';
+import { useFetchLevels } from './useFetchLevels';
+import {
+    GameMode,
+    GamePlayerNumber,
+    GameVisibility,
+    LobbyParameters,
+} from '../core/entities';
+import { useGlobalContext } from './globalContext';
 
 interface MenuDataContext {
+    state: LobbyParameters;
+    handleChange: (field: keyof LobbyParameters) => (newValue: any) => void;
     // regions
-    region: Region | '';
     regions: RegionState;
     isCalculatingPing: boolean;
     calculatePing: () => Promise<PingEndpointsWithPing[]>;
@@ -40,64 +41,58 @@ export const MenuDataContext = createContext<MenuDataContext>(
 );
 
 export function useMenuData() {
-    const [levels, setLevels] = useState<Level[]>([]);
-    const [isLoadingLevels, setIsLoadingLevels] = useState(false);
-    const [region, setRegion] = useState<Region | ''>('');
+    const { loadingFlow } = useGlobalContext();
 
-    const { calculatePing, regions, isCalculatingPing } =
-        useCalculatePing(setRegion);
+    const [state, setState] = useState(
+        new LobbyParameters(
+            GameMode.RANKED,
+            GamePlayerNumber.SOLO,
+            0,
+            GameVisibility.PUBLIC,
+            '',
+        ),
+    );
 
-    const fetchLevels = useCallback(async () => {
-        const apiClient = servicesContainer.get(CoreApiClient);
-        return apiClient.defaultApi
-            .levelsControllerFindAll({
-                status: LevelStatusEnum.Published,
-                stats: 'true',
-            })
-            .then((levels) => {
-                return levels
-                    .map((level) => {
-                        const ratings = computeLevelRatings(level);
-                        const qualityRating = ratings.find(
-                            (rating) =>
-                                rating.type === UpsertRatingDtoTypeEnum.Quality,
-                        );
-                        const difficultyRating = ratings.find(
-                            (rating) =>
-                                rating.type ===
-                                UpsertRatingDtoTypeEnum.Difficulty,
-                        );
-                        return {
-                            ...level,
-                            qualityRating: qualityRating
-                                ? qualityRating.total / qualityRating.length
-                                : 0,
-                            difficultyRating: difficultyRating
-                                ? difficultyRating.total /
-                                  difficultyRating.length
-                                : 0,
-                        };
-                    })
-                    .sort((a, b) => {
-                        return a.difficultyRating - b.difficultyRating;
-                    });
+    const handleChange = useCallback(
+        (field: keyof LobbyParameters) => (newValue: any) => {
+            if (loadingFlow.length > 0) {
+                return;
+            }
+            setState((prevState) => {
+                const nextState = {
+                    ...prevState,
+                    [field]: newValue,
+                };
+
+                if (field === 'mode' && newValue === GameMode.PRACTICE) {
+                    nextState.playerNumber = GamePlayerNumber.SOLO;
+                    nextState.visibility = GameVisibility.PUBLIC;
+                }
+
+                return nextState;
             });
-    }, []);
+        },
+        [loadingFlow],
+    );
+
+    const { calculatePing, regions, isCalculatingPing } = useCalculatePing();
 
     useEffect(() => {
-        setIsLoadingLevels(true);
-        fetchLevels()
-            .then((levels) => {
-                setLevels(levels);
-            })
-            .finally(() => {
-                setIsLoadingLevels(false);
-            });
-    }, [fetchLevels]);
+        calculatePing().then((regions) => {
+            const sortedRegions = regions.sort((a, b) => a.ping - b.ping);
+            setState((prevState) => ({
+                ...prevState,
+                region: sortedRegions[0].region,
+            }));
+        });
+    }, [calculatePing]);
+
+    const { levels, isLoadingLevels } = useFetchLevels();
 
     return {
+        state,
+        handleChange,
         // regions
-        region,
         regions,
         isCalculatingPing,
         calculatePing,

@@ -1,5 +1,5 @@
 // vendors
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import GamesIcon from '@mui/icons-material/Games';
 // import { useSearchParams } from 'next/navigation';
 // ours libs
@@ -10,7 +10,6 @@ import {
     GameMode,
     GamePlayerNumber,
     GameVisibility,
-    LobbyParameters,
 } from '../../../../core/entities/LobbyParameters';
 import { RegionSelector } from './RegionSelector';
 import { LevelSelector } from './LevelSelector';
@@ -22,10 +21,12 @@ interface Props {}
 
 export const CreateLobby: React.FC<Props> = ({}) => {
     // hooks
-    const { createGame, loadingFlow, loadingStep } = useGlobalContext();
+    const { createGame, loadingFlow, loadingStep, gameData } =
+        useGlobalContext();
 
     const {
-        region,
+        state,
+        handleChange,
         regions,
         isCalculatingPing,
         calculatePing,
@@ -44,40 +45,6 @@ export const CreateLobby: React.FC<Props> = ({}) => {
     );
 
     // local state
-    const [state, setState] = useState(
-        new LobbyParameters(
-            GameMode.RANKED,
-            GamePlayerNumber.SOLO,
-            0,
-            GameVisibility.PUBLIC,
-            region,
-        ),
-    );
-
-    useEffect(() => {
-        setState((prev) => ({
-            ...prev,
-            region,
-        }));
-    }, [region]);
-
-    const handleChange = useCallback(
-        (field: keyof LobbyParameters) => (newValue: any) => {
-            if (loadingFlow.length > 0) {
-                return;
-            }
-            setState((prevState) => ({
-                ...prevState,
-                [field]: newValue,
-            }));
-        },
-        [loadingFlow],
-    );
-
-    const handleChangeRegion = useMemo(
-        () => handleChange('region'),
-        [handleChange],
-    );
 
     const handleSubmit = useCallback(() => {
         createGame(state);
@@ -188,10 +155,14 @@ export const CreateLobby: React.FC<Props> = ({}) => {
                 <div className="create-game__row">
                     <RegionSelector
                         selectedRegion={state.region}
-                        onChange={handleChangeRegion}
+                        onChange={handleChange('region')}
                         regions={regions}
                         calculatePing={calculatePing}
                         isCalculatingPing={isCalculatingPing}
+                        isDisabled={
+                            gameData?.socketController !== undefined ||
+                            loadingFlow.length > 0
+                        }
                     />
                 </div>
             )}

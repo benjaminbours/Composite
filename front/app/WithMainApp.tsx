@@ -87,11 +87,11 @@ export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
 
             return (
                 <MenuTransitionContextProvider initialScene={initialScene}>
-                    <MenuDataContextProvider>
-                        <GlobalContextProvider>
+                    <GlobalContextProvider>
+                        <MenuDataContextProvider>
                             <MainApp dictionary={dictionary} />
-                        </GlobalContextProvider>
-                    </MenuDataContextProvider>
+                        </MenuDataContextProvider>
+                    </GlobalContextProvider>
                 </MenuTransitionContextProvider>
             );
         }

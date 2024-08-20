@@ -1,7 +1,9 @@
+// vendors
 import React, { useEffect, useState } from 'react';
 import { HathoraCloud } from '@hathora/cloud-sdk-typescript';
 import { LobbyV3 } from '@hathora/cloud-sdk-typescript/models/components';
-import { FLAG_MAP } from './CreateLobby/RegionSelector';
+// local
+import { FLAG_MAP } from '../../../constants';
 
 interface Props {
     // rooms: any[];
@@ -9,6 +11,7 @@ interface Props {
 
 export const JoinGame: React.FC<Props> = ({}) => {
     const [rooms, setRooms] = useState<LobbyV3[]>([]);
+
     useEffect(() => {
         const hathoraCloud = new HathoraCloud({
             appId: process.env.NEXT_PUBLIC_HATHORA_APP_ID,

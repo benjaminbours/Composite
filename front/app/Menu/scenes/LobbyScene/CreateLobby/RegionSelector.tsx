@@ -1,9 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { HathoraCloud } from '@hathora/cloud-sdk-typescript';
-import {
-    PingEndpoints,
-    Region,
-} from '@hathora/cloud-sdk-typescript/models/components';
+import React from 'react';
+import { Region } from '@hathora/cloud-sdk-typescript/models/components';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -13,21 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
 // local
 import { RegionState } from '../../../../contexts/useCalculatePing';
-
-const FLAG_MAP: Record<Region, string> = {
-    Dallas: '🇺🇸',
-    Chicago: '🇺🇸',
-    Seattle: '🇺🇸',
-    Los_Angeles: '🇺🇸',
-    Washington_DC: '🇺🇸',
-    London: '🇬🇧',
-    Frankfurt: '🇩🇪',
-    Sao_Paulo: '🇧🇷',
-    Mumbai: '🇮🇳',
-    Singapore: '🇸🇬',
-    Tokyo: '🇯🇵',
-    Sydney: '🇦🇺',
-};
+import { FLAG_MAP } from '../../../../constants';
 
 interface Props {
     regions: RegionState;
@@ -35,6 +17,7 @@ interface Props {
     onChange: (nextValue: Region) => void;
     calculatePing: () => void;
     isCalculatingPing: boolean;
+    isDisabled?: boolean;
 }
 
 export const RegionSelector: React.FC<Props> = ({
@@ -43,6 +26,7 @@ export const RegionSelector: React.FC<Props> = ({
     onChange,
     calculatePing,
     isCalculatingPing,
+    isDisabled,
 }) => {
     return (
         <div className="region-selector">
@@ -53,6 +37,7 @@ export const RegionSelector: React.FC<Props> = ({
                     label="Region"
                     onChange={(e) => onChange(e.target.value as Region)}
                     required
+                    disabled={isDisabled}
                 >
                     {Object.values(regions)
                         .sort((a, b) => a.ping - b.ping)
@@ -84,7 +69,7 @@ export const RegionSelector: React.FC<Props> = ({
             </FormControl>
             <IconButton
                 className="region-selector__refresh"
-                disabled={isCalculatingPing}
+                disabled={isCalculatingPing || isDisabled}
                 onClick={calculatePing}
             >
                 {isCalculatingPing ? (
