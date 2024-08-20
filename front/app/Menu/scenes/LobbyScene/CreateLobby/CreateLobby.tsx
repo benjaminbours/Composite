@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import GamesIcon from '@mui/icons-material/Games';
 // import { useSearchParams } from 'next/navigation';
 // ours libs
-import type { Level } from '@benjaminbours/composite-core-api-client';
 // local
 import { CustomSwitch } from '../CustomSwitch';
 import { useWindowSize } from '../../../../hooks/useWindowSize';
@@ -15,29 +14,24 @@ import {
 } from '../../../../core/entities/LobbyParameters';
 import { RegionSelector } from './RegionSelector';
 import { LevelSelector } from './LevelSelector';
-import { FlowItem } from '../../../../contexts';
 import { GameLoader } from './GameLoader';
+import { useGlobalContext } from '../../../../contexts';
+import { useMenuDataContext } from '../../../../contexts/menuDataContext';
 
-interface Props {
-    // level: Level | undefined;
-    levels: Level[];
-    isLoadingLevels: boolean;
-    onSubmit: (lobbyParameters: LobbyParameters) => void;
-    loadingFlow: FlowItem[];
-    loadingStep: number;
-    // gameData?: GameProps;
-}
+interface Props {}
 
-export const CreateLobby: React.FC<Props> = ({
-    onSubmit,
-    // level,
-    levels,
-    isLoadingLevels,
-    loadingFlow,
-    loadingStep,
-    // gameData,
-}) => {
+export const CreateLobby: React.FC<Props> = ({}) => {
     // hooks
+    const { createGame, loadingFlow, loadingStep } = useGlobalContext();
+
+    const {
+        region,
+        regions,
+        isCalculatingPing,
+        calculatePing,
+        levels,
+        isLoadingLevels,
+    } = useMenuDataContext();
     const { width, height } = useWindowSize();
     // const queryParams = useSearchParams();
 
@@ -56,9 +50,16 @@ export const CreateLobby: React.FC<Props> = ({
             GamePlayerNumber.SOLO,
             0,
             GameVisibility.PUBLIC,
-            '',
+            region,
         ),
     );
+
+    useEffect(() => {
+        setState((prev) => ({
+            ...prev,
+            region,
+        }));
+    }, [region]);
 
     const handleChange = useCallback(
         (field: keyof LobbyParameters) => (newValue: any) => {
@@ -79,8 +80,8 @@ export const CreateLobby: React.FC<Props> = ({
     );
 
     const handleSubmit = useCallback(() => {
-        onSubmit(state);
-    }, [state, onSubmit]);
+        createGame(state);
+    }, [state, createGame]);
 
     // // TODO: add params side in the url as well or at a state level selected without any side yet
     // useEffect(() => {
@@ -188,6 +189,9 @@ export const CreateLobby: React.FC<Props> = ({
                     <RegionSelector
                         selectedRegion={state.region}
                         onChange={handleChangeRegion}
+                        regions={regions}
+                        calculatePing={calculatePing}
+                        isCalculatingPing={isCalculatingPing}
                     />
                 </div>
             )}

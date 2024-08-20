@@ -2,28 +2,17 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { servicesContainer } from '../../../core/frameworks';
-import { CoreApiClient } from '../../../core/services';
 import { useSnackbar } from 'notistack';
 import { getDictionary } from '../../../../getDictionary';
 import { useStoreState } from '../../../hooks';
 import { AuthModal } from '../../../03_organisms/AuthModal';
 import PersonIcon from '@mui/icons-material/Person';
 import Badge from '@mui/material/Badge';
-import { useWindowSize } from '../../../hooks/useWindowSize';
 import { CustomSwitch } from './CustomSwitch';
-import { Region } from '@hathora/cloud-sdk-typescript/models/components';
-import Visibility from '@mui/icons-material/Visibility';
 import { JoinGame } from './JoinGame';
 import { CreateLobby } from './CreateLobby/CreateLobby';
-import {
-    LevelStatusEnum,
-    UpsertRatingDtoTypeEnum,
-    type Level,
-} from '@benjaminbours/composite-core-api-client';
 import { useMenuTransitionContext } from '../../../contexts/menuTransitionContext';
 import { MenuScene } from '../../../types';
-import { computeLevelRatings } from '../../../utils/game';
 import { useGlobalContext } from '../../../contexts';
 
 export enum LobbyMode {
@@ -37,11 +26,10 @@ interface Props {
 
 export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
     // contexts
-    const { menuScene, nextMenuScene, lobbyRef, goToHome } =
-        useMenuTransitionContext();
+    const { menuScene, nextMenuScene, lobbyRef } = useMenuTransitionContext();
 
-    const { createGame, loadingFlow, loadingStep, gameData } =
-        useGlobalContext();
+    const { exitLobby } = useGlobalContext();
+
     // const { enqueueSnackbar } = useSnackbar();
 
     // const urlSearchParams = useSearchParams();
@@ -53,8 +41,6 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
     // );
 
     // local
-    const [levels, setLevels] = useState<Level[]>([]);
-    const [isLoadingLevels, setIsLoadingLevels] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     // const isConnecting = useRef(false);
 
@@ -69,54 +55,6 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
             unmount: !isMount,
         });
     }, [menuScene, nextMenuScene]);
-
-    const fetchLevels = useCallback(async () => {
-        const apiClient = servicesContainer.get(CoreApiClient);
-        return apiClient.defaultApi
-            .levelsControllerFindAll({
-                status: LevelStatusEnum.Published,
-                stats: 'true',
-            })
-            .then((levels) => {
-                return levels
-                    .map((level) => {
-                        const ratings = computeLevelRatings(level);
-                        const qualityRating = ratings.find(
-                            (rating) =>
-                                rating.type === UpsertRatingDtoTypeEnum.Quality,
-                        );
-                        const difficultyRating = ratings.find(
-                            (rating) =>
-                                rating.type ===
-                                UpsertRatingDtoTypeEnum.Difficulty,
-                        );
-                        return {
-                            ...level,
-                            qualityRating: qualityRating
-                                ? qualityRating.total / qualityRating.length
-                                : 0,
-                            difficultyRating: difficultyRating
-                                ? difficultyRating.total /
-                                  difficultyRating.length
-                                : 0,
-                        };
-                    })
-                    .sort((a, b) => {
-                        return a.difficultyRating - b.difficultyRating;
-                    });
-            });
-    }, []);
-
-    useEffect(() => {
-        setIsLoadingLevels(true);
-        fetchLevels()
-            .then((levels) => {
-                setLevels(levels);
-            })
-            .finally(() => {
-                setIsLoadingLevels(false);
-            });
-    }, [fetchLevels]);
 
     // TODO: Duplicate from useController level editor
     // effect responsible to close the auth modal after successful login
@@ -187,7 +125,7 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
                 <div>
                     <button
                         className="composite-button white"
-                        onClick={goToHome}
+                        onClick={exitLobby}
                     >
                         Exit
                     </button>
@@ -206,15 +144,7 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
                 </div>
             </div>
             <div className="lobby__main">
-                {lobbyMode === LobbyMode.CREATE && (
-                    <CreateLobby
-                        onSubmit={createGame}
-                        levels={levels}
-                        isLoadingLevels={isLoadingLevels}
-                        loadingFlow={loadingFlow}
-                        loadingStep={loadingStep}
-                    />
-                )}
+                {lobbyMode === LobbyMode.CREATE && <CreateLobby />}
                 {lobbyMode === LobbyMode.JOIN && <JoinGame />}
             </div>
             {/* <div className="lobby__tabs-container">

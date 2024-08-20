@@ -11,24 +11,10 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
+// local
+import { RegionState } from '../../../../contexts/useCalculatePing';
 
-type PingEndpointsWithPing = PingEndpoints & { ping: number };
-
-type RegionState = Record<
-    Region,
-    {
-        region: Region;
-        isLoading: boolean;
-        ping: number;
-    }
->;
-
-interface Props {
-    selectedRegion: Region | '';
-    onChange: (nextValue: Region) => void;
-}
-
-export const FLAG_MAP: Record<Region, string> = {
+const FLAG_MAP: Record<Region, string> = {
     Dallas: '🇺🇸',
     Chicago: '🇺🇸',
     Seattle: '🇺🇸',
@@ -43,89 +29,21 @@ export const FLAG_MAP: Record<Region, string> = {
     Sydney: '🇦🇺',
 };
 
-const generateInitialState = () => {
-    return Object.values(Region).reduce((acc, region) => {
-        acc[region] = {
-            region,
-            ping: 0,
-            isLoading: true,
-        };
-        return acc;
-    }, {} as RegionState);
-};
+interface Props {
+    regions: RegionState;
+    selectedRegion: Region | '';
+    onChange: (nextValue: Region) => void;
+    calculatePing: () => void;
+    isCalculatingPing: boolean;
+}
 
 export const RegionSelector: React.FC<Props> = ({
+    regions,
     selectedRegion,
     onChange,
+    calculatePing,
+    isCalculatingPing,
 }) => {
-    const [regions, setRegions] = useState<RegionState>(generateInitialState());
-
-    const isLoading = useMemo(() => {
-        return Object.values(regions).some((region) => region.isLoading);
-    }, [regions]);
-
-    const calculatePing = useCallback(() => {
-        setRegions(generateInitialState());
-        const hathoraCloud = new HathoraCloud({
-            appId: process.env.NEXT_PUBLIC_HATHORA_APP_ID,
-        });
-        return hathoraCloud.discoveryV2
-            .getPingServiceEndpoints()
-            .then((regions) => {
-                return Promise.all(
-                    regions.map(async (region) => {
-                        return new Promise<PingEndpointsWithPing>((resolve) => {
-                            const url = `wss://${region.host}:${region.port}/ws`;
-                            let startTime: number;
-                            let endTime: number;
-
-                            // Create a new WebSocket instance
-                            const socket = new WebSocket(url);
-
-                            // WebSocket event listeners
-                            socket.onopen = () => {
-                                // You can perform any necessary actions after the connection is opened
-                                startTime = Date.now();
-                                socket.send('ping');
-                            };
-
-                            socket.onmessage = (event) => {
-                                if (event.data !== 'ping') {
-                                    return;
-                                }
-                                endTime = Date.now();
-                                const ping = endTime - startTime;
-                                socket.close();
-                                resolve({
-                                    ...region,
-                                    ping,
-                                });
-                            };
-                        }).then((region) => {
-                            // region
-                            setRegions((prev) => {
-                                const next = { ...prev };
-                                next[region.region] = {
-                                    ...next[region.region],
-                                    ping: region.ping,
-                                    isLoading: false,
-                                };
-                                return next;
-                            });
-                            return region;
-                        });
-                    }),
-                );
-            });
-    }, []);
-
-    useEffect(() => {
-        calculatePing().then((regions) => {
-            const sortedRegions = regions.sort((a, b) => a.ping - b.ping);
-            onChange(sortedRegions[0].region);
-        });
-    }, [calculatePing, onChange]);
-
     return (
         <div className="region-selector">
             <FormControl fullWidth>
@@ -166,10 +84,10 @@ export const RegionSelector: React.FC<Props> = ({
             </FormControl>
             <IconButton
                 className="region-selector__refresh"
-                disabled={isLoading}
+                disabled={isCalculatingPing}
                 onClick={calculatePing}
             >
-                {isLoading ? (
+                {isCalculatingPing ? (
                     <CircularProgress style={{ color: 'white' }} size={20} />
                 ) : (
                     <RefreshIcon />

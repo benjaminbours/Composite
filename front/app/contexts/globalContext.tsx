@@ -40,11 +40,10 @@ import React from 'react';
 // }
 
 export enum GameStatus {
-    // // default
-    // IDLE = 'IDLE',
     LOADING_LEVEL_DATA = 'LOADING_LEVEL_DATA',
-    // creating a game in the selected region and waiting for it to be ready
+    // Creating a game in the selected region
     CREATING_GAME = 'CREATING_GAME',
+    // Waiting for it to be ready
     CONNECTING_TO_GAME = 'CONNECTING_TO_GAME',
 }
 
@@ -62,14 +61,12 @@ export const statusTextMap = {
 
 export interface FlowItem {
     id: GameStatus;
-    // status: LoadingState;
     text: string;
 }
 
 export const PRACTICE_FLOW: FlowItem[] = [
     {
         id: GameStatus.LOADING_LEVEL_DATA,
-        // status: LoadingState.LOADING,
         text: statusTextMap[GameStatus.LOADING_LEVEL_DATA],
     },
 ];
@@ -77,17 +74,14 @@ export const PRACTICE_FLOW: FlowItem[] = [
 export const RANKED_SOLO: FlowItem[] = [
     {
         id: GameStatus.LOADING_LEVEL_DATA,
-        // status: LoadingState.LOADING,
         text: statusTextMap[GameStatus.LOADING_LEVEL_DATA],
     },
     {
         id: GameStatus.CREATING_GAME,
-        // status: LoadingState.PENDING,
         text: statusTextMap[GameStatus.CREATING_GAME],
     },
     {
         id: GameStatus.CONNECTING_TO_GAME,
-        // status: LoadingState.PENDING,
         text: statusTextMap[GameStatus.CONNECTING_TO_GAME],
     },
 ];
@@ -112,6 +106,7 @@ interface GlobalContext {
     // actions
     createGame: (params: LobbyParameters) => void;
     exitGame: () => void;
+    exitLobby: () => void;
     // components
     GameComponent: React.LazyExoticComponent<typeof Game> | undefined;
 }
@@ -130,9 +125,8 @@ export function useGameController() {
     const [loadingStep, setLoadingStep] = useState(0);
     const [isMenuVisible, setIsMenuVisible] = useState(true);
     const [isGameVisible, setIsGameVisible] = useState(false);
-    // const [assetsAreLoaded, setAssetsA] = useState(false);
 
-    const { goToLobby, setMenuScene, menuOut, menuIn } =
+    const { goToHome, setMenuScene, menuOut, menuIn } =
         useMenuTransitionContext();
 
     const fetchLevelData = useCallback((levelId: number) => {
@@ -408,6 +402,15 @@ export function useGameController() {
         exitFullScreen();
     }, [setMenuScene]);
 
+    const exitLobby = useCallback(() => {
+        if (gameData?.socketController) {
+            gameData.socketController.destroy();
+        }
+        goToHome();
+        setGameData(undefined);
+        setGameStats(undefined);
+    }, [goToHome, gameData]);
+
     useEffect(() => {
         if (isMenuVisible) {
             menuIn(() => {
@@ -425,6 +428,7 @@ export function useGameController() {
         isMenuVisible,
         createGame,
         exitGame,
+        exitLobby,
         GameComponent,
     };
 }

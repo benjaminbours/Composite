@@ -16,6 +16,7 @@ import {
     GlobalContextProvider,
     MenuTransitionContextProvider,
 } from './contexts';
+import { MenuDataContextProvider } from './contexts/menuDataContext';
 
 setupProjectEnv('client');
 
@@ -86,9 +87,11 @@ export const WithMainApp: React.FC<Props> = ({ children, lng, dictionary }) => {
 
             return (
                 <MenuTransitionContextProvider initialScene={initialScene}>
-                    <GlobalContextProvider>
-                        <MainApp dictionary={dictionary} />
-                    </GlobalContextProvider>
+                    <MenuDataContextProvider>
+                        <GlobalContextProvider>
+                            <MainApp dictionary={dictionary} />
+                        </GlobalContextProvider>
+                    </MenuDataContextProvider>
                 </MenuTransitionContextProvider>
             );
         }

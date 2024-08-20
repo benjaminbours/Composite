@@ -38,13 +38,9 @@ export const EndLevelScene: React.FC<Props> = React.memo(({ dictionary }) => {
         // setShadowRotationSpeed,
         // setCurveIsFast,
         goToLobby,
-        goToHome,
     } = useMenuTransitionContext();
-    const { gameData, gameStats } = useGlobalContext();
+    const { gameData, gameStats, exitLobby } = useGlobalContext();
 
-    // const gameMode = useStoreState(
-    //     (state) => state.lobby.lobbyParameters?.mode,
-    // );
     const isAuthenticated = useStoreState(
         (actions) => actions.user.isAuthenticated,
     );
@@ -81,9 +77,13 @@ export const EndLevelScene: React.FC<Props> = React.memo(({ dictionary }) => {
 
     const isMount = useMemo(
         () =>
-            menuScene === MenuScene.END_LEVEL ||
-            (nextMenuScene === MenuScene.END_LEVEL && gameData),
-        [menuScene, nextMenuScene, gameData],
+            Boolean(
+                (menuScene === MenuScene.END_LEVEL ||
+                    nextMenuScene === MenuScene.END_LEVEL) &&
+                    gameData &&
+                    gameStats,
+            ),
+        [menuScene, nextMenuScene, gameData, gameStats],
     );
 
     const cssClass = useMemo(() => {
@@ -249,7 +249,7 @@ export const EndLevelScene: React.FC<Props> = React.memo(({ dictionary }) => {
                 text="Login to your account to save your feedback."
             />
             <div className="end-level-scene__header">
-                <button className="composite-button white" onClick={goToHome}>
+                <button className="composite-button white" onClick={exitLobby}>
                     Exit
                 </button>
             </div>
