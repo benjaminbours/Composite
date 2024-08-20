@@ -162,7 +162,7 @@ export class GamesService {
           .filter((game) => game.duration !== 0)
           .sort((a, b) => a.duration - b.duration);
         const index = sortedGames.findIndex((g) => g.id === id);
-        return { updatedGame, rank: index };
+        return { updatedGame, rank: index + 1 };
       });
   }
 
