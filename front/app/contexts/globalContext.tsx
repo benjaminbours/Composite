@@ -22,6 +22,7 @@ import { Level } from '@benjaminbours/composite-core-api-client';
 import { HathoraCloud } from '@hathora/cloud-sdk-typescript';
 import {
     ConnectionInfoV2,
+    LobbyV3,
     Region,
     RoomReadyStatus,
 } from '@hathora/cloud-sdk-typescript/models/components';
@@ -45,12 +46,6 @@ export enum GameStatus {
     CREATING_GAME = 'CREATING_GAME',
     // Waiting for it to be ready
     CONNECTING_TO_GAME = 'CONNECTING_TO_GAME',
-}
-
-enum LoadingState {
-    LOADING,
-    PENDING,
-    DONE,
 }
 
 export const statusTextMap = {
@@ -87,8 +82,8 @@ export const RANKED_SOLO: FlowItem[] = [
 ];
 
 export interface GameData {
-    initialGameState: GameState;
     lobbyParameters: LobbyParameters;
+    roomId?: string;
     level: Level;
     socketController?: SocketController;
     onGameRendered: () => void;
@@ -97,6 +92,7 @@ export interface GameData {
 
 interface GlobalContext {
     // properties
+    initialGameState: GameState | undefined;
     gameData: GameData | undefined;
     gameStats: GameFinishedPayload | undefined;
     isMenuVisible: boolean;
@@ -121,6 +117,12 @@ export function useGameController() {
     const [gameStats, setGameStats] = useState<GameFinishedPayload | undefined>(
         undefined,
     );
+    const [initialGameState, setInitialGameState] = useState<
+        GameState | undefined
+    >(undefined);
+    const [hathoraAnonymousToken, setHathoraAnonymousToken] = useState<
+        string | undefined
+    >(undefined);
     const [loadingFlow, setLoadingFlow] = useState<FlowItem[]>([]);
     const [loadingStep, setLoadingStep] = useState(0);
     const [isMenuVisible, setIsMenuVisible] = useState(true);
@@ -147,31 +149,19 @@ export function useGameController() {
         });
     }, [menuOut]);
 
-    const handleGameStart = useCallback(
-        (params: LobbyParameters, level: Level) =>
-            (
-                socketController: SocketController,
-                initialGameState: GameState,
-            ) => {
-                // if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
-                //     (window as any).gtag('event', 'start_game', {
-                //         env: process.env.NEXT_PUBLIC_STAGE,
-                //         gameMode: lobbyMode,
-                //         userId: currentUser?.id,
-                //     });
-                // }
-                setGameData({
-                    initialGameState,
-                    level,
-                    lobbyParameters: params,
-                    onGameRendered,
-                    socketController,
-                });
-                setIsGameVisible(true);
-                // requestFullScreen();
-            },
-        [onGameRendered],
-    );
+    const handleGameStart = useCallback((initialGameState: GameState) => {
+        // if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
+        //     (window as any).gtag('event', 'start_game', {
+        //         env: process.env.NEXT_PUBLIC_STAGE,
+        //         gameMode: lobbyMode,
+        //         userId: currentUser?.id,
+        //     });
+        // }
+        setInitialGameState(initialGameState);
+
+        setIsGameVisible(true);
+        // requestFullScreen();
+    }, []);
 
     const handleGameFinished = useCallback(
         (data: GameFinishedPayload) => {
@@ -205,39 +195,18 @@ export function useGameController() {
         [setMenuScene],
     );
 
-    const createSocketController = useCallback(
-        async (uri: string, params: LobbyParameters, level: Level) => {
-            return import('../SocketController')
-                .then((mod) => mod.SocketController)
-                .then((SocketController) => {
-                    return new SocketController(
-                        uri,
-                        handleGameStart(params, level),
-                        handleGameFinished,
-                        () => {},
-                        // handleTeamMateDisconnect,
-                        () => {},
-                        // handleTeamMateJoinLobby,
-                        () => {},
-                        // handleReceiveLevelOnLobby,
-                        () => {},
-                        // handleReceiveSideOnLobby,
-                        () => {},
-                        // handleReceiveReadyToPlay,
-                    );
+    const createSocketController = useCallback(async (uri: string) => {
+        return import('../SocketController')
+            .then((mod) => mod.SocketController)
+            .then((SocketController) => {
+                // TODO: Handle connection error
+                return new Promise<SocketController>((resolve) => {
+                    const socket = new SocketController(uri, () => {
+                        resolve(socket);
+                    });
                 });
-        },
-        [
-            handleGameStart,
-            handleGameFinished,
-            // handleGameFinished,
-            // handleTeamMateDisconnect,
-            // // handleTeamMateJoinLobby,
-            // handleReceiveLevelOnLobby,
-            // handleReceiveSideOnLobby,
-            // handleReceiveReadyToPlay,
-        ],
-    );
+            });
+    }, []);
 
     const createGame = useCallback(
         async (params: LobbyParameters) => {
@@ -277,8 +246,13 @@ export function useGameController() {
             if (mode === GameMode.PRACTICE) {
                 const { initialGameState } =
                     createInitialGameStateAndLevelMapping(level);
+                setInitialGameState(initialGameState);
+                if (gameData?.socketController) {
+                    gameData.socketController.destroy();
+                }
                 setGameData({
-                    initialGameState,
+                    socketController: undefined,
+                    roomId: undefined,
                     level,
                     lobbyParameters: params,
                     onPracticeGameFinished: handleGameFinished,
@@ -298,36 +272,92 @@ export function useGameController() {
              * @returns Hathora token for anonymous user
              */
             const loginAsAnonymous = async () => {
-                // if (hathoraAnonymousToken) {
-                //     return hathoraAnonymousToken;
-                // }
+                if (hathoraAnonymousToken) {
+                    return hathoraAnonymousToken;
+                }
                 return hathoraCloud.authV1
                     .loginAnonymous(process.env.NEXT_PUBLIC_HATHORA_APP_ID)
                     .then((res) => {
-                        // actions.setHathoraAnonymousToken(res.token);
+                        setHathoraAnonymousToken(res.token);
                         return res.token;
                     });
             };
 
+            const requestLobbyCreation = async (token: string) => {
+                return hathoraCloud.lobbiesV3.createLobby(
+                    {
+                        playerAuth: token,
+                    },
+                    {
+                        region: region as Region,
+                        visibility,
+                        roomConfig: JSON.stringify({
+                            playerNumber,
+                            levelId,
+                        }),
+                    },
+                    process.env.NEXT_PUBLIC_HATHORA_APP_ID,
+                );
+            };
+
+            const waitUntilRoomIsReady = async (lobbyInfo: LobbyV3) => {
+                setLoadingStep((prev) => prev + 1);
+                const isRoomReady = async (
+                    roomId: string,
+                ): Promise<{
+                    conditionMet: boolean;
+                    data: ConnectionInfoV2;
+                }> => {
+                    const connectionInfo =
+                        await hathoraCloud.roomsV2.getConnectionInfo(roomId);
+                    return {
+                        conditionMet:
+                            connectionInfo.status === RoomReadyStatus.Active,
+                        data: connectionInfo,
+                    };
+                };
+
+                return waitUntilConditionMet(() =>
+                    isRoomReady(lobbyInfo.roomId),
+                );
+            };
+
             const connectToRoom = async (connectionInfo: ConnectionInfoV2) => {
                 const uri = `wss://${connectionInfo.exposedPort!.host}:${connectionInfo.exposedPort!.port}`;
-                const socketController = await createSocketController(
-                    uri,
-                    params,
-                    level,
+                const socketController = await createSocketController(uri);
+
+                socketController.init(
+                    handleGameStart,
+                    handleGameFinished,
+                    () => {},
+                    // handleTeamMateDisconnect,
+                    () => {},
+                    // handleTeamMateJoinLobby,
+                    () => {},
+                    // handleReceiveLevelOnLobby,
+                    () => {},
+                    // handleReceiveSideOnLobby,
+                    () => {},
+                    // handleReceiveReadyToPlay,
                 );
 
-                // const isSocketConnected = async (): Promise<{
-                //     conditionMet: boolean;
-                //     data: undefined;
-                // }> => ({
-                //     conditionMet: socketController.isConnected,
-                //     data: undefined,
-                // });
+                return [socketController, connectionInfo.roomId] as [
+                    SocketController,
+                    string,
+                ];
+            };
 
-                // await waitUntilConditionMet(() => isSocketConnected());
-                // console.log('socket is connected');
-
+            const requestSoloGame = ([socketController, roomId]: [
+                SocketController,
+                string,
+            ]) => {
+                setGameData({
+                    level,
+                    lobbyParameters: params,
+                    onGameRendered,
+                    socketController,
+                    roomId,
+                });
                 const isDesktop =
                     window.innerWidth > 768 && window.innerHeight > 500;
                 socketController.emit([
@@ -338,57 +368,36 @@ export function useGameController() {
                         level: levelId,
                         device: isDesktop ? 'desktop' : 'mobile',
                         region,
-                        roomId: connectionInfo.roomId,
+                        roomId,
                     },
                 ]);
             };
 
-            setLoadingStep((prev) => prev + 1);
-            return loginAsAnonymous()
-                .then((token) =>
-                    hathoraCloud.lobbiesV3.createLobby(
-                        {
-                            playerAuth: token,
-                        },
-                        {
-                            region: region as Region,
-                            visibility,
-                            roomConfig: JSON.stringify({
-                                playerNumber,
-                                levelId,
-                            }),
-                        },
-                        process.env.NEXT_PUBLIC_HATHORA_APP_ID,
-                    ),
-                )
-                .then((lobbyInfo) => {
-                    setLoadingStep((prev) => prev + 1);
-                    const isRoomReady = async (
-                        roomId: string,
-                    ): Promise<{
-                        conditionMet: boolean;
-                        data: ConnectionInfoV2;
-                    }> => {
-                        const connectionInfo =
-                            await hathoraCloud.roomsV2.getConnectionInfo(
-                                roomId,
-                            );
-                        return {
-                            conditionMet:
-                                connectionInfo.status ===
-                                RoomReadyStatus.Active,
-                            data: connectionInfo,
-                        };
-                    };
+            if (gameData?.socketController && gameData.roomId) {
+                // if there is already a connection, just request another game
+                setGameData({
+                    level,
+                    lobbyParameters: params,
+                    onGameRendered,
+                });
+                requestSoloGame([gameData.socketController, gameData.roomId]);
+                return;
+            }
 
-                    return waitUntilConditionMet(() =>
-                        isRoomReady(lobbyInfo.roomId),
-                    );
-                })
-                .then(connectToRoom);
+            setLoadingStep((prev) => prev + 1);
+
+            // first connection sequence
+            loginAsAnonymous()
+                .then(requestLobbyCreation)
+                .then(waitUntilRoomIsReady)
+                .then(connectToRoom)
+                .then(requestSoloGame);
         },
         [
+            gameData,
+            hathoraAnonymousToken,
             fetchLevelData,
+            handleGameStart,
             handleGameFinished,
             createSocketController,
             onGameRendered,
@@ -420,6 +429,7 @@ export function useGameController() {
     }, [isMenuVisible, menuIn]);
 
     return {
+        initialGameState,
         gameData,
         gameStats,
         loadingFlow,

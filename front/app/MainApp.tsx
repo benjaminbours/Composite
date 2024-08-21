@@ -45,8 +45,14 @@ interface Props {
  * MainApp is responsible to manage the orchestration between the Menu (2D part, the queue management, etc), the game (3D part) and the socket connection.
  */
 function MainApp({ dictionary }: Props) {
-    const { isMenuVisible, isGameVisible, gameData, exitGame, GameComponent } =
-        useGlobalContext();
+    const {
+        isMenuVisible,
+        isGameVisible,
+        exitGame,
+        gameData,
+        initialGameState,
+        GameComponent,
+    } = useGlobalContext();
 
     const { setMainAppContext } = useContext(AppContext);
     const inputsManager = useRef<InputsManager>(new InputsManager());
@@ -138,14 +144,14 @@ function MainApp({ dictionary }: Props) {
                         // }
                         side={Side.SHADOW}
                         gameData={gameData!}
-                        // gameProps={{
+                        initialGameState={initialGameState}
+                        // gameData={{
                         //     socketController:
                         //         servicesContainer.get(SocketController),
                         //     initialGameState,
                         //     lobbyParameters,
                         //     level,
-                        //     onPracticeGameFinished:
-                        //         mainController.handleGameFinished,
+                        //     onPracticeGameFinished: handleGameFinished,
                         // }}
                         tabIsHidden={tabIsHidden}
                         stats={statsRef}

@@ -23,33 +23,29 @@ export class SocketController {
     // Round-trip time or ping
     private timeSamples: { rtt: number }[] = [];
     private isTimeSynced = false;
-    public isConnected = false;
 
-    constructor(
-        uri: string,
-        onGameStart: (
-            socketController: SocketController,
-            initialGameState: GameState,
-        ) => void,
+    constructor(uri: string, onConnect: () => void) {
+        this.socket = io(uri, { transports: ['websocket'] });
+        this.socket.on(SocketEventType.CONNECT, () => {
+            console.log('connected', this.socket.id);
+            onConnect();
+        });
+    }
+
+    public init = (
+        onGameStart: (initialGameState: GameState) => void,
         onGameFinish: (data: GameFinishedPayload) => void,
         onTeamMateDisconnect: () => void,
         onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
         handleReceiveLevelOnLobby: (levelId: number) => void,
         handleReceiveSideOnLobby: (side: Side) => void,
         handleReceiveReadyToPlay: (isReady: boolean) => void,
-    ) {
-        this.socket = io(uri, { transports: ['websocket'] });
-
-        // menu listeners
-        this.socket.on(SocketEventType.CONNECT, () => {
-            console.log('connected', this.socket.id);
-            this.isConnected = true;
-        });
+    ) => {
         this.socket.on(
             SocketEventType.GAME_START,
             (data: GameStateUpdatePayload) => {
                 console.log('received game start event', data.gameState);
-                onGameStart(this, data.gameState);
+                onGameStart(data.gameState);
             },
         );
         this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
@@ -69,7 +65,7 @@ export class SocketController {
             SocketEventLobby.READY_TO_PLAY,
             handleReceiveReadyToPlay,
         );
-    }
+    };
 
     public registerGameStateUpdateListener = (
         onGameStateUpdate: (data: GameStateUpdatePayload) => void,
@@ -159,6 +155,5 @@ export class SocketController {
     public destroy = () => {
         console.log('disconnect');
         this.socket.disconnect();
-        this.isConnected = false;
     };
 }

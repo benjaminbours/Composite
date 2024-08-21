@@ -14,7 +14,6 @@ import { BufferGeometry, Mesh, Object3D, Vector2 } from 'three';
 Mesh.prototype.raycast = acceleratedRaycast;
 // our libs
 import {
-    GameFinishedPayload,
     GameState,
     MovableComponentState,
     Side,
@@ -42,6 +41,7 @@ export interface Props {
     tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
     gameData?: GameData;
+    initialGameState?: GameState;
     levelEditorProps?: LevelEditorProps;
 }
 
@@ -52,6 +52,7 @@ function Game({
     stats,
     inputsManager,
     gameData,
+    initialGameState,
     levelEditorProps,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -112,11 +113,11 @@ function Game({
             return;
         }
 
-        if (gameData) {
+        if (gameData && initialGameState) {
             appRef.current = new App(
                 canvasRef.current,
                 canvasMiniMapRef.current,
-                gameData.initialGameState,
+                initialGameState,
                 [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
                 inputsManager,
                 AppMode.GAME,
