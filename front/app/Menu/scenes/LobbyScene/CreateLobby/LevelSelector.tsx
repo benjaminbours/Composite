@@ -30,7 +30,7 @@ export const LevelSelector: React.FC<Props> = ({
     isMobile,
     isLoading,
 }) => {
-    const { setLightIsPulsingFast, setShadowRotationSpeed } =
+    const { setLightIsPulsingFast, setShadowRotationSpeed, handleSideButton } =
         useMenuTransitionContext();
 
     // author
@@ -54,96 +54,6 @@ export const LevelSelector: React.FC<Props> = ({
         }
         return levels.filter((level) => level.author!.name === author);
     }, [levels, author]);
-
-    // const handleMouseEnterSideButton = useCallback(
-    //     (side: Side) => (e: React.MouseEvent) => {
-    //         const yingYang =
-    //             e.currentTarget.parentElement?.querySelector('.ying-yang');
-    //         if (!yingYang) {
-    //             return;
-    //         }
-
-    //         if (side === Side.LIGHT) {
-    //             const ying = yingYang.querySelector<SVGPathElement>('.white');
-    //             if (ying) {
-    //                 ying.classList.add('visible');
-    //             }
-    //             moveSideElementToCoordinate(
-    //                 Side.LIGHT,
-    //                 0.25 * window.innerWidth,
-    //                 0.75 * window.innerHeight,
-    //             );
-    //             setLightIsPulsingFast(true);
-    //         } else {
-    //             const yang = yingYang.querySelector<SVGPathElement>('.black');
-    //             if (yang) {
-    //                 yang.classList.add('visible');
-    //             }
-    //             moveSideElementToCoordinate(
-    //                 Side.SHADOW,
-    //                 0.75 * window.innerWidth,
-    //                 0.75 * window.innerHeight,
-    //             );
-    //             setShadowRotationSpeed(0.02);
-    //         }
-    //     },
-    //     [
-    //         setShadowRotationSpeed,
-    //         setLightIsPulsingFast,
-    //         moveSideElementToCoordinate,
-    //     ],
-    // );
-
-    // const handleMouseLeaveSideButton = useCallback(
-    //     (side: Side) => (e: React.MouseEvent) => {
-    //         const yingYang =
-    //             e.currentTarget.parentElement?.querySelector('.ying-yang');
-    //         if (!yingYang) {
-    //             return;
-    //         }
-
-    //         if (side === Side.LIGHT) {
-    //             const ying = yingYang.querySelector<SVGPathElement>('.white');
-    //             if (ying) {
-    //                 ying.classList.remove('visible');
-    //             }
-    //             setLightIsPulsingFast(false);
-    //             sideElementToStep(
-    //                 Side.LIGHT,
-    //                 {
-    //                     step:
-    //                         state.you.side === side || state.mate?.side === side
-    //                             ? MenuScene.TEAM_LOBBY_SELECTED
-    //                             : MenuScene.TEAM_LOBBY,
-    //                 },
-    //                 false,
-    //             );
-    //         } else {
-    //             const yang = yingYang.querySelector<SVGPathElement>('.black');
-    //             if (yang) {
-    //                 yang.classList.remove('visible');
-    //             }
-    //             setShadowRotationSpeed(0.005);
-    //             sideElementToStep(
-    //                 Side.SHADOW,
-    //                 {
-    //                     step:
-    //                         state.you.side === side || state.mate?.side === side
-    //                             ? MenuScene.TEAM_LOBBY_SELECTED
-    //                             : MenuScene.TEAM_LOBBY,
-    //                 },
-    //                 false,
-    //             );
-    //         }
-    //     },
-    //     [
-    //         sideElementToStep,
-    //         state.you,
-    //         state.mate,
-    //         setShadowRotationSpeed,
-    //         setLightIsPulsingFast,
-    //     ],
-    // );
 
     const handleClickLevelItem = useCallback(
         (levelId: number) => (e: React.MouseEvent) => {
@@ -280,12 +190,7 @@ export const LevelSelector: React.FC<Props> = ({
                                     // you={state.you}
                                     // mate={state.mate}
                                     handleClick={handleClickLevelItem}
-                                    // handleMouseEnterSide={
-                                    //     handleMouseEnterSideButton
-                                    // }
-                                    // handleMouseLeaveSide={
-                                    //     handleMouseLeaveSideButton
-                                    // }
+                                    handleSideButton={handleSideButton}
                                     isSelected={selectedLevel === id}
                                     isLightWaiting={isLightWaiting}
                                     isShadowWaiting={isShadowWaiting}

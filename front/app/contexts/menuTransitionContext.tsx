@@ -57,6 +57,10 @@ interface MenuTransitionContext {
     ) => () => void;
     menuOut: (onComplete: () => void) => void;
     menuIn: (onComplete: () => void) => void;
+    handleSideButton: (
+        side: Side,
+        action: 'enter' | 'leave',
+    ) => (e: React.MouseEvent) => void;
     // refs
     canvasBlack: React.MutableRefObject<CanvasBlack | undefined>;
     canvasWhite: React.MutableRefObject<CanvasWhite | undefined>;
@@ -89,6 +93,10 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
 
     const goToStep = useCallback(
         (tweenOptions: TweenOptions, onComplete?: () => void) => {
+            if (!canvasBlack.current || !canvasWhite.current) {
+                return;
+            }
+
             const refHashMap = {
                 canvasBlack,
                 canvasWhite,
@@ -118,14 +126,12 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
             setNextMenuScene(tweenOptions.step);
             onTransition.current = true;
             const lightAnim = sideElementToStep(
-                canvasBlack.current,
-                Side.LIGHT,
+                canvasBlack.current.light,
                 tweenOptions,
                 isMobileDevice,
             );
             const shadowAnim = sideElementToStep(
-                canvasWhite.current,
-                Side.SHADOW,
+                canvasWhite.current.shadow,
                 tweenOptions,
                 isMobileDevice,
             );
@@ -355,6 +361,84 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
         );
     }, []);
 
+    const handleSideButton = useCallback(
+        (side: Side, action: 'enter' | 'leave') => (e: React.MouseEvent) => {
+            const yingYang =
+                e.currentTarget.parentElement?.querySelector('.ying-yang');
+            if (!yingYang || !canvasBlack.current || !canvasWhite.current) {
+                return;
+            }
+
+            const handleVisibility = (side: Side) => {
+                const yang = yingYang.querySelector<SVGPathElement>('.black');
+                const ying = yingYang.querySelector<SVGPathElement>('.white');
+                if (side === Side.LIGHT && ying) {
+                    ying.classList.toggle('visible');
+                } else if (side === Side.SHADOW && yang) {
+                    yang.classList.toggle('visible');
+                }
+            };
+
+            const moveElementToCoordinate = (side: Side) => {
+                if (side === Side.LIGHT) {
+                    moveSideElementToCoordinate(
+                        canvasBlack.current!.light,
+                        0.25 * window.innerWidth,
+                        0.75 * window.innerHeight,
+                    );
+                    setLightIsPulsingFast(true);
+                } else {
+                    moveSideElementToCoordinate(
+                        canvasWhite.current!.shadow,
+                        0.75 * window.innerWidth,
+                        0.75 * window.innerHeight,
+                    );
+                    setShadowRotationSpeed(0.02);
+                }
+            };
+
+            const resetElementState = (side: Side) => {
+                if (side === Side.LIGHT) {
+                    setLightIsPulsingFast(false);
+                    sideElementToStep(
+                        canvasBlack.current!.light,
+                        {
+                            step: MenuScene.TEAM_LOBBY,
+                            // step:
+                            //     state.you.side === side ||
+                            //     state.mate?.side === side
+                            //         ? MenuScene.TEAM_LOBBY_SELECTED
+                            //         : MenuScene.TEAM_LOBBY,
+                        },
+                        false,
+                    );
+                } else {
+                    setShadowRotationSpeed(0.005);
+                    sideElementToStep(
+                        canvasWhite.current!.shadow,
+                        {
+                            step: MenuScene.TEAM_LOBBY,
+                            // step:
+                            //     state.you.side === side ||
+                            //     state.mate?.side === side
+                            //         ? MenuScene.TEAM_LOBBY_SELECTED
+                            //         : MenuScene.TEAM_LOBBY,
+                        },
+                        false,
+                    );
+                }
+            };
+
+            handleVisibility(side);
+            if (action === 'enter') {
+                moveElementToCoordinate(side);
+            } else {
+                resetElementState(side);
+            }
+        },
+        [setShadowRotationSpeed, setLightIsPulsingFast],
+    );
+
     return {
         // properties
         menuScene,
@@ -374,6 +458,7 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
         startCanvasLoop,
         menuOut,
         menuIn,
+        handleSideButton,
         // refs
         canvasBlack,
         canvasWhite,

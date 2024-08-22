@@ -14,8 +14,10 @@ interface Props {
     level: Level;
     // you: PlayerState;
     // mate?: PlayerState;
-    // handleMouseEnterSide: (side: Side) => (e: React.MouseEvent) => void;
-    // handleMouseLeaveSide: (side: Side) => (e: React.MouseEvent) => void;
+    handleSideButton: (
+        side: Side,
+        action: 'enter' | 'leave',
+    ) => (e: React.MouseEvent) => void;
     handleClick: (id: number) => (e: React.MouseEvent) => void;
     isSelected: boolean;
     isLightWaiting: boolean;
@@ -29,8 +31,7 @@ export const LevelGridItem: React.FC<Props> = ({
     // you,
     // mate,
     handleClick,
-    // handleMouseEnterSide,
-    // handleMouseLeaveSide,
+    handleSideButton,
     isLightWaiting,
     isShadowWaiting,
     isMobile,
@@ -89,32 +90,32 @@ export const LevelGridItem: React.FC<Props> = ({
                 >
                     <div className="level-grid-item__side-buttons-container">
                         <div
-                            // onMouseEnter={
-                            //     isMobile
-                            //         ? undefined
-                            //         : handleMouseEnterSide(Side.LIGHT)
-                            // }
-                            // onMouseLeave={
-                            //     isMobile
-                            //         ? undefined
-                            //         : handleMouseLeaveSide(Side.LIGHT)
-                            // }
+                            onMouseEnter={
+                                isMobile
+                                    ? undefined
+                                    : handleSideButton(Side.LIGHT, 'enter')
+                            }
+                            onMouseLeave={
+                                isMobile
+                                    ? undefined
+                                    : handleSideButton(Side.LIGHT, 'leave')
+                            }
                             className="half-circle half-circle--light"
                         >
                             <div className="background" />
                             <p>Light</p>
                         </div>
                         <div
-                            // onMouseEnter={
-                            //     isMobile
-                            //         ? undefined
-                            //         : handleMouseEnterSide(Side.SHADOW)
-                            // }
-                            // onMouseLeave={
-                            //     isMobile
-                            //         ? undefined
-                            //         : handleMouseLeaveSide(Side.SHADOW)
-                            // }
+                            onMouseEnter={
+                                isMobile
+                                    ? undefined
+                                    : handleSideButton(Side.SHADOW, 'enter')
+                            }
+                            onMouseLeave={
+                                isMobile
+                                    ? undefined
+                                    : handleSideButton(Side.SHADOW, 'leave')
+                            }
                             className="half-circle half-circle--shadow"
                         >
                             <div className="background" />
