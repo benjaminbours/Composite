@@ -24,3 +24,10 @@ export const waitUntilConditionMet = async <T>(
         `Condition not met after polling for ${maxAttempts} seconds.`,
     );
 };
+
+export const formatElapsedTime = (elapsedTime: number): string => {
+    const minutes = Math.floor(elapsedTime / 60);
+    const seconds = Math.floor(elapsedTime % 60);
+    const hundredthsOfSecond = Math.floor((elapsedTime % 1) * 100);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${hundredthsOfSecond.toString().padStart(2, '0')}`;
+};

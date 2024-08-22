@@ -63,6 +63,7 @@ import {
 } from './elements/graphic.utils';
 import { PartialLevel } from '../types';
 import { bounceShadowMaterialInteractive, pulseMaterial } from './materials';
+import { formatElapsedTime } from '../utils/time';
 
 export enum AppMode {
     EDITOR = 'EDITOR',
@@ -242,12 +243,9 @@ export default class App {
         if (!this.runTimerDomElement) {
             return;
         }
-        const elapsedTime = this.runClock.getElapsedTime();
-        const minutes = Math.floor(elapsedTime / 60);
-        const seconds = Math.floor(elapsedTime % 60);
-        const hundredthsOfSecond = Math.floor((elapsedTime % 1) * 100);
-        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${hundredthsOfSecond.toString().padStart(2, '0')}`;
-        this.runTimerDomElement.innerHTML = timeString;
+        this.runTimerDomElement.innerHTML = formatElapsedTime(
+            this.runClock.getElapsedTime(),
+        );
     };
 
     public shouldCaptureSnapshot = false;

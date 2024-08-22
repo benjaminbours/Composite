@@ -23,6 +23,7 @@ import { labelsDifficulty, labelsOverall } from '../../constants';
 import { DifficultyIcon } from '../../01_atoms/DifficultyIcon';
 import { GameMode } from '../../core/entities/LobbyParameters';
 import { useGlobalContext, useMenuTransitionContext } from '../../contexts';
+import { formatElapsedTime } from '../../utils/time';
 
 interface Props {
     dictionary: Awaited<ReturnType<typeof getDictionary>>;
@@ -240,6 +241,14 @@ export const EndLevelScene: React.FC<Props> = React.memo(({ dictionary }) => {
         })(document, 'script', 'twitter-wjs');
     }, [isMount, getRatings, isAuthenticated]);
 
+    const gameDuration = useMemo(() => {
+        // TODO: Copy past from updateRunDurationCounter in App.tsx
+        if (!gameStats?.duration) {
+            return null;
+        }
+        return formatElapsedTime(gameStats.duration);
+    }, [gameStats]);
+
     return (
         <div ref={endLevelRef} className={cssClass}>
             <AuthModal
@@ -270,8 +279,7 @@ export const EndLevelScene: React.FC<Props> = React.memo(({ dictionary }) => {
                                         'Author name'}
                                 </b>
                                 <br />
-                                You did it in:{' '}
-                                <b>{gameStats?.duration.toFixed(3)}</b>
+                                You did it in: <b>{gameDuration}</b>
                                 {gameData?.lobbyParameters.mode ===
                                     GameMode.RANKED && (
                                     <>

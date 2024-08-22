@@ -8,6 +8,7 @@ import {
     GameStatusEnum,
     Level,
 } from '@benjaminbours/composite-core-api-client';
+import { formatElapsedTime } from '../../../../../utils/time';
 
 interface Props {
     level: Level;
@@ -69,13 +70,14 @@ export const LeaderBoard: React.FC<Props> = ({ level }) => {
                     {rows?.map((row, index) => {
                         const rank = index + 1;
                         const date = dayjs(row.createdAt).format('DD/MM/YYYY');
+                        const timeString = formatElapsedTime(row.duration);
                         return (
                             <tr key={rank}>
                                 <td className="leaderboard__rank-cell">
                                     {rank}
                                 </td>
                                 <td>
-                                    <b>{`${row.duration.toFixed(3)}`} </b>
+                                    <b>{`${timeString}`} </b>
                                     <span>sec</span>
                                 </td>
                                 {row.mode === GameModeEnum.SinglePlayer && (
