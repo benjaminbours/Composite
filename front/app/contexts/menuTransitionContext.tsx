@@ -361,6 +361,8 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
         );
     }, []);
 
+    // TODO: Can improve the behavior. Example, when I click, the light and shadow could go somewhere
+    // to indicate they are selected. That would also prevent the leave action to happen.
     const handleSideButton = useCallback(
         (side: Side, action: 'enter' | 'leave') => (e: React.MouseEvent) => {
             const yingYang =
@@ -369,13 +371,13 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
                 return;
             }
 
-            const handleVisibility = (side: Side) => {
+            const handleVisibility = (side: Side, visible: boolean) => {
                 const yang = yingYang.querySelector<SVGPathElement>('.black');
                 const ying = yingYang.querySelector<SVGPathElement>('.white');
                 if (side === Side.LIGHT && ying) {
-                    ying.classList.toggle('visible');
+                    ying.classList.toggle('visible', visible);
                 } else if (side === Side.SHADOW && yang) {
-                    yang.classList.toggle('visible');
+                    yang.classList.toggle('visible', visible);
                 }
             };
 
@@ -429,10 +431,11 @@ export function useMenuTransition(initialScene: MenuScene = MenuScene.HOME) {
                 }
             };
 
-            handleVisibility(side);
             if (action === 'enter') {
+                handleVisibility(side, true);
                 moveElementToCoordinate(side);
             } else {
+                handleVisibility(side, false);
                 resetElementState(side);
             }
         },

@@ -44,8 +44,6 @@ export const CreateLobby: React.FC<Props> = ({}) => {
         [width, height],
     );
 
-    // local state
-
     const handleSubmit = useCallback(() => {
         createGame(state);
     }, [state, createGame]);
@@ -178,6 +176,7 @@ export const CreateLobby: React.FC<Props> = ({}) => {
                     isLoading={isLoadingLevels}
                     isMobile={isMobile}
                     selectedLevel={state.levelId}
+                    selectedSide={state.side}
                     onChange={handleChange('levelId')}
                     playerNumber={state.playerNumber}
                     // disabled={state.isInQueue}

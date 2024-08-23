@@ -15,7 +15,8 @@ interface Props {
     levels: Level[];
     playerNumber: GamePlayerNumber;
     selectedLevel: number;
-    onChange: (levelId: number) => void;
+    selectedSide?: Side;
+    onChange: (newValue: [levelId: number, side?: Side]) => void;
     disabled?: boolean;
     isMobile: boolean;
     isLoading: boolean;
@@ -25,6 +26,7 @@ export const LevelSelector: React.FC<Props> = ({
     levels,
     playerNumber,
     selectedLevel,
+    selectedSide,
     onChange,
     disabled,
     isMobile,
@@ -55,6 +57,7 @@ export const LevelSelector: React.FC<Props> = ({
         return levels.filter((level) => level.author!.name === author);
     }, [levels, author]);
 
+    // TODO: Should be moved into menu transition context
     const handleClickLevelItem = useCallback(
         (levelId: number) => (e: React.MouseEvent) => {
             const targetClassList = (e.target as HTMLElement).classList;
@@ -109,7 +112,7 @@ export const LevelSelector: React.FC<Props> = ({
             // }));
 
             // setProperty({ field: 'levelId', value: levelId });
-            onChange(levelId);
+            onChange([levelId, side]);
 
             // // network update
             // // TODO: Send in one batch
@@ -192,6 +195,7 @@ export const LevelSelector: React.FC<Props> = ({
                                     handleClick={handleClickLevelItem}
                                     handleSideButton={handleSideButton}
                                     isSelected={selectedLevel === id}
+                                    selectedSide={selectedSide}
                                     isLightWaiting={isLightWaiting}
                                     isShadowWaiting={isShadowWaiting}
                                     isMobile={isMobile}
@@ -209,8 +213,10 @@ export const LevelSelector: React.FC<Props> = ({
         isLoading,
         levelsToDisplay,
         handleClickLevelItem,
+        handleSideButton,
         isMobile,
         selectedLevel,
+        selectedSide,
         playerNumber,
     ]);
 

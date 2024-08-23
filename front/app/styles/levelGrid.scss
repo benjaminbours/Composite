@@ -57,8 +57,6 @@ $size: 50px;
     align-items: center;
     justify-content: center;
     z-index: 1;
-    opacity: 0;
-    pointer-events: none;
 
     .half-circle {
         all: unset;
@@ -70,7 +68,9 @@ $size: 50px;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        opacity: 0;
         pointer-events: none;
+        transition: 0.3s ease-out;
 
         .background {
             position: absolute;
@@ -166,66 +166,10 @@ $size: 50px;
         .level-grid-item__border-container {
             opacity: 1;
         }
-
-        .level-grid-item__side-buttons-container {
-            opacity: 1;
-
-            .half-circle {
-                pointer-events: initial;
-            }
-        }
     }
 
-    &--solo:hover {
-        .level-grid-item__border-container {
-            opacity: 1;
-        }
-
-        .level-grid-item__side-buttons-container {
-            opacity: 1;
-
-            .half-circle {
-                pointer-events: none;
-            }
-
-            .half-circle--light,
-            .half-circle--shadow {
-                opacity: 0;
-            }
-        }
-    }
-
-    &--selected {
-        .level-grid-item__border-container {
-            opacity: 1;
-        }
-
-        .level-grid-item__side-buttons-container {
-            opacity: 1;
-
-            .half-circle {
-                pointer-events: initial;
-            }
-        }
-    }
-
-    &--selected-solo {
-        .level-grid-item__border-container {
-            opacity: 1;
-        }
-
-        .level-grid-item__side-buttons-container {
-            opacity: 1;
-
-            .half-circle {
-                pointer-events: none;
-            }
-
-            .half-circle--light,
-            .half-circle--shadow {
-                opacity: 0;
-            }
-
+    &--solo {
+        &:hover {
             .ying-yang {
                 .black,
                 .white {
@@ -235,21 +179,53 @@ $size: 50px;
         }
     }
 
-    &--selected-shadow {
+    &--duo {
+        &:hover {
+            .half-circle {
+                opacity: 1;
+                pointer-events: initial;
+            }
+        }
+    }
+
+    &--selected {
         .level-grid-item__border-container {
             opacity: 1;
         }
+    }
 
-        .level-grid-item__side-buttons-container {
+    &--selected-solo {
+        .ying-yang {
+            .black,
+            .white {
+                opacity: 1;
+            }
+        }
+    }
+
+    &--selected-duo {
+        .half-circle {
             opacity: 1;
             pointer-events: initial;
         }
+    }
 
+    &--selected-shadow {
         .ying-yang .black {
             opacity: 1;
         }
 
         .half-circle--shadow {
+            p {
+                color: $mainActionColor;
+            }
+
+            .background {
+                opacity: 1;
+            }
+        }
+
+        .half-circle--light {
             opacity: 0;
 
             .half-circle {
@@ -259,20 +235,21 @@ $size: 50px;
     }
 
     &--selected-light {
-        .level-grid-item__border-container {
-            opacity: 1;
-        }
-
-        .level-grid-item__side-buttons-container {
-            opacity: 1;
-            pointer-events: initial;
-        }
-
         .ying-yang .white {
             opacity: 1;
         }
 
         .half-circle--light {
+            p {
+                color: $mainActionColor;
+            }
+
+            .background {
+                opacity: 1;
+            }
+        }
+
+        .half-circle--shadow {
             opacity: 0;
 
             .half-circle {

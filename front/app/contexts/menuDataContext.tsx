@@ -50,6 +50,7 @@ export function useMenuData() {
             0,
             GameVisibility.PUBLIC,
             '',
+            undefined,
         ),
     );
 
@@ -61,8 +62,15 @@ export function useMenuData() {
             setState((prevState) => {
                 const nextState = {
                     ...prevState,
-                    [field]: newValue,
                 };
+
+                if (field === 'levelId') {
+                    const [levelId, side] = newValue;
+                    nextState.levelId = levelId;
+                    nextState.side = side;
+                } else {
+                    (nextState as any)[field] = newValue;
+                }
 
                 if (field === 'mode' && newValue === GameMode.PRACTICE) {
                     nextState.playerNumber = GamePlayerNumber.SOLO;

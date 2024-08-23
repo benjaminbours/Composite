@@ -19,6 +19,7 @@ interface Props {
         action: 'enter' | 'leave',
     ) => (e: React.MouseEvent) => void;
     handleClick: (id: number) => (e: React.MouseEvent) => void;
+    selectedSide?: Side;
     isSelected: boolean;
     isLightWaiting: boolean;
     isShadowWaiting: boolean;
@@ -32,8 +33,9 @@ export const LevelGridItem: React.FC<Props> = ({
     // mate,
     handleClick,
     handleSideButton,
-    isLightWaiting,
-    isShadowWaiting,
+    // isLightWaiting,
+    // isShadowWaiting,
+    selectedSide,
     isMobile,
     isSelected,
     isSoloMode,
@@ -51,8 +53,14 @@ export const LevelGridItem: React.FC<Props> = ({
     const cssClass = classNames({
         'level-grid-item': true,
         'level-grid-item--solo': isSoloMode,
+        'level-grid-item--duo': !isSoloMode,
         'level-grid-item--selected': isSelected,
         'level-grid-item--selected-solo': isSelected && isSoloMode,
+        'level-grid-item--selected-duo': isSelected && !isSoloMode,
+        'level-grid-item--selected-shadow':
+            isSelected && selectedSide === Side.SHADOW,
+        'level-grid-item--selected-light':
+            isSelected && selectedSide === Side.LIGHT,
         // 'level-grid-item--selected-shadow':
         //     (you.level === id && you.side === Side.SHADOW) ||
         //     (mate?.level === id && mate?.side === Side.SHADOW) ||
