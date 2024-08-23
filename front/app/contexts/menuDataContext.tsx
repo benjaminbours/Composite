@@ -48,7 +48,7 @@ export function useMenuData() {
             GameMode.RANKED,
             GamePlayerNumber.SOLO,
             0,
-            GameVisibility.PUBLIC,
+            GameVisibility.PRIVATE,
             '',
             undefined,
         ),
@@ -74,6 +74,20 @@ export function useMenuData() {
 
                 if (field === 'mode' && newValue === GameMode.PRACTICE) {
                     nextState.playerNumber = GamePlayerNumber.SOLO;
+                    nextState.visibility = GameVisibility.PRIVATE;
+                }
+
+                if (
+                    field === 'playerNumber' &&
+                    newValue === GamePlayerNumber.SOLO
+                ) {
+                    nextState.visibility = GameVisibility.PRIVATE;
+                }
+
+                if (
+                    field === 'playerNumber' &&
+                    newValue === GamePlayerNumber.DUO
+                ) {
                     nextState.visibility = GameVisibility.PUBLIC;
                 }
 
