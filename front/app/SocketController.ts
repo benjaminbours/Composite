@@ -33,7 +33,6 @@ export class SocketController {
     }
 
     public init = (
-        onGameStart: (initialGameState: GameState) => void,
         onGameFinish: (data: GameFinishedPayload) => void,
         onTeamMateDisconnect: () => void,
         onFriendJoinLobby: (data: FriendJoinLobbyPayload) => void,
@@ -42,13 +41,12 @@ export class SocketController {
         handleReceiveReadyToPlay: (isReady: boolean) => void,
     ) => {
         this.socket.on(
-            SocketEventType.GAME_START,
-            (data: GameStateUpdatePayload) => {
-                console.log('received game start event', data.gameState);
-                onGameStart(data.gameState);
+            SocketEventType.GAME_FINISHED,
+            (data: GameFinishedPayload) => {
+                onGameFinish(data);
+                this.destroy();
             },
         );
-        this.socket.on(SocketEventType.GAME_FINISHED, onGameFinish);
         this.socket.on(SocketEventLobby.FRIEND_JOIN_LOBBY, onFriendJoinLobby);
         this.socket.on(
             SocketEventType.TEAMMATE_DISCONNECT,

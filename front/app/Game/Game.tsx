@@ -21,8 +21,7 @@ import {
 import App, { AppMode } from './App';
 import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
-import { CircularProgress, Divider } from '@mui/material';
-import { DiscordButton } from '../02_molecules/DiscordButton';
+
 import { DesktopHUD } from './DesktopHUD';
 import { GameMode, GamePlayerNumber } from '../core/entities/LobbyParameters';
 import { GameData } from '../contexts';
@@ -36,9 +35,8 @@ interface LevelEditorProps {
 
 export interface Props {
     side: Side;
-    onExitGame?: () => void;
+    onExitGame: () => void;
     inputsManager: InputsManager;
-    tabIsHidden: boolean;
     stats: React.MutableRefObject<Stats | undefined>;
     gameData?: GameData;
     initialGameState?: GameState;
@@ -48,7 +46,6 @@ export interface Props {
 function Game({
     onExitGame,
     side,
-    tabIsHidden,
     stats,
     inputsManager,
     gameData,
@@ -58,7 +55,6 @@ function Game({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasMiniMapRef = useRef<HTMLCanvasElement>(null);
     const appRef = useRef<App>();
-    const [isSynchronizingTime, setIsSynchronizingTime] = useState(false);
     const [isMobileInteractButtonAdded, setIsMobileInteractButtonAdded] =
         useState(false);
 
@@ -104,8 +100,7 @@ function Game({
         const cleanUp = () => {
             if (appRef.current) {
                 gsap.ticker.remove(gameLoop);
-                appRef.current?.destroy();
-                appRef.current = undefined;
+                appRef.current.destroy();
             }
         };
 
@@ -114,22 +109,24 @@ function Game({
         }
 
         if (gameData && initialGameState) {
-            appRef.current = new App(
-                canvasRef.current,
-                canvasMiniMapRef.current,
-                initialGameState,
-                [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
-                inputsManager,
-                AppMode.GAME,
-                gameData.level,
-                gameData.lobbyParameters.mode === GameMode.PRACTICE
-                    ? undefined
-                    : gameData.socketController,
-                undefined,
-                gameData.lobbyParameters.mode === GameMode.PRACTICE
-                    ? gameData.onPracticeGameFinished
-                    : undefined,
-            );
+            if (!appRef.current) {
+                appRef.current = new App(
+                    canvasRef.current,
+                    canvasMiniMapRef.current,
+                    initialGameState,
+                    [side, side === Side.SHADOW ? Side.LIGHT : Side.SHADOW],
+                    inputsManager,
+                    AppMode.GAME,
+                    gameData.level,
+                    gameData.lobbyParameters.mode === GameMode.PRACTICE
+                        ? undefined
+                        : gameData.socketController,
+                    undefined,
+                    gameData.lobbyParameters.mode === GameMode.PRACTICE
+                        ? gameData.onPracticeGameFinished
+                        : undefined,
+                );
+            }
             if (
                 gameData.lobbyParameters.playerNumber === GamePlayerNumber.SOLO
             ) {
@@ -141,12 +138,7 @@ function Game({
                 appRef.current.onRemoveMobileInteractButton =
                     handleRemoveMobileInteractButton;
             }
-            if (gameData.lobbyParameters.mode === GameMode.RANKED) {
-                setIsSynchronizingTime(true);
-            } else {
-                appRef.current?.startRun();
-            }
-            gameData.onGameRendered();
+            gameData.onGameRendered(appRef.current);
         } else if (levelEditorProps) {
             const initialGameState = new GameState(
                 [
@@ -194,63 +186,8 @@ function Game({
         };
     }, []);
 
-    useEffect(() => {
-        if (!tabIsHidden && isSynchronizingTime && gameData) {
-            const onTimeSynchronized = ([serverTime, rtt]: [
-                serverTime: number,
-                rtt: number,
-            ]) => {
-                appRef.current?.gameStateManager.onAverageRttReceived(
-                    serverTime,
-                    rtt,
-                );
-            };
-
-            const onStartTimer = () => {
-                appRef.current?.inputsManager.registerEventListeners();
-                setIsSynchronizingTime(false);
-                appRef.current?.startRun();
-            };
-
-            setIsSynchronizingTime(true);
-            gameData.socketController
-                ?.synchronizeTime(onStartTimer)
-                .then(onTimeSynchronized);
-        }
-
-        return () => {
-            appRef.current?.inputsManager.destroyEventListeners();
-        };
-    }, [tabIsHidden, gameData, isSynchronizingTime]);
-
     return (
         <div className="game">
-            {isSynchronizingTime && (
-                <div className="game-sync-overlay">
-                    <h3 className="title-h3">Synchronizing</h3>
-                    <CircularProgress className="game-sync-overlay__progress" />
-                    <div>
-                        <div className="game-sync-overlay__tips">
-                            <h4 className="title-h4">Tips</h4>
-                            <p>
-                                {`The minimap at the bottom right provides information about
-                        your teammate's position.`}
-                            </p>
-                            <Divider />
-                            <p>{`Any door can be open.`}</p>
-                            <Divider />
-                            {!isMobile && (
-                                <>
-                                    <p>
-                                        {`It's funnier if you can speak by voice with your teammate.`}
-                                    </p>
-                                    <DiscordButton className="composite-button" />
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
             {isMobile && gameData && (
                 <MobileHUD
                     appRef={appRef}

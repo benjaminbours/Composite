@@ -365,7 +365,7 @@ export class LobbyGateway {
       socket.id,
       RedisPlayerState.parsePlayerState(player),
     );
-    const initialGameState = await this.mainGateway.createGame(
+    const initialGameState = await this.mainGateway.createGameLoop(
       [{ socketId: socket.id, player }],
       dbGame.id,
       dbGame.level!,

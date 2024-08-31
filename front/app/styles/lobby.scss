@@ -307,7 +307,8 @@ $gap: 15px;
     flex-direction: column;
     gap: $gap;
 
-    h2 {
+    h2,
+    h4 {
         margin: 0;
     }
 }
@@ -473,23 +474,22 @@ $gap: 15px;
 
 .game-loader {
     display: flex;
+    justify-content: center;
+    gap: 100px;
+
+    p {
+        mix-blend-mode: difference;
+        color: white;
+    }
+}
+
+.game-loader__loader {
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 20px;
-
-    // .title-h3,
-    p {
-        mix-blend-mode: difference;
-        //     padding: 5px;
-        // color: white;
-        // color: $mainActionColor;
-        // background: $mainActionColor;
-    }
-
-    p {
-        color: white;
-    }
+    width: 50%;
 }
 
 .game-loader__image {
@@ -504,13 +504,7 @@ $gap: 15px;
 }
 
 .game-loader__progress {
-    // mix-blend-mode: difference;
     color: $mainActionColor;
-
-    // svg {
-    //     width: 100%;
-    //     height: 100%;
-    // }
 }
 
 .game-loader__row {
@@ -522,5 +516,22 @@ $gap: 15px;
     p {
         margin: 0;
         font-size: 12px;
+    }
+}
+
+.game-loader__tips {
+    width: 50%;
+
+    .MuiDivider-root {
+        mix-blend-mode: difference;
+    }
+
+    p {
+        mix-blend-mode: difference;
+        text-align: left;
+    }
+
+    a {
+        margin-top: 10px;
     }
 }

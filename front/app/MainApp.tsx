@@ -63,7 +63,7 @@ function MainApp({ dictionary }: Props) {
         (width <= 768 || height <= 500);
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [tabIsHidden, setTabIsHidden] = useState(false);
+    // const [tabIsHidden, setTabIsHidden] = useState(false);
     const statsRef = useRef<Stats>();
 
     // const mateDisconnected = useStoreState(
@@ -93,22 +93,22 @@ function MainApp({ dictionary }: Props) {
             document.body.appendChild(stats.dom);
             statsRef.current = stats;
         }
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
-                setTabIsHidden(true);
-            } else {
-                setTabIsHidden(false);
-            }
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+        // const handleVisibilityChange = () => {
+        //     if (document.visibilityState === 'hidden') {
+        //         setTabIsHidden(true);
+        //     } else {
+        //         setTabIsHidden(false);
+        //     }
+        // };
+        // document.addEventListener('visibilitychange', handleVisibilityChange);
         return () => {
             if (statsRef.current) {
                 document.body.removeChild(statsRef.current.dom);
             }
-            document.removeEventListener(
-                'visibilitychange',
-                handleVisibilityChange,
-            );
+            // document.removeEventListener(
+            //     'visibilitychange',
+            //     handleVisibilityChange,
+            // );
         };
     }, []);
 
@@ -153,7 +153,6 @@ function MainApp({ dictionary }: Props) {
                         //     level,
                         //     onPracticeGameFinished: handleGameFinished,
                         // }}
-                        tabIsHidden={tabIsHidden}
                         stats={statsRef}
                         inputsManager={inputsManager.current}
                         onExitGame={exitGame}

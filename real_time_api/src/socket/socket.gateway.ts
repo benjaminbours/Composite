@@ -411,7 +411,7 @@ export class SocketGateway {
     }
   };
 
-  async createGame(
+  async createGameLoop(
     players: { socketId: string; player: PlayerState; indexToClear?: number }[],
     gameId: number,
     dbLevel: Level,

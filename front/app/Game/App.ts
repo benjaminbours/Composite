@@ -412,7 +412,8 @@ export default class App {
 
     public destroy = () => {
         this.gameStateManager.destroy();
-        this.socketController?.unregisterGameStateUpdateListener();
+        // TODO: Ensure this is not creating memory leak
+        // this.socketController?.unregisterGameStateUpdateListener();
         this.removeTextOverlay();
         this.destroySoloModeListeners();
     };

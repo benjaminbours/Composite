@@ -5,8 +5,7 @@ body {
     line-height: 1.5;
 }
 
-canvas,
-.game-sync-overlay {
+canvas {
     position: fixed;
     top: 0;
     left: 0;
@@ -231,46 +230,6 @@ p {
     color: white;
 }
 
-.game-sync-overlay {
-    background: black;
-    background-color: rgba($color: #000000, $alpha: 0.5);
-    color: white;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    h3 {
-        width: 100%;
-        margin-bottom: 30px;
-        letter-spacing: 2px;
-    }
-
-    h4,
-    h3 {
-        text-transform: uppercase;
-    }
-
-    > div {
-        display: flex;
-
-        > div {
-            margin: 0 20px;
-        }
-    }
-
-    @media (max-width: 768px), (max-height: 500px) {
-        > div {
-            display: block;
-
-            // > div {
-            //     margin: 0 20px;
-            // }
-        }
-    }
-}
-
 .desktop-motions {
     display: flex;
     flex-direction: column;
@@ -311,22 +270,6 @@ p {
     }
 }
 
-.game-sync-overlay__progress {
-    color: white;
-}
-
-.game-sync-overlay__tips {
-    flex: 1;
-
-    p {
-        text-align: left;
-    }
-
-    a {
-        margin-top: 10px;
-    }
-}
-
 .discord-button {
     display: flex;
     align-items: center;
@@ -355,7 +298,7 @@ p {
     width: 80%;
     margin: 0 auto;
 
-    @media (max-width: 768px), (max-height: 500px) {
+    @media (max-width: 1024px), (max-height: 500px) {
         width: 90%;
     }
 }

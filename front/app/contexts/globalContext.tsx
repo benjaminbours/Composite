@@ -7,7 +7,7 @@ import {
     createContext,
     useEffect,
 } from 'react';
-import { GameMode, LobbyParameters } from '../core/entities';
+import { GameMode, GamePlayerNumber, LobbyParameters } from '../core/entities';
 import { startLoadingAssets } from '../Game/assetsLoader';
 import { servicesContainer } from '../core/frameworks';
 import { CoreApiClient } from '../core/services';
@@ -15,7 +15,9 @@ import {
     createInitialGameStateAndLevelMapping,
     GameFinishedPayload,
     GameState,
+    GameStateUpdatePayload,
     SocketEventLobby,
+    SocketEventType,
 } from '@benjaminbours/composite-core';
 import { exitFullScreen, requestFullScreen } from '../utils/game';
 import { Level } from '@benjaminbours/composite-core-api-client';
@@ -26,12 +28,13 @@ import {
     Region,
     RoomReadyStatus,
 } from '@hathora/cloud-sdk-typescript/models/components';
-import type { SocketController } from '../SocketController';
+import { SocketController } from '../SocketController';
 import { useMenuTransitionContext } from './menuTransitionContext';
 import { MenuScene } from '../types';
 import { waitUntilConditionMet } from '../utils/time';
 import type Game from '../Game/Game';
 import React from 'react';
+import type App from '../Game/App';
 
 // export interface PlayerState {
 //     side: Side | undefined;
@@ -46,12 +49,16 @@ export enum GameStatus {
     CREATING_GAME = 'CREATING_GAME',
     // Waiting for it to be ready
     CONNECTING_TO_GAME = 'CONNECTING_TO_GAME',
+    SYNCHRONIZING_CLOCK = 'SYNCHRONIZING_CLOCK',
+    WAITING_TEAMMATE = 'WAITING_TEAMMATE',
 }
 
 export const statusTextMap = {
     [GameStatus.LOADING_LEVEL_DATA]: 'Building level map...',
     [GameStatus.CREATING_GAME]: 'Launching a game in your region...',
     [GameStatus.CONNECTING_TO_GAME]: 'Establishing connection...',
+    [GameStatus.SYNCHRONIZING_CLOCK]: 'Synchronizing clocks...',
+    [GameStatus.WAITING_TEAMMATE]: 'Waiting for teammate...',
 };
 
 export interface FlowItem {
@@ -66,7 +73,7 @@ export const PRACTICE_FLOW: FlowItem[] = [
     },
 ];
 
-export const RANKED_SOLO: FlowItem[] = [
+export const RANKED_SOLO_FLOW: FlowItem[] = [
     {
         id: GameStatus.LOADING_LEVEL_DATA,
         text: statusTextMap[GameStatus.LOADING_LEVEL_DATA],
@@ -79,6 +86,29 @@ export const RANKED_SOLO: FlowItem[] = [
         id: GameStatus.CONNECTING_TO_GAME,
         text: statusTextMap[GameStatus.CONNECTING_TO_GAME],
     },
+    {
+        id: GameStatus.SYNCHRONIZING_CLOCK,
+        text: statusTextMap[GameStatus.SYNCHRONIZING_CLOCK],
+    },
+];
+
+export const RANKED_DUO_FLOW: FlowItem[] = [
+    {
+        id: GameStatus.LOADING_LEVEL_DATA,
+        text: statusTextMap[GameStatus.LOADING_LEVEL_DATA],
+    },
+    {
+        id: GameStatus.CREATING_GAME,
+        text: statusTextMap[GameStatus.CREATING_GAME],
+    },
+    {
+        id: GameStatus.CONNECTING_TO_GAME,
+        text: statusTextMap[GameStatus.CONNECTING_TO_GAME],
+    },
+    {
+        id: GameStatus.WAITING_TEAMMATE,
+        text: statusTextMap[GameStatus.WAITING_TEAMMATE],
+    },
 ];
 
 export interface GameData {
@@ -86,7 +116,7 @@ export interface GameData {
     roomId?: string;
     level: Level;
     socketController?: SocketController;
-    onGameRendered: () => void;
+    onGameRendered: (app: App) => void;
     onPracticeGameFinished?: (data: GameFinishedPayload) => void;
 }
 
@@ -142,27 +172,6 @@ export function useGameController() {
         ]).then(([level, Game]) => [level, Game] as const);
     }, []);
 
-    const onGameRendered = useCallback(() => {
-        menuOut(() => {
-            setIsMenuVisible(false);
-            setLoadingFlow([]);
-        });
-    }, [menuOut]);
-
-    const handleGameStart = useCallback((initialGameState: GameState) => {
-        // if (process.env.NEXT_PUBLIC_STAGE !== 'local') {
-        //     (window as any).gtag('event', 'start_game', {
-        //         env: process.env.NEXT_PUBLIC_STAGE,
-        //         gameMode: lobbyMode,
-        //         userId: currentUser?.id,
-        //     });
-        // }
-        setInitialGameState(initialGameState);
-
-        setIsGameVisible(true);
-        // requestFullScreen();
-    }, []);
-
     const handleGameFinished = useCallback(
         (data: GameFinishedPayload) => {
             // setState((prev) => {
@@ -189,6 +198,13 @@ export function useGameController() {
             // });
             setIsMenuVisible(true);
             setGameStats(data);
+            setGameData(
+                (prev) =>
+                    ({
+                        ...prev,
+                        socketController: undefined,
+                    }) as any,
+            );
             setMenuScene(MenuScene.END_LEVEL);
             exitFullScreen();
         },
@@ -247,16 +263,19 @@ export function useGameController() {
                 const { initialGameState } =
                     createInitialGameStateAndLevelMapping(level);
                 setInitialGameState(initialGameState);
-                if (gameData?.socketController) {
-                    gameData.socketController.destroy();
-                }
                 setGameData({
                     socketController: undefined,
                     roomId: undefined,
                     level,
                     lobbyParameters: params,
                     onPracticeGameFinished: handleGameFinished,
-                    onGameRendered,
+                    onGameRendered: (app: App) => {
+                        app.startRun();
+                        menuOut(() => {
+                            setIsMenuVisible(false);
+                            setLoadingFlow([]);
+                        });
+                    },
                 });
                 setIsGameVisible(true);
                 // requestFullScreen();
@@ -301,7 +320,6 @@ export function useGameController() {
             };
 
             const waitUntilRoomIsReady = async (lobbyInfo: LobbyV3) => {
-                setLoadingStep((prev) => prev + 1);
                 const isRoomReady = async (
                     roomId: string,
                 ): Promise<{
@@ -323,11 +341,11 @@ export function useGameController() {
             };
 
             const connectToRoom = async (connectionInfo: ConnectionInfoV2) => {
+                setLoadingStep((prev) => prev + 1);
                 const uri = `wss://${connectionInfo.exposedPort!.host}:${connectionInfo.exposedPort!.port}`;
                 const socketController = await createSocketController(uri);
 
                 socketController.init(
-                    handleGameStart,
                     handleGameFinished,
                     () => {},
                     // handleTeamMateDisconnect,
@@ -347,78 +365,136 @@ export function useGameController() {
                 ];
             };
 
-            const requestSoloGame = ([socketController, roomId]: [
+            // it will start the game loop on the server. It's impossible to synchronize the clock before
+            const requestSoloGame = async ([socketController, roomId]: [
                 SocketController,
                 string,
             ]) => {
-                setGameData({
-                    level,
-                    lobbyParameters: params,
-                    onGameRendered,
-                    socketController,
-                    roomId,
+                return new Promise<[SocketController, App]>((resolve) => {
+                    // cleanup all previous listeners
+                    socketController.socket.removeAllListeners(
+                        SocketEventType.GAME_START,
+                    );
+
+                    // listen to the game start event
+                    socketController.socket.on(
+                        SocketEventType.GAME_START,
+                        (data: GameStateUpdatePayload) => {
+                            setGameData({
+                                level,
+                                lobbyParameters: params,
+                                onGameRendered: (app: App) => {
+                                    // when the game is started on the server,
+                                    // and the game component is rendered on the client
+                                    // then we resolve the promise
+                                    resolve([socketController, app]);
+                                },
+                                socketController,
+                                roomId,
+                            });
+                            setInitialGameState(data.gameState);
+                            setIsGameVisible(true);
+                        },
+                    );
+
+                    // emit start solo game event
+                    const isDesktop =
+                        window.innerWidth > 768 && window.innerHeight > 500;
+                    socketController.emit([
+                        SocketEventLobby.START_SOLO_GAME,
+                        {
+                            // userId: currentUser?.id,
+                            userId: undefined,
+                            level: levelId,
+                            device: isDesktop ? 'desktop' : 'mobile',
+                            region,
+                            roomId,
+                        },
+                    ]);
                 });
-                const isDesktop =
-                    window.innerWidth > 768 && window.innerHeight > 500;
-                socketController.emit([
-                    SocketEventLobby.START_SOLO_GAME,
-                    {
-                        // userId: currentUser?.id,
-                        userId: undefined,
-                        level: levelId,
-                        device: isDesktop ? 'desktop' : 'mobile',
-                        region,
-                        roomId,
-                    },
-                ]);
             };
 
-            if (gameData?.socketController && gameData.roomId) {
-                // if there is already a connection, just request another game
-                setGameData({
-                    level,
-                    lobbyParameters: params,
-                    onGameRendered,
-                });
-                requestSoloGame([gameData.socketController, gameData.roomId]);
-                return;
-            }
+            const synchronizeClock = async ([socketController, app]: [
+                SocketController,
+                App,
+            ]) => {
+                setLoadingStep((prev) => prev + 1);
+                const onTimeSynchronized = ([serverTime, rtt]: [
+                    serverTime: number,
+                    rtt: number,
+                ]) => {
+                    console.log('HERE time synchronized', serverTime, rtt);
+                    app.gameStateManager.onAverageRttReceived(serverTime, rtt);
+
+                    menuOut(() => {
+                        setIsMenuVisible(false);
+                        setLoadingFlow([]);
+                    });
+                };
+
+                const onStartTimer = () => {
+                    app.inputsManager.registerEventListeners();
+                    app.startRun();
+                };
+
+                socketController
+                    .synchronizeTime(onStartTimer)
+                    .then(onTimeSynchronized);
+            };
+
+            // if (gameData?.socketController && gameData.roomId) {
+            //     // if there is already a connection, just request another game
+            //     setGameData({
+            //         level,
+            //         lobbyParameters: params,
+            //         onGameRendered,
+            //     });
+            //     // sequence next connections
+            //     requestSoloGame([gameData.socketController, gameData.roomId]);
+            //     return;
+            // }
 
             setLoadingStep((prev) => prev + 1);
 
-            // first connection sequence
+            // sequence first connection
             loginAsAnonymous()
                 .then(requestLobbyCreation)
                 .then(waitUntilRoomIsReady)
                 .then(connectToRoom)
-                .then(requestSoloGame);
+                .then(requestSoloGame)
+                .then(synchronizeClock);
         },
         [
-            gameData,
             hathoraAnonymousToken,
             fetchLevelData,
-            handleGameStart,
             handleGameFinished,
             createSocketController,
-            onGameRendered,
+            menuOut,
             GameComponent,
         ],
     );
 
     const exitGame = useCallback(() => {
+        if (gameData?.socketController) {
+            gameData.socketController.destroy();
+            setGameData(
+                (prev) =>
+                    ({
+                        ...prev,
+                        socketController: undefined,
+                    }) as any,
+            );
+        }
         setMenuScene(MenuScene.TEAM_LOBBY);
         setIsMenuVisible(true);
         exitFullScreen();
-    }, [setMenuScene]);
+    }, [setMenuScene, gameData]);
 
     const exitLobby = useCallback(() => {
-        if (gameData?.socketController) {
-            gameData.socketController.destroy();
-        }
         goToHome();
         setGameData(undefined);
         setGameStats(undefined);
-    }, [goToHome, gameData]);
+    }, [goToHome]);
 
     useEffect(() => {
         if (isMenuVisible) {
