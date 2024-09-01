@@ -2,7 +2,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // our libs
-import { Side } from '@benjaminbours/composite-core';
+import { GameMode, Side } from '@benjaminbours/composite-core';
 // local
 import { CopyToClipBoardButton } from '../CopyToClipboardButton';
 import { MenuScene, Route } from '../../types';
@@ -21,7 +21,6 @@ import { useStoreState } from '../../hooks/store';
 import { AuthModal } from '../../03_organisms/AuthModal';
 import { labelsDifficulty, labelsOverall } from '../../constants';
 import { DifficultyIcon } from '../../01_atoms/DifficultyIcon';
-import { GameMode } from '../../core/entities/LobbyParameters';
 import { useGlobalContext, useMenuTransitionContext } from '../../contexts';
 import { formatElapsedTime } from '../../utils/time';
 

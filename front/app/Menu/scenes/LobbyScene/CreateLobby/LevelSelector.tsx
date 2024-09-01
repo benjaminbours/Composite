@@ -6,14 +6,13 @@ import { MenuScene, Route } from '../../../../types';
 import { QUEUE_INFO_FETCH_INTERVAL } from '../../../../useMainController';
 import { LevelGridItem } from '../LevelGridItem';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Side } from '@benjaminbours/composite-core';
-import { GamePlayerNumber } from '../../../../core/entities/LobbyParameters';
+import { GamePlayerCount, Side } from '@benjaminbours/composite-core';
 import type { Level } from '@benjaminbours/composite-core-api-client';
 import { useMenuTransitionContext } from '../../../../contexts/menuTransitionContext';
 
 interface Props {
     levels: Level[];
-    playerNumber: GamePlayerNumber;
+    playerNumber: GamePlayerCount;
     selectedLevel: number;
     selectedSide?: Side;
     onChange: (newValue: [levelId: number, side?: Side]) => void;
@@ -71,7 +70,7 @@ export const LevelSelector: React.FC<Props> = ({
             const isDesktop =
                 window.innerWidth > 768 && window.innerHeight > 500;
             if (
-                playerNumber === GamePlayerNumber.DUO &&
+                playerNumber === GamePlayerCount.DUO &&
                 side === undefined &&
                 isDesktop
             ) {
@@ -200,7 +199,7 @@ export const LevelSelector: React.FC<Props> = ({
                                     isShadowWaiting={isShadowWaiting}
                                     isMobile={isMobile}
                                     isSoloMode={
-                                        playerNumber === GamePlayerNumber.SOLO
+                                        playerNumber === GamePlayerCount.SOLO
                                     }
                                 />
                             );

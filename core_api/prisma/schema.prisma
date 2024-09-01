@@ -113,6 +113,8 @@ model Game {
 
   status   GameStatus
   duration Float
+  // TODO: Remove this field. It's ugly, it should be like player count
+  // or it should not exist and we use the array of players to know the count
   mode     GameMode
   device   GameDevice
 

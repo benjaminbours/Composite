@@ -33,7 +33,7 @@ import { SocketService } from './socket.service';
 import {
   Configuration,
   DefaultApi,
-  Level,
+  Game,
 } from '@benjaminbours/composite-core-api-client';
 import { Vector2, Vector3 } from 'three';
 import { ENVIRONMENT } from 'src/environment';
@@ -413,9 +413,9 @@ export class SocketGateway {
 
   async createGameLoop(
     players: { socketId: string; player: PlayerState; indexToClear?: number }[],
-    gameId: number,
-    dbLevel: Level,
+    game: Game,
   ) {
+    const { id: gameId, level: dbLevel } = game;
     const levelMapping = new LevelMapping(
       dbLevel.id,
       dbLevel.data as any[],
@@ -442,14 +442,6 @@ export class SocketGateway {
         mesh.raycast = acceleratedRaycast;
       },
     );
-
-    // TODO: Check if it can happen. I think it's not possible anymore because of previous
-    // validation
-    if (!levelMapping) {
-      throw new Error(
-        `Level doesn't exist or is not ready yet: ${players[0].player.selectedLevel}`,
-      );
-    }
 
     // create initial game data
     const initialGameState = new GameState(
@@ -480,7 +472,14 @@ export class SocketGateway {
     // store game state and update queue in temporary storage
     await this.temporaryStorage.createGame(players, gameId, initialGameState);
     this.registerGameLoop(gameId, levelMapping);
-    return initialGameState;
+    const gameRoomName = String(gameId);
+    this.emit(gameRoomName, [
+      SocketEventType.GAME_START,
+      {
+        gameState: initialGameState,
+        lastInputs: [undefined, undefined],
+      },
+    ]);
   }
 
   finishGame = (gameId: number) => {

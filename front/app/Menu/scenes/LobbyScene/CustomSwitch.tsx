@@ -2,11 +2,11 @@ import classNames from 'classnames';
 import React from 'react';
 
 interface Props {
-    selectedValue: string;
-    onChange: (newValue: string) => void;
+    selectedValue: string | number;
+    onChange: (newValue: string | number) => void;
     items: {
         text: string;
-        value: string;
+        value: string | number;
         disabled?: boolean;
     }[];
     className?: string;

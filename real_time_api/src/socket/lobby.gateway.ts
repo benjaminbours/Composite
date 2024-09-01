@@ -15,12 +15,14 @@ import {
   Side,
   SocketEventLobby,
   // JoinRandomQueuePayload,
-  SocketEventType,
-  StartSoloGamePayload,
+  // SocketEventType,
+  CreateGamePayload,
+  GamePlayerCount,
 } from '@benjaminbours/composite-core';
 import {
   Configuration,
   DefaultApi,
+  Game,
   GameModeEnum,
 } from '@benjaminbours/composite-core-api-client';
 // local
@@ -322,61 +324,87 @@ export class LobbyGateway {
   //   ]);
   // }
 
-  @SubscribeMessage(SocketEventLobby.START_SOLO_GAME)
-  async handleStartSoloGame(
-    @MessageBody() data: StartSoloGamePayload,
+  @SubscribeMessage(SocketEventLobby.CREATE_GAME)
+  async handleCreateGame(
+    @MessageBody() data: CreateGamePayload,
     @ConnectedSocket() socket: Socket,
   ) {
-    Logger.log('create solo game');
+    Logger.log('create game');
     const configuration = new Configuration({
       basePath: ENVIRONMENT.CORE_API_URL,
       accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
     });
     const coreApiClient = new DefaultApi(configuration);
-    const dbGame = await coreApiClient
-      .gamesControllerCreate({
-        createGameDto: {
-          userId: data.userId,
-          region: data.region,
-          levelId: data.level,
-          mode: GameModeEnum.SinglePlayer,
-          deviceType: data.device === 'desktop' ? 'DESKTOP' : 'MOBILE',
-        },
-      })
-      .catch((error) => {
-        Logger.error(error);
-        throw Error("Couldn't create game");
-      });
 
-    Logger.log(`GAME ID: ${dbGame.id}`);
-    const gameRoomName = String(dbGame.id);
-    const player = new PlayerState(
-      PlayerStatus.IS_PLAYING,
-      undefined,
-      data.level,
-      undefined,
-      data.userId,
-      dbGame.id,
-      data.roomId,
-      true,
-    );
-    this.addSocketToRoom(socket.id, gameRoomName);
-    this.temporaryStorage.setPlayer(
-      socket.id,
-      RedisPlayerState.parsePlayerState(player),
-    );
-    const initialGameState = await this.mainGateway.createGameLoop(
-      [{ socketId: socket.id, player }],
-      dbGame.id,
-      dbGame.level!,
-    );
-    this.mainGateway.emit(gameRoomName, [
-      SocketEventType.GAME_START,
-      {
-        gameState: initialGameState,
-        lastInputs: [undefined, undefined],
-      },
-    ]);
+    const createGameInDB = async () => {
+      return coreApiClient
+        .gamesControllerCreate({
+          createGameDto: {
+            userId: data.userId,
+            region: data.region,
+            levelId: data.level,
+            mode:
+              data.playerCount === GamePlayerCount.SOLO
+                ? GameModeEnum.SinglePlayer
+                : GameModeEnum.MultiPlayer,
+            deviceType: data.device === 'desktop' ? 'DESKTOP' : 'MOBILE',
+          },
+        })
+        .then((game) => {
+          Logger.log(`GAME ID: ${game.id}`);
+          return game;
+        })
+        .catch((error) => {
+          Logger.error(error);
+          throw Error("Couldn't create game in database");
+        });
+    };
+
+    const createPlayer = async (game?: Game) => {
+      const player = new PlayerState(
+        PlayerStatus.IS_PLAYING,
+        undefined,
+        data.level,
+        undefined,
+        data.userId,
+        game?.id || undefined,
+        data.roomId,
+        data.playerCount === GamePlayerCount.SOLO,
+      );
+      if (game) {
+        const gameRoomName = String(game.id);
+        this.addSocketToRoom(socket.id, gameRoomName);
+      }
+      await this.temporaryStorage.setPlayer(
+        socket.id,
+        RedisPlayerState.parsePlayerState(player),
+      );
+      return { game, player };
+    };
+
+    const createGameLoop = async ({
+      game,
+      player,
+    }: {
+      game?: Game;
+      player: PlayerState;
+    }) => {
+      if (!game) {
+        throw Error(
+          'Trying to start a game loop without game created in the database',
+        );
+      }
+      this.mainGateway.createGameLoop([{ socketId: socket.id, player }], game);
+    };
+
+    if (data.playerCount === GamePlayerCount.SOLO) {
+      // TODO: Deploy and test this sequence for SOLO
+      // sequence
+      createGameInDB().then(createPlayer).then(createGameLoop);
+      return;
+    }
+
+    // TODO: sequence for duo
   }
 
   // handlePlayerMatch = async (

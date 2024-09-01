@@ -7,13 +7,15 @@ import {
     createContext,
     useEffect,
 } from 'react';
-import { GameMode, GamePlayerNumber, LobbyParameters } from '../core/entities';
+import { LobbyParameters } from '../core/entities';
 import { startLoadingAssets } from '../Game/assetsLoader';
 import { servicesContainer } from '../core/frameworks';
 import { CoreApiClient } from '../core/services';
 import {
     createInitialGameStateAndLevelMapping,
     GameFinishedPayload,
+    GameMode,
+    GamePlayerCount,
     GameState,
     GameStateUpdatePayload,
     SocketEventLobby,
@@ -57,8 +59,8 @@ export const statusTextMap = {
     [GameStatus.LOADING_LEVEL_DATA]: 'Building level map...',
     [GameStatus.CREATING_GAME]: 'Launching a game in your region...',
     [GameStatus.CONNECTING_TO_GAME]: 'Establishing connection...',
-    [GameStatus.SYNCHRONIZING_CLOCK]: 'Synchronizing clocks...',
     [GameStatus.WAITING_TEAMMATE]: 'Waiting for teammate...',
+    [GameStatus.SYNCHRONIZING_CLOCK]: 'Synchronizing clocks...',
 };
 
 export interface FlowItem {
@@ -108,6 +110,10 @@ export const RANKED_DUO_FLOW: FlowItem[] = [
     {
         id: GameStatus.WAITING_TEAMMATE,
         text: statusTextMap[GameStatus.WAITING_TEAMMATE],
+    },
+    {
+        id: GameStatus.SYNCHRONIZING_CLOCK,
+        text: statusTextMap[GameStatus.SYNCHRONIZING_CLOCK],
     },
 ];
 
@@ -226,7 +232,8 @@ export function useGameController() {
 
     const createGame = useCallback(
         async (params: LobbyParameters) => {
-            const { region, levelId, visibility, playerNumber, mode } = params;
+            const { region, levelId, visibility, playerCount, mode, side } =
+                params;
 
             // validations
             if (!levelId) {
@@ -242,7 +249,11 @@ export function useGameController() {
                     return PRACTICE_FLOW;
                 }
 
-                return RANKED_SOLO;
+                if (playerCount === GamePlayerCount.SOLO) {
+                    return RANKED_SOLO_FLOW;
+                }
+
+                return RANKED_DUO_FLOW;
             })();
             setLoadingFlow(loadingFlow);
             setLoadingStep(0);
@@ -311,8 +322,9 @@ export function useGameController() {
                         region: region as Region,
                         visibility,
                         roomConfig: JSON.stringify({
-                            playerNumber,
+                            playerCount,
                             levelId,
+                            side,
                         }),
                     },
                     process.env.NEXT_PUBLIC_HATHORA_APP_ID,
@@ -366,7 +378,7 @@ export function useGameController() {
             };
 
             // it will start the game loop on the server. It's impossible to synchronize the clock before
-            const requestSoloGame = async ([socketController, roomId]: [
+            const requestCreateGame = async ([socketController, roomId]: [
                 SocketController,
                 string,
             ]) => {
@@ -401,7 +413,7 @@ export function useGameController() {
                     const isDesktop =
                         window.innerWidth > 768 && window.innerHeight > 500;
                     socketController.emit([
-                        SocketEventLobby.START_SOLO_GAME,
+                        SocketEventLobby.CREATE_GAME,
                         {
                             // userId: currentUser?.id,
                             userId: undefined,
@@ -409,6 +421,7 @@ export function useGameController() {
                             device: isDesktop ? 'desktop' : 'mobile',
                             region,
                             roomId,
+                            playerCount,
                         },
                     ]);
                 });
@@ -461,7 +474,7 @@ export function useGameController() {
                 .then(requestLobbyCreation)
                 .then(waitUntilRoomIsReady)
                 .then(connectToRoom)
-                .then(requestSoloGame)
+                .then(requestCreateGame)
                 .then(synchronizeClock);
         },
         [

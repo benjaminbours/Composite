@@ -14,6 +14,8 @@ import { BufferGeometry, Mesh, Object3D, Vector2 } from 'three';
 Mesh.prototype.raycast = acceleratedRaycast;
 // our libs
 import {
+    GameMode,
+    GamePlayerCount,
     GameState,
     MovableComponentState,
     Side,
@@ -23,7 +25,6 @@ import { MobileHUD } from './MobileHUD';
 import InputsManager from './Player/InputsManager';
 
 import { DesktopHUD } from './DesktopHUD';
-import { GameMode, GamePlayerNumber } from '../core/entities/LobbyParameters';
 import { GameData } from '../contexts';
 
 interface LevelEditorProps {
@@ -127,9 +128,7 @@ function Game({
                         : undefined,
                 );
             }
-            if (
-                gameData.lobbyParameters.playerNumber === GamePlayerNumber.SOLO
-            ) {
+            if (gameData.lobbyParameters.playerCount === GamePlayerCount.SOLO) {
                 appRef.current.registerSoloModeListeners();
             }
             if (isMobile) {
@@ -194,8 +193,8 @@ function Game({
                     isMobileInteractButtonAdded={isMobileInteractButtonAdded}
                     inputsManager={inputsManager}
                     withSwitchPlayer={
-                        gameData.lobbyParameters.playerNumber ===
-                        GamePlayerNumber.SOLO
+                        gameData.lobbyParameters.playerCount ===
+                        GamePlayerCount.SOLO
                     }
                     onExitGame={onExitGame}
                 />
@@ -206,8 +205,8 @@ function Game({
                     level={gameData.level}
                     onExitGame={onExitGame}
                     withActionsContainer={
-                        gameData.lobbyParameters.playerNumber ===
-                        GamePlayerNumber.SOLO
+                        gameData.lobbyParameters.playerCount ===
+                        GamePlayerCount.SOLO
                     }
                 />
             )}

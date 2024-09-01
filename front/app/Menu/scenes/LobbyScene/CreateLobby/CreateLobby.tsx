@@ -6,16 +6,16 @@ import GamesIcon from '@mui/icons-material/Games';
 // local
 import { CustomSwitch } from '../CustomSwitch';
 import { useWindowSize } from '../../../../hooks/useWindowSize';
-import {
-    GameMode,
-    GamePlayerNumber,
-    GameVisibility,
-} from '../../../../core/entities/LobbyParameters';
 import { RegionSelector } from './RegionSelector';
 import { LevelSelector } from './LevelSelector';
 import { GameLoader } from './GameLoader';
 import { useGlobalContext } from '../../../../contexts';
 import { useMenuDataContext } from '../../../../contexts/menuDataContext';
+import {
+    GameMode,
+    GamePlayerCount,
+    GameVisibility,
+} from '@benjaminbours/composite-core';
 
 interface Props {}
 
@@ -92,21 +92,21 @@ export const CreateLobby: React.FC<Props> = ({}) => {
                     ]}
                 />
                 <CustomSwitch
-                    selectedValue={state.playerNumber}
-                    onChange={handleChange('playerNumber')}
+                    selectedValue={state.playerCount}
+                    onChange={handleChange('playerCount')}
                     items={[
                         {
                             text: 'Solo',
-                            value: GamePlayerNumber.SOLO,
+                            value: GamePlayerCount.SOLO,
                         },
                         {
                             text: 'Duo',
-                            value: GamePlayerNumber.DUO,
+                            value: GamePlayerCount.DUO,
                             disabled: state.mode === GameMode.PRACTICE,
                         },
                     ]}
                 />
-                {state.playerNumber === GamePlayerNumber.DUO &&
+                {state.playerCount === GamePlayerCount.DUO &&
                     width !== undefined &&
                     width > 768 && (
                         <CustomSwitch
@@ -127,7 +127,7 @@ export const CreateLobby: React.FC<Props> = ({}) => {
                         />
                     )}
             </div>
-            {state.playerNumber === GamePlayerNumber.DUO &&
+            {state.playerCount === GamePlayerCount.DUO &&
                 width !== undefined &&
                 width <= 768 && (
                     <div className="create-game__row">
@@ -178,7 +178,7 @@ export const CreateLobby: React.FC<Props> = ({}) => {
                     selectedLevel={state.levelId}
                     selectedSide={state.side}
                     onChange={handleChange('levelId')}
-                    playerNumber={state.playerNumber}
+                    playerNumber={state.playerCount}
                     // disabled={state.isInQueue}
                 />
             )}

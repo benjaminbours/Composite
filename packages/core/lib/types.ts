@@ -14,6 +14,21 @@ export enum Layer {
     MINI_MAP,
 }
 
+export enum GameMode {
+    PRACTICE = 'practice',
+    RANKED = 'ranked',
+}
+
+export enum GamePlayerCount {
+    SOLO = 1,
+    DUO = 2,
+}
+
+export enum GameVisibility {
+    PUBLIC = 'public',
+    PRIVATE = 'private',
+}
+
 export enum SocketEventType {
     // send automatically by socket io after successful connection with server
     CONNECT = 'connect',
@@ -51,7 +66,7 @@ export enum SocketEventLobby {
     INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
     READY_TO_PLAY = 'READY_TO_PLAY',
     JOIN_RANDOM_QUEUE = 'JOIN_RANDOM_QUEUE',
-    START_SOLO_GAME = 'START_SOLO_GAME',
+    CREATE_GAME = 'CREATE_GAME',
 }
 
 export interface InputsSync {
@@ -78,12 +93,13 @@ export interface JoinRandomQueuePayload {
     level?: number;
 }
 
-export interface StartSoloGamePayload {
+export interface CreateGamePayload {
     userId?: number;
     level: number;
     device: 'desktop' | 'mobile';
     region: string;
     roomId: string;
+    playerCount: GamePlayerCount;
 }
 
 export interface StartTimerPayload {
@@ -222,9 +238,9 @@ export type JoinRandomQueueEvent = [
     payload: JoinRandomQueuePayload,
 ];
 
-export type StartSoloGameEvent = [
-    type: SocketEventLobby.START_SOLO_GAME,
-    payload: StartSoloGamePayload,
+export type CreateGameEvent = [
+    type: SocketEventLobby.CREATE_GAME,
+    payload: CreateGamePayload,
 ];
 
 export type SocketEvent =
@@ -244,7 +260,7 @@ export type SocketEvent =
     | TeamSelectSide
     | ReadyToStartEvent
     | JoinRandomQueueEvent
-    | StartSoloGameEvent;
+    | CreateGameEvent;
 
 export enum MovableComponentState {
     onFloor,

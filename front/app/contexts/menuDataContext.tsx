@@ -8,6 +8,11 @@ import {
     useEffect,
 } from 'react';
 // ours libs
+import {
+    GameMode,
+    GamePlayerCount,
+    GameVisibility,
+} from '@benjaminbours/composite-core';
 import { Level } from '@benjaminbours/composite-core-api-client';
 // local
 import {
@@ -16,12 +21,7 @@ import {
     useCalculatePing,
 } from './useCalculatePing';
 import { useFetchLevels } from './useFetchLevels';
-import {
-    GameMode,
-    GamePlayerNumber,
-    GameVisibility,
-    LobbyParameters,
-} from '../core/entities';
+import { LobbyParameters } from '../core/entities';
 import { useGlobalContext } from './globalContext';
 
 interface MenuDataContext {
@@ -46,7 +46,7 @@ export function useMenuData() {
     const [state, setState] = useState(
         new LobbyParameters(
             GameMode.RANKED,
-            GamePlayerNumber.SOLO,
+            GamePlayerCount.SOLO,
             0,
             GameVisibility.PRIVATE,
             '',
@@ -73,20 +73,20 @@ export function useMenuData() {
                 }
 
                 if (field === 'mode' && newValue === GameMode.PRACTICE) {
-                    nextState.playerNumber = GamePlayerNumber.SOLO;
+                    nextState.playerCount = GamePlayerCount.SOLO;
                     nextState.visibility = GameVisibility.PRIVATE;
                 }
 
                 if (
-                    field === 'playerNumber' &&
-                    newValue === GamePlayerNumber.SOLO
+                    field === 'playerCount' &&
+                    newValue === GamePlayerCount.SOLO
                 ) {
                     nextState.visibility = GameVisibility.PRIVATE;
                 }
 
                 if (
-                    field === 'playerNumber' &&
-                    newValue === GamePlayerNumber.DUO
+                    field === 'playerCount' &&
+                    newValue === GamePlayerCount.DUO
                 ) {
                     nextState.visibility = GameVisibility.PUBLIC;
                 }
