@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.25
+
+### Patch Changes
+
+-   Update socket payloads
+
 ## 1.0.0-next.24
 
 ### Patch Changes

@@ -61,12 +61,13 @@ export enum SocketEventLobby {
     /**
      * Create a lobby with a friend a not a random player would be more exact
      */
-    CREATE_LOBBY = 'CREATE_LOBBY',
-    FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
-    INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
+    // CREATE_LOBBY = 'CREATE_LOBBY',
+    // FRIEND_JOIN_LOBBY = 'FRIEND_JOIN_LOBBY',
+    // INVITE_FRIEND_TOKEN = 'INVITE_FRIEND_TOKEN',
     READY_TO_PLAY = 'READY_TO_PLAY',
-    JOIN_RANDOM_QUEUE = 'JOIN_RANDOM_QUEUE',
+    // JOIN_RANDOM_QUEUE = 'JOIN_RANDOM_QUEUE',
     CREATE_GAME = 'CREATE_GAME',
+    JOIN_GAME = 'JOIN_GAME',
 }
 
 export interface InputsSync {
@@ -100,6 +101,10 @@ export interface CreateGamePayload {
     region: string;
     roomId: string;
     playerCount: GamePlayerCount;
+}
+
+export interface JoinGamePayload {
+    roomId: string;
 }
 
 export interface StartTimerPayload {
@@ -153,7 +158,6 @@ export interface GameFinishedPayload {
     duration: number;
     rank: number;
 }
-
 // events
 
 export type PingEvent = [
@@ -213,33 +217,40 @@ export type TeamSelectSide = [
     payload: Side | undefined,
 ];
 
-export type CreateLobbyEvent = [
-    type: SocketEventLobby.CREATE_LOBBY,
-    payload: CreateLobbyPayload,
-];
+// export type CreateLobbyEvent = [
+//     type: SocketEventLobby.CREATE_LOBBY,
+//     payload: CreateLobbyPayload,
+// ];
 
-export type FriendJoinLobbyEvent = [
-    type: SocketEventLobby.FRIEND_JOIN_LOBBY,
-    payload: FriendJoinLobbyPayload,
-];
+// export type FriendJoinLobbyEvent = [
+//     type: SocketEventLobby.FRIEND_JOIN_LOBBY,
+//     payload: FriendJoinLobbyPayload,
+// ];
 
-export type InviteFriendTokenEvent = [
-    type: SocketEventLobby.INVITE_FRIEND_TOKEN,
-    payload: InviteFriendTokenPayload,
-];
+// export type InviteFriendTokenEvent = [
+//     type: SocketEventLobby.INVITE_FRIEND_TOKEN,
+//     payload: InviteFriendTokenPayload,
+// ];
 
 export type ReadyToStartEvent = [
     type: SocketEventLobby.READY_TO_PLAY,
     payload: boolean,
 ];
 
-export type JoinRandomQueueEvent = [
-    type: SocketEventLobby.JOIN_RANDOM_QUEUE,
-    payload: JoinRandomQueuePayload,
-];
+// export type JoinRandomQueueEvent = [
+//     type: SocketEventLobby.JOIN_RANDOM_QUEUE,
+//     payload: JoinRandomQueuePayload,
+// ];
 
 export type CreateGameEvent = [
     type: SocketEventLobby.CREATE_GAME,
+    payload: CreateGamePayload,
+];
+
+export type JoinGameEvent = [
+    type: SocketEventLobby.JOIN_GAME,
+    // TODO: Should be updated. The server already received the creation params before,
+    // it should be avoided to be sent twice
     payload: CreateGamePayload,
 ];
 
@@ -253,13 +264,14 @@ export type SocketEvent =
     | PingEvent
     | TimeInfoEvent
     | StartTimerEvent
-    | CreateLobbyEvent
-    | InviteFriendTokenEvent
-    | FriendJoinLobbyEvent
+    // | CreateLobbyEvent
+    // | InviteFriendTokenEvent
+    // | FriendJoinLobbyEvent
     | TeamSelectLevel
     | TeamSelectSide
     | ReadyToStartEvent
-    | JoinRandomQueueEvent
+    | JoinGameEvent
+    // | JoinRandomQueueEvent
     | CreateGameEvent;
 
 export enum MovableComponentState {
