@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.24
+
+### Patch Changes
+
+-   Bump version to deploy packages
+
 ## 1.0.0-next.23
 
 ### Patch Changes
