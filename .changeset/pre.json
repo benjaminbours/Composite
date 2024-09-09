@@ -9,6 +9,7 @@
     "real_time_api": "0.0.1"
   },
   "changesets": [
+    "beige-elephants-collect",
     "blue-books-draw",
     "brave-sheep-invite",
     "brown-bags-count",
@@ -51,6 +52,7 @@
     "strange-knives-melt",
     "strange-peaches-unite",
     "ten-buttons-rhyme",
+    "tender-tomatoes-remember",
     "thin-candles-notice",
     "tidy-kiwis-wink",
     "two-pans-punch",

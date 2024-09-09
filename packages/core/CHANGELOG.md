@@ -1,5 +1,11 @@
 # composite-core
 
+## 1.0.0-next.26
+
+### Patch Changes
+
+-   bump
+
 ## 1.0.0-next.25
 
 ### Patch Changes

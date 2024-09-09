@@ -101,6 +101,7 @@ export interface CreateGamePayload {
     region: string;
     roomId: string;
     playerCount: GamePlayerCount;
+    side?: Side;
 }
 
 export interface JoinGamePayload {
