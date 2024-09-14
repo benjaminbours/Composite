@@ -18,6 +18,8 @@ import {
     GamePlayerCount,
     GameState,
     GameStateUpdatePayload,
+    GameVisibility,
+    Side,
     SocketEventLobby,
     SocketEventType,
 } from '@benjaminbours/composite-core';
@@ -138,6 +140,7 @@ interface GlobalContext {
     mateDisconnected: boolean;
     // actions
     createGame: (params: LobbyParameters) => void;
+    joinGame: (room: LobbyV3) => void;
     exitGame: () => void;
     exitLobby: () => void;
     // components
@@ -231,6 +234,66 @@ export function useGameController() {
                 });
             });
     }, []);
+
+    const connectToRoom = useCallback(
+        async (connectionInfo: ConnectionInfoV2) => {
+            setLoadingStep((prev) => prev + 1);
+            const uri = `wss://${connectionInfo.exposedPort!.host}:${connectionInfo.exposedPort!.port}`;
+            const socketController = await createSocketController(uri);
+
+            socketController.init(
+                handleGameFinished,
+                () => {
+                    setMateDisconnected(true);
+                },
+                // handleTeamMateDisconnect,
+                () => {
+                    // console.log('teammate disconnect');
+                },
+                // handleTeamMateJoinLobby,
+                () => {},
+                // handleReceiveLevelOnLobby,
+                () => {},
+                // handleReceiveSideOnLobby,
+                () => {},
+                // handleReceiveReadyToPlay,
+            );
+
+            return [socketController, connectionInfo.roomId] as [
+                SocketController,
+                string,
+            ];
+        },
+        [createSocketController, handleGameFinished],
+    );
+
+    // TODO: Use browser tab detection to wait for the user to be in the focus of the tab
+    const synchronizeClock = useCallback(
+        async ([socketController, app]: [SocketController, App]) => {
+            setLoadingStep((prev) => prev + 1);
+            const onTimeSynchronized = ([serverTime, rtt]: [
+                serverTime: number,
+                rtt: number,
+            ]) => {
+                app.gameStateManager.onAverageRttReceived(serverTime, rtt);
+
+                menuOut(() => {
+                    setIsMenuVisible(false);
+                    setLoadingFlow([]);
+                });
+            };
+
+            const onStartTimer = () => {
+                app.inputsManager.registerEventListeners();
+                app.startRun();
+            };
+
+            socketController
+                .synchronizeTime(onStartTimer)
+                .then(onTimeSynchronized);
+        },
+        [menuOut],
+    );
 
     const createGame = useCallback(
         async (params: LobbyParameters) => {
@@ -354,31 +417,6 @@ export function useGameController() {
                 );
             };
 
-            const connectToRoom = async (connectionInfo: ConnectionInfoV2) => {
-                setLoadingStep((prev) => prev + 1);
-                const uri = `wss://${connectionInfo.exposedPort!.host}:${connectionInfo.exposedPort!.port}`;
-                const socketController = await createSocketController(uri);
-
-                socketController.init(
-                    handleGameFinished,
-                    () => {},
-                    // handleTeamMateDisconnect,
-                    () => {},
-                    // handleTeamMateJoinLobby,
-                    () => {},
-                    // handleReceiveLevelOnLobby,
-                    () => {},
-                    // handleReceiveSideOnLobby,
-                    () => {},
-                    // handleReceiveReadyToPlay,
-                );
-
-                return [socketController, connectionInfo.roomId] as [
-                    SocketController,
-                    string,
-                ];
-            };
-
             // it will start the game loop on the server. It's impossible to synchronize the clock before
             const requestCreateGame = async ([socketController, roomId]: [
                 SocketController,
@@ -411,7 +449,7 @@ export function useGameController() {
                         },
                     );
 
-                    // emit start solo game event
+                    // emit create game event
                     const isDesktop =
                         window.innerWidth > 768 && window.innerHeight > 500;
                     socketController.emit([
@@ -424,37 +462,15 @@ export function useGameController() {
                             region,
                             roomId,
                             playerCount,
+                            side,
                         },
                     ]);
+
+                    if (playerCount === GamePlayerCount.DUO) {
+                        // go to step waiting for teammate
+                        setLoadingStep((prev) => prev + 1);
+                    }
                 });
-            };
-
-            const synchronizeClock = async ([socketController, app]: [
-                SocketController,
-                App,
-            ]) => {
-                setLoadingStep((prev) => prev + 1);
-                const onTimeSynchronized = ([serverTime, rtt]: [
-                    serverTime: number,
-                    rtt: number,
-                ]) => {
-                    console.log('HERE time synchronized', serverTime, rtt);
-                    app.gameStateManager.onAverageRttReceived(serverTime, rtt);
-
-                    menuOut(() => {
-                        setIsMenuVisible(false);
-                        setLoadingFlow([]);
-                    });
-                };
-
-                const onStartTimer = () => {
-                    app.inputsManager.registerEventListeners();
-                    app.startRun();
-                };
-
-                socketController
-                    .synchronizeTime(onStartTimer)
-                    .then(onTimeSynchronized);
             };
 
             // if (gameData?.socketController && gameData.roomId) {
@@ -471,7 +487,6 @@ export function useGameController() {
 
             setLoadingStep((prev) => prev + 1);
 
-            // sequence first connection
             loginAsAnonymous()
                 .then(requestLobbyCreation)
                 .then(waitUntilRoomIsReady)
@@ -483,10 +498,110 @@ export function useGameController() {
             hathoraAnonymousToken,
             fetchLevelData,
             handleGameFinished,
-            createSocketController,
+            synchronizeClock,
             menuOut,
             GameComponent,
+            connectToRoom,
         ],
+    );
+
+    const joinGame = useCallback(
+        async (room: LobbyV3) => {
+            const roomConfig = (() => {
+                if (!room.roomConfig) {
+                    return undefined;
+                }
+                return JSON.parse(room.roomConfig) as {
+                    playerCount: GamePlayerCount;
+                    levelId: number;
+                    side: Side;
+                };
+            })();
+
+            const side =
+                roomConfig!.side === Side.LIGHT ? Side.SHADOW : Side.LIGHT;
+
+            const [level, Game] = await fetchLevelData(
+                roomConfig!.levelId,
+            ).catch((error) => {
+                console.error('Error fetching level data', error);
+                throw error;
+            });
+
+            // if game component is not loaded, load it
+            if (!GameComponent) {
+                setGameComponent(Game);
+            }
+
+            const hathoraCloud = new HathoraCloud({
+                appId: process.env.NEXT_PUBLIC_HATHORA_APP_ID,
+            });
+
+            const connectionInfo = await hathoraCloud.roomsV2.getConnectionInfo(
+                room.roomId,
+            );
+
+            // declarations
+            // TODO: Function is almost a copy of requestCreateGame, refactor
+            const requestJoinGame = async ([socketController, roomId]: [
+                SocketController,
+                string,
+            ]) => {
+                return new Promise<[SocketController, App]>((resolve) => {
+                    // cleanup all previous listeners
+                    socketController.socket.removeAllListeners(
+                        SocketEventType.GAME_START,
+                    );
+
+                    // listen to the game start event
+                    socketController.socket.on(
+                        SocketEventType.GAME_START,
+                        (data: GameStateUpdatePayload) => {
+                            setGameData({
+                                level,
+                                lobbyParameters: {
+                                    region: room.region,
+                                    levelId: roomConfig!.levelId,
+                                    visibility: GameVisibility.PUBLIC,
+                                    playerCount: roomConfig!.playerCount,
+                                    mode: GameMode.RANKED,
+                                    side,
+                                },
+                                onGameRendered: (app: App) => {
+                                    // when the game is started on the server,
+                                    // and the game component is rendered on the client
+                                    // then we resolve the promise
+                                    resolve([socketController, app]);
+                                },
+                                socketController,
+                                roomId,
+                            });
+                            setInitialGameState(data.gameState);
+                            setIsGameVisible(true);
+                        },
+                    );
+
+                    const isDesktop =
+                        window.innerWidth > 768 && window.innerHeight > 500;
+                    socketController.emit([
+                        SocketEventLobby.JOIN_GAME,
+                        {
+                            roomId,
+                            level: roomConfig!.levelId,
+                            device: isDesktop ? 'desktop' : 'mobile',
+                            region: room.region,
+                            playerCount: roomConfig!.playerCount,
+                            side,
+                        },
+                    ]);
+                });
+            };
+
+            connectToRoom(connectionInfo)
+                .then(requestJoinGame)
+                .then(synchronizeClock);
+        },
+        [connectToRoom, GameComponent, fetchLevelData, synchronizeClock],
     );
 
     const exitGame = useCallback(() => {
@@ -530,6 +645,7 @@ export function useGameController() {
         isMenuVisible,
         mateDisconnected,
         createGame,
+        joinGame,
         exitGame,
         exitLobby,
         GameComponent,

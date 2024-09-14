@@ -35,8 +35,7 @@ interface LevelEditorProps {
 }
 
 export interface Props {
-    side: Side;
-    onExitGame: () => void;
+    onExitGame?: () => void;
     inputsManager: InputsManager;
     stats: React.MutableRefObject<Stats | undefined>;
     gameData?: GameData;
@@ -46,7 +45,6 @@ export interface Props {
 
 function Game({
     onExitGame,
-    side,
     stats,
     inputsManager,
     gameData,
@@ -108,6 +106,8 @@ function Game({
         if (!canvasRef.current || !canvasMiniMapRef.current) {
             return;
         }
+
+        const side = gameData?.lobbyParameters.side || Side.SHADOW;
 
         if (gameData && initialGameState) {
             if (!appRef.current) {

@@ -4,6 +4,7 @@ import { HathoraCloud } from '@hathora/cloud-sdk-typescript';
 import { LobbyV3 } from '@hathora/cloud-sdk-typescript/models/components';
 // local
 import { FLAG_MAP } from '../../../constants';
+import { useGlobalContext } from '../../../contexts';
 
 interface Props {
     // rooms: any[];
@@ -11,6 +12,7 @@ interface Props {
 
 export const JoinGame: React.FC<Props> = ({}) => {
     const [rooms, setRooms] = useState<LobbyV3[]>([]);
+    const { joinGame } = useGlobalContext();
 
     useEffect(() => {
         const hathoraCloud = new HathoraCloud({
@@ -20,7 +22,6 @@ export const JoinGame: React.FC<Props> = ({}) => {
             .listActivePublicLobbies(process.env.NEXT_PUBLIC_HATHORA_APP_ID)
             .then((rooms) => {
                 console.log('HERE rooms', rooms);
-                // rooms[0].
                 setRooms(rooms);
             });
     }, []);
@@ -44,7 +45,10 @@ export const JoinGame: React.FC<Props> = ({}) => {
                                     {FLAG_MAP[room.region]} {room.region}
                                 </td>
                                 <td>
-                                    <button className="composite-button">
+                                    <button
+                                        className="composite-button"
+                                        onClick={() => joinGame(room)}
+                                    >
                                         Join
                                     </button>
                                 </td>

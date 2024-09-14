@@ -135,12 +135,6 @@ function MainApp({ dictionary }: Props) {
             <Suspense>
                 {isGameVisible && GameComponent !== undefined && (
                     <GameComponent
-                        // side={
-                        //     state.you.side === undefined
-                        //         ? Side.SHADOW
-                        //         : state.you.side
-                        // }
-                        side={Side.SHADOW}
                         gameData={gameData!}
                         initialGameState={initialGameState}
                         // gameData={{

@@ -278,13 +278,11 @@ export const LevelEditor: React.FC<Props> = withConfirmDialogProvider(
                 {/* when initial level exist, it means assets are loaded */}
                 {state.initialLevel && (
                     <Game
-                        side={Side.SHADOW}
                         levelEditorProps={{
                             onAppLoaded,
                             onTransformControlsObjectChange:
                                 handleControlObjectChange,
                         }}
-                        tabIsHidden={false}
                         stats={statsRef}
                         inputsManager={inputsManager.current}
                     />
