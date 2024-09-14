@@ -47,7 +47,7 @@ export class SocketController {
                 this.destroy();
             },
         );
-        this.socket.on(SocketEventLobby.FRIEND_JOIN_LOBBY, onFriendJoinLobby);
+        // this.socket.on(SocketEventLobby.FRIEND_JOIN_LOBBY, onFriendJoinLobby);
         this.socket.on(
             SocketEventType.TEAMMATE_DISCONNECT,
             onTeamMateDisconnect,
