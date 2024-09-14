@@ -1,5 +1,13 @@
 # composite-back
 
+## 1.0.0-next.24
+
+### Patch Changes
+
+- Bump to deploy
+- Updated dependencies
+  - @benjaminbours/composite-core@1.0.0-next.27
+
 ## 1.0.0-next.23
 
 ### Patch Changes

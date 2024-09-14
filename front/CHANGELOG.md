@@ -1,5 +1,14 @@
 # composite-front
 
+## 1.0.0-next.35
+
+### Patch Changes
+
+-   Bump to deploy
+-   Updated dependencies
+    -   @benjaminbours/composite-core@1.0.0-next.27
+    -   @benjaminbours/composite-core-api-client@1.0.0-next.22
+
 ## 1.0.0-next.34
 
 ### Patch Changes

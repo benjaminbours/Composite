@@ -1,5 +1,11 @@
 # @benjaminbours/composite-core-api-client
 
+## 1.0.0-next.22
+
+### Patch Changes
+
+- Bump to deploy
+
 ## 1.0.0-next.21
 
 ### Patch Changes

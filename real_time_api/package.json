@@ -1,6 +1,6 @@
 {
   "name": "real_time_api",
-  "version": "0.0.2-next.0",
+  "version": "0.0.2-next.1",
   "description": "",
   "author": "",
   "private": true,
@@ -20,8 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@benjaminbours/composite-core": "^1.0.0-next.26",
-    "@benjaminbours/composite-core-api-client": "^1.0.0-next.21",
+    "@benjaminbours/composite-core": "^1.0.0-next.27",
+    "@benjaminbours/composite-core-api-client": "^1.0.0-next.22",
     "@hathora/cloud-sdk-typescript": "^2.6.0",
     "@nestjs/cache-manager": "^2.2.2",
     "@nestjs/common": "^10.0.0",
