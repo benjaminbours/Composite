@@ -62,6 +62,7 @@ deploy:
 
 undeploy:
 	docker --context staging compose -f ./docker-compose.yml -f $(DOCKER_FILE_ENVIRONMENT) down
+
 # deploy_staging:
 # 	docker --context staging stack deploy --compose-file docker-compose.yml --compose-file docker-compose-staging.yml composite
 
@@ -69,18 +70,19 @@ remove_staging:
 	docker --context staging stack rm composite
 
 deploy_real_time_api:
-	cp ./back/Dockerfile.hathora ./back/Dockerfile && \
-	cp ./back/Dockerfile.hathora.dockerignore ./back/.dockerignore && \
-	tar -czf back.tar.gz --exclude='node_modules' --exclude='dist' --exclude='uploads' -C ./back . && \
+	cp ./real_time_api/Dockerfile.hathora ./real_time_api/Dockerfile && \
+	cp ./real_time_api/Dockerfile.hathora.dockerignore ./real_time_api/.dockerignore && \
+	tar -czf real_time_api.tar.gz --exclude='node_modules' --exclude='dist' -C ./real_time_api . && \
 	hathora-cloud deploy \
 	--appId app-07e72471-d9d1-4b1c-bf21-74e2ad6cb53a \
-	--file ./back.tar.gz \
+	--file ./real_time_api.tar.gz \
 	--roomsPerProcess 10 \
 	--planName "tiny" \
 	--transportType "tls" \
-	--containerPort 3002 \
+	--containerPort 3001 \
 	--token $(HATHORA_TOKEN) && \
-	rm ./back.tar.gz && rm ./back/Dockerfile && rm ./back/.dockerignore
+	rm ./real_time_api.tar.gz && rm ./real_time_api/Dockerfile && rm ./real_time_api/.dockerignore
 
 build_real_time_api_image:
-	docker build -f ./back/Dockerfile.hathora ./back
+	docker build -t hathora_real_time_api -f ./real_time_api/Dockerfile.hathora ./real_time_api
+# output log into a file version => docker build -f ./real_time_api/Dockerfile.hathora ./real_time_api &> build.log 
