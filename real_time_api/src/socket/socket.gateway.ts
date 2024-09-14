@@ -233,6 +233,7 @@ export class SocketGateway {
       clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
     }
 
+    // TODO: Destroy hathora room on disconnect, even in duo
     if (player.isSolo && ENVIRONMENT.STAGE !== 'local') {
       const hathoraCloud = new HathoraCloud({
         appId: ENVIRONMENT.HATHORA_APP_ID,
@@ -411,10 +412,13 @@ export class SocketGateway {
     }
   };
 
-  async createGameLoop(
-    players: { socketId: string; player: PlayerState; indexToClear?: number }[],
-    game: Game,
-  ) {
+  createGameLoop = async ({
+    game,
+    players,
+  }: {
+    players: { socketId: string; player: PlayerState }[];
+    game: Game;
+  }) => {
     const { id: gameId, level: dbLevel } = game;
     const levelMapping = new LevelMapping(
       dbLevel.id,
@@ -480,7 +484,7 @@ export class SocketGateway {
         lastInputs: [undefined, undefined],
       },
     ]);
-  }
+  };
 
   finishGame = (gameId: number) => {
     const gameRoomName = String(gameId);

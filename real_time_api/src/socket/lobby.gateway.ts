@@ -6,13 +6,13 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import type { Socket } from 'socket.io';
-import * as uuid from 'uuid';
+// import * as uuid from 'uuid';
 // our libs
 import {
   // FriendJoinLobbyPayload,
-  InviteFriendTokenPayload,
-  CreateLobbyPayload,
-  Side,
+  // InviteFriendTokenPayload,
+  // CreateLobbyPayload,
+  // Side,
   SocketEventLobby,
   // JoinRandomQueuePayload,
   // SocketEventType,
@@ -29,7 +29,7 @@ import {
 import { TemporaryStorageService } from './temporary-storage.service';
 import { PlayerState, PlayerStatus, RedisPlayerState } from './PlayerState';
 import { SocketGateway } from './socket.gateway';
-import ShortUniqueId from 'short-unique-id';
+// import ShortUniqueId from 'short-unique-id';
 // import {
 //   GameDevice,
 //   GameMode,
@@ -59,36 +59,36 @@ export class LobbyGateway {
     private mainGateway: SocketGateway,
   ) {}
 
-  @SubscribeMessage(SocketEventLobby.CREATE_LOBBY)
-  async handleCreateLobby(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() payload: CreateLobbyPayload,
-  ) {
-    const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
-    const teamRoomName = uuid.v4();
-    await this.temporaryStorage.storeInviteToken(inviteToken, socket.id);
-    const player = new PlayerState(
-      PlayerStatus.IS_WAITING_TEAMMATE,
-      payload.side,
-      payload.level,
-      inviteToken,
-      payload.userId,
-      undefined,
-      teamRoomName,
-    );
-    await this.temporaryStorage.setPlayer(
-      socket.id,
-      RedisPlayerState.parsePlayerState(player),
-      undefined,
-      true,
-    );
-    this.addSocketToRoom(socket.id, teamRoomName);
-    this.mainGateway.server
-      .to(socket.id)
-      .emit(SocketEventLobby.INVITE_FRIEND_TOKEN, {
-        token: inviteToken,
-      } as InviteFriendTokenPayload);
-  }
+  // @SubscribeMessage(SocketEventLobby.CREATE_LOBBY)
+  // async handleCreateLobby(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() payload: CreateLobbyPayload,
+  // ) {
+  //   const inviteToken = new ShortUniqueId({ length: 6 }).rnd();
+  //   const teamRoomName = uuid.v4();
+  //   await this.temporaryStorage.storeInviteToken(inviteToken, socket.id);
+  //   const player = new PlayerState(
+  //     PlayerStatus.IS_WAITING_TEAMMATE,
+  //     payload.side,
+  //     payload.level,
+  //     inviteToken,
+  //     payload.userId,
+  //     undefined,
+  //     teamRoomName,
+  //   );
+  //   await this.temporaryStorage.setPlayer(
+  //     socket.id,
+  //     RedisPlayerState.parsePlayerState(player),
+  //     undefined,
+  //     true,
+  //   );
+  //   this.addSocketToRoom(socket.id, teamRoomName);
+  //   this.mainGateway.server
+  //     .to(socket.id)
+  //     .emit(SocketEventLobby.INVITE_FRIEND_TOKEN, {
+  //       token: inviteToken,
+  //     } as InviteFriendTokenPayload);
+  // }
 
   // @SubscribeMessage(SocketEventLobby.FRIEND_JOIN_LOBBY)
   // async handleFriendJoinLobby(
@@ -138,84 +138,84 @@ export class LobbyGateway {
   //   ]);
   // }
 
-  @SubscribeMessage(SocketEventLobby.SELECT_LEVEL)
-  async handleSelectLevel(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() level: number | undefined,
-  ) {
-    const player = await this.temporaryStorage.getPlayer(socket.id);
+  // @SubscribeMessage(SocketEventLobby.SELECT_LEVEL)
+  // async handleSelectLevel(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() level: number | undefined,
+  // ) {
+  //   const player = await this.temporaryStorage.getPlayer(socket.id);
 
-    if (!player) {
-      // TODO: error handling
-      return;
-    }
-    player.status = PlayerStatus.IS_WAITING_TEAMMATE;
-    player.selectedLevel = level;
-    this.temporaryStorage.setPlayer(
-      socket.id,
-      RedisPlayerState.parsePlayerState(player),
-    );
-    socket.to(player.roomName).emit(SocketEventLobby.SELECT_LEVEL, level);
-  }
+  //   if (!player) {
+  //     // TODO: error handling
+  //     return;
+  //   }
+  //   player.status = PlayerStatus.IS_WAITING_TEAMMATE;
+  //   player.selectedLevel = level;
+  //   this.temporaryStorage.setPlayer(
+  //     socket.id,
+  //     RedisPlayerState.parsePlayerState(player),
+  //   );
+  //   socket.to(player.roomName).emit(SocketEventLobby.SELECT_LEVEL, level);
+  // }
 
-  @SubscribeMessage(SocketEventLobby.SELECT_SIDE)
-  async handleSelectSide(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() side: Side | undefined,
-  ) {
-    const player = await this.temporaryStorage.getPlayer(socket.id);
+  // @SubscribeMessage(SocketEventLobby.SELECT_SIDE)
+  // async handleSelectSide(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() side: Side | undefined,
+  // ) {
+  //   const player = await this.temporaryStorage.getPlayer(socket.id);
 
-    if (!player) {
-      // TODO: error handling
-      return;
-    }
-    player.status = PlayerStatus.IS_WAITING_TEAMMATE;
-    player.side = side;
-    this.temporaryStorage.setPlayer(
-      socket.id,
-      RedisPlayerState.parsePlayerState(player),
-    );
-    socket.to(player.roomName).emit(SocketEventLobby.SELECT_SIDE, side);
-  }
+  //   if (!player) {
+  //     // TODO: error handling
+  //     return;
+  //   }
+  //   player.status = PlayerStatus.IS_WAITING_TEAMMATE;
+  //   player.side = side;
+  //   this.temporaryStorage.setPlayer(
+  //     socket.id,
+  //     RedisPlayerState.parsePlayerState(player),
+  //   );
+  //   socket.to(player.roomName).emit(SocketEventLobby.SELECT_SIDE, side);
+  // }
 
-  detectIfGameCanStart = async (socket: Socket, player: PlayerState) => {
-    // find team mate socket id
-    const teamMateSocketId = await this.mainGateway.server
-      .in(String(player.roomName))
-      .fetchSockets()
-      .then((sockets) => {
-        const teamMate = sockets.find(({ id }) => id !== socket.id);
-        return teamMate?.id || undefined;
-      });
+  // detectIfGameCanStart = async (socket: Socket, player: PlayerState) => {
+  //   // find team mate socket id
+  //   const teamMateSocketId = await this.mainGateway.server
+  //     .in(String(player.roomName))
+  //     .fetchSockets()
+  //     .then((sockets) => {
+  //       const teamMate = sockets.find(({ id }) => id !== socket.id);
+  //       return teamMate?.id || undefined;
+  //     });
 
-    if (!teamMateSocketId) {
-      return false;
-    }
+  //   if (!teamMateSocketId) {
+  //     return false;
+  //   }
 
-    // find team mate player state
-    const teamMatePlayer =
-      await this.temporaryStorage.getPlayer(teamMateSocketId);
+  //   // find team mate player state
+  //   const teamMatePlayer =
+  //     await this.temporaryStorage.getPlayer(teamMateSocketId);
 
-    const isTeamReady =
-      player.status === PlayerStatus.IS_READY_TO_PLAY &&
-      teamMatePlayer.status === PlayerStatus.IS_READY_TO_PLAY &&
-      !Number.isNaN(player.side) &&
-      !Number.isNaN(teamMatePlayer.side) &&
-      teamMatePlayer.side !== player.side &&
-      teamMatePlayer.selectedLevel === player.selectedLevel;
-    // !COMING_SOON_LEVELS.includes(player.selectedLevel);
+  //   const isTeamReady =
+  //     player.status === PlayerStatus.IS_READY_TO_PLAY &&
+  //     teamMatePlayer.status === PlayerStatus.IS_READY_TO_PLAY &&
+  //     !Number.isNaN(player.side) &&
+  //     !Number.isNaN(teamMatePlayer.side) &&
+  //     teamMatePlayer.side !== player.side &&
+  //     teamMatePlayer.selectedLevel === player.selectedLevel;
+  //   // !COMING_SOON_LEVELS.includes(player.selectedLevel);
 
-    if (!isTeamReady) {
-      return false;
-    }
+  //   if (!isTeamReady) {
+  //     return false;
+  //   }
 
-    const players = [
-      { player, socketId: socket.id },
-      { player: teamMatePlayer, socketId: teamMateSocketId },
-    ];
+  //   const players = [
+  //     { player, socketId: socket.id },
+  //     { player: teamMatePlayer, socketId: teamMateSocketId },
+  //   ];
 
-    return players;
-  };
+  //   return players;
+  // };
 
   // @SubscribeMessage(SocketEventLobby.READY_TO_PLAY)
   // async handleReadyToStart(
@@ -324,87 +324,143 @@ export class LobbyGateway {
   //   ]);
   // }
 
+  // a game should be created in the database when the game is about to start
+  // if it's a duo game, it has to wait for the second player to join the room
+  private createGameInDB = async (data: CreateGamePayload) => {
+    Logger.log('create game in DB');
+    const configuration = new Configuration({
+      basePath: ENVIRONMENT.CORE_API_URL,
+      accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
+    });
+    const coreApiClient = new DefaultApi(configuration);
+    return coreApiClient
+      .gamesControllerCreate({
+        createGameDto: {
+          userId: data.userId,
+          region: data.region,
+          levelId: data.level,
+          mode:
+            data.playerCount === GamePlayerCount.SOLO
+              ? GameModeEnum.SinglePlayer
+              : GameModeEnum.MultiPlayer,
+          deviceType: data.device === 'desktop' ? 'DESKTOP' : 'MOBILE',
+        },
+      })
+      .then((game) => {
+        Logger.log(`GAME ID: ${game.id}`);
+        return game;
+      })
+      .catch((error) => {
+        Logger.error(error);
+        throw Error("Couldn't create game in database");
+      });
+  };
+
+  private createPlayer = async (
+    socketId: string,
+    data: CreateGamePayload,
+    game?: Game,
+  ) => {
+    const player = new PlayerState(
+      data.playerCount === GamePlayerCount.SOLO
+        ? PlayerStatus.IS_PLAYING
+        : PlayerStatus.IS_WAITING_TEAMMATE,
+      data.side,
+      data.level,
+      undefined,
+      data.userId,
+      game?.id || undefined,
+      data.roomId, // roomId is related to hathora roomId
+      data.playerCount === GamePlayerCount.SOLO,
+    );
+    if (game) {
+      const gameRoomName = String(game.id);
+      this.addSocketToRoom(socketId, gameRoomName);
+    }
+    this.addSocketToRoom(socketId, data.roomId);
+    await this.temporaryStorage.setPlayer(
+      socketId,
+      RedisPlayerState.parsePlayerState(player),
+    );
+    return { game, players: [{ player, socketId }] };
+  };
+
   @SubscribeMessage(SocketEventLobby.CREATE_GAME)
   async handleCreateGame(
     @MessageBody() data: CreateGamePayload,
     @ConnectedSocket() socket: Socket,
   ) {
     Logger.log('create game');
-    const configuration = new Configuration({
-      basePath: ENVIRONMENT.CORE_API_URL,
-      accessToken: ENVIRONMENT.CORE_API_ADMIN_TOKEN,
-    });
-    const coreApiClient = new DefaultApi(configuration);
-
-    const createGameInDB = async () => {
-      return coreApiClient
-        .gamesControllerCreate({
-          createGameDto: {
-            userId: data.userId,
-            region: data.region,
-            levelId: data.level,
-            mode:
-              data.playerCount === GamePlayerCount.SOLO
-                ? GameModeEnum.SinglePlayer
-                : GameModeEnum.MultiPlayer,
-            deviceType: data.device === 'desktop' ? 'DESKTOP' : 'MOBILE',
-          },
-        })
-        .then((game) => {
-          Logger.log(`GAME ID: ${game.id}`);
-          return game;
-        })
-        .catch((error) => {
-          Logger.error(error);
-          throw Error("Couldn't create game in database");
-        });
-    };
-
-    const createPlayer = async (game?: Game) => {
-      const player = new PlayerState(
-        PlayerStatus.IS_PLAYING,
-        undefined,
-        data.level,
-        undefined,
-        data.userId,
-        game?.id || undefined,
-        data.roomId,
-        data.playerCount === GamePlayerCount.SOLO,
-      );
-      if (game) {
-        const gameRoomName = String(game.id);
-        this.addSocketToRoom(socket.id, gameRoomName);
-      }
-      await this.temporaryStorage.setPlayer(
-        socket.id,
-        RedisPlayerState.parsePlayerState(player),
-      );
-      return { game, player };
-    };
-
-    const createGameLoop = async ({
-      game,
-      player,
-    }: {
-      game?: Game;
-      player: PlayerState;
-    }) => {
-      if (!game) {
-        throw Error(
-          'Trying to start a game loop without game created in the database',
-        );
-      }
-      this.mainGateway.createGameLoop([{ socketId: socket.id, player }], game);
-    };
 
     if (data.playerCount === GamePlayerCount.SOLO) {
-      // TODO: Deploy and test this sequence for SOLO
-      // sequence
-      createGameInDB().then(createPlayer).then(createGameLoop);
+      // sequence for solo
+      this.createGameInDB(data)
+        .then((game) => this.createPlayer(socket.id, data, game))
+        .then(this.mainGateway.createGameLoop);
       return;
     }
 
-    // TODO: sequence for duo
+    // sequence for duo
+    this.createPlayer(socket.id, data);
+  }
+
+  @SubscribeMessage(SocketEventLobby.JOIN_GAME)
+  async handleJoinGame(
+    @MessageBody() data: CreateGamePayload,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    Logger.log('join game');
+
+    const getCreatorPlayer = async (game: Game) => {
+      const socketsInRoom = await this.mainGateway.server
+        .in(data.roomId)
+        .fetchSockets();
+
+      // socketsInRoom
+      console.log('socketsInRoom length', socketsInRoom.length);
+
+      const socketIdsInRoom = socketsInRoom.map((socket) => socket.id);
+      Logger.log(
+        `Socket IDs in room ${data.roomId}: ${socketIdsInRoom.join(', ')}`,
+      );
+
+      const creatorSocketId = socketsInRoom[0].id;
+      const creatorPlayer =
+        await this.temporaryStorage.getPlayer(creatorSocketId);
+
+      if (!creatorPlayer) {
+        // Logger.error('Player not found');
+        throw Error('Player no found');
+      }
+
+      return { creatorSocketId, game, creatorPlayer };
+    };
+
+    const updateCreatorPlayerState = async (data: {
+      creatorSocketId: string;
+      creatorPlayer: PlayerState;
+      game: Game;
+    }) => {
+      const { creatorPlayer, game } = data;
+      creatorPlayer.status = PlayerStatus.IS_PLAYING;
+      creatorPlayer.gameId = game.id;
+      const gameRoomName = String(game.id);
+      this.addSocketToRoom(data.creatorSocketId, gameRoomName);
+      await this.temporaryStorage.setPlayer(
+        socket.id,
+        RedisPlayerState.parsePlayerState(creatorPlayer),
+      );
+      return data;
+    };
+
+    this.createGameInDB(data)
+      .then(getCreatorPlayer)
+      .then(updateCreatorPlayerState)
+      .then(async ({ game, creatorPlayer, creatorSocketId }) => {
+        const { players } = await this.createPlayer(socket.id, data, game);
+        players.push({ socketId: creatorSocketId, player: creatorPlayer });
+        this.mainGateway.createGameLoop({ players, game });
+      });
   }
 
   // handlePlayerMatch = async (
