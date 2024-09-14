@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from 'react';
 import { EndLevelScene, HomeScene, LobbyScene, NotFoundScene } from './scenes';
 import { getDictionary } from '../../getDictionary';
 import { useMenuTransitionContext } from '../contexts/menuTransitionContext';
-import { BottomRightInfo } from '../BottomRightInfo';
+// import { BottomRightInfo } from '../BottomRightInfo';
 
 interface Props {
     stats: React.MutableRefObject<Stats | undefined>;
@@ -63,7 +63,7 @@ export function Menu({ dictionary, stats }: Props) {
             <HomeScene />
             <LobbyScene dictionary={dictionary} />
             <EndLevelScene dictionary={dictionary} />
-            <BottomRightInfo />
+            {/* <BottomRightInfo /> */}
         </div>
     );
 }

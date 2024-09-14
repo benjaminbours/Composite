@@ -12,6 +12,7 @@ import {
     GameMode,
     GamePlayerCount,
     GameVisibility,
+    Side,
 } from '@benjaminbours/composite-core';
 import { Level } from '@benjaminbours/composite-core-api-client';
 // local
@@ -21,8 +22,19 @@ import {
     useCalculatePing,
 } from './useCalculatePing';
 import { useFetchLevels } from './useFetchLevels';
-import { LobbyParameters } from '../core/entities';
 import { useGlobalContext } from './globalContext';
+import { Region } from '@hathora/cloud-sdk-typescript/models/components';
+
+export class LobbyParameters {
+    constructor(
+        public mode: GameMode,
+        public playerCount: GamePlayerCount,
+        public levelId: number,
+        public visibility: GameVisibility,
+        public region: Region | '' = '',
+        public side?: Side,
+    ) {}
+}
 
 interface MenuDataContext {
     state: LobbyParameters;

@@ -172,42 +172,6 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
                 {lobbyMode === LobbyMode.CREATE && <CreateLobby />}
                 {lobbyMode === LobbyMode.JOIN && <JoinGame />}
             </div>
-            {/* <div className="lobby__tabs-container">
-                    <Tabs
-                        className="lobby__tabs"
-                        value={lobbyMode}
-                        textColor="inherit"
-                        variant="scrollable"
-                        scrollButtons="auto"
-                        onChange={handleTabChange}
-                    >
-                        <Tab label="Practice" />
-                        <Tab label="Solo" />
-                        <Tab label="Duo with friend" />
-                        <Tab
-                            label={
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    Duo with random
-                                    <Badge
-                                        badgeContent={
-                                            serverCounts?.matchmaking || 0
-                                        }
-                                        color="primary"
-                                        showZero
-                                    >
-                                        <PersonIcon />
-                                    </Badge>
-                                </div>
-                            }
-                        />
-                    </Tabs>
-                </div>
-                <Actions selectedRegion={selectedRegion} /> */}
         </div>
     );
 };

@@ -7,7 +7,6 @@ import {
     createContext,
     useEffect,
 } from 'react';
-import { LobbyParameters } from '../core/entities';
 import { startLoadingAssets } from '../Game/assetsLoader';
 import { servicesContainer } from '../core/frameworks';
 import { CoreApiClient } from '../core/services';
@@ -39,6 +38,7 @@ import { waitUntilConditionMet } from '../utils/time';
 import type Game from '../Game/Game';
 import React from 'react';
 import type App from '../Game/App';
+import { LobbyParameters } from './menuDataContext';
 
 // export interface PlayerState {
 //     side: Side | undefined;
