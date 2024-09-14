@@ -143,6 +143,7 @@ interface GlobalContext {
     joinGame: (room: LobbyV3) => void;
     exitGame: () => void;
     exitLobby: () => void;
+    fetchLobbyInfo: (shortCode: string) => Promise<void>;
     // components
     GameComponent: React.LazyExoticComponent<typeof Game> | undefined;
 }
@@ -625,6 +626,18 @@ export function useGameController() {
         setGameStats(undefined);
     }, [goToHome]);
 
+    const fetchLobbyInfo = useCallback(async (shortCode: string) => {
+        const hathoraCloud = new HathoraCloud({
+            appId: process.env.NEXT_PUBLIC_HATHORA_APP_ID,
+        });
+
+        return hathoraCloud.lobbiesV3
+            .getLobbyInfoByShortCode(shortCode)
+            .then((lobbyInfo) => {
+                setLobbyInfo(lobbyInfo);
+            });
+    }, []);
+
     useEffect(() => {
         if (isMenuVisible) {
             menuIn(() => {
@@ -647,6 +660,7 @@ export function useGameController() {
         joinGame,
         exitGame,
         exitLobby,
+        fetchLobbyInfo,
         GameComponent,
     };
 }

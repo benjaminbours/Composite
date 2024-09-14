@@ -28,11 +28,11 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
     // contexts
     const { menuScene, nextMenuScene, lobbyRef } = useMenuTransitionContext();
 
-    const { exitLobby, loadingFlow } = useGlobalContext();
+    const { exitLobby, fetchLobbyInfo, loadingFlow } = useGlobalContext();
 
-    // const { enqueueSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
-    // const urlSearchParams = useSearchParams();
+    const urlSearchParams = useSearchParams();
     const isAuthenticated = useStoreState(
         (actions) => actions.user.isAuthenticated,
     );
@@ -111,6 +111,26 @@ export const LobbyScene: React.FC<Props> = ({ dictionary }) => {
     // ]);
 
     const [lobbyMode, setLobbyMode] = useState<LobbyMode>(LobbyMode.CREATE);
+    useEffect(() => {
+        const roomCode = urlSearchParams.get('roomCode');
+        if (!roomCode) {
+            return;
+        }
+
+        fetchLobbyInfo(roomCode)
+            .then(() => {
+                setLobbyMode(LobbyMode.JOIN);
+            })
+            .catch((error) => {
+                console.error(error);
+                enqueueSnackbar(
+                    'The lobby you are trying to join is not valid or does not exist anymore.',
+                    {
+                        variant: 'error',
+                    },
+                );
+            });
+    }, [urlSearchParams, fetchLobbyInfo, enqueueSnackbar]);
 
     return (
         <div ref={lobbyRef} className={cssClass}>
