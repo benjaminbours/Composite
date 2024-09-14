@@ -512,6 +512,16 @@ export class SocketGateway {
           SocketEventType.GAME_FINISHED,
           { duration: updatedGame.duration, rank },
         ]);
+      })
+      .catch((error) => {
+        Logger.error('Error while finishing game in DB');
+        Logger.error(error);
+        this.emit(gameRoomName, [
+          SocketEventType.GAME_FINISHED,
+          { duration: -1, rank: -1 },
+        ]);
+      })
+      .finally(() => {
         this.server
           .in(gameRoomName)
           .fetchSockets()
