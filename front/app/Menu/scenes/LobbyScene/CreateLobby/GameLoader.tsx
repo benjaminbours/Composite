@@ -7,18 +7,22 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { FlowItem, GameStatus, statusTextMap } from '../../../../contexts';
 import { DiscordButton } from '../../../../02_molecules/DiscordButton';
+import type { LobbyV3 } from '@hathora/cloud-sdk-typescript/models/components';
+import { CopyToClipBoardButton } from '../../../CopyToClipboardButton';
 
 interface Props {
     level: Level;
     // gameStatus: Exclude<GameStatus, GameStatus.IDLE>;
     loadingFlow: FlowItem[];
     loadingStep: number;
+    lobbyInfo?: LobbyV3;
 }
 
 export const GameLoader: React.FC<Props> = ({
     level,
     loadingStep,
     loadingFlow,
+    lobbyInfo,
 }) => {
     const imageUrl = useMemo(() => {
         if (level.thumbnail) {
@@ -59,6 +63,12 @@ export const GameLoader: React.FC<Props> = ({
                         <p>{text}</p>
                     </div>
                 ))}
+                {lobbyInfo && (
+                    <CopyToClipBoardButton
+                        text="Copy link to share!"
+                        textToCopy={`${process.env.NEXT_PUBLIC_URL}/lobby?roomCode=${lobbyInfo.shortCode}`}
+                    />
+                )}
             </div>
             {!isMobile && (
                 <div className="game-loader__tips">

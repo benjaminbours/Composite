@@ -21,7 +21,7 @@ interface Props {}
 
 export const CreateLobby: React.FC<Props> = ({}) => {
     // hooks
-    const { createGame, loadingFlow, loadingStep, gameData } =
+    const { createGame, loadingFlow, loadingStep, gameData, lobbyInfo } =
         useGlobalContext();
 
     const {
@@ -169,6 +169,7 @@ export const CreateLobby: React.FC<Props> = ({}) => {
                     level={selectedLevel}
                     loadingFlow={loadingFlow}
                     loadingStep={loadingStep}
+                    lobbyInfo={lobbyInfo}
                 />
             ) : (
                 <LevelSelector
