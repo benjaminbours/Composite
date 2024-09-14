@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./front/Dockerfile.front
+          file: ./front/Dockerfile
           target: final
           push: true
           tags: |
