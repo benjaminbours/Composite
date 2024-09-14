@@ -162,37 +162,6 @@ export function useMainController() {
     // Fix this, try to extract it to a separate state / component
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
 
-    // const handleClickFindAnotherTeamMate = useCallback(() => {
-    //     if (onTransition.current) {
-    //         return;
-    //     }
-    //     socketController.current?.destroy();
-    //     setGameIsPlaying(false);
-    //     goToStep({ step: MenuScene.TEAM_LOBBY }, () => {
-    //         router.push(Route.LOBBY);
-    //         // TODO: I think this call is not necessary
-    //         setMenuScene(MenuScene.TEAM_LOBBY);
-    //         setState((prev) => ({
-    //             ...prev,
-    //             loadedLevel: undefined,
-    //             mateDisconnected: false,
-    //             you: {
-    //                 isReady: false,
-    //                 side: undefined,
-    //                 level: undefined,
-    //                 account: currentUser || undefined,
-    //             },
-    //             isInQueue: false,
-    //             isWaitingForFriend: false,
-    //         }));
-    //     });
-    // }, [router, setMenuScene, currentUser, goToStep, onTransition]);
-
-    // const handleDestroyConnection = useCallback(() => {
-    //     socketController.current?.destroy();
-    //     socketController.current = undefined;
-    // }, []);
-
     const handleClickReadyToPlay = useCallback(() => {
         // setState((prev) => ({
         //     ...prev,
@@ -334,44 +303,6 @@ export function useMainController() {
         //     });
         // });
     }, [currentUser]);
-
-    const handleEnterRandomQueue = useCallback((side: Side, level: number) => {
-        // socketController.current?.destroy();
-        // establishConnection().then(() => {
-        //     socketController.current?.emit([
-        //         SocketEventLobby.JOIN_RANDOM_QUEUE,
-        //         {
-        //             userId: currentUser?.id || undefined,
-        //             side,
-        //             level,
-        //         },
-        //     ]);
-        //     setState((prev) => ({ ...prev, isInQueue: true }));
-        //     fetchServerInfo();
-        // });
-    }, []);
-
-    // const exitLobby = useCallback(() => {
-    //     if (onTransition.current) {
-    //         return;
-    //     }
-    //     socketController.current?.destroy();
-    //     goToStep({ step: MenuScene.HOME }, () => {
-    //         router.push(Route.HOME);
-    //         setMenuScene(MenuScene.HOME);
-    //         setState((prev) => ({
-    //             ...prev,
-    //             mate: undefined,
-    //             mateDisconnected: false,
-    //             you: {
-    //                 isReady: false,
-    //                 level: undefined,
-    //                 side: undefined,
-    //                 account: currentUser || undefined,
-    //             },
-    //         }));
-    //     });
-    // }, [setMenuScene, onTransition, currentUser, goToStep, router]);
 
     // const handleClickPlay = useCallback(() => {
     //     if (onTransition.current) {

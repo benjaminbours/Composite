@@ -219,32 +219,34 @@ export class SocketGateway {
       this.temporaryStorage.deleteInviteToken(player.inviteToken);
     }
 
-    // room name is equivalent to team name
-    // if the player disconnected were in a room, notify the room
-    // nobody to notify if the player is solo
-    if (player.roomName && !player.isSolo) {
-      this.server
-        .to(String(player.roomName))
-        .emit(SocketEventType.TEAMMATE_DISCONNECT);
+    if (player.roomName) {
+      if (ENVIRONMENT.STAGE !== 'local') {
+        const hathoraCloud = new HathoraCloud({
+          appId: ENVIRONMENT.HATHORA_APP_ID,
+          hathoraDevToken: ENVIRONMENT.HATHORA_TOKEN,
+        });
+
+        hathoraCloud.roomsV2
+          .destroyRoom(player.roomName, ENVIRONMENT.HATHORA_APP_ID)
+          .then(() => {
+            Logger.log('Hathora room destroyed');
+          })
+          .catch((error) => {
+            Logger.error('Error while destroying room in hathora');
+            Logger.error(error);
+          });
+      }
+
+      if (!player.isSolo) {
+        this.server
+          .to(String(player.roomName))
+          .emit(SocketEventType.TEAMMATE_DISCONNECT);
+      }
     }
 
     // if the player were playing, stop the game loop on the server
     if (player.gameId) {
       clearTimeout(this.gameLoopsRegistry[`game:${player.gameId}`]);
-    }
-
-    // TODO: Destroy hathora room on disconnect, even in duo
-    if (player.isSolo && ENVIRONMENT.STAGE !== 'local') {
-      const hathoraCloud = new HathoraCloud({
-        appId: ENVIRONMENT.HATHORA_APP_ID,
-        hathoraDevToken: ENVIRONMENT.HATHORA_TOKEN,
-      });
-
-      hathoraCloud.roomsV2
-        .destroyRoom(player.roomName, ENVIRONMENT.HATHORA_APP_ID)
-        .then(() => {
-          Logger.log('Hathora room destroyed');
-        });
     }
 
     this.temporaryStorage.removePlayer(socket.id, player);
