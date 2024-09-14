@@ -135,6 +135,7 @@ interface GlobalContext {
     isGameVisible: boolean;
     loadingFlow: FlowItem[];
     loadingStep: number;
+    mateDisconnected: boolean;
     // actions
     createGame: (params: LobbyParameters) => void;
     exitGame: () => void;
@@ -163,6 +164,7 @@ export function useGameController() {
     const [loadingStep, setLoadingStep] = useState(0);
     const [isMenuVisible, setIsMenuVisible] = useState(true);
     const [isGameVisible, setIsGameVisible] = useState(false);
+    const [mateDisconnected, setMateDisconnected] = useState(false);
 
     const { goToHome, setMenuScene, menuOut, menuIn } =
         useMenuTransitionContext();
@@ -499,6 +501,7 @@ export function useGameController() {
             );
         }
         setMenuScene(MenuScene.TEAM_LOBBY);
+        setMateDisconnected(false);
         setIsMenuVisible(true);
         exitFullScreen();
     }, [setMenuScene, gameData]);
@@ -525,6 +528,7 @@ export function useGameController() {
         loadingStep,
         isGameVisible,
         isMenuVisible,
+        mateDisconnected,
         createGame,
         exitGame,
         exitLobby,

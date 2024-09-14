@@ -52,6 +52,7 @@ function MainApp({ dictionary }: Props) {
         gameData,
         initialGameState,
         GameComponent,
+        mateDisconnected,
     } = useGlobalContext();
 
     const { setMainAppContext } = useContext(AppContext);
@@ -125,14 +126,11 @@ function MainApp({ dictionary }: Props) {
 
     return (
         <>
-            <TeamMateDisconnectNotification
-                teamMateDisconnected={false}
-                // teamMateDisconnected={mateDisconnected}
-                handleClickFindAnotherTeamMate={
-                    () => {}
-                    // mainController.handleClickFindAnotherTeamMate
-                }
-            />
+            {mateDisconnected && (
+                <TeamMateDisconnectNotification
+                    handleClickFindAnotherTeamMate={exitGame}
+                />
+            )}
             {isMenuVisible && <Menu dictionary={dictionary} stats={statsRef} />}
             <Suspense>
                 {isGameVisible && GameComponent !== undefined && (
