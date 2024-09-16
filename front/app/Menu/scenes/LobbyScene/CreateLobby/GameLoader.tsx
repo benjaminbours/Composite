@@ -9,6 +9,7 @@ import { FlowItem, GameStatus, statusTextMap } from '../../../../contexts';
 import { DiscordButton } from '../../../../02_molecules/DiscordButton';
 import type { LobbyV3 } from '@hathora/cloud-sdk-typescript/models/components';
 import { CopyToClipBoardButton } from '../../../CopyToClipboardButton';
+import { GamePlayerCount } from '@benjaminbours/composite-core';
 
 interface Props {
     level: Level;
@@ -63,12 +64,23 @@ export const GameLoader: React.FC<Props> = ({
                         <p>{text}</p>
                     </div>
                 ))}
-                {lobbyInfo && (
-                    <CopyToClipBoardButton
-                        text="Copy link to share!"
-                        textToCopy={`${process.env.NEXT_PUBLIC_URL}/lobby?roomCode=${lobbyInfo.shortCode}`}
-                    />
-                )}
+                {lobbyInfo &&
+                    (() => {
+                        const roomConfig = (() => {
+                            if (!lobbyInfo.roomConfig) {
+                                return undefined;
+                            }
+                            return JSON.parse(lobbyInfo.roomConfig) as {
+                                playerCount: GamePlayerCount;
+                            };
+                        })();
+                        return roomConfig?.playerCount === GamePlayerCount.DUO;
+                    })() && (
+                        <CopyToClipBoardButton
+                            text="Copy link to share!"
+                            textToCopy={`${process.env.NEXT_PUBLIC_URL}/lobby?roomCode=${lobbyInfo.shortCode}`}
+                        />
+                    )}
             </div>
             {!isMobile && (
                 <div className="game-loader__tips">
