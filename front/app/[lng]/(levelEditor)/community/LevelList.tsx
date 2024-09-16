@@ -43,7 +43,10 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
             const apiClient = servicesContainer.get(CoreApiClient);
 
             apiClient.defaultApi
-                .levelsControllerFindAll({ stats: 'true' })
+                .levelsControllerFindAll({
+                    stats: 'true',
+                    status: LevelStatusEnum.Published,
+                })
                 .then((levels) => {
                     console.log('levels', levels);
                     setLevels(levels);
