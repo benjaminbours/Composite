@@ -62,7 +62,7 @@
     "short-unique-id": "^5.2.0",
     "socket.io-client": "^4.7.5",
     "stats.js": "^0.17.0",
-    "three": "^0.167.1",
+    "three": "^0.168.0",
     "three-mesh-bvh": "^0.7.6",
     "utf-8-validate": "^5.0.10",
     "uuid": "^9.0.1"
