@@ -640,6 +640,7 @@ p {
 
 .game-text-overlay {
     position: absolute;
+    z-index: 9;
     left: 50%;
     top: 20%;
     transform: translate(-50%);
