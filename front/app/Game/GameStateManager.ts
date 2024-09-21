@@ -271,7 +271,9 @@ export class GameStateManager {
     }
 
     public onAverageRttReceived = (serverTime: number, rtt: number) => {
-        // rtt = 500;
+        if (process.env.NEXT_PUBLIC_STAGE === 'local') {
+            rtt = 50;
+        }
         // Calculate one-way latency
         let oneWayLatency = Math.floor(rtt / 2);
 
