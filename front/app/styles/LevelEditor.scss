@@ -43,6 +43,7 @@
 
 .level-editor__top-left-container {
     position: fixed;
+    z-index: 10;
     top: 6%;
     left: 1%;
     display: flex;
@@ -52,6 +53,7 @@
 
 .level-editor__top-right-container {
     position: fixed;
+    z-index: 10;
     top: 6%;
     right: 1%;
     display: flex;
@@ -349,6 +351,7 @@
     position: fixed;
     top: 10%;
     left: 1%;
+    z-index: 10;
 
     svg {
         width: 30px;
