@@ -71,6 +71,7 @@ export const RegionSelector: React.FC<Props> = ({
                 className="region-selector__refresh"
                 disabled={isCalculatingPing || isDisabled}
                 onClick={calculatePing}
+                title="Recalculate ping"
             >
                 {isCalculatingPing ? (
                     <CircularProgress style={{ color: 'white' }} size={20} />
