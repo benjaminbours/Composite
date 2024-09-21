@@ -1,4 +1,7 @@
-import { Level } from '@benjaminbours/composite-core-api-client';
+import {
+    Level,
+    LevelStatusEnum,
+} from '@benjaminbours/composite-core-api-client';
 import IconButton from '@mui/material/IconButton';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -7,6 +10,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Route } from '../../../types';
 import { LevelPortal } from '../../../Menu/scenes/LevelPortal';
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 interface Props {
     level: Level;
@@ -35,7 +39,11 @@ export const LevelListItem: React.FC<Props> = ({
                                 aria-controls="menu-appbar"
                                 aria-haspopup="true"
                                 color="inherit"
-                                disabled={disabled}
+                                disabled={
+                                    disabled ||
+                                    level.status === LevelStatusEnum.Draft
+                                }
+                                title="Play level"
                             >
                                 <SportsEsportsIcon />
                             </IconButton>
@@ -53,6 +61,7 @@ export const LevelListItem: React.FC<Props> = ({
                                 aria-haspopup="true"
                                 color="inherit"
                                 disabled={disabled}
+                                title="Edit level"
                             >
                                 <EditIcon />
                             </IconButton>
@@ -64,12 +73,25 @@ export const LevelListItem: React.FC<Props> = ({
                             aria-controls="menu-appbar"
                             aria-haspopup="true"
                             color="inherit"
-                            disabled={disabled}
+                            disabled={
+                                disabled ||
+                                level.status === LevelStatusEnum.Published
+                            }
+                            title="Delete level"
                             onClick={() => onDelete(level.id, level.name)}
                         >
                             <DeleteIcon />
                         </IconButton>
                     </li>
+                    {level.status === LevelStatusEnum.Published && (
+                        <li>
+                            <VerifiedIcon
+                                style={{ padding: 5 }}
+                                className="icon-important"
+                                titleAccess="Published level"
+                            />
+                        </li>
+                    )}
                 </ul>
             </div>
         </li>

@@ -115,6 +115,7 @@ export const TopBarLevelEditor: React.FC<Props> = ({
                 />
                 {levelStatus === LevelStatusEnum.Published && (
                     <Chip
+                        className="top-bar__published-level"
                         icon={<VerifiedIcon />}
                         color="primary"
                         label="Published level"
