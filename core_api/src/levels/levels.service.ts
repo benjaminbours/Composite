@@ -113,7 +113,11 @@ export class LevelsService {
           authorId: authorId,
           status: status ? (status as LevelStatus) : undefined,
         },
-        include: {
+        select: {
+          name: true,
+          id: true,
+          status: true,
+          thumbnail: true,
           author: {
             select: {
               name: true,
@@ -201,6 +205,15 @@ export class LevelsService {
 
   async remove(id: number, user: JWTUserPayload) {
     await this.checkUserHasAccessToLevel(id, user);
+
+    const level = await this.findOne(id).catch((err) => {
+      throw handlePrismaError(err);
+    });
+
+    if (level.status === LevelStatus.PUBLISHED) {
+      throw new ForbiddenException('Cannot delete a published level.');
+    }
+
     return this.prisma.level
       .delete({
         where: { id },
@@ -210,6 +223,7 @@ export class LevelsService {
       });
   }
 
+  // TODO: reduce number of queries
   async checkUserHasAccessToLevel(id: number, user: JWTUserPayload) {
     const level = await this.prisma.level
       .findUnique({
