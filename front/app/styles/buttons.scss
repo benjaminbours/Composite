@@ -145,3 +145,9 @@ $buttonSizeLarge: 120px;
 .composite-button__end-icon {
     margin-left: 10px;
 }
+
+.button-important {
+    background: $mainActionColor;
+    color: black;
+    border-color: black;
+}

@@ -8,7 +8,10 @@ import { Route } from '../../../types';
 import Button from '@mui/material/Button';
 import { getDictionary } from '../../../../getDictionary';
 import { usePathname } from 'next/navigation';
-import { Level } from '@benjaminbours/composite-core-api-client';
+import {
+    Level,
+    LevelStatusEnum,
+} from '@benjaminbours/composite-core-api-client';
 import { LevelListItem } from './LevelListItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
@@ -177,20 +180,27 @@ export const LevelList: React.FC<Props> = withConfirmDialogProvider(
 
         return (
             <>
-                <Link href={Route.LEVEL_EDITOR('new')} legacyBehavior passHref>
-                    <Button variant="contained" size="large">
-                        {dictionary.common.nav['create-level']}
-                    </Button>
+                <Link
+                    className="create-level-button composite-button button-important"
+                    href={Route.LEVEL_EDITOR('new')}
+                >
+                    {dictionary.common.nav['create-level']}
                 </Link>
                 <ul className="level-list">
-                    {levels.map((level) => (
-                        <LevelListItem
-                            key={level.id}
-                            level={level}
-                            onDelete={handleDeleteLevel}
-                            disabled={isDeleting}
-                        />
-                    ))}
+                    {levels
+                        .sort((a, _b) => {
+                            return a.status === LevelStatusEnum.Published
+                                ? -1
+                                : 1;
+                        })
+                        .map((level) => (
+                            <LevelListItem
+                                key={level.id}
+                                level={level}
+                                onDelete={handleDeleteLevel}
+                                disabled={isDeleting}
+                            />
+                        ))}
                 </ul>
             </>
         );
