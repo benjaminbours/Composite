@@ -10,8 +10,8 @@ const mechanics = [
         description: (
             <p>
                 The end level element react to the presence of each player. When
-                the two players stand stand at the same time, they will complete
-                the ying-yang symbol and therefor, finish the level.
+                the two players stand at the same time, they will complete the
+                ying-yang symbol and therefor, finish the level.
             </p>
         ),
         icon: <SportsScoreIcon className="game-mechanics__icon" />,
