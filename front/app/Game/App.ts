@@ -852,6 +852,7 @@ export default class App {
                 this.gameStateManager.displayState.level.end_level.length === 2
             ) {
                 if (process.env.NEXT_PUBLIC_STAGE === 'local') {
+                    this.runClock.stop();
                     this.onPracticeGameFinished({
                         duration: this.runClock.getElapsedTime(),
                         rank: 0,
@@ -861,6 +862,7 @@ export default class App {
 
                 timeoutId = setTimeout(() => {
                     if (this.onPracticeGameFinished) {
+                        this.runClock.stop();
                         this.onPracticeGameFinished({
                             duration: this.runClock.getElapsedTime(),
                             rank: 0,
